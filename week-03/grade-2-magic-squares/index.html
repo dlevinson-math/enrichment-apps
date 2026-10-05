@@ -1,0 +1,812 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Magic Squares</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a jade game-table. The 3×3 board with its line-sum badges sits left, wooden number tiles below it; the lesson path runs across the top and the talk panel sits right. */
+:root{
+  --ground:#E7EFEB; --table:#F7FAF8; --slot:#DCE7E2; --ink:#12302A; --muted:#51706A; --line:#C3D5CD;
+  --jade:#0B7A67; --jade-ink:#FFFFFF; --jade-soft:#D2ECE4;
+  --tile:#F3C443; --tile-edge:#C6951A; --tile-ink:#3A2900;
+  --given:#FFFFFF; --given-edge:#9DB7AE;
+  --off:#C0501A; --off-soft:#FBE3D3; --glow:#F3C443;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1917; --table:#15231F; --slot:#1D2F2A; --ink:#E4F0EB; --muted:#9BB5AD; --line:#2D433D;
+    --jade:#3CC4A5; --jade-ink:#062019; --jade-soft:#17392F;
+    --tile:#E9B936; --tile-edge:#9E760F; --tile-ink:#2A1E00;
+    --given:#24362F; --given-edge:#4C6A60;
+    --off:#F28C4E; --off-soft:#3B2517; --glow:#E9B936;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1917; --table:#15231F; --slot:#1D2F2A; --ink:#E4F0EB; --muted:#9BB5AD; --line:#2D433D;
+  --jade:#3CC4A5; --jade-ink:#062019; --jade-soft:#17392F;
+  --tile:#E9B936; --tile-edge:#9E760F; --tile-ink:#2A1E00;
+  --given:#24362F; --given-edge:#4C6A60;
+  --off:#F28C4E; --off-soft:#3B2517; --glow:#E9B936;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:18px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--jade); outline-offset:3px}
+.app{min-height:100%; display:flex; flex-direction:column; padding-inline:24px; padding-block:12px 16px; gap:12px}
+
+/* Header */
+header{display:flex; align-items:center; gap:14px 28px; flex-wrap:wrap}
+.brand h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,44px); line-height:1; letter-spacing:-.01em}
+.brand p{margin:4px 0 0; font-size:15px; color:var(--muted); letter-spacing:.04em}
+.path{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.path button{display:flex; align-items:center; gap:8px; border:2px solid var(--line); background:var(--table); border-radius:999px; padding:7px 16px 7px 8px; font-weight:700; font-size:16px; color:var(--muted)}
+.path button b{width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-size:15px; background:var(--slot); color:var(--ink)}
+.path button[aria-current="step"]{border-color:var(--jade); color:var(--ink)}
+.path button[aria-current="step"] b{background:var(--jade); color:var(--jade-ink)}
+.tools{margin-left:auto; display:flex; gap:8px}
+.ghost{border:2px solid var(--line); background:var(--table); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px}
+.ghost:hover{border-color:var(--ink)}
+
+/* Main */
+main{flex:1; display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start}
+.stage{display:flex; flex-direction:column; align-items:center; gap:14px; background:var(--table); border-radius:28px; padding:22px 22px 20px; border:2px solid var(--line)}
+.board{
+  --c:clamp(60px, min(12.5vw, calc((100dvh - 360px) / 4)), 140px);
+  --b:calc(var(--c) * .64);
+  display:grid; grid-template-columns:var(--b) repeat(3,var(--c)) var(--b); grid-template-rows:repeat(3,var(--c)) var(--b);
+  gap:8px; position:relative;
+}
+.cell{position:relative; border:3px dashed var(--line); background:var(--slot); border-radius:18px; padding:0; display:grid; place-items:center; transition:background-color .2s}
+.cell.filled{border-style:solid; border-color:transparent; background:transparent}
+.cell.target-ok{box-shadow:0 0 0 3px var(--jade)}
+.cell.drop{border-color:var(--jade); background:var(--jade-soft)}
+.cell.inline{box-shadow:0 0 0 4px var(--hlc, var(--jade)); z-index:1}
+.cell.fade{opacity:.35}
+.tile{width:100%; height:100%; border-radius:16px; background:var(--tile); color:var(--tile-ink); box-shadow:inset 0 -6px 0 var(--tile-edge), 0 2px 0 rgba(0,0,0,.08);
+  display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:calc(var(--c) * .52); line-height:1; user-select:none; padding-bottom:4px}
+.cell.given .tile{background:var(--given); color:var(--ink); box-shadow:inset 0 0 0 3px var(--given-edge)}
+.cell.given::after{content:"given"; position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.cell.picked .tile{outline:4px solid var(--jade); outline-offset:3px; transform:translateY(-3px)}
+.ctag{position:absolute; top:-10px; right:-10px; min-width:32px; height:32px; padding:0 8px; border-radius:16px; background:var(--jade); color:var(--jade-ink); font-weight:700; font-size:16px; display:grid; place-items:center; z-index:3; white-space:nowrap}
+.badge{border-radius:14px; border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--display); line-height:1; color:var(--muted); background:transparent; padding:0}
+.badge .bs{font-size:calc(var(--c) * .34); font-weight:700}
+.badge .bn{font-size:calc(var(--c) * .13); font-weight:600; min-height:1em; margin-top:2px; text-align:center; line-height:1.05; padding:0 3px}
+.badge.part{border-style:dashed; border-color:var(--line)}
+.badge.full{border-color:var(--line); color:var(--ink); background:var(--ground)}
+.badge.ok{background:var(--jade); color:var(--jade-ink); border-color:var(--jade)}
+.badge.off{background:var(--off-soft); color:var(--off); border-color:var(--off)}
+.badge.lit{box-shadow:0 0 0 4px var(--hlc, var(--jade))}
+.badge.hide{visibility:hidden}
+.badge .dir{font-size:calc(var(--c) * .17)}
+.board.magic .cell.filled .tile{animation:glow 1.2s ease-out 2}
+@keyframes glow{0%,100%{box-shadow:inset 0 -6px 0 var(--tile-edge)}50%{box-shadow:inset 0 -6px 0 var(--tile-edge), 0 0 0 8px var(--jade-soft), 0 0 22px var(--glow)}}
+
+.tray{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:calc(var(--c) * 5.2); min-height:calc(var(--c) * .8); padding:10px; border-radius:20px; background:var(--slot); width:100%}
+.tray .tile{--c:clamp(60px, min(12.5vw, calc((100dvh - 360px) / 4)), 140px); width:calc(var(--c) * .74); height:calc(var(--c) * .74); font-size:calc(var(--c) * .42); border:0; padding:0 0 4px; touch-action:none; cursor:grab}
+.tray .tile[aria-pressed="true"]{outline:4px solid var(--jade); outline-offset:3px; transform:translateY(-4px)}
+.tray .empty{color:var(--muted); font-size:16px; align-self:center}
+.cell .tile{touch-action:none}
+.ghosttile{position:fixed; z-index:50; pointer-events:none; transform:translate(-50%,-50%) scale(1.08); width:80px; height:80px; font-size:44px; opacity:.92}
+
+/* Turtle */
+.turtle{width:clamp(300px, 40vw, 600px); max-width:100%}
+.turtle svg{width:100%; height:auto; display:block}
+.shell{fill:var(--jade-soft); stroke:var(--jade); stroke-width:6}
+.skin{fill:var(--slot); stroke:var(--jade); stroke-width:5}
+.plate{fill:none; stroke:var(--jade); stroke-width:2; stroke-dasharray:6 6; opacity:.6}
+.dot-even{fill:var(--ink)}
+.dot-odd{fill:var(--table); stroke:var(--ink); stroke-width:3}
+.dotline{stroke:var(--ink); stroke-width:3}
+.tnum{font-family:var(--display); font-weight:800; font-size:56px; fill:var(--off); text-anchor:middle; dominant-baseline:central; paint-order:stroke; stroke:var(--table); stroke-width:8}
+.tnums{opacity:0; transition:opacity .5s}
+.tnums.on{opacity:1}
+.dots{transition:opacity .5s}
+.dots.dim{opacity:.25}
+
+/* Panel */
+.panel{display:flex; flex-direction:column; gap:16px; min-width:0; max-width:44em}
+.panel h2{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,2.4vw,38px); line-height:1.1; text-wrap:balance}
+.lead{margin:0; font-size:clamp(19px,1.55vw,24px); line-height:1.45}
+.small{margin:0; font-size:16px; color:var(--muted); line-height:1.4}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--jade); color:var(--jade-ink); font-weight:700; font-size:clamp(18px,1.4vw,22px); padding:14px 24px; border-radius:16px; min-height:56px}
+.secondary{border:2px solid var(--ink); background:var(--table); font-weight:700; font-size:clamp(17px,1.3vw,20px); padding:12px 20px; border-radius:16px; min-height:56px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--table); border:2px solid var(--line); border-radius:16px; padding:4px; gap:4px}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:12px; font-weight:700; font-size:17px; color:var(--muted); min-height:48px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--table)}
+.magicno{display:inline-flex; align-items:center; gap:12px; font-weight:700; font-size:19px}
+.magicno .big{font-family:var(--display); font-weight:800; font-size:44px; line-height:1; min-width:64px; height:64px; padding:0 12px; border-radius:18px; background:var(--jade); color:var(--jade-ink); display:grid; place-items:center}
+.magicno .big.q{background:var(--slot); color:var(--muted)}
+.feedback{margin:0; font-size:clamp(18px,1.45vw,22px); line-height:1.45; padding:14px 18px; border-radius:16px; background:var(--jade-soft)}
+.feedback.warn{background:var(--off-soft)}
+.feedback:empty{display:none}
+.feedback b{font-family:var(--display); font-size:1.08em}
+.feedback ul{margin:8px 0 0; padding-left:1.2em}
+.sums{display:flex; flex-direction:column; gap:10px}
+.sumcard{display:flex; align-items:center; gap:16px; background:var(--table); border:2px solid var(--line); border-radius:18px; padding:10px 14px; flex-wrap:wrap}
+.sumcard .eq{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,46px); line-height:1; letter-spacing:.02em; font-variant-numeric:tabular-nums}
+.sumcard .ans{color:var(--jade)}
+.sumcard button{margin-left:auto}
+.def{border-left:6px solid var(--tile); padding:6px 0 6px 16px; margin:0; font-size:clamp(19px,1.5vw,23px); line-height:1.45}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--table); font-weight:700; font-size:20px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--table); border-color:var(--ink)}
+.qnav button.solved{border-color:var(--jade)}
+.qnav button.solved::after{content:" ✓"; color:var(--jade)}
+.qnav button[aria-pressed="true"].solved::after{color:var(--jade)}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.chip{border:2px solid var(--line); background:var(--table); border-radius:14px; padding:8px 14px; font-family:var(--display); font-weight:700; font-size:20px; min-height:48px}
+.chip[aria-pressed="true"]{border-color:var(--jade); background:var(--jade); color:var(--jade-ink)}
+.chip.mark{border-color:var(--jade); background:var(--jade-soft)}
+.minis{display:grid; grid-template-columns:repeat(auto-fill, minmax(118px,1fr)); gap:14px; margin-top:12px}
+.mini{display:flex; flex-direction:column; gap:6px; align-items:center; font-size:14px; color:var(--muted); text-align:center}
+.mini table,.big4{border-collapse:separate; border-spacing:3px}
+.mini td{width:32px; height:32px; text-align:center; background:var(--tile); color:var(--tile-ink); border-radius:7px; font-family:var(--display); font-weight:800; font-size:19px}
+.mini td.c{background:var(--jade); color:var(--jade-ink)}
+.big4 td{width:52px; height:52px; text-align:center; background:var(--tile); color:var(--tile-ink); border-radius:10px; font-family:var(--display); font-weight:800; font-size:26px; font-variant-numeric:tabular-nums}
+.big4 td.s{background:transparent; color:var(--jade); font-size:20px}
+.scroll{overflow-x:auto}
+.counter{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); font-variant-numeric:tabular-nums; line-height:1.1}
+.hintbox{display:flex; flex-direction:column; gap:8px}
+.hintbox ol{margin:0; padding-left:1.3em; font-size:clamp(17px,1.35vw,21px); line-height:1.45}
+.hintbox li+li{margin-top:6px}
+.teacher{font-size:14px; color:var(--muted); border-top:2px solid var(--line); padding-top:10px; line-height:1.4}
+.teacher b{color:var(--ink)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+@media (max-width: 1000px), (orientation: portrait){
+  main{grid-template-columns:minmax(0,1fr)}
+  .stage{justify-self:center; max-width:100%}
+  .board{--c:clamp(52px, min(16.5vw, 120px), 120px)}
+  .tray .tile{--c:clamp(52px, min(16.5vw, 120px), 120px)}
+  .tools{margin-left:0}
+}
+@media (max-width: 520px){
+  .app{padding-inline:16px}
+  .stage{padding:14px 10px; border-radius:22px}
+  .board{gap:6px; --c:min(17vw, 76px)}
+  .tray .tile{--c:min(17vw, 76px)}
+  .path button{font-size:14px; padding:5px 12px 5px 6px}
+  .ctag{top:-8px; right:-6px; min-width:26px; height:26px; font-size:13px}
+}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>Magic Squares</h1>
+      <p>Grade 2 · Week 3 · Number Detectives</p>
+    </div>
+    <nav class="path" id="path" aria-label="Lesson steps"></nav>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage" id="stage" aria-label="Board">
+      <div class="board" id="board"></div>
+      <div class="turtle" id="turtle" hidden></div>
+      <div class="tray" id="tray" hidden aria-label="Number tiles"></div>
+    </section>
+    <section class="panel" id="panel" aria-live="polite"></section>
+  </main>
+
+  <footer class="teacher"><b>Look for:</b> students moving from guess-and-check to reasoning like “the middle must be 5 because it is in 4 lines.”</footer>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s);
+
+/* ================= Math ================= */
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const LNAME = ['Top row','Middle row','Bottom row','Left column','Middle column','Right column','Diagonal ↘','Diagonal ↙'];
+const LOSHU = [4,9,2,3,5,7,8,1,6];
+const range = (a,b,s=1) => { const r=[]; for(let x=a;x<=b;x+=s) r.push(x); return r; };
+const SETS = {
+  one:{label:'1 to 9', tiles:range(1,9), task:'Task 1'},
+  two:{label:'2 to 10', tiles:range(2,10), task:'Task 3'},
+  even:{label:'Evens 2 to 18', tiles:range(2,18,2), task:'Challenge'}
+};
+const sum = a => a.reduce((x,y)=>x+y,0);
+const total = k => sum(SETS[k].tiles);
+const target = k => total(k)/3;
+const middleOf = k => target(k)/3;
+const lineVals = (v,l) => LINES[l].map(i=>v[i]);
+const lineSum = (v,l) => sum(lineVals(v,l).filter(x=>x!=null));
+const lineFull = (v,l) => lineVals(v,l).every(x=>x!=null);
+const allFull = v => v.every(x=>x!=null);
+const isMagic = (v,t) => allFull(v) && LINES.every((_,l)=>lineSum(v,l)===t);
+const rot = v => [v[6],v[3],v[0],v[7],v[4],v[1],v[8],v[5],v[2]];
+const flip = v => [v[2],v[1],v[0],v[5],v[4],v[3],v[8],v[7],v[6]];
+function variants(v){
+  const out=[]; let a=v;
+  const rl=['The Lo Shu','Turned ¼','Turned ½','Turned ¾'];
+  for(let k=0;k<4;k++){ out.push({v:a, label:rl[k]}); a=rot(a); }
+  a=flip(v);
+  const fl=['Flipped','Flipped, turned ¼','Flipped, turned ½','Flipped, turned ¾'];
+  for(let k=0;k<4;k++){ out.push({v:a, label:fl[k]}); a=rot(a); }
+  return out;
+}
+function triples(k){
+  const t=SETS[k].tiles, T=target(k), r=[];
+  for(let a=0;a<t.length;a++) for(let b=a+1;b<t.length;b++) for(let c=b+1;c<t.length;c++) if(t[a]+t[b]+t[c]===T) r.push([t[a],t[b],t[c]]);
+  return r;
+}
+const waysWith = (k,n) => triples(k).filter(tr=>tr.includes(n)).length;
+function pairsFor(k,m){
+  const need = target(k)-m, rest = SETS[k].tiles.filter(x=>x!==m), r=[];
+  for(let a=0;a<rest.length;a++) for(let b=a+1;b<rest.length;b++) if(rest[a]+rest[b]===need) r.push([rest[a],rest[b]]);
+  return r;
+}
+const mapSet = (k, v) => k==='one' ? v.slice() : k==='two' ? v.map(x=>x+1) : v.map(x=>x*2);
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+const CORNERS=[0,2,6,8], EDGES=[1,3,5,7];
+const linesThrough = i => LINES.map((l,j)=>l.includes(i)?j:-1).filter(j=>j>=0);
+
+const PUZZLES = [
+  {set:'one', g:{0:4,1:9,4:5,8:6}},
+  {set:'one', g:{1:3,3:1,4:5}},
+  {set:'one', g:{2:8,7:9}},
+  {set:'one', g:{1:7,3:9}},
+  {set:'one', g:{0:2,5:3}},
+  {set:'two', g:{0:7,4:6,7:4}},
+  {set:'two', g:{1:8,8:5}}
+];
+const DURER = [16,3,2,13,5,10,11,8,9,6,7,12,4,15,14,1];
+
+/* ================= State ================= */
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r=>setTimeout(r, reduced?0:ms));
+let S;
+function fresh(){
+  return {
+    stage:'warm', gen:0,
+    build:{set:'one', v:Array(9).fill(null), shown:{one:true, two:false, even:false}, hints:0},
+    puz:{i:0, v:[], solved:new Set()},
+    show:{v:Array(9).fill(null), t:15, lines:new Set(), hl:[], tags:{}, fade:false},
+    sel:null, warm:{rev:[false,false,false], noticed:false, checked:false}, legend:{nums:false}, q:1
+  };
+}
+function loadPuzzle(i){
+  S.puz.i=i; const P=PUZZLES[i]; S.puz.v=Array(9).fill(null);
+  for(const [k,x] of Object.entries(P.g)) S.puz.v[+k]=x;
+}
+function ctx(){
+  if(S.stage==='build'){ const k=S.build.set; return {v:S.build.v, locked:[], t:target(k), tShown:S.build.shown[k], edit:true, set:k}; }
+  if(S.stage==='puzzles'){ const P=PUZZLES[S.puz.i]; return {v:S.puz.v, locked:Object.keys(P.g).map(Number), t:target(P.set), tShown:true, edit:true, set:P.set}; }
+  return {v:S.show.v, locked:[], t:S.show.t, tShown:true, edit:false, set:null, show:true};
+}
+
+/* ================= Board ================= */
+const board = $('#board'), tray = $('#tray');
+const cells=[], badges=[];
+(function buildBoard(){
+  for(let i=0;i<9;i++){
+    const b=document.createElement('button'); b.className='cell'; b.dataset.i=i;
+    b.style.gridRow = Math.floor(i/3)+1; b.style.gridColumn = (i%3)+2;
+    board.appendChild(b); cells.push(b);
+  }
+  const pos = [[1,5],[2,5],[3,5],[4,2],[4,3],[4,4],[4,5],[4,1]];
+  for(let l=0;l<8;l++){
+    const d=document.createElement('div'); d.className='badge'; d.dataset.l=l;
+    d.style.gridRow=pos[l][0]; d.style.gridColumn=pos[l][1];
+    board.appendChild(d); badges.push(d);
+    d.addEventListener('pointerenter', ()=>{ if(ctx().edit) lightLine(l,true); });
+    d.addEventListener('pointerleave', ()=>{ if(ctx().edit) lightLine(l,false); });
+  }
+})();
+function lightLine(l,on){
+  LINES[l].forEach(i=>cells[i].classList.toggle('inline',on));
+  badges[l].classList.toggle('lit',on);
+}
+function renderBoard(){
+  const c=ctx(), v=c.v;
+  board.classList.remove('magic');
+  for(let i=0;i<9;i++){
+    const el=cells[i], x=v[i];
+    el.className='cell'+(x!=null?' filled':'')+(c.locked.includes(i)?' given':'');
+    if(S.sel && S.sel.from==='cell' && S.sel.i===i) el.classList.add('picked');
+    el.innerHTML = x!=null ? `<span class="tile">${x}</span>` : '';
+    el.style.removeProperty('--hlc');
+    el.setAttribute('aria-label', x!=null ? `Square ${i+1}: ${x}${c.locked.includes(i)?', given':''}` : `Square ${i+1}: empty`);
+    el.disabled = !c.edit && !c.show;
+    if(c.show){
+      if(S.show.hl.includes(i)) el.classList.add('inline');
+      if(S.show.fade && !S.show.hl.includes(i)) el.classList.add('fade');
+      if(S.show.tags[i]!=null) el.insertAdjacentHTML('beforeend', `<span class="ctag">${S.show.tags[i]}</span>`);
+    }
+  }
+  for(let l=0;l<8;l++){
+    const el=badges[l]; const vals=lineVals(v,l); const filled=vals.filter(x=>x!=null).length; const s=lineSum(v,l);
+    el.className='badge'; el.style.removeProperty('--hlc');
+    const dir = l===6 ? '<span class="dir" aria-hidden="true">↘</span>' : l===7 ? '<span class="dir" aria-hidden="true">↙</span>' : '';
+    let note='';
+    if(c.show && !S.show.lines.has(l)){ el.classList.add('hide'); el.innerHTML=''; continue; }
+    if(filled===0){ el.innerHTML=`${dir}<span class="bs" style="opacity:.35">·</span><span class="bn"></span>`; el.setAttribute('aria-label',`${LNAME[l]}: empty`); continue; }
+    if(filled<3){ el.classList.add('part'); note='so far'; }
+    else if(c.tShown){ if(s===c.t){ el.classList.add('ok'); note='✓'; } else { el.classList.add('off'); note = s>c.t ? `${s-c.t} too many` : `${c.t-s} too few`; } }
+    else el.classList.add('full');
+    el.innerHTML=`${dir}<span class="bs">${s}</span><span class="bn">${note}</span>`;
+    el.setAttribute('aria-label', `${LNAME[l]} adds to ${s}${filled<3?' so far':''}`);
+    if(c.show && S.show.hlLines && S.show.hlLines.includes(l)) el.classList.add('lit');
+  }
+  if(c.show && S.show.hlLines) for(const l of S.show.hlLines) LINES[l].forEach(i=>cells[i].classList.add('inline'));
+  renderTray();
+}
+function renderTray(){
+  const c=ctx();
+  tray.hidden = !c.edit;
+  if(!c.edit) return;
+  const on = new Set(c.v.filter(x=>x!=null));
+  const left = SETS[c.set].tiles.filter(x=>!on.has(x));
+  tray.innerHTML = left.length ? '' : '<span class="empty">All tiles are on the board. Tap “Check my square”.</span>';
+  for(const x of left){
+    const b=document.createElement('button'); b.className='tile'; b.textContent=x; b.dataset.v=x;
+    b.setAttribute('aria-pressed', !!(S.sel && S.sel.from==='tray' && S.sel.v===x));
+    b.setAttribute('aria-label', `Tile ${x}`);
+    tray.appendChild(b);
+  }
+}
+
+/* ---- placing tiles ---- */
+function place(src, i){
+  const c=ctx(); if(!c.edit) return;
+  if(c.locked.includes(i)){ say(`That square is part of the puzzle. Try an empty square.`, true); S.sel=null; renderBoard(); return; }
+  const v=c.v;
+  if(src.from==='tray'){ v[i]=src.v; }
+  else if(src.from==='cell'){ if(src.i===i){ S.sel=null; renderBoard(); return; } const t=v[i]; v[i]=v[src.i]; v[src.i]=t; }
+  S.sel=null; afterMove();
+}
+function removeFrom(i){
+  const c=ctx(); if(!c.edit || c.locked.includes(i)) return;
+  c.v[i]=null; S.sel=null; afterMove();
+}
+function afterMove(){
+  renderBoard();
+  const c=ctx();
+  if(isMagic(c.v,c.t)) celebrate();
+  else if(allFull(c.v)) say(`All the tiles are down. Tap <b>Check my square</b> to see which lines work.`);
+  else clearSay();
+}
+function onCellTap(i){
+  const c=ctx();
+  if(c.show){ if(S.stage==='detect') explainCell(i); return; }
+  if(S.sel){ place(S.sel, i); return; }
+  if(c.v[i]!=null && !c.locked.includes(i)){ S.sel={from:'cell', i}; renderBoard(); say(`Tap another square to move the ${c.v[i]}, or tap the tray to take it back.`); }
+  else if(c.v[i]==null) say(`Pick a tile first. Tap a tile, then tap this square.`);
+}
+function onTrayTap(x){
+  if(S.sel && S.sel.from==='tray' && S.sel.v===x){ S.sel=null; }
+  else S.sel={from:'tray', v:x};
+  renderBoard();
+}
+
+/* ---- pointer drag (works with fingers, pens and mice) ---- */
+let drag=null;
+function startDrag(e, src, label){
+  if(e.button!==undefined && e.button!==0) return;
+  drag={src, x:e.clientX, y:e.clientY, moved:false, ghost:null, label, id:e.pointerId};
+}
+document.addEventListener('pointerdown', e=>{
+  const t=e.target.closest('.tray .tile'); if(t){ startDrag(e,{from:'tray', v:+t.dataset.v}, t.textContent); return; }
+  const cl=e.target.closest('.cell');
+  if(cl && ctx().edit){ const i=+cl.dataset.i; const c=ctx(); if(c.v[i]!=null && !c.locked.includes(i)) startDrag(e,{from:'cell', i}, String(c.v[i])); }
+});
+document.addEventListener('pointermove', e=>{
+  if(!drag || e.pointerId!==drag.id) return;
+  if(!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) > 10){
+    drag.moved=true; const g=document.createElement('div'); g.className='tile ghosttile'; g.textContent=drag.label; document.body.appendChild(g); drag.ghost=g;
+  }
+  if(drag.moved){
+    e.preventDefault();
+    drag.ghost.style.left=e.clientX+'px'; drag.ghost.style.top=e.clientY+'px';
+    cells.forEach(c=>c.classList.remove('drop'));
+    const el=document.elementFromPoint(e.clientX,e.clientY); const cl=el && el.closest('.cell');
+    if(cl) cl.classList.add('drop');
+  }
+}, {passive:false});
+function endDrag(e){
+  if(!drag || e.pointerId!==drag.id) return;
+  const d=drag; drag=null;
+  cells.forEach(c=>c.classList.remove('drop'));
+  if(!d.moved) return; // plain tap: handled by click
+  d.ghost.remove();
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const cl=el && el.closest('.cell'); const tr=el && el.closest('#tray');
+  suppressClick=true; setTimeout(()=>suppressClick=false, 50);
+  if(cl) place(d.src, +cl.dataset.i);
+  else if(tr && d.src.from==='cell') removeFrom(d.src.i);
+}
+let suppressClick=false;
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', e=>{ if(drag && drag.ghost) drag.ghost.remove(); drag=null; cells.forEach(c=>c.classList.remove('drop')); });
+board.addEventListener('click', e=>{ if(suppressClick) return; const cl=e.target.closest('.cell'); if(cl) onCellTap(+cl.dataset.i); });
+tray.addEventListener('click', e=>{
+  if(suppressClick) return;
+  const t=e.target.closest('.tile');
+  if(t){ onTrayTap(+t.dataset.v); return; }
+  if(S.sel && S.sel.from==='cell') removeFrom(S.sel.i);
+});
+
+/* ================= Feedback ================= */
+function say(html, warn){ const f=$('#fb'); if(!f) return; f.innerHTML=html; f.classList.toggle('warn', !!warn); }
+function clearSay(){ const f=$('#fb'); if(f){ f.innerHTML=''; f.classList.remove('warn'); } }
+function celebrate(){
+  const c=ctx();
+  board.classList.add('magic');
+  for(let l=0;l<8;l++) badges[l].classList.add('ok');
+  let extra='';
+  if(S.stage==='build' && c.set==='one') extra=' Yours is the Lo Shu, maybe turned or flipped.';
+  if(S.stage==='build' && !S.build.shown[c.set]){ S.build.shown[c.set]=true; renderMagicNo(); renderBoard(); board.classList.add('magic'); }
+  if(S.stage==='puzzles'){ S.puz.solved.add(S.puz.i); renderPuzNav(); extra = S.puz.i<PUZZLES.length-1 ? ' Try the next puzzle.' : ' You finished every puzzle!'; }
+  say(`<b>Magic!</b> All 8 lines make ${c.t}: 3 rows, 3 columns and 2 diagonals.${extra}`);
+}
+function checkSquare(){
+  const c=ctx(), v=c.v, k=c.set;
+  const filled=v.filter(x=>x!=null).length;
+  LINES.forEach((_,l)=>lightLine(l,false));
+  if(filled===c.locked.length){ say(`Put some tiles on the board first. Drag a tile, or tap a tile and then a square.`, true); return; }
+  if(isMagic(v,c.t)){ celebrate(); return; }
+  const full=LINES.map((_,l)=>l).filter(l=>lineFull(v,l));
+  let T=c.t;
+  if(!c.tShown){
+    if(!allFull(v)){ say(`${9-filled} square${9-filled===1?' is':'s are'} still empty. Keep going! Every line has to make the same number.`); return; }
+    const sums=LINES.map((_,l)=>lineSum(v,l));
+    say(`Your 8 lines make ${listText([...new Set(sums)].sort((a,b)=>a-b))}. In a magic square they are all the <b>same</b>. What must the magic number be for ${SETS[k].label}? Tap <b>Hint</b> for a clue.`, true);
+    return;
+  }
+  const bad=full.filter(l=>lineSum(v,l)!==T);
+  bad.forEach(l=>lightLine(l,true)); bad.forEach(l=>{ badges[l].style.setProperty('--hlc','var(--off)'); LINES[l].forEach(i=>cells[i].style.setProperty('--hlc','var(--off)')); });
+  if(!bad.length){
+    say(`So far so good! Every finished line makes ${T}. ${9-filled} square${9-filled===1?'':'s'} to go.`);
+    return;
+  }
+  const items = bad.map(l=>{ const s=lineSum(v,l); return `<li>${LNAME[l]}: ${lineVals(v,l).join(' + ')} = ${s}. That is ${Math.abs(s-T)} too ${s>T?'many':'few'}.</li>`; }).join('');
+  const m=middleOf(k);
+  let nudge;
+  if(v[4]!=null && v[4]!==m) nudge=`Look at the middle square. It is in 4 lines, more than any other square. Which tile could go there? (Detective question 2 can help.)`;
+  else if(v[4]===m) nudge=`Your middle is right! Now look at the corners. A corner is in 3 lines. Which tiles can be in 3 different ways to make ${T}?`;
+  else nudge=`How could you check? Try filling the middle square first.`;
+  say(`Not magic yet. These lines don’t make ${T}:<ul>${items}</ul>${nudge}`, true);
+}
+
+/* ================= Stages ================= */
+const STAGES=[['warm','Warm-up'],['legend','The turtle'],['build','Build it'],['puzzles','Puzzles'],['detect','Detective questions']];
+function renderPath(){
+  $('#path').innerHTML = STAGES.map(([k,n],i)=>`<button data-stage="${k}" ${S.stage===k?'aria-current="step"':''}><b>${i+1}</b>${n}</button>`).join('');
+  $('#path').querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.stage));
+}
+function go(stage){
+  S.gen++; S.stage=stage; S.sel=null;
+  $('#turtle').hidden = stage!=='legend';
+  board.hidden = stage==='legend';
+  renderPath();
+  if(stage==='warm') showWarm();
+  else if(stage==='legend') showLegend();
+  else if(stage==='build') showBuild();
+  else if(stage==='puzzles') showPuzzles();
+  else showDetect();
+  renderBoard();
+}
+function nextBtn(stage,label){ return `<button class="secondary" data-go="${stage}">${label} →</button>`; }
+function wireGo(){ $('#panel').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go)); }
+function resetShow(v,t){ S.show={v:v||Array(9).fill(null), t:t||15, lines:new Set(), hl:[], tags:{}, fade:false, hlLines:[]}; }
+
+/* ---- Warm-up ---- */
+const WARM=[[4,9,2],[3,5,7],[8,1,6]];
+function showWarm(){
+  resetShow();
+  WARM.forEach((r,ri)=>{ if(S.warm.rev[ri]){ r.forEach((x,j)=>S.show.v[ri*3+j]=x); S.show.lines.add(ri); } });
+  if(S.warm.checked) for(let l=0;l<8;l++) S.show.lines.add(l);
+  const allRev = S.warm.rev.every(Boolean);
+  $('#panel').innerHTML = `
+    <h2>Warm-up: a number string</h2>
+    <p class="lead">Add each one in your head. Then tap to check.</p>
+    <div class="sums">${WARM.map((r,i)=>`
+      <div class="sumcard"><span class="eq">${r.join(' + ')} = <span class="ans">${S.warm.rev[i]?sum(r):'?'}</span></span>
+      <button class="${S.warm.rev[i]?'secondary':'primary'}" data-rev="${i}" ${S.warm.rev[i]?'disabled':''}>${S.warm.rev[i]?'Checked':'Check'}</button></div>`).join('')}
+    </div>
+    ${allRev ? `<p class="lead"><b>What do you notice about the answers?</b></p>
+      <div class="row">
+        <button class="primary" id="noticeBtn" ${S.warm.noticed?'disabled':''}>Show what we noticed</button>
+        <button class="secondary" id="colBtn" ${S.warm.noticed&&!S.warm.checked?'':'disabled'}>Check the columns and diagonals</button>
+      </div>`:''}
+    <p class="feedback" id="fb"></p>
+    <div class="row">${nextBtn('legend','Next: the turtle')}</div>`;
+  $('#panel').querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{ S.warm.rev[+b.dataset.rev]=true; showWarm(); renderBoard(); say(`${WARM[+b.dataset.rev].join(' + ')} = <b>15</b>. It is now a row on the board.`); });
+  const nb=$('#noticeBtn'); if(nb) nb.onclick=()=>{ S.warm.noticed=true; showWarm(); renderBoard(); say(`All three make <b>15</b>! Stack them up and they make the rows of a very old puzzle.`); };
+  const cb=$('#colBtn'); if(cb) cb.onclick=()=>{ S.warm.checked=true; showWarm(); renderBoard(); say(`Every column makes 15 too. So do both diagonals. That makes <b>8 lines</b> that all add to 15!`); };
+  if(S.warm.checked) say(`Every column makes 15 too. So do both diagonals. That makes <b>8 lines</b> that all add to 15!`);
+  wireGo();
+}
+
+/* ---- Legend ---- */
+function turtleSVG(){
+  const W=600,H=520, cx=300, cy=270;
+  const pos=i=>({x:cx+((i%3)-1)*118, y:cy+(Math.floor(i/3)-1)*112});
+  let dots='', nums='';
+  LOSHU.forEach((n,i)=>{
+    const p=pos(i); const cls = n%2===0 ? 'dot-even' : 'dot-odd';
+    // lay the dots out in rows of up to 3, centred on the plate
+    const perRow = n<=3 ? n : n===4 ? 2 : 3;
+    const rows = Math.ceil(n/perRow); const gap=24; const pts=[];
+    for(let k=0;k<n;k++){ const r=Math.floor(k/perRow), inRow=Math.min(perRow, n-r*perRow), c=k-r*perRow;
+      pts.push({x:p.x+(c-(inRow-1)/2)*gap, y:p.y+(r-(rows-1)/2)*gap}); }
+    for(let k=0;k+1<pts.length;k++) if(Math.floor(k/perRow)===Math.floor((k+1)/perRow)) dots+=`<line class="dotline" x1="${pts[k].x}" y1="${pts[k].y}" x2="${pts[k+1].x}" y2="${pts[k+1].y}"/>`;
+    pts.forEach(q=>dots+=`<circle class="${cls}" cx="${q.x}" cy="${q.y}" r="8"/>`);
+    nums+=`<text class="tnum" x="${p.x}" y="${p.y}">${n}</text>`;
+  });
+  let plates='';
+  for(let i=0;i<9;i++){ const p=pos(i); plates+=`<rect class="plate" x="${p.x-54}" y="${p.y-50}" width="108" height="100" rx="22"/>`; }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="A turtle whose shell shows the Lo Shu dot pattern">
+    <ellipse class="skin" cx="${cx}" cy="58" rx="46" ry="40"/>
+    <ellipse class="skin" cx="118" cy="140" rx="54" ry="30" transform="rotate(-35 118 140)"/>
+    <ellipse class="skin" cx="482" cy="140" rx="54" ry="30" transform="rotate(35 482 140)"/>
+    <ellipse class="skin" cx="118" cy="408" rx="54" ry="30" transform="rotate(35 118 408)"/>
+    <ellipse class="skin" cx="482" cy="408" rx="54" ry="30" transform="rotate(-35 482 408)"/>
+    <path class="skin" d="M${cx-18} 470 L${cx} 512 L${cx+18} 470 Z"/>
+    <rect class="shell" x="${cx-205}" y="${cy-195}" width="410" height="390" rx="170"/>
+    ${plates}
+    <g class="dots ${S.legend.nums?'dim':''}" id="tdots">${dots}</g>
+    <g class="tnums ${S.legend.nums?'on':''}" id="tnums">${nums}</g>
+  </svg>`;
+}
+function showLegend(){
+  $('#turtle').innerHTML = turtleSVG();
+  $('#panel').innerHTML = `
+    <h2>The Lo Shu turtle</h2>
+    <p class="lead">An old story from China tells of a turtle that crawled out of a river. Its shell had a pattern of dots. People say this was about 4,000 years ago.</p>
+    <p class="lead">It is called the <b>Lo Shu</b>. It is the oldest magic square we know about.</p>
+    <div class="row"><button class="primary" id="dotBtn">${S.legend.nums?'Show the dots again':'Count the dots'}</button></div>
+    <p class="feedback" id="fb"></p>
+    <p class="def"><b>A magic square:</b> every row, every column and both diagonals add up to the same number. That number is the <b>magic number</b>.</p>
+    <div class="row">${nextBtn('build','Next: build it yourself')}</div>`;
+  $('#dotBtn').onclick=()=>{ S.legend.nums=!S.legend.nums; $('#tdots').classList.toggle('dim',S.legend.nums); $('#tnums').classList.toggle('on',S.legend.nums); $('#dotBtn').textContent=S.legend.nums?'Show the dots again':'Count the dots';
+    say(S.legend.nums ? `The dots make <b>4 9 2 · 3 5 7 · 8 1 6</b>. That’s our warm-up square! Solid dots are even numbers. Open dots are odd numbers.` : ''); };
+  if(S.legend.nums) say(`The dots make <b>4 9 2 · 3 5 7 · 8 1 6</b>. That’s our warm-up square! Solid dots are even numbers. Open dots are odd numbers.`);
+  wireGo();
+}
+
+/* ---- Build ---- */
+function hintList(k){
+  const t=SETS[k].tiles, T=target(k), m=middleOf(k), tot=total(k);
+  const pairs = pairsFor(k,m).map(p=>`${p[0]} + ${p[1]}`);
+  const corner = t.filter(n=>waysWith(k,n)===3);
+  return [
+    `What do all nine tiles add up to? ${t.join(' + ')} = <b>${tot}</b>.`,
+    `The 3 rows use all nine tiles, so they share ${tot}. Split ${tot} into 3 equal parts: ${T} + ${T} + ${T} = ${tot}. Each row must make <b>${T}</b>.`,
+    `Which number goes in the middle? The middle is in 4 lines. Try the tile right in the middle of your set: <b>${m}</b>.`,
+    `Across the middle, partners make ${T-m}: ${listText(pairs)}. Put partners on opposite sides of the ${m}.`,
+    `Corners are in 3 lines each. These tiles fit in 3 ways to make ${T}: <b>${listText(corner)}</b>. Try them in the corners.`
+  ];
+}
+function renderMagicNo(){
+  const el=$('#magicno'); if(!el) return;
+  const k=S.build.set, shown=S.build.shown[k];
+  el.innerHTML = `Magic number: <span class="big ${shown?'':'q'}">${shown?target(k):'?'}</span>`;
+}
+function renderHints(){
+  const k=S.build.set, h=hintList(k), n=S.build.hints;
+  $('#hints').innerHTML = n ? `<ol>${h.slice(0,n).map(x=>`<li>${x}</li>`).join('')}</ol>` : '';
+  $('#hintBtn').disabled = n>=h.length;
+  $('#hintBtn').textContent = n ? 'Next hint' : 'Hint';
+}
+function showBuild(){
+  const k=S.build.set;
+  $('#panel').innerHTML = `
+    <h2>${k==='one'?'Rebuild the magic square':k==='two'?'Can you make one with 2 to 10?':'Only even numbers!'}</h2>
+    <div class="seg" role="group" aria-label="Tile set">${Object.entries(SETS).map(([id,s])=>`<button data-set="${id}" aria-pressed="${id===k}">${s.task}: ${s.label}</button>`).join('')}</div>
+    <div class="row" style="gap:20px"><span class="magicno" id="magicno"></span></div>
+    <p class="lead">${k==='one'?'Use the tiles 1 to 9 once each.':`Use the tiles ${SETS[k].tiles.join(', ')} once each.`} Drag a tile onto a square, or tap a tile and then a square.</p>
+    <div class="row">
+      <button class="primary" id="checkBtn">Check my square</button>
+      <button class="secondary" id="hintBtn">Hint</button>
+      <button class="secondary" id="clearBtn">Clear</button>
+    </div>
+    <p class="feedback" id="fb"></p>
+    <div class="hintbox" id="hints"></div>
+    <p class="small">The numbers around the board show what each row, column and diagonal adds up to.</p>
+    <div class="row">${nextBtn('puzzles','Next: puzzles')}</div>`;
+  $('#panel').querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{ S.build.set=b.dataset.set; S.build.v=Array(9).fill(null); S.build.hints=0; S.sel=null; showBuild(); renderBoard(); });
+  $('#checkBtn').onclick=checkSquare;
+  $('#hintBtn').onclick=()=>{ S.build.hints++; if(S.build.hints>=2 && !S.build.shown[S.build.set]){ S.build.shown[S.build.set]=true; renderMagicNo(); renderBoard(); } renderHints(); };
+  $('#clearBtn').onclick=()=>{ S.build.v=Array(9).fill(null); S.sel=null; renderBoard(); clearSay(); };
+  renderMagicNo(); renderHints(); wireGo();
+  if(isMagic(S.build.v, target(k))) setTimeout(celebrate,0);
+}
+
+/* ---- Puzzles ---- */
+function renderPuzNav(){
+  const nav=$('#puznav'); if(!nav) return;
+  nav.innerHTML = PUZZLES.map((p,i)=>`<button data-p="${i}" aria-pressed="${i===S.puz.i}" class="${S.puz.solved.has(i)?'solved':''}" aria-label="Puzzle ${i+1}${S.puz.solved.has(i)?', solved':''}">${i+1}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{ loadPuzzle(+b.dataset.p); S.sel=null; showPuzzles(); renderBoard(); });
+}
+function showPuzzles(){
+  if(!S.puz.v.length) loadPuzzle(0);
+  const P=PUZZLES[S.puz.i], T=target(P.set), n=Object.keys(P.g).length;
+  $('#panel').innerHTML = `
+    <h2>Finish the square</h2>
+    <div class="qnav" id="puznav"></div>
+    <div class="row" style="gap:20px"><span class="magicno">Magic number: <span class="big">${T}</span></span><span class="small">Tiles: ${SETS[P.set].label}<br>${n} given, ${9-n} to find</span></div>
+    <p class="lead">Tiles marked “given” are part of the puzzle. Fill the empty squares so every line makes ${T}.</p>
+    <div class="row">
+      <button class="primary" id="checkBtn">Check my square</button>
+      <button class="secondary" id="clearBtn">Clear my tiles</button>
+    </div>
+    <p class="feedback" id="fb"></p>
+    <p class="small">Stuck? Start with a line that already has two tiles. What number is missing to make ${T}?</p>
+    <div class="row">${nextBtn('detect','Next: detective questions')}</div>`;
+  renderPuzNav();
+  $('#checkBtn').onclick=checkSquare;
+  $('#clearBtn').onclick=()=>{ loadPuzzle(S.puz.i); S.sel=null; renderBoard(); clearSay(); };
+  wireGo();
+  if(isMagic(S.puz.v,T)) setTimeout(celebrate,0);
+}
+
+/* ---- Detective questions ---- */
+const Q = {
+  1:{ text:`What do all nine tiles add up to? What does that tell you about each row?`,
+      acts:[
+        {label:'Add all nine tiles', run: async g=>{
+          resetShow(LOSHU.slice(),15); S.show.fade=true; renderBoard();
+          let run=0; const order=[1,2,3,4,5,6,7,8,9];
+          for(const n of order){ if(g!==S.gen) return; run+=n; const i=LOSHU.indexOf(n); S.show.hl.push(i); S.show.tags[i]=run; renderBoard(); res(`Running total: <span class="counter">${run}</span>`); await sleep(420); }
+          S.show.fade=false; renderBoard();
+          res(`1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 = <b>45</b>. The little numbers show the total growing.`);
+        }},
+        {label:'Split 45 into 3 rows', run: g=>{
+          resetShow(LOSHU.slice(),15); [0,1,2].forEach(l=>S.show.lines.add(l)); renderBoard();
+          res(`The 3 rows use every tile once, so together they make 45. Three equal rows: <b>15 + 15 + 15 = 45</b>. So each row must make 15.`);
+        }}
+      ]},
+  2:{ text:`Why must 5 be in the middle square?`,
+      acts:[
+        {label:'Lines through the middle', run: g=>{
+          resetShow(LOSHU.slice(),15); S.show.hl=[4]; S.show.tags={4:'4 lines'}; [1,4,6,7].forEach(l=>S.show.lines.add(l)); S.show.hlLines=[]; renderBoard(); [1,4,6,7].forEach(l=>badges[l].classList.add('lit'));
+          res(`The middle square is in <b>4 lines</b>: the middle row, the middle column and both diagonals.`);
+        }},
+        {label:'Count lines for every square', run: g=>{
+          resetShow(LOSHU.slice(),15); for(let i=0;i<9;i++) S.show.tags[i]=linesThrough(i).length; renderBoard();
+          res(`The little numbers count lines. Middle: <b>4</b>. Corners: <b>3</b>. Edges: <b>2</b>. The middle needs a number that fits in 4 ways to make 15.`);
+        }},
+        {label:'Try another number in the middle', run: g=>{
+          resetShow(Array(9).fill(null),15); renderBoard();
+          const chips = range(1,9).map(n=>`<button class="chip" data-mid="${n}">${n}</button>`).join('');
+          res(`Pick a number to put in the middle. Each line through the middle then needs two more tiles.<div class="chips">${chips}</div><div id="midout" style="margin-top:10px"></div>`);
+          document.querySelectorAll('[data-mid]').forEach(b=>b.onclick=()=>{
+            document.querySelectorAll('[data-mid]').forEach(x=>x.setAttribute('aria-pressed', x===b));
+            const m=+b.dataset.mid, pr=pairsFor('one',m); const v=Array(9).fill(null); v[4]=m;
+            resetShow(v,15); S.show.hl=[4]; renderBoard();
+            const list = pr.length ? pr.map(p=>`${p[0]} + ${p[1]}`).join(', ') : 'none';
+            $('#midout').innerHTML = `With <b>${m}</b> in the middle, each line needs two tiles that make ${15-m}. Pairs: ${list}. That’s <b>${pr.length} pair${pr.length===1?'':'s'}</b>. ` +
+              (pr.length===4 ? `4 pairs for 4 lines. It works! Only 5 does this.` : `The middle is in 4 lines, so it needs 4 pairs. ${pr.length<4?'Not enough!':''}`);
+          });
+        }}
+      ]},
+  3:{ text:`Where must the even numbers go?`,
+      acts:[
+        {label:'Show the evens', run: g=>{
+          resetShow(LOSHU.slice(),15); S.show.hl=LOSHU.map((x,i)=>x%2===0?i:-1).filter(i=>i>=0); S.show.fade=true; renderBoard();
+          res(`2, 4, 6 and 8 are all in the <b>corners</b>. Is that luck? Try the next button.`);
+        }},
+        {label:'Every way to make 15', run: g=>{
+          resetShow(LOSHU.slice(),15); renderBoard();
+          const tr=triples('one');
+          res(`There are exactly <b>${tr.length} ways</b> to make 15 with three different tiles, and a magic square has <b>8 lines</b>:<div class="chips" id="trips">${tr.map(t=>`<span class="chip" data-t="${t.join(',')}">${t.join(' + ')}</span>`).join('')}</div>
+            <p style="margin:12px 0 4px">Tap a number to see how many ways use it:</p><div class="chips">${range(1,9).map(n=>`<button class="chip" data-n="${n}">${n}</button>`).join('')}</div><div id="wout" style="margin-top:10px"></div>`);
+          document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{
+            document.querySelectorAll('[data-n]').forEach(x=>x.setAttribute('aria-pressed', x===b));
+            const n=+b.dataset.n, w=waysWith('one',n), i=LOSHU.indexOf(n);
+            document.querySelectorAll('[data-t]').forEach(c=>c.classList.toggle('mark', c.dataset.t.split(',').map(Number).includes(n)));
+            resetShow(LOSHU.slice(),15); S.show.hl=[i]; S.show.hlLines=linesThrough(i); S.show.tags[i]=w; renderBoard();
+            const spot = w===4?'the middle (4 lines)': w===3?'a corner (3 lines)':'an edge (2 lines)';
+            $('#wout').innerHTML = `<b>${n}</b> is in ${w} ways to make 15, so it must go in ${spot}.`;
+          });
+        }}
+      ]},
+  4:{ text:`Mathematicians say there is really only ONE 3×3 magic square with 1 to 9. Is that true?`,
+      acts:[
+        {label:'Try every arrangement', run: async g=>{
+          resetShow(LOSHU.slice(),15); renderBoard();
+          res(`Checking arrangements… <span class="counter" id="cnt">0</span><br>Magic squares found: <span class="counter" id="found">0</span>`);
+          const F=[1,1,2,6,24,120,720,5040,40320]; const N=362880; let found=0, idx=0;
+          while(idx<N){
+            if(g!==S.gen) return;
+            const stop=Math.min(N, idx+(reduced?N:6000));
+            for(;idx<stop;idx++){
+              let r=idx; const pool=[1,2,3,4,5,6,7,8,9], p=[];
+              for(let d=8; d>=0; d--){ const q=Math.floor(r/F[d]); r%=F[d]; p.push(pool.splice(q,1)[0]); }
+              if(isMagic(p,15)) found++;
+            }
+            const c=$('#cnt'), f=$('#found'); if(!c) return;
+            c.textContent=idx.toLocaleString(); f.textContent=found;
+            await new Promise(r=>requestAnimationFrame(r));
+          }
+          if(g!==S.gen) return;
+          res(`Checked all <b>362,880</b> ways to arrange the tiles. Only <b>${found}</b> are magic. Tap “Show all ${found}” to see them.`);
+        }},
+        {label:'Show all 8', run: g=>{
+          resetShow(LOSHU.slice(),15); renderBoard();
+          const vs=variants(LOSHU);
+          const mini=v=>`<table>${[0,1,2].map(r=>`<tr>${[0,1,2].map(c=>`<td class="${r*3+c===4?'c':''}">${v[r*3+c]}</td>`).join('')}</tr>`).join('')}</table>`;
+          res(`Here are all 8. Each one is the Lo Shu turned or flipped. The 5 always stays in the middle.<div class="minis">${vs.map(x=>`<div class="mini">${mini(x.v)}<span>${x.label}</span></div>`).join('')}</div>`);
+        }}
+      ]},
+  5:{ text:`Can you make a magic square with 2 to 10 instead of 1 to 9? What is the magic number?`,
+      acts:[
+        {label:'Add 1 to every tile', run: async g=>{
+          const v=LOSHU.slice(); resetShow(v,18); for(let l=0;l<8;l++) S.show.lines.add(l); renderBoard();
+          for(let i=0;i<9;i++){ if(g!==S.gen) return; S.show.v[i]=LOSHU[i]+1; S.show.hl=[i]; renderBoard(); await sleep(260); }
+          S.show.hl=[]; renderBoard();
+          res(`Every tile went up by 1. Each line has 3 tiles, so each line went up by 3: <b>15 + 3 = 18</b>. All 8 lines make 18!`);
+        }},
+        {label:'Build it yourself', run: g=>{ S.build.set='two'; S.build.v=Array(9).fill(null); S.build.hints=0; go('build'); }}
+      ]},
+  6:{ star:true, text:`Challenge: make a magic square with only even numbers. Or find the magic number for a 4×4 square with 1 to 16.`,
+      acts:[
+        {label:'Double every tile', run: async g=>{
+          resetShow(LOSHU.slice(),30); for(let l=0;l<8;l++) S.show.lines.add(l); renderBoard();
+          for(let i=0;i<9;i++){ if(g!==S.gen) return; S.show.v[i]=LOSHU[i]*2; S.show.hl=[i]; renderBoard(); await sleep(260); }
+          S.show.hl=[]; renderBoard();
+          res(`Doubling makes 2, 4, 6 … 18. Every line doubles too: <b>15 + 15 = 30</b>. It’s a magic square with only even numbers!`);
+        }},
+        {label:'4×4 magic number', run: g=>{
+          resetShow(Array(9).fill(null),15); renderBoard();
+          const tot=sum(range(1,16));
+          res(`1 + 2 + … + 16 = <b>${tot}</b>. A 4×4 square has 4 rows, so split ${tot} into 4 equal parts: ${tot/4} + ${tot/4} + ${tot/4} + ${tot/4} = ${tot}. The magic number is <b>${tot/4}</b>.`);
+        }},
+        {label:'See a 4×4 magic square', run: g=>{
+          resetShow(Array(9).fill(null),15); renderBoard();
+          const rows=[0,1,2,3].map(r=>DURER.slice(r*4,r*4+4));
+          const cols=[0,1,2,3].map(c=>sum([0,1,2,3].map(r=>DURER[r*4+c])));
+          const d1=sum([0,5,10,15].map(i=>DURER[i])), d2=sum([3,6,9,12].map(i=>DURER[i]));
+          res(`The artist Albrecht Dürer put this square in a picture in 1514. Look at the bottom row!<div class="scroll" style="margin-top:10px"><table class="big4">${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}<td class="s">${sum(r)}</td></tr>`).join('')}<tr>${cols.map(c=>`<td class="s">${c}</td>`).join('')}<td class="s">↘${d1}</td></tr></table></div>The other diagonal makes ${d2} too.`);
+        }}
+      ]}
+};
+function res(html){ const r=$('#qres'); if(r) r.innerHTML=html; }
+function explainCell(i){
+  const v=S.show.v; if(v[i]==null) return;
+  const ls=linesThrough(i);
+  S.show.hl=[i]; S.show.hlLines=ls; ls.forEach(l=>S.show.lines.add(l)); renderBoard();
+  res(`<b>${v[i]}</b> is in ${ls.length} lines: ${ls.map(l=>`${LNAME[l].toLowerCase()} (${lineVals(v,l).join(' + ')} = ${lineSum(v,l)})`).join(', ')}.`);
+}
+function showDetect(){
+  resetShow(LOSHU.slice(),15);
+  const q=Q[S.q];
+  $('#panel').innerHTML = `
+    <h2>Detective questions</h2>
+    <div class="qnav" id="qnav">${Object.keys(Q).map(n=>`<button data-q="${n}" aria-pressed="${+n===S.q}" ${Q[n].star?'style="padding:0 18px"':''}>${Q[n].star?'★ Challenge':n}</button>`).join('')}</div>
+    <p class="lead"><b>${q.text}</b></p>
+    <p class="small">Talk it over first. Then tap a button to put evidence on the board. You can also tap any tile on the board.</p>
+    <div class="row" id="qacts"></div>
+    <div class="feedback" id="qres"></div>
+    <div id="fb" hidden></div>`;
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ S.gen++; S.q=+b.dataset.q; showDetect(); renderBoard(); });
+  q.acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=()=>{ S.gen++; a.run(S.gen); }; $('#qacts').appendChild(b); });
+}
+
+/* ================= Wire up ================= */
+function startOver(){ S=fresh(); go('warm'); }
+$('#resetBtn').onclick=startOver;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', ()=>$('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+window.__ms = {isMagic, triples, waysWith, pairsFor, variants, target, PUZZLES, LOSHU, DURER, SETS, lineSum};
+startOver();
+})();
+</script>
+
+</body></html>

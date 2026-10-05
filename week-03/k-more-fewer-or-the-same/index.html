@@ -1,0 +1,856 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>More, Fewer, or the Same?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one big "comparison mat" per step, two rows (Mine on top, Partner below) so match-up lines run straight down; step bar across the top. */
+:root{
+  --bg:#EEF2F6; --card:#FFFFFF; --ink:#1E2733; --muted:#5A6676; --line:#CFD7E1;
+  --felt:#E3EEE4; --felt2:#F3EAD9;
+  --r0:#2F6FD0; --r1:#D96A12;
+  --accent:#0E7C73; --accent-ink:#FFFFFF; --accent-soft:#D7EFEC;
+  --extra:#D6246E; --extra-soft:#FBE1EC; --chiptx:#FFFFFF;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Andika", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11161D; --card:#1A212B; --ink:#EDF1F6; --muted:#A5B0BF; --line:#34404F;
+    --felt:#1D2B24; --felt2:#2D261C;
+    --r0:#6EA2F5; --r1:#F2994A;
+    --accent:#33B7AA; --accent-ink:#06201D; --accent-soft:#163632;
+    --extra:#FF6FA8; --extra-soft:#3A1827; --chiptx:#0E131A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11161D; --card:#1A212B; --ink:#EDF1F6; --muted:#A5B0BF; --line:#34404F;
+  --felt:#1D2B24; --felt2:#2D261C;
+  --r0:#6EA2F5; --r1:#F2994A;
+  --accent:#33B7AA; --accent-ink:#06201D; --accent-soft:#163632;
+  --extra:#FF6FA8; --extra-soft:#3A1827; --chiptx:#0E131A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; -webkit-tap-highlight-color:transparent}
+.wrap{min-height:100%; display:flex; flex-direction:column; gap:12px; padding-inline:24px; padding-block:12px 20px; max-width:1500px; margin:0 auto}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid var(--accent); outline-offset:3px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,42px); line-height:1; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:17px; min-height:52px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap}
+nav button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:18px; padding:8px 18px 8px 10px; min-height:60px; font-family:var(--display); font-weight:700; font-size:clamp(18px,1.6vw,23px)}
+nav button .n{width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:19px}
+nav button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+nav button[aria-selected="true"] .n{background:var(--card); color:var(--ink)}
+
+.stage{display:flex; flex-direction:column; gap:12px; flex:1}
+.stage[hidden]{display:none}
+.prompt{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(24px,2.6vw,38px); line-height:1.15; text-wrap:balance}
+.prompt small{display:block; font-family:var(--body); font-weight:400; font-size:.55em; color:var(--muted); margin-top:4px}
+
+.scene{width:min(100%, calc((100dvh - 390px) * 1.6)); min-width:min(100%, 520px); margin-inline:auto; align-self:center}
+.scene svg{display:block; width:100%; height:auto; border-radius:22px; background:var(--card); box-shadow:0 1px 0 var(--line), 0 0 0 2px var(--line)}
+.bar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
+.bar .lbl{font-family:var(--display); font-weight:700; font-size:20px; color:var(--muted); margin-right:4px}
+.big{border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:700; font-size:clamp(20px,1.8vw,26px); padding:10px 26px; border-radius:18px; min-height:62px}
+.big:disabled{opacity:.4; cursor:default}
+.soft{border:3px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:700; font-size:clamp(18px,1.6vw,23px); padding:8px 20px; border-radius:18px; min-height:62px; display:inline-flex; align-items:center; gap:8px}
+.soft[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.soft:disabled{opacity:.4; cursor:default}
+.dot{width:18px; height:18px; border-radius:50%; background:var(--c); display:inline-block; flex:none}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:20px; padding:4px; gap:4px}
+.seg button{border:0; background:none; border-radius:15px; padding:8px 18px; min-height:54px; font-family:var(--display); font-weight:700; font-size:clamp(18px,1.6vw,22px); color:var(--muted); display:inline-flex; align-items:center; gap:8px}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.seg svg{width:30px; height:30px}
+
+.say{margin:0 auto; max-width:40em; min-height:3.2em; text-align:center; font-size:clamp(20px,1.9vw,28px); line-height:1.3; padding:10px 18px; border-radius:18px}
+.say.win{background:var(--accent-soft)}
+.say b{font-family:var(--display); font-weight:800}
+.say .m{color:var(--extra); font-family:var(--display); font-weight:800}
+.say .again{display:block; font-size:.8em; color:var(--muted); margin-top:2px}
+.bigidea{margin:0 auto; font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,32px); padding:8px 22px; border-radius:18px; border:3px dashed var(--accent); color:var(--ink); text-align:center}
+.bigidea[hidden]{display:none}
+
+/* mat svg */
+.half{stroke:none}
+.h0{fill:var(--felt)} .h1{fill:var(--felt2)}
+.divider{stroke:var(--line); stroke-width:.5; stroke-dasharray:2 2}
+.chip0{fill:var(--r0)} .chip1{fill:var(--r1)}
+.chiptxt{fill:var(--chiptx); font-family:var(--display); font-weight:700; font-size:4.6px; dominant-baseline:central}
+.tot{font-family:var(--display); font-weight:800; font-size:8px; fill:var(--ink); dominant-baseline:central}
+.verd{font-family:var(--display); font-weight:800; font-size:4.4px; dominant-baseline:central}
+.verdbg{fill:var(--ink)} .verdtx{fill:var(--card)}
+.it{cursor:pointer; transition:transform .6s cubic-bezier(.3,.8,.3,1)}
+.it .ring{fill:none; stroke:none; stroke-width:1}
+.it.sel .ring{stroke:var(--accent); stroke-width:1.2; stroke-dasharray:1.6 1}
+.it.extra .ring{stroke:var(--extra); stroke-width:1.1; stroke-dasharray:1.4 .9; animation:pulse 1.4s ease-in-out infinite}
+.it .badge{display:none}
+.it.counted .badge{display:inline}
+.bdg{fill:var(--ink)} .bdgt{fill:var(--card); font-family:var(--display); font-weight:800; font-size:3.9px; text-anchor:middle; dominant-baseline:central}
+.lines line{stroke:var(--ink); stroke-width:.8; stroke-linecap:round; opacity:.85}
+.lines line.fresh{stroke-dasharray:120; stroke-dashoffset:120; animation:draw .45s ease-out forwards}
+svg.moving .lines{opacity:0}
+.lines{transition:opacity .2s}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pulse{50%{stroke-width:.4}}
+
+/* towers */
+.cube-t0{fill:var(--r0)} .cube-t1{fill:var(--r1)}
+.cubeedge{fill:none; stroke:#000; stroke-opacity:.18; stroke-width:.35}
+.cubenum{fill:var(--chiptx); font-family:var(--display); font-weight:800; text-anchor:middle; dominant-baseline:central; opacity:0; transition:opacity .25s}
+.cubenum.on{opacity:1}
+.cubex{fill:none; stroke:none}
+.cubex.extra{stroke:var(--extra); stroke-width:.9; stroke-dasharray:1.3 .8}
+.floor{stroke:var(--muted); stroke-width:.8; stroke-linecap:round}
+.guide{stroke:var(--extra); stroke-width:.5; stroke-dasharray:1.5 1.2}
+.tower{transition:transform .8s cubic-bezier(.3,.8,.3,1)}
+.tlabel{font-family:var(--display); font-weight:800; font-size:5px; text-anchor:middle; dominant-baseline:central}
+
+/* bags */
+.bags{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; width:min(100%, 1100px); margin:0 auto}
+.bag{position:relative; border:3px solid var(--line); background:var(--card); border-radius:22px; padding:8px; display:flex; flex-direction:column; align-items:center; gap:4px; min-height:120px}
+.bag:hover{border-color:var(--ink)}
+.bag.picked{border-color:var(--accent)}
+.bag svg{width:100%; height:auto; display:block}
+.bag .letter{font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,32px); line-height:1}
+.bag .pick{position:absolute; top:-14px; right:-10px; width:52px; height:52px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:800; font-size:28px; display:grid; place-items:center; box-shadow:0 0 0 4px var(--bg)}
+.bag .pick[hidden]{display:none}
+.order{display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap; font-family:var(--display); font-weight:700; font-size:clamp(18px,1.7vw,24px); color:var(--muted)}
+.slot{width:64px; height:64px; border-radius:18px; border:3px dashed var(--line); display:grid; place-items:center; font-size:30px; font-weight:800; color:var(--ink)}
+.slot.full{border-style:solid; border-color:var(--ink); background:var(--card)}
+.arrow{font-size:28px}
+.proof{width:min(100%, 1000px); margin:0 auto}
+.proof svg{display:block; width:100%; height:auto; border-radius:18px; background:var(--card); box-shadow:0 0 0 2px var(--line)}
+.proof[hidden]{display:none}
+.rowlbl{font-family:var(--display); font-weight:800; font-size:6px; dominant-baseline:central; text-anchor:middle; fill:var(--chiptx)}
+.rowtot{font-family:var(--display); font-weight:800; font-size:7px; dominant-baseline:central; fill:var(--ink)}
+
+.qnav{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.qnav button{width:64px; height:64px; border-radius:50%; border:3px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:26px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.teacher{margin:0 auto; font-size:15px; color:var(--muted); text-align:center; max-width:50em}
+
+@media (prefers-reduced-motion: reduce){
+  .it,.tower,.cubenum,.lines{transition:none !important}
+  .lines line.fresh{animation:none; stroke-dashoffset:0}
+  .it.extra .ring{animation:none}
+}
+@media (max-width:700px){
+  .wrap{padding-inline:16px}
+  .scene{min-width:0; width:100%}
+  nav button{padding:6px 12px 6px 8px; min-height:52px}
+  nav button .w{display:none}
+  .bags{gap:10px}
+  .bag .pick{width:42px; height:42px; font-size:22px; top:-10px; right:-6px}
+  .slot{width:52px; height:52px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>More, Fewer, or the Same?</h1>
+    <p class="sub">Kindergarten · Week 3 · Math Enrichment</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Steps">
+  <button role="tab" data-stage="towers" aria-selected="true"><span class="n">1</span><span class="w">Towers</span></button>
+  <button role="tab" data-stage="grab" aria-selected="false"><span class="n">2</span><span class="w">Grab game</span></button>
+  <button role="tab" data-stage="big" aria-selected="false"><span class="n">3</span><span class="w">Can big lose?</span></button>
+  <button role="tab" data-stage="talk" aria-selected="false"><span class="n">4</span><span class="w">Detective talk</span></button>
+  <button role="tab" data-stage="bags" aria-selected="false"><span class="n">★</span><span class="w">Three bags</span></button>
+</nav>
+
+<!-- 1 · Towers warm-up -->
+<section class="stage" id="st-towers">
+  <p class="prompt">Which tower has MORE cubes?<small>Look first. Vote. Then we check.</small></p>
+  <div class="scene" id="towerScene"></div>
+  <div class="bar" id="towerVote">
+    <span class="lbl">Vote:</span>
+    <button class="soft" data-vote="0"><span class="dot" style="--c:var(--r0)"></span>Blue</button>
+    <button class="soft" data-vote="1"><span class="dot" style="--c:var(--r1)"></span>Orange</button>
+    <button class="soft" data-vote="cant">Can’t tell</button>
+  </div>
+  <div class="bar">
+    <span class="lbl">Check:</span>
+    <button class="big" id="tSide">Side by side</button>
+    <button class="big" id="tMatch">Match</button>
+    <button class="big" id="tCount">Count</button>
+  </div>
+  <p class="say" id="towerSay" aria-live="polite"></p>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Which towers">
+      <button id="tRound1" aria-pressed="true">Same cubes</button>
+      <button id="tRound2" aria-pressed="false">Tricky cubes</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Grab game -->
+<section class="stage" id="st-grab" hidden>
+  <p class="prompt">Who got MORE? Prove it!<small>Guess first. Then match or count.</small></p>
+  <div class="bar guess" data-mat="grab"></div>
+  <div class="scene" id="grabScene"></div>
+  <div class="bar proofbar" data-mat="grab"></div>
+  <p class="say" id="grabSay" aria-live="polite"></p>
+  <div class="bar"><button class="big" id="grabBtn">Grab again!</button></div>
+</section>
+
+<!-- 3 · Can big lose? -->
+<section class="stage" id="st-big" hidden>
+  <p class="prompt">Can the BIG things lose?<small>5 pom-poms or 8 beans. Which is more?</small></p>
+  <div class="bar guess" data-mat="big"></div>
+  <div class="scene" id="bigScene"></div>
+  <div class="bar proofbar" data-mat="big"></div>
+  <p class="say" id="bigSay" aria-live="polite"></p>
+  <div class="bar" id="rig"></div>
+</section>
+
+<!-- 4 · Detective talk -->
+<section class="stage" id="st-talk" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="prompt" id="qtext"></p>
+  <div class="scene" id="talkScene"></div>
+  <div class="bar" id="evidence"></div>
+  <p class="say" id="talkSay" aria-live="polite"></p>
+  <p class="bigidea" id="bigIdea" hidden>More means HOW MANY. Not how big!</p>
+  <p class="teacher">Talk it over first. Then tap a button to put the proof on the mat. Tap the mat to match or count by hand too.</p>
+</section>
+
+<!-- ★ · Three bags -->
+<section class="stage" id="st-bags" hidden>
+  <p class="prompt" id="bagPrompt">Tap each bag to open it.</p>
+  <div class="bags" id="bags"></div>
+  <div class="order" id="order"></div>
+  <div class="bar">
+    <button class="big" id="bagProofBtn">Line them up</button>
+    <button class="soft" id="bagClear">Try again</button>
+    <button class="soft" id="bagNew">New bags</button>
+  </div>
+  <p class="say" id="bagSay" aria-live="polite"></p>
+  <div class="proof" id="bagProof" hidden></div>
+</section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const NS='http://www.w3.org/2000/svg';
+const $=s=>document.querySelector(s);
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const rint=(a,b)=>Math.floor(rnd(a,b+1));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,reduced?0:ms));
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* ---------- objects ---------- */
+const TYPES={
+  pom:{r:5.3, word:'pom-poms', one:'pom-pom', spread:1, colors:['#F25C8A','#FF9F1C','#F7C948','#2EC4B6','#A06CF0']},
+  cube:{r:3.9, word:'cubes', one:'cube', spread:.7, colors:['#E63946','#3A86FF','#F4B400','#2A9D8F','#8338EC','#FB5607']},
+  bean:{r:2.6, word:'beans', one:'bean', spread:.42, colors:['#C44536','#E09F3E','#B5502F','#D4753A']}
+};
+function drawShape(g,type,color,rot){
+  if(type==='pom'){
+    el('circle',{r:5.5,fill:color,stroke:color,'stroke-width':1.3,'stroke-dasharray':'.45 .75','stroke-linecap':'round'},g);
+    el('circle',{r:4.8,fill:color},g);
+    el('circle',{cx:-1.6,cy:-1.8,r:1.8,fill:'#fff',opacity:.35},g);
+  }else if(type==='cube'){
+    el('rect',{x:-3.6,y:-3.6,width:7.2,height:7.2,rx:.9,fill:color},g);
+    el('rect',{x:-1.7,y:-1.7,width:3.4,height:3.4,rx:.5,fill:'#000',opacity:.16},g);
+    el('rect',{x:-3.1,y:-3.2,width:6.2,height:1,rx:.5,fill:'#fff',opacity:.3},g);
+  }else{
+    const b=el('g',{transform:`rotate(${rot})`},g);
+    el('ellipse',{rx:2.9,ry:1.8,fill:color},b);
+    el('path',{d:'M-.9 1.45 Q0 .6 .9 1.45',fill:'none',stroke:'#000','stroke-opacity':.22,'stroke-width':.35,'stroke-linecap':'round'},b);
+    el('ellipse',{cx:-.8,cy:-.7,rx:1.2,ry:.45,fill:'#fff',opacity:.35},b);
+  }
+}
+/* scatter n items of a type inside a box, bigger things take more room */
+function scatter(n,type,box,spread){
+  const r=TYPES[type].r, sp=spread==null?TYPES[type].spread:spread;
+  const H=box.y1-box.y0, Wfull=box.x1-box.x0;
+  const need=n*Math.pow(2*r*1.3,2)/Math.max(H-2*r,1)*1.6;
+  const w=Math.min(Wfull,Math.max(Wfull*sp,need,2*r+2));
+  const x0=box.x0+Math.random()*(Wfull-w);
+  let pts=[], factor=1.3;
+  for(let attempt=0;attempt<40;attempt++){
+    pts=[]; let ok=true;
+    for(let i=0;i<n;i++){
+      let placed=false;
+      for(let t=0;t<300;t++){
+        const x=rnd(x0+r,x0+w-r), y=rnd(box.y0+r,box.y1-r);
+        if(pts.every(p=>Math.hypot(p.x-x,p.y-y)>=2*r*factor)){pts.push({x,y});placed=true;break;}
+      }
+      if(!placed){ok=false;break;}
+    }
+    if(ok) return pts;
+    factor*=.94;
+  }
+  // fallback: simple grid (never overlaps badly)
+  pts=[]; const cols=Math.ceil(Math.sqrt(n*w/H));
+  for(let i=0;i<n;i++){pts.push({x:x0+r+(i%cols)*((w-2*r)/Math.max(cols-1,1)),y:box.y0+r+Math.floor(i/cols)*2.2*r});}
+  return pts;
+}
+
+/* ---------- the comparison mat ---------- */
+class Mat{
+  constructor(host,sayEl,opts){
+    this.host=host; this.sayEl=sayEl; this.opts=opts||{};
+    this.svg=el('svg',{viewBox:'0 0 160 100',role:'group','aria-label':'Comparison mat'});
+    host.appendChild(this.svg);
+    el('rect',{x:0,y:0,width:160,height:50,class:'half h0'},this.svg);
+    el('rect',{x:0,y:50,width:160,height:50,class:'half h1'},this.svg);
+    el('line',{x1:4,x2:156,y1:50,y2:50,class:'divider'},this.svg);
+    this.lineLayer=el('g',{class:'lines'},this.svg);
+    this.itemLayer=el('g',{},this.svg);
+    this.labelLayer=el('g',{},this.svg);
+    this.tool='match'; this.lined=false; this.gen=0;
+    this.guessBtns=[]; this.onDone=null;
+  }
+  load(rows,labels){
+    this.gen++;
+    this.labels=labels;
+    this.rows=rows.map((rw,r)=>{
+      const top=r*50;
+      const pts=scatter(rw.n,rw.type,{x0:5,x1:155,y0:top+11,y1:top+48},rw.spread);
+      const cols=TYPES[rw.type].colors;
+      return {type:rw.type, items:pts.map((p,i)=>({x:p.x,y:p.y,color:cols[(i+r*2)%cols.length],rot:rnd(-70,70)}))};
+    });
+    this.pairs=[]; this.sel=null; this.counts=[new Map(),new Map()];
+    this.guess=null; this.lined=false; this.fresh=null; this.note='';
+    this.build(); this.render(); this.syncButtons();
+  }
+  build(){
+    this.itemLayer.innerHTML='';
+    this.rows.forEach((row,r)=>{
+      row.items.forEach((it,i)=>{
+        const g=el('g',{class:'it',tabindex:0,role:'button'});
+        el('circle',{r:Math.max(TYPES[row.type].r+1.5,6),fill:'#000','fill-opacity':0},g);
+        el('circle',{class:'ring',r:TYPES[row.type].r+1.6},g);
+        drawShape(g,row.type,it.color,it.rot);
+        const b=el('g',{class:'badge',transform:`translate(${TYPES[row.type].r*.8},${-TYPES[row.type].r*.8-1})`},g);
+        el('circle',{r:2.7,class:'bdg'},b);
+        it.bt=el('text',{class:'bdgt'},b);
+        g.addEventListener('click',()=>this.tap(r,i));
+        g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();this.tap(r,i);}});
+        it.g=g; this.itemLayer.appendChild(g);
+      });
+    });
+    this.place(false);
+  }
+  /* where each item sits right now */
+  pos(r,i){
+    const it=this.rows[r].items[i];
+    if(!this.lined) return {x:it.x,y:it.y};
+    return {x:this.colX(this.col[r][i]), y:r*50+29};
+  }
+  computeCols(){
+    const a=this.rows[0].items.length,b=this.rows[1].items.length;
+    this.col=[new Array(a),new Array(b)];
+    let k=0; for(const [i,j] of this.pairs){this.col[0][i]=k;this.col[1][j]=k;k++;}
+    for(const r of [0,1]){
+      let kk=k;
+      const rest=this.rows[r].items.map((it,i)=>i).filter(i=>this.col[r][i]==null).sort((p,q)=>this.rows[r].items[p].x-this.rows[r].items[q].x);
+      for(const i of rest) this.col[r][i]=kk++;
+    }
+    const n=Math.max(a,b,1);
+    this.sp=Math.min(15,136/Math.max(n-1,1));
+  }
+  colX(c){return 13+c*this.sp;}
+  place(animate){
+    if(this.lined) this.computeCols();
+    if(animate&&!reduced){this.svg.classList.add('moving');clearTimeout(this.mt);this.mt=setTimeout(()=>this.svg.classList.remove('moving'),620);}
+    this.rows.forEach((row,r)=>row.items.forEach((it,i)=>{
+      const p=this.pos(r,i);
+      if(!animate) it.g.style.transition='none';
+      it.g.style.transform=`translate(${p.x}px,${p.y}px)`;
+      if(!animate){void it.g.getBoundingClientRect(); it.g.style.transition='';}
+    }));
+  }
+  a(){return this.rows[0].items.length;} b(){return this.rows[1].items.length;}
+  pairOf(r,i){return this.pairs.findIndex(p=>p[r]===i);}
+  matchDone(){const m=Math.min(this.a(),this.b());return m>0&&this.pairs.length===m;}
+  countDone(){return this.counts[0].size===this.a()&&this.counts[1].size===this.b();}
+  tap(r,i){
+    this.note='';
+    if(this.tool==='count'){
+      const c=this.counts[r];
+      if(c.has(i)){this.note='Already counted! Each one gets just one number.';}
+      else c.set(i,c.size+1);
+      this.render(); return;
+    }
+    const pi=this.pairOf(r,i);
+    if(pi>=0){ // unmatch
+      this.pairs.splice(pi,1); this.sel=null; this.note='Unmatched. Pick a new partner.';
+      if(this.lined) this.place(true);
+      this.render(); return;
+    }
+    if(this.sel&&this.sel.r!==r){
+      const pair=r===0?[i,this.sel.i]:[this.sel.i,i];
+      this.pairs.push(pair); this.fresh=pair; this.sel=null;
+      if(this.lined) this.place(true);
+      this.render(); return;
+    }
+    // choosing the first one of a pair
+    const other=1-r;
+    const freeOther=this.rows[other].items.some((_,j)=>this.pairOf(other,j)<0);
+    if(!freeOther){this.sel=null;this.note='No partner left for this one. It is an EXTRA!';this.render();return;}
+    this.sel={r,i}; this.note='Now tap its partner in the other row.';
+    this.render();
+  }
+  async autoMatch(){
+    const g=++this.gen; this.tool='match'; this.syncButtons(); this.sel=null;
+    while(!this.matchDone()&&g===this.gen){
+      const freeT=this.rows[0].items.map((_,i)=>i).filter(i=>this.pairOf(0,i)<0);
+      const freeB=this.rows[1].items.map((_,j)=>j).filter(j=>this.pairOf(1,j)<0);
+      let best;
+      if(this.lined){
+        const t=freeT.sort((p,q)=>this.col[0][p]-this.col[0][q])[0];
+        const bb=freeB.sort((p,q)=>this.col[1][p]-this.col[1][q])[0];
+        best=[t,bb];
+      }else{
+        const t=freeT.sort((p,q)=>this.rows[0].items[p].x-this.rows[0].items[q].x)[0];
+        const tp=this.rows[0].items[t];
+        const bb=freeB.sort((p,q)=>Math.hypot(this.rows[1].items[p].x-tp.x,this.rows[1].items[p].y-tp.y)-Math.hypot(this.rows[1].items[q].x-tp.x,this.rows[1].items[q].y-tp.y))[0];
+        best=[t,bb];
+      }
+      this.pairs.push(best); this.fresh=best; this.note='';
+      if(this.lined) this.place(false);
+      this.render();
+      await sleep(320);
+    }
+  }
+  async autoCount(){
+    const g=++this.gen; this.tool='count'; this.syncButtons();
+    for(const r of [0,1]){
+      const order=this.rows[r].items.map((_,i)=>i).sort((p,q)=>this.pos(r,p).x-this.pos(r,q).x);
+      for(const i of order){
+        if(g!==this.gen) return;
+        const c=this.counts[r]; if(c.has(i)) continue;
+        c.set(i,c.size+1); this.note=''; this.render();
+        await sleep(300);
+      }
+    }
+  }
+  setLined(v){this.lined=v;this.place(true);this.render();this.syncButtons();}
+  clearProof(){this.gen++;this.pairs=[];this.sel=null;this.counts=[new Map(),new Map()];this.note='';if(this.lined)this.place(true);this.render();}
+  setGuess(v){this.guess=v;this.render();this.syncButtons();}
+  truth(){const a=this.a(),b=this.b();return a>b?0:b>a?1:'same';}
+  render(){
+    const md=this.matchDone(), cd=this.countDone();
+    // items
+    this.rows.forEach((row,r)=>row.items.forEach((it,i)=>{
+      const paired=this.pairOf(r,i)>=0;
+      it.g.classList.toggle('sel',!!(this.sel&&this.sel.r===r&&this.sel.i===i));
+      it.g.classList.toggle('extra',md&&!paired);
+      const n=this.counts[r].get(i);
+      it.g.classList.toggle('counted',n!=null);
+      it.bt.textContent=n==null?'':n;
+      it.g.setAttribute('aria-label',`${TYPES[row.type].one}, row ${r===0?this.labels[0].name:this.labels[1].name}${paired?', matched':''}${n!=null?', counted '+n:''}`);
+    }));
+    // lines
+    this.lineLayer.innerHTML='';
+    for(const pr of this.pairs){
+      const p=this.pos(0,pr[0]), q=this.pos(1,pr[1]);
+      const ln=el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y},this.lineLayer);
+      if(this.fresh===pr) ln.classList.add('fresh');
+    }
+    this.fresh=null;
+    // labels + totals + verdict tags
+    this.labelLayer.innerHTML='';
+    const tr=this.truth(), done=md||cd;
+    [0,1].forEach(r=>{
+      const y=r*50+5.5, name=this.labels[r].name, w=name.length*2.55+8;
+      el('rect',{x:3,y:y-3.8,width:w,height:7.6,rx:3.8,class:'chip'+r},this.labelLayer);
+      const t=el('text',{x:3+w/2,y:y,class:'chiptxt','text-anchor':'middle'},this.labelLayer); t.textContent=name;
+      let x=3+w+3;
+      if(this.counts[r].size){const tt=el('text',{x:x,y:y+.3,class:'tot'},this.labelLayer); tt.textContent=this.counts[r].size; x+=String(this.counts[r].size).length*4.6+3;}
+      if(done){
+        const word=tr==='same'?'SAME':(tr===r?'MORE':'FEWER'), ww=word.length*3+5;
+        el('rect',{x:x,y:y-3.4,width:ww,height:6.8,rx:1.6,class:'verdbg'},this.labelLayer);
+        const vt=el('text',{x:x+ww/2,y:y,class:'verd verdtx','text-anchor':'middle'},this.labelLayer); vt.textContent=word;
+      }
+    });
+    this.say();
+    if(done&&this.onDone) this.onDone(this);
+  }
+  say(){
+    const md=this.matchDone(), cd=this.countDone(), a=this.a(), b=this.b(), L=this.labels;
+    const s=this.sayEl; s.classList.remove('win');
+    const V=(k)=>`${L[k].name} ${L[k].verb}`;
+    if(!md&&!cd){
+      let h=this.note;
+      if(!h){
+        if(this.tool==='match') h=this.pairs.length?'Keep matching! One and one.':'Tap one on top. Then tap one on the bottom.';
+        else h=(this.counts[0].size||this.counts[1].size)?'Keep counting! Tap each one once.':'Tap each one and say the number.';
+        if(this.guess!=null&&!this.pairs.length&&!this.counts[0].size&&!this.counts[1].size) h='You guessed! Now PROVE it. '+h;
+      }
+      s.innerHTML=h; return;
+    }
+    s.classList.add('win');
+    const tr=this.truth(); let lines=[];
+    if(md){
+      if(tr==='same') lines.push(`<b>The SAME!</b> Every one has a partner.`);
+      else{const ex=Math.abs(a-b), more=tr, fewer=1-tr;
+        lines.push(`<span class="m">${ex}</span> ${ex===1?'has':'have'} no partner. <b>${V(more)} MORE.</b> ${V(fewer)} fewer.`);}
+    }
+    if(cd){
+      if(tr==='same') lines.push(`<b>${a} and ${b}.</b> Same number. <b>The SAME!</b>`);
+      else{const hi=Math.max(a,b), lo=Math.min(a,b);
+        lines.push(`<b>${a} and ${b}.</b> ${hi} is more than ${lo}.${md?'':` <b>${V(tr)} MORE.</b>`}`);}
+    }
+    if(md&&cd) lines.push('Match and count agree!');
+    let extra='';
+    if(this.guess!=null){
+      if(this.guess===tr) extra='You guessed it. And now you PROVED it!';
+      else{
+        const gword=this.guess==='same'?'the same':L[this.guess].name, tword=tr==='same'?'the same':L[tr].name;
+        extra=`Your eyes said ${gword}. The proof says ${tword}. Tricky!`;
+      }
+    }
+    if(this.note) extra=(extra?extra+' ':'')+this.note;
+    s.innerHTML=lines.join(' ')+(extra?`<span class="again">${extra}</span>`:'');
+  }
+  /* controls */
+  mountGuess(bar){
+    bar.innerHTML='<span class="lbl">Guess:</span>';
+    this.guessBtns=[];
+    const mk=(v,html)=>{const b=document.createElement('button');b.className='soft';b.innerHTML=html;b.onclick=()=>this.setGuess(v);bar.appendChild(b);this.guessBtns.push([v,b]);};
+    this.guessBar=bar; this.guessMk=mk;
+    this.refreshGuess();
+  }
+  refreshGuess(){
+    if(!this.guessBar||!this.labels) return;
+    const bar=this.guessBar; bar.innerHTML='<span class="lbl">Guess:</span>'; this.guessBtns=[];
+    this.guessMk(0,`<span class="dot" style="--c:var(--r0)"></span>${this.labels[0].name}`);
+    this.guessMk(1,`<span class="dot" style="--c:var(--r1)"></span>${this.labels[1].name}`);
+    this.guessMk('same','Same');
+    this.syncButtons();
+  }
+  mountProof(bar){
+    bar.innerHTML='';
+    const seg=document.createElement('div'); seg.className='seg'; seg.setAttribute('role','group'); seg.setAttribute('aria-label','Proof tool');
+    seg.innerHTML=`<button data-t="match"><svg viewBox="0 0 30 30"><circle cx="15" cy="6" r="4" fill="currentColor"/><circle cx="15" cy="24" r="4" fill="currentColor"/><line x1="15" y1="9" x2="15" y2="21" stroke="currentColor" stroke-width="2.5"/></svg>Match</button><button data-t="count"><svg viewBox="0 0 30 30"><text x="15" y="21" text-anchor="middle" font-size="16" font-weight="800" fill="currentColor" font-family="Baloo 2, sans-serif">123</text></svg>Count</button>`;
+    seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{this.gen++;this.tool=b.dataset.t;this.sel=null;this.note='';this.render();this.syncButtons();});
+    bar.appendChild(seg);
+    const help=document.createElement('button'); help.className='big'; help.onclick=()=>this.tool==='match'?this.autoMatch():this.autoCount(); bar.appendChild(help);
+    const line=document.createElement('button'); line.className='soft'; line.onclick=()=>this.setLined(!this.lined); bar.appendChild(line);
+    const clr=document.createElement('button'); clr.className='soft'; clr.textContent='Clear'; clr.onclick=()=>this.clearProof(); bar.appendChild(clr);
+    this.segEl=seg; this.helpBtn=help; this.lineBtn=line;
+    this.syncButtons();
+  }
+  syncButtons(){
+    if(this.segEl) this.segEl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===this.tool));
+    if(this.helpBtn) this.helpBtn.textContent=this.tool==='match'?'Match all':'Count all';
+    if(this.lineBtn) this.lineBtn.textContent=this.lined?'Spread out':'Line up';
+    this.guessBtns.forEach(([v,b])=>b.setAttribute('aria-pressed',this.guess===v));
+  }
+}
+
+const L_MINE=[{name:'Mine',verb:'has'},{name:'Partner',verb:'has'}];
+const typeLabel=t=>({name:cap(TYPES[t].word),verb:'have'});
+
+/* ---------- 1 · Towers ---------- */
+const T={round:1};
+const tsvg=el('svg',{viewBox:'0 0 160 100',role:'img','aria-label':'Two cube towers'});
+$('#towerScene').appendChild(tsvg);
+function towerSetup(){
+  const nineLeft=Math.random()<.5;
+  const ns=nineLeft?[9,7]:[7,9];
+  let ss;
+  if(T.round===1) ss=[6.6,6.6];
+  else ss=ns.map(n=>n===9?5.8:8); // 9 small cubes (52.2 tall) vs 7 big cubes (56 tall)
+  T.n=ns; T.s=ss; T.vote=null; T.side=false; T.match=false; T.count=false; T.gen=(T.gen||0)+1;
+  drawTowers(); towerSay();
+}
+function tX(k){return T.side?(k===0?67:93):(k===0?38:122);}
+function drawTowers(){
+  tsvg.innerHTML='';
+  el('rect',{x:0,y:0,width:160,height:100,fill:'var(--felt)'},tsvg);
+  el('line',{x1:8,x2:152,y1:92,y2:92,class:'floor'},tsvg);
+  T.lineG=el('g',{class:'lines'},tsvg);
+  T.guideG=el('g',{},tsvg);
+  T.g=[0,1].map(k=>{
+    const g=el('g',{class:'tower'},tsvg); g.style.transform=`translate(${tX(k)}px,92px)`;
+    const s=T.s[k]; const cubes=[];
+    for(let c=0;c<T.n[k];c++){
+      const y=-(c+1)*s;
+      el('rect',{x:-s/2,y:y,width:s,height:s,class:'cube-t'+k},g);
+      el('rect',{x:-s/2+.2,y:y+.2,width:s-.4,height:s-.4,class:'cubeedge'},g);
+      el('rect',{x:-s*.2,y:y+s*.3,width:s*.4,height:s*.4,rx:.4,fill:'#000',opacity:.12},g);
+      const x=el('rect',{x:-s/2-.8,y:y-.3,width:s+1.6,height:s+.6,rx:1,class:'cubex'},g);
+      const t=el('text',{x:0,y:y+s/2,class:'cubenum','font-size':s*.62},g); t.textContent=c+1;
+      cubes.push({x,t});
+    }
+    const lb=el('text',{x:0,y:4.5,class:'tlabel',fill:k===0?'var(--r0)':'var(--r1)'},g); lb.textContent=k===0?'Blue':'Orange';
+    return {g,cubes};
+  });
+  renderTowerProof();
+}
+function renderTowerProof(){
+  T.g.forEach((tw,k)=>tw.g.style.transform=`translate(${tX(k)}px,92px)`);
+  T.lineG.innerHTML=''; T.guideG.innerHTML='';
+  const m=Math.min(T.n[0],T.n[1]);
+  if(T.match){
+    for(let c=0;c<m;c++){
+      const y0=92-(c+.5)*T.s[0], y1=92-(c+.5)*T.s[1];
+      el('line',{x1:tX(0)+T.s[0]/2,y1:y0,x2:tX(1)-T.s[1]/2,y2:y1},T.lineG);
+    }
+  }
+  T.g.forEach((tw,k)=>tw.cubes.forEach((cb,c)=>{
+    cb.x.classList.toggle('extra',T.match&&c>=m);
+    cb.t.classList.toggle('on',T.count&&c<(T.shown?T.shown[k]:0));
+  }));
+  if(T.side){
+    const h=Math.min(T.n[0]*T.s[0],T.n[1]*T.s[1]);
+    el('line',{x1:40,x2:120,y1:92-h,y2:92-h,class:'guide'},T.guideG);
+  }
+}
+function towerSay(){
+  const s=$('#towerSay'); s.classList.remove('win');
+  const names=['Blue','Orange'];
+  const more=T.n[0]>T.n[1]?0:1, fewer=1-more;
+  const taller=T.n[0]*T.s[0]>T.n[1]*T.s[1]?0:1;
+  const sameSize=T.s[0]===T.s[1];
+  let main='';
+  if(T.count&&T.countDone) main=`<b>${names[0]} ${T.n[0]}. ${names[1]} ${T.n[1]}.</b> ${T.n[more]} is more than ${T.n[fewer]}. <b>${names[more]} has MORE.</b>`;
+  else if(T.match) main=`<span class="m">${T.n[more]-T.n[fewer]}</span> ${names[more]} cubes have no partner. <b>${names[more]} has MORE.</b>`;
+  else if(T.side) main=sameSize?`<b>${names[taller]} is taller.</b> The cubes are the same size. So taller has more!`
+                               :`<b>${names[taller]} is taller…</b> but look! The cubes are NOT the same size. Taller does not prove it. Match or count!`;
+  const proved=(T.count&&T.countDone)||T.match||(T.side&&sameSize);
+  if(!main){ s.innerHTML=T.vote==null?'Tap a vote. Then pick a way to check.':'You voted! Now check it.'; return; }
+  let extra='';
+  if(proved&&T.vote!=null){
+    if(T.vote==='cant') extra='Smart! Looking was not enough. The proof told us.';
+    else if(T.vote===more) extra='Your vote was right. Now it is proved!';
+    else extra=`Our eyes can trick us! The proof shows ${names[more]}.`;
+  }
+  if(proved) s.classList.add('win');
+  s.innerHTML=main+(extra?`<span class="again">${extra}</span>`:'');
+}
+document.querySelectorAll('[data-vote]').forEach(b=>b.onclick=()=>{
+  const v=b.dataset.vote; T.vote=v==='cant'?'cant':+v;
+  document.querySelectorAll('[data-vote]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  towerSay();
+});
+$('#tSide').onclick=()=>{T.side=!T.side; $('#tSide').textContent=T.side?'Move apart':'Side by side'; renderTowerProof(); towerSay();};
+$('#tMatch').onclick=()=>{T.match=true; renderTowerProof(); towerSay();};
+$('#tCount').onclick=async()=>{
+  const g=++T.gen; T.count=true; T.countDone=false; T.shown=[0,0]; towerSay();
+  for(const k of [0,1]) for(let c=1;c<=T.n[k];c++){ if(g!==T.gen) return; T.shown[k]=c; renderTowerProof(); await sleep(260); }
+  T.countDone=true; renderTowerProof(); towerSay();
+};
+function setRound(r){
+  T.round=r; $('#tRound1').setAttribute('aria-pressed',r===1); $('#tRound2').setAttribute('aria-pressed',r===2);
+  document.querySelectorAll('[data-vote]').forEach(x=>x.setAttribute('aria-pressed',false));
+  $('#tSide').textContent='Side by side';
+  towerSetup();
+}
+$('#tRound1').onclick=()=>setRound(1);
+$('#tRound2').onclick=()=>setRound(2);
+
+/* ---------- 2 · Grab game ---------- */
+const grabMat=new Mat($('#grabScene'),$('#grabSay'));
+const TYPE_KEYS=['pom','cube','bean'];
+function grab(){
+  grabMat.load([{type:TYPE_KEYS[rint(0,2)],n:rint(3,10)},{type:TYPE_KEYS[rint(0,2)],n:rint(3,10)}],L_MINE);
+}
+grabMat.mountGuess(document.querySelector('.guess[data-mat="grab"]'));
+grabMat.mountProof(document.querySelector('.proofbar[data-mat="grab"]'));
+$('#grabBtn').onclick=grab;
+
+/* ---------- 3 · Can big lose? ---------- */
+const bigMat=new Mat($('#bigScene'),$('#bigSay'));
+const rig=[{type:'pom',n:5,spread:1},{type:'bean',n:8,spread:.3}];
+function loadBig(){ bigMat.load(rig.map(x=>({...x})),L_MINE); renderRig(); }
+function renderRig(){
+  const box=$('#rig'); box.innerHTML='';
+  const lab=document.createElement('span'); lab.className='lbl'; lab.textContent='Rig it:'; box.appendChild(lab);
+  [0,1].forEach(r=>{
+    const seg=document.createElement('div'); seg.className='seg'; seg.setAttribute('role','group'); seg.setAttribute('aria-label',(r?'Partner':'Mine')+' handful');
+    const tag=document.createElement('span'); tag.className='dot'; tag.style.setProperty('--c',r?'var(--r1)':'var(--r0)'); tag.style.margin='0 6px'; tag.style.alignSelf='center'; seg.appendChild(tag);
+    TYPE_KEYS.forEach(t=>{
+      const b=document.createElement('button'); b.setAttribute('aria-pressed',rig[r].type===t); b.setAttribute('aria-label',cap(TYPES[t].word));
+      const sv=el('svg',{viewBox:'-7 -7 14 14'}); drawShape(el('g',{},sv),t,TYPES[t].colors[r],20); b.appendChild(sv);
+      b.onclick=()=>{rig[r].type=t; rig[r].spread=t==='bean'?.3:null; loadBig();};
+      seg.appendChild(b);
+    });
+    const minus=document.createElement('button'); minus.textContent='−'; minus.setAttribute('aria-label','One fewer'); minus.style.fontSize='28px';
+    minus.disabled=rig[r].n<=1; minus.onclick=()=>{rig[r].n=Math.max(1,rig[r].n-1); loadBig();};
+    const plus=document.createElement('button'); plus.textContent='+'; plus.setAttribute('aria-label','One more'); plus.style.fontSize='28px';
+    plus.disabled=rig[r].n>=10; plus.onclick=()=>{rig[r].n=Math.min(10,rig[r].n+1); loadBig();};
+    seg.appendChild(minus); seg.appendChild(plus);
+    box.appendChild(seg);
+  });
+  const p=$('#st-big .prompt small');
+  p.textContent=`${rig[0].n} ${rig[0].n===1?TYPES[rig[0].type].one:TYPES[rig[0].type].word} or ${rig[1].n} ${rig[1].n===1?TYPES[rig[1].type].one:TYPES[rig[1].type].word}. Which is more?`;
+}
+bigMat.mountGuess(document.querySelector('.guess[data-mat="big"]'));
+bigMat.mountProof(document.querySelector('.proofbar[data-mat="big"]'));
+
+/* ---------- 4 · Detective talk ---------- */
+const talkMat=new Mat($('#talkScene'),$('#talkSay'));
+const QS=[
+  {q:'The pom-poms take up more room. Do they have MORE?',
+   rows:[{type:'pom',n:5,spread:1},{type:'bean',n:8,spread:.3}], labels:[typeLabel('pom'),typeLabel('bean')], idea:true},
+  {q:'Spread out and bunched up. Is one of them MORE?',
+   rows:[{type:'bean',n:6,spread:1},{type:'bean',n:6,spread:.22}], labels:[{name:'Spread',verb:'has'},{name:'Bunched',verb:'has'}], idea:true},
+  {q:'Match or count. Do both proofs agree?',
+   rows:[{type:'cube',n:7,spread:.9},{type:'bean',n:9,spread:.5}], labels:[typeLabel('cube'),typeLabel('bean')], idea:false}
+];
+let qi=0;
+function loadQ(i){
+  qi=i; const Q=QS[i];
+  $('#qnav').querySelectorAll('button').forEach((b,k)=>b.setAttribute('aria-pressed',k===i));
+  $('#qtext').textContent=Q.q;
+  $('#bigIdea').hidden=true;
+  talkMat.load(Q.rows.map(r=>({...r})),Q.labels);
+  const ev=$('#evidence'); ev.innerHTML='';
+  const mk=(t,cls,f)=>{const b=document.createElement('button');b.className=cls;b.textContent=t;b.onclick=f;ev.appendChild(b);return b;};
+  mk('Match them','big',()=>talkMat.autoMatch());
+  mk('Count them','big',()=>talkMat.autoCount());
+  const lb=mk('Line them up','soft',()=>{talkMat.setLined(!talkMat.lined); lb.textContent=talkMat.lined?'Spread out':'Line them up';});
+  mk('Clear','soft',()=>talkMat.clearProof());
+  talkMat.say();
+}
+talkMat.onDone=()=>{ if(QS[qi].idea) $('#bigIdea').hidden=false; };
+$('#qnav').innerHTML=QS.map((_,i)=>`<button aria-label="Question ${i+1}">${i+1}</button>`).join('');
+$('#qnav').querySelectorAll('button').forEach((b,i)=>b.onclick=()=>loadQ(i));
+
+/* ---------- ★ · Three bags ---------- */
+const B={};
+const BAGC=['var(--r0)','var(--accent)','var(--r1)'];
+function newBags(){
+  let ns;
+  do{ ns=shuffle([3,4,5,6,7,8,9,10]).slice(0,3).sort((a,b)=>a-b); }while(ns[0]>5||ns[2]-ns[0]<3);
+  // fewest get the biggest things, most get the smallest things: the eyes get fooled
+  const content=[{n:ns[0],type:'pom'},{n:ns[1],type:'cube'},{n:ns[2],type:'bean'}];
+  shuffle(content);
+  B.bags=content.map((c,i)=>({letter:'ABC'[i],n:c.n,type:c.type,open:false,color:BAGC[i],
+     pts:scatter(c.n,c.type,{x0:3,x1:57,y0:3,y1:39},c.type==='bean'?.5:1)}));
+  B.order=[]; B.result=null; B.proof=false;
+  renderBags();
+}
+function renderBags(){
+  const box=$('#bags'); box.innerHTML='';
+  B.bags.forEach((bg,i)=>{
+    const b=document.createElement('button'); b.className='bag'+(B.order.includes(i)?' picked':'');
+    const sv=el('svg',{viewBox:'0 0 60 42'});
+    if(!bg.open){
+      el('path',{d:'M18 12 Q14 6 20 4 L40 4 Q46 6 42 12 Q54 22 50 34 Q48 40 30 40 Q12 40 10 34 Q6 22 18 12 Z',fill:bg.color,opacity:.9},sv);
+      el('path',{d:'M18 12 Q30 16 42 12',fill:'none',stroke:'#000','stroke-opacity':.25,'stroke-width':1.4,'stroke-linecap':'round'},sv);
+      const q=el('text',{x:30,y:28,'text-anchor':'middle','dominant-baseline':'central','font-family':'Baloo 2, sans-serif','font-weight':800,'font-size':14,fill:'#fff'},sv); q.textContent='?';
+    }else{
+      el('rect',{x:0,y:0,width:60,height:42,rx:4,fill:'var(--felt)'},sv);
+      bg.pts.forEach((p,k)=>{const g=el('g',{transform:`translate(${p.x},${p.y})`},sv);drawShape(g,bg.type,TYPES[bg.type].colors[k%TYPES[bg.type].colors.length],(k*47)%120-60);});
+    }
+    b.appendChild(sv);
+    const lt=document.createElement('span'); lt.className='letter'; lt.style.color=bg.color; lt.textContent='Bag '+bg.letter; b.appendChild(lt);
+    const pk=document.createElement('span'); pk.className='pick'; const pos=B.order.indexOf(i); pk.hidden=pos<0; pk.textContent=pos+1; b.appendChild(pk);
+    b.setAttribute('aria-label',`Bag ${bg.letter}${bg.open?', open, '+TYPES[bg.type].word:', closed'}${pos>=0?', picked number '+(pos+1):''}`);
+    b.onclick=()=>tapBag(i);
+    box.appendChild(b);
+  });
+  // order slots
+  const o=$('#order'); o.innerHTML='<span>Fewest</span>';
+  for(let k=0;k<3;k++){
+    const s=document.createElement('span'); s.className='slot'+(B.order[k]!=null?' full':'');
+    if(B.order[k]!=null){s.textContent=B.bags[B.order[k]].letter; s.style.color=B.bags[B.order[k]].color;}
+    o.appendChild(s);
+    if(k<2){const a=document.createElement('span'); a.className='arrow'; a.textContent='→'; o.appendChild(a);}
+  }
+  o.insertAdjacentHTML('beforeend','<span>Most</span>');
+  const allOpen=B.bags.every(b=>b.open);
+  $('#bagProofBtn').disabled=!allOpen;
+  $('#bagProofBtn').textContent=B.proof?'Hide proof':'Line them up';
+  const pr=['Tap the bag with the FEWEST.','Now tap the next one.','Which bag has the MOST?'];
+  $('#bagPrompt').textContent=!allOpen?'Tap each bag to open it.':(B.order.length<3?pr[B.order.length]:'Fewest to most. Is it right?');
+  renderBagProof(); bagSay();
+}
+function tapBag(i){
+  const bg=B.bags[i];
+  if(!bg.open){bg.open=true; renderBags(); return;}
+  if(!B.bags.every(b=>b.open)){B.note='Open every bag first!'; bagSay(); return;}
+  if(B.order.includes(i)||B.order.length>=3) return;
+  B.order.push(i);
+  if(B.order.length===3) checkBags();
+  renderBags();
+}
+function checkBags(){
+  const ns=B.order.map(i=>B.bags[i].n);
+  let bad=-1; for(let k=0;k<2;k++) if(ns[k]>ns[k+1]){bad=k;break;}
+  B.result=bad<0?{ok:true}:{ok:false,x:B.order[bad],y:B.order[bad+1]};
+  if(!B.result.ok) B.proof=true;
+}
+function bagSay(){
+  const s=$('#bagSay'); s.classList.remove('win');
+  if(B.note){s.textContent=B.note;B.note='';return;}
+  if(!B.result){s.innerHTML=B.bags.every(b=>b.open)?'Big things or many things? Look closely!':'Three mystery bags. What is inside?';return;}
+  if(B.result.ok){
+    s.classList.add('win');
+    s.innerHTML=`<b>Yes!</b> ${B.order.map(i=>`Bag ${B.bags[i].letter} has ${B.bags[i].n}`).join(', ')}. <b>Fewest to most!</b>`+(B.proof?'':'<span class="again">Tap “Line them up” to see the proof.</span>');
+  }else{
+    const X=B.bags[B.result.x], Y=B.bags[B.result.y];
+    s.innerHTML=`Let’s check! Bag ${X.letter} has <b>${X.n}</b>. Bag ${Y.letter} has <b>${Y.n}</b>. ${X.n} is more than ${Y.n}, so Bag ${X.letter} goes after Bag ${Y.letter}.<span class="again">Look at the lines below. Then tap “Try again.”</span>`;
+  }
+}
+function renderBagProof(){
+  const box=$('#bagProof'); box.hidden=!B.proof; box.innerHTML='';
+  if(!B.proof) return;
+  const sv=el('svg',{viewBox:'0 0 160 62',role:'img','aria-label':'The three bags lined up in rows'});
+  el('rect',{x:0,y:0,width:160,height:62,fill:'var(--felt)'},sv);
+  for(let c=0;c<10;c++) el('line',{x1:22+c*12.4,x2:22+c*12.4,y1:4,y2:58,stroke:'var(--line)','stroke-width':.4,'stroke-dasharray':'1 1.5'},sv);
+  B.bags.forEach((bg,r)=>{
+    const y=11+r*20;
+    el('rect',{x:3,y:y-5,width:12,height:10,rx:3,fill:bg.color},sv);
+    const t=el('text',{x:9,y:y,class:'rowlbl'},sv); t.textContent=bg.letter;
+    for(let k=0;k<bg.n;k++){const g=el('g',{transform:`translate(${22+k*12.4},${y}) scale(.95)`},sv); drawShape(g,bg.type,TYPES[bg.type].colors[k%TYPES[bg.type].colors.length],15);}
+    const tt=el('text',{x:22+bg.n*12.4-3,y:y,class:'rowtot'},sv); tt.textContent=bg.n;
+  });
+  box.appendChild(sv);
+}
+$('#bagProofBtn').onclick=()=>{B.proof=!B.proof; renderBags();};
+$('#bagClear').onclick=()=>{B.order=[];B.result=null;B.proof=false;renderBags();};
+$('#bagNew').onclick=newBags;
+
+/* ---------- nav, reset, full screen ---------- */
+function showStage(name){
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.stage===name));
+  document.querySelectorAll('.stage').forEach(s=>s.hidden=s.id!=='st-'+name);
+  // re-place items without animation now that the mat is visible
+  [grabMat,bigMat,talkMat].forEach(m=>m.rows&&m.place(false));
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showStage(b.dataset.stage));
+function startOver(){
+  setRound(1);
+  grab();
+  rig[0]={type:'pom',n:5,spread:1}; rig[1]={type:'bean',n:8,spread:.3}; loadBig();
+  grabMat.refreshGuess(); bigMat.refreshGuess();
+  [grabMat,bigMat].forEach(m=>{m.tool='match';m.syncButtons();});
+  loadQ(0);
+  newBags();
+  showStage('towers');
+}
+$('#resetBtn').onclick=startOver;
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+
+startOver();
+})();
+</script>
+
+</body></html>

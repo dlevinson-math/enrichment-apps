@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rectangle Factory — Array Product Puzzles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F7F5EE;
+    --paper-2: #EFECE1;
+    --line: #C7D2D6;
+    --line-strong: #9FB0B6;
+    --ink: #1C2B33;
+    --ink-soft: #4B5D66;
+    --blue: #2B5F73;
+    --blue-deep: #1F4756;
+    --amber: #D9A441;
+    --amber-deep: #B5822C;
+    --rust: #B5493A;
+    --green: #4C7A5B;
+    --green-deep: #376044;
+    --white: #FFFFFF;
+    --radius: 4px;
+    --shadow: 0 1px 0 rgba(28,43,51,0.08);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #14201F;
+      --paper-2: #1B2928;
+      --line: #2E4240;
+      --line-strong: #3E5654;
+      --ink: #ECE7DA;
+      --ink-soft: #B9C6C4;
+      --blue: #7FB6C9;
+      --blue-deep: #A9D3E0;
+      --amber: #E7B85B;
+      --amber-deep: #F0CA80;
+      --rust: #E08573;
+      --green: #7FBE97;
+      --green-deep: #9FD3B0;
+      --white: #0E1817;
+      --shadow: 0 1px 0 rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14201F;
+    --paper-2: #1B2928;
+    --line: #2E4240;
+    --line-strong: #3E5654;
+    --ink: #ECE7DA;
+    --ink-soft: #B9C6C4;
+    --blue: #7FB6C9;
+    --blue-deep: #A9D3E0;
+    --amber: #E7B85B;
+    --amber-deep: #F0CA80;
+    --rust: #E08573;
+    --green: #7FBE97;
+    --green-deep: #9FD3B0;
+    --white: #0E1817;
+    --shadow: 0 1px 0 rgba(0,0,0,0.3);
+  }
+
+  html, body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 28px 28px,
+      var(--paper);
+    background-attachment: local;
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+  .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  a { color: var(--blue-deep); }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  header.site {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--ink);
+  }
+  header.site .title-block h1 {
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.1rem);
+    margin: 0 0 2px;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  header.site .title-block p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  header.site .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--blue-deep);
+    border: 1px solid var(--blue-deep);
+    padding: 4px 9px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+  }
+
+  nav.tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+  nav.tabs button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    background: transparent;
+    border: 1.5px solid var(--line-strong);
+    color: var(--ink-soft);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  nav.tabs button:hover { border-color: var(--blue-deep); color: var(--ink); }
+  nav.tabs button.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  nav.tabs button:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--blue-deep);
+    outline-offset: 2px;
+  }
+
+  section.panel { display: none; }
+  section.panel.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) {
+    section.panel.active { animation: none; }
+    * { transition: none !important; }
+  }
+
+  h2.panel-title {
+    font-size: 1.3rem;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  p.lede {
+    color: var(--ink-soft);
+    max-width: 62ch;
+    line-height: 1.5;
+    margin: 0 0 22px;
+  }
+  .question-card {
+    background: var(--white);
+    border: 1.5px solid var(--ink);
+    border-left: 6px solid var(--blue);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .question-card .k { font-size: 0.72rem; letter-spacing: 0.04em; color: var(--blue-deep); font-family: 'IBM Plex Mono', monospace; display:block; margin-bottom: 6px; }
+  .question-card p { margin: 0; line-height: 1.5; font-size: 1.02rem; }
+
+  .layout-two {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .layout-two { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--white);
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  /* --- Warm up grids --- */
+  .warmup-grids {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 22px;
+  }
+  .warmup-item { text-align: center; }
+  .warmup-item .cap {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+  .tilegrid {
+    display: inline-grid;
+    gap: 2px;
+    background: var(--line-strong);
+    padding: 2px;
+    border-radius: 3px;
+  }
+  .tile {
+    background: var(--amber);
+    border-radius: 2px;
+  }
+  .tile.blue { background: var(--blue); }
+  .tile.green { background: var(--green); }
+  .tile.ghost { background: var(--paper-2); }
+
+  button.rotate-btn, button.ghost-btn {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 0.88rem;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--ink);
+    background: var(--white);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button.rotate-btn:hover, button.ghost-btn:hover { background: var(--paper-2); }
+
+  .prompt-list {
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .prompt-list li::marker { color: var(--blue-deep); font-family: 'IBM Plex Mono', monospace; }
+
+  /* --- Build tab --- */
+  .target-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .target-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--white);
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .target-chip[aria-pressed="true"] {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+  }
+  .target-chip.custom-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 14px;
+  }
+  .target-chip.custom-wrap input {
+    width: 52px;
+    border: none;
+    background: transparent;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+  .target-chip.custom-wrap input:focus { outline: none; }
+
+  .stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--paper-2);
+    border-radius: 999px;
+    padding: 6px 10px;
+  }
+  .stepper button {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: var(--white);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .stepper button:hover { background: var(--amber); border-color: var(--amber-deep); }
+  .stepper .val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.1rem;
+    min-width: 22px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .stepper .lbl { font-size: 0.78rem; color: var(--ink-soft); margin-right: 2px; }
+
+  .product-readout {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.4rem;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: 1.5px dashed var(--line-strong);
+    background: var(--paper-2);
+  }
+  .product-readout.match { border-color: var(--green-deep); background: color-mix(in srgb, var(--green) 16%, var(--white)); color: var(--green-deep); font-weight: 600; }
+
+  .grid-stage {
+    overflow: auto;
+    padding: 6px 2px 14px;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+  }
+
+  .status-line {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    min-height: 1.4em;
+    margin-bottom: 4px;
+  }
+  .status-line.crossed { color: var(--rust); font-weight: 600; }
+  .status-line.recorded { color: var(--green-deep); font-weight: 600; }
+
+  .side-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--blue-deep);
+    margin: 0 0 12px;
+  }
+  ul.pairlist { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  ul.pairlist li {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    background: var(--paper-2);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  ul.pairlist li .side { color: var(--ink-soft); font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; }
+  .empty-note { color: var(--ink-soft); font-size: 0.88rem; font-style: italic; }
+  .complete-badge {
+    margin-top: 10px;
+    background: color-mix(in srgb, var(--green) 18%, var(--white));
+    border: 1.5px solid var(--green-deep);
+    color: var(--green-deep);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  /* --- Champion tab --- */
+  .champ-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper-2);
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .champ-banner .crown { font-size: 1.4rem; }
+  .champ-banner strong { font-family: 'IBM Plex Mono', monospace; font-size: 1.05rem; }
+  .champ-banner.none { color: var(--ink-soft); }
+
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .num-btn {
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--line-strong);
+    background: var(--white);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: var(--ink);
+    position: relative;
+  }
+  .num-btn:hover { border-color: var(--blue-deep); }
+  .num-btn.explored { background: var(--paper-2); }
+  .num-btn.selected { background: var(--blue); border-color: var(--blue); color: var(--white); }
+  .num-btn.champion { background: var(--amber); border-color: var(--amber-deep); color: var(--ink); }
+  .num-btn.champion.selected { background: var(--amber); border-color: var(--amber-deep); }
+  .num-btn .dot {
+    position: absolute;
+    bottom: 3px; right: 4px;
+    font-size: 0.55rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink-soft);
+  }
+  .num-btn.selected .dot, .num-btn.champion .dot { color: inherit; opacity: 0.75; }
+
+  .detail-box {
+    min-height: 60px;
+  }
+  .detail-box .n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+  .detail-box .pairs {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  /* --- Wrap up tab --- */
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    resize: vertical;
+    background: var(--white);
+    color: var(--ink);
+  }
+  textarea:focus { outline: 2px solid var(--blue-deep); outline-offset: 1px; }
+  label.field-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .reveal-wrap { margin-top: 14px; }
+  .reveal-box {
+    margin-top: 10px;
+    background: var(--paper-2);
+    border-left: 4px solid var(--blue);
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    display: none;
+  }
+  .reveal-box.shown { display: block; }
+
+  .stretch-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .divider { height: 2px; background: var(--line); border: none; margin: 34px 0; }
+
+  footer.foot {
+    margin-top: 40px;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <div class="title-block">
+      <h1>The Rectangle Factory</h1>
+      <p>Lesson 3.1 · Array Product Puzzles</p>
+    </div>
+    <span class="tag">How many rectangles share the same product?</span>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Lesson sections">
+    <button class="tab-btn active" data-tab="warmup" role="tab" aria-selected="true">Warm-Up</button>
+    <button class="tab-btn" data-tab="build" role="tab" aria-selected="false">Build &amp; Investigate</button>
+    <button class="tab-btn" data-tab="champion" role="tab" aria-selected="false">Champion Search</button>
+    <button class="tab-btn" data-tab="wrapup" role="tab" aria-selected="false">Wrap-Up</button>
+  </nav>
+
+  <!-- WARM UP -->
+  <section class="panel active" id="panel-warmup">
+    <h2 class="panel-title">What's the same? What's different?</h2>
+    <p class="lede">Look at both rectangles. They're built from the same 18 tiles, arranged two different ways.</p>
+
+    <div class="warmup-grids">
+      <div class="warmup-item">
+        <div id="grid-a" class="tilegrid"></div>
+        <div class="cap">3 rows × 6 columns</div>
+      </div>
+      <div class="warmup-item">
+        <div id="grid-b" class="tilegrid"></div>
+        <div class="cap">2 rows × 9 columns</div>
+      </div>
+      <div class="warmup-item">
+        <button class="rotate-btn" id="rotateBtn">↻ Rotate the 3×6</button>
+        <div class="cap" id="rotateCap">turns into 6×3 — same rectangle, same 18 tiles</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="side-title">Talk about it</p>
+      <ul class="prompt-list">
+        <li>What stays the same when you rotate 3×6 to 6×3?</li>
+        <li>Is 3×6 a different rectangle from 2×9, or just a different arrangement?</li>
+        <li>A rectangle factory has exactly 24 tiles. Which whole-number side lengths are possible — and how could we prove we found <em>all</em> of them?</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- BUILD -->
+  <section class="panel" id="panel-build">
+    <h2 class="panel-title">Build every rectangle for your target</h2>
+    <div class="question-card">
+      <span class="k">CHALLENGE</span>
+      <p>Set the width and height until the product matches your target. Every time you land on it, the pair gets logged. Rotations (like 3×8 and 8×3) count as the <strong>same</strong> rectangle.</p>
+    </div>
+
+    <div class="target-row" id="targetRow">
+      <button class="target-chip" data-target="12" aria-pressed="false">Target: 12</button>
+      <button class="target-chip" data-target="18" aria-pressed="false">Target: 18</button>
+      <button class="target-chip" data-target="24" aria-pressed="true">Target: 24</button>
+      <button class="target-chip" data-target="30" aria-pressed="false">Target: 30</button>
+      <label class="target-chip custom-wrap">
+        <span class="lbl">Custom:</span>
+        <input type="number" id="customTarget" min="1" max="60" placeholder="—" aria-label="Custom target number">
+      </label>
+    </div>
+
+    <div class="layout-two">
+      <div class="card">
+        <div class="stepper-row">
+          <div class="stepper">
+            <span class="lbl">Width</span>
+            <button id="wMinus" aria-label="Decrease width">−</button>
+            <span class="val num" id="wVal">4</span>
+            <button id="wPlus" aria-label="Increase width">+</button>
+          </div>
+          <div class="stepper">
+            <span class="lbl">Height</span>
+            <button id="hMinus" aria-label="Decrease height">−</button>
+            <span class="val num" id="hVal">6</span>
+            <button id="hPlus" aria-label="Increase height">+</button>
+          </div>
+          <div class="product-readout" id="productReadout">4 × 6 = 24</div>
+        </div>
+        <div class="status-line" id="statusLine"></div>
+        <div class="grid-stage">
+          <div class="tilegrid" id="buildGrid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="side-title">FOUND FACTOR PAIRS FOR <span id="targetLabel">24</span></p>
+        <ul class="pairlist" id="pairList"></ul>
+        <p class="empty-note" id="emptyNote">None yet — line up a width and height that multiply to your target.</p>
+        <div class="complete-badge" id="completeBadge" style="display:none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAMPION -->
+  <section class="panel" id="panel-champion">
+    <h2 class="panel-title">Search 1–36 for the rectangle champion</h2>
+    <p class="lede">Click numbers to test them. The rectangle champion is whichever number has the <em>most</em> factor pairs — not necessarily the biggest number.</p>
+
+    <div class="champ-banner none" id="champBanner">
+      <span class="crown">🏆</span> No champion yet — start clicking numbers below.
+    </div>
+
+    <div class="layout-two">
+      <div>
+        <div class="num-grid" id="numGrid"></div>
+      </div>
+      <div class="card detail-box" id="detailBox">
+        <p class="side-title">SELECTED NUMBER</p>
+        <p class="empty-note">Pick a number from the grid to see its factor pairs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WRAP UP -->
+  <section class="panel" id="panel-wrapup">
+    <h2 class="panel-title">Exit ticket</h2>
+    <p class="lede">List every factor pair of <strong class="num">28</strong>, then explain how you know your search could stop.</p>
+    <div class="card">
+      <label class="field-label" for="exitPairs">Factor pairs of 28</label>
+      <textarea id="exitPairs" placeholder="e.g. 1 × 28, 2 × 14, ..."></textarea>
+      <label class="field-label" style="margin-top:12px;" for="exitWhy">How do you know you can stop searching?</label>
+      <textarea id="exitWhy" placeholder="Explain in your own words..."></textarea>
+      <div class="reveal-wrap">
+        <button class="ghost-btn" id="revealBtn">Reveal a hint</button>
+        <div class="reveal-box" id="revealBox">
+          28 = 1×28, 2×14, 4×7. Once your test width passes the point where width and height would swap places (around 5, since 5×5=25 and 6×6=36), any new pair is just a repeat you've already found in reverse — so 28 has exactly three rectangle shapes.
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h2 class="panel-title">Stretch challenge</h2>
+    <p class="lede">Find the <em>smallest</em> number with exactly this many factors. Use the grid to test numbers up to 100.</p>
+    <div class="stretch-controls" id="stretchTargets">
+      <button class="target-chip" data-fc="6" aria-pressed="false">Exactly 6 factors</button>
+      <button class="target-chip" data-fc="8" aria-pressed="true">Exactly 8 factors</button>
+      <button class="target-chip" data-fc="9" aria-pressed="false">Exactly 9 factors</button>
+    </div>
+    <div class="card">
+      <div class="num-grid" id="stretchGrid" style="margin-bottom:0;"></div>
+    </div>
+    <p class="empty-note" style="margin-top:10px;">Numbers with the target factor count are highlighted. Which one is smallest? What do you notice about square numbers?</p>
+  </section>
+
+  <footer class="foot">Lesson 3.1 — Array Product Puzzles · Rectangle Factory tool</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- helpers ----------
+  function factorPairs(n){
+    var pairs = [];
+    for (var w = 1; w * w <= n; w++){
+      if (n % w === 0) pairs.push([w, n / w]);
+    }
+    return pairs;
+  }
+  function factorCount(n){
+    var c = 0;
+    for (var i = 1; i * i <= n; i++){
+      if (n % i === 0) c += (i * i === n) ? 1 : 2;
+    }
+    return c;
+  }
+  function pairKey(a,b){ return Math.min(a,b) + "x" + Math.max(a,b); }
+
+  function renderTileGrid(el, rows, cols, colorClass, maxCellPx){
+    maxCellPx = maxCellPx || 30;
+    var longest = Math.max(rows, cols);
+    var cell = Math.max(10, Math.min(maxCellPx, Math.floor(340 / longest)));
+    el.style.gridTemplateColumns = "repeat(" + cols + ", " + cell + "px)";
+    el.style.gridTemplateRows = "repeat(" + rows + ", " + cell + "px)";
+    el.innerHTML = "";
+    var total = rows * cols;
+    for (var i = 0; i < total; i++){
+      var d = document.createElement("div");
+      d.className = "tile" + (colorClass ? (" " + colorClass) : "");
+      el.appendChild(d);
+    }
+  }
+
+  // ---------- tabs ----------
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  var panels = document.querySelectorAll(".panel");
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){ b.classList.remove("active"); b.setAttribute("aria-selected","false"); });
+      panels.forEach(function(p){ p.classList.remove("active"); });
+      btn.classList.add("active");
+      btn.setAttribute("aria-selected","true");
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- warm up ----------
+  var gridA = document.getElementById("grid-a");
+  var gridB = document.getElementById("grid-b");
+  renderTileGrid(gridA, 3, 6, "amber", 26);
+  renderTileGrid(gridB, 2, 9, "blue", 26);
+  var rotated = false;
+  document.getElementById("rotateBtn").addEventListener("click", function(){
+    rotated = !rotated;
+    if (rotated){
+      renderTileGrid(gridA, 6, 3, "amber", 26);
+      document.querySelector('.warmup-item .cap').textContent = "6 rows × 3 columns";
+      this.textContent = "↻ Rotate back to 3×6";
+      document.getElementById("rotateCap").textContent = "same 18 tiles, same rectangle";
+    } else {
+      renderTileGrid(gridA, 3, 6, "amber", 26);
+      document.querySelector('.warmup-item .cap').textContent = "3 rows × 6 columns";
+      this.textContent = "↻ Rotate the 3×6";
+      document.getElementById("rotateCap").textContent = "turns into 6×3 — same rectangle, same 18 tiles";
+    }
+  });
+
+  // ---------- build tab ----------
+  var target = 24;
+  var width = 4, height = 6;
+  var found = {}; // key -> [w,h] as first-found orientation
+
+  var wVal = document.getElementById("wVal");
+  var hVal = document.getElementById("hVal");
+  var productReadout = document.getElementById("productReadout");
+  var buildGrid = document.getElementById("buildGrid");
+  var statusLine = document.getElementById("statusLine");
+  var pairList = document.getElementById("pairList");
+  var emptyNote = document.getElementById("emptyNote");
+  var completeBadge = document.getElementById("completeBadge");
+  var targetLabel = document.getElementById("targetLabel");
+
+  function setTarget(t){
+    target = t;
+    found = {};
+    width = Math.min(width, t);
+    height = Math.min(height, t);
+    targetLabel.textContent = t;
+    document.querySelectorAll(".target-chip[data-target]").forEach(function(chip){
+      chip.setAttribute("aria-pressed", String(Number(chip.dataset.target) === t));
+    });
+    var custom = document.getElementById("customTarget");
+    if (Number(custom.value) !== t) custom.value = "";
+    renderBuild();
+  }
+
+  function renderBuild(){
+    wVal.textContent = width;
+    hVal.textContent = height;
+    var product = width * height;
+    productReadout.textContent = width + " × " + height + " = " + product;
+    var isMatch = product === target;
+    productReadout.classList.toggle("match", isMatch);
+    renderTileGrid(buildGrid, height, width, isMatch ? "green" : "amber", 30);
+
+    var key = pairKey(width, height);
+    var already = found.hasOwnProperty(key);
+
+    if (isMatch && !already){
+      found[key] = [Math.min(width,height), Math.max(width,height)];
+      statusLine.textContent = "New pair recorded: " + width + " × " + height + "!";
+      statusLine.className = "status-line recorded";
+    } else if (isMatch && already){
+      statusLine.textContent = "Already found this pair (just rotated).";
+      statusLine.className = "status-line";
+    } else if (width > height){
+      statusLine.textContent = "Width has crossed height — any pair here is just a repeat, in reverse, of one you can find with width < height.";
+      statusLine.className = "status-line crossed";
+    } else {
+      statusLine.textContent = "Adjust width and height to reach " + target + ".";
+      statusLine.className = "status-line";
+    }
+
+    renderPairList();
+  }
+
+  function renderPairList(){
+    var keys = Object.keys(found).sort(function(a,b){
+      return found[a][0] - found[b][0];
+    });
+    pairList.innerHTML = "";
+    if (keys.length === 0){
+      emptyNote.style.display = "block";
+    } else {
+      emptyNote.style.display = "none";
+      keys.forEach(function(k){
+        var p = found[k];
+        var li = document.createElement("li");
+        li.innerHTML = '<span>' + p[0] + ' × ' + p[1] + '</span><span class="side">rectangle</span>';
+        pairList.appendChild(li);
+      });
+    }
+    var total = factorPairs(target).length;
+    if (keys.length >= total && total > 0){
+      completeBadge.style.display = "block";
+      completeBadge.textContent = "All " + total + " rectangle" + (total === 1 ? "" : "s") + " for " + target + " found! Is " + target + " a strong contender for rectangle champion?";
+    } else {
+      completeBadge.style.display = "none";
+    }
+  }
+
+  document.getElementById("wPlus").addEventListener("click", function(){ width = Math.min(width + 1, Math.max(target, 12)); renderBuild(); });
+  document.getElementById("wMinus").addEventListener("click", function(){ width = Math.max(width - 1, 1); renderBuild(); });
+  document.getElementById("hPlus").addEventListener("click", function(){ height = Math.min(height + 1, Math.max(target, 12)); renderBuild(); });
+  document.getElementById("hMinus").addEventListener("click", function(){ height = Math.max(height - 1, 1); renderBuild(); });
+
+  document.querySelectorAll(".target-chip[data-target]").forEach(function(chip){
+    chip.addEventListener("click", function(){ setTarget(Number(chip.dataset.target)); });
+  });
+  var customInput = document.getElementById("customTarget");
+  customInput.addEventListener("change", function(){
+    var v = Math.round(Number(customInput.value));
+    if (v && v > 0 && v <= 200){ setTarget(v); }
+  });
+
+  renderBuild();
+
+  // ---------- champion tab ----------
+  var numGrid = document.getElementById("numGrid");
+  var champBanner = document.getElementById("champBanner");
+  var detailBox = document.getElementById("detailBox");
+  var champion = null; // {n, count}
+  var explored = {};
+  var selected = null;
+
+  function buildNumGrid(container, max, onClick, marks){
+    container.innerHTML = "";
+    for (var n = 1; n <= max; n++){
+      (function(n){
+        var b = document.createElement("button");
+        b.className = "num-btn";
+        b.textContent = n;
+        b.id = (container === numGrid ? "num-" : "snum-") + n;
+        b.addEventListener("click", function(){ onClick(n, b); });
+        container.appendChild(b);
+      })(n);
+    }
+  }
+
+  function selectChampionNumber(n, btn){
+    selected = n;
+    var pairs = factorPairs(n);
+    explored[n] = true;
+    document.querySelectorAll("#numGrid .num-btn").forEach(function(b){ b.classList.remove("selected"); });
+    btn.classList.add("selected");
+    btn.classList.add("explored");
+    var dot = btn.querySelector(".dot");
+    if (!dot){ dot = document.createElement("span"); dot.className = "dot"; btn.appendChild(dot); }
+    dot.textContent = pairs.length;
+
+    detailBox.innerHTML =
+      '<p class="side-title">SELECTED NUMBER</p>' +
+      '<div class="n">' + n + '</div>' +
+      '<div class="pairs">' + pairs.map(function(p){ return p[0] + ' × ' + p[1]; }).join('<br>') + '</div>' +
+      '<div class="pairs" style="margin-top:8px; color: var(--ink-soft);">' + pairs.length + ' rectangle' + (pairs.length===1?'':'s') + '</div>';
+
+    if (!champion || pairs.length > champion.count){
+      champion = { n: n, count: pairs.length };
+      updateChampBanner();
+      document.querySelectorAll("#numGrid .num-btn").forEach(function(b){ b.classList.remove("champion"); });
+      btn.classList.add("champion");
+    }
+  }
+
+  function updateChampBanner(){
+    if (!champion){
+      champBanner.className = "champ-banner none";
+      champBanner.innerHTML = '<span class="crown">🏆</span> No champion yet — start clicking numbers below.';
+    } else {
+      champBanner.className = "champ-banner";
+      champBanner.innerHTML = '<span class="crown">🏆</span> Current champion: <strong>' + champion.n + '</strong> with <strong>' + champion.count + '</strong> rectangle' + (champion.count===1?'':'s') + '. Keep testing — can you beat it?';
+    }
+  }
+
+  buildNumGrid(numGrid, 36, selectChampionNumber);
+
+  // ---------- wrap up: exit ticket reveal ----------
+  document.getElementById("revealBtn").addEventListener("click", function(){
+    var box = document.getElementById("revealBox");
+    box.classList.toggle("shown");
+    this.textContent = box.classList.contains("shown") ? "Hide hint" : "Reveal a hint";
+  });
+
+  // ---------- stretch challenge ----------
+  var stretchGrid = document.getElementById("stretchGrid");
+  var stretchTarget = 8;
+
+  function renderStretch(){
+    stretchGrid.innerHTML = "";
+    for (var n = 1; n <= 100; n++){
+      (function(n){
+        var b = document.createElement("button");
+        b.className = "num-btn";
+        b.textContent = n;
+        var fc = factorCount(n);
+        if (fc === stretchTarget) b.classList.add("champion");
+        b.title = n + " has " + fc + " factor" + (fc===1?"":"s");
+        stretchGrid.appendChild(b);
+      })(n);
+    }
+  }
+  document.querySelectorAll("#stretchTargets .target-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      stretchTarget = Number(chip.dataset.fc);
+      document.querySelectorAll("#stretchTargets .target-chip").forEach(function(c){ c.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", "true");
+      renderStretch();
+    });
+  });
+  renderStretch();
+
+})();
+</script>
+</body>
+</html>

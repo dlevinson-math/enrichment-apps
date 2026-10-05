@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Sieve of Eratosthenes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F4F6; --card:#FFFFFF; --ink:#1C2130; --muted:#5B6170; --line:#D6D8DD;
+  --accent:#DF661A; --accent-soft:#FDEBDD; --hl-bg:#FFF3E8; --wrong:#D12F2F;
+  --p2:#2462C9; --p3:#138E5A; --p5:#8744C4; --p7:#CC2C5B; --p11:#08869A; --p13:#A06800;
+  --one:#9AA0AA; --sand:230,150,50;
+  --sans:"Poppins", "Segoe UI", system-ui, sans-serif;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
+    --accent:#F2893C; --accent-soft:#3A2618; --hl-bg:#33261B; --wrong:#FF6B6B;
+    --p2:#6D9EF2; --p3:#3FC58C; --p5:#B889F0; --p7:#F26C92; --p11:#3CC5D3; --p13:#E3AC3E; --one:#6C7280;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
+  --accent:#F2893C; --accent-soft:#3A2618; --hl-bg:#33261B; --wrong:#FF6B6B;
+  --p2:#6D9EF2; --p3:#3FC58C; --p5:#B889F0; --p7:#F26C92; --p11:#3CC5D3; --p13:#E3AC3E; --one:#6C7280;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; height:100%; background:var(--paper); color:var(--ink); font-family:var(--sans); display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* Header */
+header{display:flex; align-items:center; gap:24px; padding:14px 28px 10px; flex-wrap:wrap}
+.title h1{margin:0; font-size:clamp(22px,2.4vw,34px); font-weight:700; letter-spacing:-0.01em; line-height:1.1}
+.title p{margin:2px 0 0; font-family:var(--serif); font-style:italic; color:var(--muted); font-size:clamp(14px,1.2vw,18px)}
+.head-tools{margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.seg{display:inline-flex; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:3px}
+.seg button{border:0; background:none; padding:8px 16px; border-radius:9px; font-weight:500; font-size:15px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:9px 16px; font-weight:500; font-size:15px}
+.ghost:hover{border-color:var(--ink)}
+
+/* Main */
+main{flex:1; min-height:0; display:flex; gap:28px; padding:6px 28px 20px}
+.board-col{display:flex; flex-direction:column; gap:10px; flex:none}
+.board{
+  --size:min(calc(100dvh - 190px), 60vw);
+  width:var(--size); height:var(--size); container-type:size;
+  display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr); gap:0;
+  background:var(--card); border:2px solid var(--ink); border-radius:6px; overflow:hidden;
+}
+.cell{position:relative; border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--card);
+  display:flex; align-items:center; justify-content:center; font-size:3.7cqh; font-weight:500; padding:0; transition:opacity .25s, background-color .25s}
+.cell:nth-child(10n){border-right:0}
+.cell:nth-child(n+91){border-bottom:0}
+.board.three .cell{font-size:3.1cqh}
+.num{position:relative; line-height:1; z-index:1}
+.cell.is-prime .num{font-weight:700}
+.cell.is-prime .num::before{content:""; position:absolute; inset:-0.34em -0.42em; border:0.12em solid var(--ring,var(--accent)); border-radius:999px}
+.cell.is-crossed .num{opacity:.36}
+.cell.is-crossed::after{content:""; position:absolute; left:16%; right:16%; top:calc(50% - .08em); height:.16em; background:var(--c); border-radius:.1em; transform:rotate(-38deg); z-index:2}
+.cell.is-one .num{opacity:.4}
+.cell.is-one::before,.cell.is-one::after{content:""; position:absolute; left:30%; right:30%; top:calc(50% - .05em); height:.1em; background:var(--one); border-radius:.1em; z-index:2}
+.cell.is-one::before{transform:rotate(45deg)} .cell.is-one::after{transform:rotate(-45deg)}
+.tag{position:absolute; top:5%; right:7%; font-size:.4em; font-weight:700; color:var(--c); z-index:3}
+.board.no-tags .tag{display:none}
+.badge{position:absolute; bottom:5%; left:6%; font-size:.36em; font-weight:700; background:var(--hl,var(--accent)); color:var(--card); padding:.1em .4em; border-radius:.5em; z-index:3; display:none}
+.cell.has-badge .badge{display:block}
+.cell.hl{background:var(--hl-bg); box-shadow:inset 0 0 0 .14em var(--hl,var(--accent))}
+.board.focus .cell:not(.hl):not(.desert){opacity:.25}
+.cell.desert{background:rgba(var(--sand), calc(.14 + var(--d,0) * .5))}
+.cell.wrong{box-shadow:inset 0 0 0 .12em var(--wrong); background:repeating-linear-gradient(45deg, transparent 0 8px, color-mix(in srgb, var(--wrong) 10%, transparent) 8px 16px)}
+.board.hands .cell:hover{background:var(--hl-bg)}
+.cell.pop.is-crossed::after{animation:slash .32s ease-out}
+.cell.pop.is-prime .num::before{animation:ring .4s ease-out}
+.cell.pop.is-one::before,.cell.pop.is-one::after{animation:fade .3s ease-out}
+.cell.again{animation:again .45s ease-out}
+@keyframes slash{from{transform:rotate(-38deg) scaleX(0)}to{transform:rotate(-38deg) scaleX(1)}}
+@keyframes ring{from{transform:scale(1.6); opacity:0}to{transform:scale(1); opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes again{0%{box-shadow:inset 0 0 0 .22em var(--flash)}100%{box-shadow:inset 0 0 0 0 var(--flash)}}
+@media (prefers-reduced-motion: reduce){.cell,.cell *,.cell::after,.cell::before{animation:none !important; transition:none !important}}
+
+.legend{display:flex; gap:14px; align-items:center; flex-wrap:wrap; font-size:14px; color:var(--muted); min-height:28px}
+.chip{display:inline-flex; align-items:center; gap:6px}
+.chip i{width:22px; height:5px; border-radius:3px; background:var(--c); transform:rotate(-38deg)}
+.info{font-family:var(--serif); font-size:clamp(15px,1.3vw,19px); min-height:1.6em; color:var(--ink)}
+
+/* Panel */
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; overflow:auto; padding-right:2px}
+.tabs{display:flex; gap:6px; border-bottom:2px solid var(--line)}
+.tabs button{border:0; background:none; padding:10px 6px; margin-right:18px; font-size:clamp(16px,1.3vw,20px); font-weight:600; color:var(--muted); border-bottom:3px solid transparent; margin-bottom:-2px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.view{display:flex; flex-direction:column; gap:16px}
+.view[hidden]{display:none}
+.caption{font-family:var(--serif); font-size:clamp(18px,1.65vw,26px); line-height:1.4; margin:0; max-width:34em}
+.caption strong{font-family:var(--sans); font-weight:600}
+.steps{list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:6px; counter-reset:s}
+.steps li{counter-increment:s; font-size:14px; padding:6px 12px 6px 8px; border-radius:20px; background:var(--card); border:1.5px solid var(--line); color:var(--muted); display:flex; align-items:center; gap:7px}
+.steps li::before{content:counter(s); width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:600; background:var(--paper)}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{content:"✓"; background:var(--c,var(--ink)); color:var(--card)}
+.steps li.now{border-color:var(--accent); color:var(--ink); font-weight:600}
+.steps li.now::before{background:var(--accent); color:#fff}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:600; font-size:clamp(17px,1.4vw,21px); padding:14px 26px; border-radius:14px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(15px,1.2vw,18px); padding:11px 20px; border-radius:14px}
+.secondary:disabled{opacity:.4; cursor:default}
+.tally{font-size:15px; color:var(--muted); min-height:1.4em}
+.stats{display:flex; gap:28px; padding:14px 0 4px; border-top:1.5px solid var(--line)}
+.stat b{display:block; font-size:clamp(28px,2.6vw,40px); font-weight:700; line-height:1}
+.stat span{font-size:14px; color:var(--muted)}
+.check{display:flex; align-items:center; gap:10px; font-size:15px; color:var(--muted); cursor:pointer}
+.check input{width:20px; height:20px; accent-color:var(--accent)}
+.tools .seg button{font-size:16px; padding:10px 18px}
+.swatches{display:flex; gap:8px; align-items:center; font-size:15px; color:var(--muted)}
+.swatches button{width:44px; height:44px; border-radius:50%; border:3px solid transparent; background:var(--c); color:#fff; font-weight:700; font-size:15px}
+.swatches button[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:600; font-size:19px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:26px}
+.qresult{font-family:var(--serif); font-size:clamp(17px,1.45vw,22px); line-height:1.45; margin:0; padding:14px 18px; background:var(--accent-soft); border-radius:12px; max-width:34em}
+.qresult:empty{display:none}
+.compare{border-collapse:collapse; font-size:clamp(16px,1.3vw,20px); margin-top:8px}
+.compare th,.compare td{padding:6px 18px 6px 0; text-align:left}
+.compare th{font-weight:600; font-family:var(--sans); font-size:.8em; color:var(--muted)}
+.compare td b{font-family:var(--sans)}
+.hint{font-size:14px; color:var(--muted); margin:0}
+
+@media (max-width: 900px), (orientation: portrait){
+  main{flex-direction:column; overflow:auto}
+  .board{--size:min(calc(100vw - 40px), 70dvh)}
+  header,main{padding-left:16px; padding-right:16px}
+  .panel{overflow:visible}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <h1>The Sieve of Eratosthenes</h1>
+    <p>A 2,200-year-old prime-catching machine, invented by the librarian of Alexandria.</p>
+  </div>
+  <div class="head-tools">
+    <div class="seg" role="group" aria-label="Numbers on the board">
+      <button id="r1" aria-pressed="true">1 to 100</button>
+      <button id="r2" aria-pressed="false">101 to 200</button>
+    </div>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <div class="board-col">
+    <div class="board" id="board" aria-label="Number board"></div>
+    <div class="legend" id="legend"></div>
+    <div class="info" id="info" aria-live="polite"></div>
+  </div>
+
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabRun" aria-selected="true">Run the sieve</button>
+      <button role="tab" id="tabQ" aria-selected="false">Detective questions</button>
+    </div>
+
+    <div class="view" id="viewRun">
+      <div class="seg" role="group" aria-label="How to sieve" style="align-self:flex-start">
+        <button id="mWatch" aria-pressed="true">Watch it run</button>
+        <button id="mDo" aria-pressed="false">Do it yourself</button>
+      </div>
+
+      <div class="view" id="watchBox">
+        <ol class="steps" id="steps"></ol>
+        <p class="caption" id="caption"></p>
+        <div class="row">
+          <button class="primary" id="nextBtn">Next step</button>
+          <button class="secondary" id="playBtn">Run the rest</button>
+          <div class="seg" role="group" aria-label="Speed">
+            <button data-speed="slow" aria-pressed="false">Slow</button>
+            <button data-speed="med" aria-pressed="true">Medium</button>
+            <button data-speed="fast" aria-pressed="false">Fast</button>
+          </div>
+        </div>
+        <div class="tally" id="tally" aria-live="polite"></div>
+      </div>
+
+      <div class="view" id="doBox" hidden>
+        <p class="caption">Tap numbers on the board to mark them. Pick a color for each prime you sieve with, so everyone can see who caught what.</p>
+        <div class="row tools">
+          <div class="seg" role="group" aria-label="Marking tool">
+            <button data-tool="circle" aria-pressed="true">◯ Circle</button>
+            <button data-tool="cross" aria-pressed="false">╲ Cross out</button>
+            <button data-tool="erase" aria-pressed="false">Erase</button>
+          </div>
+        </div>
+        <div class="swatches" id="swatches"><span>Cross-out color:</span></div>
+        <div class="row">
+          <button class="primary" id="checkBtn">Check my sieve</button>
+          <button class="secondary" id="clearBtn">Clear board</button>
+        </div>
+        <p class="qresult" id="checkMsg" aria-live="polite"></p>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="sPrime">0</b><span>primes circled</span></div>
+        <div class="stat"><b id="sCross">0</b><span>crossed out</span></div>
+        <div class="stat"><b id="sLeft">100</b><span>still standing</span></div>
+      </div>
+      <label class="check"><input type="checkbox" id="tagToggle" checked> Show which prime caught each number</label>
+    </div>
+
+    <div class="view" id="viewQ" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="caption" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div class="qresult" id="qresult" aria-live="polite"></div>
+      <p class="hint">Talk it over first, then tap a button to put evidence on the board.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const COLOR = {2:'var(--p2)',3:'var(--p3)',5:'var(--p5)',7:'var(--p7)',11:'var(--p11)',13:'var(--p13)'};
+const PAIR_COLORS = ['var(--p2)','var(--p7)','var(--p3)','var(--p5)'];
+const SPEED = {slow:260, med:110, fast:35};
+const S = {start:1, cells:{}, mode:'watch', steps:[], idx:0, running:false, busy:false, gen:0, speed:'med', tool:'circle', toolP:2, q:1, tags:true};
+
+const isPrime = n => { if(n<2) return false; for(let i=2;i*i<=n;i++) if(n%i===0) return false; return true; };
+const spf = n => { for(let i=2;i*i<=n;i++) if(n%i===0) return i; return n; };
+const end = () => S.start + 99;
+const nums = () => Array.from({length:100}, (_,i) => S.start + i);
+const sievePrimes = () => { const r=[]; for(let p=2;p*p<=end();p++) if(isPrime(p)) r.push(p); return r; };
+const primesInRange = () => nums().filter(isPrime);
+const twinPairs = (a=S.start, b=a+99) => { const r=[]; for(let n=a;n+2<=b;n++) if(isPrime(n)&&isPrime(n+2)) r.push([n,n+2]); return r; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const delay = () => reduced ? Math.min(SPEED[S.speed], 30) : SPEED[S.speed];
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+
+/* ---------- Board ---------- */
+const board = $('#board');
+const cellEls = {};
+function buildBoard(){
+  board.innerHTML = '';
+  board.classList.toggle('three', S.start > 1);
+  for(const n of nums()){
+    const b = document.createElement('button');
+    b.className = 'cell'; b.dataset.n = n;
+    b.innerHTML = `<span class="num">${n}</span><span class="tag"></span><span class="badge"></span>`;
+    b.addEventListener('click', () => onCell(n));
+    board.appendChild(b); cellEls[n] = b;
+  }
+}
+function renderCell(n){
+  const c = S.cells[n], el = cellEls[n]; if(!el) return;
+  el.classList.toggle('is-prime', c.s==='prime');
+  el.classList.toggle('is-crossed', c.s==='crossed');
+  el.classList.toggle('is-one', c.s==='one');
+  el.style.setProperty('--c', COLOR[c.by] || 'var(--ink)');
+  el.style.setProperty('--ring', COLOR[n] && sievePrimes().includes(n) ? COLOR[n] : 'var(--accent)');
+  el.querySelector('.tag').textContent = c.s==='crossed' && c.by ? c.by : '';
+  const label = c.s==='prime' ? 'circled, prime' : c.s==='crossed' ? `crossed out${c.by?' by '+c.by:''}` : c.s==='one' ? 'crossed out, neither prime nor composite' : 'not marked';
+  el.setAttribute('aria-label', `${n}, ${label}`);
+}
+function renderAll(){ nums().forEach(renderCell); renderStats(); }
+function anim(n, cls, p){
+  const el = cellEls[n]; if(!el || reduced) return;
+  if(p) el.style.setProperty('--flash', COLOR[p]);
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 500);
+}
+function renderStats(){
+  let p=0,x=0,l=0;
+  for(const n of nums()){ const s=S.cells[n].s; if(s==='prime')p++; else if(s==='crossed'||s==='one')x++; else l++; }
+  $('#sPrime').textContent=p; $('#sCross').textContent=x; $('#sLeft').textContent=l;
+}
+function renderLegend(){
+  const sp = sievePrimes();
+  $('#legend').innerHTML = '<span>Caught by:</span>' + sp.map(p => `<span class="chip" style="--c:${COLOR[p]}"><i></i>${p}</span>`).join('') +
+    `<span class="chip"><span style="display:inline-block;width:20px;height:14px;border:2.5px solid var(--accent);border-radius:999px"></span>prime</span>`;
+  const sw = $('#swatches');
+  sw.innerHTML = '<span>Cross-out color:</span>' + sp.map(p => `<button data-p="${p}" style="--c:${COLOR[p]}" aria-pressed="${p===S.toolP}" aria-label="Color for multiples of ${p}">${p}</button>`).join('');
+  sw.querySelectorAll('button').forEach(b => b.onclick = () => { S.toolP = +b.dataset.p; sw.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x===b)); });
+}
+
+/* ---------- Highlights ---------- */
+function clearHL(){
+  board.classList.remove('focus');
+  for(const n of nums()){
+    const el = cellEls[n];
+    el.classList.remove('hl','desert','has-badge','wrong');
+    el.style.removeProperty('--hl'); el.style.removeProperty('--d');
+    el.querySelector('.badge').textContent='';
+  }
+}
+function hl(list, color, badgeFn){
+  board.classList.add('focus');
+  for(const n of list){ const el=cellEls[n]; if(!el) continue;
+    el.classList.add('hl'); if(color) el.style.setProperty('--hl', color);
+    if(badgeFn){ const t=badgeFn(n); if(t!=null){ el.classList.add('has-badge'); el.querySelector('.badge').textContent=t; } }
+  }
+}
+
+/* ---------- Steps ---------- */
+function buildSteps(){
+  const s=[];
+  if(S.start===1) s.push({k:'one', label:'Cross out 1'});
+  for(const p of sievePrimes()){
+    if(p>=S.start) s.push({k:'circle', p, label:`Circle ${p}`});
+    s.push({k:'sieve', p, label:`Multiples of ${p}`});
+  }
+  s.push({k:'rest', label:'Circle what’s left'});
+  S.steps = s;
+}
+function firstMultiple(p){ return Math.max(2*p, Math.ceil(S.start/p)*p); }
+function stepCaption(st){
+  if(!st) return `<strong>Done.</strong> Every number left standing is circled. You’ve caught every prime from ${S.start} to ${end()}. Try the detective questions.`;
+  if(st.k==='one') return `<strong>1 is neither prime nor composite.</strong> Give it a small X to set it aside.`;
+  if(st.k==='circle') return `<strong>${st.p} is still standing, so it’s prime.</strong> Circle it. Its only factors are 1 and ${st.p}.`;
+  if(st.k==='sieve'){
+    const f = firstMultiple(st.p);
+    const start = S.start===1 ? `Count by ${st.p}s: ${f}, ${f+st.p}, ${f+2*st.p}…` : `${st.p} isn’t on this board, but its multiples are. Start at ${f} = ${st.p} × ${f/st.p}.`;
+    return `<strong>Cross out every multiple of ${st.p}.</strong> ${start} Watch for numbers that flash: someone already caught them.`;
+  }
+  return `<strong>Everything still standing is prime.</strong> Circle them all.`;
+}
+function renderSteps(){
+  const ol = $('#steps');
+  ol.innerHTML = S.steps.map((st,i) => `<li class="${i<S.idx?'done':''} ${i===S.idx?'now':''}" style="--c:${st.p?COLOR[st.p]:'var(--ink)'}">${st.label}</li>`).join('');
+  $('#caption').innerHTML = stepCaption(S.steps[S.idx]);
+  const done = S.idx >= S.steps.length;
+  $('#nextBtn').disabled = done || S.busy;
+  $('#playBtn').disabled = done;
+  $('#playBtn').textContent = S.running ? 'Pause' : 'Run the rest';
+}
+async function doStep(){
+  const st = S.steps[S.idx]; if(!st || S.busy) return;
+  const g = S.gen; S.busy = true; renderSteps(); clearHL(); $('#tally').textContent='';
+  const d = delay();
+  if(st.k==='one'){ set(1,'one'); anim(1,'pop'); await sleep(d*3); }
+  else if(st.k==='circle'){ set(st.p,'prime'); anim(st.p,'pop'); await sleep(d*4); }
+  else if(st.k==='sieve'){
+    let fresh=0, again=0;
+    for(let m=firstMultiple(st.p); m<=end(); m+=st.p){
+      if(g!==S.gen) return;
+      const c = S.cells[m];
+      if(c.s==='blank'){ c.s='crossed'; c.by=st.p; fresh++; renderCell(m); anim(m,'pop'); }
+      else { again++; anim(m,'again',st.p); }
+      $('#tally').textContent = `${st.p} crossed out ${fresh} new number${fresh===1?'':'s'}. ${again} ${again===1?'was':'were'} already caught.`;
+      renderStats();
+      await sleep(d);
+    }
+  } else {
+    for(const n of nums()){
+      if(g!==S.gen) return;
+      if(S.cells[n].s==='blank'){ set(n,'prime'); anim(n,'pop'); await sleep(d/2); }
+    }
+    $('#tally').textContent = `${primesInRange().length} primes circled.`;
+  }
+  if(g!==S.gen) return;
+  S.idx = Math.min(S.idx+1, S.steps.length); S.busy=false; renderSteps();
+}
+function set(n,s,by){ S.cells[n].s=s; S.cells[n].by=by||null; renderCell(n); renderStats(); }
+async function runAll(){
+  if(S.running){ S.running=false; renderSteps(); return; }
+  S.running = true; const g=S.gen; renderSteps();
+  while(S.running && S.idx < S.steps.length && g===S.gen){
+    if(S.busy){ await sleep(50); continue; }
+    await doStep(); await sleep(delay()*4);
+  }
+  if(g===S.gen){ S.running=false; renderSteps(); }
+}
+function completeNow(){
+  S.gen++; S.running=false; S.busy=false;
+  for(const n of nums()){
+    const c = S.cells[n];
+    if(n===1){ c.s='one'; c.by=null; }
+    else if(isPrime(n)){ c.s='prime'; c.by=null; }
+    else { c.s='crossed'; c.by = spf(n); }
+  }
+  S.idx = S.steps.length;
+  if(S.mode==='do') setMode('watch', true);
+  renderAll(); renderSteps();
+}
+const isComplete = () => nums().every(n => { const s=S.cells[n].s; return n===1 ? s==='one' : isPrime(n) ? s==='prime' : s==='crossed'; });
+
+/* ---------- Reset / range / mode ---------- */
+function reset(){
+  S.gen++; S.running=false; S.busy=false; S.idx=0;
+  S.cells = {}; for(const n of nums()) S.cells[n] = {s:'blank', by:null};
+  buildSteps(); clearHL(); renderAll(); renderSteps();
+  $('#tally').textContent=''; $('#info').textContent=''; $('#checkMsg').textContent=''; $('#qresult').innerHTML='';
+}
+function setRange(start){
+  S.start = start;
+  $('#r1').setAttribute('aria-pressed', start===1); $('#r2').setAttribute('aria-pressed', start!==1);
+  if(!sievePrimes().includes(S.toolP)) S.toolP = 2;
+  buildBoard(); renderLegend(); reset(); renderQuestion();
+}
+function setMode(m, keep){
+  S.mode = m;
+  $('#mWatch').setAttribute('aria-pressed', m==='watch'); $('#mDo').setAttribute('aria-pressed', m==='do');
+  $('#watchBox').hidden = m!=='watch'; $('#doBox').hidden = m!=='do';
+  board.classList.toggle('hands', m==='do');
+  if(!keep) reset();
+}
+
+/* ---------- Cell taps ---------- */
+function describe(n){
+  const c = S.cells[n];
+  if(c.s==='one') return '1 is neither prime nor composite. Its only factor is 1.';
+  if(c.s==='prime') return isPrime(n) ? `${n} is prime. Its only factors are 1 and ${n}.` : `${n} is circled, but ${n} = ${spf(n)} × ${n/spf(n)}.`;
+  if(c.s==='crossed'){
+    if(isPrime(n)) return `${n} is crossed out, but nothing divides it except 1 and ${n}.`;
+    const f = spf(n); return `${n} = ${f} × ${n/f}.${c.by ? ` The ${c.by}s caught it.` : ''}`;
+  }
+  return `${n} is still standing… for now.`;
+}
+function onCell(n){
+  if(S.mode==='do' && $('#viewRun').hidden===false){
+    const c = S.cells[n];
+    if(S.tool==='circle'){ c.s='prime'; c.by=null; }
+    else if(S.tool==='cross'){ if(n===1){ c.s='one'; c.by=null; } else { c.s='crossed'; c.by=S.toolP; } }
+    else { c.s='blank'; c.by=null; }
+    cellEls[n].classList.remove('wrong');
+    renderCell(n); renderStats(); if(S.tool!=='erase') anim(n,'pop');
+    return;
+  }
+  $('#info').textContent = describe(n);
+}
+function checkSieve(){
+  clearHL(); let wrong=0, blank=0;
+  for(const n of nums()){
+    const s = S.cells[n].s;
+    const ok = n===1 ? s==='one' : isPrime(n) ? s==='prime' : s==='crossed';
+    if(s==='blank'){ blank++; continue; }
+    if(!ok){ wrong++; cellEls[n].classList.add('wrong'); }
+  }
+  const msg = $('#checkMsg');
+  if(!wrong && !blank) msg.textContent = `Every number is marked correctly. You caught all ${primesInRange().length} primes.`;
+  else if(!wrong) msg.textContent = `Everything you’ve marked so far is right. ${blank} number${blank===1?' is':'s are'} still unmarked.`;
+  else msg.textContent = `${wrong} number${wrong===1?' needs':'s need'} another look (striped on the board). Tap one in “Watch it run” mode later to see its factors.`;
+}
+
+/* ---------- Detective questions ---------- */
+function ensureDone(){
+  if(!isComplete()){ completeNow(); return true; }
+  return false;
+}
+function say(html){ $('#qresult').innerHTML = html; }
+function prefix(filled){ return filled ? 'I finished the sieve so the board is ready. ' : ''; }
+
+const Q = {
+  1:{ text:()=>`How many primes did you catch ${S.start===1?'under 100':'from 101 to 200'}?`,
+      actions:[{label:'Count the primes', run: async f => {
+        clearHL(); const ps = primesInRange(); const g=S.gen;
+        hl([], null);
+        for(let i=0;i<ps.length;i++){ if(g!==S.gen) return; hl([ps[i]], 'var(--accent)', () => i+1); await sleep(reduced?0:90); }
+        say(prefix(f)+`<b>${ps.length} primes</b> between ${S.start} and ${end()}.`);
+      }}]},
+  2:{ text:()=>`Why don’t we need to cross out multiples of 4, 6, 8, or 9? Who already caught them?`,
+      actions:[4,6,8,9].map(k => ({label:`Multiples of ${k}`, run: f => {
+        clearHL(); const list = nums().filter(n => n%k===0 && n>k-1);
+        hl(list, 'var(--ink)');
+        say(prefix(f)+`Every multiple of ${k} was already crossed out. Read the small corner numbers: who got there first? What do they have to do with ${k}?`);
+      }}))},
+  3:{ text:()=> S.start===1
+        ? `Why could we stop after 7? (Hint: if a number under 100 is composite, how small must its smallest factor be?)`
+        : `On this board we only sieved up to ${sievePrimes().slice(-1)[0]}. Why could we stop there?`,
+      actions:[
+        {label:'Show p × p for each prime', run: f => {
+          clearHL(); const sp = sievePrimes(); const sq = sp.map(p=>p*p).filter(n => n>=S.start && n<=end());
+          hl(sq, 'var(--accent)', n => { const p=Math.sqrt(n); return `${p}×${p}`; });
+          let q = sp.slice(-1)[0]+1; while(!isPrime(q)) q++;
+          say(prefix(f)+`${listText(sq)}. Each is a prime times itself, and it’s the smallest number that prime catches for the first time. The next prime is ${q}: ${q} × ${q} = ${q*q}. That’s off the board.`);
+        }},
+        {label:()=>`What did ${sievePrimes().slice(-1)[0]} catch first?`, run: f => {
+          clearHL(); const top = sievePrimes().slice(-1)[0];
+          const list = nums().filter(n => S.cells[n].by===top);
+          hl(list, COLOR[top], n => `${top}×${n/top}`);
+          say(prefix(f)+`Only ${listText(list)}. Every smaller partner of ${top} was already taken by a smaller prime. Look at the other factor each time.`);
+        }}]},
+  4:{ text:()=>`Twin primes are primes that are only 2 apart, like 11 and 13. Hunt down every twin-prime pair on your chart.`,
+      shown:0,
+      actions:[
+        {label:'Reveal one pair', run: f => { Q[4].shown = Math.min(Q[4].shown+1, twinPairs().length); showTwins(f); }},
+        {label:'Reveal all pairs', run: f => { Q[4].shown = twinPairs().length; showTwins(f); }}]},
+  5:{ text:()=>`Except for 5 itself, no prime ends in 5. Explain why that has to be true.`,
+      actions:[
+        {label:'Highlight numbers ending in 5', run: f => {
+          clearHL(); hl(nums().filter(n=>n%10===5), 'var(--p5)');
+          say(prefix(f)+`Which ones are circled? What do all the crossed-out ones have in common?`);
+        }},
+        {label:'Show the factor they share', run: f => {
+          clearHL(); hl(nums().filter(n=>n%10===5), 'var(--p5)', n => n===5 ? '5×1' : `5×${n/5}`);
+          say(prefix(f)+`Every number ending in 5 is 5 × something. So 5 is always a factor. Only 5 × 1 has no other factor.`);
+        }}]},
+  6:{ text:()=>`Find the longest “prime desert” on your chart: the biggest gap between two primes in a row. Where is it?`,
+      actions:[
+        {label:'Shade every desert', run: f => {
+          clearHL(); board.classList.add('focus'); const g = gaps(); const max = Math.max(...g.map(x=>x.run.length));
+          for(const x of g) for(const n of x.run){ cellEls[n].classList.add('desert'); cellEls[n].style.setProperty('--d', x.run.length/max); }
+          hl(primesInRange(), 'var(--accent)');
+          say(prefix(f)+`Darker sand means a longer stretch with no primes. Where is it darkest?`);
+        }},
+        {label:'Find the longest', run: f => {
+          clearHL(); const g = gaps(); const best = g.reduce((a,b)=> b.run.length>a.run.length ? b : a);
+          board.classList.add('focus');
+          best.run.forEach(n => { cellEls[n].classList.add('desert'); cellEls[n].style.setProperty('--d',1); });
+          hl([best.a, best.b], 'var(--accent)');
+          say(prefix(f)+`Between ${best.a} and ${best.b}: <b>${best.run.length} composites in a row</b> (${best.run[0]} to ${best.run[best.run.length-1]}), a gap of ${best.b-best.a}.`);
+        }}]},
+  7:{ text:()=>`Mathematicians believe twin primes go on forever, but no one has proved it. This is a real unsolved problem called the Twin Prime Conjecture. Predict: are there more twin primes between 100 and 200, or fewer than under 100? Explain your reasoning.`,
+      actions:[
+        {label:()=> S.start===1 ? 'Sieve 101 to 200' : 'Back to 1 to 100', run: () => { setRange(S.start===1 ? 101 : 1); selectTab('run'); setMode('watch'); }},
+        {label:'Compare the two boards', noFill:true, run: () => {
+          const row = (a,b) => { const pr=[]; for(let n=a;n<=b;n++) if(isPrime(n)) pr.push(n); return `<tr><td><b>${a} to ${b}</b></td><td>${pr.length}</td><td>${twinPairs(a,b).length}</td></tr>`; };
+          say(`<table class="compare"><tr><th>Board</th><th>Primes</th><th>Twin pairs</th></tr>${row(1,100)}${row(101,200)}${row(201,300)}</table><p style="margin:10px 0 0">What happens to the primes as numbers get bigger? Does that settle whether twins ever run out?</p>`);
+        }}]}
+};
+function showTwins(f){
+  clearHL(); const pairs = twinPairs(); const n = Q[4].shown;
+  board.classList.add('focus');
+  pairs.slice(0,n).forEach((pr,i) => hl(pr, PAIR_COLORS[i%PAIR_COLORS.length], () => `#${i+1}`));
+  const shared = S.start===1 && n>=3 ? ' Notice 5 belongs to two pairs.' : '';
+  say(prefix(f) + (n===pairs.length ? `<b>${pairs.length} twin-prime pairs</b>: ` : `${n} pair${n===1?'':'s'} so far: `) + pairs.slice(0,n).map(p=>`${p[0]} & ${p[1]}`).join(', ') + '.' + (n===pairs.length?shared:''));
+}
+function gaps(){
+  const ps = primesInRange(), r=[];
+  for(let i=0;i+1<ps.length;i++){ const run=[]; for(let n=ps[i]+1;n<ps[i+1];n++) run.push(n); if(run.length) r.push({a:ps[i], b:ps[i+1], run}); }
+  return r;
+}
+function renderQuestion(){
+  const nav = $('#qnav');
+  nav.innerHTML = [1,2,3,4,5,6].map(i => `<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="Question ${i}">${i}</button>`).join('') +
+    `<button class="star" data-q="7" aria-pressed="${S.q===7}">★ Challenge</button>`;
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; if(S.q===4) Q[4].shown=0; clearHL(); say(''); renderQuestion(); });
+  const q = Q[S.q];
+  $('#qtext').textContent = q.text();
+  const box = $('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i) => {
+    const b = document.createElement('button');
+    b.className = i===0 ? 'primary' : 'secondary';
+    b.textContent = typeof a.label==='function' ? a.label() : a.label;
+    b.onclick = () => { const filled = a.noFill ? false : ensureDone(); a.run(filled); };
+    box.appendChild(b);
+  });
+}
+function selectTab(t){
+  $('#tabRun').setAttribute('aria-selected', t==='run'); $('#tabQ').setAttribute('aria-selected', t==='q');
+  $('#viewRun').hidden = t!=='run'; $('#viewQ').hidden = t!=='q';
+  board.classList.toggle('hands', t==='run' && S.mode==='do');
+  clearHL(); say(''); if(t==='q'){ Q[4].shown=0; renderQuestion(); }
+}
+
+/* ---------- Wire up ---------- */
+$('#r1').onclick = () => setRange(1);
+$('#r2').onclick = () => setRange(101);
+$('#resetBtn').onclick = () => { reset(); Q[4].shown=0; };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+$('#tabRun').onclick = () => selectTab('run');
+$('#tabQ').onclick = () => selectTab('q');
+$('#mWatch').onclick = () => setMode('watch');
+$('#mDo').onclick = () => setMode('do');
+$('#nextBtn').onclick = doStep;
+$('#playBtn').onclick = runAll;
+document.querySelectorAll('[data-speed]').forEach(b => b.onclick = () => { S.speed=b.dataset.speed; document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed', x===b)); });
+document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => { S.tool=b.dataset.tool; document.querySelectorAll('[data-tool]').forEach(x=>x.setAttribute('aria-pressed', x===b)); });
+$('#checkBtn').onclick = checkSieve;
+$('#clearBtn').onclick = () => reset();
+$('#tagToggle').onchange = e => board.classList.toggle('no-tags', !e.target.checked);
+document.addEventListener('keydown', e => {
+  if($('#viewRun').hidden || S.mode!=='watch') return;
+  if(e.key==='ArrowRight' || (e.key===' ' && e.target===document.body)){ e.preventDefault(); doStep(); }
+});
+
+setRange(1);
+})();
+</script>
+</body>
+</html>

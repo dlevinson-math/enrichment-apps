@@ -1,0 +1,152 @@
+[
+  {
+    "order": 1,
+    "grade": "K",
+    "week": 1,
+    "activity": "The Great Counting Collection",
+    "sourceUrl": "https://claude.ai/artifact/QokgtAcwk5FDNJfPmjqNK4",
+    "path": "week-01/k-the-great-counting-collection/index.html",
+    "builtOn": "2026-09-25",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 3,
+    "grade": "Grade 2",
+    "week": 1,
+    "activity": "Patterns on the Hundred Chart",
+    "sourceUrl": "https://claude.ai/artifact/97XHWjD1X7quMJ2zQLMNq7",
+    "path": "week-01/grade-2-patterns-on-the-hundred-chart/index.html",
+    "builtOn": "2026-09-26",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 4,
+    "grade": "Grade 3",
+    "week": 1,
+    "activity": "The Array Hunt",
+    "sourceUrl": "https://claude.ai/artifact/XGVjHiKrJYoR1Rekpd5uiF?sk=h9Nf3BfS8LiMmDleN5dpjQ",
+    "path": "week-01/grade-3-the-array-hunt/index.html",
+    "builtOn": null,
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 5,
+    "grade": "Grade 4",
+    "week": 1,
+    "activity": "The Factor Hunt",
+    "sourceUrl": "https://claude.ai/artifact/QtZj6c1JewkKaokjHfLwCB",
+    "path": "week-01/grade-4-the-factor-hunt/index.html",
+    "builtOn": "2026-09-27",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 6,
+    "grade": "K",
+    "week": 2,
+    "activity": "Dot Talks: Seeing Without Counting",
+    "sourceUrl": "https://claude.ai/artifact/3jQVMi8mMq9WqvM29iFSzZ",
+    "path": "week-02/k-dot-talks-seeing-without-counting/index.html",
+    "builtOn": "2026-09-28",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 8,
+    "grade": "Grade 2",
+    "week": 2,
+    "activity": "Build the Biggest Number",
+    "sourceUrl": "https://claude.ai/artifact/6daJG1muuUMQ7aEPZguZtN",
+    "path": "week-02/grade-2-build-the-biggest-number/index.html",
+    "builtOn": "2026-09-28",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 10,
+    "grade": "Grade 4",
+    "week": 2,
+    "activity": "The Sieve of Eratosthenes",
+    "sourceUrl": "https://claude.ai/artifact/FDCACUg8ccpPJpn5tuRHTi",
+    "path": "week-02/grade-4-the-sieve-of-eratosthenes/index.html",
+    "builtOn": "2026-09-25",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 11,
+    "grade": "K",
+    "week": 3,
+    "activity": "More, Fewer, or the Same?",
+    "sourceUrl": "https://claude.ai/artifact/Hp7ndnhMUARW3GtqxPnhP9",
+    "path": "week-03/k-more-fewer-or-the-same/index.html",
+    "builtOn": "2026-09-28",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 12,
+    "grade": "Grade 1",
+    "week": 3,
+    "activity": "Tens and Ones Building",
+    "sourceUrl": "https://claude.ai/artifact/CEb6kQxhAA6fHaPyYtRR65",
+    "path": "week-03/grade-1-tens-and-ones-building/index.html",
+    "builtOn": "2026-09-29",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 13,
+    "grade": "Grade 2",
+    "week": 3,
+    "activity": "Magic Squares",
+    "sourceUrl": "https://claude.ai/artifact/RErD6roCSWLpzDQBmkn6G2",
+    "path": "week-03/grade-2-magic-squares/index.html",
+    "builtOn": "2026-09-30",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 14,
+    "grade": "Grade 3",
+    "week": 3,
+    "activity": "Secrets of the Times Table",
+    "sourceUrl": "https://claude.ai/artifact/S7oAror1A8PXTF8htc4S7Q",
+    "path": "week-03/grade-3-secrets-of-the-times-table/index.html",
+    "builtOn": "2026-10-01",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 15,
+    "grade": "Grade 4",
+    "week": 3,
+    "activity": "Divisibility Detectives",
+    "sourceUrl": "https://claude.ai/artifact/Spx662KEbtq3hgXaXTTt87",
+    "path": "week-03/grade-4-divisibility-detectives/index.html",
+    "builtOn": "2026-10-02",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 16,
+    "grade": "K",
+    "week": 4,
+    "activity": "The Estimation Station",
+    "sourceUrl": "https://claude.ai/artifact/FR72ii6xVK8ca6ewc4Bugd",
+    "path": "week-04/k-the-estimation-station/index.html",
+    "builtOn": "2026-10-03",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 17,
+    "grade": "Grade 1",
+    "week": 4,
+    "activity": "Odd & Even Investigators",
+    "sourceUrl": "https://claude.ai/artifact/HAezZTMorFuYHcwChjRUMe",
+    "path": "week-04/grade-1-odd-even-investigators/index.html",
+    "builtOn": "2026-10-04",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 18,
+    "grade": "Grade 2",
+    "week": 4,
+    "activity": "Mystery Digits (Cryptarithm Puzzles)",
+    "sourceUrl": "https://claude.ai/artifact/FtkKhpHNB24vXMysxRBYQT",
+    "path": "week-04/grade-2-mystery-digits-cryptarithm-puzzles/index.html",
+    "builtOn": "2026-10-05",
+    "publishedOn": "2026-10-05"
+  }
+]

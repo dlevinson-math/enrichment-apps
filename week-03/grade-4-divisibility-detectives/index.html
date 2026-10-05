@@ -1,0 +1,743 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Divisibility Detectives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* Layout: case-file tabs follow the lesson flow; each tab is a big evidence stage (left) beside detective notes and controls (right), stacking on narrow screens */
+:root{
+  --paper:#E8EDF2; --card:#FFFFFF; --ink:#15202D; --muted:#55606E; --line:#CBD3DC;
+  --accent:#1E4D9C; --accent-ink:#FFFFFF; --accent-soft:#DCE5F5;
+  --hl:#FFDF5E; --hl-ink:#15202D;
+  --yes:#16794B; --yes-soft:#DCF1E5; --no:#B5302A; --no-soft:#F8E0DD;
+  --display:"Special Elite","Courier New",monospace;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F151D; --card:#18212C; --ink:#E6EBF1; --muted:#9AA6B5; --line:#2C3948;
+    --accent:#7BA6F0; --accent-ink:#0D1520; --accent-soft:#1D2D47;
+    --hl:#7A650E; --hl-ink:#FFF5C8;
+    --yes:#52CC8F; --yes-soft:#12352A; --no:#FF7D72; --no-soft:#3D1D1A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F151D; --card:#18212C; --ink:#E6EBF1; --muted:#9AA6B5; --line:#2C3948;
+  --accent:#7BA6F0; --accent-ink:#0D1520; --accent-soft:#1D2D47;
+  --hl:#7A650E; --hl-ink:#FFF5C8;
+  --yes:#52CC8F; --yes-soft:#12352A; --no:#FF7D72; --no-soft:#3D1D1A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; padding-inline:clamp(16px,2.4vw,32px); padding-block:12px 28px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1360px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:400; font-size:clamp(30px,3.6vw,52px); line-height:1; letter-spacing:.01em; text-wrap:balance}
+.title p{margin:6px 0 0; color:var(--muted); font-size:clamp(15px,1.25vw,19px)}
+.title .grade{display:inline-block; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78em; color:var(--accent); margin-right:8px}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line)}
+.tabs button{border:2px solid transparent; border-bottom:0; background:none; padding:12px 16px 10px; border-radius:12px 12px 0 0; font-weight:700; font-size:clamp(15px,1.25vw,19px); color:var(--muted); margin-bottom:-2px; min-height:52px; display:flex; gap:8px; align-items:center}
+.tabs button span{font-family:var(--mono); font-size:.8em; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background:var(--line); color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--card); border-color:var(--line); color:var(--ink)}
+.tabs button[aria-selected="true"] span{background:var(--accent); color:var(--accent-ink)}
+
+.panel{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:20px; align-items:start}
+.panel[hidden]{display:none}
+.stage{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:clamp(16px,2vw,28px); display:flex; flex-direction:column; gap:16px; min-width:0}
+.notes{display:flex; flex-direction:column; gap:14px; min-width:0}
+.eyebrow{font-family:var(--display); font-size:clamp(15px,1.2vw,18px); letter-spacing:.06em; color:var(--muted); text-transform:uppercase}
+.lead{font-size:clamp(19px,1.6vw,24px); margin:0; max-width:34em; text-wrap:pretty}
+.small{font-size:15px; color:var(--muted); margin:0}
+
+.bignum{font-family:var(--mono); font-weight:600; font-size:clamp(54px,9vw,128px); line-height:1; letter-spacing:.02em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.midnum{font-family:var(--mono); font-weight:600; font-size:clamp(36px,5vw,68px); line-height:1.05; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+.d{display:inline-block; border-radius:.12em; padding:0 .03em; transition:background-color .25s}
+.d.hl{background:var(--hl); color:var(--hl-ink)}
+.comma{opacity:.55}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:13px 24px; border-radius:14px; min-height:54px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:11px 20px; border-radius:14px; min-height:54px}
+.secondary:disabled{opacity:.4; cursor:default}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:10px 18px; border-radius:10px; font-weight:700; font-size:17px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+.stamp{display:inline-block; font-family:var(--display); text-transform:uppercase; letter-spacing:.08em; font-size:clamp(18px,1.8vw,26px); padding:6px 14px 4px; border:3px solid currentColor; border-radius:8px; transform:rotate(-5deg); line-height:1.1; white-space:nowrap}
+.stamp.yes{color:var(--yes)} .stamp.no{color:var(--no)}
+.stamp.pop{animation:stampIn .35s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stampIn{from{transform:rotate(-5deg) scale(1.9); opacity:0}to{transform:rotate(-5deg) scale(1); opacity:1}}
+
+.out{background:var(--accent-soft); border-radius:14px; padding:14px 18px; font-size:clamp(17px,1.4vw,21px); line-height:1.5; display:flex; flex-direction:column; gap:8px}
+.out:empty{display:none}
+.out p{margin:0}
+.out.yes{background:var(--yes-soft)} .out.no{background:var(--no-soft)}
+.eq{font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:500}
+
+/* keypad */
+.pad{display:flex; flex-direction:column; gap:10px; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:14px}
+.pad .disp{font-family:var(--mono); font-weight:600; font-size:clamp(28px,2.6vw,40px); min-height:1.3em; border-bottom:2px dashed var(--line); padding-bottom:4px; overflow-wrap:anywhere; font-variant-numeric:tabular-nums}
+.pad .disp.empty{color:var(--muted); font-family:var(--body); font-size:18px; font-weight:400}
+.keys{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+.keys button{min-height:56px; border-radius:12px; border:2px solid var(--line); background:var(--paper); font-family:var(--mono); font-weight:600; font-size:24px}
+.keys button.wide{font-family:var(--body); font-size:16px}
+.keys button:active{background:var(--accent-soft)}
+
+/* warm-up */
+.vote{display:flex; gap:12px; flex-wrap:wrap}
+.vote button{min-width:140px; min-height:64px; font-size:22px; font-weight:700; border-radius:16px; border:3px solid var(--line); background:var(--card)}
+.vote button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.count{font-family:var(--display); font-size:clamp(28px,3vw,44px); color:var(--accent); min-height:1.2em}
+.stamp-slot{min-height:64px; display:flex; align-items:center; padding-left:12px}
+
+/* lab */
+.chain{display:flex; flex-direction:column; gap:6px; font-size:clamp(20px,1.9vw,28px)}
+.verdicts{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+.verdict{border:2px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.verdict h3{margin:0; font-size:20px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+.verdict .eq{font-size:17px; color:var(--muted)}
+.break{border-collapse:collapse; font-size:clamp(16px,1.35vw,20px); font-family:var(--mono)}
+.break td{padding:3px 12px 3px 0; white-space:nowrap}
+.break .left{background:var(--hl); color:var(--hl-ink); border-radius:4px; padding:0 4px}
+.scroll{overflow-x:auto; max-width:100%}
+
+/* stations */
+.chips-row{display:flex; gap:8px; flex-wrap:wrap}
+.chips-row button{min-height:54px; min-width:78px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-family:var(--mono); font-weight:600; font-size:22px; position:relative}
+.chips-row button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.chips-row button.solved::after{content:"✓"; position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:var(--yes); color:var(--card); font-size:14px; display:grid; place-items:center; font-family:var(--body)}
+.evidence{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.evcol{border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.evcol.y{background:var(--yes-soft)} .evcol.n{background:var(--no-soft)}
+.evcol h3{margin:0; font-size:17px; letter-spacing:.04em}
+.evcol.y h3{color:var(--yes)} .evcol.n h3{color:var(--no)}
+.evlist{display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:6px}
+.ev{font-family:var(--mono); font-weight:600; font-size:clamp(20px,1.9vw,28px); background:var(--card); border-radius:10px; padding:6px 8px; text-align:center; font-variant-numeric:tabular-nums}
+.ev.flag{outline:4px solid var(--accent); animation:flag 1s ease-out 2}
+@keyframes flag{50%{outline-color:transparent}}
+.ev small{display:block; font-family:var(--body); font-weight:400; font-size:13px; color:var(--muted)}
+.rules{display:flex; flex-direction:column; gap:8px}
+.rules button{text-align:left; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px 16px; font-size:clamp(17px,1.35vw,20px); min-height:56px}
+.rules button.bust{border-color:var(--no); color:var(--muted); text-decoration:line-through; text-decoration-color:var(--no)}
+.rules button.right{border-color:var(--yes); background:var(--yes-soft); font-weight:700}
+.log{display:flex; flex-direction:column; gap:8px}
+.logitem{border-left:5px solid var(--yes); background:var(--card); border-radius:0 12px 12px 0; padding:10px 14px; font-size:17px}
+.dots{display:flex; gap:8px; align-items:center; font-weight:700}
+.dots i{width:22px; height:22px; border-radius:50%; border:2.5px solid var(--yes)}
+.dots i.on{background:var(--yes)}
+
+/* codex */
+.codex{width:100%; border-collapse:collapse; font-size:clamp(16px,1.35vw,20px)}
+.codex th,.codex td{text-align:left; padding:10px 10px; border-bottom:1.5px solid var(--line); vertical-align:top}
+.codex th{font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.codex td:first-child{font-family:var(--mono); font-weight:600; font-size:1.3em; white-space:nowrap}
+.codex .locked{color:var(--muted); font-style:italic}
+.scan{display:flex; flex-direction:column; gap:8px}
+.scanrow{display:grid; grid-template-columns:56px minmax(0,1fr) auto; gap:12px; align-items:center; padding:10px 12px; border-radius:12px; background:var(--paper)}
+.scanrow b{font-family:var(--mono); font-size:22px}
+.scanrow .why{font-size:16px}
+.scanrow .why small{display:block; color:var(--muted); font-family:var(--mono); font-size:14px}
+.scanrow .stamp{font-size:16px; padding:4px 8px 2px; border-width:2.5px}
+
+/* questions */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-size:clamp(22px,2.1vw,32px); line-height:1.3; margin:0; text-wrap:balance}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{display:inline-flex; flex-direction:column; align-items:center; min-width:76px; padding:6px 8px; border-radius:10px; background:var(--card); border:2px solid var(--line)}
+.chip b{font-family:var(--mono); font-size:22px}
+.chip small{font-size:13px; color:var(--muted); font-family:var(--mono)}
+.chip.ok{border-color:var(--yes); background:var(--yes-soft)}
+.chip.bad{border-color:var(--no); background:var(--no-soft)}
+
+/* challenge */
+.slots{display:flex; gap:clamp(6px,1vw,12px); flex-wrap:nowrap}
+.slot,.card{width:clamp(46px,7vw,92px); height:clamp(62px,9.4vw,124px); border-radius:12px; font-family:var(--mono); font-weight:600; font-size:clamp(30px,4.6vw,62px); display:grid; place-items:center}
+.slot{border:3px dashed var(--line); background:var(--paper)}
+.slot.full{border:3px solid var(--ink); background:var(--card)}
+.slot.hl{background:var(--hl); color:var(--hl-ink)}
+.cards{display:flex; gap:clamp(6px,1vw,12px); flex-wrap:wrap}
+.card{border:3px solid var(--accent); background:var(--accent-soft); box-shadow:0 3px 0 var(--accent)}
+.card:disabled{opacity:.18; box-shadow:none; cursor:default}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+@media (max-width: 920px){
+  .panel{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+}
+@media (max-width: 520px){
+  body{font-size:17px}
+  .evidence{grid-template-columns:1fr}
+  .tabs button{padding:10px 10px 8px; font-size:15px}
+  .vote button{min-width:110px}
+  .keys button{min-height:50px; font-size:21px}
+  .scanrow{grid-template-columns:44px minmax(0,1fr)}
+  .scanrow .stamp{grid-column:2; justify-self:start}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <h1>Divisibility Detectives</h1>
+    <p><span class="grade">Grade 4 · Week 3</span>Judge a giant number in two seconds flat, no long division allowed.</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><span>1</span>Warm-up</button>
+  <button role="tab" data-tab="lab" aria-selected="false"><span>2</span>Digit-sum lab</button>
+  <button role="tab" data-tab="st" aria-selected="false"><span>3</span>Evidence stations</button>
+  <button role="tab" data-tab="codex" aria-selected="false"><span>4</span>The Codex</button>
+  <button role="tab" data-tab="q" aria-selected="false"><span>5</span>Detective questions</button>
+  <button role="tab" data-tab="ch" aria-selected="false"><span>★</span>Challenge</button>
+</nav>
+
+<!-- 1 WARM-UP -->
+<section class="panel" id="p-warm">
+  <div class="stage">
+    <div class="eyebrow">Case file · Instant judgment</div>
+    <div class="bignum" id="wNum"></div>
+    <p class="lead" id="wQ"></p>
+    <div class="count" id="wCount" aria-live="polite"></div>
+    <div class="vote">
+      <button id="wYes" aria-pressed="false">Yes</button>
+      <button id="wNo" aria-pressed="false">No</button>
+    </div>
+    <div class="stamp-slot" id="wStamp"></div>
+  </div>
+  <div class="notes">
+    <p class="lead">Your teacher can answer in two seconds. Can you? Vote first, then ask for the trick.</p>
+    <div class="row">
+      <span class="small">Divisible by</span>
+      <div class="seg" role="group" aria-label="Divisor">
+        <button data-wd="3" aria-pressed="true">3</button>
+        <button data-wd="9" aria-pressed="false">9</button>
+      </div>
+    </div>
+    <div class="row">
+      <button class="primary" id="wTrick">Show the trick</button>
+      <button class="secondary" id="wCheck">Check by dividing</button>
+    </div>
+    <div class="row">
+      <button class="secondary" id="wNew">New suspect</button>
+      <button class="secondary" id="wTimer">2-second timer</button>
+    </div>
+    <div class="out" id="wOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 2 LAB -->
+<section class="panel" id="p-lab" hidden>
+  <div class="stage">
+    <div class="eyebrow">The digit-sum trick for 3 and 9</div>
+    <div class="midnum" id="lNum"></div>
+    <div class="chain" id="lChain"></div>
+    <div class="verdicts" id="lVerd"></div>
+    <div class="out" id="lLeft"></div>
+    <div id="lWhyBox" hidden>
+      <div class="eyebrow" style="margin-bottom:8px">Why does adding digits tell us about dividing?</div>
+      <div class="scroll" id="lWhy"></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p class="lead"><b>Rule:</b> a number is divisible by 3 if its digit sum is divisible by 3. Divisible by 9 if its digit sum is divisible by 9.</p>
+    <div class="pad" id="lPad"></div>
+    <div class="row">
+      <button class="secondary" data-lab="3741">3,741</button>
+      <button class="secondary" data-lab="8406">8,406</button>
+      <button class="secondary" id="lRand">Random giant</button>
+    </div>
+    <button class="primary" id="lWhyBtn" aria-pressed="false">Why does it work?</button>
+  </div>
+</section>
+
+<!-- 3 STATIONS -->
+<section class="panel" id="p-st" hidden>
+  <div class="stage">
+    <div class="row" style="justify-content:space-between">
+      <div class="eyebrow" id="sEyebrow"></div>
+      <button class="secondary" id="sClue" aria-pressed="false">Highlight the clue</button>
+    </div>
+    <div class="evidence" id="sEv"></div>
+    <p class="small">Study both lists. What do ALL the divisible numbers have that the others don’t?</p>
+  </div>
+  <div class="notes">
+    <div class="chips-row" id="sPick" role="group" aria-label="Station"></div>
+    <div id="sRuleBox">
+      <p class="lead" style="margin-bottom:10px"><b>Which rule fits every piece of evidence?</b></p>
+      <div class="rules" id="sRules"></div>
+    </div>
+    <div class="out" id="sOut" aria-live="polite"></div>
+    <div id="sTestBox" hidden>
+      <div class="row" style="justify-content:space-between; margin-bottom:8px">
+        <p class="lead" style="margin:0"><b>Defend it:</b> test 3 numbers of your own.</p>
+        <div class="dots" id="sDots"></div>
+      </div>
+      <div class="pad" id="sPad"></div>
+      <div class="row" style="margin-top:10px"><button class="primary" id="sTest">Test it</button></div>
+      <div class="log" id="sLog" style="margin-top:10px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 CODEX -->
+<section class="panel" id="p-codex" hidden>
+  <div class="stage">
+    <div class="row" style="justify-content:space-between">
+      <div class="eyebrow">The class Divisibility Codex</div>
+      <button class="secondary" id="cReveal">Reveal all rules</button>
+    </div>
+    <div class="scroll">
+      <table class="codex"><thead><tr><th>÷</th><th>The rule</th><th>Look at</th></tr></thead><tbody id="cBody"></tbody></table>
+    </div>
+    <p class="small">Rules for 3 and 9 come from the digit-sum lab. Crack a station to add its rule.</p>
+  </div>
+  <div class="notes">
+    <p class="lead"><b>Codex scanner:</b> enter any number and run all seven tests at once.</p>
+    <div class="pad" id="cPad"></div>
+    <div class="scan" id="cScan"></div>
+  </div>
+</section>
+
+<!-- 5 QUESTIONS -->
+<section class="panel" id="p-q" hidden>
+  <div class="stage">
+    <div class="qnav" id="qNav"></div>
+    <p class="qtext" id="qText"></p>
+    <div class="row" id="qAct"></div>
+    <p class="small">Talk it over first. Then tap a button to put evidence on the board.</p>
+  </div>
+  <div class="notes">
+    <div class="out" id="qOut" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 6 CHALLENGE -->
+<section class="panel" id="p-ch" hidden>
+  <div class="stage">
+    <div class="eyebrow">★ Digit-card challenge</div>
+    <div class="row">
+      <span class="small">Largest number divisible by</span>
+      <div class="seg" role="group" aria-label="Target divisor">
+        <button data-ct="4" aria-pressed="true">4</button>
+        <button data-ct="3" aria-pressed="false">3</button>
+        <button data-ct="6" aria-pressed="false">6</button>
+      </div>
+    </div>
+    <p class="lead" id="chPrompt"></p>
+    <div class="slots" id="chSlots"></div>
+    <div class="cards" id="chCards"></div>
+    <div class="row">
+      <button class="primary" id="chCheck">Check my number</button>
+      <button class="secondary" id="chClear">Clear</button>
+      <button class="secondary" id="chShow">Show the champion</button>
+    </div>
+  </div>
+  <div class="notes">
+    <p class="small">Tap a card to place it. Tap a placed card to send it back.</p>
+    <div class="out" id="chOut" aria-live="polite"></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- exact math helpers (BigInt for giant numbers) ---------- */
+const fmt = s => String(s).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const dsum = s => [...String(s)].reduce((a,c) => a + Number(c), 0);
+const divmod = (s,d) => { const n = BigInt(s), D = BigInt(d); return {q:(n/D).toString(), r:Number(n%D)}; };
+const divides = (s,d) => divmod(s,d).r === 0;
+const last = s => Number(String(s).slice(-1));
+const lastTwo = s => parseInt(String(s).slice(-2), 10);
+const divLine = (s,d) => { const {q,r} = divmod(s,d); return `${fmt(s)} ÷ ${d} = ${fmt(q)}${r ? ` r ${r}` : ''}`; };
+const inTable = (n,d) => n % d === 0 ? `${n} = ${d} × ${n/d}` : `${n} = ${d} × ${Math.floor(n/d)} + ${n % d}`;
+const sumExpr = s => `${[...String(s)].join(' + ')} = ${dsum(s)}`;
+const stamp = (ok, label, pop) => `<span class="stamp ${ok?'yes':'no'}${pop && !reduced ? ' pop':''}">${label || (ok ? 'Divisible' : 'Not divisible')}</span>`;
+const allIdx = s => [...String(s)].map((_,i) => i);
+function numHTML(s, hl){
+  s = String(s); const set = new Set(hl || []); let h = '';
+  for(let i=0;i<s.length;i++){
+    if(i>0 && (s.length - i) % 3 === 0) h += '<span class="comma">,</span>';
+    h += `<span class="d${set.has(i)?' hl':''}">${s[i]}</span>`;
+  }
+  return h;
+}
+function randDigits(len){ let s = String(1 + Math.floor(Math.random()*9)); while(s.length < len) s += Math.floor(Math.random()*10); return s; }
+
+/* ---------- the seven rules ---------- */
+const RULES = {
+  2:{text:'The last digit is even: 0, 2, 4, 6 or 8.', look:'last digit', hl:s=>[s.length-1], test:s=>last(s)%2===0,
+     why:s=>`Last digit ${last(s)} is ${last(s)%2===0?'even':'odd'}.`},
+  3:{text:'The digit sum is divisible by 3.', look:'all the digits (add them)', hl:allIdx, test:s=>dsum(s)%3===0,
+     why:s=>`Digit sum ${dsum(s)}: ${inTable(dsum(s),3)}.`},
+  4:{text:'The number made by the last two digits is divisible by 4.', look:'last two digits', hl:s=>s.length>1?[s.length-2,s.length-1]:[0], test:s=>lastTwo(s)%4===0,
+     why:s=>`Last two digits make ${lastTwo(s)}: ${inTable(lastTwo(s),4)}.`},
+  5:{text:'The last digit is 0 or 5.', look:'last digit', hl:s=>[s.length-1], test:s=>last(s)%5===0,
+     why:s=>`Last digit ${last(s)} ${last(s)%5===0?'is':'is not'} 0 or 5.`},
+  6:{text:'It passes BOTH the ÷2 test (even) and the ÷3 test (digit sum).', look:'last digit + digit sum', hl:allIdx, test:s=>last(s)%2===0 && dsum(s)%3===0,
+     why:s=>`÷2: last digit ${last(s)} is ${last(s)%2===0?'even ✓':'odd ✗'}. ÷3: digit sum ${dsum(s)} ${dsum(s)%3===0?'is in the 3s ✓':'is not in the 3s ✗'}.`},
+  9:{text:'The digit sum is divisible by 9.', look:'all the digits (add them)', hl:allIdx, test:s=>dsum(s)%9===0,
+     why:s=>`Digit sum ${dsum(s)}: ${inTable(dsum(s),9)}.`},
+  10:{text:'The last digit is 0.', look:'last digit', hl:s=>[s.length-1], test:s=>last(s)===0,
+     why:s=>`Last digit ${last(s)} ${last(s)===0?'is':'is not'} 0.`}
+};
+const DIVS = [2,3,4,5,6,9,10];
+
+/* ---------- evidence stations ---------- */
+const STATIONS = {
+  2:{yes:[12,38,146,270,504,1996,3018,7354], no:[15,41,123,289,507,1999,3021,8465], rules:[
+    {text:'The digit sum is even.', pred:s=>dsum(s)%2===0},
+    {text:'The last digit is even: 0, 2, 4, 6 or 8.', pred:s=>last(s)%2===0, ok:true},
+    {text:'The last digit is 2, 4, 6 or 8.', pred:s=>[2,4,6,8].includes(last(s))},
+    {text:'The first digit is even.', pred:s=>Number(s[0])%2===0}]},
+  4:{yes:[12,36,116,324,1000,2348,5172,9016], no:[14,30,118,326,1010,2342,5174,9022], rules:[
+    {text:'It is an even number.', pred:s=>last(s)%2===0},
+    {text:'The last digit is 0, 4 or 8.', pred:s=>[0,4,8].includes(last(s))},
+    {text:'The digit sum is divisible by 4.', pred:s=>dsum(s)%4===0},
+    {text:'The number made by the last two digits is divisible by 4.', pred:s=>lastTwo(s)%4===0, ok:true}]},
+  5:{yes:[15,40,125,300,785,1010,4445,6090], no:[14,51,152,303,788,1011,4454,6096], rules:[
+    {text:'The last digit is 0 or 5.', pred:s=>last(s)%5===0, ok:true},
+    {text:'The last digit is 5.', pred:s=>last(s)===5},
+    {text:'The digit sum is divisible by 5.', pred:s=>dsum(s)%5===0},
+    {text:'The first digit is 5 or bigger.', pred:s=>Number(s[0])>=5}]},
+  6:{yes:[12,18,54,126,372,1020,2346,8406], no:[15,16,26,33,129,1022,2343,8404], rules:[
+    {text:'The last digit is 6.', pred:s=>last(s)===6},
+    {text:'It is an even number.', pred:s=>last(s)%2===0},
+    {text:'It is even AND its digit sum is divisible by 3.', pred:s=>last(s)%2===0 && dsum(s)%3===0, ok:true},
+    {text:'The digit sum is divisible by 3.', pred:s=>dsum(s)%3===0}]},
+  10:{yes:[10,70,150,380,1000,2460,5090,9900], no:[15,72,155,385,1005,2464,5095,9909], rules:[
+    {text:'The last digit is 0 or 5.', pred:s=>last(s)%5===0},
+    {text:'It is an even number.', pred:s=>last(s)%2===0},
+    {text:'The last digit is 0.', pred:s=>last(s)===0, ok:true},
+    {text:'It has a 0 somewhere in it.', pred:s=>s.includes('0')}]}
+};
+const ST_ORDER = [2,4,5,6,10];
+function counterexample(d, pred){
+  const all = [...STATIONS[d].yes, ...STATIONS[d].no].sort((a,b)=>a-b);
+  for(const n of all){ const s = String(n); if(pred(s) !== divides(s,d)) return s; }
+  for(let n=1;n<=10000;n++){ const s = String(n); if(pred(s) !== divides(s,d)) return s; }
+  return null;
+}
+
+/* ---------- keypad ---------- */
+const pads = {};
+function Keypad(el, {max=12, value='', placeholder='Tap digits', onChange}){
+  let v = value;
+  el.innerHTML = `<div class="disp" aria-live="polite"></div><div class="keys">${[1,2,3,4,5,6,7,8,9,0].map(k=>`<button data-k="${k}" aria-label="${k}">${k}</button>`).join('')}<button class="wide" data-k="back" aria-label="Delete last digit">⌫ Delete</button><button class="wide" data-k="clear" style="grid-column:span 4">Clear</button></div>`;
+  const disp = el.querySelector('.disp');
+  const render = () => { disp.classList.toggle('empty', !v); disp.textContent = v ? fmt(v) : placeholder; };
+  const press = k => {
+    if(k==='back') v = v.slice(0,-1);
+    else if(k==='clear') v = '';
+    else if(v.length < max){ v = (v==='0' ? '' : v) + k; }
+    render(); onChange && onChange(v);
+  };
+  el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => press(b.dataset.k));
+  render();
+  return {get:()=>v, set:x=>{ v=String(x); render(); onChange && onChange(v); }, press};
+}
+
+/* ---------- state ---------- */
+let S;
+function freshState(){
+  return {
+    tab:'warm',
+    w:{s:'3741', d:3, vote:null, revealed:false, timer:0},
+    lab:{why:false},
+    st:{cur:2, clue:false, data:Object.fromEntries(ST_ORDER.map(d=>[d,{busted:[], right:false, tests:[], flag:null}]))},
+    codexAll:false,
+    q:1,
+    ch:{t:4, slots:[null,null,null,null,null,null]}
+  };
+}
+
+/* ---------- tabs ---------- */
+function selectTab(t){
+  S.tab = t;
+  $$('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','lab','st','codex','q','ch'].forEach(k => $('#p-'+k).hidden = k!==t);
+  if(t==='codex') renderCodex();
+}
+$$('.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------- 1 warm-up ---------- */
+function renderWarm(){
+  const w = S.w;
+  $('#wNum').innerHTML = numHTML(w.s, w.revealed ? allIdx(w.s) : []);
+  $('#wQ').innerHTML = `Is <b class="mono">${fmt(w.s)}</b> divisible by <b>${w.d}</b>?`;
+  $('#wYes').setAttribute('aria-pressed', w.vote==='yes'); $('#wNo').setAttribute('aria-pressed', w.vote==='no');
+  $$('[data-wd]').forEach(b => b.setAttribute('aria-pressed', Number(b.dataset.wd)===w.d));
+  if(!w.revealed){ $('#wStamp').innerHTML=''; }
+}
+function warmTrick(){
+  const w = S.w; w.revealed = true; clearTimer(); renderWarm();
+  const ds = dsum(w.s), ok = ds % w.d === 0, truth = divides(w.s, w.d);
+  $('#wStamp').innerHTML = stamp(truth, null, true);
+  let vote = '';
+  if(w.vote){ const said = w.vote==='yes'; vote = said===truth ? `<p>You voted <b>${w.vote}</b>. The digit sum agrees with you.</p>` : `<p>You voted <b>${w.vote}</b>, but the digit sum points the other way. Check it by dividing and see who’s right.</p>`; }
+  $('#wOut').className = 'out';
+  $('#wOut').innerHTML = `<p><b>The trick:</b> add the digits.</p><p class="eq">${sumExpr(w.s)}</p><p>${ok ? `${ds} is in the ${w.d}s: <span class="eq">${inTable(ds,w.d)}</span>. So ${fmt(w.s)} is divisible by ${w.d}.` : `${ds} is not in the ${w.d}s: <span class="eq">${inTable(ds,w.d)}</span>. So ${fmt(w.s)} is not divisible by ${w.d}.`}</p>${vote}<p class="small">Detective question: why would ADDING digits tell you about DIVIDING?</p>`;
+}
+function warmCheck(){
+  const w = S.w; const {q,r} = divmod(w.s, w.d);
+  const ok = r===0;
+  $('#wStamp').innerHTML = stamp(ok, null, true);
+  $('#wOut').className = 'out ' + (ok?'yes':'no');
+  $('#wOut').innerHTML = `<p class="eq">${divLine(w.s,w.d)}</p><p>${ok ? `Nothing left over, so ${w.d} divides it exactly. Check: <span class="eq">${fmt(q)} × ${w.d} = ${fmt(w.s)}</span>.` : `${r} left over, so ${w.d} does not divide it exactly.`}</p>${w.revealed ? '<p>Same answer as the digit-sum trick, without the long division.</p>' : '<p>That took a while. Want to see the two-second way? Tap “Show the trick.”</p>'}`;
+}
+function warmNew(){
+  const w = S.w; let s = randDigits(4 + Math.floor(Math.random()*4));
+  if(Math.random() < 0.5){ // nudge about half the suspects to be divisible, by adjusting the last digit
+    const need = (w.d - dsum(s.slice(0,-1)) % w.d) % w.d;
+    const opts = []; for(let k=0;k<=9;k++) if(k % w.d === need) opts.push(k);
+    s = s.slice(0,-1) + opts[Math.floor(Math.random()*opts.length)];
+  }
+  w.s = s; w.vote = null; w.revealed = false; clearTimer();
+  $('#wOut').innerHTML = ''; $('#wCount').textContent = ''; renderWarm();
+}
+function clearTimer(){ clearTimeout(S.w.timer); $('#wCount').textContent=''; }
+function warmTimer(){
+  clearTimer(); let t = 2; $('#wCount').textContent = '2…';
+  const tick = () => { t--; $('#wCount').textContent = t>0 ? `${t}…` : 'Judge it!'; if(t>0) S.w.timer = setTimeout(tick, 1000); };
+  S.w.timer = setTimeout(tick, 1000);
+}
+$('#wYes').onclick = () => { S.w.vote='yes'; renderWarm(); };
+$('#wNo').onclick = () => { S.w.vote='no'; renderWarm(); };
+$('#wTrick').onclick = warmTrick; $('#wCheck').onclick = warmCheck; $('#wNew').onclick = warmNew; $('#wTimer').onclick = warmTimer;
+$$('[data-wd]').forEach(b => b.onclick = () => { S.w.d = Number(b.dataset.wd); S.w.vote=null; S.w.revealed=false; $('#wOut').innerHTML=''; renderWarm(); });
+
+/* ---------- 2 lab ---------- */
+function breakdownHTML(s){
+  s = String(s);
+  if(s.length > 8) return `<p class="small">Try a number with 8 digits or fewer to see the breakdown.</p>`;
+  const rows = [];
+  for(let i=0;i<s.length;i++){
+    const place = s.length - 1 - i, d = s[i];
+    const pv = '1' + '0'.repeat(place), nines = '9'.repeat(place);
+    rows.push(place === 0
+      ? `<tr><td>${d} one${d==='1'?'':'s'}</td><td>= </td><td></td><td><span class="left">${d}</span></td></tr>`
+      : `<tr><td>${d} × ${fmt(pv)}</td><td>=</td><td>${d} × ${fmt(nines)}</td><td>+ <span class="left">${d}</span></td></tr>`);
+  }
+  const ds = dsum(s);
+  return `<table class="break"><tbody>${rows.join('')}</tbody></table>
+  <p class="lead" style="margin-top:12px">Every 9, 99, 999 … is a multiple of 9 (9 = 9 × 1, 99 = 9 × 11, 999 = 9 × 111). And 9 = 3 × 3, so they are multiples of 3 too.</p>
+  <p class="lead" style="margin-top:8px">What’s left over is just the highlighted digits: <span class="eq">${sumExpr(s)}</span>, the digit sum. So ${fmt(s)} and ${ds} leave the <b>same remainder</b> when you divide by 3 or by 9.</p>`;
+}
+function renderLab(v){
+  const s = v || '';
+  if(!s){
+    $('#lNum').innerHTML = '<span class="small">Tap digits to build a number.</span>';
+    $('#lChain').innerHTML = ''; $('#lVerd').innerHTML = ''; $('#lLeft').innerHTML = ''; $('#lWhy').innerHTML = ''; return;
+  }
+  $('#lNum').innerHTML = numHTML(s, allIdx(s));
+  const chain = [`<div><span class="small">Digit sum</span><br><span class="eq">${sumExpr(s)}</span></div>`];
+  let cur = String(dsum(s));
+  while(cur.length > 1){ chain.push(`<div><span class="small">Still big? Add again</span><br><span class="eq">${sumExpr(cur)}</span></div>`); cur = String(dsum(cur)); }
+  $('#lChain').innerHTML = chain.join('');
+  const ds = dsum(s);
+  $('#lVerd').innerHTML = [3,9].map(d => {
+    const ok = ds % d === 0;
+    return `<div class="verdict"><h3>÷ ${d} ${stamp(divides(s,d))}</h3><div>${ok ? `${ds} is in the ${d}s` : `${ds} is not in the ${d}s`}: <span class="eq">${inTable(ds,d)}</span></div><div class="eq">Calculator check: ${divLine(s,d)}</div></div>`;
+  }).join('');
+  const r9 = divmod(s,9).r;
+  $('#lLeft').innerHTML = `<p><b>Leftover clue:</b> ${fmt(s)} ÷ 9 leaves <b>${r9}</b>. Its digit sum ${ds} ÷ 9 leaves <b>${ds % 9}</b>. ${r9 === ds % 9 ? 'The same!' : ''} Try other numbers. Does it always match?</p>`;
+  $('#lWhy').innerHTML = breakdownHTML(s);
+}
+$('#lWhyBtn').onclick = () => { S.lab.why = !S.lab.why; $('#lWhyBox').hidden = !S.lab.why; $('#lWhyBtn').setAttribute('aria-pressed', S.lab.why); $('#lWhyBtn').textContent = S.lab.why ? 'Hide the explanation' : 'Why does it work?'; };
+$$('[data-lab]').forEach(b => b.onclick = () => pads.lab.set(b.dataset.lab));
+$('#lRand').onclick = () => pads.lab.set(randDigits(9 + Math.floor(Math.random()*4)));
+
+/* ---------- 3 stations ---------- */
+function renderStation(){
+  const d = S.st.cur, st = STATIONS[d], sd = S.st.data[d];
+  $('#sEyebrow').textContent = `Evidence station · Divisible by ${d}`;
+  $('#sPick').innerHTML = ST_ORDER.map(k => `<button data-st="${k}" aria-pressed="${k===d}" class="${S.st.data[k].tests.length>=3?'solved':''}" aria-label="Station divisible by ${k}">÷${k}</button>`).join('');
+  $$('#sPick button').forEach(b => b.onclick = () => { S.st.cur = Number(b.dataset.st); $('#sOut').innerHTML=''; renderStation(); });
+  const ev = n => { const s = String(n); const extra = S.st.clue && d===6 ? `<small>digit sum ${dsum(s)}</small>` : ''; return `<div class="ev${sd.flag===s?' flag':''}">${numHTML(s, S.st.clue ? (d===6 ? [s.length-1] : RULES[d].hl(s)) : [])}${extra}</div>`; };
+  $('#sEv').innerHTML = `<div class="evcol y"><h3>DIVISIBLE BY ${d}</h3><div class="evlist">${st.yes.map(ev).join('')}</div></div><div class="evcol n"><h3>NOT DIVISIBLE BY ${d}</h3><div class="evlist">${st.no.map(ev).join('')}</div></div>`;
+  $('#sClue').setAttribute('aria-pressed', S.st.clue); $('#sClue').textContent = S.st.clue ? 'Hide the clue' : 'Highlight the clue';
+  $('#sRules').innerHTML = st.rules.map((r,i) => `<button data-r="${i}" class="${sd.busted.includes(i)?'bust':''} ${sd.right && r.ok?'right':''}">${r.text}</button>`).join('');
+  $$('#sRules button').forEach(b => b.onclick = () => chooseRule(Number(b.dataset.r)));
+  $('#sTestBox').hidden = !sd.right;
+  $('#sDots').innerHTML = [0,1,2].map(i => `<i class="${i<sd.tests.length?'on':''}"></i>`).join('') + `<span>${Math.min(sd.tests.length,3)}/3</span>`;
+  $('#sLog').innerHTML = sd.tests.slice().reverse().map(t => `<div class="logitem">${t}</div>`).join('');
+}
+function chooseRule(i){
+  const d = S.st.cur, r = STATIONS[d].rules[i], sd = S.st.data[d];
+  if(r.ok){
+    sd.right = true; sd.flag = null;
+    $('#sOut').className = 'out yes';
+    $('#sOut').innerHTML = `<p>${stamp(true,'Fits all 16',true)}</p><p>This rule sorts every number on the board correctly. A good detective still tests it on new suspects. Try at least one the rule says YES to and one it says NO to.</p>`;
+  } else {
+    const c = counterexample(d, r.pred); const said = r.pred(c); const rem = divmod(c,d).r;
+    if(!sd.busted.includes(i)) sd.busted.push(i);
+    sd.flag = c;
+    $('#sOut').className = 'out no';
+    $('#sOut').innerHTML = `<p>${stamp(false,'Busted',true)}</p><p>Look at <b class="mono">${fmt(c)}</b>. This rule says <b>${said?'YES':'NO'}</b>, but <span class="eq">${divLine(c,d)}</span>${rem===0?' exactly':''}. ${rem===0 ? `So ${fmt(c)} <b>is</b> divisible by ${d}.` : `So ${fmt(c)} is <b>not</b> divisible by ${d}.`}</p><p>One counterexample is enough to bust a rule. Which rule is left standing?</p>`;
+  }
+  renderStation();
+}
+function runTest(){
+  const d = S.st.cur, sd = S.st.data[d], s = pads.st.get();
+  if(!s){ $('#sOut').className='out'; $('#sOut').innerHTML = '<p>Tap digits on the keypad to make a test number first.</p>'; return; }
+  const pred = RULES[d].test(s), truth = divides(s,d);
+  const line = `<b class="mono">${fmt(s)}</b>: ${RULES[d].why(s)} Rule says <b>${pred?'YES':'NO'}</b>. Calculator: <span class="eq">${divLine(s,d)}</span>. ${pred===truth ? '✓ The rule was right.' : '✗ They disagree!'}`;
+  const dup = sd.tests.some(t => t.startsWith(`<b class="mono">${fmt(s)}</b>`));
+  if(!dup) sd.tests.push(line);
+  const yesCount = sd.tests.filter(t => t.includes('Rule says <b>YES')).length, noCount = sd.tests.length - yesCount;
+  let msg = `<p>${line}</p>`;
+  if(dup) msg += `<p>You already tested ${fmt(s)}. Try a different suspect.</p>`;
+  else if(sd.tests.length === 3){
+    msg += `<p>${stamp(true,'Case closed',true)}</p><p>The ÷${d} rule is now in the class Codex.${!yesCount || !noCount ? ` Bonus: all your tests got the same answer. Try one the rule says ${yesCount?'NO':'YES'} to.` : ''}</p>`;
+  }
+  $('#sOut').className = 'out yes'; $('#sOut').innerHTML = msg;
+  renderStation();
+}
+$('#sClue').onclick = () => { S.st.clue = !S.st.clue; renderStation(); };
+$('#sTest').onclick = runTest;
+
+/* ---------- 4 codex ---------- */
+const unlocked = d => S.codexAll || d===3 || d===9 || (STATIONS[d] && S.st.data[d].tests.length >= 3);
+function renderCodex(){
+  $('#cBody').innerHTML = DIVS.map(d => unlocked(d)
+    ? `<tr><td>÷${d}</td><td>${RULES[d].text}</td><td>${RULES[d].look}</td></tr>`
+    : `<tr><td>÷${d}</td><td class="locked">Not cracked yet. Solve the ÷${d} evidence station.</td><td class="locked">?</td></tr>`).join('');
+  $('#cReveal').textContent = S.codexAll ? 'Hide uncracked rules' : 'Reveal all rules';
+  renderScan(pads.codex ? pads.codex.get() : '');
+}
+function renderScan(s){
+  if(!s){ $('#cScan').innerHTML = '<p class="small">Enter a number to scan it.</p>'; return; }
+  $('#cScan').innerHTML = DIVS.map(d => {
+    const truth = divides(s,d);
+    const why = unlocked(d) ? RULES[d].why(s) : '<i>Rule not cracked yet.</i>';
+    return `<div class="scanrow"><b>÷${d}</b><div class="why">${why}<small>${divLine(s,d)}</small></div>${stamp(truth, truth?'Yes':'No')}</div>`;
+  }).join('');
+}
+$('#cReveal').onclick = () => { S.codexAll = !S.codexAll; renderCodex(); };
+
+/* ---------- 5 detective questions ---------- */
+const chips = (list, fn) => `<div class="chips">${list.map(n => { const c = fn(n); return `<span class="chip ${c.cls}"><b>${n}</b><small>${c.label}</small></span>`; }).join('')}</div>`;
+const Q = {
+  1:{text:'Is 4,518 divisible by 6? Show your two-second detective work. No dividing!',
+     acts:[
+      {label:'Run the ÷2 test', run:()=>`<p class="eq">4,518</p><p>${RULES[2].why('4518')} So it passes the ÷2 test ✓.</p>`},
+      {label:'Run the ÷3 test', run:()=>`<p class="eq">${sumExpr('4518')}</p><p>${dsum('4518')} = 3 × ${dsum('4518')/3}, so it passes the ÷3 test ✓.</p>`},
+      {label:'Verdict + calculator check', run:()=>`<p>${stamp(divides('4518',6),null,true)}</p><p>It passes BOTH tests, so 4,518 is divisible by 6.</p><p class="eq">${divLine('4518',6)} and ${fmt(divmod('4518',6).q)} × 6 = 4,518</p>`}]},
+  2:{text:'TRUE or FALSE: every number divisible by 9 is also divisible by 3. Explain.',
+     acts:[
+      {label:'Line up multiples of 9', run:()=>{ const L = Array.from({length:15},(_,i)=>9*(i+1)); return `<p>The first 15 multiples of 9, each split into 3s:</p>${chips(L, n => ({cls:n%3===0?'ok':'bad', label:`3 × ${n/3}`}))}<p>Every single one is in the 3s.</p>`; }},
+      {label:'Why must it be true?', run:()=>`<p><b>TRUE.</b> 9 = 3 × 3. So 9 groups of anything can be regrouped as 3 × (3 groups). For example <span class="eq">9 × 7 = 63 = 3 × 21</span>.</p><p>With digit sums: if the digit sum is in the 9s (9, 18, 27 …), it’s also in the 3s.</p>`}]},
+  3:{text:'TRUE or FALSE: every number divisible by 3 is also divisible by 9. One counterexample settles it!',
+     acts:[
+      {label:'Hunt for a counterexample', run:()=>{ const L = Array.from({length:20},(_,i)=>3*(i+1)); const bad = L.filter(n=>n%9!==0).length; return `<p>The first 20 multiples of 3. Red ones are NOT divisible by 9:</p>${chips(L, n => n%9===0 ? {cls:'ok',label:`9 × ${n/9}`} : {cls:'bad',label:`÷9 r ${n%9}`})}<p>${bad} of the 20 are busted.</p>`; }},
+      {label:'Settle it with 12', run:()=>`<p><b>FALSE.</b> 12 has digit sum 1 + 2 = 3. It is in the 3s (<span class="eq">12 = 3 × 4</span>) but not in the 9s (<span class="eq">12 ÷ 9 = 1 r 3</span>).</p><p>One counterexample is enough to prove a “every number” claim false.</p>`}]},
+  4:{text:'Why would ADDING digits tell you anything about DIVIDING?',
+     acts:[
+      {label:'Break 3,741 apart', run:()=>`<div class="scroll">${breakdownHTML('3741')}</div>`},
+      {label:'Test the leftover pattern', run:()=>{ const L = ['3741','8406','4518','1234','98765','100']; return `<p>Remainder when you divide by 9:</p><div class="scroll"><table class="break"><tbody><tr><td><b>Number</b></td><td><b>÷ 9 leaves</b></td><td><b>Digit sum</b></td><td><b>÷ 9 leaves</b></td></tr>${L.map(s=>`<tr><td>${fmt(s)}</td><td>${divmod(s,9).r}</td><td>${dsum(s)}</td><td>${dsum(s)%9}</td></tr>`).join('')}</tbody></table></div><p>The leftovers always match, because the 9s, 99s and 999s divide evenly and only the digits are left over.</p>`; }}]},
+  5:{text:'A classmate claims: “A number is divisible by 4 if its LAST digit is divisible by 4.” Prove it or bust it.',
+     acts:[
+      {label:'Search 1–100 for counterexamples', run:()=>{ const L=[]; for(let n=1;n<=100;n++){ const p = last(String(n))%4===0, t = n%4===0; if(p!==t) L.push(n); } return `<p>Every number from 1 to 100 where the claim gets it wrong (${L.length} of them):</p>${chips(L, n => n%4===0 ? {cls:'ok', label:`÷4 ✓`} : {cls:'bad', label:`r ${n%4}`})}<p>Green: divisible by 4 but the claim says no (like 12). Red: the claim says yes but it isn’t (like 10 or 18). <b>Busted.</b></p>`; }},
+      {label:'Why the last TWO digits?', run:()=>`<p><span class="eq">100 = 4 × 25</span>, so every whole hundred is already in the 4s.</p><p>Example: <span class="eq">2,348 = 2,300 + 48</span>. 2,300 is 23 hundreds, so it’s in the 4s. Only 48 decides: <span class="eq">48 = 4 × 12</span>. So 2,348 is divisible by 4 (<span class="eq">${divLine('2348',4)}</span>).</p><p>But 10 is not in the 4s, so one digit isn’t enough.</p>`}]},
+  6:{text:'Divisible by 2 AND by 3 means divisible by 6. Does divisible by 2 AND by 4 mean divisible by 8?',
+     acts:[
+      {label:'Test every number up to 60', run:()=>{ const L=[]; for(let n=1;n<=60;n++) if(n%2===0 && n%4===0) L.push(n); const bad = L.filter(n=>n%8!==0); return `<p>Numbers to 60 that pass both the ÷2 and ÷4 tests. Are they in the 8s?</p>${chips(L, n => n%8===0 ? {cls:'ok',label:`8 × ${n/8}`} : {cls:'bad',label:`÷8 r ${n%8}`})}<p><b>No.</b> ${bad.slice(0,3).join(', ')} and more pass both tests but are not divisible by 8. Example: <span class="eq">12 ÷ 8 = 1 r 4</span>.</p>`; }},
+      {label:'So why does 2 and 3 work?', run:()=>`<p>4 already has a 2 inside it (4 = 2 × 2). Passing the ÷2 test tells you nothing new once you know ÷4.</p><p>2 and 3 share no factor. A number in the 2s and the 3s must hold a 2 and a 3 as different factors, so 2 × 3 = 6 fits inside it.</p>`}]}
+};
+function renderQ(){
+  $('#qNav').innerHTML = Object.keys(Q).map(i => `<button data-q="${i}" aria-pressed="${S.q===Number(i)}" aria-label="Question ${i}">${i}</button>`).join('');
+  $$('#qNav button').forEach(b => b.onclick = () => { S.q = Number(b.dataset.q); $('#qOut').innerHTML=''; renderQ(); });
+  const q = Q[S.q]; $('#qText').textContent = q.text;
+  $('#qAct').innerHTML = '';
+  q.acts.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent = a.label; b.onclick = () => { $('#qOut').className='out'; $('#qOut').innerHTML = a.run(); }; $('#qAct').appendChild(b); });
+}
+
+/* ---------- 6 challenge ---------- */
+function perms(a){ if(a.length<=1) return [a]; const r=[]; a.forEach((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).forEach(p=>r.push([x,...p]))); return r; }
+const ALL6 = perms([1,2,3,4,5,6]).map(p=>p.join(''));
+const CHAMP = {}, COUNT = {};
+[3,4,6].forEach(t => { const ok = ALL6.filter(s => divides(s,t)); COUNT[t] = ok.length; CHAMP[t] = ok.reduce((a,b) => Number(b)>Number(a) ? b : a); });
+function renderCh(hlIdx){
+  const c = S.ch;
+  $$('[data-ct]').forEach(b => b.setAttribute('aria-pressed', Number(b.dataset.ct)===c.t));
+  $('#chPrompt').innerHTML = `Use each card <b>1, 2, 3, 4, 5, 6</b> exactly once. Build the <b>largest</b> six-digit number divisible by <b>${c.t}</b>.`;
+  const hl = new Set(hlIdx||[]);
+  $('#chSlots').innerHTML = c.slots.map((d,i) => `<button class="slot${d!=null?' full':''}${hl.has(i)?' hl':''}" data-slot="${i}" aria-label="Place ${i+1}${d!=null?`, card ${d}`:', empty'}">${d!=null?d:''}</button>`).join('');
+  $('#chCards').innerHTML = [1,2,3,4,5,6].map(d => `<button class="card" data-card="${d}" ${c.slots.includes(d)?'disabled':''} aria-label="Card ${d}">${d}</button>`).join('');
+  $$('[data-slot]').forEach(b => b.onclick = () => { c.slots[Number(b.dataset.slot)] = null; renderCh(); });
+  $$('[data-card]').forEach(b => b.onclick = () => { const i = c.slots.indexOf(null); if(i>=0){ c.slots[i] = Number(b.dataset.card); renderCh(); } });
+}
+function chCheck(){
+  const c = S.ch, t = c.t, out = $('#chOut');
+  if(c.slots.includes(null)){ out.className='out'; out.innerHTML = `<p>Use all six cards first. ${c.slots.filter(x=>x==null).length} place${c.slots.filter(x=>x==null).length===1?' is':'s are'} still empty.</p>`; renderCh(); return; }
+  const s = c.slots.join(''), ok = divides(s,t), champ = CHAMP[t];
+  const hl = RULES[t].hl(s);
+  const note3 = t===3 ? `<p>Notice: 1 + 2 + 3 + 4 + 5 + 6 = 21, and 21 = 3 × 7. Rearranging cards never changes the digit sum, so <b>all ${COUNT[3]} arrangements</b> are divisible by 3.</p>` : '';
+  if(!ok){
+    out.className = 'out no';
+    out.innerHTML = `<p>${stamp(false,null,true)}</p><p><b class="mono">${fmt(s)}</b>: ${RULES[t].why(s)}</p><p class="eq">${divLine(s,t)}</p><p>${t===4 ? 'Which pairs of cards could sit at the end? List two-digit endings that are in the 4s.' : t===6 ? 'It must be even AND have a digit sum in the 3s. Which card belongs at the end?' : 'Try again.'}</p>`;
+  } else if(s !== champ){
+    let k = 0; while(s[k] === champ[k]) k++;
+    out.className = 'out yes';
+    out.innerHTML = `<p>${stamp(true,null,true)}</p><p><b class="mono">${fmt(s)}</b> works: ${RULES[t].why(s)}</p><p>But there’s a <b>bigger</b> one. ${k>0 ? `Your first ${k} digit${k===1?' is':'s are'} as big as they can be. ` : ''}Can the digit in place ${k+1} be bigger and still pass the ÷${t} test?</p>${note3}`;
+  } else {
+    out.className = 'out yes';
+    out.innerHTML = `<p>${stamp(true,'Champion',true)}</p><p><b class="mono">${fmt(s)}</b> is the largest. ${RULES[t].why(s)}</p><p class="eq">${divLine(s,t)}</p>${t===4?`<p>Big digits go in front. The last two cards must make a multiple of 4, and 12 is the only one left from 1 and 2.</p>`:''}${t===6?`<p>${fmt(CHAMP[3])} is odd, so it fails the ÷2 test. Swapping the last two cards gives the largest even one.</p>`:''}${note3}<p class="small">${COUNT[t]} of the 720 possible arrangements are divisible by ${t}.</p>`;
+  }
+  renderCh(hl);
+}
+$('#chCheck').onclick = chCheck;
+$('#chClear').onclick = () => { S.ch.slots = [null,null,null,null,null,null]; $('#chOut').innerHTML=''; renderCh(); };
+$('#chShow').onclick = () => { S.ch.slots = CHAMP[S.ch.t].split('').map(Number); chCheck(); };
+$$('[data-ct]').forEach(b => b.onclick = () => { S.ch.t = Number(b.dataset.ct); $('#chOut').innerHTML=''; renderCh(); });
+
+/* ---------- keyboard: digits go to the visible keypad ---------- */
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('input,textarea')) return;
+  const pad = {lab:pads.lab, st:(!$('#sTestBox').hidden && pads.st), codex:pads.codex}[S.tab];
+  if(!pad) return;
+  if(/^[0-9]$/.test(e.key)) pad.press(e.key);
+  else if(e.key==='Backspace'){ e.preventDefault(); pad.press('back'); }
+  else if(e.key==='Enter' && S.tab==='st'){ runTest(); }
+});
+
+/* ---------- reset / full screen ---------- */
+function resetAll(){
+  if(S) clearTimeout(S.w.timer);
+  S = freshState();
+  pads.lab = Keypad($('#lPad'), {max:12, value:'3741', onChange:renderLab});
+  pads.st = Keypad($('#sPad'), {max:9, placeholder:'Your test number'});
+  pads.codex = Keypad($('#cPad'), {max:12, value:'4518', onChange:renderScan});
+  $$('.out').forEach(o => { o.innerHTML=''; o.className='out'; });
+  $('#wCount').textContent=''; $('#lWhyBox').hidden = true; $('#lWhyBtn').setAttribute('aria-pressed','false'); $('#lWhyBtn').textContent='Why does it work?';
+  renderWarm(); renderLab('3741'); renderStation(); renderCodex(); renderQ(); renderCh(); selectTab('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+window.__DD = {RULES, STATIONS, counterexample, CHAMP, COUNT, divides, dsum};
+resetAll();
+})();
+</script>
+
+</body></html>

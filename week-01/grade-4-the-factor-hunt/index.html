@@ -1,0 +1,676 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Factor Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF1F4; --gridline:#DCE3EA; --card:#FFFFFF; --ink:#1A2230; --muted:#566174; --line:#C9D2DC;
+  --blue:#2F66C8; --blue-soft:#DDE7F8; --red:#D2412C; --red-soft:#F9DFDA;
+  --tile:#EDB523; --tile-edge:#B98600; --green:#1F8A55; --green-soft:#DDF1E5; --hl:#FFF1C7;
+  --p1:#2F66C8; --p2:#D2412C; --p3:#1F8A55; --p4:#9A4FC2;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#12161C; --gridline:#1C232D; --card:#1A2029; --ink:#E9EDF2; --muted:#9CA7B7; --line:#333D4B;
+    --blue:#77A2F2; --blue-soft:#1F2D48; --red:#F2806D; --red-soft:#43241F;
+    --tile:#F2C443; --tile-edge:#9C7414; --green:#52C98F; --green-soft:#183A2A; --hl:#3A3218;
+    --p1:#77A2F2; --p2:#F2806D; --p3:#52C98F; --p4:#C592E6;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#12161C; --gridline:#1C232D; --card:#1A2029; --ink:#E9EDF2; --muted:#9CA7B7; --line:#333D4B;
+  --blue:#77A2F2; --blue-soft:#1F2D48; --red:#F2806D; --red-soft:#43241F;
+  --tile:#F2C443; --tile-edge:#9C7414; --green:#52C98F; --green-soft:#183A2A; --hl:#3A3218;
+  --p1:#77A2F2; --p2:#F2806D; --p3:#52C98F; --p4:#C592E6;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{min-height:100%}
+body{margin:0; min-height:100%; color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--gridline) 1px, transparent 1px), linear-gradient(90deg, var(--gridline) 1px, transparent 1px);
+  background-size:32px 32px; padding-inline:max(16px, 2.2vw); padding-block:0 24px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+button:disabled{opacity:.45; cursor:default}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap; padding-block:16px 10px}
+.eyebrow{font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,52px); line-height:1; margin:4px 0 0; letter-spacing:-.02em; text-wrap:balance}
+.sub{margin:6px 0 0; color:var(--muted); font-size:clamp(16px,1.3vw,20px)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{min-height:48px; padding:0 18px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:16px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:8px; flex-wrap:wrap; padding-block:6px 14px}
+.tabs button{display:flex; align-items:center; gap:10px; min-height:56px; padding:0 18px 0 10px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,20px)}
+.tabs button b{width:32px; height:32px; border-radius:8px; display:grid; place-items:center; background:var(--paper); font-family:var(--display)}
+.tabs button small{font-weight:400; font-size:13px; color:var(--muted)}
+.tabs button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.tabs button[aria-selected="true"] b{background:var(--tile); color:#1A2230}
+.tabs button[aria-selected="true"] small{color:inherit; opacity:.75}
+
+.work{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:28px; align-items:start}
+.stage{display:flex; flex-direction:column; gap:12px; min-width:0}
+.side{display:flex; flex-direction:column; gap:16px; min-width:0; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:20px}
+.lead{font-size:clamp(20px,1.7vw,27px); line-height:1.3; margin:0; font-weight:700; text-wrap:balance}
+.hint{margin:0; color:var(--muted); font-size:16px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.btn{min-height:56px; padding:0 22px; border-radius:14px; border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:clamp(17px,1.35vw,21px)}
+.btn2{min-height:56px; padding:0 20px; border-radius:14px; border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px)}
+.btn2 .sw{display:inline-block; width:14px; height:14px; margin-right:8px; vertical-align:-1px}
+.msg{font-size:clamp(17px,1.4vw,22px); line-height:1.45; padding:14px 16px; border-radius:12px; background:var(--hl); margin:0}
+.msg:empty{display:none}
+.msg p{margin:0 0 8px} .msg p:last-child{margin:0}
+.label{font-size:14px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+
+/* Number grids */
+.ngrid{display:grid; grid-template-columns:repeat(10,1fr); gap:clamp(3px,.5vw,7px); container-type:inline-size;
+  width:min(100%, max(300px, calc((100dvh - 250px) * 10 / var(--rows,6))))}
+.nc{position:relative; aspect-ratio:1; border-radius:10px; border:2px solid var(--line); background:var(--card); padding:0;
+  display:grid; place-items:center; font-size:max(14px,4.1cqw); font-weight:700; font-variant-numeric:tabular-nums; transition:background-color .2s, opacity .2s, border-color .2s}
+.nc .n{position:relative; line-height:1; z-index:1}
+.nc .bd{position:absolute; bottom:5%; right:7%; font-size:max(10px,1.9cqw); font-weight:700; color:var(--muted); line-height:1}
+.nc.on4::before,.nc.on6::after{content:""; position:absolute; top:9%; width:17%; height:17%}
+.nc.on4::before{left:9%; border-radius:50%; background:var(--blue)}
+.nc.on6::after{right:9%; border-radius:2px; background:var(--red)}
+.nc.marked .n::before{content:""; position:absolute; inset:-.32em -.4em; border:.12em solid var(--ink); border-radius:999px}
+.nc.good{background:var(--green-soft); border-color:var(--green)}
+.nc.bad{border-color:var(--red); background:repeating-linear-gradient(45deg, var(--card) 0 7px, var(--red-soft) 7px 14px)}
+.nc.dim{opacity:.32}
+.nc.ownA{background:var(--blue); border-color:var(--blue); color:var(--card)}
+.nc.ownB{background:var(--red); border-color:var(--red); color:var(--card)}
+.nc.ownA .bd,.nc.ownB .bd{color:var(--card)}
+.nc.pvA{background:var(--blue-soft); box-shadow:inset 0 0 0 4px var(--blue); border-color:var(--blue)}
+.nc.pvB{background:var(--red-soft); box-shadow:inset 0 0 0 4px var(--red); border-color:var(--red)}
+.nc.pvA .bd{color:var(--blue)} .nc.pvB .bd{color:var(--red)}
+.nc.nope{border-color:var(--muted); background:repeating-linear-gradient(45deg, var(--card) 0 7px, var(--paper) 7px 14px)}
+.nc.none{opacity:.35; border-style:dashed}
+.ngrid.focus .nc:not(.hl){opacity:.3}
+.nc.hl{background:var(--hl); border-color:var(--hlc,var(--tile-edge)); box-shadow:inset 0 0 0 3px var(--hlc,var(--tile-edge))}
+.nc.hl .bd{color:var(--ink)}
+.nc.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(1.15)}100%{transform:scale(1)}}
+.legend{display:flex; gap:18px; flex-wrap:wrap; font-size:16px; color:var(--muted); align-items:center}
+.legend i{display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:-1px}
+.dotB{border-radius:50%; background:var(--blue)} .sqR{border-radius:2px; background:var(--red)}
+.ring{border:2.5px solid var(--ink); border-radius:999px; width:22px !important}
+.info{font-size:clamp(16px,1.3vw,20px); min-height:1.5em}
+
+/* Rectangle factory */
+.rstage{background:var(--card); border:2px solid var(--line); border-radius:18px; height:min(60dvh,560px); min-height:280px; padding:18px; display:flex}
+.rstage svg{width:100%; height:100%; display:block}
+.t{fill:var(--tile); stroke:var(--tile-edge); stroke-width:1.5; vector-effect:non-scaling-stroke}
+.tl{fill:var(--red-soft); stroke:var(--red); stroke-width:2; vector-effect:non-scaling-stroke}
+.gap{fill:none; stroke:var(--muted); stroke-width:1.5; stroke-dasharray:5 4; vector-effect:non-scaling-stroke}
+.dims{font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,28px)}
+.dims .x{color:var(--red)}
+.stepper{display:flex; align-items:center; gap:10px}
+.stepper button{width:60px; height:60px; border-radius:14px; border:2px solid var(--ink); background:var(--card); font-size:30px; font-weight:700; line-height:1}
+.stepper output{min-width:80px; text-align:center; font-family:var(--display); font-weight:800; font-size:44px; font-variant-numeric:tabular-nums}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{min-height:44px; padding:0 14px; border-radius:22px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:17px}
+.chip[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.pair{display:inline-flex; align-items:center; padding:6px 14px; border-radius:10px; background:var(--hl); border:2px solid var(--tile-edge); font-weight:700; font-size:20px; font-variant-numeric:tabular-nums}
+.trail{display:flex; gap:6px; flex-wrap:wrap}
+.trail span{padding:6px 10px; border-radius:10px; font-weight:700; font-size:16px; border:2px solid var(--line); font-variant-numeric:tabular-nums}
+.trail .ok{border-color:var(--green); background:var(--green-soft)}
+.trail .no{border-color:var(--line); color:var(--muted)}
+.trail .stop{border-color:var(--ink); background:var(--ink); color:var(--card)}
+
+/* Game */
+.turn{display:flex; align-items:center; gap:12px; font-family:var(--display); font-weight:800; font-size:clamp(24px,2.2vw,34px); line-height:1.1}
+.turn .d{width:26px; height:26px; border-radius:50%; flex:none}
+.scores{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.score{border-radius:14px; padding:10px 14px; border:2px solid var(--c)}
+.score b{display:block; font-family:var(--display); font-weight:800; font-size:clamp(34px,3vw,48px); line-height:1; color:var(--c); font-variant-numeric:tabular-nums}
+.score span{font-size:15px; color:var(--muted)}
+.score.now{background:color-mix(in srgb, var(--c) 12%, var(--card))}
+.log{list-style:none; margin:0; padding:0; font-size:16px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
+.log b{color:var(--ink)}
+.check{display:flex; align-items:center; gap:10px; font-size:16px; cursor:pointer}
+.check input{width:24px; height:24px; accent-color:var(--ink)}
+
+/* Questions */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:56px; height:56px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px; font-family:var(--display)}
+.qnav button.star{width:auto; padding:0 20px; border-radius:28px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-size:clamp(20px,1.7vw,27px); line-height:1.35; margin:0; font-weight:700; text-wrap:balance}
+
+@media (max-width: 960px), (orientation: portrait){
+  .work{grid-template-columns:1fr}
+  .ngrid{width:100%}
+  .rstage{height:min(52dvh,460px)}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  .tabs button small{display:none}
+  .tabs{display:grid; grid-template-columns:1fr 1fr}
+  .tabs button{font-size:15px; padding:0 10px 0 8px}
+  .ngrid{grid-template-columns:repeat(5,1fr)}
+  .nc{font-size:max(16px,7.4cqw)}
+  .nc .bd{font-size:max(11px,3.4cqw)}
+  .side{padding:16px}
+  .stepper button{width:52px; height:52px}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<header>
+  <div>
+    <div class="eyebrow">Grade 4 · Week 1 · Number Theory Detectives</div>
+    <h1>The Factor Hunt</h1>
+    <p class="sub">Every number hides its factors in rectangles. Find them all.</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><b>1</b>Warm-up <small>5 min</small></button>
+  <button role="tab" data-tab="rect" aria-selected="false"><b>2</b>Rectangle Factory <small>12 min</small></button>
+  <button role="tab" data-tab="game" aria-selected="false"><b>3</b>Factor Capture <small>20 min</small></button>
+  <button role="tab" data-tab="q" aria-selected="false"><b>4</b>Detective questions <small>8 min</small></button>
+</nav>
+
+<main>
+  <!-- Warm-up -->
+  <section class="view" id="v-warm">
+    <div class="work">
+      <div class="stage">
+        <div class="ngrid" id="warmGrid" style="--rows:6" aria-label="Numbers 1 to 60"></div>
+        <div class="legend">
+          <span><i class="dotB"></i>on the 4s list</span>
+          <span><i class="sqR"></i>on the 6s list</span>
+          <span><i class="ring"></i>your circle</span>
+        </div>
+      </div>
+      <div class="side">
+        <p class="lead">Skip-count by 4s. Skip-count by 6s. Which numbers are on <u>both</u> lists?</p>
+        <div class="row">
+          <button class="btn2" id="w4"><span class="sw dotB" style="border-radius:50%"></span>Count by 4s</button>
+          <button class="btn2" id="w6"><span class="sw sqR"></span>Count by 6s</button>
+        </div>
+        <p class="hint">Tap numbers on the board to circle the ones you think are on both lists. Tap again to un-circle.</p>
+        <div class="row">
+          <button class="btn" id="wCheck">Check my circles</button>
+          <button class="btn2" id="wReveal">Name the mystery</button>
+        </div>
+        <div class="msg" id="wMsg" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rectangle Factory -->
+  <section class="view" id="v-rect" hidden>
+    <div class="work">
+      <div class="stage">
+        <div class="dims" id="rDims" aria-live="polite"></div>
+        <div class="rstage"><svg id="rSvg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Tiles arranged in rows"></svg></div>
+      </div>
+      <div class="side">
+        <div>
+          <p class="label">Tiles</p>
+          <div class="row">
+            <div class="stepper">
+              <button id="nMinus" aria-label="One fewer tile">−</button>
+              <output id="nVal">24</output>
+              <button id="nPlus" aria-label="One more tile">+</button>
+            </div>
+            <div class="chips" id="presets"></div>
+          </div>
+        </div>
+        <div>
+          <p class="label">Tiles in each row</p>
+          <div class="stepper">
+            <button id="wMinus" aria-label="Shorter rows">−</button>
+            <output id="wVal">6</output>
+            <button id="wPlus" aria-label="Longer rows">+</button>
+          </div>
+        </div>
+        <div class="msg" id="rMsg" aria-live="polite"></div>
+        <div>
+          <p class="label" id="foundCount">Rectangles found</p>
+          <div class="chips" id="found"></div>
+        </div>
+        <div class="row"><button class="btn" id="sysBtn">Check systematically</button></div>
+        <div class="trail" id="trail"></div>
+        <div class="msg" id="rSum" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Factor Capture -->
+  <section class="view" id="v-game" hidden>
+    <div class="work">
+      <div class="stage">
+        <div class="ngrid" id="gGrid" style="--rows:3" aria-label="Factor Capture board, 1 to 30"></div>
+        <p class="hint"><b>Rules.</b> On your turn, claim a number. The other team gets every unclaimed factor of it. Your score is the total of your numbers. Highest total wins.</p>
+      </div>
+      <div class="side">
+        <div class="turn" id="turn"></div>
+        <div class="msg" id="gMsg" aria-live="polite"></div>
+        <div class="row" id="gBtns">
+          <button class="btn" id="claimBtn">Claim it</button>
+          <button class="btn2" id="cancelBtn">Pick another</button>
+        </div>
+        <div class="scores">
+          <div class="score" id="scA" style="--c:var(--blue)"><b id="sA">0</b><span id="cA">Team Blue</span></div>
+          <div class="score" id="scB" style="--c:var(--red)"><b id="sB">0</b><span id="cB">Team Red</span></div>
+        </div>
+        <ul class="log" id="gLog"></ul>
+        <div class="row">
+          <button class="btn2" id="undoBtn">Undo</button>
+          <button class="btn2" id="newBtn">New game</button>
+        </div>
+        <label class="check"><input type="checkbox" id="classic" checked> You can only claim a number that still has an unclaimed factor to give away</label>
+        <label class="check"><input type="checkbox" id="cpu"> Team Red is played by the computer</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detective questions -->
+  <section class="view" id="v-q" hidden>
+    <div class="work">
+      <div class="stage">
+        <div class="ngrid" id="qGrid" aria-label="Number board"></div>
+        <div class="info" id="qInfo" aria-live="polite">Tap any number to see all its factors.</div>
+      </div>
+      <div class="side">
+        <div class="qnav" id="qnav"></div>
+        <p class="qtext" id="qText"></p>
+        <div class="row" id="qActions"></div>
+        <div class="msg" id="qResult" aria-live="polite"></div>
+        <p class="hint">Talk it over first. Then tap a button to put evidence on the board.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const factors = n => { const r=[]; for(let i=1;i<=n;i++) if(n%i===0) r.push(i); return r; };
+const pairsOf = n => { const r=[]; for(let i=1;i*i<=n;i++) if(n%i===0) r.push([i,n/i]); return r; };
+const isPrime = n => n>1 && factors(n).length===2;
+const sum = a => a.reduce((x,y)=>x+y,0);
+const proper = n => factors(n).filter(f=>f<n);
+const listText = a => a.length<=1 ? a.join('') : a.length===2 ? a[0]+' and '+a[1] : a.slice(0,-1).join(', ')+', and '+a[a.length-1];
+const divText = (n,d) => { const q=Math.floor(n/d), r=n%d; return r ? `${n} ÷ ${d} = ${q} R ${r}` : `${n} ÷ ${d} = ${q}`; };
+const signed = v => v>0 ? '+'+v : v<0 ? '−'+(-v) : '0';
+const pl = (k,w,ws) => `${k} ${k===1?w:(ws||w+'s')}`;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+function pop(el){ if(reduced||!el) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+
+function makeGrid(el, count, onTap){
+  el.innerHTML=''; el.style.setProperty('--rows', Math.ceil(count/10));
+  const cells={};
+  for(let n=1;n<=count;n++){
+    const b=document.createElement('button'); b.className='nc';
+    b.innerHTML=`<span class="n">${n}</span><span class="bd"></span>`;
+    b.addEventListener('click', () => onTap(n));
+    el.appendChild(b); cells[n]=b;
+  }
+  return cells;
+}
+
+/* ---------------- Tabs ---------------- */
+let tab='warm';
+function selectTab(t){
+  tab=t;
+  document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','rect','game','q'].forEach(k => $('#v-'+k).hidden = k!==t);
+  if(t==='q') renderQ();
+}
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------------- Warm-up ---------------- */
+const COMMON=[]; for(let n=1;n<=60;n++) if(n%4===0 && n%6===0) COMMON.push(n);
+let W;
+function resetWarm(){ W={s4:0, s6:0, marked:new Set(), checked:false, revealed:false, gen:(W?W.gen+1:0)}; $('#wMsg').innerHTML=''; renderWarm(); }
+const warmCells = makeGrid($('#warmGrid'), 60, n => {
+  if(W.revealed) return;
+  W.marked.has(n) ? W.marked.delete(n) : W.marked.add(n);
+  W.checked=false; renderWarm(); pop(warmCells[n]);
+});
+function renderWarm(){
+  for(let n=1;n<=60;n++){
+    const c=warmCells[n], isC=COMMON.includes(n);
+    const on4 = n%4===0 && n/4<=W.s4, on6 = n%6===0 && n/6<=W.s6;
+    c.classList.toggle('on4', on4); c.classList.toggle('on6', on6);
+    c.classList.toggle('marked', W.marked.has(n) || (W.revealed && isC));
+    c.classList.toggle('good', (W.checked && W.marked.has(n) && isC) || (W.revealed && isC));
+    c.classList.toggle('bad', W.checked && W.marked.has(n) && !isC);
+    c.classList.toggle('dim', W.revealed && !isC);
+    const parts=[]; if(on4) parts.push('on the 4s list'); if(on6) parts.push('on the 6s list'); if(W.marked.has(n)) parts.push('circled');
+    c.setAttribute('aria-label', `${n}${parts.length?', '+parts.join(', '):''}`);
+  }
+}
+async function skip(k){
+  const key = k===4?'s4':'s6', g=++W.gen; W[key]=0;
+  const list=[];
+  for(let i=1;i*k<=60;i++){
+    if(g!==W.gen) return;
+    W[key]=i; list.push(i*k); renderWarm(); pop(warmCells[i*k]);
+    $('#wMsg').innerHTML = `<p>Counting by ${k}s: ${list.join(', ')}</p>`;
+    await sleep(reduced?0:260);
+  }
+  $('#wMsg').innerHTML = `<p>Counting by ${k}s: ${list.join(', ')}.</p><p>${k===4 && W.s6===0 ? 'Now count by 6s. Watch for numbers that get both marks.' : k===6 && W.s4===0 ? 'Now count by 4s. Watch for numbers that get both marks.' : 'Which numbers have <b>both</b> marks?'}</p>`;
+}
+function whyNot(n){
+  if(n%4===0) return `<b>${n}</b> is on the 4s list (4 × ${n/4}), but not the 6s list: ${divText(n,6)}.`;
+  if(n%6===0) return `<b>${n}</b> is on the 6s list (6 × ${n/6}), but not the 4s list: ${divText(n,4)}.`;
+  return `<b>${n}</b> is on neither list: ${divText(n,4)} and ${divText(n,6)}.`;
+}
+function checkWarm(){
+  if(W.revealed) return;
+  if(!W.marked.size){ $('#wMsg').innerHTML='<p>Circle some numbers first. Tap the ones you think are on both lists.</p>'; return; }
+  W.checked=true; renderWarm();
+  const marked=[...W.marked].sort((a,b)=>a-b);
+  const right=marked.filter(n=>COMMON.includes(n)), wrong=marked.filter(n=>!COMMON.includes(n));
+  const missing=COMMON.filter(n=>!W.marked.has(n));
+  let h='';
+  if(right.length) h+=`<p>✓ ${listText(right)} ${right.length===1?'is':'are'} on both lists. ${right.map(n=>`${n} = 4 × ${n/4} = 6 × ${n/6}`).join('; ')}.</p>`;
+  if(wrong.length){ h+=wrong.slice(0,3).map(n=>`<p>${whyNot(n)}</p>`).join(''); if(wrong.length>3) h+=`<p>${wrong.length-3} more striped ${wrong.length-3===1?'number needs':'numbers need'} another look.</p>`; h+='<p>Un-circle the striped ones and try again.</p>'; }
+  if(!wrong.length && missing.length) h+=`<p>${pl(missing.length,'more number is','more numbers are')} hiding on the board. Tip: count by 4s and 6s to see the marks.</p>`.replace('1 more number is','1 more number is');
+  if(!wrong.length && !missing.length) h+=`<p><b>You found all ${COMMON.length}.</b> What do these numbers have in common? Tap “Name the mystery.”</p>`;
+  $('#wMsg').innerHTML=h;
+}
+function revealWarm(){
+  W.gen++; W.revealed=true; W.s4=15; W.s6=10; W.checked=false; renderWarm();
+  $('#wMsg').innerHTML = `<p>The mystery numbers are <b>common multiples</b> of 4 and 6: ${listText(COMMON)}.</p><p>Look: they go up by 12 each time. Every one is a multiple of 12. The smallest one, 12, is the <b>least common multiple</b>.</p><p>Why 12? 4 = 2 × 2 and 6 = 2 × 3. The first number both lists reach is 2 × 2 × 3 = 12.</p>`;
+}
+$('#w4').onclick=()=>{ if(!W.revealed) skip(4); };
+$('#w6').onclick=()=>{ if(!W.revealed) skip(6); };
+$('#wCheck').onclick=checkWarm;
+$('#wReveal').onclick=revealWarm;
+
+/* ---------------- Rectangle Factory ---------------- */
+const PRESETS=[24,7,13,12,36,30];
+let R;
+function resetRect(){ R={n:24, w:6, found:new Map(), msg:null, trail:[], sysDone:false, gen:(R?R.gen+1:0)}; evaluate(); renderRect(); }
+function evaluate(){
+  const n=R.n, w=R.w, h=Math.floor(n/w), r=n%w;
+  if(r===0){
+    const key=Math.min(w,h);
+    if(!R.found.has(key)){ R.found.set(key,[w,h]); R.msg={k:'new'}; }
+    else { const [fw,fh]=R.found.get(key); R.msg = fw===w ? {k:'again'} : {k:'flip', fw, fh}; }
+  } else R.msg={k:'left'};
+}
+function rectMsg(){
+  const n=R.n, w=R.w, h=Math.floor(n/w), r=n%w, m=R.msg;
+  if(m.k==='new') return `<p><b>A rectangle!</b> ${w} × ${h} = ${n}.${w===h?` It’s a square!`:''} So ${w===h?`${w} times itself makes ${n}`:`${w} and ${h} are a <b>factor pair</b> of ${n}`}.</p>`;
+  if(m.k==='again') return `<p>You already found ${w} × ${h}. Try a different row length.</p>`;
+  if(m.k==='flip') return `<p>${w} × ${h} is the same rectangle as ${m.fw} × ${m.fh}, turned on its side. Same factor pair, so nothing new.</p>`;
+  return `<p>${pl(h,'full row')} of ${w} ${h===1?'uses':'use'} ${h*w} tiles, and <b>${pl(r,'tile')} ${r===1?'is':'are'} left over</b>. The last row can’t be finished.</p><p>${divText(n,w)}, so ${w} is not a factor of ${n}. Try another row length.</p>`;
+}
+function renderSvg(){
+  const n=R.n, w=R.w, full=Math.floor(n/w), r=n%w, rows=full+(r?1:0), pad=.2;
+  let s='';
+  for(let i=0;i<n;i++){ const row=Math.floor(i/w), col=i%w; s+=`<rect class="${row>=full?'tl':'t'}" x="${col+.06}" y="${row+.06}" width=".88" height=".88" rx=".14"/>`; }
+  if(r) for(let col=r; col<w; col++) s+=`<rect class="gap" x="${col+.1}" y="${full+.1}" width=".8" height=".8" rx=".14"/>`;
+  const svg=$('#rSvg'); svg.setAttribute('viewBox', `${-pad} ${-pad} ${w+2*pad} ${rows+2*pad}`); svg.innerHTML=s;
+  svg.setAttribute('aria-label', r ? `${n} tiles in rows of ${w}: ${full} full rows and ${r} left over` : `${n} tiles make a ${w} by ${full} rectangle`);
+  $('#rDims').innerHTML = r
+    ? `${w} in each row · ${pl(full,'full row')} · <span class="x">${r} left over</span>`
+    : `${w} in each row × ${pl(full,'row')} = ${n} tiles`;
+}
+function renderRect(){
+  $('#nVal').textContent=R.n; $('#wVal').textContent=R.w;
+  $('#nMinus').disabled=R.n<=1; $('#nPlus').disabled=R.n>=100;
+  $('#wMinus').disabled=R.w<=1; $('#wPlus').disabled=R.w>=R.n;
+  $('#presets').innerHTML = PRESETS.map(p=>`<button class="chip" data-p="${p}" aria-pressed="${p===R.n}">${p}</button>`).join('');
+  $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>setN(+b.dataset.p));
+  renderSvg();
+  $('#rMsg').innerHTML = rectMsg();
+  const keys=[...R.found.keys()].sort((a,b)=>a-b);
+  $('#foundCount').textContent = `Rectangles found for ${R.n}: ${keys.length}`;
+  $('#found').innerHTML = keys.length ? keys.map(k=>`<span class="pair">${k} × ${R.n/k}</span>`).join('') : '<span class="hint">None yet.</span>';
+  $('#trail').innerHTML = R.trail.map(t => t.stop
+      ? `<span class="stop">${t.i} × ${t.i} = ${t.i*t.i} &gt; ${R.n}: stop</span>`
+      : t.ok ? `<span class="ok">${t.i} ✓ × ${R.n/t.i}</span>` : `<span class="no">${t.i} ✗ R ${R.n%t.i}</span>`).join('');
+  const n=R.n, f=factors(n), p=pairsOf(n), sq=p.length && p[p.length-1][0]===p[p.length-1][1];
+  let h='';
+  if(R.sysDone){
+    const last=R.trail[R.trail.length-1];
+    h+=`<p>We tested every row length from 1 up to ${last.i-1}. At ${last.i}, ${last.i} × ${last.i} = ${last.i*last.i} is more than ${n}, so any new partner would have to be smaller than ${last.i}. We already tested those. <b>No rectangles are missing.</b></p>`;
+    if(n===1) h+=`<p>1 makes just one rectangle: 1 × 1. It has only one factor, so 1 is <b>neither prime nor composite</b>.</p>`;
+    else if(isPrime(n)) h+=`<p>${n} has exactly 2 factors: 1 and ${n}. It makes only one rectangle, a single row. So ${n} is <b>prime</b>.</p>`;
+    else h+=`<p>${n} has ${f.length} factors: ${f.join(', ')}. It makes ${p.length} different rectangles, so ${n} is <b>composite</b>.</p>`;
+    if(sq){ const s=p[p.length-1][0]; h+=`<p>One rectangle is a square (${s} × ${s}), so ${n} is a <b>square number</b>. ${s} is its own partner, which is why ${n} has an odd number of factors.</p>`; }
+  } else if(R.found.size) {
+    h='<p>Are there more rectangles? How could you be <b>sure</b>? Try row lengths 1, 2, 3… in order, or tap “Check systematically.”</p>';
+  }
+  $('#rSum').innerHTML=h;
+  $('#sysBtn').textContent = R.running ? 'Checking…' : 'Check systematically';
+  $('#sysBtn').disabled = !!R.running;
+}
+function setN(n){ R.gen++; R.running=false; R.n=clamp(n,1,100); R.w=Math.min(R.w,R.n); R.found=new Map(); R.trail=[]; R.sysDone=false; evaluate(); renderRect(); }
+function setW(w){ R.gen++; R.running=false; R.w=clamp(w,1,R.n); if(!R.sysDone) R.trail=[]; evaluate(); renderRect(); }
+async function sysCheck(){
+  const g=++R.gen; R.trail=[]; R.sysDone=false; R.running=true; renderRect();
+  const n=R.n;
+  for(let i=1;;i++){
+    if(i*i>n){ R.trail.push({i, stop:true}); break; }
+    R.w=i; evaluate(); R.trail.push({i, ok:n%i===0}); renderRect();
+    await sleep(reduced?120:800); if(g!==R.gen) return;
+  }
+  R.running=false; R.sysDone=true; renderRect();
+}
+$('#nMinus').onclick=()=>setN(R.n-1); $('#nPlus').onclick=()=>setN(R.n+1);
+$('#wMinus').onclick=()=>setW(R.w-1); $('#wPlus').onclick=()=>setW(R.w+1);
+$('#sysBtn').onclick=sysCheck;
+
+/* ---------------- Factor Capture ---------------- */
+const TEAM={A:'Blue', B:'Red'}; const other=t=>t==='A'?'B':'A';
+let G;
+function newGame(){ const keep=G?{classic:G.classic,cpu:G.cpu,gen:G.gen+1}:{classic:true,cpu:false,gen:0}; G={owner:{}, turn:'A', sel:null, hist:[], log:[], over:false, ...keep}; renderGame(); }
+const gCells = makeGrid($('#gGrid'), 30, n => { if(G.over || (G.cpu && G.turn==='B')) return; G.sel = G.sel===n ? null : n; renderGame(); });
+const uf = n => factors(n).filter(f => f<n && !G.owner[f]);
+const legal = n => !G.owner[n] && (!G.classic || uf(n).length>0);
+const anyLegal = () => { for(let n=1;n<=30;n++) if(legal(n)) return true; return false; };
+const score = t => { let s=0; for(const k in G.owner) if(G.owner[k]===t) s+=+k; return s; };
+const count = t => Object.values(G.owner).filter(v=>v===t).length;
+function claim(){
+  const n=G.sel; if(n==null || !legal(n) || G.over) return;
+  const t=G.turn, o=other(t), got=uf(n);
+  G.hist.push({owner:{...G.owner}, turn:t, log:G.log.slice()});
+  G.owner[n]=t; got.forEach(f=>G.owner[f]=o);
+  G.log.unshift({t,n,got}); G.turn=o; G.sel=null; G.over=!anyLegal();
+  renderGame(); pop(gCells[n]); maybeCpu();
+}
+function cpuPick(){ let best=null, bv=-Infinity; for(let n=1;n<=30;n++) if(legal(n)){ const v=n-sum(uf(n)); if(v>bv || (v===bv && n>best)){ bv=v; best=n; } } return best; }
+function maybeCpu(){
+  if(!G.cpu || G.over || G.turn!=='B') return;
+  const g=++G.gen;
+  setTimeout(()=>{ if(g!==G.gen) return; G.sel=cpuPick(); renderGame();
+    setTimeout(()=>{ if(g!==G.gen) return; claim(); }, reduced?400:1300); }, reduced?200:700);
+}
+function undo(){
+  if(!G.hist.length) return; G.gen++;
+  let h=G.hist.pop();
+  if(G.cpu && h.turn==='B' && G.hist.length) h=G.hist.pop();
+  G.owner=h.owner; G.turn=h.turn; G.log=h.log; G.sel=null; G.over=!anyLegal();
+  renderGame(); maybeCpu();
+}
+function renderGame(){
+  const t=G.turn, o=other(t), sel=G.sel, cpuTurn=G.cpu && t==='B' && !G.over;
+  const pv = sel!=null && !G.owner[sel] && legal(sel) ? uf(sel) : [];
+  for(let n=1;n<=30;n++){
+    const c=gCells[n], own=G.owner[n];
+    c.className='nc'+(own?' own'+own:'')+(G.over && !own?' none':'');
+    let bd='';
+    if(!G.over && sel===n && !own){ if(legal(n)){ c.classList.add('pv'+t); bd='+'+n; } else c.classList.add('nope'); }
+    if(pv.includes(n)){ c.classList.add('pv'+o); }
+    c.querySelector('.bd').textContent=bd;
+    c.setAttribute('aria-label', `${n}${own?', Team '+TEAM[own]:G.over?', unclaimed':''}`);
+  }
+  const sa=score('A'), sb=score('B');
+  $('#sA').textContent=sa; $('#sB').textContent=sb;
+  $('#cA').textContent=`Team Blue · ${pl(count('A'),'number')}`;
+  $('#cB').textContent=`Team Red${G.cpu?' (computer)':''} · ${pl(count('B'),'number')}`;
+  $('#scA').classList.toggle('now', !G.over && t==='A'); $('#scB').classList.toggle('now', !G.over && t==='B');
+  const col = x => x==='A'?'var(--blue)':'var(--red)';
+  let msg='', showBtns=false;
+  if(G.over){
+    const w = sa>sb?'A':sb>sa?'B':null;
+    $('#turn').innerHTML = w ? `<span class="d" style="background:${col(w)}"></span>Team ${TEAM[w]} wins, ${Math.max(sa,sb)} to ${Math.min(sa,sb)}!` : `It’s a tie, ${sa} to ${sb}!`;
+    const left=[]; for(let n=1;n<=30;n++) if(!G.owner[n]) left.push(n);
+    msg = `<p>No more legal moves.</p>` + (left.length ? `<p>Nobody gets ${listText(left)}. Every factor of ${left.length===1?'it':'those numbers'} was already claimed.</p>` : '') + `<p>Scouting report: which move helped the winner most?</p>`;
+  } else {
+    $('#turn').innerHTML = `<span class="d" style="background:${col(t)}"></span>Team ${TEAM[t]}’s turn`;
+    if(sel==null) msg = cpuTurn ? '<p>The computer is thinking…</p>' : `<p>Tap a number to see what would happen. Think ahead: what will Team ${TEAM[o]} get?</p>`;
+    else if(G.owner[sel]) msg = `<p>${sel} already belongs to Team ${TEAM[G.owner[sel]]}. Pick an unclaimed number.</p>`;
+    else if(!legal(sel)) msg = `<p>${sel===1?'1 has no factors smaller than itself':`Every factor of ${sel} smaller than ${sel} is already claimed (${listText(proper(sel))})`}, so Team ${TEAM[o]} would get nothing.</p><p>The rule says you can’t pick it. Look for a number that still has a factor to give away.</p>`;
+    else {
+      const got=uf(sel), g=sum(got), net=sel-g;
+      msg = `<p>${cpuTurn?'The computer picks':`Team ${TEAM[t]} takes`} <b>${sel}</b>. Team ${TEAM[o]} gets ${got.length ? `${got.join(' + ')} = <b>${g}</b>` : '<b>nothing</b>'}.</p><p>That’s a gain of <b>${signed(net)}</b> for Team ${TEAM[t]}.${net<0?' Ouch. Is there a better move?':''}</p>`;
+      showBtns = !cpuTurn;
+    }
+  }
+  $('#gMsg').innerHTML=msg;
+  $('#gBtns').hidden=!showBtns;
+  $('#claimBtn').textContent = sel!=null ? `Claim ${sel}` : 'Claim it';
+  $('#gLog').innerHTML = G.log.slice(0,5).map(e=>`<li><b>${TEAM[e.t]}</b> took ${e.n} · ${TEAM[other(e.t)]} got ${e.got.length?e.got.join(', '):'nothing'}</li>`).join('');
+  $('#undoBtn').disabled=!G.hist.length;
+}
+$('#claimBtn').onclick=claim;
+$('#cancelBtn').onclick=()=>{ G.sel=null; renderGame(); };
+$('#undoBtn').onclick=undo;
+$('#newBtn').onclick=newGame;
+$('#classic').onchange=e=>{ G.classic=e.target.checked; newGame(); };
+$('#cpu').onchange=e=>{ G.cpu=e.target.checked; G.gen++; G.sel=null; renderGame(); maybeCpu(); };
+
+/* ---------------- Detective questions ---------------- */
+let qn=1, qCells=null, qCount=0;
+const PAIRC=['var(--p1)','var(--p2)','var(--p3)','var(--p4)','var(--tile-edge)'];
+function setQGrid(n){
+  if(qCount===n) return; qCount=n;
+  qCells = makeGrid($('#qGrid'), n, k => { const f=factors(k); $('#qInfo').innerHTML = `<b>${k}</b> has ${pl(f.length,'factor')}: ${f.join(', ')}.`; });
+}
+function clearQ(){
+  $('#qGrid').classList.remove('focus');
+  for(let n=1;n<=qCount;n++){ const c=qCells[n]; c.classList.remove('hl','dim'); c.style.removeProperty('--hlc'); c.querySelector('.bd').textContent=''; }
+}
+function mark(list, color, badge){
+  $('#qGrid').classList.add('focus');
+  list.forEach(n=>{ const c=qCells[n]; if(!c) return; c.classList.add('hl'); if(color) c.style.setProperty('--hlc', typeof color==='function'?color(n):color); if(badge) c.querySelector('.bd').textContent=badge(n); pop(c); });
+}
+function badgeAll(to, fn){ for(let n=1;n<=to;n++) qCells[n].querySelector('.bd').textContent=fn(n); }
+const say = h => $('#qResult').innerHTML=h;
+const openNet = n => n - sum(proper(n));   // opening-board gain
+const openLegal = n => !G.classic || proper(n).length>0;
+
+const Q={
+  1:{count:30, text:'Which numbers make only ONE rectangle? What do we call them?', actions:[
+    {label:'Count rectangles for 1–30', run:()=>{
+      badgeAll(30, n=>pairsOf(n).length);
+      const ones=[]; for(let n=1;n<=30;n++) if(pairsOf(n).length===1) ones.push(n);
+      mark(ones, 'var(--green)', n=>pairsOf(n).length);
+      say(`<p>The small number shows how many rectangles each number makes. Only ${ones.length} numbers make just one: ${listText(ones)}.</p><p>Every one except 1 has exactly two factors, 1 and itself. They are <b>prime</b> numbers. A number with more than one rectangle, like 24, is <b>composite</b>. 1 is neither.</p>`);
+    }},
+    {label:'Try 13 in the factory', secondary:true, run:()=>{ selectTab('rect'); setN(13); setW(5); }}
+  ]},
+  2:{count:30, text:'In Factor Capture, which numbers are the best FIRST moves? Why?', actions:[
+    {label:'Score every first move', run:()=>{
+      badgeAll(30, n=>openLegal(n)?signed(openNet(n)):'✕');
+      const cand=[]; for(let n=1;n<=30;n++) if(openLegal(n)) cand.push(n);
+      const top=cand.sort((a,b)=>openNet(b)-openNet(a)||b-a).slice(0,3);
+      mark(top, 'var(--green)', n=>signed(openNet(n)));
+      const b=top[0];
+      say(`<p>Each badge shows the gain if you pick that number on an empty board: your number minus what the other team gets.</p><p>Best opener: <b>${b}</b>. You get ${b}, and the other team gets only ${listText(proper(b))}: a gain of <b>${signed(openNet(b))}</b>. Next best: ${top.slice(1).map(n=>`${n} (${signed(openNet(n))})`).join(' and ')}.</p><p>${top.every(isPrime)?'They are all big primes. A prime’s only smaller factor is 1.':`Big numbers with very few smaller factors win. ${top.filter(n=>!isPrime(n)).map(n=>`${n} sneaks in because its smaller factors, ${listText(proper(n))}, add up to only ${sum(proper(n))}`).join('. ')}.`}</p>`);
+    }},
+    {label:'What happens once 1 is taken?', secondary:true, run:()=>{
+      const ps=[]; for(let n=2;n<=30;n++) if(isPrime(n)) ps.push(n);
+      mark(ps, 'var(--p4)');
+      say(G.classic
+        ? `<p>A prime’s only smaller factor is 1. Once 1 is claimed, a prime has nothing left to give away, so under our rule <b>nobody can pick it</b>.</p><p>That’s why grabbing a big prime early matters. Only one team gets that chance.</p>`
+        : `<p>A prime’s only smaller factor is 1. Once 1 is claimed, picking a prime gives the other team <b>nothing</b>. Primes become free points.</p><p>Tip: turn on the rule “You can only claim a number that still has an unclaimed factor” for a trickier game.</p>`);
+    }}
+  ]},
+  3:{count:30, text:'Which number is a terrible early pick? Why?', actions:[
+    {label:'Show the worst first moves', run:()=>{
+      let worst=Infinity; for(let n=2;n<=30;n++) worst=Math.min(worst, openNet(n));
+      const ws=[]; for(let n=2;n<=30;n++) if(openNet(n)===worst) ws.push(n);
+      mark(ws, 'var(--red)', n=>signed(openNet(n)));
+      say(ws.map(n=>`<p><b>${n}</b>: the other team gets ${proper(n).join(' + ')} = ${sum(proper(n))}. You get ${n}. That’s <b>${signed(openNet(n))}</b>.</p>`).join('') + `<p>Numbers with lots of factors are terrible early picks: you hand all those factors to the other team. Later, once their factors are gone, they can become great picks.</p>`);
+    }},
+    {label:'A strange one: 28', secondary:true, run:()=>{
+      const perf=[]; for(let n=2;n<=30;n++) if(sum(proper(n))===n) perf.push(n);
+      mark(perf, 'var(--p4)', ()=>'0');
+      say(perf.map(n=>`<p><b>${n}</b>: ${proper(n).join(' + ')} = ${n}. The other team gets exactly ${n}, so the gain is 0.</p>`).join('') + `<p>A number whose smaller factors add up to exactly itself is called <b>perfect</b>. You’ll hunt for these in Week 5.</p>`);
+    }}
+  ]},
+  4:{count:50, text:'24 has an even number of factors, but 36 has an odd number. Why? (Hint: what’s special about 6 × 6?)', actions:[
+    {label:'Pair up 24’s factors', run:()=>showPairs(24)},
+    {label:'Pair up 36’s factors', run:()=>showPairs(36)},
+    {label:'Every odd count to 50', secondary:true, run:()=>{
+      const odd=[]; for(let n=1;n<=50;n++) if(factors(n).length%2===1) odd.push(n);
+      mark(odd, 'var(--tile-edge)', n=>factors(n).length);
+      say(`<p>Numbers from 1 to 50 with an odd number of factors: ${listText(odd)}.</p><p>They are all <b>square numbers</b>: ${odd.map(n=>`${Math.sqrt(n)}×${Math.sqrt(n)}`).join(', ')}. In a square number, one factor is its own partner, so it only counts once.</p>`);
+    }}
+  ]},
+  5:{count:50, star:true, text:'Challenge: find the number under 50 with the MOST factors. Can you prove no number under 50 beats it?', actions:[
+    {label:'Count factors for 1–49', run:()=>{
+      badgeAll(49, n=>factors(n).length); qCells[50].classList.add('dim');
+      say('<p>Each badge shows how many factors that number has. 50 is greyed out: the question says <b>under</b> 50. Which badge is biggest?</p>');
+    }},
+    {label:'Crown the champion', run:()=>{
+      badgeAll(49, n=>factors(n).length);
+      let max=0; for(let n=1;n<50;n++) max=Math.max(max, factors(n).length);
+      const champs=[]; for(let n=1;n<50;n++) if(factors(n).length===max) champs.push(n);
+      let second=0; for(let n=1;n<50;n++){ const k=factors(n).length; if(k<max) second=Math.max(second,k); }
+      const runners=[]; for(let n=1;n<50;n++) if(factors(n).length===second) runners.push(n);
+      mark(champs, 'var(--green)', n=>factors(n).length);
+      mark(runners, 'var(--p1)', n=>factors(n).length);
+      qCells[50].classList.add('dim');
+      const c=champs[0];
+      say(`<p><b>${listText(champs)}</b> ${champs.length===1?'has':'each have'} ${max} factors${champs.length===1?`: ${factors(c).join(', ')}`:''}.</p><p>Runner-up: ${listText(runners)} with ${second}.</p><p>We counted the factors of <b>every</b> number from 1 to 49, and none has more than ${max}. Checking every case is a proof!</p><p>Why does ${c} win? ${c} = ${primeFact(c).join(' × ')}. Lots of small building blocks make lots of factors.</p>`);
+    }}
+  ]}
+};
+function primeFact(n){ const r=[]; let m=n; for(let p=2;p*p<=m;p++) while(m%p===0){ r.push(p); m/=p; } if(m>1) r.push(m); return r; }
+function showPairs(n){
+  clearQ(); const p=pairsOf(n);
+  const colorOf={}; p.forEach(([a,b],i)=>{ colorOf[a]=PAIRC[i%PAIRC.length]; colorOf[b]=PAIRC[i%PAIRC.length]; });
+  mark(factors(n), k=>colorOf[k], k=>k*k===n?`×${k}`:`×${n/k}`);
+  const sq=p.find(([a,b])=>a===b);
+  say(`<p>${p.map(([a,b])=>`<span class="pair" style="border-color:${colorOf[a]}">${a} × ${b}</span>`).join(' ')}</p><p>${sq
+    ? `${p.length-1} pairs of different factors, plus ${sq[0]} × ${sq[0]}. ${sq[0]} is its own partner, so it is counted only once: ${(p.length-1)*2} + 1 = <b>${factors(n).length} factors</b>. Odd!`
+    : `${p.length} pairs, and every factor has a different partner: ${p.length} × 2 = <b>${factors(n).length} factors</b>. Even!`}</p>`);
+}
+function renderQ(){
+  const q=Q[qn]; setQGrid(q.count); clearQ(); say('');
+  $('#qInfo').textContent='Tap any number to see all its factors.';
+  $('#qnav').innerHTML = Object.keys(Q).map(k=>`<button data-q="${k}" aria-pressed="${+k===qn}" ${Q[k].star?'class="star"':''} aria-label="${Q[k].star?'Challenge':'Question '+k}">${Q[k].star?'★ Challenge':k}</button>`).join('');
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ qn=+b.dataset.q; renderQ(); });
+  $('#qText').textContent=q.text;
+  const box=$('#qActions'); box.innerHTML='';
+  q.actions.forEach((a,i)=>{ const b=document.createElement('button'); b.className=(i===0?'btn':'btn2'); b.textContent=a.label; b.onclick=()=>{ clearQ(); if(q.count===50 && qn===5) qCells[50].classList.add('dim'); a.run(); }; box.appendChild(b); });
+  if(qn===5) qCells[50].classList.add('dim');
+}
+
+/* ---------------- Global ---------------- */
+function resetAll(){
+  resetWarm(); resetRect();
+  G=null; newGame(); $('#classic').checked=true; $('#cpu').checked=false;
+  qn=1; if(tab==='q') renderQ();
+}
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', ()=> $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+resetAll();
+})();
+</script>
+
+</body></html>

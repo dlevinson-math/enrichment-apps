@@ -1,0 +1,499 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Estimation Station</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom estimation table. Clear jars on the left, prompt + big controls on the right, a sticky-note number line across the bottom. */
+:root{
+  --paper:#EEF3F5; --card:#FFFFFF; --ink:#18303D; --muted:#56707C; --line:#C9D7DD;
+  --accent:#0E7C86; --accent-ink:#FFFFFF; --accent-soft:#DCEFF0;
+  --note1:#FFD84D; --note2:#FF9EC0; --note-ink:#2B2410;
+  --real:#14895A; --real-soft:rgba(20,137,90,.16); --warm:#C2571B;
+  --glass:rgba(150,200,212,.20); --glass-edge:#86AFBB; --lid:#7D8E98; --cloth:#D9534F; --cloth2:#F3B6B3;
+  --cotton:#FFFFFF; --cotton-edge:#B7C3C9;
+  --c1:#E5484D; --c2:#2F7DE1; --c3:#F2B01E; --c4:#2EA567; --c5:#8E5BD8;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --hand:"Patrick Hand","Comic Sans MS","Segoe Print",cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10171C; --card:#18232A; --ink:#E6EEF1; --muted:#9DB0B9; --line:#2E3E47;
+    --accent:#3FB7C1; --accent-ink:#06262A; --accent-soft:#163338;
+    --real:#3FCB8C; --real-soft:rgba(63,203,140,.18); --warm:#F08A4B;
+    --glass:rgba(150,200,215,.09); --glass-edge:#5F8693; --lid:#5C6C75; --cloth:#B8433F; --cloth2:#6E2B29;
+    --cotton:#F4F6F7; --cotton-edge:#8C9AA1;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10171C; --card:#18232A; --ink:#E6EEF1; --muted:#9DB0B9; --line:#2E3E47;
+  --accent:#3FB7C1; --accent-ink:#06262A; --accent-soft:#163338;
+  --real:#3FCB8C; --real-soft:rgba(63,203,140,.18); --warm:#F08A4B;
+  --glass:rgba(150,200,215,.09); --glass-edge:#5F8693; --lid:#5C6C75; --cloth:#B8433F; --cloth2:#6E2B29;
+  --cotton:#F4F6F7; --cotton-edge:#8C9AA1;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1400px; margin:0 auto; padding-inline:24px; padding-block:14px 24px; display:flex; flex-direction:column; gap:14px}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+button:disabled{opacity:.42; cursor:default}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap}
+.brand h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3.2vw,44px); line-height:1.05; letter-spacing:-.01em; text-wrap:balance}
+.brand p{margin:4px 0 0; color:var(--muted); font-weight:700; font-size:clamp(14px,1.2vw,17px); letter-spacing:.06em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:800; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:10px; flex-wrap:wrap}
+.tab{display:flex; align-items:center; gap:10px; border:2.5px solid var(--line); background:var(--card); border-radius:18px; padding:8px 18px 8px 10px; min-height:60px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,22px)}
+.tab[aria-selected="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.tab .glyph{width:36px; height:36px; display:grid; place-items:center}
+.tab .done{font-family:var(--body); font-size:13px; font-weight:800; color:var(--real); background:var(--real-soft); border-radius:10px; padding:2px 8px}
+
+.stage{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:20px; align-items:start; background:var(--card); border:2px solid var(--line); border-radius:24px; padding:18px}
+.jars{display:flex; gap:18px; justify-content:center; align-items:flex-end; flex-wrap:wrap; min-height:200px}
+figure{margin:0; display:flex; flex-direction:column; align-items:center; gap:6px}
+figure svg{height:clamp(210px,44vh,440px); width:auto; max-width:100%; display:block}
+figcaption{font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,22px); text-align:center}
+figcaption small{display:block; font-family:var(--body); font-weight:700; color:var(--muted); font-size:15px}
+.tenbadge{display:inline-block; background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:0 12px; font-family:var(--display); font-size:1.15em}
+.slidein{animation:slidein .5s ease-out}
+@keyframes slidein{from{transform:translateX(40px); opacity:0}to{transform:none; opacity:1}}
+
+.side{display:flex; flex-direction:column; gap:16px; min-width:0}
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(26px,2.6vw,40px); line-height:1.15; margin:0; text-wrap:balance}
+.sub{margin:0; font-size:clamp(17px,1.4vw,21px); color:var(--muted); font-weight:700; line-height:1.4}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px); padding:14px 28px; border-radius:18px; min-height:64px}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(18px,1.5vw,22px); padding:11px 22px; border-radius:18px; min-height:58px}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.nudge{width:64px; height:64px; border-radius:50%; border:2.5px solid var(--ink); background:var(--card); font-family:var(--display); font-size:34px; font-weight:600; line-height:1; display:grid; place-items:center}
+.bignote{min-width:110px; height:96px; display:grid; place-items:center; font-family:var(--hand); font-size:62px; color:var(--note-ink); border-radius:4px; box-shadow:0 6px 14px rgba(0,0,0,.18); transform:rotate(-3deg); padding:0 14px}
+.bignote.n1{background:var(--note1)} .bignote.n2{background:var(--note2); transform:rotate(3deg)}
+.bignote.empty{background:transparent; border:3px dashed var(--line); box-shadow:none; color:var(--muted); font-size:44px}
+.hint{font-size:15px; color:var(--muted); margin:0}
+
+.chips{display:flex; flex-direction:column; gap:10px}
+.chip{display:flex; align-items:center; gap:12px; font-size:clamp(17px,1.4vw,21px); font-weight:800}
+.chip .sw{flex:none; width:52px; height:46px; display:grid; place-items:center; font-family:var(--hand); font-size:30px; color:var(--note-ink); border-radius:3px}
+.sw.n1{background:var(--note1)} .sw.n2{background:var(--note2)} .sw.star{background:none; color:var(--real)}
+.verdict{font-weight:800; padding:3px 12px; border-radius:12px; background:var(--paper); white-space:nowrap}
+.verdict.hi{color:var(--warm)} .verdict.lo{color:var(--accent)} .verdict.ok{color:var(--real); background:var(--real-soft)}
+.message{margin:0; font-family:var(--display); font-weight:500; font-size:clamp(20px,1.8vw,26px); line-height:1.3; background:var(--accent-soft); border-radius:16px; padding:14px 18px}
+.message:empty{display:none}
+
+.tray{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:100%}
+.frame{display:grid; grid-template-columns:repeat(5,1fr); gap:3px; padding:5px; background:var(--paper); border:2.5px solid var(--ink); border-radius:8px; width:clamp(150px,15vw,200px)}
+.frame.full{border-color:var(--real); box-shadow:0 0 0 3px var(--real-soft)}
+.cell{aspect-ratio:1; border:1.5px solid var(--line); border-radius:4px; display:grid; place-items:center; background:var(--card)}
+.mini{width:78%; height:78%}
+.mini.cube{border-radius:3px}
+.mini.cotton{border-radius:50%; background:var(--cotton); border:1.5px solid var(--cotton-edge)}
+.mini.marble{border-radius:50%; width:62%; height:62%; box-shadow:inset -2px -2px 0 rgba(0,0,0,.18)}
+.pop{animation:pop .3s ease-out}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.counter{font-family:var(--display); font-weight:700; font-size:clamp(64px,7vw,104px); line-height:1; color:var(--accent); font-variant-numeric:tabular-nums}
+.trail{font-family:var(--display); font-weight:500; color:var(--muted); font-size:clamp(18px,1.5vw,22px); min-height:1.3em; overflow-wrap:anywhere}
+
+.nlbox{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:10px 14px}
+.nlbox svg{width:100%; height:auto; display:block; touch-action:none}
+.nlbox.live svg{cursor:pointer}
+.nlhead{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-weight:800; color:var(--muted); font-size:15px; padding:2px 6px 0}
+
+.talk{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:18px; display:flex; flex-direction:column; gap:16px}
+.qnav{display:flex; gap:10px; flex-wrap:wrap}
+.jrow{display:grid; grid-template-columns:150px minmax(0,1fr); gap:14px; align-items:center; border-top:2px solid var(--line); padding-top:12px}
+.jrow h3{margin:0; font-family:var(--display); font-weight:600; font-size:22px}
+.jrow h3 small{display:block; font-family:var(--body); font-size:15px; color:var(--muted); font-weight:700}
+.jrow .chipline{display:flex; gap:10px 18px; flex-wrap:wrap; margin-top:4px; font-weight:800}
+.jrow svg{width:100%; height:auto; display:block}
+.pick[aria-pressed="true"]{outline:4px solid var(--accent); outline-offset:6px; border-radius:16px}
+
+@media (max-width: 880px){
+  .wrap{padding-inline:16px}
+  .stage{grid-template-columns:1fr}
+  figure svg{height:clamp(190px,34vh,320px)}
+  .jrow{grid-template-columns:1fr}
+  #nl{overflow-x:auto}
+  #nl svg{min-width:620px; touch-action:pan-x}
+}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>The Estimation Station</h1>
+      <p>Kindergarten · Week 4 · Guess, use the ten jar, guess again</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" data-act="newjars" id="newJarsBtn">New jars</button>
+      <button class="ghost" data-act="reset" id="resetBtn">Start over</button>
+      <button class="ghost" data-act="fs" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Stations"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const U = 22, H = 10, WALL = 5, MAX = 50, PEEK_MS = 3000, ZONE = 5;
+const SIZE = {cube:1, cotton:1.4, marble:0.6};
+const CUBE_COLORS = ['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)'];
+const JARS = [
+  {id:'A', name:'Jar A', thing:'cubes',        kind:'cube',   w:5, def:34, range:[15,48], seed:11},
+  {id:'B', name:'Jar B', thing:'cotton balls', kind:'cotton', w:7, def:17, range:[11,34], seed:23},
+  {id:'C', name:'Jar C', thing:'marbles',      kind:'marble', w:3, def:38, range:[15,48], seed:37}
+];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const S = {tab:'A', jars:{}, q:1, chal:null, peekTimer:null};
+
+function freshJar(count){ return {count, first:null, second:null, phase:'peek', counted:0, tens:false, peeking:false, said:[]}; }
+function resetAll(keepCounts){
+  clearTimeout(S.peekTimer);
+  for(const j of JARS){ const c = keepCounts && S.jars[j.id] ? S.jars[j.id].count : j.def; S.jars[j.id] = freshJar(c); }
+  S.q = 1; S.chal = null;
+}
+function rng(seed){ let a = seed>>>0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1 | a); t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+
+/* ---------- Geometry: objects packed in level rows, so height is proportional to how many ---------- */
+const perRow = (kind, w) => Math.floor(w / SIZE[kind] + 1e-9);
+const tenHeight = (kind, w) => 10 / perRow(kind, w) * SIZE[kind];          // in jar units
+const levelOf = (kind, w, n) => n / perRow(kind, w) * SIZE[kind];
+function layout(kind, w, n, seed){
+  const s = SIZE[kind], per = perRow(kind, w), off = (w - per*s)/2, r = rng(seed), out = [];
+  for(let i=0;i<n;i++){
+    const row = Math.floor(i/per), col = i%per;
+    out.push({cx: off + (col+.5)*s + (r()-.5)*s*.1, cy: H - (row+.5)*s + (r()-.5)*s*.08, rot:(r()-.5)*14, color: CUBE_COLORS[Math.floor(r()*5)], s});
+  }
+  return out;
+}
+
+/* ---------- Jar drawing ---------- */
+function objSVG(kind, o, ix, iy){
+  const x = ix + o.cx*U, y = iy + o.cy*U, d = o.s*U;
+  if(kind==='cube'){ const a = d*.86;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${o.rot.toFixed(1)})"><rect x="${-a/2}" y="${-a/2}" width="${a}" height="${a}" rx="${a*.14}" fill="${o.color}" stroke="rgba(0,0,0,.28)" stroke-width="1.2"/><rect x="${-a*.22}" y="${-a*.22}" width="${a*.44}" height="${a*.44}" rx="${a*.08}" fill="rgba(255,255,255,.22)"/></g>`; }
+  if(kind==='cotton'){ const r = d*.47;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="${r}" fill="var(--cotton)" stroke="var(--cotton-edge)" stroke-width="1.5"/><circle cx="${-r*.3}" cy="${-r*.25}" r="${r*.42}" fill="none" stroke="var(--cotton-edge)" stroke-width="1" opacity=".55"/><circle cx="${r*.32}" cy="${r*.2}" r="${r*.34}" fill="none" stroke="var(--cotton-edge)" stroke-width="1" opacity=".45"/></g>`; }
+  const r = d*.45;
+  return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="${r}" fill="${o.color}" stroke="rgba(0,0,0,.3)" stroke-width="1"/><circle cx="${-r*.35}" cy="${-r*.35}" r="${r*.3}" fill="rgba(255,255,255,.75)"/></g>`;
+}
+function jarSVG(o){
+  // o: {w, kind, n, shown, seed, lines:[{h,label}], cover, label}
+  const iw = o.w*U, ih = H*U, ox = 10, oy = 26, ix = ox+WALL, iy = oy+WALL;
+  const W = ox + iw + 2*WALL + 50, HH = oy + ih + 2*WALL + 8;
+  const items = layout(o.kind, o.w, o.n, o.seed).slice(0, o.shown==null ? o.n : o.shown);
+  let s = `<svg viewBox="0 0 ${W} ${HH}" role="img" aria-label="${o.label}">`;
+  s += `<rect x="${ox-4}" y="8" width="${iw+2*WALL+8}" height="20" rx="5" fill="var(--lid)"/>`;
+  s += `<rect x="${ox}" y="${oy}" width="${iw+2*WALL}" height="${ih+2*WALL}" rx="16" fill="var(--glass)" stroke="var(--glass-edge)" stroke-width="3"/>`;
+  s += items.map(it => objSVG(o.kind, it, ix, iy)).join('');
+  s += `<rect x="${ix+6}" y="${iy+12}" width="7" height="${ih*.7}" rx="3.5" fill="#fff" opacity=".28"/>`;
+  if(o.cover){
+    s += `<defs><pattern id="ck${o.seed}" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="var(--cloth)"/><rect width="11" height="11" fill="var(--cloth2)"/><rect x="11" y="11" width="11" height="11" fill="var(--cloth2)"/></pattern></defs>`;
+    s += `<rect x="${ox-6}" y="4" width="${iw+2*WALL+12}" height="${ih+2*WALL+28}" rx="18" fill="url(#ck${o.seed})" stroke="var(--ink)" stroke-width="2"/>`;
+    s += `<circle cx="${ox+WALL+iw/2}" cy="${iy+ih/2}" r="${Math.min(iw/2,48)}" fill="var(--card)"/>`;
+    s += `<text x="${ox+WALL+iw/2}" y="${iy+ih/2}" text-anchor="middle" dominant-baseline="central" font-family="Fredoka, sans-serif" font-weight="700" font-size="${Math.min(iw*.7,64)}" fill="var(--ink)">?</text>`;
+  }
+  for(const L of (o.lines||[])){
+    const y = iy + (H - L.h)*U;
+    s += `<line x1="${ix-6}" x2="${ix+iw+6}" y1="${y}" y2="${y}" stroke="${L.color||'var(--accent)'}" stroke-width="3.5" stroke-dasharray="9 6"/>`;
+    s += `<rect x="${ix+iw+WALL+8}" y="${y-14}" width="38" height="28" rx="9" fill="${L.color||'var(--accent)'}"/>`;
+    s += `<text x="${ix+iw+WALL+27}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Fredoka, sans-serif" font-weight="600" font-size="17" fill="var(--card)">${L.label}</text>`;
+  }
+  return s + `</svg>`;
+}
+function tenLines(kind, w, count){
+  const th = tenHeight(kind, w), out = [];
+  for(let k=1; k*th <= H + 1e-9 && k <= Math.ceil(count/10); k++) out.push({h:k*th, label:String(k*10)});
+  return out;
+}
+function tensPhrase(count){
+  const k = Math.floor(count/10), r = count%10;
+  if(k===0) return 'Less than one ten.';
+  if(r===0) return `Exactly ${k} ten${k>1?'s':''} tall.`;
+  return `${k} ten${k>1?'s':''} and some more.`;
+}
+
+/* ---------- Number line ---------- */
+const nx = n => 50 + n*18;
+function noteSVG(x, stemX, value, cls, tilt, faded){
+  const fill = cls==='n1' ? 'var(--note1)' : 'var(--note2)';
+  return `<g opacity="${faded?0.72:1}"><line x1="${stemX}" x2="${x}" y1="104" y2="74" stroke="var(--ink)" stroke-width="2"/><circle cx="${stemX}" cy="110" r="6" fill="${fill}" stroke="var(--ink)" stroke-width="2"/>
+    <g transform="translate(${x} 42) rotate(${tilt})"><rect x="-33" y="-31" width="66" height="62" rx="3" fill="${fill}" filter="url(#sh)"/><text y="3" text-anchor="middle" dominant-baseline="central" font-family="'Patrick Hand', cursive" font-size="40" fill="var(--note-ink)">${value}</text></g></g>`;
+}
+function starPath(cx, cy, R){ let p=''; for(let i=0;i<10;i++){ const r = i%2 ? R*.45 : R, a = -Math.PI/2 + i*Math.PI/5; p += (i?'L':'M') + (cx + r*Math.cos(a)).toFixed(1) + ' ' + (cy + r*Math.sin(a)).toFixed(1); } return p+'Z'; }
+function numberLine(o){
+  // o: {first, second, real, active, gaps, zone, compact}
+  let s = `<svg viewBox="0 0 1000 ${o.compact?162:176}" aria-hidden="true"><defs><filter id="sh" x="-20%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-opacity=".22"/></filter></defs>`;
+  if(o.zone && o.real!=null){ const a = nx(Math.max(0,o.real-ZONE)), b = nx(Math.min(MAX,o.real+ZONE)); s += `<rect x="${a}" y="90" width="${b-a}" height="40" rx="10" fill="var(--real-soft)" stroke="var(--real)" stroke-width="2" stroke-dasharray="6 5"/>`; }
+  s += `<line x1="${nx(0)-14}" x2="${nx(MAX)+14}" y1="110" y2="110" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>`;
+  for(let n=0;n<=MAX;n++){
+    const big = n%10===0, mid = n%5===0, h = big?14:mid?10:6;
+    s += `<line x1="${nx(n)}" x2="${nx(n)}" y1="${110-h}" y2="${110+h}" stroke="var(--ink)" stroke-width="${big?3:mid?2.4:1.6}"/>`;
+    if(big) s += `<text x="${nx(n)}" y="152" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="600" font-size="28" fill="var(--ink)">${n}</text>`;
+    else if(mid && !o.compact) s += `<text x="${nx(n)}" y="148" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="500" font-size="18" fill="var(--muted)">${n}</text>`;
+  }
+  if(o.gaps && o.real!=null){
+    if(o.first!=null && o.first!==o.real) s += `<line x1="${nx(o.first)}" x2="${nx(o.real)}" y1="124" y2="124" stroke="var(--note1)" stroke-width="10" stroke-linecap="round" opacity=".9"/>`;
+    if(o.second!=null && o.second!==o.real) s += `<line x1="${nx(o.second)}" x2="${nx(o.real)}" y1="96" y2="96" stroke="var(--note2)" stroke-width="10" stroke-linecap="round" opacity=".9"/>`;
+  }
+  // notes, pushed apart if they would overlap
+  let x1 = o.first!=null ? nx(o.first) : null, x2 = o.second!=null ? nx(o.second) : null;
+  if(x1!=null && x2!=null && Math.abs(x1-x2) < 74){ const m=(x1+x2)/2, sgn = (x2>x1 || (x2===x1)) ? 1 : -1; x1 = m - 37*sgn; x2 = m + 37*sgn; }
+  const clamp = v => Math.max(36, Math.min(964, v));
+  if(o.first!=null) s += noteSVG(clamp(x1), nx(o.first), o.first, 'n1', -4, o.active==='second');
+  if(o.second!=null) s += noteSVG(clamp(x2), nx(o.second), o.second, 'n2', 4, false);
+  if(o.real!=null){
+    s += `<path d="${starPath(nx(o.real),110,19)}" fill="var(--real)" stroke="var(--card)" stroke-width="2.5"/>`;
+    s += `<rect x="${nx(o.real)-24}" y="${o.compact?126:132}" width="48" height="30" rx="10" fill="var(--real)"/><text x="${nx(o.real)}" y="${o.compact?141:147}" text-anchor="middle" dominant-baseline="central" font-family="Fredoka, sans-serif" font-weight="700" font-size="22" fill="var(--card)">${o.real}</text>`;
+  }
+  return s + `</svg>`;
+}
+
+/* ---------- Verdicts ---------- */
+function verdict(g, real){
+  if(g===real) return {cls:'ok', text:'Exact!'};
+  const d = Math.abs(g-real), close = d<=ZONE ? ' · close!' : '';
+  return g>real ? {cls:'hi', text:`Too high · ${d} away${close}`} : {cls:'lo', text:`Too low · ${d} away${close}`};
+}
+function closerText(J){
+  const d1 = Math.abs(J.first-J.count), d2 = Math.abs(J.second-J.count);
+  if(d2 < d1) return {key:'closer', text:`Your new guess moved closer! ${d1} away → ${d2} away.`};
+  if(J.first===J.second) return {key:'kept', text:`You kept your guess. It was ${d1===0?'exact':d1+' away'}.`};
+  if(d2 === d1) return {key:'same', text:`Both guesses were ${d1} away. One too high, one too low!`};
+  return {key:'first', text:`Your first guess was closer this time. That's okay! Look again: how many tens tall?`};
+}
+
+/* ---------- Tabs ---------- */
+function glyph(kind){
+  if(kind==='cube') return `<svg viewBox="0 0 36 36" width="32" height="32"><rect x="5" y="5" width="26" height="26" rx="4" fill="var(--c2)"/></svg>`;
+  if(kind==='cotton') return `<svg viewBox="0 0 36 36" width="32" height="32"><circle cx="18" cy="18" r="14" fill="var(--cotton)" stroke="var(--cotton-edge)" stroke-width="2"/></svg>`;
+  if(kind==='marble') return `<svg viewBox="0 0 36 36" width="32" height="32"><circle cx="18" cy="18" r="11" fill="var(--c4)"/><circle cx="14" cy="14" r="3.5" fill="#fff" opacity=".8"/></svg>`;
+  if(kind==='talk') return `<svg viewBox="0 0 36 36" width="32" height="32"><path d="M5 8h26v16H15l-7 6v-6H5z" fill="var(--accent)"/></svg>`;
+  return `<svg viewBox="0 0 36 36" width="32" height="32"><path d="${starPath(18,19,15)}" fill="var(--c3)"/></svg>`;
+}
+function renderTabs(){
+  const t = JARS.map(j => `<button class="tab" role="tab" data-act="tab:${j.id}" aria-selected="${S.tab===j.id}"><span class="glyph">${glyph(j.kind)}</span>${j.name}${S.jars[j.id].phase==='result'?'<span class="done">counted</span>':''}</button>`).join('')
+    + `<button class="tab" role="tab" data-act="tab:talk" aria-selected="${S.tab==='talk'}"><span class="glyph">${glyph('talk')}</span>Talk it over</button>`
+    + `<button class="tab" role="tab" data-act="tab:chal" aria-selected="${S.tab==='chal'}"><span class="glyph">${glyph('star')}</span>Challenge</button>`;
+  $('#tabs').innerHTML = t;
+}
+
+/* ---------- Station ---------- */
+function frameHTML(def, J){
+  const items = layout(def.kind, def.w, J.count, def.seed);
+  const frames = Math.ceil(J.count/10); let h = '';
+  for(let f=0; f<frames; f++){
+    const full = J.counted >= (f+1)*10 && (f+1)*10 <= J.count;
+    h += `<div class="frame${full?' full':''}">`;
+    for(let c=0;c<10;c++){
+      const i = f*10+c;
+      if(i < J.counted){ const it = items[J.count-1-i]; const bg = def.kind==='cotton' ? '' : `background:${it.color}`;
+        h += `<div class="cell"><div class="mini ${def.kind}${i>=J.lastFrom?' pop':''}" style="${bg}"></div></div>`; }
+      else h += `<div class="cell"></div>`;
+    }
+    h += `</div>`;
+  }
+  return `<div class="tray" aria-label="Counted in groups of ten">${h}</div>`;
+}
+function renderStation(){
+  const def = JARS.find(j => j.id===S.tab), J = S.jars[def.id];
+  const covered = (J.phase==='peek' || J.phase==='guess1') && !J.peeking;
+  const shown = (J.phase==='count' || J.phase==='result') ? J.count - J.counted : J.count;
+  const lines = (J.phase==='bench' && J.tens) ? tenLines(def.kind, def.w, J.count) : [];
+  let jars = `<figure><div>${jarSVG({w:def.w, kind:def.kind, n:J.count, shown, seed:def.seed, lines, cover:covered, label:`${def.name}, full of ${def.thing}`})}</div><figcaption>${def.name}<small>${def.thing}</small></figcaption></figure>`;
+  if(J.phase==='bench') jars += `<figure class="${J.benchNew?'slidein':''}"><div>${jarSVG({w:def.w, kind:def.kind, n:10, seed:def.seed+5, label:`Ten jar with exactly 10 ${def.thing}`})}</div><figcaption><span class="tenbadge">10</span><small>the ten jar</small></figcaption></figure>`;
+  if(J.phase==='count' || J.phase==='result') jars += `<figure style="flex:1 1 300px; max-width:100%">${frameHTML(def, J)}<figcaption><small>groups of ten</small></figcaption></figure>`;
+  J.benchNew = false; J.lastFrom = Infinity;
+
+  let side = '';
+  const noteBox = (v, cls) => v==null ? `<div class="bignote empty">?</div>` : `<div class="bignote ${cls}">${v}</div>`;
+  if(J.phase==='peek'){
+    side = `<p class="prompt">How many ${def.thing}?</p><p class="sub">Just look. No counting!</p>
+      <div class="row"><button class="primary" data-act="peek">Peek! 3 seconds</button></div>`;
+  } else if(J.phase==='guess1'){
+    side = `<p class="prompt">${J.peeking ? 'Look fast!' : 'Stick your guess on the line.'}</p>
+      <div class="row">${noteBox(J.first,'n1')}<button class="nudge" data-act="minus" aria-label="One less">−</button><button class="nudge" data-act="plus" aria-label="One more">+</button></div>
+      <div class="row"><button class="primary" data-act="lock1" ${J.first==null||J.peeking?'disabled':''}>That's my guess</button><button class="secondary" data-act="peek" ${J.peeking?'disabled':''}>Peek again</button></div>
+      <p class="hint">Tap or drag on the number line. Yellow note = first guess.</p>`;
+  } else if(J.phase==='bench'){
+    side = `<p class="prompt">This jar has 10. Move your guess?</p>
+      <div class="row"><button class="secondary" data-act="tens" aria-pressed="${J.tens}">How many tens tall?</button></div>
+      ${J.tens ? `<p class="message">${tensPhrase(J.count)}</p>` : `<p class="sub">Look at both jars.</p>`}
+      <div class="row">${noteBox(J.second,'n2')}<button class="nudge" data-act="minus" aria-label="One less">−</button><button class="nudge" data-act="plus" aria-label="One more">+</button></div>
+      <div class="row"><button class="primary" data-act="lock2">That's my new guess</button></div>
+      <p class="hint">Pink note = new guess. Moving it is what estimators do!</p>`;
+  } else if(J.phase==='count'){
+    const done = J.counted >= J.count;
+    const nextIsTen = J.counted%10===0 && J.count-J.counted >= 10;
+    side = `<p class="prompt">Let's count! Groups of ten.</p>
+      <div class="counter" aria-live="polite">${J.counted}</div>
+      <div class="trail">${J.said.join(', ')}</div>
+      <div class="row">${done ? `<button class="primary" data-act="result">See how close!</button>` :
+        `<button class="primary" data-act="next">${nextIsTen ? 'Take out 10' : 'Take out 1'}</button><button class="secondary" data-act="countall">Count them all</button>`}</div>`;
+  } else {
+    const v1 = verdict(J.first, J.count), v2 = verdict(J.second, J.count), c = closerText(J);
+    const about = Math.abs(J.second-J.count) <= ZONE ? ` Close counts! That's <b>about</b> right.` : '';
+    side = `<p class="prompt">${J.count} ${def.thing}!</p>
+      <div class="chips">
+        <div class="chip"><span class="sw n1">${J.first}</span>First guess <span class="verdict ${v1.cls}">${v1.text}</span></div>
+        <div class="chip"><span class="sw n2">${J.second}</span>New guess <span class="verdict ${v2.cls}">${v2.text}</span></div>
+      </div>
+      <p class="message">${c.text}${about}</p>
+      <div class="row">${nextStop() ? `<button class="primary" data-act="tab:${nextStop()}">Next: ${nextStop()==='talk'?'Talk it over':'Jar '+nextStop()}</button>` : ''}<button class="secondary" data-act="again">Try this jar again</button></div>`;
+  }
+  const active = J.phase==='guess1' && !J.peeking ? 'first' : J.phase==='bench' ? 'second' : null;
+  const real = J.phase==='result' ? J.count : null;
+  const head = J.phase==='result' ? `<span>Bars show how far each guess was from the real number.</span>` : active ? `<span>Tap the line to stick your note.</span>` : `<span>Our number line</span>`;
+  $('#main').innerHTML = `<section class="stage"><div class="jars">${jars}</div><div class="side">${side}</div></section>
+    <div class="nlbox ${active?'live':''}" id="nlbox"><div class="nlhead">${head}<span>0 to ${MAX}</span></div><div id="nl" ${active?`tabindex="0" role="slider" aria-label="${active==='first'?'First':'New'} guess" aria-valuemin="0" aria-valuemax="${MAX}" aria-valuenow="${J[active]??''}"`:''}>${numberLine({first:J.first, second:J.second, real, active, gaps: J.phase==='result'})}</div></div>`;
+  if(active) wireLine(J, active);
+}
+function nextStop(){
+  const i = JARS.findIndex(j => j.id===S.tab);
+  for(let k=i+1;k<JARS.length;k++) if(S.jars[JARS[k].id].phase!=='result') return JARS[k].id;
+  return 'talk';
+}
+function wireLine(J, which){
+  const host = $('#nl');
+  const toN = e => { const svg = host.querySelector('svg'); const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return Math.max(0, Math.min(MAX, Math.round((p.x-50)/18))); };
+  let drag = false;
+  const update = n => { if(J[which]===n) return; J[which] = n; refreshLine(J, which); };
+  host.addEventListener('pointerdown', e => { drag = true; try{ host.setPointerCapture(e.pointerId); }catch(_){} update(toN(e)); });
+  host.addEventListener('pointermove', e => { if(drag) update(toN(e)); });
+  const stop = () => { if(drag){ drag = false; renderStation(); renderTabs(); } };
+  host.addEventListener('pointerup', stop); host.addEventListener('pointercancel', stop);
+  host.addEventListener('keydown', e => {
+    const step = {ArrowRight:1, ArrowUp:1, ArrowLeft:-1, ArrowDown:-1}[e.key]; if(!step) return;
+    e.preventDefault(); J[which] = Math.max(0, Math.min(MAX, (J[which] ?? 25) + step)); renderStation(); $('#nl').focus();
+  });
+}
+function refreshLine(J, which){
+  const host = $('#nl'); host.innerHTML = numberLine({first:J.first, second:J.second, active:which});
+  host.setAttribute('aria-valuenow', J[which]);
+  const big = document.querySelector('.bignote'); if(big){ big.textContent = J[which]; big.classList.remove('empty'); big.classList.add(which==='first'?'n1':'n2'); }
+  const lock = document.querySelector('[data-act="lock1"]'); if(lock) lock.disabled = false;
+}
+
+/* ---------- Talk it over ---------- */
+const QS = {
+  1:{btn:'Closer?', text:'Did your guess move closer after the ten jar?'},
+  2:{btn:'Too high? Too low?', text:'Was each guess too high or too low?'},
+  3:{btn:'What is “about”?', text:'Estimators aim for close, not exact. Green means close: 5 or fewer away.'}
+};
+function renderTalk(){
+  const done = JARS.filter(j => S.jars[j.id].phase==='result');
+  let body = '';
+  if(!done.length){
+    body = `<p class="prompt">Count a jar first. Then come back!</p><div class="row"><button class="primary" data-act="tab:A">Go to Jar A</button></div>`;
+  } else {
+    body = done.map(j => {
+      const J = S.jars[j.id]; let chips = '';
+      if(S.q===1){ const c = closerText(J); chips = `<span class="verdict ${c.key==='closer'?'ok':''}">${c.key==='closer'?'Moved closer':c.key==='kept'?'Kept the same guess':c.key==='same'?'Same distance':'First guess was closer'}</span><span>${Math.abs(J.first-J.count)} away → ${Math.abs(J.second-J.count)} away</span>`; }
+      if(S.q===2){ const a = verdict(J.first,J.count), b = verdict(J.second,J.count); chips = `<span>First ${J.first}: <span class="verdict ${a.cls}">${a.text.split(' · ')[0]}</span></span><span>New ${J.second}: <span class="verdict ${b.cls}">${b.text.split(' · ')[0]}</span></span>`; }
+      if(S.q===3){ const inz = g => Math.abs(g-J.count)<=ZONE; chips = `<span>First ${J.first}: <span class="verdict ${inz(J.first)?'ok':''}">${inz(J.first)?'close!':'not yet close'}</span></span><span>New ${J.second}: <span class="verdict ${inz(J.second)?'ok':''}">${inz(J.second)?'close!':'not yet close'}</span></span>`; }
+      return `<div class="jrow"><h3>${j.name}<small>${J.count} ${j.thing}</small></h3><div>${numberLine({first:J.first, second:J.second, real:J.count, gaps:S.q===1, zone:S.q===3, compact:true})}<div class="chipline">${chips}</div></div></div>`;
+    }).join('');
+    const moved = done.filter(j => closerText(S.jars[j.id]).key==='closer').length;
+    if(S.q===1) body = `<p class="message">The new guess moved closer on ${moved} of ${done.length} jar${done.length>1?'s':''}. Whose guess moved closer?</p>` + body;
+    if(done.length < JARS.length) body += `<p class="hint">Count the other jars to add them here.</p>`;
+  }
+  $('#main').innerHTML = `<section class="talk"><div class="qnav">${[1,2,3].map(i => `<button class="secondary" data-act="q:${i}" aria-pressed="${S.q===i}">${QS[i].btn}</button>`).join('')}</div>
+    <p class="prompt">${QS[S.q].text}</p>${body}</section>`;
+}
+
+/* ---------- Challenge ---------- */
+function renderChal(){
+  const def = JARS.find(j => j.id==='C'), J = S.jars.C, n = J.count;
+  let lines = [], msg = '';
+  if(S.chal==='cotton'){
+    const th = tenHeight('cotton', def.w); for(let k=1; k*th <= H+1e-9; k++) lines.push({h:k*th, label:String(k*10), color:'var(--warm)'});
+    const k = Math.floor(levelOf('marble', def.w, n)/th + 1e-9);
+    msg = k===0 ? `10 cotton balls reach the orange line. The marbles don't even get that high! So… fewer than 10 marbles? Look at all those marbles. That guess would be way too low.` : `The marbles are about ${k} cotton-ball tens tall.`;
+  } else if(S.chal==='marble'){
+    lines = tenLines('marble', def.w, n);
+    msg = `10 marbles reach each dashed line. The marble jar is ${tensPhrase(n).toLowerCase().replace('.','')}. That's a great clue!`;
+  } else if(S.chal==='why'){
+    msg = `Cotton balls are BIG. Marbles are small. Ten cotton balls take up much more room than ten marbles. Use a ten of the SAME thing!`;
+  }
+  const fig = (kind, label, cap, pressed, act) => `<figure class="pick" aria-pressed="${pressed}"><button class="ghost" style="padding:6px; border:0; background:none" data-act="${act}" aria-label="${cap}">${jarSVG({w:def.w, kind, n:10, seed:kind==='cotton'?91:def.seed+5, label})}</button><figcaption><span class="tenbadge">10</span><small>${cap}</small></figcaption></figure>`;
+  $('#main').innerHTML = `<section class="stage"><div class="jars">
+      ${fig('cotton','Ten jar with 10 cotton balls','10 cotton balls', S.chal==='cotton','chal:cotton')}
+      <figure><div>${jarSVG({w:def.w, kind:'marble', n, seed:def.seed, lines, label:'The marble jar'})}</div><figcaption>Marble jar<small>${J.phase==='result' ? n+' marbles (we counted!)' : 'how many?'}</small></figcaption></figure>
+      ${fig('marble','Ten jar with 10 marbles','10 marbles', S.chal==='marble','chal:marble')}
+    </div><div class="side">
+      <p class="prompt">Which ten jar helps you guess the marbles?</p>
+      <p class="sub">Predict first. Then test each one.</p>
+      <div class="row"><button class="secondary" data-act="chal:cotton" aria-pressed="${S.chal==='cotton'}">Try the cotton ten</button><button class="secondary" data-act="chal:marble" aria-pressed="${S.chal==='marble'}">Try the marble ten</button></div>
+      <div class="row"><button class="primary" data-act="chal:why">Why?</button></div>
+      <p class="message">${msg}</p>
+    </div></section>`;
+}
+
+/* ---------- Actions ---------- */
+function render(){ renderTabs(); if(S.tab==='talk') renderTalk(); else if(S.tab==='chal') renderChal(); else renderStation(); }
+function act(a){
+  const J = S.jars[S.tab];
+  if(a.startsWith('tab:')){ clearTimeout(S.peekTimer); if(J) J.peeking = false; S.tab = a.slice(4); render(); window.scrollTo({top:0, behavior: reduced?'auto':'smooth'}); return; }
+  if(a.startsWith('q:')){ S.q = +a.slice(2); render(); return; }
+  if(a.startsWith('chal:')){ S.chal = a.slice(5); render(); return; }
+  if(a==='reset'){ resetAll(true); render(); return; }
+  if(a==='newjars'){ resetAll(false); for(const j of JARS){ const [lo,hi] = j.range; let c; do{ c = lo + Math.floor(Math.random()*(hi-lo+1)); } while(c===S.jars[j.id].count); S.jars[j.id].count = c; } render(); return; }
+  if(a==='fs'){ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} return; }
+  if(!J) return;
+  if(a==='peek'){
+    clearTimeout(S.peekTimer); J.peeking = true; if(J.phase==='peek') J.phase = 'guess1'; render();
+    S.peekTimer = setTimeout(() => { J.peeking = false; if(S.tab===JARS.find(j=>S.jars[j.id]===J)?.id) render(); }, PEEK_MS);
+    return;
+  }
+  const which = J.phase==='guess1' ? 'first' : J.phase==='bench' ? 'second' : null;
+  if((a==='minus'||a==='plus') && which && !J.peeking){ J[which] = Math.max(0, Math.min(MAX, (J[which] ?? 25) + (a==='plus'?1:-1))); render(); return; }
+  if(a==='lock1' && J.first!=null){ J.phase = 'bench'; J.second = J.first; J.benchNew = true; render(); return; }
+  if(a==='tens'){ J.tens = !J.tens; render(); return; }
+  if(a==='lock2'){ J.phase = 'count'; J.counted = 0; J.said = []; render(); return; }
+  if(a==='next'){
+    const from = J.counted;
+    if(J.counted%10===0 && J.count-J.counted >= 10) J.counted += 10; else J.counted += 1;
+    J.counted = Math.min(J.counted, J.count); J.said.push(J.counted); J.lastFrom = from; render(); return;
+  }
+  if(a==='countall'){
+    const from = J.counted;
+    while(J.counted < J.count){ if(J.counted%10===0 && J.count-J.counted>=10) J.counted += 10; else J.counted += 1; J.said.push(J.counted); }
+    J.lastFrom = from; render(); return;
+  }
+  if(a==='result'){ J.phase = 'result'; render(); return; }
+  if(a==='again'){ S.jars[S.tab] = freshJar(J.count); render(); return; }
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if(b && !b.disabled) act(b.dataset.act); });
+document.addEventListener('fullscreenchange', () => { $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+
+/* ---------- Self-checks (math must be exact) ---------- */
+(function selfCheck(){
+  const fail = m => console.error('Self-check failed: ' + m);
+  for(const j of JARS){
+    const per = perRow(j.kind, j.w);
+    if(per !== 5) fail(`${j.id} perRow ${per}`);
+    const cap = Math.floor(H/SIZE[j.kind] + 1e-9) * per;
+    if(j.range[1] > cap || j.def > cap || j.range[1] > MAX) fail(`${j.id} capacity`);
+    if(layout(j.kind, j.w, j.def, j.seed).length !== j.def) fail(`${j.id} layout count`);
+    if(Math.abs(levelOf(j.kind, j.w, 10) - tenHeight(j.kind, j.w)) > 1e-9) fail(`${j.id} ten height`);
+  }
+  if(perRow('cotton', 3) !== 2 || Math.abs(tenHeight('cotton',3) - 7) > 1e-9) fail('cotton ten in marble jar');
+  if(tensPhrase(34) !== '3 tens and some more.' || tensPhrase(30) !== 'Exactly 3 tens tall.') fail('tensPhrase');
+})();
+
+resetAll(false);
+render();
+})();
+</script>
+
+</body></html>

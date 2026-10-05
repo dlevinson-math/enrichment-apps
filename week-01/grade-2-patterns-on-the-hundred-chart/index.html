@@ -1,0 +1,872 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Patterns on the Hundred Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E8EFEC; --card:#FFFFFF; --ink:#1D2B36; --muted:#51616B; --line:#C6D3CF; --grid:#D9E3E0;
+  --accent:#2F63D6; --on-accent:#FFFFFF; --soft:#E3ECFB;
+  --red:#DC4B25; --blue:#2F63D6; --green:#1C9150; --yellow:#E2A200; --purple:#8646D1;
+  --look:#C2410C; --cover:#C3D1CC; --cover2:#B6C6C0;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#11191E; --card:#1A242B; --ink:#E7EFEC; --muted:#9FB2AC; --line:#2E3C44; --grid:#26333A;
+    --accent:#77A2FF; --on-accent:#0C1830; --soft:#1D2A44;
+    --red:#FF7C57; --blue:#77A2FF; --green:#4ED08A; --yellow:#F6C544; --purple:#BC8FFF;
+    --look:#FF9B5E; --cover:#26343B; --cover2:#2E3D45;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#11191E; --card:#1A242B; --ink:#E7EFEC; --muted:#9FB2AC; --line:#2E3C44; --grid:#26333A;
+  --accent:#77A2FF; --on-accent:#0C1830; --soft:#1D2A44;
+  --red:#FF7C57; --blue:#77A2FF; --green:#4ED08A; --yellow:#F6C544; --purple:#BC8FFF;
+  --look:#FF9B5E; --cover:#26343B; --cover2:#2E3D45;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px 24px; padding:14px 28px 8px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(24px,2.6vw,38px); line-height:1.05; text-wrap:balance}
+.title p{margin:4px 0 0; font-size:clamp(13px,1.1vw,16px); color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+main{flex:1; min-height:0; display:flex; gap:28px; padding:6px 28px 22px}
+.board-col{flex:none; display:flex; flex-direction:column; gap:10px}
+.board{
+  --size:min(calc(100dvh - 180px), 56vw);
+  width:var(--size); height:var(--size); container-type:size;
+  display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr);
+  background:var(--card); border:3px solid var(--ink); border-radius:10px; overflow:hidden;
+}
+.cell{position:relative; border:0; padding:0; background:var(--card); border-right:1.5px solid var(--grid); border-bottom:1.5px solid var(--grid);
+  display:flex; align-items:center; justify-content:center; font-family:var(--body); font-weight:700; font-size:4.1cqh; font-variant-numeric:tabular-nums; transition:opacity .2s, background-color .2s}
+.cell:nth-child(10n){border-right:0}
+.cell:nth-child(n+91){border-bottom:0}
+.num{position:relative; z-index:2; line-height:1}
+/* transparent counter sitting on the square */
+.cell.m::before{content:""; position:absolute; inset:9%; border-radius:50%; background:color-mix(in srgb, var(--c) 30%, transparent); border:.13em solid var(--c); z-index:1}
+.cell.pop::before{animation:drop .3s ease-out}
+@keyframes drop{from{transform:scale(1.5); opacity:0} to{transform:scale(1); opacity:1}}
+.badge{position:absolute; top:4%; right:6%; font-size:.42em; font-weight:700; color:var(--bc,var(--ink)); z-index:3; font-family:var(--body)}
+.board.focus .cell:not(.on){opacity:.28}
+.cell.win{background:var(--soft)}
+.cell.cur{box-shadow:inset 0 0 0 .16em var(--ink)}
+.cell.flag{box-shadow:inset 0 0 0 .12em var(--look); background:repeating-linear-gradient(45deg, transparent 0 7px, color-mix(in srgb, var(--look) 14%, transparent) 7px 14px)}
+.cell.flag::after{content:""; position:absolute; inset:9%; border-radius:50%; border:.12em dashed var(--look); z-index:3}
+.cell.ghostc::before{content:""; position:absolute; inset:12%; border-radius:50%; border:.1em dashed var(--c); z-index:1}
+.cell.cov{background:repeating-linear-gradient(135deg, var(--cover) 0 10px, var(--cover2) 10px 20px); color:transparent}
+.cell.blank{background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 .1em var(--accent)}
+.cell.blank .num{font-family:var(--display)}
+.cell.hole{background:var(--paper); color:var(--muted)}
+.cell.hole::before{content:""; position:absolute; inset:12% 10% 14% 14%; border-radius:48% 58% 42% 62% / 55% 44% 60% 46%; border:.09em dashed var(--muted); background:transparent; z-index:1}
+.cell.fixed{color:var(--green)}
+.cell.sel{box-shadow:inset 0 0 0 .2em var(--accent)!important}
+.board.tapme .cell{cursor:pointer}
+.board.tapme .cell:hover{background:var(--soft)}
+.board.tapme .cell.cov:hover{background:repeating-linear-gradient(135deg, var(--cover) 0 10px, var(--cover2) 10px 20px)}
+@media (prefers-reduced-motion: reduce){ .cell,.cell::before{animation:none!important; transition:none!important} }
+
+.moves{display:flex; gap:8px 18px; flex-wrap:wrap; align-items:center; font-size:16px; color:var(--muted)}
+.moves b{font-family:var(--display); font-weight:600; color:var(--ink); font-size:19px}
+.moves span{display:inline-flex; gap:6px; align-items:baseline}
+
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; overflow:auto; padding:2px 4px 4px 0}
+.tabs{display:flex; gap:6px; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:5px; align-self:flex-start}
+.tabs button{border:0; background:none; border-radius:13px; padding:11px 16px; font-family:var(--display); font-weight:600; font-size:clamp(16px,1.3vw,20px); color:var(--muted); min-height:48px}
+.tabs button[aria-selected="true"]{background:var(--ink); color:var(--card)}
+.view{display:flex; flex-direction:column; gap:14px}
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; border:2px solid var(--line); border-radius:14px; padding:3px; background:var(--card); align-self:flex-start}
+.seg button{border:0; background:none; border-radius:10px; padding:9px 15px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.caption{margin:0; font-size:clamp(18px,1.55vw,24px); line-height:1.4; max-width:32em}
+.caption b{font-family:var(--display); font-weight:600}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--on-accent); font-weight:700; font-size:clamp(17px,1.35vw,20px); padding:13px 24px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:11px 20px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.msg{margin:0; font-size:clamp(17px,1.4vw,22px); line-height:1.45; padding:14px 18px; border-radius:14px; background:var(--soft); max-width:32em}
+.msg:empty{display:none}
+.msg.good{background:color-mix(in srgb, var(--green) 16%, var(--card))}
+.msg.look{background:color-mix(in srgb, var(--look) 13%, var(--card))}
+.msg b{font-family:var(--display); font-weight:600}
+.hint{margin:0; font-size:15px; color:var(--muted)}
+
+.talk{display:flex; gap:18px; align-items:center}
+.bign{font-family:var(--display); font-weight:700; font-size:clamp(64px,7vw,104px); line-height:.9; color:var(--accent); font-variant-numeric:tabular-nums}
+.noticed{display:flex; gap:8px; flex-wrap:wrap}
+.noticed span{background:var(--card); border:2px solid var(--line); border-radius:999px; padding:5px 12px; font-size:15px; font-weight:700}
+.dots{display:grid; gap:6px; justify-content:start}
+.dots:empty{display:none}
+.dot{width:var(--d,16px); height:var(--d,16px); border-radius:50%; background:var(--c,var(--blue))}
+.pair{display:flex; gap:3px; padding:4px; border:2px solid var(--line); border-radius:999px}
+.mini{display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(3,52px); gap:4px}
+.mini div{display:grid; place-items:center; border-radius:10px; font-weight:700; font-size:20px; background:var(--card); border:2px solid var(--line)}
+.mini .empty{visibility:hidden}
+
+.sq{display:grid; gap:4px; align-self:flex-start}
+.sq div{min-width:74px; padding:10px 6px; text-align:center; border-radius:10px; font-weight:700; font-size:22px; background:var(--card); border:3px solid var(--line); font-variant-numeric:tabular-nums}
+.sq .ca{border-color:var(--red); color:var(--red)} .sq .cb{border-color:var(--blue); color:var(--blue)} .sq .cc{border-color:var(--purple); color:var(--purple)}
+.eq{font-size:clamp(20px,1.7vw,26px); font-weight:700; font-variant-numeric:tabular-nums; margin:2px 0}
+.eq.a{color:var(--red)} .eq.b{color:var(--blue)} .eq.c{color:var(--purple)}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chips span{font-size:14px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--card); border:2px solid var(--green); color:var(--green)}
+
+.pad{display:grid; grid-template-columns:repeat(5, minmax(52px,72px)); gap:8px; align-self:flex-start}
+.pad button{min-height:58px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:26px}
+.pad button:active{background:var(--soft)}
+.pad .go{grid-column:span 2; background:var(--accent); color:var(--on-accent); border-color:var(--accent); font-size:22px}
+.readout{display:flex; align-items:center; gap:14px}
+.readout output{min-width:120px; min-height:64px; padding:6px 16px; border:3px solid var(--ink); border-radius:14px; background:var(--card); font-family:var(--display); font-weight:700; font-size:40px; display:flex; align-items:center; font-variant-numeric:tabular-nums}
+.readout span{color:var(--muted); font-size:16px}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:19px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.digits{border-collapse:collapse; font-variant-numeric:tabular-nums; margin-top:6px}
+.digits td,.digits th{padding:2px 16px 2px 0; text-align:left}
+.digits th{font-size:.8em; color:var(--muted)}
+.digits .o{color:var(--red)}
+
+@media (max-width: 900px), (orientation: portrait){
+  main{flex-direction:column; overflow:visible; padding-left:16px; padding-right:16px}
+  header{padding-left:16px; padding-right:16px}
+  .board{--size:min(calc(100vw - 32px), 68dvh)}
+  .panel{overflow:visible}
+}
+@media (max-width: 480px){
+  .tabs button{padding:9px 11px; font-size:15px}
+  .pad{grid-template-columns:repeat(5, 1fr); width:100%}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>Patterns on the Hundred Chart</h1>
+    <p>Grade 2 · Week 1 · Number Detectives</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <div class="board-col">
+    <div class="board" id="board" aria-label="Hundred chart"></div>
+    <div class="moves" aria-label="The moves">
+      <span><b>→</b> +1</span><span><b>↓</b> +10</span><span><b>←</b> −1</span><span><b>↑</b> −10</span>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="warm" aria-selected="true">Warm-up</button>
+      <button role="tab" data-tab="hunt" aria-selected="false">Pattern hunts</button>
+      <button role="tab" data-tab="myst" aria-selected="false">Chart mysteries</button>
+      <button role="tab" data-tab="q" aria-selected="false">Detective questions</button>
+    </div>
+
+    <!-- WARM-UP -->
+    <div class="view" id="v-warm">
+      <div class="talk">
+        <div class="bign" id="wN">64</div>
+        <p class="caption"><b>Number Talk.</b> What do you notice about <span id="wN2">64</span>? Tell me everything.</p>
+      </div>
+      <div class="row" id="wFacts">
+        <button class="secondary" data-fact="parity">Even or odd?</button>
+        <button class="secondary" data-fact="tens">Tens and ones</button>
+        <button class="secondary" data-fact="near">Its neighbors</button>
+        <button class="secondary" data-fact="rows">Equal rows</button>
+      </div>
+      <p class="msg" id="wOut" aria-live="polite"></p>
+      <div id="dots" class="dots" aria-hidden="true"></div>
+      <div class="noticed" id="noticed"></div>
+      <p class="hint">Talk first, then tap a button to check an idea. Tap any number on the chart to talk about it instead.</p>
+    </div>
+
+    <!-- PATTERN HUNTS -->
+    <div class="view" id="v-hunt" hidden>
+      <div class="seg" role="group" aria-label="Pattern hunt">
+        <button data-st="hop" aria-pressed="true">Hop</button>
+        <button data-st="skip" aria-pressed="false">Skip-count</button>
+        <button data-st="corner" aria-pressed="false">Corner squares</button>
+      </div>
+
+      <div class="view" id="st-hop">
+        <p class="caption" id="hopCap"></p>
+        <div class="seg" role="group" aria-label="Hop size">
+          <button data-hop="10" aria-pressed="true">+10</button>
+          <button data-hop="9" aria-pressed="false">+9</button>
+          <button data-hop="11" aria-pressed="false">+11</button>
+          <button data-hop="1" aria-pressed="false">+1</button>
+        </div>
+        <div class="row">
+          <button class="primary" id="hopFor">Hop for me</button>
+          <button class="secondary" id="hopAll">Show the whole trail</button>
+          <button class="secondary" id="hopNew">New start</button>
+        </div>
+        <p class="msg" id="hopMsg" aria-live="polite"></p>
+      </div>
+
+      <div class="view" id="st-skip" hidden>
+        <p class="caption" id="skipCap"></p>
+        <div class="seg" role="group" aria-label="Count by">
+          <button data-by="2" aria-pressed="false">2s</button>
+          <button data-by="3" aria-pressed="true">3s</button>
+          <button data-by="4" aria-pressed="false">4s</button>
+          <button data-by="5" aria-pressed="false">5s</button>
+          <button data-by="9" aria-pressed="false">9s</button>
+          <button data-by="10" aria-pressed="false">10s</button>
+        </div>
+        <div class="row">
+          <button class="primary" id="skipCheck">Check my coloring</button>
+          <button class="secondary" id="skipMiss">Show what's missing</button>
+          <button class="secondary" id="skipFill">Count for me</button>
+          <button class="secondary" id="skipClear">Clear</button>
+        </div>
+        <p class="msg" id="skipMsg" aria-live="polite"></p>
+      </div>
+
+      <div class="view" id="st-corner" hidden>
+        <p class="caption" id="cornCap"></p>
+        <div class="seg" role="group" aria-label="Square size">
+          <button data-size="2" aria-pressed="true">2 × 2 square</button>
+          <button data-size="3" aria-pressed="false">3 × 3 challenge</button>
+        </div>
+        <div class="sq" id="sq"></div>
+        <div class="row">
+          <button class="primary" id="cornAdd">Add the corners</button>
+          <button class="secondary" id="cornRand">Try a random square</button>
+        </div>
+        <div class="msg" id="cornMsg" aria-live="polite"></div>
+        <div class="chips" id="cornLog"></div>
+      </div>
+    </div>
+
+    <!-- MYSTERIES -->
+    <div class="view" id="v-myst" hidden>
+      <div class="seg" role="group" aria-label="Mystery">
+        <button data-my="win" aria-pressed="true">Chart windows</button>
+        <button data-my="moth" aria-pressed="false">Moth holes</button>
+        <button data-my="where" aria-pressed="false">Who am I?</button>
+      </div>
+      <p class="caption" id="myCap"></p>
+      <div class="readout"><output id="kpOut" aria-live="polite"></output><span id="kpFor"></span></div>
+      <div class="pad" id="pad"></div>
+      <p class="msg" id="myMsg" aria-live="polite"></p>
+      <div class="row" id="myActs"></div>
+    </div>
+
+    <!-- DETECTIVE QUESTIONS -->
+    <div class="view" id="v-q" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="caption" id="qtext"></p>
+      <div class="row" id="qacts"></div>
+      <div class="msg" id="qres" aria-live="polite"></div>
+      <p class="hint">Say “I think ___ always happens because ___.” Then tap a button to put evidence on the chart.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const R = n => Math.floor((n-1)/10), C = n => (n-1)%10, N = (r,c) => r*10 + c + 1;
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const sgn = d => d>=0 ? `+${d}` : `−${-d}`;
+const plural = (k,w) => `${k} ${w}${k===1?'':'s'}`;
+const listText = a => a.length<=2 ? a.join(' and ') : a.slice(0,-1).join(', ') + ', and ' + a[a.length-1];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+function movePhrase(dr, dc){
+  const p = [];
+  if(dr) p.push(`${plural(Math.abs(dr),'row')} ${dr>0?'down':'up'}`);
+  if(dc) p.push(`${plural(Math.abs(dc),'step')} ${dc>0?'right':'left'}`);
+  return p.length ? p.join(' and ') : 'the same square';
+}
+
+/* ================= Board ================= */
+const board = $('#board'), cellEl = {};
+for(let n=1;n<=100;n++){
+  const b = document.createElement('button');
+  b.className = 'cell'; b.innerHTML = `<span class="num">${n}</span><span class="badge"></span>`;
+  b.addEventListener('click', () => onTap(n));
+  board.appendChild(b); cellEl[n] = b;
+}
+let B;
+function clearB(){ B = {mark:{}, badge:{}, cls:{}, text:{}, focus:null, pop:new Set()}; }
+const mark = (n,c,pop) => { B.mark[n] = c; if(pop) B.pop.add(n); };
+const badge = (n,t,c) => { B.badge[n] = {t, c}; };
+const addc = (n,k) => { (B.cls[n] = B.cls[n] || new Set()).add(k); };
+function focus(list){ B.focus = new Set(list); }
+function render(){
+  board.classList.toggle('focus', !!B.focus);
+  for(let n=1;n<=100;n++){
+    const el = cellEl[n], k = B.cls[n] ? [...B.cls[n]] : [];
+    let cls = 'cell ' + k.join(' ');
+    if(B.mark[n]){ cls += ' m'; el.style.setProperty('--c', B.mark[n]); }
+    else if(k.includes('ghostc')) {} else el.style.removeProperty('--c');
+    if(B.focus && B.focus.has(n)) cls += ' on';
+    if(B.pop.has(n) && !reduced) cls += ' pop';
+    el.className = cls;
+    const t = B.text[n] !== undefined ? B.text[n] : n;
+    el.firstChild.textContent = t;
+    const bd = B.badge[n]; el.lastChild.textContent = bd ? bd.t : '';
+    el.lastChild.style.setProperty('--bc', bd && bd.c ? bd.c : 'var(--ink)');
+    el.setAttribute('aria-label', k.includes('cov') ? 'covered square' : (k.includes('blank')||k.includes('hole')) && B.text[n]!==n ? 'empty square' : String(n));
+  }
+  B.pop = new Set();
+}
+board.addEventListener('animationend', e => e.target.classList.remove('pop'));
+
+/* ================= App state ================= */
+const S = {tab:'warm', st:'hop', my:'win', gen:0};
+function onTap(n){
+  if(S.tab==='warm') warmTap(n);
+  else if(S.tab==='hunt') ({hop:hopTap, skip:skipTap, corner:cornTap})[S.st](n);
+  else if(S.tab==='myst') ({win:winTap, moth:mothTap, where:whereTap})[S.my](n);
+  else qTap(n);
+}
+function draw(){
+  S.gen++;
+  board.classList.toggle('tapme', S.tab!=='q');
+  if(S.tab==='warm') warmDraw();
+  else if(S.tab==='hunt') ({hop:hopDraw, skip:skipDraw, corner:cornDraw})[S.st]();
+  else if(S.tab==='myst') mystDraw();
+  else qDraw();
+}
+function setMsg(el, html, tone){ el.innerHTML = html || ''; el.classList.toggle('good', tone==='good'); el.classList.toggle('look', tone==='look'); }
+
+/* ================= Warm-up ================= */
+let W;
+function warmInit(){ W = {n:64, active:null, seen:[]}; }
+function factText(f, n){
+  if(f==='parity'){
+    if(n%2===0) return `<b>${n} is even.</b> ${n} dots make ${n/2} pairs with no dot left over.`;
+    return `<b>${n} is odd.</b> ${n} dots make ${(n-1)/2} pair${(n-1)/2===1?'':'s'} and 1 dot left over.`;
+  }
+  if(f==='tens'){
+    const t = Math.floor(n/10), o = n%10;
+    if(t===0) return `<b>${n} is ${o} ones.</b> Not even one full row of ten.`;
+    if(o===0) return `<b>${n} = ${t} tens.</b> ${plural(t,'full row')} of ten and nothing extra.`;
+    return `<b>${n} = ${t*10} + ${o}.</b> ${plural(t,'full row')} of ten and ${o} more.`;
+  }
+  if(f==='near'){
+    const p = [];
+    if(n-1>=1) p.push(`One less: ${n-1}.`); if(n+1<=100) p.push(`One more: ${n+1}.`);
+    if(n-10>=1) p.push(`Ten less: ${n-10}.`); if(n+10<=100) p.push(`Ten more: ${n+10}.`);
+    return `<b>Neighbors of ${n}.</b> ` + p.join(' ');
+  }
+  if(f==='rows'){
+    const pr = factorPairs(n);
+    if(n===1) return `<b>1 dot is 1 row of 1.</b>`;
+    if(!pr.length) return `<b>${n} only makes 1 row of ${n}.</b> Try 2 rows, 3 rows… it never comes out even.`;
+    const [a,b] = pr[pr.length-1];
+    let s = `<b>${n} makes ${a} rows of ${b}.</b>`;
+    if(a===b) s += ` That's a square!`;
+    const others = pr.slice(0,-1).map(([x,y]) => `${x} rows of ${y}`);
+    if(others.length) s += ` It can also make ${listText(others)}.`;
+    return s;
+  }
+}
+function factorPairs(n){ const r=[]; for(let a=2;a*a<=n;a++) if(n%a===0) r.push([a,n/a]); return r; }
+function warmDraw(){
+  clearB();
+  const n = W.n, f = W.active;
+  $('#wN').textContent = n; $('#wN2').textContent = n;
+  mark(n, 'var(--accent)');
+  const dots = $('#dots'); dots.innerHTML = ''; dots.style.gridTemplateColumns = '';
+  if(f==='parity'){
+    const list = []; for(let k = n%2===0 ? 2 : 1; k<=n; k+=2) list.push(k);
+    list.forEach(k => mark(k, 'var(--blue)')); focus(list);
+    const pairs = Math.floor(n/2), lone = n%2;
+    dots.style.gridTemplateColumns = 'repeat(8, max-content)';
+    for(let i=0;i<pairs;i++) dots.insertAdjacentHTML('beforeend', `<div class="pair"><i class="dot" style="--d:12px"></i><i class="dot" style="--d:12px"></i></div>`);
+    if(lone) dots.insertAdjacentHTML('beforeend', `<div class="pair" style="border-color:var(--red)"><i class="dot" style="--d:12px;--c:var(--red)"></i></div>`);
+  } else if(f==='tens'){
+    const t = Math.floor(n/10);
+    const list = []; for(let k=1;k<=n;k++){ list.push(k); mark(k, k<=t*10 ? 'var(--blue)' : 'var(--red)'); }
+    focus(list);
+    dots.style.gridTemplateColumns = 'repeat(10, max-content)';
+    for(let k=1;k<=n;k++) dots.insertAdjacentHTML('beforeend', `<i class="dot" style="--c:${k<=t*10?'var(--blue)':'var(--red)'}"></i>`);
+  } else if(f==='near'){
+    const nb = [[n-10,'−10',n>10],[n-1,'−1',n>1],[n+1,'+1',n<100],[n+10,'+10',n<=90]];
+    const list=[n];
+    nb.forEach(([m,t,ok]) => { if(ok){ mark(m,'var(--purple)'); badge(m,t,'var(--purple)'); list.push(m); } });
+    focus(list);
+    const at = (m, ok) => ok ? `<div>${m}</div>` : `<div class="empty"></div>`;
+    dots.innerHTML = `<div class="mini"><div class="empty"></div>${at(n-10,n>10)}<div class="empty"></div>${at(n-1,n>1)}<div style="border-color:var(--accent);color:var(--accent)">${n}</div>${at(n+1,n<100)}<div class="empty"></div>${at(n+10,n<=90)}<div class="empty"></div></div>`;
+  } else if(f==='rows'){
+    const pr = factorPairs(n);
+    if(pr.length){
+      const [a,b] = pr[pr.length-1];
+      if(b<=25){
+        dots.style.gridTemplateColumns = `repeat(${b}, max-content)`;
+        for(let k=0;k<n;k++) dots.insertAdjacentHTML('beforeend', `<i class="dot" style="--c:var(--green); --d:${b>12?12:16}px"></i>`);
+      }
+    }
+  }
+  setMsg($('#wOut'), f ? factText(f,n) : '');
+  $('#noticed').innerHTML = W.seen.map(k => `<span>${({parity: n%2?'odd':'even', tens:`${Math.floor(n/10)} tens ${n%10} ones`, near:'neighbors', rows:'equal rows'})[k]}</span>`).join('');
+  $$('#wFacts button').forEach(b => b.setAttribute('aria-pressed', b.dataset.fact===f));
+  render();
+}
+function warmTap(n){ W.n = n; W.active = null; W.seen = []; warmDraw(); }
+$$('#wFacts button').forEach(b => b.onclick = () => { W.active = b.dataset.fact; if(!W.seen.includes(W.active)) W.seen.push(W.active); warmDraw(); });
+
+/* ================= Hop ================= */
+const MOVE = {1:[0,1], 10:[1,0], 9:[1,-1], 11:[1,1]};
+const MOVEWORD = {1:'one step right', 10:'one row straight down', 9:'one row down and one step left', 11:'one row down and one step right'};
+const wrapped = (from, step) => { const to = from+step, [er,ec] = MOVE[step]; return R(to)-R(from)!==er || C(to)-C(from)!==ec; };
+let H;
+function hopInit(){ H = {step:10, path:[7], choosing:false, msg:'', tone:''}; }
+const hopCur = () => H.path[H.path.length-1];
+function hopDraw(){
+  clearB();
+  H.path.forEach((n,i) => {
+    mark(n, i===0 ? 'var(--yellow)' : 'var(--blue)', i===H.path.length-1);
+    if(i>0){ badge(n, sgn(H.step), 'var(--blue)'); if(wrapped(H.path[i-1], H.step)) addc(n,'flag'); }
+  });
+  addc(hopCur(),'cur');
+  $('#hopCap').innerHTML = H.choosing ? `<b>Tap any number</b> to start a new trail.`
+    : `Start at <b>${H.path[0]}</b> and keep adding <b>${H.step}</b>. Tap where the next hop lands.`;
+  setMsg($('#hopMsg'), H.msg, H.tone);
+  $$('[data-hop]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.hop===H.step));
+  const done = hopCur()+H.step > 100;
+  $('#hopFor').disabled = done || H.choosing; $('#hopAll').disabled = done || H.choosing;
+  render();
+}
+function hopSummary(){
+  const p = H.path, s = H.step;
+  let t = `<b>Trail done:</b> ${p.join(', ')}. The next hop, ${hopCur()} + ${s} = ${hopCur()+s}, is past 100.`;
+  if(s===10 && p.length>1) t += ` Every number ends in ${p[0]%10}. Only the tens digit changes.`;
+  const w = []; for(let i=1;i<p.length;i++) if(wrapped(p[i-1],s)) w.push(`${p[i-1]} + ${s} = ${p[i]}`);
+  if(w.length) t += ` Look at the dashed squares: ${listText(w)} fell off the edge and wrapped to the other side of the chart.`;
+  return t;
+}
+function hopAdvance(n){
+  const cur = hopCur(); H.path.push(n);
+  if(wrapped(cur, H.step)){
+    const [er,ec] = MOVE[H.step];
+    const side = ec>0 ? 'right' : 'left';
+    H.msg = `${cur} + ${H.step} = ${n}. But look: ${cur} is on the ${side} edge, so the hop can't go ${MOVEWORD[H.step]}. It wrapped around to the other side.`;
+    H.tone = 'look';
+  } else { H.msg = `Yes! ${cur} + ${H.step} = ${n}. That's ${MOVEWORD[H.step]}.`; H.tone = 'good'; }
+  if(n + H.step > 100){ H.msg += ' ' + hopSummary(); }
+}
+function hopTap(n){
+  if(H.choosing){ H.path = [n]; H.choosing = false; H.msg = n+H.step>100 ? `${n} + ${H.step} is past 100. Pick a smaller start or a smaller hop.` : ''; H.tone=''; hopDraw(); return; }
+  const cur = hopCur(), next = cur + H.step;
+  if(next > 100){ H.msg = hopSummary(); H.tone=''; }
+  else if(n===next) hopAdvance(n);
+  else if(n===cur){ H.msg = `You're standing on ${cur}. Where does ${sgn(H.step)} take you?`; H.tone=''; }
+  else {
+    H.msg = `${n} is ${movePhrase(R(n)-R(cur), C(n)-C(cur))} from ${cur}. That's ${sgn(n-cur)}. Adding ${H.step} means ${MOVEWORD[H.step]}. Try again!`;
+    H.tone = 'look';
+  }
+  hopDraw();
+}
+$$('[data-hop]').forEach(b => b.onclick = () => { H.step = +b.dataset.hop; H.path = [H.path[0]]; H.msg=''; H.tone=''; hopDraw(); });
+$('#hopFor').onclick = () => { const nx = hopCur()+H.step; if(nx<=100){ hopAdvance(nx); hopDraw(); } };
+$('#hopAll').onclick = async () => {
+  const g = ++S.gen;
+  while(hopCur()+H.step<=100){ hopAdvance(hopCur()+H.step); hopDraw(); await sleep(260); if(g!==S.gen) return; }
+  H.msg = hopSummary(); H.tone=''; hopDraw();
+};
+$('#hopNew').onclick = () => { H.choosing = true; H.msg=''; hopDraw(); };
+
+/* ================= Skip-count ================= */
+const BYCOLOR = {2:'var(--blue)',3:'var(--purple)',4:'var(--green)',5:'var(--red)',9:'var(--yellow)',10:'var(--blue)'};
+let K;
+function skipInit(){ K = {by:3, picked:new Set(), checked:false, missing:false, msg:'', tone:''}; }
+const skipWhy = (n,by) => { const prev = Math.floor(n/by)*by; return prev===0 ? `Counting by ${by}s starts at ${by}, so ${n} isn't in the count.` : `Counting by ${by}s goes ${prev}, ${prev+by}. ${n} gets skipped.`; };
+function skipDraw(){
+  clearB(); const c = BYCOLOR[K.by];
+  for(let n=1;n<=100;n++){
+    if(K.picked.has(n)){ mark(n,c); if(K.checked && n%K.by!==0) addc(n,'flag'); }
+    else if(K.missing && n%K.by===0){ addc(n,'ghostc'); cellEl[n].style.setProperty('--c', c); }
+  }
+  $('#skipCap').innerHTML = `Tap every number you say when you <b>count by ${K.by}s</b>. Then check. What shape appears?`;
+  setMsg($('#skipMsg'), K.msg, K.tone);
+  $$('[data-by]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.by===K.by));
+  render();
+}
+function skipReport(){
+  const by = K.by, total = Math.floor(100/by);
+  let good=0, extra=0; K.picked.forEach(n => n%by===0 ? good++ : extra++);
+  const miss = total - good;
+  if(!extra && !miss){ K.msg = `<b>All ${total} numbers in the ${by}s count are colored.</b> What shape do they make? Why that shape?`; K.tone='good'; return; }
+  const p = [`${good} of ${total} counters are in the ${by}s count.`];
+  if(extra) p.push(`${extra===1?'1 counter needs':extra+' counters need'} another look (dashed rings). Tap one to see why.`);
+  if(miss) p.push(`${miss===1?'1 number still needs':miss+' numbers still need'} a counter.`);
+  K.msg = p.join(' '); K.tone = extra ? 'look' : '';
+}
+function skipTap(n){
+  if(K.picked.has(n)){
+    K.picked.delete(n);
+    if(K.checked && n%K.by!==0){ K.msg = `Good fix. ${skipWhy(n,K.by)}`; K.tone=''; }
+    else if(K.checked) skipReport();
+  } else {
+    K.picked.add(n);
+    if(K.checked) skipReport();
+  }
+  skipDraw();
+}
+$$('[data-by]').forEach(b => b.onclick = () => { K.by = +b.dataset.by; K.picked = new Set(); K.checked=false; K.missing=false; K.msg=''; skipDraw(); });
+$('#skipCheck').onclick = () => { K.checked = true; skipReport(); skipDraw(); };
+$('#skipMiss').onclick = () => { K.missing = !K.missing; skipDraw(); };
+$('#skipClear').onclick = () => { K.picked = new Set(); K.checked=false; K.missing=false; K.msg=''; skipDraw(); };
+$('#skipFill').onclick = async () => {
+  const g = ++S.gen; K.checked = false; K.missing = false;
+  for(const n of [...K.picked]) if(n%K.by) K.picked.delete(n);
+  for(let n=K.by;n<=100;n+=K.by){ if(!K.picked.has(n)){ K.picked.add(n); K.msg = `Counting by ${K.by}s… ${n}`; K.tone=''; skipDraw(); await sleep(90); if(g!==S.gen) return; } }
+  K.checked = true; skipReport(); skipDraw();
+};
+
+/* ================= Corner squares ================= */
+let Q2;
+function cornInit(){ Q2 = {size:2, a:34, shown:false, log:[]}; }
+function cornCells(){
+  if(Q2.size===2){ const a=Q2.a; return {tl:a, tr:a+1, bl:a+10, br:a+11, all:[a,a+1,a+10,a+11]}; }
+  const c=Q2.a, all=[]; for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) all.push(c+10*dr+dc);
+  return {tl:c-11, tr:c-9, bl:c+9, br:c+11, c, all};
+}
+function cornDraw(){
+  clearB(); const k = cornCells();
+  k.all.forEach(n => addc(n,'win'));
+  mark(k.tl,'var(--red)'); mark(k.br,'var(--red)'); mark(k.tr,'var(--blue)'); mark(k.bl,'var(--blue)');
+  if(Q2.size===3) mark(k.c,'var(--purple)');
+  focus(k.all);
+  $('#cornCap').innerHTML = Q2.size===2
+    ? `Tap the chart to place a <b>2 × 2 square</b>. Add the <span style="color:var(--red)">red</span> corners. Add the <span style="color:var(--blue)">blue</span> corners. Predict first: which sum is bigger?`
+    : `Tap the chart to choose a <b>center</b>. Is the center always right in the middle of the four corners?`;
+  const sq = $('#sq');
+  if(Q2.size===2){ sq.style.gridTemplateColumns='repeat(2,auto)'; sq.innerHTML = `<div class="ca">${k.tl}</div><div class="cb">${k.tr}</div><div class="cb">${k.bl}</div><div class="ca">${k.br}</div>`; }
+  else { sq.style.gridTemplateColumns='repeat(3,auto)'; sq.innerHTML = k.all.map(n => `<div class="${n===k.tl||n===k.br?'ca':n===k.tr||n===k.bl?'cb':n===k.c?'cc':''}">${n}</div>`).join(''); }
+  let html = '';
+  if(Q2.shown){
+    const sA = k.tl+k.br, sB = k.tr+k.bl;
+    html = `<p class="eq a">${k.tl} + ${k.br} = ${sA}</p><p class="eq b">${k.tr} + ${k.bl} = ${sB}</p>`;
+    if(Q2.size===2) html += sA===sB ? `<b>The same!</b> Does it work for every 2 × 2 square? Try more.` : `These sums are different.`;
+    else {
+      const four = k.tl+k.tr+k.bl+k.br;
+      html += `<p class="eq c">Double the center: ${k.c} + ${k.c} = ${2*k.c}</p>`;
+      html += `All four corners: ${k.tl} + ${k.tr} + ${k.bl} + ${k.br} = <b>${four}</b>. Four centers: ${k.c} + ${k.c} + ${k.c} + ${k.c} = <b>${4*k.c}</b>. `;
+      html += four===4*k.c ? `They match, so ${k.c} is the average of the corners.` : `They don't match.`;
+    }
+  }
+  setMsg($('#cornMsg'), html);
+  $('#cornLog').innerHTML = Q2.log.length ? `<span style="border-color:var(--line);color:var(--muted)">Tested</span>` + Q2.log.map(l => `<span>${l}</span>`).join('') : '';
+  $$('[data-size]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.size===Q2.size));
+  $('#cornAdd').disabled = Q2.shown;
+  render();
+}
+function cornPlace(n){
+  const r = R(n), c = C(n);
+  Q2.a = Q2.size===2 ? N(Math.min(r,8), Math.min(c,8)) : N(Math.min(Math.max(r,1),8), Math.min(Math.max(c,1),8));
+  Q2.shown = false; cornDraw();
+}
+function cornTap(n){ cornPlace(n); }
+$('#cornAdd').onclick = () => {
+  Q2.shown = true; const k = cornCells(); const ok = k.tl+k.br===k.tr+k.bl && (Q2.size===2 || k.tl+k.tr+k.bl+k.br===4*k.c);
+  const label = (Q2.size===2 ? `${k.tl} square` : `center ${k.c}`) + (ok ? ' ✓' : ' ✗');
+  if(!Q2.log.includes(label)) Q2.log.push(label);
+  cornDraw();
+};
+$('#cornRand').onclick = () => { cornPlace(rnd(1,100)); };
+$$('[data-size]').forEach(b => b.onclick = () => { Q2.size = +b.dataset.size; Q2.a = Q2.size===2 ? 34 : 45; Q2.shown=false; Q2.log=[]; cornDraw(); });
+
+/* ================= Mysteries ================= */
+let kp = '';
+const PAD = ['1','2','3','4','5','6','7','8','9','0','⌫','Check'];
+$('#pad').innerHTML = PAD.map(k => `<button data-k="${k}" class="${k==='Check'?'go':''}" aria-label="${k==='⌫'?'Delete':k}">${k}</button>`).join('');
+$$('#pad button').forEach(b => b.onclick = () => padKey(b.dataset.k));
+function padKey(k){
+  if(k==='⌫') kp = kp.slice(0,-1);
+  else if(k==='Check'){ if(kp!==''){ mystCheck(+kp); kp=''; } }
+  else if(kp.length<3){ const v = kp + k; if(+v<=100 && v!=='0') kp = v.replace(/^0+/,''); }
+  $('#kpOut').textContent = kp;
+}
+document.addEventListener('keydown', e => {
+  if(S.tab!=='myst' || e.target.closest('input,textarea')) return;
+  if(/^[0-9]$/.test(e.key)) padKey(e.key);
+  else if(e.key==='Backspace') padKey('⌫');
+  else if(e.key==='Enter'){ e.preventDefault(); padKey('Check'); }
+});
+
+// --- Chart windows
+const DIRS = [['above',-10],['left',-1],['right',1],['below',10]];
+const DIRHINT = {above:['one row up','10 less than'], left:['one step left','1 less than'], right:['one step right','1 more than'], below:['one row down','10 more than']};
+let WN;
+function winInit(){ WN = {list:[47,62], idx:0, center:47, hide:false, done:new Set(), sel:null, tries:0, msg:'', tone:''}; winSetup(); }
+function winSetup(){ WN.done = new Set(); WN.tries = 0; WN.sel = WN.hide ? WN.center : WN.center-10; }
+const winCells = () => [WN.center, ...DIRS.map(([,d]) => WN.center+d)];
+const winTargets = () => WN.hide ? [WN.center] : DIRS.map(([,d]) => WN.center+d);
+const dirOf = m => { const d = m - WN.center; const f = DIRS.find(x => x[1]===d); return f ? f[0] : null; };
+function winDraw(){
+  const cells = new Set(winCells()), targets = winTargets();
+  for(let n=1;n<=100;n++){
+    if(!cells.has(n)){ addc(n,'cov'); continue; }
+    if(targets.includes(n) && !WN.done.has(n)){ addc(n,'blank'); B.text[n] = '?'; if(n===WN.sel) addc(n,'sel'); }
+    else if(targets.includes(n)){ mark(n,'var(--green)'); }
+    else { mark(n,'var(--yellow)'); }
+  }
+  $('#myCap').innerHTML = WN.hide
+    ? `<b>Mystery center.</b> The four neighbors are showing. What number is hiding in the middle?`
+    : `<b>Chart window.</b> The center is ${WN.center}. Fill in the numbers above, below, left, and right. Tap a <b>?</b>, then type.`;
+  $('#kpFor').textContent = WN.sel ? (WN.hide ? 'for the center' : `for the square ${dirOf(WN.sel)}`) : '';
+  acts([
+    ['Next window', () => { WN.idx++; WN.center = WN.idx < WN.list.length ? WN.list[WN.idx] : N(rnd(1,8), rnd(1,8)); WN.msg=''; winSetup(); mystDraw(); }, 'primary'],
+    [WN.hide ? 'Show the center' : 'Hide the center', () => { WN.hide = !WN.hide; WN.msg=''; winSetup(); mystDraw(); }],
+    ...(WN.tries>=2 && WN.sel ? [['Show me', () => winReveal(true)]] : [])
+  ]);
+}
+function winNextSel(){ const t = winTargets().find(n => !WN.done.has(n)); WN.sel = t || null; WN.tries = 0; }
+function winExplain(m){
+  if(WN.hide){ const [dn, d] = DIRS[0]; return `The number above is ${WN.center-10}. One row down is +10, so ${WN.center-10} + 10 = ${WN.center}.`; }
+  const dn = dirOf(m), d = m - WN.center;
+  return `${dn[0].toUpperCase()+dn.slice(1)} is ${DIRHINT[dn][0]}: ${WN.center} ${d>0?'+':'−'} ${Math.abs(d)} = ${m}.`;
+}
+function winReveal(shown){
+  const m = WN.sel; WN.done.add(m);
+  WN.msg = (shown ? '' : 'Yes! ') + winExplain(m); WN.tone = 'good';
+  winNextSel();
+  if(!WN.sel) WN.msg += ` <b>Window solved.</b> The rule: below is always +10, above −10, right +1, left −1.`;
+  mystDraw();
+}
+function winCheck(v){
+  if(!WN.sel){ WN.msg = 'This window is solved. Tap “Next window.”'; WN.tone=''; return mystDraw(); }
+  const m = WN.sel;
+  if(v===m) return winReveal(false);
+  WN.tries++;
+  let why;
+  if(WN.hide){
+    const f = DIRS.find(([,d]) => WN.center+d===v);
+    why = f ? `${v} is already showing ${f[0]==='above'?'above':f[0]==='below'?'below':'to the '+f[0]}. The center is a different number.` : `If the center were ${v}, the number above it would be ${v-10}. But above shows ${WN.center-10}.`;
+    why += ` Hint: the number above is ${WN.center-10}, and one row down is +10.`;
+  } else {
+    const dn = dirOf(m), other = dirOf(v);
+    why = v===WN.center ? `${v} is the center itself.` : other && other!==dn ? `${v} is the square ${other==='above'||other==='below'?other:'to the '+other}. This square is ${dn==='above'||dn==='below'?dn:'to the '+dn}.` : `${v} is ${movePhrase(R(v)-R(WN.center), C(v)-C(WN.center))} from ${WN.center}.`;
+    why += ` Hint: ${dn} is ${DIRHINT[dn][0]}. What is ${DIRHINT[dn][1]} ${WN.center}?`;
+  }
+  WN.msg = `${why} Try again!`; WN.tone = 'look'; mystDraw();
+}
+function winTap(n){
+  const t = winTargets();
+  if(t.includes(n) && !WN.done.has(n)){ WN.sel = n; WN.tries = 0; WN.msg=''; }
+  else if(!winCells().includes(n)){ WN.msg = 'That square is covered. Use the moves from the window.'; WN.tone=''; }
+  mystDraw();
+}
+
+// --- Moth holes
+const MOTH0 = [14,27,33,39,45,52,58,61,70,76,83,88,95,99];
+let M;
+function mothInit(){ M = {holes:MOTH0.slice(), fixed:new Set(), sel:14, tries:0, msg:'', tone:''}; }
+const isOpen = n => !M.holes.includes(n) || M.fixed.has(n);
+function mothClue(n){
+  const opts = [
+    [C(n)>0, n-1, m => `The number to the left is ${m}. One step right is +1.`],
+    [R(n)>0, n-10, m => `Above it is ${m}. One row down is +10.`],
+    [C(n)<9, n+1, m => `To the right is ${m}. One step left is −1.`],
+    [R(n)<9, n+10, m => `Below it is ${m}. One row up is −10.`]];
+  for(const [ok,m,f] of opts) if(ok && isOpen(m)) return {m, text:f(m)};
+  return {m:null, text:`Find the start of this row: ${R(n)*10+1}. Count on from there.`};
+}
+function mothDraw(){
+  for(const h of M.holes){
+    if(M.fixed.has(h)){ addc(h,'fixed'); }
+    else { addc(h,'hole'); B.text[h] = ''; if(h===M.sel) addc(h,'sel'); }
+  }
+  const left = M.holes.length - M.fixed.size;
+  $('#myCap').innerHTML = left ? `<b>Moths ate ${M.holes.length} holes</b> in our chart! Tap a hole, then type its number. Use the moves. Don't count from 1. <b>${M.fixed.size} of ${M.holes.length}</b> fixed.`
+    : `<b>All ${M.holes.length} holes are fixed!</b> Which moves helped the most?`;
+  $('#kpFor').textContent = M.sel ? 'for the selected hole' : '';
+  acts([
+    ['New moths', () => { mothNew(); mystDraw(); }, 'primary'],
+    ...(M.tries>=2 && M.sel ? [['Show me', () => mothFix(true)]] : [])
+  ]);
+}
+function mothNew(){
+  let h;
+  do { const s = new Set(); while(s.size<14) s.add(rnd(1,100)); h = [...s].sort((a,b)=>a-b); M.holes = h; M.fixed = new Set(); }
+  while(h.some(n => mothClue(n).m===null));
+  M.sel = h[0]; M.tries = 0; M.msg = ''; M.tone='';
+}
+function mothFix(shown){
+  const n = M.sel, clue = mothClue(n); M.fixed.add(n);
+  const d = clue.m!==null ? n - clue.m : 0;
+  M.msg = (shown?'':'Yes! ') + (clue.m!==null ? `${clue.m} ${d>0?'+':'−'} ${Math.abs(d)} = ${n}.` : `It's ${n}.`); M.tone='good';
+  const next = M.holes.find(h => !M.fixed.has(h)); M.sel = next || null; M.tries = 0;
+  mystDraw();
+}
+function mothCheck(v){
+  if(!M.sel){ M.msg = M.fixed.size===M.holes.length ? 'Every hole is fixed. Tap “New moths” for more.' : 'Tap a hole first.'; M.tone=''; return mystDraw(); }
+  const n = M.sel; if(v===n) return mothFix(false);
+  M.tries++;
+  const clue = mothClue(n);
+  M.msg = `${v} is ${movePhrase(R(v)-R(n), C(v)-C(n))} from this hole. ${clue.text} Try again!`; M.tone='look';
+  mystDraw();
+}
+function mothTap(n){
+  if(M.holes.includes(n) && !M.fixed.has(n)){ M.sel = n; M.tries = 0; M.msg=''; }
+  mystDraw();
+}
+
+// --- Who am I?
+let WH;
+function whereInit(){ WH = {s:25, dr:3, dc:2, solved:false, path:false, tries:0, msg:'', tone:''}; }
+const whereT = () => WH.s + 10*WH.dr + WH.dc;
+function clueText(){
+  const r = `${plural(Math.abs(WH.dr),'row')} ${WH.dr>0?'down':'up'}`, c = `${plural(Math.abs(WH.dc),'column')} ${WH.dc>0?'right':'left'}`;
+  return `I am ${r} and ${c} of ${WH.s}.`;
+}
+function wherePath(){
+  const p = [WH.s]; let n = WH.s;
+  for(let i=0;i<Math.abs(WH.dr);i++){ n += WH.dr>0?10:-10; p.push(n); }
+  for(let i=0;i<Math.abs(WH.dc);i++){ n += WH.dc>0?1:-1; p.push(n); }
+  return p;
+}
+function whereDraw(){
+  mark(WH.s,'var(--yellow)'); badge(WH.s,'start');
+  if(WH.path){ const p = wherePath(); p.slice(1).forEach((n,i) => { mark(n, n===whereT() ? 'var(--green)' : 'var(--blue)'); badge(n, i < Math.abs(WH.dr) ? sgn(WH.dr>0?10:-10) : sgn(WH.dc>0?1:-1), 'var(--blue)'); }); focus(p); }
+  $('#myCap').innerHTML = `<b>${clueText()}</b> Who am I? Work it out first, then type your answer.`;
+  $('#kpFor').textContent = 'your answer';
+  acts([
+    ['New puzzle', () => { whereNew(); mystDraw(); }, 'primary'],
+    ['Show the path', () => { WH.path = true; const p = wherePath(); WH.msg = `${p.join(' → ')}. I am <b>${whereT()}</b>.`; WH.tone='good'; mystDraw(); }]
+  ]);
+}
+function whereNew(){
+  do { WH.s = rnd(1,100); WH.dr = rnd(-4,4); WH.dc = rnd(-4,4); }
+  while(!WH.dr || !WH.dc || R(WH.s)+WH.dr<0 || R(WH.s)+WH.dr>9 || C(WH.s)+WH.dc<0 || C(WH.s)+WH.dc>9);
+  WH.solved=false; WH.path=false; WH.tries=0; WH.msg=''; WH.tone='';
+}
+function whereCheck(v){
+  const t = whereT();
+  if(v===t){ WH.solved = true; WH.path = true; WH.msg = `Yes! ${wherePath().join(' → ')}. You are ${t}.`; WH.tone='good'; }
+  else { WH.msg = `${v} is ${movePhrase(R(v)-R(WH.s), C(v)-C(WH.s))} from ${WH.s}. The clue says ${movePhrase(WH.dr, WH.dc).replace(/step/g,'column')}. Try again!`; WH.tone='look'; }
+  mystDraw();
+}
+function whereTap(n){ WH.msg = `That's ${n}. It's ${movePhrase(R(n)-R(WH.s), C(n)-C(WH.s)).replace(/step/g,'column')} from ${WH.s}.`; WH.tone=''; mystDraw(); }
+
+function acts(list){
+  const box = $('#myActs'); box.innerHTML = '';
+  list.forEach(([t,f,k]) => { const b = document.createElement('button'); b.className = k||'secondary'; b.textContent = t; b.onclick = f; box.appendChild(b); });
+}
+function mystDraw(){
+  clearB();
+  const st = ({win:WN, moth:M, where:WH})[S.my];
+  if(S.my==='win') winDraw(); else if(S.my==='moth') mothDraw(); else whereDraw();
+  setMsg($('#myMsg'), st.msg, st.tone);
+  $$('[data-my]').forEach(b => b.setAttribute('aria-pressed', b.dataset.my===S.my));
+  $('#kpOut').textContent = kp;
+  render();
+}
+function mystCheck(v){ if(S.my==='win') winCheck(v); else if(S.my==='moth') mothCheck(v); else whereCheck(v); }
+
+/* ================= Detective questions ================= */
+let QS = {q:1};
+function hopsFrom(a, step){ const p=[a]; while(p[p.length-1]+step<=100) p.push(p[p.length-1]+step); return p; }
+function edgeStory(p, step){
+  const i = p.findIndex((n,k) => k>0 && wrapped(p[k-1], step));
+  if(i<0) return `Every hop stayed on the diagonal.`;
+  const side = MOVE[step][1]>0 ? 'right' : 'left';
+  return `The first ${plural(i-1,'hop')} go ${MOVEWORD[step].replace('one row down and ','down and ').replace('one step ','')}. Then ${p[i-1]} + ${step} = ${p[i]}. ${p[i-1]} is on the ${side} edge, so the hop wraps to the other side (dashed square). The rule works everywhere except at the edge.`;
+}
+const QUEST = {
+  1:{ nav:'1', text:'Start at 7 and keep adding 10. Why do the numbers line up in one column?',
+      acts:[
+        ['Show the hops', () => { const p = hopsFrom(7,10); p.forEach((n,i) => { mark(n, i?'var(--blue)':'var(--yellow)'); if(i) badge(n,'+10','var(--blue)'); }); focus(p); return `${p.join(', ')}. Each hop is one row straight down.`; }],
+        ['Look at the digits', () => { const p = hopsFrom(7,10); p.forEach(n => mark(n,'var(--blue)')); focus(p);
+          return `<table class="digits"><tr><th>Number</th><th>Tens</th><th>Ones</th></tr>${p.map(n => `<tr><td>${n}</td><td>${Math.floor(n/10)}</td><td class="o">${n%10}</td></tr>`).join('')}</table>Adding 10 adds one ten and no ones. The ones digit stays 7, so every number sits in the 7 column.`; }]
+      ]},
+  2:{ nav:'2', text:'Pick any 2 × 2 square. Add opposite corners. Will that work for EVERY square? How do you know?',
+      acts:[
+        ['Test every 2 × 2 square', async (g) => {
+          let ok=0, total=0;
+          for(let r=0;r<9;r++) for(let c=0;c<9;c++){
+            const a = N(r,c); total++; if(a + (a+11) === (a+1) + (a+10)) ok++;
+            clearB(); [a,a+11].forEach(n=>mark(n,'var(--red)')); [a+1,a+10].forEach(n=>mark(n,'var(--blue)')); focus([a,a+1,a+10,a+11]); render();
+            setMsg($('#qres'), `Testing square ${total} of 81: ${a} + ${a+11} = ${2*a+11} and ${a+1} + ${a+10} = ${2*a+11}`);
+            await sleep(45); if(g!==S.gen) return null;
+          }
+          return `<b>${total} squares tested. ${ok} worked.</b> That's every 2 × 2 square on the chart. But testing isn't the same as knowing why. Tap “Show why.”`;
+        }],
+        ['Show why', () => { const a = 34; [a,a+11].forEach(n=>mark(n,'var(--red)')); [a+1,a+10].forEach(n=>mark(n,'var(--blue)')); focus([a,a+1,a+10,a+11]);
+          return `<div class="sq" style="grid-template-columns:repeat(2,auto);margin-bottom:10px"><div class="ca">${a}</div><div class="cb">${a} + 1</div><div class="cb">${a} + 10</div><div class="ca">${a} + 11</div></div>Right is always +1. Down is always +10. So the <span style="color:var(--red)">red pair</span> is ${a} + ${a} and 11 more. The <span style="color:var(--blue)">blue pair</span> is ${a} + ${a} and 1 + 10 more, which is also 11. Same pieces, same sum, in every square.`; }]
+      ]},
+  3:{ nav:'3', text:'Color every number you say counting by 3s. What shape appears? Why?',
+      acts:[
+        ['Color the 3s', () => { const l=[]; for(let n=3;n<=100;n+=3){ l.push(n); mark(n,'var(--purple)'); } return `${l.length} numbers, from 3 to ${l[l.length-1]}. They make slanted stripes going down and to the left.`; }],
+        ['Follow one stripe', () => { for(let n=3;n<=100;n+=3) mark(n,'var(--purple)'); const p=[6]; while(C(p[p.length-1])>0 && p[p.length-1]+9<=100) p.push(p[p.length-1]+9);
+          p.forEach((n,i) => { mark(n,'var(--red)'); if(i) badge(n,'+9','var(--red)'); }); focus(p);
+          return `${p.join(', ')}. Each step down the stripe is one row down (+10) and one step left (−1). That's +9. And 9 = 3 + 3 + 3, so each step stays in the 3s count.`; }]
+      ]},
+  4:{ nav:'4', text:'The +11 rule moves down and to the right. The +9 rule moves down and to the left. Do they ALWAYS?',
+      acts:[
+        ['Hop +11 from 5', () => { const p = hopsFrom(5,11); p.forEach((n,i) => { mark(n,'var(--blue)'); if(i){ badge(n,'+11','var(--blue)'); if(wrapped(p[i-1],11)) addc(n,'flag'); } }); focus(p); return `${p.join(', ')}. ${edgeStory(p,11)}`; }],
+        ['Hop +9 from 8', () => { const p = hopsFrom(8,9); p.forEach((n,i) => { mark(n,'var(--green)'); if(i){ badge(n,'+9','var(--green)'); if(wrapped(p[i-1],9)) addc(n,'flag'); } }); focus(p); return `${p.join(', ')}. ${edgeStory(p,9)}`; }]
+      ]},
+  5:{ nav:'★ Challenge', text:'In a 3 × 3 square, is the center number always the average of the four corners?',
+      acts:[
+        ['Show one square', () => { const c=45, k=[c-11,c-9,c+9,c+11]; const all=[]; for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){ all.push(c+10*dr+dc); addc(c+10*dr+dc,'win'); }
+          k.forEach(n=>mark(n,'var(--red)')); mark(c,'var(--purple)'); focus(all); const s=k.reduce((x,y)=>x+y,0);
+          return `Corners: ${k.join(' + ')} = <b>${s}</b>. Center: ${c} + ${c} + ${c} + ${c} = <b>${4*c}</b>. ${s===4*c?'They match':'They don’t match'}, so ${c} is the average. Each corner is 11 or 9 away from the center, and the ups and downs cancel out.`; }],
+        ['Test every 3 × 3 square', async (g) => {
+          let ok=0,total=0;
+          for(let r=1;r<=8;r++) for(let cc=1;cc<=8;cc++){
+            const c=N(r,cc), k=[c-11,c-9,c+9,c+11], s=k.reduce((x,y)=>x+y,0); total++; if(s===4*c) ok++;
+            clearB(); k.forEach(n=>mark(n,'var(--red)')); mark(c,'var(--purple)'); focus([...k,c]); render();
+            setMsg($('#qres'), `Testing ${total} of 64: corners add to ${s}, and 4 × ${c} = ${4*c}`);
+            await sleep(55); if(g!==S.gen) return null;
+          }
+          return `<b>${total} squares tested. ${ok} worked.</b> The center is always the average of the corners.`;
+        }]
+      ]},
+  6:{ nav:'Exit puzzle', text:'I am on the hundred chart. I am 3 rows down and 2 columns right of 25. Who am I?',
+      acts:[
+        ['Show the path', () => { const p=[25]; let n=25; for(let i=0;i<3;i++){ n+=10; p.push(n); } for(let i=0;i<2;i++){ n+=1; p.push(n); }
+          p.forEach((m,i) => { mark(m, i===0?'var(--yellow)':i===p.length-1?'var(--green)':'var(--blue)'); if(i) badge(m, i<=3?'+10':'+1','var(--blue)'); }); focus(p);
+          return `${p.slice(0,4).join(' → ')} (3 rows down, +10 each), then → ${p.slice(4).join(' → ')} (2 columns right, +1 each). <b>I am ${n}.</b> Check: 25 + 10 + 10 + 10 + 1 + 1 = ${25+30+2}.`; }]
+      ]}
+};
+function qDraw(){
+  clearB(); render(); setMsg($('#qres'), '');
+  $('#qnav').innerHTML = Object.entries(QUEST).map(([i,q]) => `<button data-q="${i}" aria-pressed="${+i===QS.q}" aria-label="${q.nav.length<3?'Question '+q.nav:q.nav}">${q.nav}</button>`).join('');
+  $$('#qnav button').forEach(b => b.onclick = () => { QS.q = +b.dataset.q; draw(); });
+  const q = QUEST[QS.q]; $('#qtext').textContent = q.text;
+  const box = $('#qacts'); box.innerHTML = '';
+  q.acts.forEach(([t,f],i) => { const b = document.createElement('button'); b.className = i?'secondary':'primary'; b.textContent = t;
+    b.onclick = async () => { const g = ++S.gen; clearB(); const out = await f(g); if(out===null || g!==S.gen) return; render(); setMsg($('#qres'), out); };
+    box.appendChild(b); });
+}
+function qTap(){}
+
+/* ================= Tabs / reset ================= */
+function setTab(t){ S.tab = t; $$('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t)); ['warm','hunt','myst','q'].forEach(k => $('#v-'+k).hidden = k!==t); draw(); }
+function setSt(s){ S.st = s; $$('[data-st]').forEach(b => b.setAttribute('aria-pressed', b.dataset.st===s)); ['hop','skip','corner'].forEach(k => $('#st-'+k).hidden = k!==s); draw(); }
+$$('[data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$$('[data-st]').forEach(b => b.onclick = () => setSt(b.dataset.st));
+$$('[data-my]').forEach(b => b.onclick = () => { S.my = b.dataset.my; kp=''; draw(); });
+function resetAll(){ S.gen++; kp=''; warmInit(); hopInit(); skipInit(); cornInit(); winInit(); mothInit(); whereInit(); QS.q = 1; draw(); }
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

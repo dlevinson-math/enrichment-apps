@@ -1,0 +1,862 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Build the Biggest Number</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --felt:#EAF0F4; --panel:#FFFFFF; --ink:#18263A; --muted:#566478; --line:#CFD9E2;
+  --accent:#D63F36; --accent-ink:#FFFFFF; --soft:#FCE9E6; --good:#1E7F4F; --good-soft:#E2F4EA; --warn:#9A5B00; --warn-soft:#FFF1D6;
+  --p1000:#7A4BB0; --p100:#1E62B8; --p10:#1E8A5C; --p1:#D18A00;
+  --cardback:#27456B;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --felt:#121A24; --panel:#1C2633; --ink:#EDF2F7; --muted:#A3B1C2; --line:#344354;
+    --accent:#FF6B5E; --accent-ink:#1A0A08; --soft:#3A2220; --good:#4FD08E; --good-soft:#173527; --warn:#F2B64C; --warn-soft:#3A2C12;
+    --p1000:#B58CEB; --p100:#6FA3F0; --p10:#4FC98F; --p1:#F2B94A; --cardback:#3A5D8A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --felt:#121A24; --panel:#1C2633; --ink:#EDF2F7; --muted:#A3B1C2; --line:#344354;
+  --accent:#FF6B5E; --accent-ink:#1A0A08; --soft:#3A2220; --good:#4FD08E; --good-soft:#173527; --warn:#F2B64C; --warn-soft:#3A2C12;
+  --p1000:#B58CEB; --p100:#6FA3F0; --p10:#4FC98F; --p1:#F2B94A; --cardback:#3A5D8A;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--felt); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; padding-inline:clamp(16px,2.5vw,32px); padding-block:0 32px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Header */
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; padding-block:16px 12px}
+.brand{display:flex; align-items:center; gap:14px}
+.mini-cards{display:flex}
+.mini-cards span{width:34px; height:46px; border-radius:7px; background:var(--panel); border:2px solid var(--ink); display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:22px; color:var(--accent); margin-left:-10px; box-shadow:0 2px 0 var(--line)}
+.mini-cards span:first-child{margin-left:0; transform:rotate(-8deg)} .mini-cards span:last-child{transform:rotate(8deg)}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(26px,3vw,40px); line-height:1.05; margin:0; text-wrap:balance}
+.sub{margin:2px 0 0; font-size:15px; color:var(--muted); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--panel); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+nav.tabs{display:flex; gap:6px; flex-wrap:wrap; border-bottom:3px solid var(--line); margin-bottom:18px}
+nav.tabs button{border:0; background:none; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.7vw,24px); padding:10px 14px; color:var(--muted); border-bottom:5px solid transparent; margin-bottom:-3px; min-height:52px}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+nav.tabs small{font-family:var(--body); font-weight:400; font-size:13px; display:block; letter-spacing:.04em; text-transform:uppercase}
+
+/* Shared controls */
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--panel); border:2px solid var(--line); border-radius:14px; padding:3px; gap:2px}
+.seg button{border:0; background:none; border-radius:10px; padding:9px 14px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--panel)}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:600; font-size:clamp(19px,1.7vw,24px); padding:14px 26px; border-radius:16px; min-height:58px; box-shadow:0 4px 0 color-mix(in srgb, var(--accent) 60%, #000)}
+.primary:active{transform:translateY(2px); box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 60%, #000)}
+.primary:disabled{opacity:.4; cursor:default; transform:none}
+.secondary{border:2px solid var(--ink); background:var(--panel); font-weight:700; font-size:17px; padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.lbl{font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700}
+.box{background:var(--panel); border:2px solid var(--line); border-radius:18px; padding:18px}
+.say{font-size:clamp(18px,1.6vw,23px); line-height:1.45; margin:0; max-width:40em}
+.note{font-size:clamp(17px,1.4vw,21px); line-height:1.45; padding:14px 18px; border-radius:14px; background:var(--soft); margin:0; max-width:44em}
+.note:empty{display:none}
+.note.good{background:var(--good-soft)} .note.warn{background:var(--warn-soft)}
+.check{display:inline-flex; gap:8px; align-items:center; font-size:16px; cursor:pointer; min-height:44px}
+.check input{width:22px; height:22px; accent-color:var(--accent)}
+.view[hidden]{display:none!important}
+
+/* ---------- Quick images ---------- */
+.qi{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:22px; align-items:start}
+.stage{position:relative; min-height:clamp(260px,42vh,460px); display:flex; flex-direction:column; gap:14px; justify-content:center}
+.blocks{display:flex; flex-wrap:wrap; gap:clamp(14px,2vw,28px); align-items:flex-end; justify-content:center; --u:clamp(9px,1.25vw,15px); padding:10px}
+.grp{display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end; max-width:100%}
+.grp.ones{display:grid; grid-template-columns:repeat(5, var(--u)); gap:3px}
+.flat{width:calc(var(--u)*10); height:calc(var(--u)*10); background-color:color-mix(in srgb, var(--p100) 22%, var(--panel)); border:2px solid var(--p100); border-radius:3px;
+  background-image:linear-gradient(to right, color-mix(in srgb, var(--p100) 55%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--p100) 55%, transparent) 1px, transparent 1px); background-size:var(--u) var(--u)}
+.rod{width:var(--u); height:calc(var(--u)*10); background-color:color-mix(in srgb, var(--p10) 25%, var(--panel)); border:2px solid var(--p10); border-radius:3px;
+  background-image:linear-gradient(to bottom, color-mix(in srgb, var(--p10) 60%, transparent) 1px, transparent 1px); background-size:100% var(--u)}
+.unit{width:var(--u); height:var(--u); background:color-mix(in srgb, var(--p1) 40%, var(--panel)); border:2px solid var(--p1); border-radius:2px}
+.new{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.4); opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1); opacity:1}}
+.cover{position:absolute; inset:0; background:var(--panel); border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:20px}
+.cover b{font-family:var(--display); font-size:clamp(28px,3.4vw,46px); font-weight:600}
+.cover span{font-size:clamp(18px,1.6vw,24px); color:var(--muted)}
+.timer{height:10px; border-radius:6px; background:var(--line); overflow:hidden}
+.timer i{display:block; height:100%; width:100%; background:var(--accent); transform-origin:left}
+.reveal{font-family:var(--display); font-size:clamp(22px,2.4vw,34px); font-weight:600; text-align:center; line-height:1.3}
+.reveal .h{color:var(--p100)} .reveal .t{color:var(--p10)} .reveal .o{color:var(--p1)}
+.presets{display:flex; gap:8px; flex-wrap:wrap}
+.presets button{min-width:54px; min-height:54px; border-radius:50%; border:2px solid var(--line); background:var(--panel); font-weight:700; font-size:19px}
+.presets button[aria-pressed="true"]{background:var(--ink); color:var(--panel); border-color:var(--ink)}
+.stepper{display:grid; grid-template-columns:1fr auto auto auto; gap:8px; align-items:center}
+.stepper b{font-family:var(--display); font-size:24px; min-width:2ch; text-align:center}
+.stepper button{width:48px; height:48px; border-radius:12px; border:2px solid var(--line); background:var(--panel); font-size:24px; font-weight:700}
+.stepper button:disabled{opacity:.35}
+.sw{display:inline-block; width:14px; height:14px; border-radius:3px; background:var(--c); margin-right:6px; vertical-align:-1px}
+
+/* ---------- Game ---------- */
+.game{display:grid; grid-template-columns:minmax(260px,340px) minmax(0,1fr); gap:24px; align-items:start}
+.table{display:flex; flex-direction:column; gap:16px; align-items:stretch}
+.cardwrap{display:flex; justify-content:center; perspective:900px}
+.card{width:clamp(150px,15vw,200px); aspect-ratio:5/7; max-width:100%; position:relative; transform-style:preserve-3d; transition:transform .5s}
+.card.back{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; border-radius:18px; backface-visibility:hidden; display:grid; place-items:center; border:3px solid var(--ink); background:var(--panel); box-shadow:0 6px 0 var(--line)}
+.face .big{font-family:var(--display); font-weight:700; font-size:clamp(90px,10vw,140px); color:var(--accent); line-height:1}
+.face .c{position:absolute; font-family:var(--display); font-weight:600; font-size:24px; color:var(--accent); line-height:1}
+.face .tl{top:10px; left:14px} .face .br{bottom:10px; right:14px; transform:rotate(180deg)}
+.face .big.u{text-decoration:underline; text-decoration-thickness:6px; text-underline-offset:10px}
+.face.rear{transform:rotateY(180deg); background:var(--cardback); background-image:repeating-linear-gradient(45deg, transparent 0 10px, rgba(255,255,255,.12) 10px 20px); color:#fff; font-family:var(--display); font-size:22px; font-weight:600; text-align:center; padding:12px}
+@media (prefers-reduced-motion: reduce){ .card{transition:none} .new{animation:none} .seat.fill{animation:none!important} .timer i{transition:none!important} }
+.decktrack{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
+.decktrack span{aspect-ratio:1; border-radius:10px; border:2px solid var(--line); display:grid; place-items:center; font-family:var(--display); font-weight:600; font-size:22px; background:var(--panel)}
+.decktrack span.gone{opacity:.28; text-decoration:line-through}
+.decktrack span.now{border-color:var(--accent); color:var(--accent); opacity:1; text-decoration:none}
+.decktrack span.hot{background:var(--good-soft); border-color:var(--good)}
+.decktrack span.cold{background:var(--soft)}
+.settings{display:flex; flex-direction:column; gap:10px}
+.settings .seg{display:flex}
+.settings .seg button{flex:1 1 auto}
+.settings select{font:inherit; font-size:16px; padding:10px 12px; border-radius:12px; border:2px solid var(--line); background:var(--panel); color:var(--ink); min-height:48px; max-width:100%}
+.plan{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.plan span{min-width:40px; height:40px; padding:0 8px; border-radius:20px; display:grid; place-items:center; font-weight:700; font-size:15px; border:2px solid var(--line); background:var(--panel); color:var(--muted)}
+.plan span.done{background:var(--line); color:var(--ink)}
+.plan span.now{border-color:var(--accent); color:var(--ink); background:var(--soft)}
+.goal{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.6vw,36px); line-height:1.1; margin:0}
+.goal small{display:block; font-family:var(--body); font-weight:400; font-size:16px; color:var(--muted); margin-top:4px}
+.mats{display:flex; flex-direction:column; gap:16px}
+.mat{background:var(--panel); border:2px solid var(--line); border-radius:20px; padding:14px 18px 16px; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px 18px; align-items:center}
+.mat.turn{border-color:var(--accent); box-shadow:0 0 0 3px var(--soft)}
+.who{font-family:var(--display); font-weight:600; font-size:22px; min-width:5.5em}
+.who small{display:block; font-family:var(--body); font-weight:400; font-size:14px; color:var(--muted)}
+.seats{display:flex; gap:10px; flex-wrap:wrap}
+.seatcol{display:flex; flex-direction:column; align-items:center; gap:4px}
+.seatcol .pl{font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c)}
+.seat{width:clamp(70px,7.5vw,104px); aspect-ratio:5/6; border-radius:14px; border:3px dashed var(--c); background:color-mix(in srgb, var(--c) 8%, var(--panel)); font-family:var(--display); font-weight:700; font-size:clamp(46px,5vw,70px); color:var(--ink); display:grid; place-items:center; padding:0; line-height:1}
+.seat.open{cursor:pointer}
+.seat.open:hover{background:color-mix(in srgb, var(--c) 20%, var(--panel))}
+.seat.filled{border-style:solid; background:var(--panel); cursor:default}
+.seat.hidden{border-style:solid; background:var(--cardback); background-image:repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,.14) 8px 16px); color:transparent}
+.seat.nozero{opacity:.45}
+.seat.fill{animation:pop .4s ease-out}
+.seat:disabled{cursor:default}
+.seatcol .worth{font-size:15px; color:var(--muted); min-height:1.3em}
+.total{font-family:var(--display); font-weight:700; font-size:clamp(34px,3.6vw,52px); text-align:right; min-width:3.2ch}
+.total small{display:block; font-family:var(--body); font-weight:400; font-size:14px; color:var(--muted)}
+.discard{grid-column:1 / -1; display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:16px; color:var(--muted)}
+.discard .secondary{min-height:44px; padding:8px 14px; font-size:15px}
+.mat .msg{grid-column:1 / -1; font-size:17px; margin:0; color:var(--ink)}
+.mat .msg:empty{display:none}
+.score{display:flex; gap:18px; flex-wrap:wrap; align-items:baseline; font-size:16px; color:var(--muted)}
+.score b{font-family:var(--display); font-size:30px; color:var(--ink); margin-right:4px}
+.result{display:flex; flex-direction:column; gap:10px}
+.result h3{font-family:var(--display); font-size:clamp(24px,2.4vw,32px); margin:0}
+.cmp{font-size:clamp(17px,1.4vw,20px)}
+.cmp .h{color:var(--p100); font-weight:700} .cmp .t{color:var(--p10); font-weight:700} .cmp .o{color:var(--p1); font-weight:700} .cmp .k{color:var(--p1000); font-weight:700}
+
+/* ---------- Strategy lab ---------- */
+.lab{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; max-width:1100px}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--panel); font-weight:700; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--panel); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:28px}
+.qtext{font-family:var(--display); font-weight:500; font-size:clamp(22px,2.3vw,32px); line-height:1.25; margin:0; max-width:34em; text-wrap:balance}
+.evidence{display:flex; flex-direction:column; gap:14px}
+.tablewrap{overflow-x:auto}
+table.ev{border-collapse:separate; border-spacing:0 6px; font-size:clamp(16px,1.4vw,20px); min-width:520px}
+table.ev th{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); text-align:left; padding:0 16px}
+table.ev td{background:var(--panel); padding:12px 16px; border-block:2px solid var(--line)}
+table.ev td:first-child{border-left:2px solid var(--line); border-radius:12px 0 0 12px; font-weight:700}
+table.ev td:last-child{border-right:2px solid var(--line); border-radius:0 12px 12px 0}
+table.ev td.best{background:var(--good-soft); border-color:var(--good)}
+table.ev td.no{color:var(--muted); font-style:italic}
+table.ev td b{font-family:var(--display); font-size:1.25em}
+.tag{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; background:var(--good); color:var(--panel); padding:2px 8px; border-radius:8px; margin-left:6px; vertical-align:2px}
+.pickrow{display:flex; gap:6px; flex-wrap:wrap}
+.pickrow button{width:52px; height:60px; border-radius:10px; border:2px solid var(--ink); background:var(--panel); font-family:var(--display); font-weight:700; font-size:28px; color:var(--accent)}
+.pickrow button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.bars{display:flex; flex-direction:column; gap:10px; max-width:640px}
+.bar{display:grid; grid-template-columns:9em minmax(0,1fr) 4em; gap:10px; align-items:center; font-size:17px}
+.bar i{display:block; height:28px; border-radius:8px; background:var(--c); min-width:2px}
+.bar span:last-child{font-family:var(--display); font-weight:600; font-size:22px; text-align:right}
+.arr{display:flex; gap:8px; flex-wrap:wrap}
+.arr span{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.4vw,32px); padding:6px 14px; border-radius:12px; background:var(--panel); border:2px solid var(--line)}
+.arr span.max{border-color:var(--good); background:var(--good-soft)}
+.arr span.min{border-color:var(--p100); background:color-mix(in srgb, var(--p100) 14%, var(--panel))}
+.arr span.fake{text-decoration:line-through; opacity:.55}
+.hint{font-size:15px; color:var(--muted); margin:0}
+
+@media (max-width: 960px){
+  .qi,.game{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+}
+@media (max-width: 560px){
+  .mat{grid-template-columns:minmax(0,1fr) auto}
+  .mat .seats{grid-column:1 / -1; order:3}
+  .seat{width:clamp(62px,20vw,86px)}
+  .bar{grid-template-columns:6.5em minmax(0,1fr) 3.2em}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <div class="mini-cards" aria-hidden="true"><span>7</span><span>3</span><span>9</span></div>
+    <div>
+      <h1>Build the Biggest Number</h1>
+      <p class="sub">Grade 2 · Week 2 · Place value to 1,000</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tab-qi" aria-selected="true"><small>Warm-up</small>Quick Images</button>
+  <button role="tab" id="tab-game" aria-selected="false"><small>Play</small>The Card Game</button>
+  <button role="tab" id="tab-lab" aria-selected="false"><small>Talk it over</small>Strategy Lab</button>
+</nav>
+
+<!-- ============ QUICK IMAGES ============ -->
+<section class="view" id="view-qi">
+  <div class="qi">
+    <div class="box stage" id="stage">
+      <div class="blocks" id="blocks" aria-label="Base-ten blocks"></div>
+      <div class="reveal" id="reveal" aria-live="polite"></div>
+      <div class="cover" id="cover" hidden>
+        <b id="coverTitle">Look fast!</b>
+        <span id="coverText"></span>
+        <div class="timer" style="width:min(320px,70%)"><i id="timerBar"></i></div>
+      </div>
+    </div>
+    <div class="settings">
+      <span class="lbl">Pick a picture</span>
+      <div class="presets" id="presets"></div>
+      <div class="row">
+        <button class="primary" id="flashBtn">Flash for 3 seconds</button>
+      </div>
+      <div class="row">
+        <button class="secondary" id="showBtn">Show the blocks</button>
+        <button class="secondary" id="revealBtn">What number is it?</button>
+      </div>
+      <button class="secondary" id="tradeBtn">Trade 10 for 1</button>
+      <p class="note" id="qiNote" aria-live="polite"></p>
+      <div class="box" style="padding:14px">
+        <span class="lbl">Build your own</span>
+        <div class="stepper" style="margin-top:8px">
+          <span><i class="sw" style="--c:var(--p100)"></i>Hundreds</span><button data-st="h" data-d="-1" aria-label="One fewer hundred">−</button><b class="num" id="stH">0</b><button data-st="h" data-d="1" aria-label="One more hundred">+</button>
+          <span><i class="sw" style="--c:var(--p10)"></i>Tens</span><button data-st="t" data-d="-1" aria-label="One fewer ten">−</button><b class="num" id="stT">0</b><button data-st="t" data-d="1" aria-label="One more ten">+</button>
+          <span><i class="sw" style="--c:var(--p1)"></i>Ones</span><button data-st="o" data-d="-1" aria-label="One fewer one">−</button><b class="num" id="stO">0</b><button data-st="o" data-d="1" aria-label="One more one">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section class="view" id="view-game" hidden>
+  <div class="game">
+    <div class="table">
+      <div class="cardwrap"><div class="card back" id="card" aria-live="polite">
+        <div class="face"><span class="c tl" id="cTL"></span><span class="big" id="cBig"></span><span class="c br" id="cBR"></span></div>
+        <div class="face rear" id="cRear">Digit cards 0 to 9</div>
+      </div></div>
+      <button class="primary" id="flipBtn">Flip a card</button>
+      <div>
+        <span class="lbl">Cards in the deck</span>
+        <div class="decktrack" id="deck" style="margin-top:6px"></div>
+      </div>
+      <div class="box settings" style="padding:14px">
+        <span class="lbl">Game</span>
+        <div class="seg" role="group" aria-label="Goal" id="modeSeg">
+          <button data-mode="big" aria-pressed="true">Biggest</button>
+          <button data-mode="small" aria-pressed="false">Smallest</button>
+          <button data-mode="close" aria-pressed="false" id="closeBtn">Closest to 500</button>
+        </div>
+        <label class="check"><input type="checkbox" id="planChk" checked> Follow the lesson plan (rounds 1–7)</label>
+        <label for="oppSel" class="lbl">Opponent</label>
+        <select id="oppSel">
+          <option value="smart">Thinking Robot</option>
+          <option value="random">Coin-Flip Robot (places cards at random)</option>
+          <option value="team">Team B (two teams of students)</option>
+        </select>
+        <label class="check"><input type="checkbox" id="rejChk"> Reject pile: throw away one card per round</label>
+        <label class="check"><input type="checkbox" id="fourChk"> 4-digit numbers</label>
+      </div>
+    </div>
+
+    <div class="mats">
+      <div class="row" style="justify-content:space-between; align-items:flex-end">
+        <p class="goal" id="goal"></p>
+        <div class="score" id="score"></div>
+      </div>
+      <div class="plan" id="plan" aria-label="Lesson plan rounds"></div>
+      <div id="matList" class="mats"></div>
+      <p class="note" id="gameNote" aria-live="polite"></p>
+      <div class="box result" id="result" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STRATEGY LAB ============ -->
+<section class="view" id="view-lab" hidden>
+  <div class="lab">
+    <div class="qnav" id="qnav"></div>
+    <p class="qtext" id="qtext"></p>
+    <div class="row" id="qactions"></div>
+    <div class="evidence" id="qev" aria-live="polite"></div>
+    <p class="hint">Talk it over with a partner first. Then tap a button to put evidence on the screen.</p>
+  </div>
+</section>
+
+<script>
+/* ---------- Pure math: Build the Biggest Number ---------- */
+const L = (function(){
+  const FULL = (1<<10) - 1;
+  const target = n => n===3 ? 500 : 5000;
+  const valueOf = seats => seats.reduce((a,d) => a*10 + (d==null ? 0 : d), 0);
+  // score: higher is always better
+  function score(mode, n, v){
+    if(mode==='big') return v;
+    if(mode==='small') return -v;
+    return -Math.abs(v - target(n));
+  }
+  const legal = (seats, s, c) => seats[s]==null && !(c===0 && s===0);
+  const openSeats = seats => seats.map((d,i)=> d==null ? i : -1).filter(i=>i>=0);
+  const canPlace = (seats, c) => openSeats(seats).some(s => legal(seats, s, c));
+  const memo = new Map();
+  // Expected score with smart play from here: next card is uniform from mask.
+  function V(mode, n, seats, mask, disc){
+    if(seats.every(d => d!=null)) return score(mode, n, valueOf(seats));
+    const key = mode+n+'|'+seats.map(d=>d==null?'_':d).join('')+'|'+mask+'|'+disc;
+    if(memo.has(key)) return memo.get(key);
+    let sum=0, cnt=0;
+    for(let c=0;c<10;c++){
+      if(!(mask & (1<<c))) continue;
+      cnt++;
+      const nm = mask & ~(1<<c);
+      sum += bestAfter(mode, n, seats, nm, disc, c).v;
+    }
+    const r = cnt ? sum/cnt : score(mode, n, valueOf(seats));
+    memo.set(key, r); return r;
+  }
+  // Best action when card c is showing (mask already excludes c).
+  function bestAfter(mode, n, seats, nm, disc, c){
+    let best = {v:-Infinity, act:null}; const opts = [];
+    for(const s of openSeats(seats)){
+      if(!legal(seats, s, c)) continue;
+      const ns = seats.slice(); ns[s] = c;
+      const v = V(mode, n, ns, nm, disc); opts.push({act:'seat', s, v});
+      if(v > best.v + 1e-9) best = {v, act:'seat', s};
+    }
+    if(!opts.length){ const v = V(mode, n, seats, nm, disc); return {v, act:'pass', opts:[]}; }
+    if(disc > 0){
+      const v = V(mode, n, seats, nm, disc-1); opts.push({act:'discard', v});
+      if(v > best.v + 1e-9) best = {v, act:'discard'};
+    }
+    best.opts = opts; return best;
+  }
+  function perms(a){
+    if(a.length<=1) return [a.slice()];
+    const r=[]; a.forEach((x,i)=>{ const rest=a.slice(0,i).concat(a.slice(i+1)); perms(rest).forEach(p=>r.push([x].concat(p))); });
+    return r;
+  }
+  // Best arrangement of the given digits (no leading zero)
+  function bestArrangement(mode, digits){
+    const n = digits.length; let best=null;
+    for(const p of perms(digits)){
+      if(p[0]===0) continue;
+      const v = valueOf(p), sc = score(mode, n, v);
+      if(!best || sc > best.sc) best = {p, v, sc};
+    }
+    return best;
+  }
+  // Table: first card d, expected result for each seat (standard rules)
+  function firstCardTable(mode, n, d){
+    const mask = FULL & ~(1<<d);
+    const rows = [];
+    for(let s=0;s<n;s++){
+      if(d===0 && s===0){ rows.push({s, allowed:false}); continue; }
+      const seats = Array(n).fill(null); seats[s]=d;
+      const e = V(mode, n, seats, mask, 0);
+      // best and worst cases with the remaining distinct digits
+      rows.push({s, allowed:true, e, ...extremes(mode, n, seats, mask)});
+    }
+    return rows;
+  }
+  function extremes(mode, n, seats, mask){
+    const avail=[]; for(let c=0;c<10;c++) if(mask&(1<<c)) avail.push(c);
+    const open = openSeats(seats); let best=null, worst=null;
+    (function rec(i, ss, used){
+      if(i===open.length){ if(ss[0]===0) return; const v=valueOf(ss), sc=score(mode,n,v);
+        if(!best||sc>best.sc) best={v,sc}; if(!worst||sc<worst.sc) worst={v,sc}; return; }
+      for(const c of avail){ if(used&(1<<c)) continue; const t=ss.slice(); t[open[i]]=c; rec(i+1,t,used|(1<<c)); }
+    })(0, seats.slice(), 0);
+    return {bestV:best.v, bestSc:best.sc, worstV:worst.v, worstSc:worst.sc};
+  }
+  function shuffle(a, rnd=Math.random){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  // Simulate one round between two bot kinds on a shared deck (standard rules)
+  function simRound(mode, n, kinds, rnd=Math.random){
+    const deck = shuffle([0,1,2,3,4,5,6,7,8,9], rnd);
+    let mask = FULL;
+    const P = kinds.map(k => ({k, seats:Array(n).fill(null)}));
+    while(P.some(p => p.seats.some(d=>d==null))){
+      const c = deck.pop(); mask &= ~(1<<c);
+      for(const p of P){
+        if(p.seats.every(d=>d!=null)) continue;
+        if(!canPlace(p.seats, c)) continue;
+        if(p.k==='smart'){ const b = bestAfter(mode, n, p.seats, mask, 0, c); p.seats[b.s] = c; }
+        else { const o = openSeats(p.seats).filter(s=>legal(p.seats,s,c)); p.seats[o[Math.floor(rnd()*o.length)]] = c; }
+      }
+    }
+    return P.map(p => valueOf(p.seats));
+  }
+  return {FULL, target, valueOf, score, legal, openSeats, canPlace, V, bestAfter, perms, bestArrangement, firstCardTable, extremes, shuffle, simRound};
+})();
+if(typeof module!=='undefined') module.exports = L;
+
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = n => n.toLocaleString('en-US');
+const r0 = x => Math.round(x);
+const list = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+
+/* ================= QUICK IMAGES ================= */
+const PRESETS = [
+  {h:3,t:4,o:7},
+  {h:4,t:12,o:5},
+  {h:2,t:0,o:13},
+  {h:5,t:11,o:11},
+  {h:1,t:9,o:10},
+];
+const QI = {sel:0, h:3, t:4, o:7, timer:null, fresh:null};
+const qiVal = () => QI.h*100 + QI.t*10 + QI.o;
+function drawBlocks(){
+  const b = $('#blocks'); b.innerHTML='';
+  const mk = (cls, n, grp) => { const g=document.createElement('div'); g.className='grp '+grp; for(let i=0;i<n;i++){ const e=document.createElement('div'); e.className=cls; g.appendChild(e);} return g; };
+  if(QI.h) b.appendChild(mk('flat', QI.h, 'hundreds'));
+  if(QI.t) b.appendChild(mk('rod', QI.t, 'tens'));
+  if(QI.o) b.appendChild(mk('unit', QI.o, 'ones'));
+  if(!QI.h && !QI.t && !QI.o){ b.innerHTML = '<p class="say" style="color:var(--muted)">No blocks yet. Tap + to add some.</p>'; }
+  if(QI.fresh && !reduced){
+    const g = b.querySelector('.'+QI.fresh); if(g && g.lastElementChild) g.lastElementChild.classList.add('new');
+  }
+  QI.fresh = null;
+  b.setAttribute('aria-label', `${QI.h} hundreds, ${QI.t} tens, ${QI.o} ones`);
+  $('#stH').textContent=QI.h; $('#stT').textContent=QI.t; $('#stO').textContent=QI.o;
+  document.querySelectorAll('[data-st]').forEach(btn => {
+    const k=btn.dataset.st, d=+btn.dataset.d, next={...QI}; next[k]+=d;
+    const max = k==='h' ? 9 : 19;
+    btn.disabled = next[k] < 0 || next[k] > max || (next.h*100+next.t*10+next.o) > 999;
+  });
+  $('#tradeBtn').disabled = !(QI.o>=10 || QI.t>=10);
+  $('#tradeBtn').textContent = QI.o>=10 ? 'Trade 10 ones for 1 ten' : QI.t>=10 ? 'Trade 10 tens for 1 hundred' : 'Nothing to trade';
+}
+function revealText(){
+  const v = qiVal();
+  const canon = QI.t<10 && QI.o<10;
+  let s = `<span class="h">${QI.h} hundred${QI.h===1?'':'s'}</span> + <span class="t">${QI.t} ten${QI.t===1?'':'s'}</span> + <span class="o">${QI.o} one${QI.o===1?'':'s'}</span><br>` +
+    `<span class="h">${QI.h*100}</span> + <span class="t">${QI.t*10}</span> + <span class="o">${QI.o}</span> = <b class="num">${fmt(v)}</b>`;
+  if(!canon) s += `<div class="say" style="margin:8px auto 0; font-family:var(--body); font-weight:400">More than 9 in one place! Tap <b>Trade 10 for 1</b> to see why it's still ${fmt(v)}.</div>`;
+  return s;
+}
+function selPreset(i){
+  clearTimeout(QI.timer); $('#cover').hidden = true;
+  QI.sel=i; Object.assign(QI, PRESETS[i]);
+  $('#presets').querySelectorAll('button').forEach((b,j)=>b.setAttribute('aria-pressed', j===i));
+  $('#reveal').innerHTML=''; $('#qiNote').textContent=''; $('#qiNote').className='note';
+  drawBlocks();
+  $('#cover').hidden=false; $('#timerBar').parentElement.hidden=true;
+  $('#coverTitle').textContent=`Picture ${i+1} is ready`; $('#coverText').textContent='Tap Flash for 3 seconds. Look fast!';
+}
+function flash(){
+  clearTimeout(QI.timer); $('#reveal').innerHTML=''; $('#qiNote').textContent='';
+  const cover=$('#cover'), bar=$('#timerBar');
+  cover.hidden=false; $('#coverTitle').textContent='Get ready…'; $('#coverText').textContent='Eyes on the screen!';
+  bar.parentElement.hidden=false;
+  bar.style.transition='none'; bar.style.transform='scaleX(1)'; bar.offsetWidth;
+  if(!reduced){ bar.style.transition='transform 1.5s linear'; bar.style.transform='scaleX(0)'; }
+  QI.timer = setTimeout(() => {
+    cover.hidden = true;
+    QI.timer = setTimeout(() => {
+      cover.hidden=false; bar.parentElement.hidden=true;
+      $('#coverTitle').textContent='What did you see?'; $('#coverText').textContent='How did you see it? Tell a partner.';
+    }, 3000);
+  }, 1500);
+}
+function trade(){
+  if(QI.o>=10){ QI.o-=10; QI.t+=1; QI.fresh='tens'; $('#qiNote').textContent='10 ones → 1 ten. Same amount, fewer blocks.'; }
+  else if(QI.t>=10){ QI.t-=10; QI.h+=1; QI.fresh='hundreds'; $('#qiNote').textContent='10 tens → 1 hundred. Same amount, fewer blocks.'; }
+  $('#qiNote').className='note good';
+  $('#cover').hidden=true; drawBlocks(); $('#reveal').innerHTML = revealText();
+}
+$('#presets').innerHTML = PRESETS.map((p,i)=>`<button aria-pressed="${i===0}" aria-label="Picture ${i+1}">${i+1}</button>`).join('');
+$('#presets').querySelectorAll('button').forEach((b,i)=> b.onclick=()=>selPreset(i));
+$('#flashBtn').onclick = flash;
+$('#showBtn').onclick = () => { clearTimeout(QI.timer); $('#cover').hidden=true; };
+$('#revealBtn').onclick = () => { clearTimeout(QI.timer); $('#cover').hidden=true; $('#reveal').innerHTML = revealText(); };
+$('#tradeBtn').onclick = trade;
+document.querySelectorAll('[data-st]').forEach(btn => btn.onclick = () => {
+  const k=btn.dataset.st; QI[k]+= +btn.dataset.d; QI.fresh = +btn.dataset.d>0 ? {h:'hundreds',t:'tens',o:'ones'}[k] : null;
+  $('#presets').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', false));
+  clearTimeout(QI.timer); $('#cover').hidden=true; $('#qiNote').textContent='';
+  drawBlocks(); $('#reveal').innerHTML = revealText();
+});
+
+/* ================= GAME ================= */
+const PLACE = {3:['hundreds','tens','ones'], 4:['thousands','hundreds','tens','ones']};
+const PCOL = {thousands:'var(--p1000)', hundreds:'var(--p100)', tens:'var(--p10)', ones:'var(--p1)'};
+const PCLS = {thousands:'k', hundreds:'h', tens:'t', ones:'o'};
+const PLAN = ['big','big','big','small','small','close','close'];
+const MODE_NAME = {big:'Biggest number wins', small:'Smallest number wins', close:null};
+const PAUSE = {
+  3:'Pause and talk: Where should a 9 go? Where should a 4 go? When are you unsure?',
+  5:'Pause and talk: In the Smallest game, where should a 9 go now? Where should a 4 go? When are you unsure?',
+  7:'Pause and talk: In Closest to 500, where should a 9 go? Where should a 4 go? When are you unsure?'
+};
+const G = {n:3, mode:'big', opp:'smart', reject:false, plan:true, round:1, deck:[], mask:L.FULL, card:null, phase:'ready', P:[], wins:[0,0], ties:0, used:[]};
+const tgt = () => L.target(G.n);
+const goalText = m => m==='close' ? `Closest to ${fmt(tgt())} wins` : MODE_NAME[m];
+function newPlayers(){
+  const bot = G.opp!=='team';
+  G.P = [
+    {name: bot ? 'Class' : 'Team A', human:true},
+    {name: G.opp==='smart' ? 'Thinking Robot' : G.opp==='random' ? 'Coin-Flip Robot' : 'Team B', human:!bot, kind:G.opp}
+  ].map(p => ({...p, seats:Array(G.n).fill(null), disc:G.reject?1:0, acted:true, hidden:null, msg:'', rejected:[], passed:[]}));
+}
+function newRound(){
+  G.deck = L.shuffle([0,1,2,3,4,5,6,7,8,9]); G.mask = L.FULL; G.card=null; G.phase='ready'; G.used=[];
+  newPlayers();
+  $('#card').classList.add('back');
+  $('#result').hidden = true; $('#gameNote').textContent=''; $('#gameNote').className='note';
+  renderGame();
+}
+const full = p => p.seats.every(d => d!=null);
+function flip(){
+  if(G.phase!=='ready') return;
+  G.card = G.deck.pop(); G.mask &= ~(1<<G.card); G.used.push(G.card); G.phase='placing';
+  $('#gameNote').textContent=''; $('#gameNote').className='note';
+  for(const p of G.P){
+    p.msg=''; p.hidden=null;
+    if(full(p)){ p.acted=true; continue; }
+    if(!L.canPlace(p.seats, G.card)){ p.acted=true; p.passed.push(G.card); p.msg = `0 can't sit in the ${PLACE[G.n][0]} seat, so this card skips ${p.name}. Wait for the next card.`; continue; }
+    p.acted = false;
+    if(!p.human) botMove(p);
+  }
+  const card = $('#card');
+  if(!reduced){ card.classList.add('back'); card.offsetWidth; }
+  setTimeout(() => { renderCard(); card.classList.remove('back'); }, reduced ? 0 : 180);
+  checkAllActed();
+  renderGame();
+}
+function botMove(p){
+  const c = G.card;
+  let act;
+  if(p.kind==='smart'){
+    const b = L.bestAfter(G.mode, G.n, p.seats, G.mask, p.disc, c);
+    act = b.act==='discard' ? {discard:true} : {s:b.s};
+  } else {
+    const o = L.openSeats(p.seats).filter(s => L.legal(p.seats, s, c));
+    act = {s:o[Math.floor(Math.random()*o.length)]};
+  }
+  p.hidden = act; p.pendingMsg = explain(p, act, c);
+}
+function explain(p, act, c){
+  const names = PLACE[G.n];
+  if(p.kind==='random') return act.discard ? '' : `Coin-Flip Robot put the ${c} in the ${names[act.s]} seat, just by chance.`;
+  const left = []; for(let d=0; d<10; d++) if(G.mask & (1<<d)) left.push(d);
+  if(act.discard) return `Thinking Robot threw the ${c} on the reject pile. It is hoping for a better card.`;
+  const open = L.openSeats(p.seats).filter(s => L.legal(p.seats, s, c));
+  const where = `Thinking Robot put the ${c} in the ${names[act.s]} seat.`;
+  if(open.length===1) return `${where} It was the only seat it could use.`;
+  if(G.mode==='big' || G.mode==='small'){
+    const better = G.mode==='big' ? left.filter(d=>d>c) : left.filter(d=>d<c);
+    const word = G.mode==='big' ? 'bigger' : 'smaller';
+    const n = better.length;
+    return `${where} ${n===0 ? `No ${word} card is left in the deck.` : `${n} ${word} card${n===1?' is':'s are'} still in the deck (${list(better)}).`}`;
+  }
+  // closest
+  const T = tgt(), lead = names[0];
+  if(act.s===0){
+    return `${where} Its number will start with ${c}. ` + ((c===4||c===5) ? `That is close to ${fmt(T)}.` : `Waiting for a 4 or a 5 was riskier.`);
+  }
+  if(p.seats[0]!=null) return `${where} Its ${lead} digit is already ${p.seats[0]}, so it chose the seat that should land closest.`;
+  if(c===0) return `${where} 0 can't go in the ${lead} seat.`;
+  const tmp = p.seats.slice(); tmp[0]=c;
+  const ex = L.extremes('close', G.n, tmp, G.mask);
+  return `${where} A ${c} in the ${lead} seat would mean at least ${fmt(-ex.bestSc)} away from ${fmt(T)}.`;
+}
+function place(pi, s){
+  const p = G.P[pi], c = G.card;
+  if(G.phase!=='placing' || p.acted || !p.human) return;
+  if(p.seats[s]!=null) return;
+  if(c===0 && s===0){
+    p.msg = `A 0 can't sit in the ${PLACE[G.n][0]} seat. 0${'_'.repeat(G.n-1)} would really be a ${G.n-1}-digit number. Try another seat.`;
+    renderGame(); return;
+  }
+  p.seats[s]=c; p.acted=true; p.msg=''; p.justFilled = s;
+  checkAllActed(); renderGame();
+}
+function rejectCard(pi){
+  const p = G.P[pi];
+  if(G.phase!=='placing' || p.acted || p.disc<1) return;
+  p.disc--; p.rejected.push(G.card); p.acted=true; p.msg = `${p.name} threw the ${G.card} on the reject pile.`;
+  checkAllActed(); renderGame();
+}
+function checkAllActed(){
+  if(G.P.some(p => p.human && !p.acted)) return;
+  for(const p of G.P){
+    if(p.hidden){
+      if(p.hidden.discard){ p.disc--; p.rejected.push(G.card); } else { p.seats[p.hidden.s]=G.card; p.justFilled=p.hidden.s; }
+      p.msg = p.pendingMsg; p.hidden=null; p.acted=true;
+    }
+  }
+  if(G.P.every(full)){ G.phase='over'; finishRound(); }
+  else G.phase='ready';
+}
+function worthLine(digits){
+  const names = PLACE[G.n];
+  return digits.map((d,i)=>`<span class="${PCLS[names[i]]}">${fmt(d*10**(G.n-1-i))}</span>`).join(' + ');
+}
+function finishRound(){
+  const vals = G.P.map(p => L.valueOf(p.seats));
+  const sc = vals.map(v => L.score(G.mode, G.n, v));
+  let head;
+  if(sc[0]===sc[1]){ G.ties++; head = `It's a tie!`; }
+  else { const w = sc[0]>sc[1] ? 0 : 1; G.wins[w]++; head = `${G.P[w].name} wins round ${G.round}!`; }
+  let html = `<h3>${head}</h3>`;
+  if(G.mode==='close'){
+    html += `<p class="say">` + G.P.map((p,i)=>`${p.name}: <b class="num">${fmt(vals[i])}</b> is ${fmt(Math.abs(vals[i]-tgt()))} away from ${fmt(tgt())}.`).join('<br>') + `</p>`;
+  } else {
+    html += `<p class="say">` + G.P.map((p,i)=>`${p.name}: <b class="num">${fmt(vals[i])}</b>`).join(' &nbsp;·&nbsp; ') + `</p>`;
+  }
+  // hindsight feedback for each human player
+  for(const [i,p] of G.P.entries()){
+    if(!p.human) continue;
+    const digits = p.seats.slice();
+    const best = L.bestArrangement(G.mode, digits.slice().sort((a,b)=>b-a));
+    const sorted = digits.slice().sort((a,b)=>a-b);
+    const who = G.opp==='team' ? `${p.name}, ` : '';
+    if(best.sc === L.score(G.mode, G.n, vals[i])){
+      html += `<p class="note good">${who ? who+'with' : 'With'} ${list(sorted)}, nothing beats <b class="num">${fmt(vals[i])}</b>. Perfect placement!</p>`;
+    } else {
+      const how = G.mode==='close' ? `${fmt(Math.abs(best.v-tgt()))} away` : '';
+      html += `<div class="note warn cmp">${who ? who+'with' : 'With'} the cards ${list(sorted)}, the best number was <b class="num">${fmt(best.v)}</b>${how?` (only ${how})`:''}.<br>` +
+        `Yours: ${worthLine(digits)} = ${fmt(vals[i])}<br>Best: ${worthLine(best.p)} = ${fmt(best.v)}<br>` +
+        `<span style="font-size:.92em">But you had to choose before you saw the next card. What would you do differently next time?</span></div>`;
+    }
+  }
+  if(G.plan && PAUSE[G.round]) html += `<p class="note">${PAUSE[G.round]}</p>`;
+  const nextMode = G.plan && G.round < PLAN.length ? PLAN[G.round] : G.mode;
+  const change = nextMode!==G.mode ? ` (${goalText(nextMode)})` : '';
+  html += `<div class="row"><button class="primary" id="nextRoundBtn">Next round${change}</button></div>`;
+  const res = $('#result'); res.innerHTML = html; res.hidden=false;
+  $('#nextRoundBtn').onclick = () => { G.round++; if(G.plan && G.round<=PLAN.length) G.mode = PLAN[G.round-1]; newRound(); };
+}
+function renderCard(){
+  const c = G.card;
+  $('#cBig').textContent = c==null ? '' : c; $('#cTL').textContent = c==null ? '' : c; $('#cBR').textContent = c==null ? '' : c;
+  $('#cBig').classList.toggle('u', c===6 || c===9);
+  $('#card').setAttribute('aria-label', c==null ? 'No card yet' : `The card is ${c}`);
+}
+function renderGame(){
+  $('#modeSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode===G.mode));
+  $('#closeBtn').textContent = `Closest to ${fmt(tgt())}`;
+  $('#goal').innerHTML = `${goalText(G.mode)}<small>Round ${G.round} · Place each card before the next one flips. No moving cards!</small>`;
+  $('#score').innerHTML = `<span><b>${G.wins[0]}</b>${G.P[0].name}</span><span><b>${G.wins[1]}</b>${G.P[1].name}</span><span><b>${G.ties}</b>Ties</span>`;
+  $('#plan').innerHTML = G.plan ? PLAN.map((m,i)=>`<span class="${i+1<G.round?'done':''} ${i+1===G.round?'now':''}" title="Round ${i+1}">${i+1} ${m==='big'?'Big':m==='small'?'Small':fmt(tgt())}</span>`).join('') : '';
+  // deck
+  $('#deck').innerHTML = [0,1,2,3,4,5,6,7,8,9].map(d => {
+    const gone = !(G.mask & (1<<d)); const now = d===G.card && G.phase!=='ready' ? 'now' : '';
+    return `<span class="${gone?'gone':''} ${now}" aria-label="${d} ${gone?'already flipped':'still in the deck'}">${d}</span>`;
+  }).join('');
+  // flip button
+  const fb = $('#flipBtn');
+  fb.disabled = G.phase!=='ready';
+  fb.textContent = G.phase==='placing' ? 'Place the card first' : G.phase==='over' ? 'Round over' : (G.card==null ? 'Flip a card' : 'Flip the next card');
+  // mats
+  const names = PLACE[G.n];
+  $('#matList').innerHTML = G.P.map((p,pi) => {
+    const myTurn = G.phase==='placing' && p.human && !p.acted;
+    const seats = names.map((nm,s) => {
+      const d = p.seats[s];
+      const hiddenHere = p.hidden && !p.hidden.discard && p.hidden.s===s;
+      let cls='seat', inner='', dis='';
+      if(hiddenHere){ cls+=' hidden'; inner='?'; dis='disabled'; }
+      else if(d!=null){ cls+=' filled' + (p.justFilled===s && !reduced ? ' fill' : ''); inner=d; dis='disabled'; }
+      else if(myTurn){ cls+=' open' + (G.card===0 && s===0 ? ' nozero' : ''); }
+      else dis='disabled';
+      const worth = d!=null && !hiddenHere ? `= ${fmt(d*10**(G.n-1-s))}` : '';
+      const al = d!=null ? `${nm}: ${d}` : hiddenHere ? `${nm}: face-down card` : `${nm}: empty${myTurn?`, tap to place ${G.card}`:''}`;
+      return `<div class="seatcol" style="--c:${PCOL[nm]}"><span class="pl">${nm}</span><button class="${cls}" data-p="${pi}" data-s="${s}" ${dis} aria-label="${al}">${inner}</button><span class="worth num">${worth}</span></div>`;
+    }).join('');
+    const hasAny = p.seats.some(d=>d!=null);
+    const val = L.valueOf(p.seats);
+    const shown = full(p) && !p.hidden ? fmt(val) : hasAny ? '…' : '';
+    const sub = !p.human ? (p.kind==='smart' ? 'plays the odds' : 'places at random') : (G.opp==='team' ? 'students' : 'you');
+    const extra = G.reject ? `<div class="discard">Reject pile: ${p.rejected.length? p.rejected.join(', ') : 'empty'} · ${p.disc} left` +
+      (myTurn && p.disc>0 ? ` <button class="secondary" data-rej="${pi}">Throw away the ${G.card}</button>` : '') + `</div>` : '';
+    const waiting = p.hidden ? `${p.name} has chosen. Its card stays face-down until ${G.P.filter(q=>q.human).map(q=>q.name).join(' and ')} ${G.P.filter(q=>q.human).length>1?'have':'has'} placed.` : '';
+    return `<div class="mat ${myTurn?'turn':''}"><div class="who">${p.name}<small>${sub}</small></div><div class="seats">${seats}</div>` +
+      `<div class="total num">${shown}<small>${full(p)&&!p.hidden&&G.mode==='close' ? fmt(Math.abs(val-tgt()))+' away' : ''}</small></div>${extra}<p class="msg">${p.msg || waiting}</p></div>`;
+  }).join('');
+  G.P.forEach(p => p.justFilled = null);
+  document.querySelectorAll('#matList .seat.open').forEach(b => b.onclick = () => place(+b.dataset.p, +b.dataset.s));
+  document.querySelectorAll('[data-rej]').forEach(b => b.onclick = () => rejectCard(+b.dataset.rej));
+  if(G.phase==='placing'){
+    const who = G.P.filter(p=>p.human && !p.acted).map(p=>p.name);
+    if(who.length) { $('#gameNote').textContent = `${list(who)}: where does the ${G.card} go?`; $('#gameNote').className='note'; }
+  } else if(G.phase==='ready' && G.card==null){
+    $('#gameNote').textContent = 'Tap Flip a card to start the round.'; $('#gameNote').className='note';
+  } else { $('#gameNote').textContent=''; }
+  renderCard();
+}
+function setMode(m){ G.mode=m; G.plan=false; $('#planChk').checked=false; newRound(); }
+$('#modeSeg').querySelectorAll('button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$('#planChk').onchange = e => { G.plan = e.target.checked; if(G.plan){ G.round=1; G.mode=PLAN[0]; G.wins=[0,0]; G.ties=0; } newRound(); };
+$('#oppSel').onchange = e => { G.opp = e.target.value; G.wins=[0,0]; G.ties=0; newRound(); };
+$('#rejChk').onchange = e => { G.reject = e.target.checked; newRound(); };
+$('#fourChk').onchange = e => { G.n = e.target.checked ? 4 : 3; newRound(); };
+$('#flipBtn').onclick = flip;
+
+/* ================= STRATEGY LAB ================= */
+const LAB = {q:1, pick:5, simMode:'big'};
+const MODES = [['big','Biggest'],['small','Smallest'],['close','Closest to 500']];
+function ev(html){ $('#qev').innerHTML = html; }
+function firstCardEvidence(d){
+  const names = PLACE[3];
+  let rows = MODES.map(([m,label]) => {
+    const t = L.firstCardTable(m, 3, d);
+    const allowed = t.filter(r=>r.allowed);
+    const bestE = Math.max(...allowed.map(r=>r.e));
+    const sorted = allowed.map(r=>r.e).sort((a,b)=>b-a);
+    const gap = sorted.length>1 ? sorted[0]-sorted[1] : null;
+    const cells = t.map(r => {
+      if(!r.allowed) return `<td class="no">not allowed</td>`;
+      const isBest = Math.abs(r.e-bestE)<1e-9;
+      const main = m==='close' ? `<b class="num">${r0(-r.e)}</b> away` : `<b class="num">${r0(m==='big'?r.e:-r.e)}</b>`;
+      return `<td class="${isBest?'best':''}">${main}${isBest?'<span class="tag">BEST</span>':''}</td>`;
+    }).join('');
+    const gapTxt = gap==null ? '' : m==='close' ? `${r0(gap)} closer` : `${r0(gap)} ${m==='big'?'bigger':'smaller'}`;
+    return `<tr><td>${label}</td>${cells}<td>${gapTxt}</td></tr>`;
+  }).join('');
+  return `<div class="tablewrap"><table class="ev"><tr><th>Game</th>${names.map(n=>`<th>${d} in ${n}</th>`).join('')}<th>Best beats next by</th></tr>${rows}</table></div>` +
+    `<p class="hint">Each number is the average result if you place the ${d} there and then play smart with the next two cards. The computer checked every possible order of cards.</p>`;
+}
+const Q = {
+  1:{ text:()=>'Warm-up puzzle: With the cards 3, 7 and 1, what is the biggest number you can make? The smallest? Now try 0, 5 and 8. What is the smallest real 3-digit number?',
+      actions:[
+        {label:'Show every way with 3, 7, 1', run:()=>arrangements([3,7,1])},
+        {label:'Show every way with 0, 5, 8', run:()=>arrangements([0,5,8])}]},
+  2:{ text:()=>'Where should a 9 go? Does the answer change in each game?',
+      actions:[{label:'Test the 9 in every seat', run:()=>ev(firstCardEvidence(9))}]},
+  3:{ text:()=>'Where should a 4 go? When are you unsure?',
+      actions:[{label:'Test the 4 in every seat', run:()=>ev(firstCardEvidence(4) + `<p class="note">Look at the last column. When the best seat only wins by a little, that is a card to feel unsure about.</p>`)}]},
+  4:{ text:()=>'If my first card is 5, what should I do in each game, and why? Pick any first card to test it.',
+      actions:[{label:'Test this card', run:()=>pickCard()}]},
+  5:{ text:()=>'Most cards are bigger than 3. Is that true? How likely is the next card to be bigger than the one you have?',
+      actions:[
+        {label:'Count cards bigger than 3', run:()=>deckEvidence(3)},
+        {label:'Pick a card and count', run:()=>deckEvidence(LAB.pick, true)}]},
+  6:{ text:()=>'Exit ticket: You are playing Closest to 500 and your first card is 6. Where do you put it? Convince me.',
+      actions:[{label:'Show the evidence', run:()=>exitEvidence()}]},
+  7:{ text:()=>'Does strategy really beat luck? The Thinking Robot plays the odds. The Coin-Flip Robot places cards at random.',
+      actions:[{label:'Play 1,000 rounds', run:()=>simulate()}]},
+  8:{ star:true, text:()=>'Challenge: Add a reject pile. Each player may throw away exactly one card per round. How does that change the game?',
+      actions:[
+        {label:'Compare with and without', run:()=>rejectEvidence()},
+        {label:'Try it in the game', run:()=>{ $('#rejChk').checked=true; G.reject=true; selectTab('game'); newRound(); }},
+        {label:'Try 4-digit numbers', run:()=>{ $('#fourChk').checked=true; G.n=4; selectTab('game'); newRound(); }}]},
+};
+function arrangements(ds){
+  const all = L.perms(ds).map(p=>({p, v:L.valueOf(p), real:p[0]!==0})).sort((a,b)=>b.v-a.v);
+  const real = all.filter(a=>a.real);
+  const max = real[0].v, min = real[real.length-1].v;
+  const spans = all.map(a => `<span class="${!a.real?'fake':a.v===max?'max':a.v===min?'min':''}">${a.real ? a.v : a.p.join('')}</span>`).join('');
+  const fakeTxt = all.some(a=>!a.real) ? ` The crossed-out ones start with 0, so ${list(all.filter(a=>!a.real).map(a=>a.p.join('')))} are really ${list(all.filter(a=>!a.real).map(a=>String(a.v)))}: 2-digit numbers.` : '';
+  ev(`<div class="arr">${spans}</div><p class="say">There are ${all.length} ways to line up ${list(ds.map(String))}. Biggest: <b>${max}</b> (green). Smallest real 3-digit number: <b>${min}</b> (blue).${fakeTxt}</p>` +
+     `<p class="note">How could you check you found every way? Try: pick the hundreds digit first, then list what can follow it.</p>`);
+}
+function pickCard(){
+  const d = LAB.pick;
+  ev(`<div class="pickrow" id="pick">${[0,1,2,3,4,5,6,7,8,9].map(k=>`<button aria-pressed="${k===d}">${k}</button>`).join('')}</div>` + firstCardEvidence(d));
+  document.querySelectorAll('#pick button').forEach((b,k) => b.onclick = () => { LAB.pick=k; pickCard(); });
+}
+function deckEvidence(d, picker){
+  const bigger = [], smaller = [];
+  for(let k=0;k<10;k++){ if(k>d) bigger.push(k); else if(k<d) smaller.push(k); }
+  const base = picker ? 9 : 10;
+  const pick = picker ? `<div class="pickrow" id="pick2">${[0,1,2,3,4,5,6,7,8,9].map(k=>`<button aria-pressed="${k===d}">${k}</button>`).join('')}</div>` : '';
+  const chips = `<div class="decktrack" style="max-width:420px">${[0,1,2,3,4,5,6,7,8,9].map(k=>`<span class="${k>d?'hot':k<d?'cold':(picker?'gone':'')}">${k}</span>`).join('')}</div>`;
+  const txt = picker
+    ? `You hold the ${d}. The other 9 cards are still in the deck: <b>${bigger.length}</b> are bigger (green) and <b>${smaller.length}</b> are smaller (pink). The chance the next card is bigger: ${bigger.length} out of 9.`
+    : `Cards bigger than 3: ${list(bigger.map(String))}. That is <b>${bigger.length} out of 10</b> cards. Smaller than 3: ${list(smaller.map(String))} (${smaller.length} cards). So yes, most cards are bigger than 3.`;
+  ev(pick + chips + `<p class="say">${txt}</p>` + (picker ? `<p class="note">If most cards left are bigger than yours, should you save the big seats or fill them now?</p>` : ''));
+  if(picker) document.querySelectorAll('#pick2 button').forEach((b,k)=> b.onclick = () => { LAB.pick=k; deckEvidence(k, true); });
+}
+function exitEvidence(){
+  const t = L.firstCardTable('close', 3, 6);
+  const names = PLACE[3];
+  const bestE = Math.max(...t.map(r=>r.e));
+  const rows = t.map(r => `<tr><td>6 in ${names[r.s]}</td><td class="${Math.abs(r.e-bestE)<1e-9?'best':''}"><b class="num">${r0(-r.e)}</b> away on average${Math.abs(r.e-bestE)<1e-9?'<span class="tag">BEST</span>':''}</td><td>Luckiest: <b class="num">${r.bestV}</b> (${Math.abs(r.bestV-500)} away)</td><td>Unluckiest: <b class="num">${r.worstV}</b> (${Math.abs(r.worstV-500)} away)</td></tr>`).join('');
+  const h = t[0];
+  ev(`<div class="tablewrap"><table class="ev"><tr><th>Choice</th><th>Average</th><th>Best case</th><th>Worst case</th></tr>${rows}</table></div>` +
+    `<p class="say">A 6 in the hundreds makes a 600-number. It can never be closer than ${h.bestV} (${Math.abs(h.bestV-500)} away), but it can never be worse than ${h.worstV} either. Saving the hundreds seat gives a chance at a really close number, but only if a 4 or a 5 shows up in time.</p>` +
+    `<p class="note">Which would you choose: safe, or lucky? Use the numbers to convince a partner.</p>`);
+}
+function simulate(){
+  const m = LAB.simMode, N = 1000;
+  let w=[0,0,0];
+  for(let i=0;i<N;i++){ const [a,b] = L.simRound(m, 3, ['smart','random']); const sa=L.score(m,3,a), sb=L.score(m,3,b); w[sa>sb?0:sa<sb?1:2]++; }
+  const seg = `<div class="seg" role="group" aria-label="Game" id="simSeg">${MODES.map(([k,l])=>`<button data-m="${k}" aria-pressed="${k===m}">${l}</button>`).join('')}</div>`;
+  const bar = (label, v, c) => `<div class="bar"><span>${label}</span><i style="width:${v/N*100}%; --c:${c}"></i><span class="num">${fmt(v)}</span></div>`;
+  ev(seg + `<p class="say">${MODES.find(x=>x[0]===m)[1]} game, 1,000 rounds, same cards for both robots each round:</p><div class="bars">${bar('Thinking Robot', w[0], 'var(--good)')}${bar('Coin-Flip Robot', w[1], 'var(--accent)')}${bar('Ties', w[2], 'var(--muted)')}</div>` +
+     `<p class="note">The Coin-Flip Robot still wins sometimes. Why? And why does thinking win most of the time?</p>`);
+  document.querySelectorAll('#simSeg button').forEach(b => b.onclick = () => { LAB.simMode=b.dataset.m; simulate(); });
+}
+function rejectEvidence(){
+  const rows = MODES.map(([m,label]) => {
+    const a = L.V(m,3,[null,null,null],L.FULL,0), b = L.V(m,3,[null,null,null],L.FULL,1);
+    const f = x => m==='close' ? `<b class="num">${r0(-x)}</b> away` : `<b class="num">${r0(m==='big'?x:-x)}</b>`;
+    return `<tr><td>${label}</td><td>${f(a)}</td><td class="best">${f(b)}</td></tr>`;
+  }).join('');
+  ev(`<div class="tablewrap"><table class="ev"><tr><th>Game</th><th>Average, no reject pile</th><th>Average, with a reject pile</th></tr>${rows}</table></div>` +
+     `<p class="say">These are averages for a smart player over every possible order of cards. One throw-away helps in every game.</p>` +
+     `<p class="note">When should you use your one throw-away? On the first bad card, or save it? Play a few rounds and decide.</p>`);
+}
+function renderQ(){
+  $('#qnav').innerHTML = Object.keys(Q).map(k => Q[k].star ? `<button class="star" data-q="${k}" aria-pressed="${LAB.q==k}">★ Challenge</button>` : `<button data-q="${k}" aria-pressed="${LAB.q==k}" aria-label="Question ${k}">${k}</button>`).join('');
+  $('#qnav').querySelectorAll('button').forEach(b => b.onclick = () => { LAB.q=+b.dataset.q; ev(''); renderQ(); });
+  const q = Q[LAB.q];
+  $('#qtext').textContent = q.text();
+  const box = $('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i) => { const b=document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=a.run; box.appendChild(b); });
+}
+
+/* ================= Shell ================= */
+function selectTab(t){
+  ['qi','game','lab'].forEach(k => { $('#tab-'+k).setAttribute('aria-selected', k===t); $('#view-'+k).hidden = k!==t; });
+}
+['qi','game','lab'].forEach(k => $('#tab-'+k).onclick = () => selectTab(k));
+function resetAll(){
+  selPreset(0);
+  Object.assign(G, {n:3, mode:'big', opp:'smart', reject:false, plan:true, round:1, wins:[0,0], ties:0});
+  $('#planChk').checked=true; $('#oppSel').value='smart'; $('#rejChk').checked=false; $('#fourChk').checked=false;
+  newRound();
+  Object.assign(LAB, {q:1, pick:5, simMode:'big'}); ev(''); renderQ();
+  selectTab('qi');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

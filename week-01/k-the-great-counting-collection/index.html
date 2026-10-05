@@ -1,0 +1,777 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Counting Collections</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: header with the five lesson tabs; left = big interactive field (scatter → frames), right = lesson panel.
+   Plain CSS with color tokens (no framework). Five-frames purple, ten-frames indigo, leftover ones amber. */
+:root{
+  --bg:#EEF2F7; --card:#FFFFFF; --soft:#F5F7FB; --ink:#172033; --muted:#56617A; --line:#D3DAE6;
+  --brand:#0369A1; --brand-2:#4F46E5; --brand-soft:#E0F2FE; --on-brand:#FFFFFF;
+  --five:#9333EA; --five-soft:#F3E8FF; --ten:#4F46E5; --ten-soft:#E0E7FF;
+  --ones:#D97706; --ones-soft:#FEF3C7; --ones-ink:#92400E;
+  --good:#047857; --good-soft:#D1FAE5; --try:#92400E; --try-soft:#FEF3C7; --rose:#BE123C; --rose-soft:#FFE4E6;
+  --field-a:#F8FAFC; --field-b:#EEF2FF;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1522; --card:#1A2233; --soft:#141B2A; --ink:#EEF2F8; --muted:#A5AFC3; --line:#334058;
+    --brand:#38BDF8; --brand-2:#818CF8; --brand-soft:#0C2E44; --on-brand:#0B1220;
+    --five:#C084FC; --five-soft:#2E1A45; --ten:#A5B4FC; --ten-soft:#232B55;
+    --ones:#FBBF24; --ones-soft:#3A2C10; --ones-ink:#FCD34D;
+    --good:#34D399; --good-soft:#0F3328; --try:#FCD34D; --try-soft:#3A2C10; --rose:#FB7185; --rose-soft:#3F1622;
+    --field-a:#141B2A; --field-b:#1A2140; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1522; --card:#1A2233; --soft:#141B2A; --ink:#EEF2F8; --muted:#A5AFC3; --line:#334058;
+  --brand:#38BDF8; --brand-2:#818CF8; --brand-soft:#0C2E44; --on-brand:#0B1220;
+  --five:#C084FC; --five-soft:#2E1A45; --ten:#A5B4FC; --ten-soft:#232B55;
+  --ones:#FBBF24; --ones-soft:#3A2C10; --ones-ink:#FCD34D;
+  --good:#34D399; --good-soft:#0F3328; --try:#FCD34D; --try-soft:#3A2C10; --rose:#FB7185; --rose-soft:#3F1622;
+  --field-a:#141B2A; --field-b:#1A2140; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:20px; line-height:1.4; -webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer; touch-action:manipulation}
+button:disabled{opacity:.45; cursor:default}
+:focus-visible{outline:3px solid var(--brand); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); margin:0; line-height:1.1; text-wrap:balance}
+.app{height:100%; display:flex; flex-direction:column; padding-inline:clamp(12px,1.6vw,24px); padding-block:10px 14px; gap:12px}
+
+/* Header */
+header{display:flex; align-items:center; gap:12px 20px; flex-wrap:wrap}
+.brandbox{display:flex; align-items:center; gap:12px}
+.kbadge{width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:var(--on-brand); font-family:var(--display); font-weight:700; font-size:28px}
+h1{font-size:clamp(26px,2.4vw,34px); font-weight:700}
+.sub{margin:2px 0 0; color:var(--muted); font-size:16px; font-weight:700; letter-spacing:.02em}
+.tabs{display:flex; gap:6px; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:5px}
+.tabs button{border:0; background:none; border-radius:13px; padding:8px 16px; min-height:52px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.4vw,21px); color:var(--muted); display:flex; align-items:center; gap:8px}
+.tabs button b{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--soft); color:var(--ink); font-size:18px}
+.tabs button[aria-selected="true"]{background:var(--brand-soft); color:var(--ink)}
+.tabs button[aria-selected="true"] b{background:var(--brand); color:var(--on-brand)}
+.tabs button.star{color:var(--ones-ink)}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.tool{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:8px 14px; min-height:48px; font-weight:700; font-size:17px; display:flex; align-items:center; gap:6px}
+.tool:hover{border-color:var(--ink)}
+.tool.warn{color:var(--rose)}
+.tool.good{background:var(--good); border-color:var(--good); color:var(--card)}
+.stars{display:flex; align-items:center; gap:6px; padding:8px 14px; min-height:48px; border-radius:14px; background:var(--ones-soft); color:var(--ones-ink); font-weight:800; font-size:19px}
+.minibar{display:flex; align-items:center; justify-content:space-between; gap:12px; font-family:var(--display); font-weight:600; font-size:20px}
+
+/* Main two columns */
+main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,7fr) minmax(340px,5fr); gap:14px}
+.card{background:var(--card); border:2px solid var(--line); border-radius:24px; overflow:hidden; display:flex; flex-direction:column; min-height:0}
+.wbar{display:flex; align-items:center; justify-content:space-between; gap:10px 14px; flex-wrap:wrap; padding:10px 14px; border-bottom:2px solid var(--line); background:var(--soft)}
+.wbar h2{font-size:clamp(21px,1.7vw,26px); font-weight:600}
+.wtools{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+select{min-height:48px; border-radius:12px; border:2px solid var(--line); background:var(--card); padding:4px 10px; font-weight:700; font-size:18px}
+.qty{display:flex; align-items:center; gap:2px; background:var(--line); border-radius:14px; padding:3px}
+.qty button{border:0; background:var(--card); border-radius:10px; min-width:46px; min-height:44px; font-weight:800; font-size:17px}
+.qty input{width:74px; min-height:44px; text-align:center; border:0; border-radius:10px; background:var(--card); font-weight:800; font-size:22px}
+.wbtn{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:6px 16px; min-height:48px; font-weight:800; font-size:18px}
+.wbtn:hover{border-color:var(--ink)}
+.wbtn.on{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.wbtn.go{background:var(--brand); color:var(--on-brand); border-color:var(--brand)}
+.field{position:relative; flex:1; min-height:0; overflow:hidden; background:linear-gradient(135deg,var(--field-a),var(--field-b))}
+.layer{position:absolute; inset:14px}
+.status{display:flex; justify-content:space-between; align-items:center; gap:6px 14px; flex-wrap:wrap; padding:10px 16px; border-top:2px solid var(--line); background:var(--soft); font-size:19px}
+.status b{font-family:var(--display); font-weight:700; font-size:24px; color:var(--brand); font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+
+/* Items */
+.it{position:absolute; left:0; top:0; display:grid; place-items:center; border-radius:28%; background:var(--card); border:2px solid var(--line); box-shadow:0 2px 4px rgba(0,0,0,.12); line-height:1; user-select:none; -webkit-user-select:none}
+.it.anim{transition:transform .7s cubic-bezier(.3,.8,.25,1)}
+.it.tap{cursor:pointer}
+.it.tap:hover{border-color:var(--brand)}
+.it.counted{background:var(--good-soft); border-color:var(--good)}
+.it.lit{background:var(--ones-soft); border-color:var(--ones)}
+.bd{position:absolute; top:-12px; right:-12px; min-width:30px; height:30px; padding:0 7px; border-radius:15px; display:grid; place-items:center; background:var(--good); color:var(--card); font-family:var(--display); font-weight:700; font-size:18px; font-variant-numeric:tabular-nums; box-shadow:0 1px 3px rgba(0,0,0,.25); pointer-events:none}
+.it.lit .bd{background:var(--ones); color:#1B1203}
+.fbox{position:absolute; display:grid; border-radius:16px; border:3px solid var(--ten); background:var(--ten-soft); opacity:0; transition:opacity .5s .25s}
+.fbox.five{border-color:var(--five); background:var(--five-soft)}
+.fbox .cell{border:2px dashed color-mix(in srgb, var(--ten) 45%, transparent); border-radius:12px; margin:3px}
+.fbox.five .cell{border-color:color-mix(in srgb, var(--five) 45%, transparent)}
+.zone{position:absolute; border:3px dashed var(--ones); background:var(--ones-soft); border-radius:16px; opacity:0; transition:opacity .5s .25s}
+.zone span{position:absolute; left:12px; top:4px; font-family:var(--display); font-weight:600; font-size:17px; color:var(--ones-ink)}
+.show .fbox,.show .zone{opacity:1}
+.fbox.lit{box-shadow:0 0 0 5px var(--ones)}
+.fbd{position:absolute; top:-16px; right:-14px; min-width:40px; height:36px; padding:0 9px; border-radius:18px; display:grid; place-items:center; background:var(--ones); color:#1B1203; font-family:var(--display); font-weight:700; font-size:22px; box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.hint{position:absolute; left:50%; bottom:16px; transform:translateX(-50%); background:var(--card); border:2px solid var(--line); border-radius:999px; padding:8px 18px; font-weight:700; font-size:18px; color:var(--muted); white-space:nowrap; pointer-events:none}
+
+/* Race lanes & challenge visuals */
+.lanes{position:absolute; inset:14px; display:flex; flex-direction:column; gap:12px; overflow:auto}
+.lane{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:10px 14px; display:flex; flex-direction:column; gap:8px}
+.lane.win{border-color:var(--good); box-shadow:0 0 0 3px var(--good-soft)}
+.lanehead{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-weight:800; font-size:19px}
+.lanehead .ct{font-variant-numeric:tabular-nums; color:var(--muted)}
+.lanehead .ct b{color:var(--brand); font-family:var(--display); font-size:24px}
+.track{position:relative; height:34px; border-radius:17px; background:var(--soft); border:2px solid var(--line); overflow:visible}
+.fill{position:absolute; left:0; top:0; bottom:0; border-radius:17px; transition:width .3s}
+.runner{position:absolute; top:50%; transform:translate(-50%,-50%); font-size:26px; transition:left .3s}
+.trail{font-size:16px; color:var(--muted); font-variant-numeric:tabular-nums; min-height:1.2em; overflow-wrap:anywhere}
+.chal{position:absolute; inset:14px; overflow:auto; display:flex; flex-direction:column; gap:14px}
+.target{align-self:center; text-align:center; background:var(--ones-soft); border:2px solid var(--ones); border-radius:20px; padding:10px 28px}
+.target small{display:block; font-weight:800; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--ones-ink)}
+.target b{font-family:var(--display); font-weight:700; font-size:clamp(48px,5vw,72px); line-height:1}
+.tens{display:flex; flex-wrap:wrap; gap:10px}
+.tcard{display:grid; grid-template-columns:repeat(5,1fr); gap:2px; padding:8px; border-radius:14px; border:3px solid var(--ten); background:var(--ten-soft); font-size:22px; line-height:1.15}
+.loose{display:flex; flex-wrap:wrap; gap:8px; padding:12px; border-radius:16px; border:3px dashed var(--ones); background:var(--ones-soft); min-height:64px; align-items:center}
+.loose span{font-size:30px}
+.lbl{font-family:var(--display); font-weight:600; font-size:20px}
+
+/* Panel */
+.phead{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:linear-gradient(90deg,var(--brand),var(--brand-2)); color:var(--on-brand)}
+.pbadge{font-size:14px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; opacity:.9}
+.phead h3{font-size:clamp(24px,2vw,30px); font-weight:600; margin-top:2px}
+.pstar{font-size:34px; line-height:1}
+.pbody{flex:1; min-height:0; overflow:auto; padding:18px; display:flex; flex-direction:column; gap:16px}
+.pbody p{margin:0}
+.lead{font-size:clamp(20px,1.6vw,24px); line-height:1.4}
+.box{background:var(--soft); border:2px solid var(--line); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:12px}
+.box label{font-weight:800; font-size:20px}
+.box input{width:100%; min-height:58px; border-radius:14px; border:2px solid var(--line); background:var(--card); padding:6px 14px; font-weight:800; font-size:28px; font-family:var(--display)}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.pair > div{display:flex; flex-direction:column; gap:6px}
+.btn{border:0; border-radius:16px; min-height:58px; padding:10px 22px; font-family:var(--display); font-weight:600; font-size:clamp(19px,1.6vw,23px)}
+.btn.primary{background:var(--brand); color:var(--on-brand)}
+.btn.ghost{background:var(--card); border:2px solid var(--line)}
+.btn.five{background:var(--five); color:var(--card)}
+.btn.ten{background:var(--ten); color:var(--card)}
+.btn.amber{background:var(--ones); color:#1B1203}
+.fb{border-radius:16px; padding:14px 16px; font-weight:700; font-size:clamp(19px,1.5vw,22px); line-height:1.4}
+.fb.ok{background:var(--good-soft); color:var(--ink); border:2px solid var(--good)}
+.fb.try{background:var(--try-soft); color:var(--ink); border:2px solid var(--ones)}
+.targets{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.targets button{min-height:56px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:24px}
+.targets button[aria-pressed="true"]{background:var(--ones); color:#1B1203; border-color:var(--ones)}
+.pfoot{display:flex; justify-content:space-between; gap:10px; padding:12px 16px; border-top:2px solid var(--line); background:var(--soft)}
+
+/* Modals & confetti */
+.modal{position:fixed; inset:0; z-index:40; display:grid; place-items:center; padding:16px; background:rgba(10,15,30,.55)}
+.dlg{background:var(--card); border-radius:26px; border:2px solid var(--line); max-width:560px; width:100%; max-height:90vh; overflow:auto; padding:24px; display:flex; flex-direction:column; gap:14px; text-align:center}
+.dlg h3{font-size:30px}
+.dlg .big{font-size:56px; line-height:1}
+.dlg p{margin:0; font-size:20px}
+.dlg .row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.cert{text-align:left}
+.cert .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.cert .cell2{background:var(--soft); border:2px solid var(--line); border-radius:14px; padding:10px 12px}
+.cert .cell2 span{display:block; font-size:15px; font-weight:700; color:var(--muted)}
+.cert .cell2 b{font-size:20px}
+.cert input{width:100%; min-height:52px; border-radius:12px; border:2px solid var(--line); background:var(--soft); padding:6px 12px; font-weight:800; font-size:20px}
+.cert label{font-size:15px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+#confetti{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:60}
+.vh{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+
+@media (max-width:1100px), (orientation:portrait){
+  html,body{height:auto}
+  .app{height:auto; min-height:100%}
+  main{flex:none; grid-template-columns:minmax(0,1fr)}
+  .field{flex:none; height:62vh; min-height:400px}
+  .pbody{overflow:visible}
+  .tools{margin-left:0}
+}
+@media (max-width:520px){
+  body{font-size:18px}
+  .tabs button{padding:6px 10px; min-height:46px}
+  .tabs button b{width:28px; height:28px; font-size:16px}
+  .pair{grid-template-columns:1fr}
+  .field{min-height:360px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="app">
+  <header id="hdr">
+    <div class="brandbox">
+      <div class="kbadge" aria-hidden="true">K</div>
+      <div><h1>Counting Collections</h1><p class="sub">Kindergarten · Week 1 · Math Enrichment</p></div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Lesson sections"></nav>
+    <div class="tools">
+      <span class="stars" title="Stars earned">⭐ <span id="starCount">0</span></span>
+      <button class="tool" id="soundBtn" type="button" aria-pressed="true">🔊 Sound on</button>
+      <button class="tool" id="fsBtn" type="button">Full screen</button>
+      <button class="tool warn" id="resetBtn" type="button">↺ Start over</button>
+      <button class="tool good" id="certBtn" type="button">🏆 Certificate</button>
+      <button class="tool" id="hideHdr" type="button" aria-label="Hide header">▲</button>
+    </div>
+  </header>
+  <div class="minibar" id="miniBar" hidden>
+    <span>Counting Collections · Section <span id="miniSec">1</span></span>
+    <button class="tool" id="showHdr" type="button">Show header ▼</button>
+  </div>
+
+  <main>
+    <section class="card" aria-label="Workspace">
+      <div class="wbar">
+        <h2 id="wTitle">Scattered Canvas</h2>
+        <div class="wtools">
+          <select id="theme" aria-label="What to count">
+            <option value="stars">⭐ Stars</option>
+            <option value="apples">🍎 Apples</option>
+            <option value="coins">🪙 Coins</option>
+            <option value="bears">🧸 Teddy bears</option>
+            <option value="counters">🔴 Counters</option>
+          </select>
+          <div class="qty" id="qtyBox" role="group" aria-label="How many items">
+            <button type="button" data-d="-10">−10</button>
+            <button type="button" data-d="-1">−1</button>
+            <input id="qty" type="number" inputmode="numeric" min="1" max="120" value="24" aria-label="Number of items">
+            <button type="button" data-d="1">+1</button>
+            <button type="button" data-d="10">+10</button>
+          </div>
+          <button class="wbtn" id="scrBtn" type="button">🔀 Scramble</button>
+          <button class="wbtn" id="gridBtn" type="button">▦ Grid</button>
+          <button class="wbtn go" id="countBtn" type="button">▶ Count them</button>
+        </div>
+      </div>
+      <div class="field" id="field"><div class="layer" id="layer"></div></div>
+      <div class="status" aria-live="polite"><span id="statusL"></span><span id="statusR" class="muted"></span></div>
+    </section>
+
+    <section class="card" aria-label="Lesson">
+      <div class="phead">
+        <div><span class="pbadge" id="pBadge">Section 1 of 5</span><h3 id="pHead"></h3></div>
+        <div class="pstar" id="pStar" aria-label="Section star">☆</div>
+      </div>
+      <div class="pbody" id="pBody"></div>
+      <div class="pfoot">
+        <button class="btn ghost" id="prevBtn" type="button">← Previous</button>
+        <button class="btn primary" id="nextBtn" type="button">Next section →</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="resetModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="rmT">
+    <div class="big">🔄</div>
+    <h3 id="rmT">Start over?</h3>
+    <p>This clears counted items, answers, the race and stars, and goes back to Section 1.</p>
+    <div class="row"><button class="btn ghost" id="rmNo" type="button">Cancel</button><button class="btn primary" id="rmYes" type="button">Start over</button></div>
+  </div>
+</div>
+
+<div class="modal" id="raceModal" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="raceT">
+    <div class="big">🏆</div>
+    <h3 id="raceT"></h3>
+    <p id="raceP"></p>
+    <div class="row"><button class="btn amber" id="raceOk" type="button">Got it!</button></div>
+  </div>
+</div>
+
+<div class="modal" id="certModal" hidden>
+  <div class="dlg cert" role="dialog" aria-modal="true" aria-labelledby="certT">
+    <h3 id="certT" style="text-align:center">🏆 Counting Collections Master</h3>
+    <p class="muted" style="text-align:center">Kindergarten · Week 1</p>
+    <div class="grid">
+      <div><label for="certName">Name</label><input id="certName" value="Awesome Mathematician"></div>
+      <div><label for="certDate">Date</label><input id="certDate"></div>
+    </div>
+    <div class="grid">
+      <div class="cell2"><span>Collection size</span><b id="cSize"></b></div>
+      <div class="cell2"><span>In 10-frames</span><b id="cTens"></b></div>
+      <div class="cell2"><span>In 5-frames</span><b id="cFives"></b></div>
+      <div class="cell2"><span>Fastest way</span><b id="cRace"></b></div>
+    </div>
+    <div class="row"><button class="btn primary" id="certClose" type="button">Close</button></div>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const pl = (k, one, many) => `${k} ${k===1 ? one : (many || one+'s')}`;
+
+/* ---------- Sound (Web Audio, no files) ---------- */
+const snd = { ctx:null, on:true,
+  c(){ if(!this.on) return null; try{ if(!this.ctx){ const A = window.AudioContext || window.webkitAudioContext; if(A) this.ctx = new A(); } if(this.ctx && this.ctx.state==='suspended') this.ctx.resume(); }catch(e){} return this.ctx; },
+  tone(f, dur, type, vol, delay){ const c = this.c(); if(!c) return; try{ const t = c.currentTime + (delay||0); const o = c.createOscillator(), g = c.createGain(); o.type = type||'sine'; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(vol||.15, t); g.gain.exponentialRampToValueAtTime(.001, t+dur); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+.02); }catch(e){} },
+  pop(f){ this.tone(f||480, .09, 'sine', .16); },
+  tick(f){ this.tone(f||320, .07, 'triangle', .12); },
+  chime(){ [523.25,659.25,783.99,1046.5].forEach((f,i) => this.tone(f, .25, 'sine', .18, i*.065)); },
+  soft(){ this.tone(260, .18, 'triangle', .12); }
+};
+
+/* ---------- Confetti (small canvas burst) ---------- */
+function confetti(){
+  if(RM) return;
+  const cv = $('#confetti'), ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ['#0369A1','#4F46E5','#9333EA','#D97706','#047857','#E11D48'];
+  const ps = Array.from({length:70}, () => ({x:cv.width/2, y:cv.height*.7, vx:(Math.random()-.5)*14, vy:-Math.random()*14-6, s:6+Math.random()*6, c:cols[rnd(0,5)], r:Math.random()*6}));
+  let f = 0;
+  (function step(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .45; p.r += .2; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66); ctx.restore(); });
+    if(++f < 90) requestAnimationFrame(step); else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+/* ---------- State ---------- */
+const ICONS = {stars:'⭐', apples:'🍎', coins:'🪙', bears:'🧸', counters:'🔴'};
+const NAMES = {stars:'stars', apples:'apples', coins:'coins', bears:'teddy bears', counters:'counters'};
+const TABS = [
+  {id:1, label:'Free Canvas'},
+  {id:2, label:'5-Frames', g:5},
+  {id:3, label:'10-Frames', g:10},
+  {id:4, label:'Strategy Race'},
+  {id:5, label:'Challenge', star:true}
+];
+const LANES = [
+  {id:'1s', name:'Count by 1s', icon:'🐢', step:1, color:'#E11D48'},
+  {id:'2s', name:'Count by 2s, then 1s', icon:'🐰', step:2, color:'#D97706'},
+  {id:'5s', name:'Count by 5s, then 1s', icon:'🐆', step:5, color:'#9333EA'},
+  {id:'10s', name:'Count by 10s, then 1s', icon:'🚀', step:10, color:'#047857'}
+];
+let S;
+function freshState(){
+  return {
+    tab:1, theme:'stars', n:24, stars:0, gen:0,
+    canvas:{scatter:null, grid:false, order:{}, answer:'', ok:false, fb:null},
+    fr:{5:{grid:false, scatter:null, a:'', b:'', ok:false, fb:null}, 10:{grid:false, scatter:null, a:'', b:'', ok:false, fb:null}},
+    counts:{5:{}, 10:{}},
+    race:{running:false, paused:false, timer:null, lanes:[], ok:false, best:null},
+    ch:{target:56, a:'', b:'', ok:false, fb:null}
+  };
+}
+S = freshState();
+const icon = () => ICONS[S.theme];
+
+/* ---------- Geometry ---------- */
+const layer = $('#layer');
+function box(){ const r = layer.getBoundingClientRect(); return {W:Math.max(160, r.width), H:Math.max(160, r.height)}; }
+function makeScatter(n, W, H){
+  const cols = Math.max(1, Math.round(Math.sqrt(n*W/H))), rows = Math.ceil(n/cols);
+  const cells = shuffle([...Array(cols*rows).keys()]).slice(0, n);
+  return cells.map(k => ({cx:k%cols, cy:Math.floor(k/cols), cols, rows, jx:Math.random(), jy:Math.random(), rot:rnd(-28,28)}));
+}
+function scatterXY(p, c, W, H){
+  const cw = W/p.cols, ch = H/p.rows;
+  const x = p.cx*cw + (cw-c)*(.15 + .7*p.jx), y = p.cy*ch + (ch-c)*(.15 + .7*p.jy);
+  return {x:clamp(x, 0, W-c), y:clamp(y, 0, H-c)};
+}
+/* Largest cell step that fits all full frames plus the leftover zone inside W x H. */
+function frameLayout(g, n, W, H){
+  const F = Math.floor(n/g), r = n % g, R = g/5, labelH = 30;
+  for(let s = 92; s >= 16; s -= 1){
+    const pad = Math.round(s*.18), gap = Math.round(s*.4);
+    const fw = 5*s + 2*pad, fh = R*s + 2*pad;
+    const fc = Math.max(1, Math.min(F || 1, Math.floor((W + gap)/(fw + gap))));
+    if(fw > W) continue;
+    const frows = F ? Math.ceil(F/fc) : 0;
+    const zh = labelH + s + 2*pad, zw = Math.max(5, r)*s + 2*pad;
+    const blockH = (frows ? frows*(fh+gap) : 0) + zh;
+    if((blockH > H || zw > W) && s > 16) continue;
+    const x0 = (W - (Math.min(F||1, fc)*(fw+gap) - gap))/2, y0 = Math.max(0, (H - blockH)/2);
+    const frames = [], cells = [];
+    for(let f=0; f<F; f++){
+      const fx = x0 + (f%fc)*(fw+gap), fy = y0 + Math.floor(f/fc)*(fh+gap);
+      frames.push({x:fx, y:fy, w:fw, h:fh});
+      for(let j=0;j<g;j++) cells.push({x:fx + pad + (j%5)*s, y:fy + pad + Math.floor(j/5)*s});
+    }
+    const zy = y0 + (frows ? frows*(fh+gap) : 0), zx = (W - zw)/2;
+    for(let j=0;j<r;j++) cells.push({x:zx + pad + j*s, y:zy + labelH + pad});
+    return {s, c:Math.round(s*.84), pad, frames, zone:{x:zx, y:zy, w:zw, h:zh}, cells, F, r};
+  }
+  return null;
+}
+function plainGrid(n, W, H){
+  const cols = Math.max(1, Math.round(Math.sqrt(n*W/H))), rows = Math.ceil(n/cols);
+  const cell = Math.min(W/cols, H/rows), c = Math.round(Math.min(88, cell*.78));
+  const x0 = (W - cols*cell)/2, y0 = (H - rows*cell)/2;
+  return {c, cols, rows, pos:Array.from({length:n}, (_,i) => ({x:x0 + (i%cols)*cell + (cell-c)/2, y:y0 + Math.floor(i/cols)*cell + (cell-c)/2}))};
+}
+
+/* ---------- Field rendering (tabs 1–3 share the moving-items engine) ---------- */
+let itemEls = [], frameEls = [], L = null;
+function itemNode(i, c, tappable){
+  const d = document.createElement(tappable ? 'button' : 'div');
+  d.className = 'it' + (tappable ? ' tap' : ''); d.dataset.i = i;
+  if(tappable){ d.type = 'button'; d.setAttribute('aria-label', `Item ${i+1}`); }
+  d.style.width = d.style.height = c + 'px'; d.style.fontSize = Math.round(c*.6) + 'px';
+  d.innerHTML = `<span aria-hidden="true">${icon()}</span>`;
+  return d;
+}
+function place(el, x, y, rot){ el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot||0}deg)`; }
+function setAnim(on){ itemEls.forEach((el,i) => { el.classList.toggle('anim', on && !RM); el.style.transitionDelay = on ? Math.min(i*12, 600) + 'ms' : '0ms'; }); }
+
+function renderCanvas(){
+  const {W,H} = box(), n = S.n, G = plainGrid(n, W, H);
+  if(!S.canvas.scatter || S.canvas.scatter.length !== n) S.canvas.scatter = makeScatter(n, G.cols ? W : W, H);
+  layer.innerHTML = ''; itemEls = []; frameEls = []; L = G;
+  for(let i=0;i<n;i++){ const el = itemNode(i, G.c, true); el.onclick = () => tapItem(i); layer.appendChild(el); itemEls.push(el); }
+  positionCanvas(false); paintOrder();
+}
+function positionCanvas(animate){
+  const {W,H} = box(); setAnim(animate);
+  itemEls.forEach((el,i) => {
+    if(S.canvas.grid){ const p = L.pos[i]; place(el, p.x, p.y, 0); }
+    else { const p = scatterXY(S.canvas.scatter[i], L.c, W, H); place(el, p.x, p.y, S.canvas.scatter[i].rot); }
+  });
+}
+function paintOrder(){
+  itemEls.forEach((el,i) => {
+    const k = S.canvas.order[i]; el.classList.toggle('counted', !!k);
+    let b = el.querySelector('.bd');
+    if(k){ if(!b){ b = document.createElement('b'); b.className = 'bd'; el.appendChild(b); } b.textContent = k; el.setAttribute('aria-label', `Item, counted ${k}`); }
+    else { if(b) b.remove(); el.setAttribute('aria-label', 'Item, not counted'); }
+  });
+  const tapped = Object.keys(S.canvas.order).length;
+  $('#statusL').innerHTML = `Tapped: <b>${tapped}</b>`;
+  $('#statusR').textContent = 'Tap each one once. Tap again to undo.';
+}
+function tapItem(i){
+  const o = S.canvas.order;
+  if(o[i]){ const k = o[i]; delete o[i]; for(const j in o) if(o[j] > k) o[j]--; snd.soft(); }
+  else { const k = Object.keys(o).length + 1; o[i] = k; snd.pop(420 + Math.min(k,60)*10); }
+  paintOrder();
+}
+
+function renderFrames(g){
+  const {W,H} = box(), n = S.n, st = S.fr[g];
+  L = frameLayout(g, n, W, H);
+  if(!st.scatter || st.scatter.length !== n) st.scatter = makeScatter(n, W, H);
+  layer.innerHTML = ''; itemEls = []; frameEls = [];
+  const wrap = document.createElement('div'); wrap.style.cssText = 'position:absolute; inset:0'; wrap.id = 'fwrap';
+  L.frames.forEach((f, k) => {
+    const d = document.createElement('div'); d.className = 'fbox' + (g===5 ? ' five' : '');
+    Object.assign(d.style, {left:f.x+'px', top:f.y+'px', width:f.w+'px', height:f.h+'px', padding:L.pad+'px', gridTemplateColumns:`repeat(5, ${L.s}px)`, gridAutoRows:L.s+'px'});
+    d.innerHTML = '<i class="cell"></i>'.repeat(g); d.setAttribute('aria-label', `${g}-frame ${k+1}`);
+    wrap.appendChild(d); frameEls.push(d);
+  });
+  const z = document.createElement('div'); z.className = 'zone';
+  Object.assign(z.style, {left:L.zone.x+'px', top:L.zone.y+'px', width:L.zone.w+'px', height:L.zone.h+'px'});
+  z.innerHTML = '<span>Leftover ones</span>'; wrap.appendChild(z);
+  layer.appendChild(wrap);
+  const off = (L.s - L.c)/2;
+  for(let i=0;i<n;i++){ const el = itemNode(i, L.c, false); layer.appendChild(el); itemEls.push(el); }
+  L.off = off;
+  const hint = document.createElement('div'); hint.className = 'hint'; hint.id = 'fhint'; hint.textContent = `Messy! Tap ▦ Grid to sort them into ${g}-frames.`;
+  layer.appendChild(hint);
+  positionFrames(g, false);
+  frameStatus(g);
+}
+function positionFrames(g, animate){
+  const {W,H} = box(), st = S.fr[g];
+  setAnim(animate);
+  $('#fwrap').classList.toggle('show', st.grid);
+  $('#fhint').hidden = st.grid;
+  itemEls.forEach((el,i) => {
+    if(st.grid){ const p = L.cells[i]; place(el, p.x + L.off, p.y + L.off, 0); }
+    else { const p = scatterXY(st.scatter[i], L.c, W, H); place(el, p.x, p.y, st.scatter[i].rot); }
+  });
+}
+function clearCountMarks(){
+  itemEls.forEach(el => { el.classList.remove('lit'); const b = el.querySelector('.bd'); if(b) b.remove(); });
+  frameEls.forEach(f => { f.classList.remove('lit'); const b = f.querySelector('.fbd'); if(b) b.remove(); });
+}
+function frameStatus(g){
+  const c = S.counts[g];
+  $('#statusL').innerHTML = S.fr[g].grid ? `Sorted into ${g}-frames` : 'All mixed up';
+  const parts = [];
+  if(c.mess != null) parts.push(`Mixed up: ${pl(c.mess,'count')}`);
+  if(c.grid != null) parts.push(`In ${g}-frames: ${pl(c.grid,'count')}`);
+  $('#statusR').textContent = parts.length ? parts.join(' · ') : 'Tap ▶ Count them to count out loud.';
+}
+/* Count-along: one by one when mixed up, by frames then ones when sorted. Totals are exact running sums. */
+async function countAlong(){
+  const g = TABS[S.tab-1].g; if(!g) return;
+  const gen = ++S.gen, st = S.fr[g], n = S.n;
+  clearCountMarks(); setAnim(false);
+  const steps = [];
+  if(!st.grid){
+    const order = itemEls.map((el,i) => i).sort((a,b) => (st.scatter[a].cy - st.scatter[b].cy) || (st.scatter[a].cx - st.scatter[b].cx));
+    order.forEach((i,k) => steps.push({el:itemEls[i], t:k+1}));
+  } else {
+    for(let f=0; f<L.F; f++) steps.push({frame:frameEls[f], t:(f+1)*g});
+    for(let j=0; j<L.r; j++) steps.push({el:itemEls[L.F*g + j], t:L.F*g + j + 1});
+  }
+  const oneDelay = RM ? 120 : Math.max(110, Math.min(450, 9000/n));
+  for(const s of steps){
+    if(gen !== S.gen) return;
+    if(s.frame){ s.frame.classList.add('lit'); const b = document.createElement('b'); b.className = 'fbd'; b.textContent = s.t; s.frame.appendChild(b); snd.tick(440); }
+    else { s.el.classList.add('lit'); const b = document.createElement('b'); b.className = 'bd'; b.textContent = s.t; s.el.appendChild(b); snd.tick(300 + Math.min(s.t,60)*6); }
+    $('#statusL').innerHTML = `Counting: <b>${s.t}</b>`;
+    await sleep(s.frame ? 850 : oneDelay);
+  }
+  if(gen !== S.gen) return;
+  S.counts[g][st.grid ? 'grid' : 'mess'] = steps.length;
+  snd.chime();
+  frameStatus(g);
+  $('#statusL').innerHTML = `<b>${n}</b> ${st.grid ? `in ${pl(steps.length,'count')}: by ${g}s, then 1s` : `in ${pl(steps.length,'count')}, one by one`}`;
+}
+
+/* ---------- Race ---------- */
+function resetRace(){
+  clearInterval(S.race.timer); S.race.timer = null; S.race.running = false; S.race.paused = false; S.race.best = null;
+  S.race.lanes = LANES.map(l => ({...l, cur:0, steps:0, trail:[], done:false}));
+}
+function renderRace(){
+  if(!S.race.lanes.length) resetRace();
+  const t = S.n, best = S.race.best;
+  layer.innerHTML = `<div class="lanes">${S.race.lanes.map(l => {
+    const pct = Math.round(l.cur/t*100);
+    return `<div class="lane ${best!=null && l.done && l.steps===best ? 'win' : ''}">
+      <div class="lanehead"><span>${l.icon} ${l.name}</span><span class="ct"><b>${l.cur}</b> / ${t} · ${pl(l.steps,'count')}</span></div>
+      <div class="track"><div class="fill" style="width:${pct}%;background:${l.color}"></div><div class="runner" style="left:${clamp(pct,3,97)}%">${l.icon}</div></div>
+      <div class="trail">${l.trail.join(', ')}</div></div>`; }).join('')}</div>`;
+  $('#statusL').innerHTML = S.race.running ? 'Race in progress…' : `Race to <b>${t}</b>`;
+  $('#statusR').textContent = 'Each tick, every runner says one number.';
+}
+function startRace(){
+  if(S.race.running && S.race.paused){ S.race.paused = false; runRace(); return; }
+  resetRace(); S.race.running = true; snd.chime(); renderRace(); runRace();
+}
+function pauseRace(){ if(!S.race.running) return; S.race.paused = true; clearInterval(S.race.timer); S.race.timer = null; }
+function runRace(){
+  clearInterval(S.race.timer);
+  const t = S.n;
+  S.race.timer = setInterval(() => {
+    let all = true;
+    S.race.lanes.forEach(l => {
+      if(l.done) return; all = false;
+      const jump = (l.cur + l.step <= t) ? l.step : 1;   // skip-count while a whole jump fits, then count on by 1s
+      l.cur += jump; l.steps++; l.trail.push(l.cur);
+      if(l.cur >= t) l.done = true;
+    });
+    snd.tick(300);
+    if(S.race.lanes.every(l => l.done)) all = true;
+    if(all){ clearInterval(S.race.timer); S.race.timer = null; S.race.running = false; S.race.best = Math.min(...S.race.lanes.map(l => l.steps)); if(S.tab===4) renderRace(); finishRace(); return; }
+    if(S.tab===4) renderRace();
+  }, RM ? 250 : 450);
+}
+function finishRace(){
+  const ls = S.race.lanes, best = S.race.best, win = ls.filter(l => l.steps === best);
+  const one = ls.find(l => l.id==='1s'), ten = ls.find(l => l.id==='10s');
+  $('#raceT').textContent = win.length === 1 ? `${win[0].name.split(',')[0]} wins!` : "It's a tie!";
+  $('#raceP').textContent = `Everyone got to ${S.n}. By 1s took ${pl(one.steps,'count')}. By 10s, then 1s, took ${pl(ten.steps,'count')}: ${ten.trail.join(', ')}. Bigger groups mean fewer counts and fewer places to lose track.`;
+  S.race.winName = win.map(w => w.name.split(',')[0]).join(' & ');
+  $('#raceModal').hidden = false; snd.chime(); confetti();
+  if(!S.race.ok){ S.race.ok = true; addStar(); }
+  renderPanel();
+}
+
+/* ---------- Challenge visual ---------- */
+function renderChallenge(){
+  const t = S.ch.target, T = Math.floor(t/10), O = t%10, e = icon();
+  layer.innerHTML = `<div class="chal">
+    <div class="target"><small>Our big collection</small><b>${t}</b> <span style="font-size:40px">${e}</span></div>
+    <div class="lbl">Groups of 10</div>
+    <div class="tens">${Array.from({length:T}, () => `<div class="tcard" aria-label="a group of 10">${`<span>${e}</span>`.repeat(10)}</div>`).join('')}</div>
+    <div class="lbl">Leftover ones</div>
+    <div class="loose">${`<span>${e}</span>`.repeat(O) || '<span class="muted" style="font-size:18px">No leftovers</span>'}</div></div>`;
+  $('#statusL').innerHTML = 'How many tens? How many ones?';
+  $('#statusR').textContent = '';
+}
+
+/* ---------- Answer checks ---------- */
+function groupCheck(total, g, a, b, word, where){
+  const gw = k => `${k} ${k===1 ? word : word+'s'}`, ow = k => `${k} ${k===1 ? 'one' : 'ones'}`;
+  const expG = Math.floor(total/g), expO = total % g;
+  if(isNaN(a) || isNaN(b)) return {ok:false, html:'Fill in both boxes, then check.'};
+  if(a===expG && b===expO) return {ok:true, html:`🎉 Yes! ${gw(expG)} and ${ow(expO)} make ${total}.`};
+  const made = a*g + b;
+  if(made === total) return {ok:false, html:`${gw(a)} and ${ow(b)} do make ${total}! But ${ow(b)} is enough for another group of ${g}. Can you make one more group?`};
+  const tips = [];
+  if(a !== expG) tips.push(`Count the ${where} again.`);
+  if(b !== expO) tips.push('Count the leftover ones again.');
+  return {ok:false, html:`${gw(a)} and ${ow(b)} make ${made}, not ${total}. ${tips.join(' ')}`};
+}
+function checkCanvas(){
+  const v = parseInt(S.canvas.answer, 10), n = S.n; let ok = false, html;
+  if(isNaN(v)) html = 'Type how many you counted, then tap Check.';
+  else if(v === n){ ok = true; html = `🎉 Yes! There are ${n}. How did you keep track?`; }
+  else if(v > n) html = `${v} is more than we have. Maybe some got counted twice. Tap ▦ Grid to line them up, then count again.`;
+  else html = `${v} is fewer than we have. Maybe some got skipped. Look for ones without a green number, then count again.`;
+  S.canvas.fb = {ok, html}; result(ok, 'canvas');
+}
+function checkFrames(g){
+  const st = S.fr[g];
+  const r = groupCheck(S.n, g, parseInt(st.a,10), parseInt(st.b,10), g===5 ? 'five' : 'ten', `full ${g}-frames`);
+  if(!st.grid && !r.ok) r.html = `Tip: tap ▦ Grid first to sort them into ${g}-frames. ` + r.html;
+  st.fb = r; result(r.ok, g);
+}
+function checkChallenge(){
+  const r = groupCheck(S.ch.target, 10, parseInt(S.ch.a,10), parseInt(S.ch.b,10), 'ten', 'groups of 10');
+  S.ch.fb = r; result(r.ok, 'ch');
+}
+function result(ok, which){
+  const tgt = which==='canvas' ? S.canvas : which==='ch' ? S.ch : S.fr[which];
+  if(ok){ snd.chime(); if(!tgt.ok){ tgt.ok = true; addStar(); } } else snd.soft();
+  renderPanel();
+}
+function addStar(){ S.stars++; $('#starCount').textContent = S.stars; confetti(); }
+
+/* ---------- Panel ---------- */
+const fbHTML = fb => fb ? `<div class="fb ${fb.ok ? 'ok' : 'try'}" role="status">${fb.html}</div>` : '';
+function renderPanel(){
+  const t = S.tab, body = $('#pBody');
+  $('#pBadge').textContent = `Section ${t} of 5`;
+  $('#prevBtn').disabled = t === 1;
+  $('#nextBtn').textContent = t === 5 ? 'Certificate 🏆' : 'Next section →';
+  const things = NAMES[S.theme];
+  let html = '', ok = false;
+  if(t === 1){
+    $('#pHead').textContent = 'Free Canvas'; ok = S.canvas.ok;
+    html = `<p class="lead">Tap each one to count it. A number shows on every one you tap.</p>
+      <div class="box"><label for="aCanvas">How many ${things}?</label>
+      <input id="aCanvas" type="number" inputmode="numeric" value="${S.canvas.answer}" placeholder="Type the total">
+      <button class="btn primary" id="chkCanvas" type="button">Check</button></div>${fbHTML(S.canvas.fb)}
+      <p class="muted">Lost your place? Tap ▦ Grid to line them up, or 🔀 Scramble to mix them again.</p>`;
+  } else if(t === 2 || t === 3){
+    const g = t === 2 ? 5 : 10, st = S.fr[g], cls = g===5 ? 'five' : 'ten';
+    $('#pHead').textContent = `${g}-Frames`; ok = st.ok;
+    html = `<p class="lead">The ${things} are all mixed up. Tap <b>▦ Grid</b> to sort them into ${g}-frames. Tap <b>▶ Count them</b> before and after. Which count is faster?</p>
+      <div class="box"><div class="pair">
+        <div><label for="aG">Full ${g}-frames</label><input id="aG" type="number" inputmode="numeric" value="${st.a}" placeholder="${g===5 ? 'Fives' : 'Tens'}"></div>
+        <div><label for="aO">Leftover ones</label><input id="aO" type="number" inputmode="numeric" value="${st.b}" placeholder="Ones"></div>
+      </div><button class="btn ${cls}" id="chkG" type="button">Check my ${g}-frames</button></div>${fbHTML(st.fb)}`;
+  } else if(t === 4){
+    $('#pHead').textContent = 'Strategy Race'; ok = S.race.ok;
+    html = `<p class="lead">Four runners count to <b>${S.n}</b>. Each one says a number every tick. Who gets there in the fewest counts?</p>
+      <p class="muted">Predict first! Then start the race.</p>
+      <div class="box"><button class="btn amber" id="rStart" type="button">🏁 Start race</button>
+      <div class="pair"><button class="btn ghost" id="rPause" type="button">⏸ Pause</button><button class="btn ghost" id="rReset" type="button">↺ Reset</button></div></div>
+      ${S.race.best != null ? `<div class="fb ok">${S.race.winName} used the fewest counts: ${S.race.best}.</div>` : ''}`;
+  } else {
+    $('#pHead').textContent = 'Challenge'; ok = S.ch.ok;
+    html = `<p class="lead">A big collection! How many tens and how many leftover ones?</p>
+      <div class="targets" role="group" aria-label="Pick a collection">${[36,56,72,85].map(v => `<button type="button" data-t="${v}" aria-pressed="${S.ch.target===v}">${v}</button>`).join('')}</div>
+      <div class="box"><div class="pair">
+        <div><label for="aT">Tens</label><input id="aT" type="number" inputmode="numeric" value="${S.ch.a}" placeholder="Tens"></div>
+        <div><label for="aO2">Ones</label><input id="aO2" type="number" inputmode="numeric" value="${S.ch.b}" placeholder="Ones"></div>
+      </div><button class="btn amber" id="chkCh" type="button">Check</button></div>${fbHTML(S.ch.fb)}`;
+  }
+  body.innerHTML = html;
+  $('#pStar').textContent = ok ? '★' : '☆';
+  wirePanel();
+}
+function wirePanel(){
+  const t = S.tab, on = (id, ev, fn) => { const e = $(id); if(e) e.addEventListener(ev, fn); };
+  if(t === 1){ on('#aCanvas','input', e => S.canvas.answer = e.target.value); on('#chkCanvas','click', checkCanvas); on('#aCanvas','keydown', e => e.key==='Enter' && checkCanvas()); }
+  if(t === 2 || t === 3){ const g = t===2 ? 5 : 10; on('#aG','input', e => S.fr[g].a = e.target.value); on('#aO','input', e => S.fr[g].b = e.target.value); on('#chkG','click', () => checkFrames(g)); }
+  if(t === 4){ on('#rStart','click', startRace); on('#rPause','click', pauseRace); on('#rReset','click', () => { resetRace(); renderRace(); renderPanel(); }); }
+  if(t === 5){
+    $$('.targets button').forEach(b => b.onclick = () => { S.ch.target = +b.dataset.t; S.ch.a = ''; S.ch.b = ''; S.ch.fb = null; S.ch.ok = false; snd.pop(400); renderChallenge(); renderPanel(); });
+    on('#aT','input', e => S.ch.a = e.target.value); on('#aO2','input', e => S.ch.b = e.target.value); on('#chkCh','click', checkChallenge);
+  }
+}
+
+/* ---------- Tabs & toolbar ---------- */
+function renderTabs(){
+  $('#tabs').innerHTML = TABS.map(t => `<button type="button" role="tab" data-tab="${t.id}" aria-selected="${S.tab===t.id}" class="${t.star ? 'star' : ''}"><b>${t.star ? '★' : t.id}</b>${t.label}</button>`).join('');
+  $$('#tabs button').forEach(b => b.onclick = () => go(+b.dataset.tab));
+}
+function renderField(){
+  const t = S.tab;
+  if(t === 1) renderCanvas();
+  else if(t === 2) renderFrames(5);
+  else if(t === 3) renderFrames(10);
+  else if(t === 4) renderRace();
+  else renderChallenge();
+}
+function toolbar(){
+  const t = S.tab, g = TABS[t-1].g;
+  $('#wTitle').textContent = ['Scattered Canvas','5-Frame Workstation','10-Frame Workstation','Strategy Race','Challenge'][t-1];
+  $('#qtyBox').hidden = t === 5;
+  $('#scrBtn').hidden = $('#gridBtn').hidden = t > 3;
+  $('#countBtn').hidden = !g;
+  const grid = t === 1 ? S.canvas.grid : g ? S.fr[g].grid : false;
+  $('#gridBtn').classList.toggle('on', grid);
+  $('#gridBtn').setAttribute('aria-pressed', grid);
+}
+function go(t){
+  S.gen++; S.tab = t; snd.pop(360);
+  const g = TABS[t-1].g;
+  if(g){ S.fr[g].grid = false; S.fr[g].scatter = null; }   // frame workstations always open mixed up
+  $('#miniSec').textContent = t;
+  renderTabs(); toolbar(); renderField(); renderPanel();
+}
+function scramble(){
+  S.gen++; snd.pop(300);
+  const {W,H} = box(), t = S.tab, g = TABS[t-1].g;
+  if(t === 1){ S.canvas.grid = false; S.canvas.scatter = makeScatter(S.n, W, H); positionCanvas(true); }
+  else if(g){ clearCountMarks(); S.fr[g].grid = false; S.fr[g].scatter = makeScatter(S.n, W, H); positionFrames(g, true); frameStatus(g); }
+  toolbar();
+}
+function grid(){
+  S.gen++; snd.pop(600);
+  const t = S.tab, g = TABS[t-1].g;
+  if(t === 1){ S.canvas.grid = true; positionCanvas(true); }
+  else if(g){ clearCountMarks(); S.fr[g].grid = true; positionFrames(g, true); frameStatus(g); }
+  toolbar();
+}
+function setCount(v){
+  const n = clamp(parseInt(v,10) || 1, 1, 120);
+  S.n = n; $('#qty').value = n; S.gen++;
+  S.canvas = {...S.canvas, scatter:null, grid:false, order:{}, answer:'', fb:null};
+  [5,10].forEach(g => Object.assign(S.fr[g], {scatter:null, grid:false, a:'', b:'', fb:null}));
+  S.counts = {5:{}, 10:{}};
+  resetRace();
+  snd.chime(); renderField(); renderPanel(); toolbar();
+}
+
+/* ---------- Global wiring ---------- */
+$('#qtyBox').addEventListener('click', e => { const d = e.target.closest('[data-d]'); if(d) setCount(S.n + (+d.dataset.d)); });
+$('#qty').addEventListener('change', e => setCount(e.target.value));
+$('#theme').addEventListener('change', e => { S.theme = e.target.value; snd.pop(500); renderField(); renderPanel(); });
+$('#scrBtn').onclick = scramble;
+$('#gridBtn').onclick = grid;
+$('#countBtn').onclick = countAlong;
+$('#prevBtn').onclick = () => S.tab > 1 && go(S.tab - 1);
+$('#nextBtn').onclick = () => S.tab < 5 ? go(S.tab + 1) : openCert();
+$('#soundBtn').onclick = () => { snd.on = !snd.on; $('#soundBtn').setAttribute('aria-pressed', snd.on); $('#soundBtn').textContent = snd.on ? '🔊 Sound on' : '🔇 Sound off'; };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => { $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; setTimeout(renderField, 120); });
+$('#hideHdr').onclick = () => { $('#hdr').hidden = true; $('#miniBar').hidden = false; setTimeout(renderField, 50); };
+$('#showHdr').onclick = () => { $('#hdr').hidden = false; $('#miniBar').hidden = true; setTimeout(renderField, 50); };
+$('#resetBtn').onclick = () => { $('#resetModal').hidden = false; };
+$('#rmNo').onclick = () => { $('#resetModal').hidden = true; };
+$('#rmYes').onclick = () => {
+  $('#resetModal').hidden = true; clearInterval(S.race.timer);
+  const sound = snd.on; S = freshState(); snd.on = sound;
+  $('#qty').value = 24; $('#theme').value = 'stars'; $('#starCount').textContent = '0';
+  resetRace(); go(1);
+};
+$('#raceOk').onclick = () => { $('#raceModal').hidden = true; };
+function openCert(){
+  const n = S.n;
+  $('#cSize').textContent = pl(n, 'item');
+  $('#cTens').textContent = `${pl(Math.floor(n/10),'ten')} + ${pl(n%10,'one')}`;
+  $('#cFives').textContent = `${pl(Math.floor(n/5),'five')} + ${pl(n%5,'one')}`;
+  $('#cRace').textContent = S.race.winName ? S.race.winName + ' ⚡' : 'Run the race to find out';
+  $('#certModal').hidden = false; snd.chime();
+}
+$('#certBtn').onclick = openCert;
+$('#certClose').onclick = () => { $('#certModal').hidden = true; };
+$$('.modal').forEach(m => m.addEventListener('click', e => { if(e.target === m) m.hidden = true; }));
+document.addEventListener('keydown', e => { if(e.key === 'Escape') $$('.modal').forEach(m => m.hidden = true); });
+$('#certDate').value = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if(S.tab !== 4) renderField(); }, 150); });
+
+window.__test = { groupCheck, frameLayout, get S(){ return S; } };
+resetRace();
+requestAnimationFrame(() => go(1));
+})();
+</script>
+
+</body></html>

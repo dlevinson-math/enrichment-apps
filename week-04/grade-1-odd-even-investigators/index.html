@@ -1,0 +1,739 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Odd &amp; Even Investigators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: big step tabs on top; each step is one stage (counters, carton, cards) with a feedback strip under it. */
+:root{
+  --bg:#EDF1F7; --card:#FFFFFF; --ink:#1B2A41; --muted:#56637A; --line:#D2DAE6;
+  --even:#2763CF; --even-soft:#DDE8FB; --odd:#D8492A; --odd-soft:#FBE2DA;
+  --counter:#F5BA1E; --counter-edge:#C48E00; --counterB:#17A07B; --counterB-edge:#0D7558;
+  --cup:#E4DED0; --cup-edge:#C9C0AC; --good:#1E8A4C; --good-soft:#DDF3E5;
+  --s1:#2763CF; --s2:#D8492A; --s3:#17A07B; --s4:#8B55D0; --s5:#E08A00; --s6:#C23A7A;
+  --k1:#F1C9A5; --k2:#C98E62; --k3:#8D5A3B; --k4:#5E3A26;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111721; --card:#1A2230; --ink:#EAF0F8; --muted:#9DA9BD; --line:#2F3B4E;
+    --even:#6EA0F6; --even-soft:#1C2D4A; --odd:#FF7F5E; --odd-soft:#3E2219;
+    --counter:#F7C547; --counter-edge:#A97E0B; --counterB:#3DCBA3; --counterB-edge:#1C8A6B;
+    --cup:#2A3342; --cup-edge:#435066; --good:#5BD08B; --good-soft:#173525;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111721; --card:#1A2230; --ink:#EAF0F8; --muted:#9DA9BD; --line:#2F3B4E;
+  --even:#6EA0F6; --even-soft:#1C2D4A; --odd:#FF7F5E; --odd-soft:#3E2219;
+  --counter:#F7C547; --counter-edge:#A97E0B; --counterB:#3DCBA3; --counterB-edge:#1C8A6B;
+  --cup:#2A3342; --cup-edge:#435066; --good:#5BD08B; --good-soft:#173525;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{min-height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.4vw,21px); -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:4px solid var(--counter); outline-offset:3px}
+.wrap{max-width:1280px; margin:0 auto; padding-inline:clamp(16px,2.5vw,32px); padding-block:14px 32px; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.logo{width:56px; height:56px; flex:none}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,46px); line-height:1; margin:0; letter-spacing:-.01em; text-wrap:balance}
+h1 .o{color:var(--odd)} h1 .e{color:var(--even)}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase; font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap}
+nav button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.5vw,22px); min-height:56px}
+nav button .n{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:20px}
+nav button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav button[aria-selected="true"] .n{background:var(--counter); color:#1B2A41}
+
+.stage{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:clamp(16px,2.4vw,32px); display:flex; flex-direction:column; gap:20px; min-width:0}
+.stage[hidden]{display:none}
+.ask{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.ask h2{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.2vw,44px); line-height:1.1; margin:0; text-wrap:balance}
+.say{width:48px; height:48px; border-radius:50%; border:2px solid var(--line); background:var(--bg); display:grid; place-items:center; flex:none}
+.say svg{width:24px; height:24px}
+.say[hidden]{display:none}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.big{border:0; border-radius:18px; font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,30px); padding:12px 26px; min-height:64px; background:var(--ink); color:var(--card)}
+.big:disabled{opacity:.4; cursor:default}
+.soft{border:2.5px solid var(--ink); background:var(--card); border-radius:18px; font-family:var(--display); font-weight:700; font-size:clamp(19px,1.8vw,24px); padding:10px 22px; min-height:58px}
+.soft:disabled{opacity:.4; cursor:default}
+.pick{border:3px solid currentColor; background:var(--card); border-radius:20px; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); padding:6px 30px; min-height:72px; min-width:150px; letter-spacing:.04em}
+.pick.odd{color:var(--odd)} .pick.even{color:var(--even)}
+.pick[aria-pressed="true"].odd{background:var(--odd); color:var(--card); border-color:var(--odd)}
+.pick[aria-pressed="true"].even{background:var(--even); color:var(--card); border-color:var(--even)}
+.chip{display:inline-block; font-family:var(--display); font-weight:800; letter-spacing:.05em; border-radius:10px; padding:0 12px; line-height:1.5}
+.chip.odd{background:var(--odd); color:var(--card)} .chip.even{background:var(--even); color:var(--card)}
+.stepper{display:inline-flex; align-items:center; gap:6px; background:var(--bg); border-radius:999px; padding:6px}
+.stepper button{width:56px; height:56px; border-radius:50%; border:0; background:var(--card); font-family:var(--display); font-weight:800; font-size:30px; line-height:1}
+.stepper button:disabled{opacity:.35}
+.stepper output{min-width:2.2ch; text-align:center; font-family:var(--display); font-weight:800; font-size:40px; font-variant-numeric:tabular-nums}
+
+.say-box{font-size:clamp(20px,2vw,28px); line-height:1.4; padding:16px 20px; border-radius:16px; background:var(--bg); min-height:2.2em; max-width:44em}
+.say-box:empty{display:none}
+.say-box.good{background:var(--good-soft)}
+.say-box.look{background:var(--odd-soft)}
+.say-box b{font-family:var(--display)}
+.note{font-size:15px; color:var(--muted); margin:0}
+
+/* Friends (warm-up) */
+.crowd{display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:clamp(6px,1.4vw,18px); min-height:170px; padding:12px; border-radius:18px; background:var(--bg)}
+.fig{width:clamp(40px,6vw,72px); flex:none}
+.fig svg{display:block; width:100%; height:auto}
+.duo{display:flex; align-items:flex-end; gap:0; position:relative; padding:6px 8px 10px; border-radius:16px; background:var(--even-soft); animation:pop .35s ease-out}
+.duo::after{content:""; position:absolute; left:calc(50% - 14px); width:28px; bottom:calc(40% + 4px); height:6px; border-radius:3px; background:var(--even)}
+.solo{position:relative; padding:6px 8px 10px; border-radius:16px; border:3px dashed var(--odd); background:var(--odd-soft); display:flex; flex-direction:column; align-items:center; animation:pop .35s ease-out}
+.solo span{font-family:var(--display); font-weight:800; color:var(--odd); font-size:16px; line-height:1.1; white-space:nowrap}
+
+/* Counters & pair tiles */
+.dot{display:inline-block; width:var(--d,28px); height:var(--d,28px); border-radius:50%; background:var(--counter); border:max(2px,calc(var(--d,28px)*.12)) solid var(--counter-edge)}
+.dot.b{background:var(--counterB); border-color:var(--counterB-edge)}
+.pairs{display:flex; flex-wrap:wrap; gap:calc(var(--d,28px)*.35); align-items:flex-start; align-content:flex-start}
+.tile{display:inline-flex; flex-direction:column; gap:calc(var(--d,28px)*.18); padding:calc(var(--d,28px)*.2); border-radius:calc(var(--d,28px)*.5 + 4px); background:var(--even-soft); outline:2px solid var(--even); outline-offset:-2px}
+.tile.lone{background:var(--odd-soft); outline:3px dashed var(--odd)}
+.tile .empty{display:inline-block; width:var(--d,28px); height:var(--d,28px)}
+.tile.joined{outline:4px solid var(--good); background:var(--good-soft); animation:pop .5s ease-out}
+.loose{display:flex; flex-wrap:wrap; gap:10px}
+
+/* Sort 1–10 */
+.cards{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:8px}
+.card{aspect-ratio:3/4; max-height:96px; border:3px solid var(--line); border-radius:14px; background:var(--card); font-family:var(--display); font-weight:800; font-size:clamp(24px,3vw,42px)}
+.card.cur{border-color:var(--ink); background:var(--counter); color:#1B2A41}
+.card.even{background:var(--even); border-color:var(--even); color:var(--card)}
+.card.odd{background:var(--odd); border-color:var(--odd); color:var(--card)}
+.bins{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.bin{border:3px solid var(--even); background:var(--even-soft); border-radius:20px; padding:14px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; text-align:left; min-height:150px}
+.bin.odd{border-color:var(--odd); background:var(--odd-soft)}
+.bin h3{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(20px,2vw,28px); line-height:1.1}
+.bin .icon{--d:20px; display:flex; gap:6px; align-items:flex-start}
+.bin .got{display:flex; flex-wrap:wrap; gap:6px}
+.bin .got span{font-family:var(--display); font-weight:800; font-size:26px; width:46px; height:46px; display:grid; place-items:center; border-radius:12px; background:var(--card); animation:pop .35s ease-out}
+.bin.shake{animation:shake .4s}
+.sortstage{min-height:110px; display:flex; flex-direction:column; gap:12px; justify-content:center; align-items:flex-start}
+.strip{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px}
+.strip span{font-family:var(--display); font-weight:800; font-size:clamp(20px,2.4vw,32px); text-align:center; border-radius:12px; padding:4px 0; color:var(--card)}
+
+/* Test 1–20 */
+.lab{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:24px; align-items:start}
+.chart{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px}
+.cell{aspect-ratio:1; border:2.5px solid var(--line); border-radius:12px; background:var(--card); font-family:var(--display); font-weight:800; font-size:clamp(18px,1.9vw,28px); padding:0; display:flex; align-items:center; justify-content:center; position:relative}
+.cell.cur{border-color:var(--ink); box-shadow:0 0 0 3px var(--counter)}
+.cell.even{background:var(--even); border-color:var(--even); color:var(--card)}
+.cell.odd{background:var(--odd); border-color:var(--odd); color:var(--card)}
+.cell .ld{border-radius:6px; padding:0 2px}
+.chart.spot .cell.even .ld{background:var(--card); color:var(--even); box-shadow:0 0 0 2px var(--card)}
+.chart.spot .cell.odd{opacity:.35}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:15px; color:var(--muted); align-items:center}
+.legend i{display:inline-block; width:18px; height:18px; border-radius:5px; vertical-align:-3px; margin-right:6px}
+.tray{position:relative; width:100%; aspect-ratio:7/3; background:var(--bg); border-radius:18px; border:2px dashed var(--line)}
+.tray .ctr{position:absolute; transform:translate(-50%,-50%); width:11%; aspect-ratio:1; border-radius:50%; background:var(--counter); border:4px solid var(--counter-edge); padding:0; transition:transform .15s}
+.tray .ctr:hover{transform:translate(-50%,-50%) scale(1.08)}
+.tray .ctr.gone{visibility:hidden}
+.tray .hint{position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-family:var(--display); font-weight:700; font-size:clamp(18px,2vw,26px); text-align:center; padding:12px}
+.carton{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px; background:var(--cup-edge); padding:8px; border-radius:16px}
+.col{display:flex; flex-direction:column; gap:6px; border-radius:12px; padding:3px; position:relative}
+.col.paired{background:var(--even)}
+.col.lonely{background:var(--odd)}
+.cup{aspect-ratio:1; border-radius:50%; background:var(--cup); box-shadow:inset 0 3px 6px rgba(0,0,0,.18); display:grid; place-items:center}
+.cup i{width:84%; aspect-ratio:1; border-radius:50%; background:var(--counter); border:3px solid var(--counter-edge)}
+.cup i.new{animation:pop .3s ease-out}
+.carton-note{display:flex; gap:16px; flex-wrap:wrap; font-family:var(--display); font-weight:700; font-size:clamp(18px,1.7vw,24px)}
+
+/* Last digit */
+.bignum{font-family:var(--display); font-weight:800; font-size:clamp(84px,12vw,170px); line-height:1; display:flex; align-items:center; gap:4px; font-variant-numeric:tabular-nums}
+.bignum .ld{border:6px solid var(--ink); border-radius:24px; padding:0 .12em; background:var(--counter); color:#1B2A41}
+.bignum .rest{color:var(--muted)}
+.queue{display:flex; gap:8px; flex-wrap:wrap}
+.queue button{min-width:64px; height:52px; border-radius:14px; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:22px; padding:0 12px}
+.queue button.cur{border-color:var(--ink); box-shadow:0 0 0 3px var(--counter)}
+.queue button.even{background:var(--even); color:var(--card); border-color:var(--even)}
+.queue button.odd{background:var(--odd); color:var(--card); border-color:var(--odd)}
+.key{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px; max-width:620px}
+.key span{font-family:var(--display); font-weight:800; font-size:clamp(22px,2.6vw,34px); text-align:center; border-radius:12px; color:var(--card); padding:2px 0}
+.dg{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start}
+.proof{background:var(--bg); border-radius:18px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.proof h3{margin:0; font-family:var(--display); font-weight:800; font-size:22px}
+
+/* Detective */
+.modes{display:flex; gap:8px; flex-wrap:wrap}
+.modes button{border:2.5px solid var(--line); background:var(--card); border-radius:14px; padding:8px 16px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.6vw,22px); min-height:52px}
+.modes button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.eq{display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,48px)}
+.eq .q{color:var(--muted)}
+.groups{display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; padding:14px; background:var(--bg); border-radius:18px; min-height:120px}
+.group{display:flex; flex-direction:column; gap:8px; min-width:0}
+.group .lbl{font-family:var(--display); font-weight:800; font-size:24px}
+.plus{font-family:var(--display); font-weight:800; font-size:40px; align-self:center}
+.evidence{display:flex; flex-wrap:wrap; gap:8px}
+.evidence span{background:var(--bg); border-radius:12px; padding:6px 12px; font-family:var(--display); font-weight:700; font-size:20px; display:inline-flex; gap:8px; align-items:center}
+.meter{display:flex; gap:6px}
+.meter i{width:26px; height:26px; border-radius:50%; border:3px solid var(--line)}
+.meter i.on{background:var(--good); border-color:var(--good)}
+.claim{display:flex; flex-direction:column; gap:12px; padding-top:16px; border-top:2px solid var(--line)}
+.claim .row button{border:3px solid var(--ink); background:var(--card); border-radius:16px; font-family:var(--display); font-weight:800; font-size:clamp(19px,1.9vw,26px); padding:8px 20px; min-height:60px}
+.claim .row button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.claim .row button:disabled{opacity:.35; cursor:default}
+details.teach{font-size:15px; color:var(--muted)}
+details.teach summary{cursor:pointer; font-weight:700}
+details.teach p{margin:8px 0 0; max-width:60em; line-height:1.5}
+
+@keyframes pop{0%{transform:scale(.6); opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1); opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important; transition:none !important}}
+
+@media (max-width: 900px){
+  .lab,.dg{grid-template-columns:minmax(0,1fr)}
+  .bins{grid-template-columns:1fr}
+  .cards{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .card{max-height:72px; aspect-ratio:auto; height:64px}
+  nav button{padding-right:14px; font-size:17px; min-height:50px}
+  nav button .n{width:32px; height:32px; font-size:17px}
+  .tools{margin-left:0}
+  .pick{min-width:120px; padding:6px 18px}
+}
+@media (max-width: 480px){
+  .strip,.key{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .chart{gap:4px} .cell{border-radius:8px}
+  .carton{gap:3px; padding:5px} .col{gap:3px; padding:2px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 56 56" aria-hidden="true">
+      <circle cx="23" cy="23" r="17" fill="none" stroke="var(--ink)" stroke-width="5"/>
+      <line x1="35" y1="35" x2="50" y2="50" stroke="var(--ink)" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="17" cy="18" r="5" fill="var(--counter)" stroke="var(--counter-edge)" stroke-width="1.5"/>
+      <circle cx="17" cy="29" r="5" fill="var(--counter)" stroke="var(--counter-edge)" stroke-width="1.5"/>
+      <circle cx="29" cy="18" r="5" fill="var(--counter)" stroke="var(--counter-edge)" stroke-width="1.5"/>
+      <circle cx="29" cy="29" r="5" fill="none" stroke="var(--odd)" stroke-width="2" stroke-dasharray="3 2"/>
+    </svg>
+    <div>
+      <h1><span class="o">Odd</span> &amp; <span class="e">Even</span> Investigators</h1>
+      <p class="sub">Grade 1 · Week 4 · Math Enrichment</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Steps">
+  <button role="tab" data-tab="warm" aria-selected="true"><span class="n">1</span>Partners?</button>
+  <button role="tab" data-tab="sort" aria-selected="false"><span class="n">2</span>Sort 1 to 10</button>
+  <button role="tab" data-tab="test" aria-selected="false"><span class="n">3</span>Test 1 to 20</button>
+  <button role="tab" data-tab="digit" aria-selected="false"><span class="n">4</span>Last digit</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span class="n">★</span>Odd + Odd</button>
+</nav>
+
+<!-- 1 Warm-up -->
+<section class="stage" id="tab-warm">
+  <div class="ask"><h2 id="wQ">Can 7 friends all find a partner?</h2><button class="say" data-say="wQ" aria-label="Read aloud"></button></div>
+  <div class="row">
+    <div class="stepper" aria-label="How many friends">
+      <button id="wMinus" aria-label="One fewer friend">−</button><output id="wN">7</output><button id="wPlus" aria-label="One more friend">+</button>
+    </div>
+    <button class="soft" id="wYes">Yes, everyone!</button>
+    <button class="soft" id="wNo">No, one is alone</button>
+    <button class="big" id="wPair">Pair up!</button>
+  </div>
+  <div class="crowd" id="crowd" aria-live="polite"></div>
+  <div class="say-box" id="wMsg" aria-live="polite"></div>
+</section>
+
+<!-- 2 Sort 1–10 -->
+<section class="stage" id="tab-sort" hidden>
+  <div class="ask"><h2 id="sQ">Pick a number. Pair it up. Which box?</h2><button class="say" data-say="sQ" aria-label="Read aloud"></button></div>
+  <div class="cards" id="cards"></div>
+  <div class="sortstage" id="sortStage"></div>
+  <div class="bins">
+    <button class="bin even" id="binEven">
+      <h3>Everyone has a partner</h3>
+      <span class="icon"><span class="tile"><i class="dot"></i><i class="dot"></i></span><span class="tile"><i class="dot"></i><i class="dot"></i></span></span>
+      <span class="got" id="gotEven"></span>
+    </button>
+    <button class="bin odd" id="binOdd">
+      <h3>One left over</h3>
+      <span class="icon"><span class="tile"><i class="dot"></i><i class="dot"></i></span><span class="tile lone"><i class="dot"></i><i class="empty"></i></span></span>
+      <span class="got" id="gotOdd"></span>
+    </button>
+  </div>
+  <div class="say-box" id="sMsg" aria-live="polite"></div>
+  <div id="sPattern"></div>
+</section>
+
+<!-- 3 Test 1–20 -->
+<section class="stage" id="tab-test" hidden>
+  <div class="ask"><h2 id="tQ">Pick a number. Pair the counters. Odd or even?</h2><button class="say" data-say="tQ" aria-label="Read aloud"></button></div>
+  <div class="lab">
+    <div style="display:flex; flex-direction:column; gap:12px; min-width:0">
+      <div class="chart" id="chart" aria-label="Recording chart 1 to 20"></div>
+      <div class="legend"><span><i style="background:var(--even)"></i>even</span><span><i style="background:var(--odd)"></i>odd</span><span id="tCount"></span></div>
+      <div class="row">
+        <button class="soft" id="tSpot">Look at the last digits</button>
+        <button class="soft" id="tFill">Fill the chart</button>
+      </div>
+      <div class="say-box" id="tPat" aria-live="polite"></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0">
+      <div class="tray" id="tray"></div>
+      <div class="carton" id="carton" aria-label="Egg carton"></div>
+      <div class="carton-note" id="cNote"></div>
+      <div class="row">
+        <button class="pick odd" data-t="odd" aria-pressed="false">ODD</button>
+        <button class="pick even" data-t="even" aria-pressed="false">EVEN</button>
+        <button class="soft" id="tAll">Pair them all</button>
+      </div>
+      <div class="say-box" id="tMsg" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 Last digit -->
+<section class="stage" id="tab-digit" hidden>
+  <div class="ask"><h2 id="dQ">No counting! Look at the last digit.</h2><button class="say" data-say="dQ" aria-label="Read aloud"></button></div>
+  <div class="queue" id="queue"></div>
+  <div class="dg">
+    <div style="display:flex; flex-direction:column; gap:16px; min-width:0">
+      <div class="bignum" id="bignum" aria-live="polite"></div>
+      <div class="row">
+        <button class="pick odd" data-d="odd" aria-pressed="false">ODD</button>
+        <button class="pick even" data-d="even" aria-pressed="false">EVEN</button>
+      </div>
+      <div class="say-box" id="dMsg" aria-live="polite"></div>
+      <div class="row">
+        <button class="soft" id="dProof">Check by pairing</button>
+        <button class="soft" id="dMystery">Mystery number</button>
+        <button class="soft" id="dKeyBtn">Show the digit key</button>
+      </div>
+      <div class="key" id="dKey" hidden></div>
+    </div>
+    <div class="proof" id="proof" hidden>
+      <h3 id="proofT"></h3>
+      <div class="pairs" id="proofPairs"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 Detective -->
+<section class="stage" id="tab-det" hidden>
+  <div class="ask"><h2 id="xQ">Is odd + odd always even?</h2><button class="say" data-say="xQ" aria-label="Read aloud"></button></div>
+  <div class="modes" id="modes">
+    <button data-m="oo" aria-pressed="true">odd + odd</button>
+    <button data-m="ee" aria-pressed="false">even + even</button>
+    <button data-m="oe" aria-pressed="false">★ Challenge: odd + even (two-digit)</button>
+  </div>
+  <div class="row" id="xSteppers"></div>
+  <div class="eq" id="xEq"></div>
+  <div class="groups" id="xGroups"></div>
+  <div class="row" id="xActions"></div>
+  <div class="say-box" id="xMsg" aria-live="polite"></div>
+  <div class="row"><span style="font-family:var(--display);font-weight:700;font-size:20px">Tests:</span><div class="meter" id="xMeter"></div><div class="evidence" id="xEvidence"></div></div>
+  <div class="claim">
+    <div class="ask"><h2 id="xClaimQ" style="font-size:clamp(22px,2.4vw,32px)">Make a claim</h2><button class="say" data-say="xClaimQ" aria-label="Read aloud"></button></div>
+    <div class="row" id="xClaim"></div>
+    <div class="say-box" id="xClaimMsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<details class="teach">
+  <summary>Teacher notes</summary>
+  <p><b>Objective:</b> decide odd or even by pairing, then generalize the last-digit rule. Flow: Partners? (warm-up with 7 friends) → Sort 1 to 10 (launch) → Test 1 to 20 with the egg carton (investigate) → Last digit on 14, 27, 38, 45, 100, 34 and 47 → Odd + Odd (extension: test five examples, then claim). <b>Look for:</b> do students trust the tested rule for new numbers like 34, 47 and 100, or keep re-pairing every time? Trusting a verified pattern is early generalization (MP8). When a student asks "is this right?", tap the check buttons together and ask "how could you check?"</p>
+</details>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const par = n => n % 2 === 0 ? 'even' : 'odd';
+const PAR = n => par(n).toUpperCase();
+const pl = (k, w) => `${k} ${w}${k===1?'':'s'}`;
+const chip = p => `<span class="chip ${p}">${p.toUpperCase()}</span>`;
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* sanity checks on the core math */
+console.assert([0,2,4,6,8].every(d => par(d)==='even') && [1,3,5,7,9].every(d => par(d)==='odd'));
+for(let a=1;a<100;a+=2) for(let b=1;b<100;b+=2) console.assert(par(a+b)==='even');
+for(let a=1;a<100;a+=2) for(let b=0;b<100;b+=2) console.assert(par(a+b)==='odd');
+
+let S;
+function fresh(){
+  return {
+    tab: S ? S.tab : 'warm',
+    warm:{n:7, paired:false, pred:null},
+    sort:{cur:null, paired:false, bins:{even:[],odd:[]}, msg:'', look:false, shake:null},
+    test:{n:null, slots:[], gone:[], placed:0, pred:null, tested:{}, msg:'', mood:'', spot:false, pat:'', last:-1},
+    digit:{list:[14,27,38,45,100,34,47], i:0, done:{}, ans:null, proof:false, key:false, msg:'', mood:''},
+    det:{mode:'oo', m:{
+      oo:{a:3,b:5,preset:0,joined:false,ans:null,ev:[],claim:null,msg:'',mood:'',cmsg:'',cmood:''},
+      ee:{a:4,b:6,preset:0,joined:false,ans:null,ev:[],claim:null,msg:'',mood:'',cmsg:'',cmood:''},
+      oe:{a:23,b:14,preset:0,joined:false,ans:null,ev:[],claim:null,msg:'',mood:'',cmsg:'',cmood:''}
+    }}
+  };
+}
+S = fresh();
+function msg(el, html, mood){ el.innerHTML = html || ''; el.className = 'say-box' + (mood ? ' '+mood : ''); }
+
+/* ---------- speech ---------- */
+const canSpeak = 'speechSynthesis' in window;
+const SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+$$('.say').forEach(b => {
+  b.innerHTML = SPK; b.hidden = !canSpeak;
+  b.onclick = () => { try{ speechSynthesis.cancel(); const t = document.getElementById(b.dataset.say).textContent.replace(/\+/g,' plus '); const u = new SpeechSynthesisUtterance(t); u.rate = .9; speechSynthesis.speak(u); }catch(e){} };
+});
+
+/* ---------- tabs ---------- */
+function setTab(t){
+  S.tab = t;
+  $$('nav [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','sort','test','digit','det'].forEach(k => $('#tab-'+k).hidden = k!==t);
+}
+$$('nav [data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ---------- shared: pair tiles ---------- */
+function dotSize(n){ return n<=12 ? 34 : n<=24 ? 26 : n<=60 ? 18 : n<=110 ? 13 : 10; }
+function tiles(n, cls=''){
+  let h=''; for(let i=0;i<Math.floor(n/2);i++) h+=`<span class="tile"><i class="dot ${cls}"></i><i class="dot ${cls}"></i></span>`;
+  if(n%2) h+=`<span class="tile lone"><i class="dot ${cls}"></i><i class="empty"></i></span>`;
+  return h;
+}
+function pairWords(n){
+  const k = Math.floor(n/2);
+  return n%2 ? `${pl(k,'pair')} and <b>1 left over</b>` : `${pl(k,'pair')}, <b>nobody left over</b>`;
+}
+
+/* ================= 1 WARM-UP ================= */
+const SHIRTS = ['--s1','--s2','--s3','--s4','--s5','--s6'], SKIN = ['--k1','--k2','--k3','--k4','--k2','--k1','--k4'];
+function fig(i){
+  const sh = `var(${SHIRTS[i%6]})`, sk = `var(${SKIN[i%7]})`;
+  return `<span class="fig"><svg viewBox="0 0 40 72" aria-hidden="true"><circle cx="20" cy="13" r="10.5" fill="${sk}"/><path d="M5 70V38a15 15 0 0 1 30 0v32z" fill="${sh}"/><rect x="11" y="56" width="7" height="14" rx="2" fill="var(--ink)" opacity=".75"/><rect x="22" y="56" width="7" height="14" rx="2" fill="var(--ink)" opacity=".75"/></svg></span>`;
+}
+function renderWarm(){
+  const w = S.warm, n = w.n;
+  $('#wN').textContent = n; $('#wMinus').disabled = n<=1; $('#wPlus').disabled = n>=10;
+  $('#wQ').textContent = `Can ${n} ${n===1?'friend':'friends'} all find a partner?`;
+  let h='';
+  if(!w.paired){ for(let i=0;i<n;i++) h+=fig(i); }
+  else {
+    for(let p=0;p<Math.floor(n/2);p++) h+=`<div class="duo">${fig(2*p)}${fig(2*p+1)}</div>`;
+    if(n%2) h+=`<div class="solo">${fig(n-1)}<span>No partner!</span></div>`;
+  }
+  $('#crowd').innerHTML = h;
+  $('#crowd').setAttribute('aria-label', `${n} friends`);
+  if(!w.paired){ msg($('#wMsg'), ''); return; }
+  const allPaired = n%2===0;
+  let lead = '';
+  if(w.pred!==null) lead = (w.pred===allPaired) ? 'You were right! ' : 'Look closely! ';
+  msg($('#wMsg'), `${lead}${n} ${n===1?'friend makes':'friends make'} ${pairWords(n)}. ${n} is ${chip(par(n))}`, w.pred===null ? '' : (w.pred===allPaired ? 'good' : 'look'));
+}
+$('#wMinus').onclick = () => { S.warm.n=Math.max(1,S.warm.n-1); S.warm.paired=false; S.warm.pred=null; renderWarm(); };
+$('#wPlus').onclick = () => { S.warm.n=Math.min(10,S.warm.n+1); S.warm.paired=false; S.warm.pred=null; renderWarm(); };
+$('#wYes').onclick = () => { S.warm.pred=true; S.warm.paired=true; renderWarm(); };
+$('#wNo').onclick = () => { S.warm.pred=false; S.warm.paired=true; renderWarm(); };
+$('#wPair').onclick = () => { S.warm.pred=null; S.warm.paired=true; renderWarm(); };
+
+/* ================= 2 SORT 1–10 ================= */
+function renderSort(){
+  const s = S.sort;
+  const where = n => s.bins.even.includes(n) ? 'even' : s.bins.odd.includes(n) ? 'odd' : '';
+  $('#cards').innerHTML = Array.from({length:10},(_,i)=>i+1).map(n => {
+    const w = where(n);
+    return `<button class="card ${w} ${s.cur===n?'cur':''}" data-n="${n}" ${w?'aria-disabled="true"':''} aria-label="${n}${w?', sorted '+w:''}">${n}</button>`;
+  }).join('');
+  $$('#cards .card').forEach(b => b.onclick = () => {
+    const n = +b.dataset.n; if(where(n)) { msg($('#sMsg'), `${n} is already in the <b>${where(n)==='even'?'Everyone has a partner':'One left over'}</b> box.`); return; }
+    s.cur = n; s.paired = false; s.msg=''; s.look=false; renderSort();
+  });
+  const st = $('#sortStage');
+  if(s.cur===null){
+    const left = 10 - s.bins.even.length - s.bins.odd.length;
+    st.innerHTML = left ? `<p class="note" style="font-size:20px">Tap a number card.</p>` : '';
+  } else if(!s.paired){
+    const d = dotSize(s.cur);
+    st.innerHTML = `<div class="loose" style="--d:${d}px">${'<i class="dot"></i>'.repeat(s.cur)}</div><button class="big" id="sPair">Pair up ${s.cur}</button>`;
+    $('#sPair').onclick = () => { s.paired = true; renderSort(); };
+  } else {
+    st.innerHTML = `<div class="pairs" style="--d:${dotSize(s.cur)}px">${tiles(s.cur)}</div><p class="note" style="font-size:20px">${s.cur}: ${pairWords(s.cur)}. Which box?</p>`;
+  }
+  $('#gotEven').innerHTML = s.bins.even.slice().sort((a,b)=>a-b).map(n=>`<span>${n}</span>`).join('');
+  $('#gotOdd').innerHTML = s.bins.odd.slice().sort((a,b)=>a-b).map(n=>`<span>${n}</span>`).join('');
+  msg($('#sMsg'), s.msg, s.mood);
+  const done = s.bins.even.length + s.bins.odd.length === 10;
+  $('#sPattern').innerHTML = done ? `<div class="strip">${Array.from({length:10},(_,i)=>i+1).map(n=>`<span style="background:var(--${par(n)})">${n}</span>`).join('')}</div><p class="note" style="font-size:20px;margin-top:10px">Odd, even, odd, even… What do you notice?</p>` : '';
+}
+function drop(box){
+  const s = S.sort;
+  if(s.cur===null){ s.msg = 'Tap a number card first.'; s.mood=''; renderSort(); return; }
+  const n = s.cur, right = par(n);
+  if(box===right){
+    s.bins[box].push(n); s.cur=null; s.paired=false;
+    s.msg = `Yes! ${n}: ${pairWords(n)}.`; s.mood='good';
+    if(s.bins.even.length + s.bins.odd.length === 10) s.msg += ' All 10 are sorted! Look at the two boxes.';
+  } else {
+    s.paired = true; s.mood='look';
+    s.msg = `Look at the pairs: ${n} makes ${pairWords(n)}. Which box fits? Try again.`;
+    const el = box==='even' ? $('#binEven') : $('#binOdd');
+    if(!reduced){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+  }
+  renderSort();
+}
+$('#binEven').onclick = () => drop('even');
+$('#binOdd').onclick = () => drop('odd');
+
+/* ================= 3 TEST 1–20 ================= */
+function makeSlots(n){
+  const cells=[]; for(let r=0;r<3;r++) for(let c=0;c<7;c++) cells.push([c,r]);
+  for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+  return cells.slice(0,n).map(([c,r]) => ({x:(c+0.5)/7*100 + (Math.random()*4-2), y:(r+0.5)/3*100 + (Math.random()*8-4)}));
+}
+function chooseTest(n){
+  const t = S.test; t.n=n; t.slots=makeSlots(n); t.gone=new Array(n).fill(false); t.placed=0; t.pred=null; t.msg=''; t.mood=''; t.last=-1;
+  renderTest();
+}
+function renderChart(){
+  const t = S.test;
+  $('#chart').classList.toggle('spot', t.spot);
+  $('#chart').innerHTML = Array.from({length:20},(_,i)=>i+1).map(n => {
+    const r = t.tested[n] || '';
+    const s = String(n), ld = `<span class="ld">${s.slice(-1)}</span>`;
+    return `<button class="cell ${r} ${t.n===n?'cur':''}" data-n="${n}" aria-label="${n}${r?', '+r:''}">${s.length>1?s.slice(0,-1):''}${ld}</button>`;
+  }).join('');
+  $$('#chart .cell').forEach(b => b.onclick = () => chooseTest(+b.dataset.n));
+  const k = Object.keys(t.tested).length;
+  $('#tCount').textContent = `${k} of 20 tested`;
+  msg($('#tPat'), t.pat);
+}
+function renderTest(){
+  const t = S.test; renderChart();
+  const tray = $('#tray'), carton = $('#carton');
+  $$('[data-t]').forEach(b => b.setAttribute('aria-pressed', t.pred===b.dataset.t));
+  if(t.n===null){
+    tray.innerHTML = `<div class="hint">Tap a number on the chart.<br>Counters will spill out here.</div>`;
+    carton.innerHTML = Array.from({length:10},()=>`<div class="col"><div class="cup"></div><div class="cup"></div></div>`).join('');
+    $('#cNote').innerHTML=''; $('#tAll').disabled = true; msg($('#tMsg'),''); return;
+  }
+  $('#tAll').disabled = t.placed===t.n;
+  tray.innerHTML = t.slots.map((p,i) => `<button class="ctr ${t.gone[i]?'gone':''}" data-i="${i}" style="left:${p.x}%;top:${p.y}%" aria-label="Counter"></button>`).join('') +
+    (t.placed===t.n ? `<div class="hint">All ${t.n} counters are in the carton.</div>` : '');
+  $$('#tray .ctr').forEach(b => b.onclick = () => place(+b.dataset.i));
+  const done = t.placed===t.n;
+  let h='';
+  for(let c=0;c<10;c++){
+    const a = 2*c, b = 2*c+1;
+    const fa = a < t.placed, fb = b < t.placed;
+    let cls = '';
+    if(fa && fb) cls='paired'; else if(done && fa && !fb) cls='lonely';
+    h += `<div class="col ${cls}"><div class="cup">${fa?`<i class="${a===t.last?'new':''}"></i>`:''}</div><div class="cup">${fb?`<i class="${b===t.last?'new':''}"></i>`:''}</div></div>`;
+  }
+  carton.innerHTML = h;
+  const pairs = Math.floor(t.placed/2);
+  $('#cNote').innerHTML = `<span>${t.placed} of ${t.n} in the carton</span><span style="color:var(--even)">${pl(pairs,'pair')}</span>` + (done && t.n%2 ? `<span style="color:var(--odd)">1 with no partner</span>` : done ? `<span style="color:var(--even)">no one left over</span>` : '');
+  msg($('#tMsg'), t.msg, t.mood);
+}
+function place(i){
+  const t = S.test; if(t.gone[i]) return;
+  t.gone[i]=true; t.last=t.placed; t.placed++;
+  if(t.placed===t.n && t.pred){ check(t.pred); return; }
+  if(t.placed===t.n){ t.msg = `All paired up! Is ${t.n} odd or even?`; t.mood=''; }
+  renderTest();
+}
+function check(choice){
+  const t = S.test, n = t.n, right = par(n);
+  if(choice===right){
+    t.tested[n]=right; t.mood='good';
+    t.msg = `Yes! ${n} is ${chip(right)}. ${n%2 ? 'One counter has no partner.' : 'Every counter has a partner.'}`;
+    t.pred = choice;
+  } else {
+    t.mood='look'; t.pred=null;
+    t.msg = `Look at the carton. ${n} makes ${pairWords(n)}. So is ${n} odd or even? Try again.`;
+  }
+  renderTest();
+}
+$$('[data-t]').forEach(b => b.onclick = () => {
+  const t = S.test; if(t.n===null){ t.msg=''; msg($('#tMsg'),'Tap a number on the chart first.'); return; }
+  const c = b.dataset.t;
+  if(t.placed < t.n){ t.pred = c; t.mood=''; t.msg = `You think ${t.n} is ${chip(c)}. Now pair the counters to check!`; renderTest(); }
+  else check(c);
+});
+$('#tAll').onclick = () => {
+  const t = S.test; if(t.n===null) return;
+  t.gone = t.gone.map(()=>true); t.last=-1; t.placed=t.n;
+  if(t.pred){ check(t.pred); return; }
+  t.msg = `All paired up! Is ${t.n} odd or even?`; t.mood=''; renderTest();
+};
+function fillChart(){ let added=0; for(let n=1;n<=20;n++) if(!S.test.tested[n]){ S.test.tested[n]=par(n); added++; } return added; }
+$('#tFill').onclick = () => { const a = fillChart(); S.test.pat = a ? `I filled in the ${a} numbers you had not tested yet.` : 'The chart is already full.'; renderTest(); };
+$('#tSpot').onclick = () => {
+  const t = S.test;
+  if(t.spot){ t.spot=false; t.pat=''; $('#tSpot').textContent='Look at the last digits'; renderTest(); return; }
+  const a = fillChart(); t.spot = true;
+  $('#tSpot').textContent = 'Show all numbers';
+  t.pat = (a ? 'I filled in the rest of the chart. ' : '') + `Look at the <b>even</b> numbers. What do their last digits have in common? <button class="soft" id="tTell" style="margin-top:10px;display:block">Tell me the secret</button>`;
+  renderTest();
+};
+$('#tPat').onclick = e => {
+  if(e.target.id!=='tTell') return; const t = S.test;
+  { t.pat = `Every even number ends in <b>0, 2, 4, 6 or 8</b>. Every odd number ends in <b>1, 3, 5, 7 or 9</b>. Does it work for bigger numbers? Go to step 4!`; renderChart(); }
+};
+
+/* ================= 4 LAST DIGIT ================= */
+function curDigit(){ return S.digit.list[S.digit.i]; }
+function renderDigit(){
+  const d = S.digit, n = curDigit(), s = String(n);
+  $('#queue').innerHTML = d.list.map((x,i) => `<button class="${i===d.i?'cur':''} ${d.done[i]||''}" data-i="${i}">${x}</button>`).join('');
+  $$('#queue button').forEach(b => b.onclick = () => { d.i=+b.dataset.i; d.ans=null; d.proof=false; d.msg=''; d.mood=''; renderDigit(); });
+  $('#bignum').innerHTML = `<span class="rest">${s.slice(0,-1)}</span><span class="ld">${s.slice(-1)}</span>`;
+  $('#bignum').setAttribute('aria-label', `${n}, last digit ${s.slice(-1)}`);
+  $$('[data-d]').forEach(b => b.setAttribute('aria-pressed', d.ans===b.dataset.d));
+  msg($('#dMsg'), d.msg, d.mood);
+  $('#proof').hidden = !d.proof;
+  if(d.proof){
+    $('#proofT').innerHTML = `${n} counters: ${pairWords(n)}`;
+    $('#proofPairs').style.setProperty('--d', dotSize(n)+'px');
+    $('#proofPairs').innerHTML = tiles(n);
+  }
+  $('#dKey').hidden = !d.key;
+  $('#dKeyBtn').textContent = d.key ? 'Hide the digit key' : 'Show the digit key';
+  $('#dKey').innerHTML = [0,1,2,3,4,5,6,7,8,9].map(k => `<span style="background:var(--${par(k)})" aria-label="${k} ${par(k)}">${k}</span>`).join('');
+}
+$$('[data-d]').forEach(b => b.onclick = () => {
+  const d = S.digit, n = curDigit(), last = n%10, c = b.dataset.d, right = par(n);
+  if(c===right){
+    d.ans=c; d.done[d.i]=right; d.mood='good';
+    d.msg = `Yes! ${n} ends in <b>${last}</b>, so ${n} is ${chip(right)}. Want proof? Check by pairing.`;
+  } else {
+    d.ans=null; d.mood='look'; d.proof=true;
+    d.msg = `Look at the last digit: <b>${last}</b>. Is ${last} odd or even? Look at the pairs too. Try again!`;
+  }
+  renderDigit();
+});
+$('#dProof').onclick = () => { S.digit.proof = !S.digit.proof; renderDigit(); };
+$('#dKeyBtn').onclick = () => { S.digit.key = !S.digit.key; renderDigit(); };
+$('#dMystery').onclick = () => {
+  const d = S.digit; let n; do{ n = rand(11,99); } while(d.list.includes(n));
+  d.list.push(n); d.i = d.list.length-1; d.ans=null; d.proof=false; d.msg='A new mystery number. Odd or even?'; d.mood=''; renderDigit();
+};
+
+/* ================= 5 DETECTIVE ================= */
+const MODES = {
+  oo:{q:'Is odd + odd always even?', pa:'odd', pb:'odd', presets:[[3,5],[7,9],[11,3]], lo:[1,1], hi:[19,19], correct:'always', randA:()=>rand(0,9)*2+1, randB:()=>rand(0,9)*2+1},
+  ee:{q:'Is even + even always even?', pa:'even', pb:'even', presets:[[4,6],[8,10],[12,2]], lo:[2,2], hi:[20,20], correct:'always', randA:()=>rand(1,10)*2, randB:()=>rand(1,10)*2},
+  oe:{q:'Two-digit odd + two-digit even. Is the sum ever even?', pa:'odd', pb:'even', presets:[[23,14],[45,30],[17,56]], lo:[11,10], hi:[99,98], correct:'never', randA:()=>rand(5,49)*2+1, randB:()=>rand(5,49)*2}
+};
+function M(){ return S.det.m[S.det.mode]; }
+function renderDet(){
+  const key = S.det.mode, cfg = MODES[key], m = M(), a = m.a, b = m.b, sum = a+b;
+  $$('#modes button').forEach(x => x.setAttribute('aria-pressed', x.dataset.m===key));
+  $('#xQ').textContent = cfg.q;
+  $('#xSteppers').innerHTML =
+    `<div class="stepper" aria-label="First number"><button data-s="a-">−</button><output>${a}</output><button data-s="a+">+</button></div>
+     <span class="plus">+</span>
+     <div class="stepper" aria-label="Second number"><button data-s="b-">−</button><output>${b}</output><button data-s="b+">+</button></div>
+     <button class="soft" id="xNew">New example</button>`;
+  $$('[data-s]').forEach(x => {
+    const which = x.dataset.s[0], dir = x.dataset.s[1]==='+' ? 2 : -2, idx = which==='a'?0:1;
+    const v = m[which] + dir; x.disabled = v < cfg.lo[idx] || v > cfg.hi[idx];
+    x.onclick = () => { m[which] = v; m.joined=false; m.ans=null; m.msg=''; m.mood=''; renderDet(); };
+    x.setAttribute('aria-label', (dir>0?'Up 2':'Down 2') + (which==='a'?' first number':' second number'));
+  });
+  $('#xNew').onclick = () => {
+    m.preset++;
+    if(m.preset < cfg.presets.length){ [m.a,m.b] = cfg.presets[m.preset]; }
+    else { let t=0; do{ m.a=cfg.randA(); m.b=cfg.randB(); t++; } while(m.ev.some(e=>e.a===m.a&&e.b===m.b) && t<30); }
+    m.joined=false; m.ans=null; m.msg=''; m.mood=''; renderDet();
+  };
+  $('#xEq').innerHTML = `<span>${a} + ${b} =</span><span class="${m.joined?'':'q'}">${m.joined?sum:'?'}</span>` +
+    `<span style="font-size:.5em;display:flex;gap:8px">${chip(par(a))}<span>+</span>${chip(par(b))}</span>`;
+  const d = dotSize(sum);
+  const g = $('#xGroups'); g.style.setProperty('--d', d+'px');
+  if(!m.joined){
+    g.innerHTML = `<div class="group"><span class="lbl">${a}</span><div class="pairs">${tiles(a)}</div></div><span class="plus">+</span><div class="group"><span class="lbl">${b}</span><div class="pairs">${tiles(b,'b')}</div></div>`;
+  } else {
+    let h = ''; for(let i=0;i<Math.floor(a/2);i++) h+=`<span class="tile"><i class="dot"></i><i class="dot"></i></span>`;
+    for(let i=0;i<Math.floor(b/2);i++) h+=`<span class="tile"><i class="dot b"></i><i class="dot b"></i></span>`;
+    if(a%2 && b%2) h+=`<span class="tile joined" title="The two leftovers team up"><i class="dot"></i><i class="dot b"></i></span>`;
+    else if(a%2) h+=`<span class="tile lone"><i class="dot"></i><i class="empty"></i></span>`;
+    else if(b%2) h+=`<span class="tile lone"><i class="dot b"></i><i class="empty"></i></span>`;
+    g.innerHTML = `<div class="group"><span class="lbl">${a} + ${b} = ${sum}: ${pairWords(sum)}</span><div class="pairs">${h}</div></div>`;
+  }
+  const act = $('#xActions');
+  if(!m.joined){
+    act.innerHTML = `<button class="big" id="xJoin">Put them together</button>`;
+    $('#xJoin').onclick = () => {
+      m.joined = true; m.mood='';
+      m.msg = a%2 && b%2 ? `The two left-over counters <b>team up</b> and make a new pair! Is ${sum} odd or even?` :
+              a%2 || b%2 ? `The left-over counter still has no partner. Is ${sum} odd or even?` :
+              `No one was left over before, so no one is left over now. Is ${sum} odd or even?`;
+      renderDet();
+    };
+  } else {
+    act.innerHTML = `<button class="pick odd" data-x="odd" aria-pressed="${m.ans==='odd'}">ODD</button><button class="pick even" data-x="even" aria-pressed="${m.ans==='even'}">EVEN</button>`;
+    $$('[data-x]').forEach(x => x.onclick = () => {
+      const c = x.dataset.x, right = par(sum);
+      if(c===right){
+        m.ans=c; m.mood='good';
+        const dup = m.ev.some(e=>e.a===a&&e.b===b);
+        if(!dup) m.ev.push({a,b,sum,p:right});
+        m.msg = `Yes! ${a} + ${b} = ${sum}, and ${sum} is ${chip(right)}.` + (dup ? ' You tested this one already. Try a new example!' : m.ev.length<5 ? ' Tap <b>New example</b> to test another.' : ' You have 5 tests. Make your claim below!');
+      } else {
+        m.ans=null; m.mood='look';
+        m.msg = `Look at the pairs: ${sum} makes ${pairWords(sum)}. Check the last digit too: <b>${sum%10}</b>. Try again!`;
+      }
+      renderDet();
+    });
+  }
+  msg($('#xMsg'), m.msg, m.mood);
+  const k = m.ev.length;
+  $('#xMeter').innerHTML = [0,1,2,3,4].map(i=>`<i class="${i<k?'on':''}"></i>`).join('');
+  $('#xEvidence').innerHTML = m.ev.map(e => `<span>${e.a} + ${e.b} = ${e.sum} ${chip(e.p)}</span>`).join('');
+  const word = key==='oe' ? 'odd + even' : key==='ee' ? 'even + even' : 'odd + odd';
+  $('#xClaimQ').textContent = k<5 ? `Test 5 examples, then make a claim. (${k} of 5)` : `Your claim: ${word} is…`;
+  $('#xClaim').innerHTML = ['always','sometimes','never'].map(c => `<button data-c="${c}" aria-pressed="${m.claim===c}" ${k<5?'disabled':''}>${c.toUpperCase()} even</button>`).join('');
+  $$('[data-c]').forEach(x => x.onclick = () => judgeClaim(x.dataset.c));
+  msg($('#xClaimMsg'), m.cmsg, m.cmood);
+}
+function judgeClaim(c){
+  const key = S.det.mode, cfg = MODES[key], m = M(), k = m.ev.length;
+  const evens = m.ev.filter(e=>e.p==='even').length;
+  m.claim = c;
+  if(c===cfg.correct){
+    m.cmood='good';
+    m.cmsg = key==='oo' ? `Great claim! All ${k} of your tests were even. <b>Why?</b> Each odd number has 1 left over. Put them together and the 2 left-overs make a new pair. So nobody is ever alone.`
+           : key==='ee' ? `Great claim! All ${k} tests were even. <b>Why?</b> Even numbers have no left-overs, so putting two of them together still leaves nobody alone.`
+           : `Great claim! All ${k} sums were odd. <b>Why?</b> The odd number has 1 left over, and the even number has no left-over to be its partner. So 1 is always alone.`;
+  } else {
+    m.cmood='look';
+    const seen = cfg.correct==='always' ? `${evens} of your ${k} sums were even` : `${evens} of your ${k} sums were even`;
+    const need = c==='sometimes'
+      ? (cfg.correct==='always' ? 'To say SOMETIMES, you would need a sum that is odd. Can you find one?' : 'To say SOMETIMES, you would need a sum that is even. Can you find one?')
+      : c==='always' ? 'To say ALWAYS even, every sum must be even. Look at your tests.' : 'To say NEVER even, no sum can be even. Look at your tests.';
+    m.cmsg = `${seen}. ${need} Press <b>Put them together</b> and watch the left-over counters. Then try again.`;
+  }
+  renderDet();
+}
+$$('#modes button').forEach(b => b.onclick = () => { S.det.mode = b.dataset.m; renderDet(); });
+
+/* ---------- global ---------- */
+function renderAll(){ renderWarm(); renderSort(); renderTest(); renderDigit(); renderDet(); }
+$('#resetBtn').onclick = () => { S = fresh(); $('#tSpot').textContent='Look at the last digits'; try{ speechSynthesis.cancel(); }catch(e){} renderAll(); setTab(S.tab); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+renderAll(); setTab('warm');
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enrichment Apps</title>
+<meta name="description" content="Interactive K–5 math enrichment apps, organized by week.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F4F6; --card:#FFFFFF; --ink:#1C2130; --muted:#5B6170; --line:#D6D8DD;
+  --accent:#DF661A; --accent-soft:#FDEBDD;
+  --sans:"Poppins","Segoe UI",system-ui,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
+    --accent:#F2893C; --accent-soft:#3A2618; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
+  --accent:#F2893C; --accent-soft:#3A2618; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.4; -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1120px; margin:0 auto; padding:32px 16px 48px}
+header h1{margin:0; font-size:clamp(30px,5vw,44px); font-weight:700; letter-spacing:-0.01em}
+header p{margin:6px 0 0; font-family:var(--serif); font-style:italic; color:var(--muted); font-size:clamp(17px,2.2vw,20px)}
+nav.weeks{display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 4px}
+nav.weeks a{min-width:48px; min-height:48px; display:inline-grid; place-items:center; padding:0 14px; border-radius:24px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); text-decoration:none; font-weight:600}
+nav.weeks a:hover{border-color:var(--ink)}
+nav.weeks a.empty{color:var(--muted); font-weight:500}
+section{margin-top:34px; scroll-margin-top:16px}
+section h2{margin:0 0 14px; font-size:clamp(22px,3vw,28px); font-weight:700; display:flex; align-items:baseline; gap:12px}
+section h2 small{font-size:15px; font-weight:500; color:var(--muted)}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr)); gap:14px}
+a.card{min-width:0; display:flex; flex-direction:column; gap:6px; min-height:150px; padding:18px 18px 16px; background:var(--card); border:1.5px solid var(--line); border-radius:16px; color:var(--ink); text-decoration:none; transition:border-color .15s, transform .15s}
+a.card:hover{border-color:var(--accent); transform:translateY(-2px)}
+a.card:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.grade{align-self:flex-start; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:3px 10px; border-radius:12px}
+.card h3{margin:2px 0 0; font-size:19px; font-weight:600; line-height:1.25}
+.note{margin:0; font-family:var(--serif); color:var(--muted); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.meta{margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:8px; font-size:14px; color:var(--muted)}
+.meta span{white-space:nowrap}
+.go{font-weight:600; color:var(--accent)}
+.soon{padding:18px; border:1.5px dashed var(--line); border-radius:16px; color:var(--muted); font-family:var(--serif); font-style:italic}
+footer{margin-top:48px; padding-top:18px; border-top:1.5px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--muted); font-size:15px}
+@media (prefers-reduced-motion: reduce){a.card{transition:none} a.card:hover{transform:none}}
+@media (max-width:540px){.wrap{padding-top:22px} .grid{grid-template-columns:1fr} a.card{min-height:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Enrichment Apps</h1>
+<p>Interactive K–5 math enrichment activities for the classroom board, organized by week. Tap a card to open an app.</p>
+</header>
+<nav class="weeks" aria-label="Jump to week"><a href="#week-1">Week 1</a><a href="#week-2">Week 2</a><a href="#week-3">Week 3</a><a href="#week-4">Week 4</a><a href="#week-5" class="empty">Week 5</a><a href="#week-6" class="empty">Week 6</a><a href="#week-7" class="empty">Week 7</a><a href="#week-8" class="empty">Week 8</a><a href="#week-9" class="empty">Week 9</a><a href="#week-10" class="empty">Week 10</a></nav>
+<main>
+<section id="week-1"><h2>Week 1 <small>4 apps</small></h2><div class="grid"><a class="card" href="week-01/k-the-great-counting-collection/"><span class="grade">K</span><h3>The Great Counting Collection</h3><p class="note" title="David&#x27;s app: tap-count canvas, 10- and 5-frames, strategy race, tens-and-ones challenge">David&#x27;s app: tap-count canvas, 10- and 5-frames, strategy race, tens-and-ones challenge</p><span class="meta"><span>Built Sep 25, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-01/grade-2-patterns-on-the-hundred-chart/"><span class="grade">Grade 2</span><h3>Patterns on the Hundred Chart</h3><p class="note" title="64 number talk, +10/+9/+11 hops, skip-count stripes, corner sums, windows &amp; moth holes">64 number talk, +10/+9/+11 hops, skip-count stripes, corner sums, windows &amp; moth holes</p><span class="meta"><span>Built Sep 26, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-01/grade-3-the-array-hunt/"><span class="grade">Grade 3</span><h3>The Array Hunt</h3><p class="note" title="Rectangle Factory: build every array for a product, champion search 1–36, exit ticket">Rectangle Factory: build every array for a product, champion search 1–36, exit ticket</p><span class="meta"><span>Build date not recorded</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-01/grade-4-the-factor-hunt/"><span class="grade">Grade 4</span><h3>The Factor Hunt</h3><p class="note" title="Common multiples warm-up, tile Rectangle Factory, Factor Capture game, factor-count proofs">Common multiples warm-up, tile Rectangle Factory, Factor Capture game, factor-count proofs</p><span class="meta"><span>Built Sep 27, 2026</span><span class="go">Open app &rarr;</span></span></a></div></section>
+<section id="week-2"><h2>Week 2 <small>3 apps</small></h2><div class="grid"><a class="card" href="week-02/k-dot-talks-seeing-without-counting/"><span class="grade">K</span><h3>Dot Talks: Seeing Without Counting</h3><p class="note" title="Flash 4 and 7, flash rounds with &#x27;how did you see it&#x27;, build a Hard 8, compare layouts">Flash 4 and 7, flash rounds with &#x27;how did you see it&#x27;, build a Hard 8, compare layouts</p><span class="meta"><span>Built Sep 28, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-02/grade-2-build-the-biggest-number/"><span class="grade">Grade 2</span><h3>Build the Biggest Number</h3><p class="note" title="Base-ten quick images, digit-card game vs robot/team, 7-round plan, seat-choice evidence">Base-ten quick images, digit-card game vs robot/team, 7-round plan, seat-choice evidence</p><span class="meta"><span>Built Sep 28, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-02/grade-4-the-sieve-of-eratosthenes/"><span class="grade">Grade 4</span><h3>The Sieve of Eratosthenes</h3><p class="note" title="Built before the schedule; this is the style reference for all apps">Built before the schedule; this is the style reference for all apps</p><span class="meta"><span>Built Sep 25, 2026</span><span class="go">Open app &rarr;</span></span></a></div></section>
+<section id="week-3"><h2>Week 3 <small>5 apps</small></h2><div class="grid"><a class="card" href="week-03/k-more-fewer-or-the-same/"><span class="grade">K</span><h3>More, Fewer, or the Same?</h3><p class="note" title="Vote on towers, grab-and-compare with match lines or counts, rig big vs. little, order 3 bags">Vote on towers, grab-and-compare with match lines or counts, rig big vs. little, order 3 bags</p><span class="meta"><span>Built Sep 28, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-03/grade-1-tens-and-ones-building/"><span class="grade">Grade 1</span><h3>Tens and Ones Building</h3><p class="note" title="Bundle a pile of 23, build cards on a mat + recount check, 39+1 predict, 6-bundle max">Bundle a pile of 23, build cards on a mat + recount check, 39+1 predict, 6-bundle max</p><span class="meta"><span>Built Sep 29, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-03/grade-2-magic-squares/"><span class="grade">Grade 2</span><h3>Magic Squares</h3><p class="note" title="15 number string, Lo Shu turtle, tile builder 1–9/2–10/evens, 7 puzzles, why-5-is-middle proofs">15 number string, Lo Shu turtle, tile builder 1–9/2–10/evens, 7 puzzles, why-5-is-middle proofs</p><span class="meta"><span>Built Sep 30, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-03/grade-3-secrets-of-the-times-table/"><span class="grade">Grade 3</span><h3>Secrets of the Times Table</h3><p class="note" title="Fold the table, quarter-turn arrays, square-tile builder, cut-apart teardowns, n×n vs (n−1)(n+1)">Fold the table, quarter-turn arrays, square-tile builder, cut-apart teardowns, n×n vs (n−1)(n+1)</p><span class="meta"><span>Built Oct 1, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-03/grade-4-divisibility-detectives/"><span class="grade">Grade 4</span><h3>Divisibility Detectives</h3><p class="note" title="3,741 digit-sum judge, ÷3/÷9 lab + why, bust-a-rule stations, Codex scanner, digit cards">3,741 digit-sum judge, ÷3/÷9 lab + why, bust-a-rule stations, Codex scanner, digit cards</p><span class="meta"><span>Built Oct 2, 2026</span><span class="go">Open app &rarr;</span></span></a></div></section>
+<section id="week-4"><h2>Week 4 <small>3 apps</small></h2><div class="grid"><a class="card" href="week-04/k-the-estimation-station/"><span class="grade">K</span><h3>The Estimation Station</h3><p class="note" title="Peek &amp; guess, ten-jar revise + tens lines, count by tens, closer/about talk, cotton vs marble ten">Peek &amp; guess, ten-jar revise + tens lines, count by tens, closer/about talk, cotton vs marble ten</p><span class="meta"><span>Built Oct 3, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-04/grade-1-odd-even-investigators/"><span class="grade">Grade 1</span><h3>Odd &amp; Even Investigators</h3><p class="note" title="Partner line-up, sort 1–10 bins, egg-carton pairing 1–20, last-digit rule, odd+odd claim">Partner line-up, sort 1–10 bins, egg-carton pairing 1–20, last-digit rule, odd+odd claim</p><span class="meta"><span>Built Oct 4, 2026</span><span class="go">Open app &rarr;</span></span></a><a class="card" href="week-04/grade-2-mystery-digits-cryptarithm-puzzles/"><span class="grade">Grade 2</span><h3>Mystery Digits (Cryptarithm Puzzles)</h3><p class="note" title="Who-am-I riddle chart, 4□+□3 think-aloud, A/B/C puzzle board w/ column checks, ON+ON=GO">Who-am-I riddle chart, 4□+□3 think-aloud, A/B/C puzzle board w/ column checks, ON+ON=GO</p><span class="meta"><span>Built Oct 5, 2026</span><span class="go">Open app &rarr;</span></span></a></div></section>
+<section id="week-5"><h2>Week 5 </h2><p class="soon">Apps for this week are on the way.</p></section>
+<section id="week-6"><h2>Week 6 </h2><p class="soon">Apps for this week are on the way.</p></section>
+<section id="week-7"><h2>Week 7 </h2><p class="soon">Apps for this week are on the way.</p></section>
+<section id="week-8"><h2>Week 8 </h2><p class="soon">Apps for this week are on the way.</p></section>
+<section id="week-9"><h2>Week 9 </h2><p class="soon">Apps for this week are on the way.</p></section>
+<section id="week-10"><h2>Week 10 </h2><p class="soon">Apps for this week are on the way.</p></section>
+</main>
+<footer><span>Updated Oct 5, 2026</span><span>15 of 55 apps</span></footer>
+</div>
+</body>
+</html>

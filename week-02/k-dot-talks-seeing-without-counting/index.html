@@ -1,0 +1,650 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dot Talks: Seeing Without Counting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#E7ECF4; --panel:#FFFFFF; --card:#FFFFFF; --ink:#1B2336; --muted:#586177; --line:#CBD3E1;
+  --dot:#1F2B47; --accent:#2F56D0; --accent-ink:#FFFFFF; --soft:#DCE4F7;
+  --back:#2F56D0; --back-dot:#6A88E8;
+  --g0:#E0533A; --g1:#1B8BD6; --g2:#17976A; --g3:#D2930A; --g4:#8B55D6;
+  --good:#17976A;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Lexend", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#10141C; --panel:#191F2D; --card:#1E2536; --ink:#EAEEF6; --muted:#A0A9BD; --line:#333C52;
+    --dot:#EEF2FA; --accent:#86A2FF; --accent-ink:#0E1424; --soft:#26304A;
+    --back:#34509F; --back-dot:#5270C4;
+    --g0:#FF7B5F; --g1:#4DB5F7; --g2:#3FCB95; --g3:#F2BF3B; --g4:#B68BF7; --good:#3FCB95;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#10141C; --panel:#191F2D; --card:#1E2536; --ink:#EAEEF6; --muted:#A0A9BD; --line:#333C52;
+  --dot:#EEF2FA; --accent:#86A2FF; --accent-ink:#0E1424; --soft:#26304A;
+  --back:#34509F; --back-dot:#5270C4;
+  --g0:#FF7B5F; --g1:#4DB5F7; --g2:#3FCB95; --g3:#F2BF3B; --g4:#B68BF7; --good:#3FCB95;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:16px; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer; touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+button:disabled{opacity:.4; cursor:default}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; padding:14px 24px 6px}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.title p{margin:4px 0 0; font-size:14px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:500}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--panel); border-radius:14px; padding:10px 18px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; padding:8px 24px; overflow-x:auto; scrollbar-width:none}
+nav button{flex:none; display:flex; align-items:center; gap:10px; border:2px solid transparent; background:transparent; border-radius:999px; padding:8px 18px 8px 8px; font-weight:600; font-size:clamp(15px,1.3vw,19px); color:var(--muted); min-height:52px}
+nav button i{font-style:normal; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--panel); border:2px solid var(--line); font-family:var(--display); font-size:18px; color:var(--ink)}
+nav button[aria-selected="true"]{background:var(--panel); border-color:var(--ink); color:var(--ink)}
+nav button[aria-selected="true"] i{background:var(--ink); border-color:var(--ink); color:var(--panel)}
+
+main{flex:1; padding:6px 24px 24px; min-height:0}
+.tab[hidden]{display:none}
+.cue{margin:0 0 12px; font-size:15px; color:var(--muted); max-width:70ch}
+.cue b{color:var(--ink); font-weight:600}
+
+.stage{display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start;
+  --cs:clamp(240px, min(calc(100dvh - 230px), 50vw), 640px)}
+.cardwrap{position:relative; width:var(--cs); height:var(--cs); max-width:100%}
+.card{display:block; width:100%; height:100%}
+.card-bg{fill:var(--card); stroke:var(--line); stroke-width:1}
+.face{fill:none; stroke:var(--line); stroke-width:.8}
+.frame{fill:none; stroke:var(--muted); stroke-width:.7; opacity:.7}
+.dot{fill:var(--dot); transition:fill .25s}
+.dot.g0,.halo.g0{fill:var(--g0)} .dot.g1,.halo.g1{fill:var(--g1)} .dot.g2,.halo.g2{fill:var(--g2)} .dot.g3,.halo.g3{fill:var(--g3)} .dot.g4,.halo.g4{fill:var(--g4)}
+.halo{opacity:.2}
+.cnum{fill:var(--card); font-family:var(--display); font-weight:800; text-anchor:middle; dominant-baseline:central}
+.cover{position:absolute; inset:0; border-radius:9%; display:grid; place-items:center;
+  background:radial-gradient(circle, var(--back-dot) 17%, transparent 19%) 0 0/34px 34px, var(--back);
+  border:6px solid var(--card); box-shadow:0 0 0 1px var(--line); transition:opacity .1s}
+.cover span{font-family:var(--display); font-weight:800; font-size:calc(var(--cs) * .34); color:#fff; line-height:1; text-shadow:0 4px 0 rgba(0,0,0,.18)}
+.cover[hidden]{display:grid !important; opacity:0; pointer-events:none}
+.timer{position:absolute; left:8%; right:8%; bottom:-14px; height:8px; border-radius:4px; background:var(--soft); overflow:hidden; opacity:0}
+.timer i{display:block; height:100%; background:var(--accent); transform-origin:left}
+.flashing .timer{opacity:1}
+.timer.run i{animation:shrink var(--dur,2000ms) linear forwards}
+@keyframes shrink{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+.side{display:flex; flex-direction:column; gap:16px; min-width:0; padding-top:4px}
+.say{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(34px,4.2vw,64px); line-height:1.05; text-wrap:balance}
+.big-n{font-size:1.25em; color:var(--good)}
+.sub{margin:0; font-size:clamp(20px,2vw,30px); font-weight:500; line-height:1.3; min-height:1.3em; text-wrap:balance}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.row:empty{display:none}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:clamp(20px,1.8vw,26px); padding:14px 30px; border-radius:18px; min-height:64px}
+.primary.big{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); padding:10px 44px; min-height:84px; border-radius:22px; box-shadow:0 5px 0 color-mix(in srgb, var(--accent) 60%, #000)}
+.primary.big:active{transform:translateY(3px); box-shadow:0 2px 0 color-mix(in srgb, var(--accent) 60%, #000)}
+.secondary{border:2px solid var(--ink); background:var(--panel); font-weight:600; font-size:clamp(17px,1.4vw,21px); padding:12px 22px; border-radius:16px; min-height:56px}
+.numpad{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; max-width:520px}
+.numpad[hidden]{display:none}
+.numpad button{aspect-ratio:1; min-height:56px; border:2px solid var(--line); background:var(--panel); border-radius:18px; font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,46px); line-height:1}
+.numpad button:hover{border-color:var(--accent)}
+.seeings{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.seeings[hidden]{display:none}
+.seeings .lab{width:100%; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:500}
+.chip{border:2px solid var(--line); background:var(--panel); border-radius:999px; padding:10px 20px; font-weight:600; font-size:clamp(17px,1.5vw,22px); min-height:52px}
+.chip[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--panel)}
+.note{margin:0; padding:14px 18px; border-radius:16px; background:var(--soft); font-size:clamp(18px,1.6vw,24px); font-weight:500; max-width:32em}
+.note[hidden]{display:none}
+.panel{background:var(--panel); border:1.5px solid var(--line); border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; gap:12px}
+.set{display:flex; gap:8px 12px; flex-wrap:wrap; align-items:center}
+.set > span{font-size:14px; color:var(--muted); min-width:4.5em; font-weight:500}
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--ground); border-radius:14px; padding:4px}
+.seg button{border:0; background:none; border-radius:10px; padding:8px 14px; font-weight:500; font-size:15px; min-height:44px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--panel); color:var(--ink); box-shadow:0 1px 0 var(--line), 0 0 0 1.5px var(--ink)}
+.hist{display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:40px}
+.hist .lab{font-size:14px; color:var(--muted); margin-right:4px}
+.hchip{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:20px; background:var(--good); color:var(--card)}
+.hchip.look{background:transparent; color:var(--ink); border:2.5px dashed var(--muted)}
+
+/* compare */
+.cmp{display:grid; grid-template-columns:auto minmax(0,1fr); gap:28px; align-items:start; --mc:clamp(140px, min(calc((100dvh - 300px) / 2), 18vw), 300px)}
+.cgrid{display:grid; grid-template-columns:repeat(3, var(--mc)); gap:16px 14px}
+.cc{border:0; background:none; padding:0; display:flex; flex-direction:column; gap:6px; align-items:stretch; text-align:left}
+.cc .cardwrap{width:var(--mc); height:var(--mc); --cs:var(--mc)}
+.cc .cover{border-width:4px; background-size:22px 22px}
+.cc .cap{display:flex; justify-content:space-between; align-items:center; font-weight:600; font-size:16px; min-height:26px}
+.votes{display:flex; gap:3px; flex-wrap:wrap; justify-content:flex-end; max-width:60%}
+.votes i{width:12px; height:12px; border-radius:50%; background:var(--accent)}
+.talk{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px}
+.talk li{font-size:clamp(18px,1.6vw,24px); font-weight:500; line-height:1.3; padding-left:30px; position:relative}
+.talk li::before{content:""; position:absolute; left:4px; top:.45em; width:14px; height:14px; border-radius:50%; background:var(--g0)}
+.talk li:nth-child(2)::before{background:var(--g1)} .talk li:nth-child(3)::before{background:var(--g2)}
+
+/* make */
+.pad{cursor:crosshair; touch-action:none}
+.pips{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.pips i{width:26px; height:26px; border-radius:50%; border:3px solid var(--dot); opacity:.35}
+.pips i.on{background:var(--dot); opacity:1}
+.pips b{font-family:var(--display); font-size:28px; margin-left:8px}
+.yesno{display:flex; gap:14px}
+.yesno button{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); min-width:150px; min-height:84px; border-radius:22px; border:3px solid var(--ink); background:var(--panel)}
+.tally{font-size:16px; color:var(--muted)}
+.hint{margin:0; font-size:15px; color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition:none !important; animation:none !important}
+  .flashing .timer{opacity:0}
+}
+@media (max-width: 860px), (orientation: portrait){
+  header,nav,main{padding-left:16px; padding-right:16px}
+  .stage,.cmp{grid-template-columns:minmax(0,1fr)}
+  .stage{--cs:min(calc(100vw - 32px), 58dvh)}
+  .cardwrap{justify-self:center}
+  .cmp{--mc:calc((100vw - 32px - 14px) / 2)}
+  .cgrid{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .cc .cardwrap{width:100%; height:auto; aspect-ratio:1}
+  .cover span{font-size:28vw}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>Dot Talks: Seeing Without Counting</h1>
+    <p>Kindergarten · Week 2 · Math Enrichment</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Lesson steps">
+  <button role="tab" data-tab="warm" aria-selected="true"><i>1</i>Warm-up</button>
+  <button role="tab" data-tab="quick" aria-selected="false"><i>2</i>Too fast to count</button>
+  <button role="tab" data-tab="game" aria-selected="false"><i>3</i>Flash rounds</button>
+  <button role="tab" data-tab="make" aria-selected="false"><i>4</i>Make a card</button>
+  <button role="tab" data-tab="cmp" aria-selected="false"><i>5</i>Which is easy?</button>
+</nav>
+
+<main>
+  <section class="tab" id="tab-warm">
+    <p class="cue"><b>Teacher:</b> Flash the card for 2 seconds. Ask: how many? How did you SEE it? 2 and 2, or 3 and 1?</p>
+    <div id="warmStage"></div>
+  </section>
+  <section class="tab" id="tab-quick" hidden>
+    <p class="cue"><b>Teacher:</b> This card flashes too fast to count. Collect answers and “seeings” before you tap the number.</p>
+    <div id="quickStage"></div>
+  </section>
+  <section class="tab" id="tab-game" hidden>
+    <p class="cue"><b>Teacher:</b> Flash a card. Students name the total and tell the parts they saw. Change the cards and time in the box below.</p>
+    <div id="gameStage"></div>
+  </section>
+  <section class="tab" id="tab-make" hidden>
+    <p class="cue"><b>Teacher:</b> Tap the card to add a dot. Tap a dot to take it away. Then flash it for the class.</p>
+    <div class="stage">
+      <div class="cardwrap" id="makeWrap">
+        <svg class="card pad" id="pad" viewBox="0 0 100 100" role="img" aria-label="Dot card you are making"></svg>
+        <div class="cover" id="makeCover" hidden aria-hidden="true"><span>?</span></div>
+        <div class="timer"><i></i></div>
+      </div>
+      <div class="side">
+        <div class="seg" role="group" aria-label="Which card to make" style="align-self:flex-start">
+          <button id="t8" aria-pressed="true">Hard 8</button>
+          <button id="t9" aria-pressed="false">★ Easy 9</button>
+        </div>
+        <p class="say" id="makeSay" style="font-size:clamp(28px,3.2vw,48px)"></p>
+        <div class="pips" id="pips" aria-live="polite"></div>
+        <p class="sub" id="makeSub"></p>
+        <div class="yesno" id="yesno" hidden>
+          <button id="yesBtn">YES</button><button id="noBtn">NO</button>
+        </div>
+        <div class="row" id="makeActs">
+          <button class="primary big" id="mFlash">Flash it!</button>
+          <button class="secondary" id="mGroups">Show groups</button>
+        </div>
+        <div class="row">
+          <button class="ghost" id="mSample">Try a sample</button>
+          <button class="ghost" id="mClear">Clear</button>
+        </div>
+        <div class="tally" id="mTally"></div>
+      </div>
+    </div>
+  </section>
+  <section class="tab" id="tab-cmp" hidden>
+    <p class="cue"><b>Teacher:</b> Same number, six ways. Flash them all. Tap a card once for each student who saw it fastest.</p>
+    <div class="cmp">
+      <div class="cgrid" id="cgrid"></div>
+      <div class="side">
+        <div class="set"><span>Number</span><div class="seg" id="cN" role="group" aria-label="Number of dots"></div></div>
+        <div class="row">
+          <button class="primary" id="cFlash">Flash them all</button>
+          <button class="secondary" id="cGroups" aria-pressed="false">Show groups</button>
+        </div>
+        <ul class="talk">
+          <li>Which card can you see right away?</li>
+          <li>Which card makes you count?</li>
+          <li>Circle, line, or dice: which is easiest? Why?</li>
+        </ul>
+        <div class="row"><button class="ghost" id="cClear">Clear votes</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+/* ================= Dot-card math (every card is checked below) ================= */
+function rng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const seq = (a, b) => Array.from({length: b - a}, (_, i) => a + i);
+const DIE = {
+  1: [[.5,.5]],
+  2: [[.2,.2],[.8,.8]],
+  3: [[.2,.2],[.5,.5],[.8,.8]],
+  4: [[.2,.2],[.8,.2],[.2,.8],[.8,.8]],
+  5: [[.2,.2],[.8,.2],[.2,.8],[.8,.8],[.5,.5]],
+  6: [[.2,.2],[.2,.5],[.2,.8],[.8,.2],[.8,.5],[.8,.8]]
+};
+const DIE_SEE = {
+  2: [{groups:[[0,1]], label:'2'}],
+  3: [{groups:[[0,1,2]], label:'3 in a line'}],
+  4: [{groups:[[0,1],[2,3]]}, {groups:[[0,1,2],[3]]}],
+  5: [{groups:[[0,1,2,3],[4]]}, {groups:[[0,1,4],[2,3]]}],
+  6: [{groups:[[0,1,2],[3,4,5]]}, {groups:[[0,3],[1,4],[2,5]]}]
+};
+const DOUBLE = {7:[4,3], 8:[4,4], 9:[5,4], 10:[5,5]};
+
+function dice(n){
+  if(n <= 6){
+    const f = {x:20, y:20, w:60};
+    return {pts: DIE[n].map(([u,v]) => [f.x + u*f.w, f.y + v*f.w]), r:7, faces:[f], seeings: DIE_SEE[n]};
+  }
+  const [a, b] = DOUBLE[n];
+  const fa = {x:5, y:29, w:42}, fb = {x:53, y:29, w:42};
+  const pts = DIE[a].map(([u,v]) => [fa.x + u*fa.w, fa.y + v*fa.w]).concat(DIE[b].map(([u,v]) => [fb.x + u*fb.w, fb.y + v*fb.w]));
+  const seeings = [{groups:[seq(0,a), seq(a,n)]}];
+  if(n === 9) seeings.push({groups:[[0,1,2,3],[5,6,7,8],[4]]});
+  if(n === 10) seeings.push({groups:[[0,1,2,3],[5,6,7,8],[4,9]]});
+  return {pts, r:4.8, faces:[fa, fb], seeings};
+}
+function frame(n){
+  const pts = seq(0, n).map(i => [18 + 16*(i % 5), 42 + 16*Math.floor(i / 5)]);
+  const seeings = n > 5 ? [{groups:[seq(0,5), seq(5,n)]}] : [{groups:[seq(0,n)], label: n === 5 ? 'a full row of 5' : n + ' in a row'}];
+  return {pts, r:6, frame:true, seeings};
+}
+function halves(n){ const h = Math.ceil(n/2); return {groups:[seq(0,h), seq(h,n)]}; }
+function line(n){
+  const s = Math.min(16, 80/(n-1));
+  const pts = seq(0, n).map(i => [50 + (i - (n-1)/2)*s, 50]);
+  const seeings = [halves(n)];
+  if(n >= 5){ const g = []; for(let i=0;i<n;i+=2) g.push(seq(i, Math.min(i+2, n))); seeings.push({groups:g}); }
+  return {pts, r:Math.min(7, s*0.4), seeings};
+}
+function circle(n){
+  const R = 32;
+  const pts = n === 2 ? [[35,50],[65,50]] : seq(0, n).map(i => { const t = -Math.PI/2 + i*2*Math.PI/n; return [50 + R*Math.cos(t), 50 + R*Math.sin(t)]; });
+  const r = n === 2 ? 7 : Math.min(7, R*Math.sin(Math.PI/n)*0.8);
+  return {pts, r, seeings:[halves(n)]};
+}
+const PARTS = {2:[2],3:[3],4:[2,2],5:[3,2],6:[3,3],7:[3,2,2],8:[3,3,2],9:[3,3,3],10:[3,3,2,2]};
+const CENTERS = {1:[[50,50]], 2:[[32,34],[68,66]], 3:[[29,31],[71,33],[50,73]], 4:[[29,29],[71,29],[29,71],[71,71]]};
+function clusters(n, seed){
+  const R = rng(seed), parts = PARTS[n], cs = CENTERS[parts.length], pts = [], groups = [];
+  parts.forEach((k, j) => {
+    const [cx, cy] = [cs[j][0] + (R()-.5)*6, cs[j][1] + (R()-.5)*6], th = R()*Math.PI*2, g = [];
+    for(let i=0;i<k;i++){
+      const t = th + i*2*Math.PI/k, d = k === 2 ? 8 : 9;
+      g.push(pts.length); pts.push([cx + d*Math.cos(t), cy + d*Math.sin(t)]);
+    }
+    groups.push(g);
+  });
+  const seeings = groups.length === 1 ? [{groups, label: String(n)}] : [{groups}];
+  return {pts, r:6.2, seeings};
+}
+function scatter(n, seed){
+  let min = 19, pts;
+  for(let tries=0; tries<40; tries++, min -= .4){
+    const R = rng(seed + tries*977); pts = [];
+    for(let i=0;i<n;i++){
+      let ok = false;
+      for(let k=0;k<300 && !ok;k++){
+        const p = [13 + R()*74, 13 + R()*74];
+        if(pts.every(q => Math.hypot(p[0]-q[0], p[1]-q[1]) >= min)){ pts.push(p); ok = true; }
+      }
+      if(!ok) break;
+    }
+    if(pts.length === n) break;
+  }
+  const byX = seq(0,n).sort((a,b) => pts[a][0] - pts[b][0]);
+  const byY = seq(0,n).sort((a,b) => pts[a][1] - pts[b][1]);
+  const h = Math.floor(n/2);
+  return {pts, r:6.2, seeings:[{groups:[byX.slice(0,h), byX.slice(h)]}, {groups:[byY.slice(0,h), byY.slice(h)]}]};
+}
+const TYPES = {dice:'Dice', frame:'Ten-frame', groups:'Groups', circle:'Circle', line:'Line', scatter:'Scatter'};
+function makeCard(type, n, seed = 1){
+  const b = type === 'dice' ? dice(n) : type === 'frame' ? frame(n) : type === 'line' ? line(n) : type === 'circle' ? circle(n) : type === 'groups' ? clusters(n, seed) : scatter(n, seed);
+  return Object.assign({type, n}, b);
+}
+/* A card is valid only if it has exactly n dots, every "seeing" splits those n dots with no dot missed or repeated, and no two dots touch. */
+function valid(c){
+  if(c.pts.length !== c.n) return false;
+  for(let i=0;i<c.n;i++) for(let j=i+1;j<c.n;j++) if(Math.hypot(c.pts[i][0]-c.pts[j][0], c.pts[i][1]-c.pts[j][1]) < 2*c.r + 1) return false;
+  if(!c.pts.every(([x,y]) => x - c.r >= 2 && x + c.r <= 98 && y - c.r >= 2 && y + c.r <= 98)) return false;
+  return c.seeings.length > 0 && c.seeings.every(s => { const f = s.groups.flat().sort((a,b)=>a-b); return f.length === c.n && f.every((v,i) => v === i) && s.groups.every(g => g.length > 0); });
+}
+const sizesText = s => s.groups.map(g => g.length).join(' and ');
+const chipText = s => s.groups.length === 1 ? (s.label || String(s.groups[0].length)) : sizesText(s);
+const sentence = (s, n) => s.groups.length > 1 ? `${sizesText(s)} make ${n}.` : (s.label && s.label !== String(n) ? cap(s.label) + '.' : `${n} dots, all together.`);
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+/* Groups by closeness for student-made cards: dots closer than GAP join the same group. */
+const GAP = 20;
+function closeGroups(pts){
+  const n = pts.length, id = seq(0,n);
+  const find = i => id[i] === i ? i : (id[i] = find(id[i]));
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++) if(Math.hypot(pts[i][0]-pts[j][0], pts[i][1]-pts[j][1]) <= GAP) id[find(i)] = find(j);
+  const m = {}; for(let i=0;i<n;i++){ const r = find(i); (m[r] = m[r] || []).push(i); }
+  return Object.values(m).sort((a,b) => b.length - a.length);
+}
+window.__dotMath = {makeCard, valid, closeGroups, sentence, chipText, TYPES};
+/* ================= end of math ================= */
+
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pick = (R, a) => a[Math.floor(R() * a.length)];
+const SEED = rng(Date.now() % 100000);
+function goodCard(type, n, seed){ for(let k=0;k<20;k++){ const c = makeCard(type, n, seed + k*131); if(valid(c)) return c; } return makeCard('frame', n); }
+
+function drawCard(svg, c, o = {}){
+  const see = o.see ?? -1, count = o.count || 0;
+  let h = '<rect class="card-bg" x="1.5" y="1.5" width="97" height="97" rx="9"/>';
+  if(c.frame){
+    h += '<rect class="frame" x="10" y="34" width="80" height="32" rx="1.5"/>';
+    for(let i=1;i<5;i++) h += `<line class="frame" x1="${10+16*i}" y1="34" x2="${10+16*i}" y2="66"/>`;
+    h += '<line class="frame" x1="10" y1="50" x2="90" y2="50"/>';
+  }
+  (c.faces || []).forEach(f => h += `<rect class="face" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.w}" rx="6"/>`);
+  const gi = new Array(c.n).fill(-1);
+  const s = see >= 0 ? c.seeings[see] : null;
+  if(s) s.groups.forEach((g, k) => g.forEach(i => gi[i] = k));
+  if(s) c.pts.forEach(([x,y], i) => h += `<circle class="halo g${gi[i] % 5}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(c.r*1.9).toFixed(2)}"/>`);
+  c.pts.forEach(([x,y], i) => h += `<circle class="dot${gi[i] >= 0 ? ' g' + (gi[i] % 5) : ''}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${c.r.toFixed(2)}"/>`);
+  if(count){
+    const order = s ? s.groups.flat() : seq(0, c.n);
+    order.slice(0, count).forEach((i, j) => { const [x,y] = c.pts[i]; h += `<text class="cnum" x="${x.toFixed(2)}" y="${(y+.3).toFixed(2)}" font-size="${(c.r*1.25).toFixed(2)}">${j+1}</text>`; });
+  }
+  svg.innerHTML = h;
+}
+function mkBtn(label, cls, fn){ const b = document.createElement('button'); b.className = cls; b.innerHTML = label; b.onclick = fn; return b; }
+
+/* ================= Flash stage ================= */
+class Flash{
+  constructor(root, o){
+    this.o = o;
+    root.innerHTML = `<div class="stage">
+      <div class="cardwrap"><svg class="card" viewBox="0 0 100 100" role="img"></svg><div class="cover" aria-hidden="true"><span>?</span></div><div class="timer"><i></i></div></div>
+      <div class="side">
+        <p class="say" aria-live="polite"></p><p class="sub" aria-live="polite"></p>
+        <div class="row acts"></div>
+        <div class="numpad" role="group" aria-label="How many dots"></div>
+        <div class="seeings"></div>
+        <p class="note" hidden></p>
+        <div class="row more"></div>
+        ${o.extra || ''}
+      </div></div>`;
+    const q = s => root.querySelector(s);
+    this.root = root; this.wrap = q('.cardwrap'); this.svg = q('svg'); this.cover = q('.cover'); this.sayEl = q('.say'); this.subEl = q('.sub');
+    this.acts = q('.acts'); this.pad = q('.numpad'); this.seeEl = q('.seeings'); this.noteEl = q('.note'); this.more = q('.more');
+    this.pad.innerHTML = seq(1, 11).map(k => `<button data-k="${k}">${k}</button>`).join('');
+    this.pad.onclick = e => { const b = e.target.closest('button'); if(b) this.answer(+b.dataset.k); };
+    this.tok = 0; this.reset();
+  }
+  reset(){ this.tok++; this.card = this.o.first(); this.phase = 'ready'; this.render(); }
+  flash(){
+    const t = ++this.tok; this.phase = 'flash'; this.render();
+    const d = Math.round(this.o.dur() * 1000);
+    this.wrap.style.setProperty('--dur', d + 'ms');
+    const bar = this.wrap.querySelector('.timer'); bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run');
+    setTimeout(() => { if(t !== this.tok) return; this.phase = 'ask'; this.render(); this.pad.querySelector('button').focus({preventScroll:true}); }, d);
+  }
+  answer(k){
+    if(this.phase !== 'ask') return;
+    this.tok++; this.said = k; this.correct = k === this.card.n; this.phase = 'done';
+    this.see = this.correct ? -1 : 0; this.count = 0;
+    if(this.o.onAnswer) this.o.onAnswer(this.card, this.correct);
+    this.render();
+  }
+  showCard(){ this.tok++; this.said = null; this.correct = null; this.phase = 'done'; this.see = -1; this.count = 0; this.render(); }
+  next(){ this.card = this.o.next(this.card); this.tok++; this.phase = 'ready'; this.render(); }
+  draw(){ drawCard(this.svg, this.card, {see:this.see, count:this.count}); }
+  countAlong(){
+    const t = ++this.tok, n = this.card.n;
+    if(this.see < 0) this.see = 0;
+    this.renderChips();
+    const step = j => {
+      if(t !== this.tok) return;
+      this.count = j; this.draw();
+      this.subEl.textContent = j < n ? j + '…' : `We counted ${n}. ${sentence(this.card.seeings[this.see], n)}`;
+      if(j < n) setTimeout(() => step(j+1), reduced ? 0 : 550);
+    };
+    if(reduced){ this.count = n; this.draw(); this.subEl.textContent = `We counted ${n}. ${sentence(this.card.seeings[this.see], n)}`; }
+    else step(1);
+  }
+  renderChips(){
+    const c = this.card;
+    this.seeEl.innerHTML = '<span class="lab">How did you see it?</span>';
+    c.seeings.forEach((s, i) => { const b = mkBtn(chipText(s), 'chip', () => {
+      this.tok++; this.see = i; this.count = 0; this.draw(); this.subEl.textContent = sentence(s, c.n); this.renderChips();
+    }); b.setAttribute('aria-pressed', String(this.see === i)); this.seeEl.append(b); });
+    this.seeEl.append(mkBtn('Count with me', 'chip', () => this.countAlong()));
+  }
+  render(){
+    const p = this.phase, c = this.card;
+    this.cover.hidden = !(p === 'ready' || p === 'ask');
+    this.wrap.classList.toggle('flashing', p === 'flash');
+    if(p !== 'done'){ this.see = -1; this.count = 0; }
+    this.draw();
+    this.svg.setAttribute('aria-label', p === 'flash' || p === 'done' ? `Dot card with ${c.n} dots` : 'Dot card, face down');
+    this.pad.hidden = p !== 'ask'; this.seeEl.hidden = p !== 'done'; this.noteEl.hidden = true;
+    this.acts.innerHTML = ''; this.more.innerHTML = '';
+    if(p === 'ready'){
+      this.sayEl.textContent = 'Get ready. Look fast!'; this.subEl.textContent = this.o.readySub || '';
+      this.acts.append(mkBtn('Flash!', 'primary big', () => this.flash()));
+    } else if(p === 'flash'){
+      this.sayEl.textContent = 'Look!'; this.subEl.textContent = '';
+    } else if(p === 'ask'){
+      this.sayEl.textContent = 'How many dots?'; this.subEl.textContent = 'Tap the number.';
+      this.more.append(mkBtn('See it again', 'secondary', () => this.flash()), mkBtn('Show the card', 'ghost', () => this.showCard()));
+    } else {
+      const n = c.n;
+      if(this.correct === false){
+        this.sayEl.textContent = `You said ${this.said}. Let’s check!`;
+        this.subEl.textContent = sentence(c.seeings[0], n);
+        this.acts.append(mkBtn('Try it again', 'primary', () => this.flash()));
+        if(this.o.next) this.more.append(mkBtn('Next card', 'secondary', () => this.next()));
+      } else {
+        this.sayEl.innerHTML = this.correct ? `Yes! <span class="big-n">${n}</span>` : `<span class="big-n">${n}</span> dots`;
+        this.subEl.textContent = 'How did you SEE it?';
+        if(this.o.note){ this.noteEl.textContent = this.o.note; this.noteEl.hidden = false; }
+        if(this.o.next){ this.acts.append(mkBtn('Next card', 'primary', () => this.next())); this.more.append(mkBtn('Flash it again', 'secondary', () => this.flash())); }
+        else this.acts.append(mkBtn('Flash it again', 'primary', () => this.flash()));
+      }
+      this.renderChips();
+    }
+  }
+}
+
+/* ================= Tabs 1–3 ================= */
+const warmCard = makeCard('dice', 4);
+const quickCard = {type:'custom', n:7, r:6.5,
+  pts:[[30,22],[30,50],[30,78],[70,22],[70,50],[70,78],[50,50]],
+  seeings:[{groups:[[0,1,2],[3,4,5],[6]]}, {groups:[[0,1,2,3,4,5],[6]]}, {groups:[[0,3],[1,6,4],[2,5]]}, {groups:[[0,1,2,6],[3,4,5]]}]};
+const warm = new Flash($('#warmStage'), {first:() => warmCard, dur:() => 2, readySub:'Watch closely!' });
+const quick = new Flash($('#quickStage'), {first:() => quickCard, dur:() => 0.8, readySub:'This one is super fast!', note:'Nobody had time to count. We all saw groups! Numbers hide inside numbers.'});
+
+const G = {max:10, style:'mix', dur:2, hist:[]};
+function randomCard(prev){
+  const types = G.style === 'mix' ? Object.keys(TYPES) : [G.style];
+  let n; do { n = 2 + Math.floor(SEED() * (G.max - 1)); } while(prev && n === prev.n && G.max > 2);
+  return goodCard(pick(SEED, types), n, Math.floor(SEED() * 1e6));
+}
+const segHTML = (id, label, opts, cur) => `<div class="set"><span>${label}</span><div class="seg" id="${id}" role="group" aria-label="${label}">${opts.map(([v,t]) => `<button data-v="${v}" aria-pressed="${String(v) === String(cur)}">${t}</button>`).join('')}</div></div>`;
+const game = new Flash($('#gameStage'), {
+  first:() => randomCard(null), next:c => randomCard(c), dur:() => G.dur,
+  onAnswer:(c, ok) => { G.hist.push({n:c.n, ok}); renderHist(); },
+  extra:`<div class="panel">
+    ${segHTML('gMax','Numbers',[[5,'2 to 5'],[10,'2 to 10']],10)}
+    ${segHTML('gStyle','Cards',[['mix','Mix'],...Object.entries(TYPES)],'mix')}
+    ${segHTML('gDur','Time',[[1,'1 sec'],[2,'2 sec'],[3,'3 sec']],2)}
+    <div class="hist" id="hist"></div></div>`
+});
+function wireSeg(id, fn){ const el = $('#' + id); el.onclick = e => { const b = e.target.closest('button'); if(!b) return; el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fn(b.dataset.v); }; }
+wireSeg('gMax', v => { G.max = +v; game.next(); });
+wireSeg('gStyle', v => { G.style = v; game.next(); });
+wireSeg('gDur', v => { G.dur = +v; });
+function renderHist(){
+  const h = $('#hist');
+  h.innerHTML = '<span class="lab">' + (G.hist.length ? `Cards so far: ${G.hist.length}` : 'Cards you flash show up here.') + '</span>' +
+    G.hist.slice(-14).map(x => `<span class="hchip${x.ok ? '' : ' look'}" title="${x.ok ? 'Seen on the first look' : 'We looked again'}">${x.n}</span>`).join('');
+}
+renderHist();
+
+/* ================= Tab 4: make a card ================= */
+const M = {target:8, dots:[], groups:false, phase:'edit', yes:0, no:0, tok:0};
+const pad = $('#pad');
+const SAMPLES = {
+  8: () => goodCard('scatter', 8, 4242).pts.map(p => p.slice()),
+  9: () => makeCard('groups', 9, 7).pts.map(p => p.slice())
+};
+function renderMake(){
+  const n = M.dots.length, full = n === M.target;
+  const card = {n, r:6.2, pts:M.dots, seeings:[{groups: closeGroups(M.dots)}]};
+  drawCard(pad, card, {see: M.groups && n ? 0 : -1});
+  $('#makeCover').hidden = !(M.phase === 'wait' || M.phase === 'ask');
+  $('#makeWrap').classList.toggle('flashing', M.phase === 'flash');
+  $('#t8').setAttribute('aria-pressed', String(M.target === 8)); $('#t9').setAttribute('aria-pressed', String(M.target === 9));
+  $('#pips').innerHTML = seq(0, M.target).map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('') + `<b>${n}</b>`;
+  $('#yesno').hidden = M.phase !== 'ask';
+  $('#makeActs').hidden = M.phase === 'ask';
+  $('#mFlash').disabled = !full || M.phase !== 'edit';
+  $('#mGroups').disabled = !n || M.phase !== 'edit';
+  $('#mGroups').textContent = M.groups ? 'Hide groups' : 'Show groups';
+  const say = $('#makeSay'), sub = $('#makeSub');
+  if(M.phase === 'wait'){ say.textContent = 'Get ready…'; sub.textContent = ''; }
+  else if(M.phase === 'flash'){ say.textContent = 'Look!'; sub.textContent = ''; }
+  else if(M.phase === 'ask'){ say.textContent = 'Could you see it without counting?'; sub.textContent = ''; }
+  else {
+    say.textContent = M.target === 8 ? 'Make a HARD 8.' : 'Make a 9 so clear nobody needs to count.';
+    if(M.groups && n) sub.textContent = groupSentence(card.seeings[0].groups, n);
+    else if(n < M.target) sub.textContent = M.target === 8 ? `Easy for you, tricky for friends. ${M.target - n} more to go.` : `What makes it easy? ${M.target - n} more to go.`;
+    else sub.textContent = `That’s ${M.target}! Flash it for your friends.`;
+  }
+  $('#mTally').textContent = M.yes + M.no ? `Friends tested it. YES: ${M.yes} · NO: ${M.no}` : '';
+}
+function groupSentence(groups, n){
+  if(groups.length === 1) return `One big group of ${n}.`;
+  if(groups.every(g => g.length === 1)) return `Every dot is on its own. Eyes have to count them one by one.`;
+  if(groups.length > 4) return `Lots of little groups and lonely dots. Eyes have to count.`;
+  return `Close groups: ${groups.map(g => g.length).join(' and ')} make ${n}.`;
+}
+function padPoint(e){
+  const pt = pad.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const p = pt.matrixTransform(pad.getScreenCTM().inverse());
+  return [Math.min(91, Math.max(9, p.x)), Math.min(91, Math.max(9, p.y))];
+}
+pad.addEventListener('pointerdown', e => {
+  if(M.phase !== 'edit') return;
+  e.preventDefault();
+  const p = padPoint(e);
+  const hit = M.dots.findIndex(d => Math.hypot(d[0]-p[0], d[1]-p[1]) < 10);
+  if(hit >= 0) M.dots.splice(hit, 1);
+  else if(M.dots.length < M.target){
+    if(M.dots.some(d => Math.hypot(d[0]-p[0], d[1]-p[1]) < 13.5)) return;
+    M.dots.push(p);
+  } else { $('#makeSub').textContent = `That’s ${M.target} already. Tap a dot to take it away.`; return; }
+  M.yes = M.no = 0; renderMake();
+});
+function makeFlash(){
+  const t = ++M.tok; M.phase = 'wait'; renderMake();
+  setTimeout(() => {
+    if(t !== M.tok) return; M.phase = 'flash'; M.groups = false; renderMake();
+    const bar = $('#makeWrap .timer'); $('#makeWrap').style.setProperty('--dur', '1500ms'); bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run');
+    setTimeout(() => { if(t !== M.tok) return; M.phase = 'ask'; renderMake(); }, 1500);
+  }, 900);
+}
+function verdict(yes){
+  M.tok++; if(yes) M.yes++; else M.no++;
+  M.phase = 'edit'; M.groups = true; renderMake();
+  const groups = closeGroups(M.dots);
+  $('#makeSub').textContent = groupSentence(groups, M.dots.length) + (yes ? ' What made it easy?' : ' What made it tricky?');
+}
+$('#mFlash').onclick = makeFlash;
+$('#yesBtn').onclick = () => verdict(true);
+$('#noBtn').onclick = () => verdict(false);
+$('#mGroups').onclick = () => { M.groups = !M.groups; renderMake(); };
+$('#mClear').onclick = () => { M.tok++; M.dots = []; M.groups = false; M.phase = 'edit'; M.yes = M.no = 0; renderMake(); };
+$('#mSample').onclick = () => { M.tok++; M.dots = SAMPLES[M.target](); M.groups = false; M.phase = 'edit'; M.yes = M.no = 0; renderMake(); };
+function setTarget(t){ M.tok++; M.target = t; if(M.dots.length > t) M.dots = M.dots.slice(0, t); M.phase = 'edit'; M.groups = false; M.yes = M.no = 0; renderMake(); }
+$('#t8').onclick = () => setTarget(8);
+$('#t9').onclick = () => setTarget(9);
+
+/* ================= Tab 5: compare ================= */
+const C = {n:8, votes:{}, groups:false, tok:0};
+const ORDER = ['dice','frame','groups','circle','line','scatter'];
+$('#cN').innerHTML = [5,6,7,8,9,10].map(n => `<button data-v="${n}" aria-pressed="${n === C.n}">${n}</button>`).join('');
+wireSeg('cN', v => { C.n = +v; C.votes = {}; C.tok++; buildCompare(); });
+function buildCompare(){
+  const g = $('#cgrid'); g.innerHTML = '';
+  ORDER.forEach(t => {
+    const card = goodCard(t, C.n, 50 + C.n*7);
+    const b = document.createElement('button'); b.className = 'cc'; b.dataset.t = t;
+    b.innerHTML = `<div class="cardwrap"><svg class="card" viewBox="0 0 100 100" role="img" aria-label="${TYPES[t]} card with ${C.n} dots"></svg><div class="cover" hidden aria-hidden="true"><span>?</span></div></div><div class="cap"><span>${TYPES[t]}</span><span class="votes"></span></div>`;
+    drawCard(b.querySelector('svg'), card, {see: C.groups ? 0 : -1});
+    b.onclick = () => { if(!b.querySelector('.cover').hidden) return; C.votes[t] = (C.votes[t] || 0) + 1; renderVotes(); };
+    g.appendChild(b);
+  });
+  renderVotes();
+  $('#cGroups').textContent = C.groups ? 'Hide groups' : 'Show groups';
+}
+function renderVotes(){
+  document.querySelectorAll('.cc').forEach(b => {
+    const v = C.votes[b.dataset.t] || 0;
+    b.querySelector('.votes').innerHTML = seq(0, Math.min(v, 20)).map(() => '<i></i>').join('') + (v ? ` <span style="margin-left:4px">${v}</span>` : '');
+    b.setAttribute('aria-label', `${TYPES[b.dataset.t]} card, ${v} vote${v === 1 ? '' : 's'}. Tap to add a vote.`);
+  });
+}
+function covers(on){ document.querySelectorAll('.cc .cover').forEach(c => c.hidden = !on); }
+$('#cFlash').onclick = () => {
+  const t = ++C.tok; C.groups = false; buildCompare(); covers(true); $('#cFlash').disabled = true;
+  setTimeout(() => { if(t !== C.tok) return; covers(false);
+    setTimeout(() => { if(t !== C.tok) return; covers(true); $('#cFlash').disabled = false; $('#cFlash').textContent = 'Flash again';
+      const show = mkBtn('Show them', 'secondary', () => { covers(false); show.remove(); }); show.id = 'cShow';
+      const old = $('#cShow'); if(old) old.remove(); $('#cFlash').after(show);
+    }, 1500);
+  }, 900);
+};
+$('#cGroups').onclick = () => { C.tok++; C.groups = !C.groups; $('#cFlash').disabled = false; const s = $('#cShow'); if(s) s.remove(); buildCompare(); };
+$('#cClear').onclick = () => { C.votes = {}; renderVotes(); };
+
+/* ================= Shell ================= */
+function selectTab(name){
+  document.querySelectorAll('nav [role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+  document.querySelectorAll('.tab').forEach(s => s.hidden = s.id !== 'tab-' + name);
+}
+document.querySelectorAll('nav [role="tab"]').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+$('#resetBtn').onclick = () => {
+  warm.reset(); quick.reset(); G.hist = []; renderHist(); game.reset();
+  M.tok++; Object.assign(M, {target:8, dots:[], groups:false, phase:'edit', yes:0, no:0}); renderMake();
+  C.tok++; Object.assign(C, {votes:{}, groups:false}); $('#cFlash').disabled = false; $('#cFlash').textContent = 'Flash them all'; const s = $('#cShow'); if(s) s.remove(); buildCompare();
+  selectTab('warm');
+};
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+renderMake(); buildCompare();
+})();
+</script>
+
+</body></html>

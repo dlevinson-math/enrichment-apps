@@ -1,0 +1,786 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mystery Digits (Cryptarithm Puzzles)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a codebreaker's desk. Big column-addition board on the left, case notes on the right; stacks on phones. */
+:root{
+  --paper:#EDF0F6; --card:#FFFFFF; --ink:#1A2238; --muted:#566079; --line:#D2D8E4;
+  --accent:#3343A6; --accent-ink:#FFFFFF;
+  --box:#E8A900; --box-soft:#FFF3C9; --carry:#D9502A; --good:#127F57; --good-soft:#DDF3EA; --warn-soft:#FDE8E1;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121521; --card:#1B2031; --ink:#E9ECF4; --muted:#A3ABBF; --line:#323B52;
+    --accent:#8391FF; --accent-ink:#10132A;
+    --box:#F6C445; --box-soft:#3A3115; --carry:#FF8460; --good:#47CF94; --good-soft:#163428; --warn-soft:#3B2219;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121521; --card:#1B2031; --ink:#E9ECF4; --muted:#A3ABBF; --line:#323B52;
+  --accent:#8391FF; --accent-ink:#10132A;
+  --box:#F6C445; --box-soft:#3A3115; --carry:#FF8460; --good:#47CF94; --good-soft:#163428; --warn-soft:#3B2219;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.app{min-height:100%; display:flex; flex-direction:column; padding-inline:clamp(16px,2.4vw,32px); padding-block:12px 20px; gap:12px}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(26px,3vw,42px); line-height:1.05; letter-spacing:-.01em; text-wrap:balance}
+.title h1 .q{display:inline-grid; place-items:center; width:1.05em; height:1.05em; border:.09em dashed var(--box); border-radius:.18em; color:var(--box); margin-left:.12em; font-size:.85em; vertical-align:.04em}
+.title p{margin:3px 0 0; color:var(--muted); font-size:clamp(14px,1.15vw,17px)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:500; font-size:15px; min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px 22px; border-bottom:2px solid var(--line); flex-wrap:wrap}
+.tabs button{border:0; background:none; padding:10px 2px; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,23px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--box)}
+
+.view{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:clamp(18px,2.5vw,36px); align-items:start}
+.view[hidden]{display:none}
+.stage{display:flex; flex-direction:column; gap:14px; align-items:center; min-width:0}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.eyebrow{font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0}
+.lead{font-size:clamp(18px,1.6vw,23px); line-height:1.4; margin:0; max-width:32em}
+.lead b{font-family:var(--display); font-weight:600}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:clamp(17px,1.35vw,20px); padding:13px 24px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(15px,1.2vw,18px); padding:11px 18px; border-radius:14px; min-height:52px}
+.note{font-size:clamp(16px,1.35vw,20px); line-height:1.45; margin:0; padding:14px 18px; border-radius:14px; background:var(--card); border:1.5px solid var(--line); max-width:34em}
+.note:empty{display:none}
+.note.good{background:var(--good-soft); border-color:var(--good)}
+.note.warn{background:var(--warn-soft); border-color:var(--carry)}
+.note b{font-family:var(--display); font-weight:600}
+.note .eq{font-family:var(--display); font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+.hint{font-size:14px; color:var(--muted); margin:0}
+
+/* ---------- The board ---------- */
+.board{--cell:clamp(54px, min(8.2vw, 11dvh), 112px); background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:calc(var(--cell)*.25) calc(var(--cell)*.4); display:grid; grid-auto-rows:auto; justify-content:center; max-width:100%; overflow-x:auto}
+.brow{display:grid; grid-template-columns:repeat(var(--cols), var(--cell)); gap:calc(var(--cell)*.1)}
+.bc{height:var(--cell); display:grid; place-items:center; font-family:var(--display); font-weight:600; font-size:calc(var(--cell)*.72); line-height:1; font-variant-numeric:tabular-nums; position:relative}
+.bc.op{color:var(--muted)}
+.carryrow .bc{height:calc(var(--cell)*.5); font-size:calc(var(--cell)*.36); color:var(--carry)}
+.carryrow .bc span{animation:drop .35s ease-out}
+.rule{height:0; border-top:calc(var(--cell)*.06) solid var(--ink); margin:calc(var(--cell)*.08) 0; grid-column:1/-1}
+.slot{border:calc(var(--cell)*.045) dashed var(--box); background:var(--box-soft); border-radius:calc(var(--cell)*.16); padding:0; color:var(--ink)}
+.slot.empty{color:var(--box)}
+.slot.sel{border-style:solid; box-shadow:0 0 0 calc(var(--cell)*.05) var(--card), 0 0 0 calc(var(--cell)*.1) var(--box)}
+.slot .lt{position:absolute; top:4%; left:8%; font-size:.32em; font-weight:700; color:var(--box)}
+.slot.empty .lt{display:none}
+.slot.bad{border-color:var(--carry); background:var(--warn-soft)}
+.slot.ok{border-color:var(--good); border-style:solid; background:var(--good-soft)}
+.bc.colhl{background:color-mix(in srgb, var(--carry) 14%, transparent); border-radius:calc(var(--cell)*.14)}
+.slot.pop{animation:pop .3s ease-out}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes drop{from{transform:translateY(-40%); opacity:0}to{transform:none; opacity:1}}
+
+.pad{display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:8px; width:min(100%, 560px)}
+.pad button{min-height:60px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(26px,2.4vw,34px); box-shadow:0 3px 0 var(--line)}
+.pad button:active{transform:translateY(2px); box-shadow:0 1px 0 var(--line)}
+.pad .erase{font-family:var(--body); font-size:16px; font-weight:500}
+.pad button:disabled{opacity:.35}
+
+.levels{display:flex; flex-direction:column; gap:10px}
+.lvl{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.lvl .tag{font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); width:8.2em; flex:none}
+.pz{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:8px 12px; min-height:48px; font-family:var(--display); font-weight:600; font-size:17px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.pz[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.pz.solved::after{content:" ✓"; color:var(--good)}
+.pz[aria-pressed="true"].solved::after{color:var(--card)}
+.found{display:flex; flex-wrap:wrap; gap:8px}
+.found span{font-family:var(--display); font-weight:600; font-size:18px; background:var(--good-soft); border:1.5px solid var(--good); border-radius:10px; padding:4px 10px; font-variant-numeric:tabular-nums}
+.check{display:flex; align-items:center; gap:10px; font-size:15px; color:var(--muted); cursor:pointer}
+.check input{width:22px; height:22px; accent-color:var(--accent)}
+.steps{display:flex; gap:6px; flex-wrap:wrap}
+.steps i{width:12px; height:12px; border-radius:50%; background:var(--line)}
+.steps i.on{background:var(--box)}
+
+/* ---------- Riddles ---------- */
+.chart{display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:4px; width:min(100%, 620px); background:var(--card); border:2px solid var(--ink); border-radius:16px; padding:10px}
+.chart button{aspect-ratio:1; max-width:100%; border:0; border-radius:8px; background:var(--paper); font-family:var(--display); font-weight:600; font-size:clamp(15px,1.7vw,24px); font-variant-numeric:tabular-nums; padding:0; transition:opacity .2s, background-color .2s}
+.chart button.out{opacity:.16}
+.chart button.pick{background:var(--box); color:#1A2238}
+.chart button.win{background:var(--good); color:var(--card)}
+.count{font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px)}
+.rpick{display:flex; gap:8px; flex-wrap:wrap}
+.clues{display:flex; flex-direction:column; gap:10px}
+.clue{display:grid; grid-template-columns:auto 1fr auto; gap:6px 12px; align-items:center; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:10px 14px}
+.clue.on{border-color:var(--accent)}
+.clue .txt{font-size:clamp(17px,1.4vw,21px); font-weight:500}
+.clue .res{grid-column:2/-1; font-size:15px; color:var(--muted); min-height:0}
+.clue .res:empty{display:none}
+.clue .res.y{color:var(--good)} .clue .res.n{color:var(--carry)}
+.tog{width:46px; height:46px; border-radius:12px; border:2px solid var(--line); background:var(--paper); font-weight:700; font-size:20px}
+.clue.on .tog{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.step{display:inline-flex; align-items:center; gap:4px}
+.step button{width:40px; height:40px; border-radius:10px; border:1.5px solid var(--line); background:var(--paper); font-weight:700; font-size:20px}
+.step b{font-family:var(--display); min-width:1.6em; text-align:center; font-size:20px}
+
+/* ---------- Detective evidence ---------- */
+.evidence{width:100%; background:var(--card); border:2px solid var(--ink); border-radius:18px; padding:clamp(14px,2vw,26px); min-height:320px; display:flex; flex-direction:column; gap:14px; overflow-x:auto}
+.evidence .empty{color:var(--muted); font-size:18px; margin:auto; text-align:center; max-width:22em}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:21px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:27px}
+table.ev{border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:clamp(16px,1.4vw,21px)}
+table.ev th, table.ev td{padding:6px 10px; text-align:center; border-bottom:1px solid var(--line)}
+table.ev th{font-size:.78em; color:var(--muted); font-weight:600}
+table.ev td.big{font-family:var(--display); font-weight:600}
+table.ev tr.hit td{background:var(--good-soft); font-weight:600}
+table.ev tr.miss td{color:var(--muted)}
+.ab{display:grid; grid-template-columns:auto repeat(9, minmax(30px,1fr)); gap:3px; font-variant-numeric:tabular-nums; min-width:340px}
+.ab div{display:grid; place-items:center; min-height:34px; border-radius:6px; font-size:14px; background:var(--paper)}
+.ab .h{background:none; font-weight:700; color:var(--muted); font-family:var(--display); font-size:17px}
+.ab .y{background:var(--good); color:var(--card); font-weight:700}
+.ab .z{background:var(--box-soft)}
+.path{display:flex; flex-direction:column; gap:8px}
+.path p{margin:0; font-size:clamp(17px,1.4vw,21px)}
+.path p .eq{font-family:var(--display); font-weight:600}
+.mini{font-family:var(--display); font-weight:600; font-size:clamp(28px,3vw,44px); font-variant-numeric:tabular-nums; line-height:1.15}
+.mini .x{color:var(--box)}
+.tick{color:var(--good); font-weight:700} .cross{color:var(--carry); font-weight:700}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important; transition:none !important}}
+@media (max-width: 900px), (orientation: portrait){
+  .view{grid-template-columns:minmax(0,1fr)}
+  .board{--cell:clamp(48px, 15vw, 96px)}
+  .lvl .tag{width:100%}
+}
+</style>
+
+<div class="app">
+<header>
+  <div class="title">
+    <h1>Mystery Digits<span class="q" aria-hidden="true">?</span></h1>
+    <p>Grade 2 · Week 4 · Number Detectives: crack missing-digit puzzles with place value</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tabR" aria-selected="false">1 · Who am I?</button>
+  <button role="tab" id="tabP" aria-selected="true">2 · Crack the code</button>
+  <button role="tab" id="tabQ" aria-selected="false">3 · Detective questions</button>
+</nav>
+
+<!-- Warm-up riddles -->
+<section class="view" id="viewR" hidden>
+  <div class="stage">
+    <div class="chart" id="chart" aria-label="Two-digit numbers 10 to 99"></div>
+    <div class="count" id="rcount" aria-live="polite"></div>
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Warm-up riddles</p>
+    <div class="rpick" id="rpick"></div>
+    <p class="lead" id="rlead"></p>
+    <div class="clues" id="clues"></div>
+    <p class="note" id="rnote" aria-live="polite"></p>
+    <p class="hint">Tap a number on the chart to test it against every clue. Tap a clue’s button to cross out every number that breaks it.</p>
+  </div>
+</section>
+
+<!-- Puzzle workshop -->
+<section class="view" id="viewP">
+  <div class="stage">
+    <div class="board" id="board" aria-label="Puzzle board"></div>
+    <div class="pad" id="pad" aria-label="Digit cards"></div>
+  </div>
+  <div class="panel">
+    <p class="lead" id="plead"></p>
+    <div class="row" id="pextra"></div>
+    <div class="row">
+      <button class="primary" id="checkBtn">Check</button>
+      <button class="secondary" id="hintBtn">Hint</button>
+      <button class="secondary" id="clearBtn">Clear boxes</button>
+    </div>
+    <p class="note" id="pnote" aria-live="polite"></p>
+    <div id="foundBox" hidden>
+      <p class="eyebrow" id="foundLbl">Solutions found</p>
+      <div class="found" id="found"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="carryToggle"> Show carries on the board</label>
+    <p class="eyebrow" style="margin-top:6px">Pick a puzzle</p>
+    <div class="levels" id="levels"></div>
+  </div>
+</section>
+
+<!-- Detective questions -->
+<section class="view" id="viewQ" hidden>
+  <div class="stage">
+    <div class="evidence" id="evidence" aria-live="polite"><p class="empty">Talk it over first. Then tap a button to put evidence here.</p></div>
+  </div>
+  <div class="panel">
+    <div class="qnav" id="qnav"></div>
+    <p class="lead" id="qtext"></p>
+    <div class="row" id="qactions"></div>
+    <p class="hint">Every answer needs a “because.”</p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PLACE = ['ones','tens','hundreds','thousands'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* =========================================================
+   Puzzle engine
+   ========================================================= */
+const PUZ = [
+  {id:'M', level:'Model', top:'4□', op:'+', bot:'□3', res:'81',
+   lead:'Solve this one together. <b>4□ + □3 = 81.</b> Think out loud: what could the ones digit be? Is there regrouping?',
+   hints:['Start with the ones column. Which digit plus 3 ends in 1?','8 + 3 = 11. Write 1 and carry 1 to the tens. Now the tens: 4 + □ + 1 = 8.'],
+   why:'8, because 8 + 3 = 11 ends in 1. Carry the 1: 4 + 3 + 1 = 8.', expect:[48,33]},
+  {id:'A1', level:'A', top:'2□', op:'+', bot:'□4', res:'68',
+   hints:['Ones column: what plus 4 makes 8?','Tens column: 2 plus what makes 6?'],
+   why:'4 + 4 = 8 in the ones, and 2 + 4 = 6 in the tens.', expect:[24,44]},
+  {id:'A2', level:'A', top:'□5', op:'+', bot:'3□', res:'87',
+   hints:['Ones column: 5 plus what makes 7?','Tens column: what plus 3 makes 8?'],
+   why:'5 + 2 = 7 in the ones, and 5 + 3 = 8 in the tens.', expect:[55,32]},
+  {id:'A3', level:'A', top:'□□', op:'+', bot:'23', res:'59',
+   hints:['Ones column: what plus 3 makes 9?','Tens column: what plus 2 makes 5?'],
+   why:'6 + 3 = 9 in the ones, and 3 + 2 = 5 in the tens.', expect:[36,23]},
+  {id:'A4', level:'A', top:'7□', op:'−', bot:'□3', res:'25',
+   hints:['Ones column: what minus 3 leaves 5?','Tens column: 7 minus what leaves 2?'],
+   why:'8 − 3 = 5 in the ones, and 7 − 5 = 2 in the tens.', expect:[78,53]},
+  {id:'B1', level:'B', top:'3□', op:'+', bot:'□7', res:'62',
+   hints:['Ones column: what plus 7 ends in 2? It could be 12!','5 + 7 = 12: write 2, carry 1. Tens: 3 + □ + 1 = 6.'],
+   why:'5 + 7 = 12, so write 2 and carry 1. Then 3 + 2 + 1 = 6.', expect:[35,27]},
+  {id:'B2', level:'B', top:'□6', op:'+', bot:'2□', res:'73',
+   hints:['Ones column: 6 plus what ends in 3?','6 + 7 = 13: carry 1. Tens: □ + 2 + 1 = 7.'],
+   why:'6 + 7 = 13, so write 3 and carry 1. Then 4 + 2 + 1 = 7.', expect:[46,27]},
+  {id:'B3', level:'B', top:'5□', op:'−', bot:'□8', res:'17',
+   hints:['Ones column: □ − 8 can’t leave 7 unless you regroup. Think: 1□ − 8 = 7.','15 − 8 = 7, so a ten was used up. The 5 tens became 4 tens: 4 − □ = 1.'],
+   why:'Regroup: 15 − 8 = 7. The 5 tens became 4 tens, and 4 − 3 = 1.', expect:[55,38]},
+  {id:'B4', level:'B', top:'□47', op:'+', bot:'2□6', res:'583',
+   hints:['The ones are done for you: 7 + 6 = 13. Write 3, carry 1.','Tens: 4 + □ + 1 = 8. Hundreds: □ + 2 = 5.'],
+   why:'7 + 6 = 13, carry 1. Tens: 4 + 3 + 1 = 8. Hundreds: 3 + 2 = 5.', expect:[347,236]},
+  {id:'C1', level:'C', top:'AB', op:'+', bot:'AB', res:'86', distinct:true,
+   lead:'Letters stand for digits. The same letter is always the same digit. <b>AB + AB = 86.</b>',
+   hints:['AB + AB is double AB. What number, doubled, makes 86?','Half of 86 is 43.'],
+   why:'43 + 43 = 86, because half of 86 is 43.', expect:[43,43]},
+  {id:'C2', level:'C', top:'AA', op:'+', bot:'A', res:'2B', distinct:true,
+   lead:'The same letter is always the same digit, and different letters are different digits. <b>AA + A = 2B.</b>',
+   hints:['Try A = 1: 11 + 1 = 12. Does that start with 2?','Try A = 2.'],
+   why:'22 + 2 = 24. A = 1 gives 12, which doesn’t start with 2, and A = 3 gives 36, which is too big.', expect:[22,2]},
+  {id:'C3', level:'C', top:'AB', op:'+', bot:'BA', res:'66', collect:true, sameRule:true,
+   lead:'<b>AB + BA = 66.</b> This one has more than one answer. Find as many as you can!',
+   hints:['Ones column: B + A. Tens column: A + B. It’s the same sum!','So A + B must be 6. Find every way to make 6.']},
+  {id:'C4', level:'Challenge', top:'ON', op:'+', bot:'ON', res:'GO', collect:true, distinct:true,
+   lead:'★ Classic cryptarithm: <b>ON + ON = GO.</b> Each letter is one digit, and different letters are different digits. How many solutions?',
+   hints:['ON + ON doubles N in the ones column. The ones digit of the answer is O.','Try N = 1: 1 + 1 = 2, so O = 2 and ON = 21. What is 21 + 21?']}
+];
+
+function parse(p){
+  let k = 0; const vars = [];
+  const conv = s => [...s].map(ch => {
+    if(ch === '□'){ const v = 'b'+(k++); vars.push(v); return {v, box:true}; }
+    if(/[A-Z]/.test(ch)){ if(!vars.includes(ch)) vars.push(ch); return {v:ch}; }
+    return {d:+ch};
+  });
+  p.T = conv(p.top); p.B = conv(p.bot); p.R = conv(p.res); p.vars = vars;
+  p.letters = vars.filter(v => !v.startsWith('b'));
+}
+PUZ.forEach(parse);
+
+const numOf = (toks, vals) => { let n = 0; for(const t of toks){ const d = t.v ? vals[t.v] : t.d; if(d == null) return null; n = n*10 + d; } return n; };
+const strOf = (toks, vals) => toks.map(t => t.v ? (vals[t.v] ?? '□') : t.d).join('');
+const lead0 = (toks, vals) => toks.length > 1 && (toks[0].v ? vals[toks[0].v] : toks[0].d) === 0;
+function satisfies(p, vals, allowSame){
+  if(lead0(p.T,vals) || lead0(p.B,vals) || lead0(p.R,vals)) return false;
+  const distinct = p.distinct || (p.sameRule && !allowSame);
+  if(distinct){ const ds = p.letters.map(l => vals[l]); if(new Set(ds).size !== ds.length) return false; }
+  const a = numOf(p.T,vals), b = numOf(p.B,vals), r = numOf(p.R,vals);
+  return (p.op === '+' ? a + b : a - b) === r;
+}
+function solve(p, allowSame){
+  const out = []; const n = p.vars.length;
+  for(let i = 0; i < 10**n; i++){
+    const vals = {}; let x = i;
+    for(const v of p.vars){ vals[v] = x % 10; x = Math.floor(x/10); }
+    if(satisfies(p, vals, allowSame)) out.push(vals);
+  }
+  return out;
+}
+// Self-check: every one-answer puzzle has exactly the answer we wrote down.
+const SELF = PUZ.map(p => {
+  const s = solve(p, true);
+  const ok = p.collect ? s.length > 1 : (s.length === 1 && numOf(p.T,s[0]) === p.expect[0] && numOf(p.B,s[0]) === p.expect[1]);
+  if(!ok) console.warn('Puzzle check failed', p.id, s);
+  return {id:p.id, count:s.length, ok};
+});
+window.__mysteryDigitsSelfCheck = SELF;
+
+/* =========================================================
+   Puzzle workshop state + board
+   ========================================================= */
+const S = {pid:'M', vals:{}, sel:null, solved:{}, found:{C3:[], C4:[]}, allowSame:true, showCarry:false, hint:0, think:0, marks:null};
+const P = () => PUZ.find(p => p.id === S.pid);
+
+function carriesFor(p, vals){
+  // carry into each column (index from the right), addition only; null where unknown
+  const W = Math.max(p.T.length, p.B.length);
+  const dig = (toks, i) => { const t = toks[toks.length-1-i]; if(!t) return 0; return t.v ? vals[t.v] : t.d; };
+  const c = []; let carry = 0;
+  for(let i = 0; i < W; i++){
+    const a = dig(p.T,i), b = dig(p.B,i);
+    if(a == null || b == null || carry == null){ carry = null; c.push(null); continue; }
+    const s = a + b + carry; carry = s >= 10 ? 1 : 0; c.push(carry);
+  }
+  return c; // c[i] = carry out of column i
+}
+
+function renderBoard(){
+  const p = P(); const b = $('#board');
+  const W = Math.max(p.T.length, p.B.length, p.R.length);
+  const cols = W + 1;
+  b.style.setProperty('--cols', cols);
+  b.style.gridTemplateColumns = '';
+  const cell = (t, rowKey, idx) => {
+    if(!t) return '<div class="bc"></div>';
+    if(!t.v) return `<div class="bc" data-col="${idx}">${t.d}</div>`;
+    const val = S.vals[t.v];
+    const cls = ['bc','slot', val == null ? 'empty' : 'filled'];
+    if(S.sel === t.v) cls.push('sel');
+    if(S.marks && S.marks[t.v]) cls.push(S.marks[t.v]);
+    const label = t.box ? 'Mystery box' : `Letter ${t.v}`;
+    return `<button class="${cls.join(' ')}" data-v="${t.v}" data-col="${idx}" aria-label="${label}, ${val == null ? 'empty' : val}">${t.box ? '' : `<span class="lt">${t.v}</span>`}${val == null ? (t.box ? '?' : t.v) : val}</button>`;
+  };
+  const line = (toks, opch) => {
+    let h = `<div class="bc op">${opch || ''}</div>`;
+    for(let c = W-1; c >= 0; c--){ const t = toks[toks.length-1-c]; h += cell(t, '', c); }
+    return `<div class="brow">${h}</div>`;
+  };
+  let carryRow = '';
+  if(p.op === '+'){
+    const cs = carriesFor(p, S.vals);
+    let h = '<div class="bc"></div>';
+    for(let c = W-1; c >= 0; c--){ const cin = c > 0 ? cs[c-1] : 0; h += `<div class="bc">${S.showCarry && cin === 1 && c < W ? '<span>1</span>' : ''}</div>`; }
+    carryRow = `<div class="brow carryrow">${h}</div>`;
+  }
+  b.innerHTML = carryRow + line(p.T,'') + line(p.B, p.op) + `<div class="brow"><div class="rule"></div></div>` + line(p.R,'');
+  b.querySelectorAll('.slot').forEach(el => el.onclick = () => { S.sel = el.dataset.v; renderBoard(); });
+  if(S.colhl != null) b.querySelectorAll(`[data-col="${S.colhl}"]`).forEach(el => el.classList.add('colhl'));
+}
+
+function renderPad(){
+  const pad = $('#pad');
+  pad.innerHTML = [0,1,2,3,4,5,6,7,8,9].map(d => `<button data-d="${d}" aria-label="Digit ${d}">${d}</button>`).join('') + '<button class="erase" data-d="x" style="grid-column:span 2">Erase box</button>';
+  pad.querySelectorAll('button').forEach(b => b.onclick = () => enter(b.dataset.d));
+}
+function enter(d){
+  const p = P();
+  if(!S.sel){ S.sel = p.vars.find(v => S.vals[v] == null) || p.vars[0]; }
+  if(!S.sel) return;
+  S.marks = null; S.colhl = null;
+  if(d === 'x'){ delete S.vals[S.sel]; }
+  else {
+    S.vals[S.sel] = +d;
+    const v = S.sel;
+    const order = p.vars; const i = order.indexOf(v);
+    const next = order.slice(i+1).concat(order.slice(0,i)).find(x => S.vals[x] == null);
+    if(next) S.sel = next;
+    setTimeout(() => { const el = document.querySelector(`.slot[data-v="${v}"]`); if(el && !reduced){ el.classList.add('pop'); } }, 0);
+  }
+  $('#pnote').textContent = ''; $('#pnote').className = 'note';
+  renderBoard();
+}
+
+function renderLevels(){
+  const groups = [['Model','Model'],['A','Level A · no regrouping'],['B','Level B · regrouping'],['C','Level C · letters'],['Challenge','★ Challenge']];
+  $('#levels').innerHTML = groups.map(([k,lbl]) => `<div class="lvl"><span class="tag">${lbl}</span>${PUZ.filter(p => p.level === k).map(p => `<button class="pz ${S.solved[p.id] ? 'solved':''}" data-id="${p.id}" aria-pressed="${S.pid === p.id}">${p.top} ${p.op} ${p.bot} = ${p.res}</button>`).join('')}</div>`).join('');
+  $('#levels').querySelectorAll('.pz').forEach(b => b.onclick = () => openPuzzle(b.dataset.id));
+}
+function openPuzzle(id){
+  S.pid = id; S.vals = {}; S.hint = 0; S.think = 0; S.marks = null; S.colhl = null;
+  const p = P(); S.sel = p.vars[0];
+  $('#plead').innerHTML = p.lead || `Find the mystery digit${p.vars.length > 1 ? 's' : ''}. Every box holds one digit, 0 to 9. <b>Start with the ones column.</b>`;
+  $('#pnote').textContent = ''; $('#pnote').className = 'note';
+  const ex = $('#pextra'); ex.innerHTML = '';
+  if(id === 'M'){
+    ex.innerHTML = '<button class="secondary" id="thinkBtn">Think aloud: step 1</button><div class="steps" id="tsteps"><i></i><i></i><i></i><i></i></div>';
+    $('#thinkBtn').onclick = thinkAloud;
+  }
+  if(p.sameRule){
+    ex.innerHTML = `<label class="check"><input type="checkbox" id="sameToggle" ${S.allowSame ? 'checked':''}> Class rule: A and B may be the same digit</label>`;
+    $('#sameToggle').onchange = e => { S.allowSame = e.target.checked; if(!S.allowSame) S.found.C3 = S.found.C3.filter(f => f.a !== f.b); renderFound(); };
+  }
+  renderLevels(); renderBoard(); renderFound();
+}
+function renderFound(){
+  const p = P(); const box = $('#foundBox');
+  if(!p.collect){ box.hidden = true; return; }
+  box.hidden = false;
+  const list = S.found[p.id];
+  $('#foundLbl').textContent = `Solutions found: ${list.length}`;
+  $('#found').innerHTML = list.length ? list.map(f => `<span>${f.eq}</span>`).join('') : '<span style="background:none;border-style:dashed;border-color:var(--line);color:var(--muted)">none yet</span>';
+}
+
+function thinkAloud(){
+  const p = P(); const step = S.think;
+  const n = $('#pnote');
+  const [b0, b1] = p.vars; // b0 = ones box in 4□, b1 = tens box in □3
+  if(step === 0){
+    S.vals = {}; S.colhl = 0;
+    n.className = 'note'; n.innerHTML = '<b>Ones column:</b> □ + 3 has to end in 1. Could □ + 3 be exactly 1? No. 3 is already more than 1. So it has to be <span class="eq">11</span>. That means <b>regrouping</b>!';
+  } else if(step === 1){
+    S.vals[b0] = 8; S.colhl = 0; S.showCarry = true; $('#carryToggle').checked = true;
+    n.className = 'note'; n.innerHTML = '<span class="eq">8 + 3 = 11</span>. Write 1 in the ones, and carry 1 ten to the tens column. So the first box is <b>8</b>.';
+  } else if(step === 2){
+    S.vals[b1] = 3; S.colhl = 1;
+    n.className = 'note'; n.innerHTML = '<b>Tens column:</b> <span class="eq">4 + □ + 1 = 8</span>. Don’t forget the carried 1! <span class="eq">4 + 3 + 1 = 8</span>, so the second box is <b>3</b>.';
+  } else {
+    S.colhl = null; S.solved.M = true;
+    n.className = 'note good'; n.innerHTML = '<b>Check it:</b> <span class="eq">48 + 33 = 81</span> ✓. What if we forgot the carry? Then 4 + □ = 8 makes □ = 4, and <span class="eq">48 + 43 = 91</span>. That’s not 81!';
+    renderLevels();
+  }
+  S.think = step >= 3 ? 0 : step + 1;
+  const btn = $('#thinkBtn'); if(btn) btn.textContent = S.think === 0 ? 'Think aloud again' : `Think aloud: step ${S.think + 1}`;
+  document.querySelectorAll('#tsteps i').forEach((el,i) => el.classList.toggle('on', i <= step));
+  renderBoard();
+}
+
+/* Explain an attempt: show the real arithmetic and the first column that breaks. */
+function explain(p, vals){
+  const a = numOf(p.T,vals), b = numOf(p.B,vals);
+  const actual = p.op === '+' ? a + b : a - b;
+  const target = strOf(p.R, vals);
+  const W = Math.max(p.T.length, p.B.length);
+  const dig = (toks, i) => { const t = toks[toks.length-1-i]; if(!t) return 0; return t.v ? vals[t.v] : t.d; };
+  let head = `Your numbers: <span class="eq">${a} ${p.op} ${b} = ${actual}</span>. The puzzle needs <span class="eq">${target}</span>.`;
+  if(actual < 0) return {head:`<span class="eq">${a} − ${b}</span> would go below zero, because ${b} is bigger than ${a}.`, col:null, line:'Try a smaller bottom number or a bigger top number.'};
+  const as = String(actual), rs = p.R;
+  if(as.length !== rs.length){
+    return {head, col:null, line: as.length > rs.length ? `That answer has ${as.length} digits, but the puzzle’s answer only has ${rs.length}. Your numbers are too big.` : `That answer has only ${as.length} digit${as.length>1?'s':''}, but the puzzle’s answer has ${rs.length}. Your numbers are too small.`};
+  }
+  let carry = 0, borrow = 0;
+  for(let i = 0; i < Math.max(W, rs.length); i++){
+    const x = dig(p.T,i), y = dig(p.B,i);
+    let text, write;
+    if(p.op === '+'){
+      const s = x + y + carry;
+      text = `${x} + ${y}${carry ? ' + 1 carried' : ''} = ${s}`;
+      write = s % 10;
+      if(s >= 10) text += `. Write ${write}, carry 1`;
+      carry = s >= 10 ? 1 : 0;
+    } else {
+      const top = x - borrow;
+      if(top < y){ write = top + 10 - y; text = `${borrow ? `${x} became ${top}, and ` : ''}${top} − ${y} needs a regroup: ${top + 10} − ${y} = ${write}`; borrow = 1; }
+      else { write = top - y; text = `${borrow ? `${x} became ${top} after regrouping, and ` : ''}${top} − ${y} = ${write}`; borrow = 0; }
+    }
+    const rt = rs[rs.length-1-i]; const need = rt.v ? vals[rt.v] : rt.d;
+    if(write !== need){
+      const place = PLACE[i];
+      const who = rt.v && !rt.box ? ` (you made ${rt.v} = ${need})` : '';
+      return {head, col:i, line:`<b>${place[0].toUpperCase() + place.slice(1)} column:</b> <span class="eq">${text}</span>. The answer needs ${need} there${who}.`};
+    }
+  }
+  return {head, col:null, line:''};
+}
+
+function check(){
+  const p = P(); const n = $('#pnote');
+  const empty = p.vars.filter(v => S.vals[v] == null);
+  if(empty.length){
+    n.className = 'note'; n.innerHTML = `Fill every box first. ${empty.length} ${empty.length === 1 ? 'box is' : 'boxes are'} still empty.`;
+    S.sel = empty[0]; renderBoard(); return;
+  }
+  const v = S.vals;
+  // rule problems first
+  for(const [toks] of [[p.T],[p.B],[p.R]]){
+    if(lead0(toks, v)){
+      const s = strOf(toks, v);
+      S.marks = {}; if(toks[0].v) S.marks[toks[0].v] = 'bad';
+      n.className = 'note warn'; n.innerHTML = `<span class="eq">${s}</span> starts with 0, so it’s really just <span class="eq">${+s}</span>. A ${toks.length}-digit number can’t start with 0. Try another digit there.`;
+      renderBoard(); return;
+    }
+  }
+  const distinct = p.distinct || (p.sameRule && !S.allowSame);
+  if(distinct){
+    for(let i = 0; i < p.letters.length; i++) for(let j = i+1; j < p.letters.length; j++){
+      const L1 = p.letters[i], L2 = p.letters[j];
+      if(v[L1] === v[L2]){
+        S.marks = {[L1]:'bad', [L2]:'bad'};
+        n.className = 'note warn'; n.innerHTML = `${L1} and ${L2} are both ${v[L1]}. Different letters have to be different digits${p.sameRule ? ' with today’s class rule' : ''}. Change one of them.`;
+        renderBoard(); return;
+      }
+    }
+  }
+  if(satisfies(p, v, S.allowSame)){
+    S.marks = Object.fromEntries(p.vars.map(x => [x,'ok'])); S.colhl = null;
+    S.showCarry = S.showCarry || p.op === '+'; $('#carryToggle').checked = S.showCarry;
+    const eq = `${numOf(p.T,v)} ${p.op} ${numOf(p.B,v)} = ${numOf(p.R,v)}`;
+    if(p.collect){
+      const list = S.found[p.id];
+      const key = p.letters.map(l => v[l]).join(',');
+      if(list.some(f => f.key === key)){
+        n.className = 'note'; n.innerHTML = `<span class="eq">${eq}</span> works, but you already found it. Can you find a different one?`;
+      } else {
+        list.push({key, eq, a:v.A, b:v.B});
+        n.className = 'note good'; n.innerHTML = `<b>It works!</b> <span class="eq">${eq}</span> ✓. Clear the boxes and hunt for another. How will you know when you’ve found them all?`;
+        S.solved[p.id] = true; renderFound(); renderLevels();
+      }
+    } else {
+      S.solved[p.id] = true; renderLevels();
+      n.className = 'note good'; n.innerHTML = `<b>Cracked it!</b> <span class="eq">${eq}</span> ✓<br>Now say it with <b>because</b>. One way: “${esc(p.why)}”`;
+    }
+    renderBoard(); return;
+  }
+  const e = explain(p, v);
+  S.colhl = e.col; S.marks = null;
+  if(e.col != null){
+    S.marks = {};
+    [p.T, p.B, p.R].forEach(toks => { const t = toks[toks.length-1-e.col]; if(t && t.v) S.marks[t.v] = 'bad'; });
+  }
+  n.className = 'note warn'; n.innerHTML = `${e.head}<br>${e.line}<br>Change a digit and check again.`;
+  renderBoard();
+}
+
+function hint(){
+  const p = P(); const n = $('#pnote');
+  const h = p.hints[Math.min(S.hint, p.hints.length-1)];
+  n.className = 'note'; n.innerHTML = `<b>Hint ${Math.min(S.hint, p.hints.length-1)+1}:</b> ${esc(h)}`;
+  S.hint++;
+}
+
+/* =========================================================
+   Warm-up riddles
+   ========================================================= */
+const tens = n => Math.floor(n/10), ones = n => n % 10;
+const CLUE = {
+  double: () => ({text:'My tens digit is double my ones digit.', test:n => tens(n) === 2*ones(n), why:n => `${tens(n)} ${tens(n) === 2*ones(n) ? 'is' : 'is not'} double ${ones(n)} (double ${ones(n)} is ${2*ones(n)})`}),
+  sum: k => ({text:`My digits add up to ${k}.`, test:n => tens(n)+ones(n) === k, why:n => `${tens(n)} + ${ones(n)} = ${tens(n)+ones(n)}`}),
+  more: k => ({text:`My tens digit is ${k} more than my ones digit.`, test:n => tens(n)-ones(n) === k, why:n => `${tens(n)} − ${ones(n)} = ${tens(n)-ones(n)}`}),
+  same: () => ({text:'My two digits are the same.', test:n => tens(n) === ones(n), why:n => tens(n) === ones(n) ? `${tens(n)} and ${ones(n)} match` : `${tens(n)} and ${ones(n)} are different`}),
+  between: (a,b) => ({text:`I am between ${a} and ${b}.`, test:n => n > a && n < b, why:n => n > a && n < b ? `${n} is between ${a} and ${b}` : `${n} is not between ${a} and ${b}`}),
+  odd: () => ({text:'I am odd.', test:n => n % 2 === 1, why:n => `my ones digit ${ones(n)} is ${ones(n)%2 ? 'odd' : 'even'}`}),
+  even: () => ({text:'I am even.', test:n => n % 2 === 0, why:n => `my ones digit ${ones(n)} is ${ones(n)%2 ? 'odd' : 'even'}`}),
+  onesIs: k => ({text:`My ones digit is ${k}.`, test:n => ones(n) === k, why:n => `my ones digit is ${ones(n)}`})
+};
+const RIDDLES = [
+  {name:'Riddle 1', clues:[CLUE.double(), CLUE.sum(9)]},
+  {name:'Riddle 2', clues:[CLUE.more(3), CLUE.sum(11)]},
+  {name:'Riddle 3', clues:[CLUE.same(), CLUE.between(40,60), CLUE.odd()]},
+  {name:'Write your own', build:true}
+];
+const BUILD = [
+  {k:'double', on:false},
+  {k:'sum', on:true, a:10, min:1, max:18},
+  {k:'more', on:false, a:2, min:0, max:9},
+  {k:'same', on:false},
+  {k:'onesIs', on:false, a:5, min:0, max:9},
+  {k:'odd', on:false}, {k:'even', on:false},
+  {k:'between', on:false, a:30, b:70}
+];
+const R = {i:0, on:[], pick:null};
+const NUMS = Array.from({length:90}, (_,i) => i+10);
+function buildClues(){ return BUILD.map(c => ({...(c.k === 'between' ? CLUE.between(c.a,c.b) : CLUE[c.k](c.a)), cfg:c})); }
+function curClues(){ const r = RIDDLES[R.i]; return r.build ? buildClues() : r.clues; }
+function activeIdx(){ const r = RIDDLES[R.i]; return r.build ? BUILD.map((c,i) => c.on ? i : -1).filter(i => i >= 0) : R.on; }
+
+function renderRiddles(){
+  $('#rpick').innerHTML = RIDDLES.map((r,i) => `<button class="pz" data-i="${i}" aria-pressed="${R.i === i}">${r.name}</button>`).join('');
+  $('#rpick').querySelectorAll('button').forEach(b => b.onclick = () => { R.i = +b.dataset.i; R.on = []; R.pick = null; renderRiddles(); });
+  const r = RIDDLES[R.i]; const clues = curClues(); const act = activeIdx();
+  $('#rlead').innerHTML = r.build ? 'Write a riddle for a partner. Turn clues on and change the numbers. <b>A good riddle has exactly one answer.</b>' : '<b>Who am I?</b> I am a two-digit number.';
+  $('#clues').innerHTML = clues.map((c,i) => {
+    const on = act.includes(i);
+    let res = '', rc = '';
+    if(R.pick != null && (!r.build || on)){ const y = c.test(R.pick); rc = y ? 'y' : 'n'; res = `${y ? '✓' : '✗'} ${c.why(R.pick)}`; }
+    let step = '';
+    const cfg = c.cfg;
+    if(cfg && cfg.a != null && cfg.k !== 'between') step = `<span class="step"><button data-s="${i}" data-d="-1" aria-label="Smaller">−</button><b>${cfg.a}</b><button data-s="${i}" data-d="1" aria-label="Bigger">+</button></span>`;
+    if(cfg && cfg.k === 'between') step = `<span class="step"><button data-s="${i}" data-d="-10" aria-label="Lower range">−</button><b>${cfg.a}–${cfg.b}</b><button data-s="${i}" data-d="10" aria-label="Higher range">+</button></span>`;
+    return `<div class="clue ${on ? 'on' : ''}"><button class="tog" data-c="${i}" aria-pressed="${on}" aria-label="${r.build ? 'Use this clue' : 'Filter by this clue'}">${on ? '✓' : (r.build ? '+' : i+1)}</button><span class="txt">${c.text}</span>${step || '<span></span>'}<span class="res ${rc}">${res}</span></div>`;
+  }).join('');
+  $('#clues').querySelectorAll('.tog').forEach(b => b.onclick = () => {
+    const i = +b.dataset.c;
+    if(r.build){ BUILD[i].on = !BUILD[i].on; if(BUILD[i].on && BUILD[i].k === 'odd') BUILD[6].on = false; if(BUILD[i].on && BUILD[i].k === 'even') BUILD[5].on = false; }
+    else R.on = R.on.includes(i) ? R.on.filter(x => x !== i) : [...R.on, i];
+    renderRiddles();
+  });
+  $('#clues').querySelectorAll('.step button').forEach(b => b.onclick = () => {
+    const c = BUILD[+b.dataset.s]; const d = +b.dataset.d;
+    if(c.k === 'between'){ const na = c.a + d, nb = c.b + d; if(na >= 0 && nb <= 100){ c.a = na; c.b = nb; } }
+    else c.a = Math.max(c.min, Math.min(c.max, c.a + d));
+    c.on = true; renderRiddles();
+  });
+  const fit = NUMS.filter(n => act.every(i => clues[i].test(n)));
+  const allFit = NUMS.filter(n => clues.every(c => c.test(n)));
+  const ch = $('#chart');
+  ch.innerHTML = NUMS.map(n => {
+    const cls = [];
+    if(act.length && !fit.includes(n)) cls.push('out');
+    if(!r.build && act.length === clues.length && fit.length === 1 && fit[0] === n) cls.push('win');
+    if(R.pick === n) cls.push('pick');
+    return `<button class="${cls.join(' ')}" data-n="${n}">${n}</button>`;
+  }).join('');
+  ch.querySelectorAll('button').forEach(b => b.onclick = () => { R.pick = +b.dataset.n; renderRiddles(); });
+  const rc = $('#rcount'), rn = $('#rnote');
+  rc.textContent = act.length ? `${fit.length} number${fit.length === 1 ? '' : 's'} still fit${fit.length === 1 ? 's' : ''}` : '90 two-digit numbers';
+  rn.className = 'note'; rn.innerHTML = '';
+  if(r.build){
+    if(!act.length) rn.innerHTML = 'Turn on a clue to start.';
+    else if(fit.length === 1){ rn.className = 'note good'; rn.innerHTML = `<b>Exactly one answer: ${fit[0]}.</b> That’s a fair riddle. Read your clues to a partner!`; }
+    else if(!fit.length){ rn.className = 'note warn'; rn.innerHTML = 'No number fits every clue. Change a clue so at least one number survives.'; }
+    else rn.innerHTML = `${fit.length} numbers still fit${fit.length <= 6 ? ` (${fit.join(', ')})` : ''}. Add or change a clue until only one is left.`;
+  } else if(act.length === clues.length && fit.length === 1){
+    rn.className = 'note good'; rn.innerHTML = `<b>Only ${fit[0]} survives every clue.</b> That’s how we know the riddle has exactly one answer.`;
+  } else if(R.pick != null){
+    const ok = clues.every(c => c.test(R.pick));
+    if(ok){ rn.className = 'note good'; rn.innerHTML = `<b>${R.pick} fits every clue!</b> Is it the only one? Turn on all the clue buttons to prove it.`; }
+    else { const bad = clues.findIndex(c => !c.test(R.pick)); rn.className = 'note warn'; rn.innerHTML = `${R.pick} breaks clue ${bad+1}: ${clues[bad].why(R.pick)}. Which number could fix that?`; }
+  } else if(act.length === clues.length && fit.length === 1){
+    rn.className = 'note good'; rn.innerHTML = `<b>Only ${fit[0]} survives every clue.</b> That’s how we know the riddle has exactly one answer.`;
+  }
+  void allFit;
+}
+
+/* =========================================================
+   Detective questions
+   ========================================================= */
+const C3 = PUZ.find(p => p.id === 'C3'), C4 = PUZ.find(p => p.id === 'C4'), M = PUZ.find(p => p.id === 'M');
+const ev = html => { $('#evidence').innerHTML = html; };
+const QS = {
+  1:{text:'<b>4□ + □3 = 81.</b> What could the ones digit be? Is there regrouping? How could you check?',
+     actions:[
+       {label:'Test every digit in the ones', run:() => {
+         let rows = '';
+         for(let d = 0; d <= 9; d++){ const s = d + 3; const hit = s % 10 === 1; rows += `<tr class="${hit ? 'hit' : 'miss'}"><td class="big">${d} + 3</td><td class="big">${s}</td><td>${s % 10}</td><td>${hit ? '<span class="tick">ends in 1 ✓</span>' : ''}</td></tr>`; }
+         ev(`<p class="mini">4<span class="x">□</span> + <span class="x">□</span>3 = 81</p><table class="ev"><tr><th>Try</th><th>Sum</th><th>Ones digit</th><th></th></tr>${rows}</table><p class="lead">Only <b>8</b> works, and 8 + 3 = 11. The sum went past 10, so 1 ten moves to the tens column. That’s regrouping.</p>`);
+       }},
+       {label:'Now the tens', run:() => {
+         ev(`<div class="path"><p class="mini">&nbsp;&nbsp;<span style="color:var(--carry);font-size:.55em">1</span><br>4<span class="x">8</span> + <span class="x">3</span>3 = 81</p>
+           <p><span class="tick">With the carry:</span> <span class="eq">4 + □ + 1 = 8</span> → □ = 3. Check: <span class="eq">48 + 33 = ${48+33}</span> ✓</p>
+           <p><span class="cross">Forgot the carry:</span> <span class="eq">4 + □ = 8</span> → □ = 4. Check: <span class="eq">48 + 43 = ${48+43}</span> ✗ not 81</p>
+           <p>Checking both cases is how detectives make sure.</p></div>`);
+       }}]},
+  2:{text:'How many solutions did we find for <b>AB + BA = 66</b>? Why is there more than one answer?',
+     actions:[
+       {label:'Test every A and B', run:() => {
+         let g = '<div class="h">A╲B</div>' + [1,2,3,4,5,6,7,8,9].map(b => `<div class="h">${b}</div>`).join('');
+         let hits = [];
+         for(let a = 1; a <= 9; a++){
+           g += `<div class="h">${a}</div>`;
+           for(let b = 1; b <= 9; b++){ const s = (10*a+b) + (10*b+a); const y = s === 66; if(y) hits.push(`${a}${b} + ${b}${a}`); g += `<div class="${y ? 'y' : ''}" title="${a}${b} + ${b}${a} = ${s}">${s}</div>`; }
+         }
+         ev(`<p class="lead">Every box shows AB + BA. Green boxes make 66.</p><div style="overflow-x:auto"><div class="ab">${g}</div></div><p class="lead"><b>${hits.length} solutions:</b> ${hits.map(h => h + ' = 66').join(', ')}.</p><p class="hint">33 + 33 only counts if your class lets A and B be the same digit. Without it, there are ${hits.length - 1}.</p>`);
+       }},
+       {label:'Why more than one?', run:() => {
+         ev(`<div class="path"><p class="mini">A<span class="x">B</span> + <span class="x">B</span>A = 66</p>
+           <p><b>Ones column:</b> B + A. &nbsp; <b>Tens column:</b> A + B.</p>
+           <p>Both columns add the <b>same two digits</b>! So the answer’s two digits match, like 66.</p>
+           <p>A + B just has to make 6. There are lots of ways to make 6: <span class="eq">1 + 5, 2 + 4, 3 + 3, 4 + 2, 5 + 1</span>.</p>
+           <p>Could A + B be 16? Then the ones would be 6 with a carry, and the tens would be 16 + 1 = 17. That makes ${10*17+6}, way too big.</p></div>`);
+       }}]},
+  3:{text:'Someone says A = 0 and B = 6 works for AB + BA = 66, because 06 + 60 = 66. Do you agree?',
+     actions:[
+       {label:'Show 06 + 60', run:() => {
+         ev(`<div class="path"><p class="mini"><span class="x">0</span>6 + 60 = ${6+60}</p>
+           <p>The math adds up, but <span class="eq">06</span> is really just <span class="eq">6</span>, a one-digit number.</p>
+           <p>AB is supposed to be a <b>two-digit</b> number, so A can’t be 0. The same goes for B in BA.</p>
+           <p>That’s why the list of solutions starts at 15 + 51, not 06 + 60.</p></div>`);
+       }}]},
+  4:{text:'Two pairs cracked <b>4□ + □3 = 81</b> in different ways. Compare their paths.',
+     actions:[
+       {label:'Path 1: ones first', run:() => {
+         ev(`<div class="path"><p class="eyebrow">Path 1 · column by column</p>
+           <p>Ones: □ + 3 ends in 1. Only <span class="eq">8 + 3 = 11</span> works. Carry 1.</p>
+           <p>Tens: <span class="eq">4 + □ + 1 = 8</span>, so □ = 3.</p>
+           <p class="mini">48 + 33 = ${48+33} <span class="tick">✓</span></p></div>`);
+       }},
+       {label:'Path 2: think in tens', run:() => {
+         const rows = [23,33,43,53].map(n => { const other = 81 - n; const ok = other >= 40 && other <= 49; return `<tr class="${ok ? 'hit' : 'miss'}"><td class="big">${n}</td><td class="big">81 − ${n} = ${other}</td><td>${ok ? '<span class="tick">in the 40s ✓</span>' : '<span class="cross">not 4□</span>'}</td></tr>`; }).join('');
+         ev(`<div class="path"><p class="eyebrow">Path 2 · work backwards</p>
+           <p>4□ is somewhere from 40 to 49. Try numbers for □3 and see what’s left.</p></div>
+           <table class="ev"><tr><th>□3</th><th>What’s left</th><th></th></tr>${rows}</table>
+           <p class="lead">Only 33 leaves a number in the 40s: 48. <b>Same answer, different path.</b></p>`);
+       }}]},
+  5:{text:'When does regrouping sneak into a puzzle? Look at the ones column of every puzzle we solved.',
+     actions:[
+       {label:'Compare the ones columns', run:() => {
+         const rows = PUZ.filter(p => !p.collect && p.op === '+').map(p => {
+           const s = solve(p, true)[0]; const a = numOf(p.T,s) % 10, b = numOf(p.B,s) % 10; const sum = a + b;
+           return `<tr class="${sum >= 10 ? 'hit' : ''}"><td class="big">${p.top} + ${p.bot} = ${p.res}</td><td class="big">${a} + ${b} = ${sum}</td><td>${sum >= 10 ? 'regroup! carry 1' : 'no regrouping'}</td></tr>`;
+         }).join('');
+         ev(`<table class="ev"><tr><th>Puzzle</th><th>Ones column</th><th></th></tr>${rows}</table><p class="lead">When the ones add up to <b>10 or more</b>, a ten moves over. Detectives check: “Is there a carry here or not?” before deciding.</p>`);
+       }}]},
+  6:{text:'★ <b>ON + ON = GO.</b> Each letter is one digit, and different letters are different digits. How many solutions are there?',
+     actions:[
+       {label:'Try it on the board', run:() => { selectTab('P'); openPuzzle('C4'); }},
+       {label:'Why must O be even?', run:() => {
+         ev(`<div class="path"><p class="mini">O<span class="x">N</span> + O<span class="x">N</span> = G<span class="x">O</span></p>
+           <p>The ones column is <span class="eq">N + N</span>, a double. Doubles always end in an even digit: ${[0,1,2,3,4,5,6,7,8,9].map(n => `${n}+${n}=${2*n}`).join(', ')}.</p>
+           <p>So <b>O is even</b>. It can’t be 0, because ON starts with O. That leaves O = 2, 4, 6 or 8.</p>
+           <p>Try each one. What does the tens column say about G?</p></div>`);
+       }},
+       {label:'Show every solution', run:() => {
+         const s = solve(C4, false);
+         const rows = s.map(v => `<tr class="hit"><td>O = ${v.O}, N = ${v.N}, G = ${v.G}</td><td class="big">${numOf(C4.T,v)} + ${numOf(C4.B,v)} = ${numOf(C4.R,v)}</td></tr>`).join('');
+         ev(`<table class="ev"><tr><th>Letters</th><th>Check</th></tr>${rows}</table><p class="lead"><b>${s.length} solutions.</b> O = 6 or 8 fails: 6□ + 6□ and 8□ + 8□ are over 100, so GO can’t be two digits.</p>`);
+       }}]}
+};
+let QI = 1;
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4,5].map(i => `<button data-q="${i}" aria-pressed="${QI === i}" aria-label="Question ${i}">${i}</button>`).join('') + `<button class="star" data-q="6" aria-pressed="${QI === 6}">★ Challenge</button>`;
+  $('#qnav').querySelectorAll('button').forEach(b => b.onclick = () => { QI = +b.dataset.q; ev('<p class="empty">Talk it over first. Then tap a button to put evidence here.</p>'); renderQ(); });
+  $('#qtext').innerHTML = QS[QI].text;
+  const box = $('#qactions'); box.innerHTML = '';
+  QS[QI].actions.forEach((a,i) => { const b = document.createElement('button'); b.className = i === 0 ? 'primary' : 'secondary'; b.textContent = a.label; b.onclick = a.run; box.appendChild(b); });
+}
+
+/* =========================================================
+   Tabs, reset, wiring
+   ========================================================= */
+function selectTab(t){
+  ['R','P','Q'].forEach(k => { $('#tab'+k).setAttribute('aria-selected', k === t); $('#view'+k).hidden = k !== t; });
+}
+function resetAll(){
+  S.solved = {}; S.found = {C3:[], C4:[]}; S.allowSame = true; S.showCarry = false; $('#carryToggle').checked = false;
+  R.i = 0; R.on = []; R.pick = null;
+  BUILD.forEach(c => { c.on = c.k === 'sum'; }); BUILD[1].a = 10; BUILD[2].a = 2; BUILD[4].a = 5; BUILD[7].a = 30; BUILD[7].b = 70;
+  QI = 1; ev('<p class="empty">Talk it over first. Then tap a button to put evidence here.</p>');
+  openPuzzle('M'); renderRiddles(); renderQ();
+}
+$('#tabR').onclick = () => selectTab('R');
+$('#tabP').onclick = () => selectTab('P');
+$('#tabQ').onclick = () => selectTab('Q');
+$('#checkBtn').onclick = check;
+$('#hintBtn').onclick = hint;
+$('#clearBtn').onclick = () => { S.vals = {}; S.marks = null; S.colhl = null; S.sel = P().vars[0]; $('#pnote').textContent = ''; $('#pnote').className = 'note'; renderBoard(); };
+$('#carryToggle').onchange = e => { S.showCarry = e.target.checked; renderBoard(); if(e.target.checked && P().op === '−'){ const n = $('#pnote'); n.className = 'note'; n.innerHTML = 'Carries show up on addition puzzles. For subtraction, look for regrouping in the ones column.'; } };
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+document.addEventListener('keydown', e => {
+  if($('#viewP').hidden) return;
+  if(/^[0-9]$/.test(e.key)){ enter(e.key); e.preventDefault(); }
+  else if(e.key === 'Backspace' || e.key === 'Delete'){ enter('x'); e.preventDefault(); }
+  else if(e.key === 'Enter' && e.target === document.body){ check(); }
+  else if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+    const vs = P().vars; if(!vs.length) return; const i = Math.max(0, vs.indexOf(S.sel));
+    S.sel = vs[(i + (e.key === 'ArrowRight' ? 1 : vs.length - 1)) % vs.length]; renderBoard();
+  }
+});
+
+renderPad(); resetAll();
+})();
+</script>
+
+</body></html>
