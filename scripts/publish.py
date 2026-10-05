@@ -15,6 +15,8 @@ Two subcommands, run from the repo root:
       updates apps.json, and rebuilds the home page index.html.
       ORDERS is a comma-separated list of orders that were flagged (e.g. they
       call window.claude) and must not be published.
+      --manual publishes FILE's pages even for done apps the plan skips
+      because their url isn't a claude.ai artifact (HTML uploaded by hand).
 """
 import argparse
 import datetime as dt
@@ -73,7 +75,12 @@ def plan(docs, manifest):
         if not url:
             out["skipped"].append({**item, "reason": "no url in tracker"})
         elif not is_artifact(url):
-            out["skipped"].append({**item, "reason": "not a claude.ai artifact (can't copy)"})
+            # Built elsewhere (e.g. Gemini): published only from HTML David supplies by hand.
+            pub = by_order.get(d["order"])
+            if not pub:
+                out["skipped"].append({**item, "reason": "not a claude.ai artifact (needs HTML uploaded by hand)"})
+            elif pub["sourceUrl"] != url:
+                out["skipped"].append({**item, "reason": "external link changed since its HTML was uploaded (old version still live)"})
         elif d["order"] not in by_order:
             out["new"].append(item)
         elif by_order[d["order"]]["sourceUrl"] != url:
@@ -228,6 +235,8 @@ def main():
     b.add_argument("--tracker", required=True)
     b.add_argument("--fetched")
     b.add_argument("--flagged", default="")
+    b.add_argument("--manual", action="store_true",
+                   help="publish the fetched files even for apps the plan skips (HTML uploaded by hand, e.g. Gemini builds)")
     b.add_argument("--today", default=dt.date.today().isoformat())
     a = ap.parse_args()
 
@@ -247,6 +256,8 @@ def main():
             fetched = {int(k): v for k, v in json.load(fh).items()}
     flagged = {int(x) for x in a.flagged.split(",") if x.strip()}
     pending = {i["order"] for k in ("new", "rebuilt") for i in plan(docs, manifest)[k]}
+    if a.manual:
+        pending |= {d["order"] for d in docs if d.get("status") == "done" and (d.get("url") or "").strip()}
 
     entries = {m["order"]: m for m in manifest}
     added, runtime = [], []

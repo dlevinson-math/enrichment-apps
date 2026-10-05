@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Enrichment: Counting Collections</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+            },
+            funYellow: '#fbbf24',
+            funGreen: '#22c55e',
+            funPurple: '#a855f7',
+            funPink: '#ec4899',
+            funOrange: '#f97316'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Fredoka"', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+    }
+
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', cursive;
+    }
+
+    /* Custom Scrollbar for sleek side panels */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.2);
+      border-radius: 4px;
+    }
+
+    /* Counter items style & interactions */
+    .counter-item {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+      cursor: pointer;
+      touch-action: none;
+    }
+    .counter-item:hover {
+      transform: scale(1.18) rotate(5deg);
+      z-index: 30;
+    }
+    .counter-item:active {
+      transform: scale(0.92);
+    }
+    .counter-counted {
+      filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.7));
+    }
+
+    /* Header collapse transition */
+    #main-header {
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, padding 0.3s ease;
+    }
+    #main-header.collapsed {
+      max-height: 0px !important;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+      border-bottom: none;
+    }
+
+    /* Strategy Race Track Runners */
+    .runner-avatar {
+      transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .progress-bar-fill {
+      transition: width 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Pulse animation for winner badges */
+    @keyframes winner-bounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.08); }
+    }
+    .winner-anim {
+      animation: winner-bounce 0.8s infinite ease-in-out;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-certificate, #print-certificate * {
+        visibility: visible;
+      }
+      #print-certificate {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 h-screen w-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- COMPACT LANDSCAPE HEADER NAVBAR (< 52px height) -->
+  <header id="main-header" class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm z-40 px-3 py-1.5 flex-shrink-0 max-h-14">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 h-full">
+      
+      <!-- Title & Lesson Info -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-500 to-indigo-500 flex items-center justify-center text-white shadow-md font-display font-bold text-sm">
+          1.1
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-slate-900 dark:text-white text-sm leading-tight flex items-center gap-1.5">
+            Counting Collections
+            <span class="text-[10px] bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded-full border border-amber-300 dark:border-amber-700 hidden sm:inline-block">
+              Unit 1 Week 1
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/80 text-xs font-semibold">
+        <button onclick="switchTab(1)" id="tab-btn-1" class="tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-brand-600 bg-white dark:bg-slate-800 shadow-sm font-bold">
+          <span>1. Free Canvas</span>
+        </button>
+        <button onclick="switchTab(2)" id="tab-btn-2" class="tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <span>2. 10-Frames</span>
+        </button>
+        <button onclick="switchTab(3)" id="tab-btn-3" class="tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <span>3. 5-Frames</span>
+        </button>
+        <button onclick="switchTab(4)" id="tab-btn-4" class="tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <span>4. Strategy Race</span>
+        </button>
+        <button onclick="switchTab(5)" id="tab-btn-5" class="tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-amber-600 dark:text-amber-400 hover:text-amber-700 font-bold">
+          <span>5. Challenge</span>
+        </button>
+      </nav>
+
+      <!-- Right Utility Bar -->
+      <div class="flex items-center gap-1.5">
+        
+        <!-- Star Tracker Score -->
+        <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 px-2 py-0.5 rounded-lg text-xs font-bold text-amber-800 dark:text-amber-300" title="Stars Earned">
+          <span>⭐</span>
+          <span id="star-count-display">0</span>
+        </div>
+
+        <!-- Start Over / Reset App Button -->
+        <button onclick="promptResetAll()" title="Reset App to Beginning" class="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs transition flex items-center gap-1 border border-rose-200 dark:border-rose-800">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span class="hidden md:inline">Start Over</span>
+        </button>
+
+        <!-- Audio Mute Toggle -->
+        <button onclick="toggleAudio()" id="sound-btn" title="Toggle Audio FX" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+          <svg id="sound-icon-on" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+          <svg id="sound-icon-off" class="w-4 h-4 hidden text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+        </button>
+
+        <!-- Progress Summary Modal Button -->
+        <button onclick="openCertificateModal()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1 shadow-sm">
+          <span>🏆 Certificate</span>
+        </button>
+
+        <!-- Header Minimize Collapse Toggle -->
+        <button onclick="toggleHeaderCollapse()" title="Minimize Header" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg id="collapse-chevron" class="w-4 h-4 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- COLLAPSED HEADER RE-EXPAND TRIGGER STRIP -->
+  <div id="mini-header-trigger" class="hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-3 py-0.5 flex items-center justify-between text-xs z-30">
+    <div class="flex items-center gap-2 font-display font-bold text-slate-700 dark:text-slate-200">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span>Math Enrichment 1.1</span>
+      <span class="text-slate-400">• Section <span id="mini-current-section">1</span></span>
+    </div>
+    <button onclick="toggleHeaderCollapse()" class="text-brand-600 dark:text-brand-400 font-bold hover:underline flex items-center gap-1 text-[11px]">
+      <span>Expand Navigation Header</span>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div>
+
+  <!-- MAIN LANDSCAPE WORKSPACE DASHBOARD (100vh flex fill) -->
+  <main class="flex-1 min-h-0 w-full max-w-7xl mx-auto p-2 sm:p-3 grid grid-cols-12 gap-2 sm:gap-3 overflow-hidden">
+
+    <!-- LEFT COLUMN: INTERACTIVE VISUAL WORKSPACE (Col 7/12 in Landscape) -->
+    <section class="col-span-12 lg:col-span-7 flex flex-col bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden relative">
+      
+      <!-- Workspace Control Bar -->
+      <div class="bg-slate-50 dark:bg-slate-800/90 px-3 py-1.5 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-1.5 flex-shrink-0">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+          <h2 id="workspace-title" class="font-display font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">
+            Interactive Field Canvas
+          </h2>
+        </div>
+
+        <!-- Quantity Adjuster & Theme Tools -->
+        <div class="flex items-center gap-1.5 flex-wrap" id="workspace-tools">
+          
+          <!-- Item Theme Selector -->
+          <select id="theme-item-select" onchange="changeItemTheme(this.value)" class="bg-white dark:bg-slate-700 text-[11px] font-bold rounded-lg px-2 py-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer">
+            <option value="stars">⭐ Stars</option>
+            <option value="apples">🍎 Apples</option>
+            <option value="coins">🪙 Coins</option>
+            <option value="bears">🧸 Teddy Bears</option>
+            <option value="counters">🔴 Counters</option>
+          </select>
+
+          <!-- Custom Quantity Stepper Input Box -->
+          <div class="flex items-center bg-slate-200/80 dark:bg-slate-700/80 p-0.5 rounded-xl border border-slate-300 dark:border-slate-600">
+            <button onclick="adjustQuantity(-10)" title="Subtract 10" class="px-1.5 py-0.5 text-slate-700 dark:text-slate-200 font-extrabold hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-[10px]">-10</button>
+            <button onclick="adjustQuantity(-1)" title="Subtract 1" class="px-1.5 py-0.5 text-slate-700 dark:text-slate-200 font-extrabold hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-[10px]">-1</button>
+            <input 
+              type="number" 
+              id="custom-qty-input" 
+              value="24" 
+              min="1" 
+              max="100" 
+              onchange="setCustomItemCount(this.value)" 
+              class="w-10 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded py-0.5 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-brand-500"
+            >
+            <button onclick="adjustQuantity(1)" title="Add 1" class="px-1.5 py-0.5 text-brand-700 dark:text-brand-300 font-extrabold hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-[10px]">+1</button>
+            <button onclick="adjustQuantity(10)" title="Add 10" class="px-1.5 py-0.5 text-brand-700 dark:text-brand-300 font-extrabold hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-[10px]">+10</button>
+          </div>
+
+          <!-- Canvas Layout Quick Buttons -->
+          <button onclick="scrambleCounters()" title="Scramble randomly" class="px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
+            🔀 Scramble
+          </button>
+          <button onclick="autoGridCounters()" title="Organize in neat grid" class="px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition">
+            ▦ Grid
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Canvas Container -->
+      <div id="interactive-field" class="flex-1 relative bg-gradient-to-br from-slate-50 via-indigo-50/20 to-sky-50/40 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900/90 overflow-hidden flex flex-col justify-center items-center p-3">
+        <!-- JS renders active workspace here -->
+      </div>
+
+      <!-- Workspace Footer Indicator -->
+      <div id="workspace-status-bar" class="bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 px-3 py-1 text-xs flex items-center justify-between text-slate-600 dark:text-slate-300 font-medium flex-shrink-0">
+        <span id="counter-progress-indicator" class="font-bold text-brand-600 dark:text-brand-400">
+          Items Counted: 0 / 24
+        </span>
+        <span id="workspace-hint" class="text-slate-400 text-[11px]">
+          💡 Click or tap items to count them!
+        </span>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: GUIDED LESSON CONTENT & CONTROLS (Col 5/12) -->
+    <section class="col-span-12 lg:col-span-5 flex flex-col bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+      
+      <!-- Activity Section Title Header -->
+      <div class="bg-gradient-to-r from-brand-600 to-indigo-600 text-white px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+        <div>
+          <span id="card-step-badge" class="text-[9px] font-extrabold uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded-full">
+            Section 1 of 5
+          </span>
+          <h3 id="card-heading" class="font-display font-bold text-base leading-tight mt-0.5">
+            Free Canvas & Counting
+          </h3>
+        </div>
+        <div id="section-completion-star" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-amber-300 font-bold text-base">
+          ☆
+        </div>
+      </div>
+
+      <!-- Scrollable Activity Body -->
+      <div id="activity-panel-body" class="flex-1 p-4 overflow-y-auto space-y-4">
+        <!-- JS injects step questions & controls -->
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700 p-3 flex items-center justify-between flex-shrink-0">
+        <button id="prev-step-btn" onclick="navigateStep(-1)" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold text-xs text-slate-700 dark:text-slate-200 transition disabled:opacity-40 disabled:cursor-not-allowed">
+          ← Previous
+        </button>
+        <button id="next-step-btn" onclick="navigateStep(1)" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-600 hover:to-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1">
+          <span>Next Section</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- START OVER / RESET CONFIRMATION MODAL -->
+  <div id="reset-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-sm w-full p-5 border border-slate-200 dark:border-slate-700 text-center space-y-3">
+      <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl mx-auto shadow-inner">
+        🔄
+      </div>
+      <h3 class="font-display font-bold text-slate-900 dark:text-white text-lg">Reset App to Start?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        This will reset all counted items, quantity inputs, race simulations, and stars earned back to Section 1.
+      </p>
+      <div class="flex items-center justify-center gap-2 pt-1">
+        <button onclick="closeResetModal()" class="flex-1 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 font-bold text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-300 transition">
+          Cancel
+        </button>
+        <button onclick="confirmResetAll()" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition">
+          Reset Everything
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RACE WINNER CELEBRATION MODAL -->
+  <div id="race-winner-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 text-center space-y-4">
+      <div class="w-16 h-16 rounded-3xl bg-amber-100 dark:bg-amber-900/50 text-amber-500 flex items-center justify-center text-3xl mx-auto winner-anim shadow-lg">
+        🏆
+      </div>
+      <div class="space-y-1">
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Race Simulation Complete</span>
+        <h3 id="race-winner-title" class="font-display font-extrabold text-slate-900 dark:text-white text-2xl">
+          Counting by 10s Wins!
+        </h3>
+      </div>
+      <p id="race-winner-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-amber-50 dark:bg-amber-950/40 p-3 rounded-2xl border border-amber-200 dark:border-amber-800">
+        Grouping by 10s required far fewer steps to reach the target count than counting one-by-one!
+      </p>
+      <button onclick="closeRaceWinnerModal()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md transition">
+        Awesome, Got It!
+      </button>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE & SUMMARY REPORT MODAL -->
+  <div id="certificate-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 flex flex-col">
+      <div class="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 rounded-t-3xl">
+        <h3 class="font-display font-bold text-slate-800 dark:text-white text-base flex items-center gap-2">
+          <span>🏆 Student Progress Report Certificate</span>
+        </h3>
+        <button onclick="closeCertificateModal()" class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div id="print-certificate" class="p-6 space-y-5">
+        <div class="text-center space-y-1 border-b border-dashed border-slate-300 dark:border-slate-700 pb-4">
+          <span class="inline-block px-3 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 font-bold text-[10px] uppercase tracking-wider">
+            Math Enrichment • Unit 1 Week 1
+          </span>
+          <h2 class="font-display font-extrabold text-2xl text-slate-900 dark:text-white">
+            Counting Collections Master
+          </h2>
+          <p class="text-slate-500 dark:text-slate-400 text-xs">
+            Certificate of Completion & Worksheet Summary
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Student Name:</label>
+            <input type="text" id="cert-student-name" value="Awesome Mathematician" class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Date:</label>
+            <input type="text" id="cert-date" class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-white focus:outline-none">
+          </div>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+          <h4 class="font-display font-bold text-slate-800 dark:text-slate-200">
+            Activity Completion Summary
+          </h4>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="text-slate-400 block font-semibold">Active Collection Size</span>
+              <span id="cert-collection-size" class="font-bold text-slate-800 dark:text-slate-100">24 Items</span>
+            </div>
+            <div class="p-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="text-slate-400 block font-semibold">10-Frame Grouping</span>
+              <span id="cert-tens-breakdown" class="font-bold text-slate-800 dark:text-slate-100">2 tens + 4 ones</span>
+            </div>
+            <div class="p-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="text-slate-400 block font-semibold">5-Frame Grouping</span>
+              <span id="cert-fives-breakdown" class="font-bold text-slate-800 dark:text-slate-100">4 fives + 4 ones</span>
+            </div>
+            <div class="p-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span class="text-slate-400 block font-semibold">Fastest Strategy</span>
+              <span id="cert-race-strategy" class="font-bold text-emerald-600 dark:text-emerald-400">Counting by 10s ⚡</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2 bg-slate-50 dark:bg-slate-800/80 rounded-b-3xl">
+        <button onclick="closeCertificateModal()" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 font-bold text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-300 transition">
+          Close
+        </button>
+        <button onclick="window.print()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Print Summary</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       SYNTHESIZED WEB AUDIO API SOUND EFFECTS
+       ========================================================================== */
+    class SoundFx {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playPop(freq = 440) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(freq * 1.5, this.ctx.currentTime + 0.08);
+
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.09);
+        } catch (e) {}
+      }
+
+      playTick(pitchShift = 1) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300 * pitchShift, this.ctx.currentTime);
+
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.07);
+        } catch (e) {}
+      }
+
+      playChime() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          setTimeout(() => {
+            try {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+              gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start();
+              osc.stop(this.ctx.currentTime + 0.28);
+            } catch (e) {}
+          }, i * 65);
+        });
+      }
+
+      playError() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.22);
+        } catch (e) {}
+      }
+    }
+
+    const soundFx = new SoundFx();
+
+    /* ==========================================================================
+       GLOBAL APP STATE
+       ========================================================================== */
+    const state = {
+      currentStep: 1,
+      itemTheme: 'stars',
+      itemCount: 24,
+      earnedStars: 0,
+      isHeaderCollapsed: false,
+
+      // Section 1 State
+      sec1: {
+        counters: [], // { id, x, y, countedOrder }
+        userAnswer: '',
+        validated: false
+      },
+
+      // Section 2 State
+      sec2: {
+        tensInput: '',
+        onesInput: '',
+        validated: false
+      },
+
+      // Section 3 State
+      sec3: {
+        fivesInput: '',
+        onesInput: '',
+        validated: false
+      },
+
+      // Section 4: Race Simulator State
+      race: {
+        target: 24,
+        running: false,
+        paused: false,
+        timerId: null,
+        tickMs: 400,
+        finishOrder: [],
+        lanes: [
+          { id: '1s', name: 'Count by 1s', icon: '🐢', step: 1, current: 0, stepsCount: 0, finished: false, rank: null, color: 'bg-rose-500' },
+          { id: '2s', name: 'Count by 2s', icon: '🐰', step: 2, current: 0, stepsCount: 0, finished: false, rank: null, color: 'bg-amber-500' },
+          { id: '5s', name: 'Count by 5s', icon: '🐆', step: 5, current: 0, stepsCount: 0, finished: false, rank: null, color: 'bg-purple-500' },
+          { id: '10s', name: 'Count by 10s', icon: '🚀', step: 10, current: 0, stepsCount: 0, finished: false, rank: null, color: 'bg-emerald-500' }
+        ],
+        validated: false
+      },
+
+      // Section 5 State
+      sec5: {
+        challengeTarget: 56,
+        userTens: '',
+        userOnes: '',
+        validated: false
+      }
+    };
+
+    const ITEM_ICONS = {
+      stars: { emoji: '⭐', name: 'Stars' },
+      apples: { emoji: '🍎', name: 'Apples' },
+      coins: { emoji: '🪙', name: 'Coins' },
+      bears: { emoji: '🧸', name: 'Teddy Bears' },
+      counters: { emoji: '🔴', name: 'Counters' }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('cert-date').value = new Date().toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+
+      generateCounters(state.itemCount);
+      renderCurrentStep();
+    });
+
+    function generateCounters(count) {
+      state.sec1.counters = [];
+      const field = document.getElementById('interactive-field');
+      const containerW = field ? field.clientWidth || 500 : 500;
+      const containerH = field ? field.clientHeight || 320 : 320;
+
+      for (let i = 0; i < count; i++) {
+        const x = Math.floor(Math.random() * (containerW - 80)) + 20;
+        const y = Math.floor(Math.random() * (containerH - 80)) + 20;
+        state.sec1.counters.push({
+          id: i + 1,
+          x: x,
+          y: y,
+          countedOrder: null
+        });
+      }
+    }
+
+    function setCustomItemCount(val) {
+      const num = Math.max(1, Math.min(100, parseInt(val, 10) || 1));
+      state.itemCount = num;
+      state.race.target = num;
+      soundFx.playChime();
+
+      const input = document.getElementById('custom-qty-input');
+      if (input) input.value = state.itemCount;
+
+      generateCounters(state.itemCount);
+      resetRaceState();
+      renderCurrentStep();
+    }
+
+    function adjustQuantity(delta) {
+      setCustomItemCount(state.itemCount + delta);
+    }
+
+    function changeItemTheme(themeKey) {
+      soundFx.playPop(500);
+      state.itemTheme = themeKey;
+      renderWorkspaceCanvas();
+    }
+
+    function switchTab(stepNum) {
+      soundFx.playPop(350);
+      state.currentStep = stepNum;
+
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        if (idx + 1 === stepNum) {
+          btn.className = 'tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-brand-600 bg-white dark:bg-slate-800 shadow-sm font-bold';
+        } else {
+          btn.className = 'tab-btn px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium';
+        }
+      });
+
+      document.getElementById('mini-current-section').textContent = stepNum;
+      renderCurrentStep();
+    }
+
+    function navigateStep(delta) {
+      const next = state.currentStep + delta;
+      if (next >= 1 && next <= 5) {
+        switchTab(next);
+      }
+    }
+
+    function toggleHeaderCollapse() {
+      const header = document.getElementById('main-header');
+      const miniTrigger = document.getElementById('mini-header-trigger');
+      const chevron = document.getElementById('collapse-chevron');
+
+      state.isHeaderCollapsed = !state.isHeaderCollapsed;
+
+      if (state.isHeaderCollapsed) {
+        header.classList.add('collapsed');
+        miniTrigger.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        header.classList.remove('collapsed');
+        miniTrigger.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function toggleAudio() {
+      soundFx.muted = !soundFx.muted;
+      document.getElementById('sound-icon-on').classList.toggle('hidden', soundFx.muted);
+      document.getElementById('sound-icon-off').classList.toggle('hidden', !soundFx.muted);
+    }
+
+    function addStar() {
+      state.earnedStars++;
+      document.getElementById('star-count-display').textContent = state.earnedStars;
+      confetti({ particleCount: 35, spread: 50, origin: { y: 0.7 } });
+    }
+
+    function renderCurrentStep() {
+      const step = state.currentStep;
+      document.getElementById('card-step-badge').textContent = `Section ${step} of 5`;
+      document.getElementById('prev-step-btn').disabled = (step === 1);
+
+      const nextBtn = document.getElementById('next-step-btn');
+      if (step === 5) {
+        nextBtn.innerHTML = `<span>Certificate</span> 🏆`;
+        nextBtn.onclick = () => openCertificateModal();
+      } else {
+        nextBtn.innerHTML = `<span>Next Section</span> <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+        nextBtn.onclick = () => navigateStep(1);
+      }
+
+      renderWorkspaceCanvas();
+      renderActivityPanel();
+    }
+
+    function renderWorkspaceCanvas() {
+      const field = document.getElementById('interactive-field');
+      const title = document.getElementById('workspace-title');
+      const statusBar = document.getElementById('counter-progress-indicator');
+      const icon = ITEM_ICONS[state.itemTheme].emoji;
+
+      if (state.currentStep === 1) {
+        title.textContent = `Scattered Field Canvas (${state.itemCount} Items)`;
+        const countedNum = state.sec1.counters.filter(c => c.countedOrder !== null).length;
+        statusBar.textContent = `Items Counted: ${countedNum} / ${state.itemCount}`;
+
+        field.innerHTML = `
+          <div class="absolute inset-0 p-3">
+            ${state.sec1.counters.map(c => `
+              <div 
+                onclick="tapCounter(${c.id})"
+                style="left: ${c.x}px; top: ${c.y}px;"
+                class="counter-item absolute w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-md border-2 ${c.countedOrder ? 'bg-emerald-100 dark:bg-emerald-950/80 border-emerald-500 scale-105 counter-counted' : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600'} transition-all duration-200 select-none"
+              >
+                <span>${icon}</span>
+                ${c.countedOrder ? `<span class="absolute -top-2 -right-2 bg-emerald-600 text-white font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md">${c.countedOrder}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      else if (state.currentStep === 2) {
+        const tens = Math.floor(state.itemCount / 10);
+        const ones = state.itemCount % 10;
+        title.textContent = `10-Frame Workstation (${tens} Tens + ${ones} Ones)`;
+        statusBar.textContent = `Organized ${state.itemCount} Items into Ten-Frames`;
+
+        field.innerHTML = `
+          <div class="w-full h-full flex flex-col justify-between items-center gap-2 p-1 overflow-y-auto">
+            ${tens > 0 ? `
+              <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
+                ${Array.from({length: tens}).map((_, i) => `
+                  <div onclick="speakSkipCount(${(i+1)*10})" class="bg-indigo-50 dark:bg-slate-800 border-2 border-indigo-400 dark:border-indigo-500 rounded-xl p-2 shadow-sm cursor-pointer hover:scale-[1.01] transition">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="font-display font-bold text-xs text-indigo-700 dark:text-indigo-300">10-Frame #${i+1}</span>
+                      <span class="text-[9px] bg-indigo-200 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 font-extrabold px-1.5 py-0.5 rounded-full">10 Items</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1 bg-white dark:bg-slate-700 p-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                      ${Array.from({length: 10}).map(() => `
+                        <div class="h-8 rounded bg-indigo-100 dark:bg-slate-600 border border-indigo-300 flex items-center justify-center text-base">
+                          ${icon}
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="p-3 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 rounded-xl text-xs font-bold">Add items above to form full 10-frames!</div>`}
+
+            <div class="w-full bg-amber-50/80 dark:bg-amber-950/30 border-2 border-dashed border-amber-400 rounded-xl p-2">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-display font-bold text-xs text-amber-800 dark:text-amber-300">Remaining Ones Zone</span>
+                <span class="text-[9px] bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 font-extrabold px-1.5 py-0.5 rounded-full">${ones} Ones</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 justify-center">
+                ${Array.from({length: ones}).map(() => `
+                  <div class="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 border border-amber-400 flex items-center justify-center text-base shadow-sm">
+                    ${icon}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 3) {
+        const fives = Math.floor(state.itemCount / 5);
+        const ones = state.itemCount % 5;
+        title.textContent = `5-Frame Workstation (${fives} Fives + ${ones} Ones)`;
+        statusBar.textContent = `Organized ${state.itemCount} Items into Five-Frames`;
+
+        field.innerHTML = `
+          <div class="w-full h-full flex flex-col justify-between items-center gap-2 p-1 overflow-y-auto">
+            ${fives > 0 ? `
+              <div class="w-full grid grid-cols-2 md:grid-cols-3 gap-2">
+                ${Array.from({length: fives}).map((_, i) => `
+                  <div onclick="speakSkipCount(${(i+1)*5})" class="bg-purple-50 dark:bg-slate-800 border-2 border-purple-400 dark:border-purple-500 rounded-xl p-2 shadow-sm cursor-pointer hover:scale-[1.01] transition">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="font-display font-bold text-[11px] text-purple-700 dark:text-purple-300">5-Frame #${i+1}</span>
+                      <span class="text-[9px] bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 font-extrabold px-1.5 py-0.5 rounded-full">5</span>
+                    </div>
+                    <div class="flex justify-between gap-1 bg-white dark:bg-slate-700 p-1 rounded-lg border border-purple-200">
+                      ${Array.from({length: 5}).map(() => `
+                        <div class="w-6 h-6 rounded bg-purple-100 dark:bg-slate-600 flex items-center justify-center text-xs">
+                          ${icon}
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `<div class="p-3 bg-purple-50 text-purple-800 rounded-xl text-xs font-bold">Add items to form 5-frames!</div>`}
+
+            <div class="w-full bg-amber-50/80 dark:bg-amber-950/30 border-2 border-dashed border-amber-400 rounded-xl p-2">
+              <span class="font-display font-bold text-xs text-amber-800 dark:text-amber-300 block mb-1">Leftover Ones (${ones})</span>
+              <div class="flex flex-wrap gap-1.5 justify-center">
+                ${Array.from({length: ones}).map(() => `
+                  <div class="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 border border-amber-400 flex items-center justify-center text-sm shadow-sm">
+                    ${icon}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 4) {
+        title.textContent = `Strategy Speed Test (Target: ${state.race.target} Count)`;
+        statusBar.textContent = state.race.running ? `Race in progress...` : `Press 'Start Race' to test counting speeds!`;
+
+        field.innerHTML = `
+          <div class="w-full h-full flex flex-col justify-between p-2 space-y-2 overflow-y-auto">
+            
+            <!-- Race Track Lanes -->
+            <div class="space-y-2 flex-1">
+              ${state.race.lanes.map(lane => {
+                const pct = Math.min(100, Math.round((lane.current / state.race.target) * 100));
+                return `
+                  <div class="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-1">
+                    <div class="flex items-center justify-between text-xs font-bold">
+                      <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-100">
+                        <span class="text-base">${lane.icon}</span>
+                        <span>${lane.name}</span>
+                      </span>
+                      <span class="text-[11px] font-extrabold text-slate-600 dark:text-slate-300">
+                        Current: <span class="text-brand-600 dark:text-brand-400 font-black">${lane.current}</span> / ${state.race.target}
+                        <span class="text-slate-400 font-semibold ml-1">(${lane.stepsCount} steps)</span>
+                      </span>
+                    </div>
+
+                    <!-- Progress Bar Track -->
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-5 rounded-full overflow-hidden p-0.5 relative border border-slate-200 dark:border-slate-600 flex items-center">
+                      <div class="progress-bar-fill ${lane.color} h-full rounded-full" style="width: ${pct}%"></div>
+                      
+                      <div class="runner-avatar absolute top-0 bottom-0 flex items-center text-sm transition-all duration-300 z-10" style="left: calc(${pct}% - 12px)">
+                        ${lane.icon}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Race Controls -->
+            <div class="flex items-center justify-center gap-2 pt-1 border-t border-slate-200 dark:border-slate-700 flex-shrink-0">
+              <button onclick="startRaceSimulation()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-display font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                <span>🏎️ Start Race!</span>
+              </button>
+              <button onclick="pauseRaceSimulation()" class="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-bold text-xs transition">
+                ⏸️ Pause
+              </button>
+              <button onclick="resetRaceState()" class="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-bold text-xs transition">
+                🔄 Reset
+              </button>
+            </div>
+
+          </div>
+        `;
+      }
+      else if (state.currentStep === 5) {
+        title.textContent = `Math Challenge Mode (${state.sec5.challengeTarget} Items)`;
+        statusBar.textContent = `Break down ${state.sec5.challengeTarget} into Tens and Ones!`;
+
+        const tens = Math.floor(state.sec5.challengeTarget / 10);
+        const ones = state.sec5.challengeTarget % 10;
+
+        field.innerHTML = `
+          <div class="w-full h-full flex flex-col justify-between items-center gap-2 p-2 overflow-y-auto">
+            <div class="text-center bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-300 dark:border-amber-700 w-full">
+              <span class="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase">Challenge Collection Target</span>
+              <div class="font-display font-black text-2xl text-amber-600 dark:text-amber-400">
+                ${state.sec5.challengeTarget} ${icon}
+              </div>
+            </div>
+
+            <div class="w-full space-y-1">
+              <span class="font-display font-bold text-xs text-indigo-700 dark:text-indigo-300 block">
+                Groups of 10 (${tens} Tens)
+              </span>
+              <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                ${Array.from({length: tens}).map((_, i) => `
+                  <div class="bg-indigo-100 dark:bg-slate-700 border border-indigo-400 rounded-lg p-1 text-center shadow-sm">
+                    <span class="text-[9px] font-extrabold text-indigo-800 dark:text-indigo-200 block mb-0.5">Ten #${i+1}</span>
+                    <div class="grid grid-cols-2 gap-0.5">
+                      ${Array.from({length: 10}).map(() => `<span class="text-[8px]">${icon}</span>`).join('')}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="w-full bg-amber-50/80 dark:bg-amber-950/30 border-2 border-dashed border-amber-400 rounded-xl p-2">
+              <span class="font-display font-bold text-xs text-amber-800 dark:text-amber-300 block mb-1">Leftover Ones (${ones})</span>
+              <div class="flex flex-wrap gap-1 justify-center">
+                ${Array.from({length: ones}).map(() => `
+                  <div class="w-7 h-7 rounded-md bg-white dark:bg-slate-700 border border-amber-400 flex items-center justify-center text-xs shadow-sm">
+                    ${icon}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function tapCounter(id) {
+      soundFx.playPop(480 + (id * 12));
+      const counter = state.sec1.counters.find(c => c.id === id);
+      if (!counter) return;
+
+      if (counter.countedOrder !== null) {
+        counter.countedOrder = null;
+      } else {
+        const maxVal = Math.max(0, ...state.sec1.counters.map(c => c.countedOrder || 0));
+        counter.countedOrder = maxVal + 1;
+      }
+
+      renderWorkspaceCanvas();
+    }
+
+    function scrambleCounters() {
+      soundFx.playPop(300);
+      generateCounters(state.itemCount);
+      renderWorkspaceCanvas();
+    }
+
+    function autoGridCounters() {
+      soundFx.playPop(600);
+      const cols = 6;
+      state.sec1.counters.forEach((c, idx) => {
+        const row = Math.floor(idx / cols);
+        const col = idx % cols;
+        c.x = 25 + (col * 60);
+        c.y = 20 + (row * 60);
+      });
+      renderWorkspaceCanvas();
+    }
+
+    function speakSkipCount(num) {
+      soundFx.playChime();
+    }
+
+    /* ==========================================================================
+       FIXED STRATEGY RACE SIMULATOR LOGIC
+       ========================================================================== */
+    function startRaceSimulation() {
+      soundFx.playChime();
+
+      if (state.race.running && state.race.paused) {
+        state.race.paused = false;
+        runRaceInterval();
+        return;
+      }
+
+      resetRaceState();
+      state.race.running = true;
+      state.race.paused = false;
+      runRaceInterval();
+    }
+
+    function pauseRaceSimulation() {
+      soundFx.playPop(300);
+      state.race.paused = true;
+      if (state.race.timerId) {
+        clearInterval(state.race.timerId);
+        state.race.timerId = null;
+      }
+    }
+
+    function resetRaceState() {
+      if (state.race.timerId) {
+        clearInterval(state.race.timerId);
+        state.race.timerId = null;
+      }
+
+      state.race.running = false;
+      state.race.paused = false;
+      state.race.finishOrder = [];
+      state.race.lanes.forEach(l => {
+        l.current = 0;
+        l.stepsCount = 0;
+        l.finished = false;
+        l.rank = null;
+      });
+
+      renderWorkspaceCanvas();
+    }
+
+    function runRaceInterval() {
+      if (state.race.timerId) clearInterval(state.race.timerId);
+
+      state.race.timerId = setInterval(() => {
+        if (state.race.paused) return;
+
+        let allFinished = true;
+
+        state.race.lanes.forEach(lane => {
+          if (!lane.finished) {
+            allFinished = false;
+            lane.current = Math.min(state.race.target, lane.current + lane.step);
+            lane.stepsCount++;
+            
+            // Audio sound pitch based on skip size
+            soundFx.playTick(lane.step / 2);
+
+            if (lane.current >= state.race.target) {
+              lane.finished = true;
+              state.race.finishOrder.push(lane);
+              lane.rank = state.race.finishOrder.length;
+            }
+          }
+        });
+
+        renderWorkspaceCanvas();
+
+        if (allFinished) {
+          clearInterval(state.race.timerId);
+          state.race.timerId = null;
+          state.race.running = false;
+          showRaceWinnerAnnouncement();
+        }
+      }, state.race.tickMs);
+    }
+
+    function showRaceWinnerAnnouncement() {
+      soundFx.playChime();
+      confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+
+      const winner = state.race.finishOrder[0];
+      const tensSteps = state.race.lanes.find(l => l.id === '10s').stepsCount;
+      const onesSteps = state.race.lanes.find(l => l.id === '1s').stepsCount;
+
+      document.getElementById('race-winner-title').textContent = `${winner ? winner.name : 'Counting by 10s'} Wins!`;
+      document.getElementById('race-winner-explanation').textContent = 
+        `Counting by 10s finished in only ${tensSteps} steps, while counting by 1s took ${onesSteps} steps! Grouping larger numbers saves time and reduces counting errors!`;
+
+      document.getElementById('race-winner-modal').classList.remove('hidden');
+      if (!state.race.validated) {
+        state.race.validated = true;
+        addStar();
+      }
+    }
+
+    function closeRaceWinnerModal() {
+      soundFx.playPop(250);
+      document.getElementById('race-winner-modal').classList.add('hidden');
+    }
+
+    function renderActivityPanel() {
+      const body = document.getElementById('activity-panel-body');
+      const heading = document.getElementById('card-heading');
+      const star = document.getElementById('section-completion-star');
+
+      if (state.currentStep === 1) {
+        heading.textContent = "Section 1: Free Canvas";
+        star.textContent = state.sec1.validated ? "★" : "☆";
+
+        body.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Tap items on the canvas to mark them with a numbered badge. How many items are in this collection?
+            </p>
+
+            <div class="bg-brand-50 dark:bg-brand-950/40 p-3 rounded-2xl border border-brand-200 dark:border-brand-800 space-y-2">
+              <label class="block text-xs font-bold text-brand-900 dark:text-brand-200 uppercase">
+                Collection Total Count:
+              </label>
+              <div class="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  value="${state.sec1.userAnswer}" 
+                  oninput="state.sec1.userAnswer = this.value"
+                  placeholder="Enter total..." 
+                  class="flex-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-sm font-bold focus:outline-none"
+                >
+                <button onclick="validateSec1()" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm transition">
+                  Check
+                </button>
+              </div>
+            </div>
+
+            <div id="sec1-feedback" class="text-xs font-bold"></div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 2) {
+        const expectedTens = Math.floor(state.itemCount / 10);
+        const expectedOnes = state.itemCount % 10;
+
+        heading.textContent = "Section 2: 10-Frame Workstation";
+        star.textContent = state.sec2.validated ? "★" : "☆";
+
+        body.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              We organized <strong>${state.itemCount} items</strong> into 10-Frames. Fill in the breakdown below:
+            </p>
+
+            <div class="space-y-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-0.5">1. How many full 10-Frames?</label>
+                <input type="number" value="${state.sec2.tensInput}" oninput="state.sec2.tensInput = this.value" placeholder="e.g. ${expectedTens}" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold">
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-0.5">2. How many leftover ones?</label>
+                <input type="number" value="${state.sec2.onesInput}" oninput="state.sec2.onesInput = this.value" placeholder="e.g. ${expectedOnes}" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold">
+              </div>
+
+              <button onclick="validateSec2()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition">
+                Verify 10-Frames
+              </button>
+            </div>
+
+            <div id="sec2-feedback" class="text-xs font-bold"></div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 3) {
+        const expectedFives = Math.floor(state.itemCount / 5);
+        const expectedOnes = state.itemCount % 5;
+
+        heading.textContent = "Section 3: 5-Frame Workstation";
+        star.textContent = state.sec3.validated ? "★" : "☆";
+
+        body.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Grouping the same <strong>${state.itemCount} items</strong> into 5-Frames:
+            </p>
+
+            <div class="space-y-2 bg-purple-50/50 dark:bg-slate-900/50 p-3 rounded-2xl border border-purple-200 dark:border-purple-800">
+              <div>
+                <label class="block text-[11px] font-bold text-purple-900 dark:text-purple-300 mb-0.5">1. How many 5-Frames?</label>
+                <input type="number" value="${state.sec3.fivesInput}" oninput="state.sec3.fivesInput = this.value" placeholder="e.g. ${expectedFives}" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold">
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-purple-900 dark:text-purple-300 mb-0.5">2. Leftover ones?</label>
+                <input type="number" value="${state.sec3.onesInput}" oninput="state.sec3.onesInput = this.value" placeholder="e.g. ${expectedOnes}" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold">
+              </div>
+
+              <button onclick="validateSec3()" class="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition">
+                Verify 5-Frames
+              </button>
+            </div>
+
+            <div id="sec3-feedback" class="text-xs font-bold"></div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 4) {
+        heading.textContent = "Section 4: Strategy Race Simulator";
+        star.textContent = state.sec4.validated ? "★" : "☆";
+
+        body.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Run the strategy simulator on the left to see why skip counting by 10s is faster!
+            </p>
+
+            <div class="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-300 dark:border-amber-700 space-y-2 text-xs">
+              <span class="font-bold text-amber-900 dark:text-amber-200 block">Race Strategy Insight:</span>
+              <p class="text-[11px] text-amber-800 dark:text-amber-300">
+                Counting 30 items by 1s requires 30 counting steps. Counting by 10s takes only 3 steps!
+              </p>
+              <button onclick="startRaceSimulation()" class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-sm transition">
+                🚀 Start Race Animation
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      else if (state.currentStep === 5) {
+        heading.textContent = "Section 5: Challenge Mode";
+        star.textContent = state.sec5.validated ? "★" : "☆";
+
+        body.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Test your skills on big collections over 50 items!
+            </p>
+
+            <div class="space-y-2 bg-amber-50/60 dark:bg-amber-950/30 p-3 rounded-2xl border border-amber-200 dark:border-amber-800">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300">Choose Challenge Target:</label>
+              <div class="grid grid-cols-4 gap-1">
+                ${[36, 56, 72, 85].map(num => `
+                  <button onclick="setChallengeTarget(${num})" class="py-1 rounded-lg font-bold text-xs transition ${state.sec5.challengeTarget === num ? 'bg-amber-500 text-white shadow-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border'}">
+                    ${num}
+                  </button>
+                `).join('')}
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 mb-0.5">Tens (Groups of 10):</label>
+                  <input type="number" id="challenge-tens" value="${state.sec5.userTens}" oninput="state.sec5.userTens = this.value" placeholder="Tens" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-bold">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 mb-0.5">Leftover Ones:</label>
+                  <input type="number" id="challenge-ones" value="${state.sec5.userOnes}" oninput="state.sec5.userOnes = this.value" placeholder="Ones" class="w-full bg-white dark:bg-slate-700 border border-slate-300 rounded-xl px-2.5 py-1 text-xs font-bold">
+                </div>
+              </div>
+
+              <button onclick="validateSec5()" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition">
+                Verify Challenge
+              </button>
+            </div>
+
+            <div id="sec5-feedback" class="text-xs font-bold"></div>
+          </div>
+        `;
+      }
+    }
+
+    function validateSec1() {
+      const val = parseInt(state.sec1.userAnswer, 10);
+      const feedback = document.getElementById('sec1-feedback');
+
+      if (val === state.itemCount) {
+        soundFx.playChime();
+        if (!state.sec1.validated) {
+          state.sec1.validated = true;
+          addStar();
+        }
+        feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200";
+        feedback.textContent = `🎉 Correct! There are ${state.itemCount} objects in this collection!`;
+      } else {
+        soundFx.playError();
+        feedback.className = "text-xs font-bold text-rose-600 dark:text-rose-400 p-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200";
+        feedback.textContent = `❌ Try again! Expected count: ${state.itemCount}.`;
+      }
+      renderCurrentStep();
+    }
+
+    function validateSec2() {
+      const tens = parseInt(state.sec2.tensInput, 10);
+      const ones = parseInt(state.sec2.onesInput, 10);
+      const expectedTens = Math.floor(state.itemCount / 10);
+      const expectedOnes = state.itemCount % 10;
+      const feedback = document.getElementById('sec2-feedback');
+
+      if (tens === expectedTens && ones === expectedOnes) {
+        soundFx.playChime();
+        if (!state.sec2.validated) {
+          state.sec2.validated = true;
+          addStar();
+        }
+        feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200";
+        feedback.textContent = `🎉 Spot on! ${expectedTens} tens + ${expectedOnes} ones = ${state.itemCount}!`;
+      } else {
+        soundFx.playError();
+        feedback.className = "text-xs font-bold text-rose-600 dark:text-rose-400 p-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200";
+        feedback.textContent = `❌ Check the 10-frames! Expected: ${expectedTens} tens and ${expectedOnes} ones.`;
+      }
+      renderCurrentStep();
+    }
+
+    function validateSec3() {
+      const fives = parseInt(state.sec3.fivesInput, 10);
+      const ones = parseInt(state.sec3.onesInput, 10);
+      const expectedFives = Math.floor(state.itemCount / 5);
+      const expectedOnes = state.itemCount % 5;
+      const feedback = document.getElementById('sec3-feedback');
+
+      if (fives === expectedFives && ones === expectedOnes) {
+        soundFx.playChime();
+        if (!state.sec3.validated) {
+          state.sec3.validated = true;
+          addStar();
+        }
+        feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200";
+        feedback.textContent = `🎉 Awesome! ${expectedFives} fives + ${expectedOnes} ones = ${state.itemCount}!`;
+      } else {
+        soundFx.playError();
+        feedback.className = "text-xs font-bold text-rose-600 dark:text-rose-400 p-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200";
+        feedback.textContent = `❌ Expected: ${expectedFives} fives and ${expectedOnes} ones.`;
+      }
+      renderCurrentStep();
+    }
+
+    function setChallengeTarget(num) {
+      soundFx.playPop(400);
+      state.sec5.challengeTarget = num;
+      state.sec5.userTens = '';
+      state.sec5.userOnes = '';
+      state.sec5.validated = false;
+      renderCurrentStep();
+    }
+
+    function validateSec5() {
+      const tens = parseInt(state.sec5.userTens, 10);
+      const ones = parseInt(state.sec5.userOnes, 10);
+      const expectedTens = Math.floor(state.sec5.challengeTarget / 10);
+      const expectedOnes = state.sec5.challengeTarget % 10;
+      const feedback = document.getElementById('sec5-feedback');
+
+      if (tens === expectedTens && ones === expectedOnes) {
+        soundFx.playChime();
+        if (!state.sec5.validated) {
+          state.sec5.validated = true;
+          addStar();
+        }
+        feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200";
+        feedback.textContent = `🎉 Mastered! ${expectedTens} tens + ${expectedOnes} ones = ${state.sec5.challengeTarget}!`;
+      } else {
+        soundFx.playError();
+        feedback.className = "text-xs font-bold text-rose-600 dark:text-rose-400 p-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200";
+        feedback.textContent = `❌ Expected: ${expectedTens} tens and ${expectedOnes} ones.`;
+      }
+      renderCurrentStep();
+    }
+
+    function promptResetAll() {
+      soundFx.playPop(300);
+      document.getElementById('reset-modal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      soundFx.playPop(250);
+      document.getElementById('reset-modal').classList.add('hidden');
+    }
+
+    function confirmResetAll() {
+      soundFx.playChime();
+      closeResetModal();
+
+      state.currentStep = 1;
+      state.itemCount = 24;
+      state.earnedStars = 0;
+      document.getElementById('star-count-display').textContent = '0';
+
+      state.sec1 = { counters: [], userAnswer: '', validated: false };
+      state.sec2 = { tensInput: '', onesInput: '', validated: false };
+      state.sec3 = { fivesInput: '', onesInput: '', validated: false };
+      state.sec5 = { challengeTarget: 56, userTens: '', userOnes: '', validated: false };
+
+      resetRaceState();
+      generateCounters(24);
+      switchTab(1);
+    }
+
+    function openCertificateModal() {
+      soundFx.playChime();
+      document.getElementById('cert-collection-size').textContent = `${state.itemCount} Items`;
+      document.getElementById('cert-tens-breakdown').textContent = `${Math.floor(state.itemCount/10)} tens + ${state.itemCount%10} ones`;
+      document.getElementById('cert-fives-breakdown').textContent = `${Math.floor(state.itemCount/5)} fives + ${state.itemCount%5} ones`;
+      document.getElementById('certificate-modal').classList.remove('hidden');
+    }
+
+    function closeCertificateModal() {
+      soundFx.playPop(250);
+      document.getElementById('certificate-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

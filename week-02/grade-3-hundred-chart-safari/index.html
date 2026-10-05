@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-stone-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hundred-Chart Safari | Grade 3 Math Enrichment</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Fredoka & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-heading {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #047857;
+        }
+
+        /* Grid Cell Animations & Styling */
+        .grid-cell {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .grid-cell:hover {
+            transform: scale(1.08);
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .grid-cell:active {
+            transform: scale(0.95);
+        }
+
+        /* Badge Glows */
+        .badge-glow {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+        }
+
+        /* Pulse Animation for active hop */
+        @keyframes hop-pulse {
+            0%, 100% { transform: scale(1); border-color: #f59e0b; }
+            50% { transform: scale(1.15); border-color: #d97706; background-color: #fef3c7; }
+        }
+        .animate-hop {
+            animation: hop-pulse 0.6s ease-in-out infinite;
+        }
+
+        /* Wanted Poster Texture */
+        .wanted-bg {
+            background-color: #fef3c7;
+            background-image: radial-gradient(#d97706 0.75px, transparent 0.75px), radial-gradient(#d97706 0.75px, #fef3c7 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+
+        /* Certificate Print CSS */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printable-certificate, #printable-certificate * {
+                visibility: visible;
+            }
+            #printable-certificate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="h-full text-stone-800 antialiased flex flex-col bg-amber-50/30">
+
+    <!-- Top Header -->
+    <header class="bg-emerald-900 text-white shadow-lg border-b-4 border-amber-500 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 bg-amber-500 text-emerald-950 rounded-2xl flex items-center justify-center font-heading text-2xl shadow-md transform -rotate-3">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-heading text-2xl sm:text-3xl font-bold tracking-wide text-amber-300 flex items-center gap-2">
+                            Hundred-Chart Safari
+                            <span class="text-xs font-sans font-semibold bg-emerald-700 text-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block border border-emerald-500">Grade 3 Math</span>
+                        </h1>
+                        <p class="text-xs text-emerald-200 hidden sm:block">Explore Skip-Counting, Factors, Multiples & Visual Patterns!</p>
+                    </div>
+                </div>
+
+                <!-- Action Controls (Sound, Badges Summary, Reset) -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- Audio Toggle -->
+                    <button id="sound-toggle-btn" onclick="toggleAudio()" class="bg-emerald-800 hover:bg-emerald-700 text-amber-300 px-3 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-emerald-600 transition shadow-sm">
+                        <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                        <span class="hidden md:inline">Audio</span>
+                    </button>
+
+                    <!-- Safari Badges Modal Button -->
+                    <button onclick="openBadgesModal()" class="bg-amber-500 hover:bg-amber-400 text-emerald-950 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-md transition transform active:scale-95">
+                        <i class="fa-solid fa-award text-base"></i>
+                        <span class="hidden sm:inline">Badges</span>
+                        <span id="badge-count-pill" class="bg-emerald-950 text-amber-300 text-xs px-2 py-0.5 rounded-full font-extrabold">0/5</span>
+                    </button>
+
+                    <!-- Global Reset -->
+                    <button onclick="resetAllState()" title="Reset All Explorer Settings" class="bg-emerald-800 hover:bg-rose-700 text-emerald-200 hover:text-white px-3 py-2 rounded-xl text-sm transition border border-emerald-600">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-emerald-800 border-b border-emerald-700 shadow-inner">
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 no-scrollbar" id="nav-tabs">
+                <button onclick="switchTab('explorer')" id="tab-explorer" class="tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition bg-amber-400 text-emerald-950 shadow-md">
+                    <i class="fa-solid fa-border-all"></i> Chart Explorer
+                </button>
+                <button onclick="switchTab('module1')" id="tab-module1" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-100 hover:bg-emerald-700 flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-footprints"></i> Mod 1: Strange Counting
+                </button>
+                <button onclick="switchTab('module2')" id="tab-module2" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-100 hover:bg-emerald-700 flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i> Mod 2: Pattern Reporter
+                </button>
+                <button onclick="switchTab('module3')" id="tab-module3" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-100 hover:bg-emerald-700 flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-scroll"></i> Mod 3: WANTED Poster
+                </button>
+                <button onclick="switchTab('module4')" id="tab-module4" class="tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-100 hover:bg-emerald-700 flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="fa-solid fa-chess-knight"></i> Mod 4: 7s Knight's Challenge
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+
+        <!-- ================= TAB 1: CHART EXPLORER ================= -->
+        <section id="view-explorer" class="tab-view space-y-6">
+            <!-- Controls Banner -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-amber-200/80 space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-heading text-xl font-bold text-emerald-900 flex items-center gap-2">
+                            <i class="fa-solid fa-map text-amber-500"></i> Safari Grid Explorer
+                        </h2>
+                        <p class="text-xs sm:text-sm text-stone-600">Select numbers to highlight multiples, overlay factors, or toggle up to the 200 Chart.</p>
+                    </div>
+
+                    <!-- Chart Size Switcher & Quick Heatmap Toggle -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="bg-stone-100 p-1 rounded-xl border border-stone-200 flex items-center">
+                            <button id="grid-100-btn" onclick="setGridRange(100)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-700 text-white shadow-sm">1 - 100</button>
+                            <button id="grid-200-btn" onclick="setGridRange(200)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-900">1 - 200</button>
+                        </div>
+
+                        <button onclick="toggleHeatmapMode()" id="heatmap-toggle-btn" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-amber-600"></i> Heatmap Mode: <span id="heatmap-status-text">OFF</span>
+                        </button>
+
+                        <button onclick="clearSelectedMultipliers()" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-200 border border-stone-300 transition">
+                            <i class="fa-solid fa-eraser"></i> Clear Highlights
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Multiplier Color Chips Selection -->
+                <div class="pt-3 border-t border-stone-100">
+                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Toggle Multiplier Layers (2s through 10s):</label>
+                    <div class="flex flex-wrap gap-2" id="multiplier-chips-container">
+                        <!-- Rendered dynamically in JS -->
+                    </div>
+                </div>
+
+                <!-- Custom Skip Count Input Bar -->
+                <div class="pt-3 border-t border-stone-100 flex flex-wrap items-center gap-3">
+                    <span class="text-xs font-bold text-stone-700 uppercase tracking-wider">Custom Pattern:</span>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span>Start at:</span>
+                        <input type="number" id="custom-start-input" value="7" min="1" max="200" class="w-16 px-2 py-1 border border-stone-300 rounded-lg text-center font-bold">
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span>Step by:</span>
+                        <input type="number" id="custom-step-input" value="10" min="1" max="50" class="w-16 px-2 py-1 border border-stone-300 rounded-lg text-center font-bold">
+                    </div>
+                    <button onclick="applyCustomPattern()" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition shadow-sm">
+                        Apply Skip Pattern
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid Container + Side Inspector Panel Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- The Main Interactive 100/200 Grid -->
+                <div class="lg:col-span-8 bg-white p-3 sm:p-5 rounded-2xl shadow-md border border-amber-200/80 overflow-hidden">
+                    <div class="flex items-center justify-between mb-3 text-xs text-stone-500 font-medium">
+                        <span><i class="fa-solid fa-hand-pointer text-amber-500"></i> Click any grid cell to investigate details</span>
+                        <span id="grid-showing-indicator" class="font-bold text-emerald-800">Showing 100 Cells</span>
+                    </div>
+
+                    <!-- Interactive Grid Wrapper -->
+                    <div id="chart-grid" class="grid grid-cols-10 gap-1 sm:gap-1.5 transition-all duration-300">
+                        <!-- Grid cells injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Side Panel Cell Inspector -->
+                <div class="lg:col-span-4 bg-white p-5 rounded-2xl shadow-md border border-amber-200/80 space-y-4 sticky top-24">
+                    <div class="border-b border-stone-200 pb-3 flex items-center justify-between">
+                        <h3 class="font-heading text-lg font-bold text-emerald-950 flex items-center gap-2">
+                            <i class="fa-solid fa-microscope text-emerald-600"></i> Number Detective
+                        </h3>
+                        <span id="inspector-number-badge" class="bg-amber-500 text-emerald-950 font-heading font-extrabold text-2xl w-12 h-12 rounded-2xl flex items-center justify-center shadow">
+                            24
+                        </span>
+                    </div>
+
+                    <div id="inspector-content" class="space-y-4 text-xs sm:text-sm">
+                        <!-- Place Value Breakdown Card -->
+                        <div class="bg-emerald-50/80 p-3.5 rounded-xl border border-emerald-200 space-y-1">
+                            <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Place Value Analysis</span>
+                            <div id="inspector-place-value" class="text-stone-800 font-semibold text-base">
+                                2 Tens + 4 Ones = 24
+                            </div>
+                        </div>
+
+                        <!-- Factors List -->
+                        <div class="space-y-1">
+                            <span class="text-xs font-bold text-stone-600 uppercase tracking-wider block">Factors of this Number:</span>
+                            <div id="inspector-factors" class="flex flex-wrap gap-1.5">
+                                <span class="px-2 py-1 bg-stone-100 rounded-lg text-stone-700 font-bold border border-stone-200">1</span>
+                                <span class="px-2 py-1 bg-stone-100 rounded-lg text-stone-700 font-bold border border-stone-200">2</span>
+                                <span class="px-2 py-1 bg-stone-100 rounded-lg text-stone-700 font-bold border border-stone-200">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Multipliers Active Matches -->
+                        <div class="space-y-1">
+                            <span class="text-xs font-bold text-stone-600 uppercase tracking-wider block">Multiples Matches (2-10):</span>
+                            <div id="inspector-multipliers" class="flex flex-wrap gap-1.5 text-xs font-bold">
+                                <!-- Match tags -->
+                            </div>
+                        </div>
+
+                        <!-- Pattern Insight -->
+                        <div class="bg-amber-50 p-3.5 rounded-xl border border-amber-200 space-y-1">
+                            <span class="text-xs font-bold text-amber-900 uppercase tracking-wider block flex items-center gap-1">
+                                <i class="fa-regular fa-lightbulb text-amber-600"></i> Safari Insight
+                            </span>
+                            <p id="inspector-insight" class="text-amber-950 text-xs leading-relaxed">
+                                Click any cell on the grid to unlock factor breakdown, digit sum properties, and pattern hints!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: MODULE 1 - STRANGE COUNTING ================= -->
+        <section id="view-module1" class="tab-view hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200/80 space-y-6">
+                <!-- Header Info -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Module 1 Warm-Up</span>
+                        <h2 class="font-heading text-2xl font-bold text-emerald-950 mt-1">"Strange Counting" - Skip Counting by 10s</h2>
+                        <p class="text-xs sm:text-sm text-stone-600">What happens when you start at a non-zero single digit (like 7) and add 10 repeatedly?</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-graduation-cap text-2xl text-amber-600"></i>
+                        <div class="text-xs">
+                            <p class="font-bold text-amber-900">Key Learning Goal:</p>
+                            <p class="text-amber-800">Adding 10 keeps the <strong>Ones Digit constant</strong> while the <strong>Tens Digit grows by +1</strong> (moving straight down a column!).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Walkthrough Setup -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Controls & Generator -->
+                    <div class="space-y-4 bg-stone-50 p-4 rounded-xl border border-stone-200">
+                        <h3 class="font-heading font-bold text-emerald-900 text-lg">1. Choose Starting Digit</h3>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">Pick a starting digit (1-9):</label>
+                            <div class="grid grid-cols-3 gap-2" id="mod1-digit-buttons">
+                                <!-- 1 through 9 buttons -->
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="mod1-animate-btn" onclick="runStrangeCountingAnimation()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-heading font-bold text-base rounded-xl shadow-md transition flex items-center justify-center gap-2 transform active:scale-95">
+                                <i class="fa-solid fa-play"></i> Run Animated Walkthrough
+                            </button>
+                        </div>
+
+                        <div id="mod1-step-history" class="bg-white p-3 rounded-xl border border-stone-200 min-h-[120px] max-h-[180px] overflow-y-auto space-y-1 text-xs">
+                            <span class="text-stone-400 italic">Sequence history will appear here...</span>
+                        </div>
+                    </div>
+
+                    <!-- Mini Visual Grid showing straight down movement -->
+                    <div class="md:col-span-2 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-heading font-bold text-emerald-900 text-lg">2. Visual Column Tracker</h3>
+                            <span class="text-xs text-stone-500">Notice how jumps move straight down!</span>
+                        </div>
+
+                        <div id="mod1-grid" class="grid grid-cols-10 gap-1 bg-stone-100 p-3 rounded-2xl border border-stone-200">
+                            <!-- 100 mini grid rendered here -->
+                        </div>
+
+                        <!-- Rule Explanation Box -->
+                        <div class="bg-emerald-900 text-emerald-50 p-4 rounded-2xl shadow space-y-2">
+                            <h4 class="font-heading text-amber-300 font-bold text-base flex items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass"></i> Place Value Rule Discovery
+                            </h4>
+                            <p id="mod1-rule-text" class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+                                Select a digit above and click "Run Animated Walkthrough" to see how adding 10 creates a straight vertical path down the column!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reflection Quiz Section -->
+                <div class="pt-6 border-t border-stone-200 space-y-4">
+                    <h3 class="font-heading text-xl font-bold text-emerald-950 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-question text-amber-500"></i> Safari Checkup Quiz
+                    </h3>
+
+                    <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-200 space-y-4">
+                        <p class="font-semibold text-stone-800 text-sm sm:text-base">
+                            <i class="fa-solid fa-circle-right text-amber-600 mr-2"></i>
+                            If you start at <span class="text-emerald-700 font-bold underline">7</span> and skip-count by <span class="text-emerald-700 font-bold underline">10</span> six times, what number do you land on?
+                        </p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mod1-quiz-options">
+                            <button onclick="checkMod1Quiz(57)" class="py-2.5 px-4 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl font-bold text-stone-800 text-sm transition">57</button>
+                            <button onclick="checkMod1Quiz(67)" class="py-2.5 px-4 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl font-bold text-stone-800 text-sm transition">67</button>
+                            <button onclick="checkMod1Quiz(77)" class="py-2.5 px-4 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl font-bold text-stone-800 text-sm transition">77</button>
+                            <button onclick="checkMod1Quiz(70)" class="py-2.5 px-4 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl font-bold text-stone-800 text-sm transition">70</button>
+                        </div>
+
+                        <div id="mod1-quiz-feedback" class="hidden p-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2">
+                            <!-- Feedback output -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: MODULE 2 - PATTERN REPORTER ================= -->
+        <section id="view-module2" class="tab-view hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200/80 space-y-6">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Module 2</span>
+                        <h2 class="font-heading text-2xl font-bold text-emerald-950 mt-1">Safari Pattern Reporter</h2>
+                        <p class="text-xs sm:text-sm text-stone-600">Investigate visual geometry, diagonal skips, and place-value reasons behind number patterns.</p>
+                    </div>
+
+                    <!-- Multiplier Selection Dropdown -->
+                    <div class="flex items-center gap-2 bg-stone-100 p-2 rounded-xl border border-stone-200">
+                        <label for="mod2-multiplier-select" class="text-xs font-bold text-stone-700 whitespace-nowrap">Investigate Multiples:</label>
+                        <select id="mod2-multiplier-select" onchange="renderMod2Pattern()" class="bg-white border border-stone-300 font-bold text-emerald-900 rounded-lg px-3 py-1.5 text-sm">
+                            <option value="2">2s (Even Checkerboard)</option>
+                            <option value="3" selected>3s (Diagonal Steps)</option>
+                            <option value="4">4s (Alternating Columns)</option>
+                            <option value="5">5s (Two Vertical Pillars)</option>
+                            <option value="6">6s (Steep Diagonal Steps)</option>
+                            <option value="7">7s (Knight's Move Drift)</option>
+                            <option value="8">8s (Wide Skew Steps)</option>
+                            <option value="9">9s (Slanted Down Diagonal)</option>
+                            <option value="10">10s (Right Pillar Wall)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Pattern Report Overview Cards -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column: Geometry Tag & Why It Happens Breakdown -->
+                    <div class="space-y-4">
+                        <!-- Shape Classification Tag Badge -->
+                        <div class="bg-emerald-900 text-white p-5 rounded-2xl shadow space-y-3">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest block">Visual Classification Tag</span>
+                            <h3 id="mod2-shape-tag" class="font-heading text-2xl font-bold text-amber-300 flex items-center gap-2">
+                                <i class="fa-solid fa-shapes"></i> Diagonal Steps
+                            </h3>
+                            <p id="mod2-shape-desc" class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+                                Multiples of 3 form neat diagonal staircases sloping across the hundred chart!
+                            </p>
+                        </div>
+
+                        <!-- Why Does It Happen Accordion Box -->
+                        <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200 space-y-3">
+                            <h4 class="font-heading text-lg font-bold text-amber-950 flex items-center gap-2">
+                                <i class="fa-solid fa-brain text-amber-600"></i> Why Does It Happen?
+                            </h4>
+                            <p id="mod2-why-text" class="text-xs sm:text-sm text-stone-700 leading-relaxed">
+                                Because 3 is 1 less than 4 (or 10-7), every jump of +3 moves down 1 row (+10) and back 7 columns (-7), creating a crisp diagonal angle!
+                            </p>
+                            <div id="mod2-digit-rule" class="bg-white p-3 rounded-xl border border-amber-300 text-xs text-amber-900 font-medium">
+                                <strong>Digit Sum Secret:</strong> The sum of digits for any multiple of 3 is ALWAYS divisible by 3! (e.g., 2+7 = 9)
+                            </div>
+                        </div>
+
+                        <!-- 101-200 Predictor Extension Card -->
+                        <div class="bg-white p-5 rounded-2xl border border-stone-200 space-y-3 shadow-sm">
+                            <h4 class="font-heading text-base font-bold text-emerald-900 flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> 101–200 Extension Predictor
+                            </h4>
+                            <p id="mod2-predictor-question" class="text-xs text-stone-600">
+                                Will the number <strong class="text-emerald-800">123</strong> be highlighted as a multiple of 3 on the 101-200 chart?
+                            </p>
+                            <div class="flex gap-2">
+                                <button onclick="checkMod2Prediction(true)" class="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-xl font-bold text-xs transition">YES, It Will!</button>
+                                <button onclick="checkMod2Prediction(false)" class="flex-1 py-2 bg-rose-100 hover:bg-rose-200 text-rose-900 rounded-xl font-bold text-xs transition">NO, It Won't</button>
+                            </div>
+                            <div id="mod2-prediction-result" class="hidden text-xs p-2.5 rounded-xl font-bold"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Grid Display (Main Visual Preview) -->
+                    <div class="lg:col-span-2 bg-stone-50 p-4 sm:p-5 rounded-2xl border border-stone-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-stone-600 uppercase tracking-wider">Live Pattern Grid (1-100 & 101-200 Overlay)</span>
+                            <div class="flex items-center gap-2 text-xs">
+                                <button onclick="toggleMod2Extend()" id="mod2-extend-btn" class="px-3 py-1 bg-emerald-800 text-amber-300 rounded-lg font-bold hover:bg-emerald-700 transition">
+                                    Show 101–200 Extension
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="mod2-grid" class="grid grid-cols-10 gap-1 bg-white p-3 rounded-2xl border border-stone-200">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: MODULE 3 - WANTED POSTER ================= -->
+        <section id="view-module3" class="tab-view hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200/80 space-y-6">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+                    <div>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Module 3</span>
+                        <h2 class="font-heading text-2xl font-bold text-emerald-950 mt-1">WANTED: The Most Popular Number</h2>
+                        <p class="text-xs sm:text-sm text-stone-600">Which composite numbers under 40 have the highest count of factors? Let's investigate!</p>
+                    </div>
+
+                    <button onclick="switchTab('explorer'); toggleHeatmapMode(true);" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-emerald-950 rounded-xl font-heading font-bold text-xs sm:text-sm shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-900"></i> View Factors Heatmap on Chart
+                    </button>
+                </div>
+
+                <!-- Popular Numbers Leaderboard & Selector -->
+                <div class="space-y-3">
+                    <h3 class="font-heading text-lg font-bold text-emerald-900">Top Popular Super-Composite Contenders (1 to 40):</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mod3-popular-grid">
+                        <!-- Populated with popular numbers like 12, 24, 30, 36 -->
+                    </div>
+                </div>
+
+                <!-- Interactive Wanted Poster Generator -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pt-4 border-t border-stone-200">
+                    <!-- Controls Column -->
+                    <div class="lg:col-span-5 space-y-4 bg-stone-50 p-5 rounded-2xl border border-stone-200">
+                        <h3 class="font-heading text-lg font-bold text-emerald-900 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-nib text-amber-600"></i> Poster Designer
+                        </h3>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">Select Target Number:</label>
+                            <select id="mod3-target-select" onchange="updateWantedPoster()" class="w-full bg-white border border-stone-300 font-bold text-stone-800 rounded-xl px-3 py-2 text-sm">
+                                <option value="36">36 - "The Super-Square Master" (5 factors: 2, 3, 4, 6, 9)</option>
+                                <option value="24" selected>24 - "The Two-Dozen Dynamo" (5 factors: 2, 3, 4, 6, 8)</option>
+                                <option value="12">12 - "The Dozen Specialist" (4 factors: 2, 3, 4, 6)</option>
+                                <option value="30">30 - "The Triple-Factor Trailblazer" (5 factors: 2, 3, 5, 6, 10)</option>
+                                <option value="20">20 - "The Score Bandit" (3 factors: 2, 4, 5)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">Custom Detective Notes:</label>
+                            <textarea id="mod3-notes-input" onkeyup="updateWantedPosterNotes()" rows="3" class="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs text-stone-800 focus:ring-2 focus:ring-amber-400 outline-none" placeholder="Explain why composite numbers with many factor pairs are so versatile..."></textarea>
+                        </div>
+
+                        <div class="bg-amber-100/60 p-3.5 rounded-xl border border-amber-300 text-xs text-amber-950 space-y-1">
+                            <strong><i class="fa-solid fa-lightbulb text-amber-600"></i> Safari Tip:</strong>
+                            <p>Numbers like 24 and 36 appear in almost every skip-counting sequence because they can be split into many equal groups!</p>
+                        </div>
+
+                        <button onclick="claimWantedBadge()" class="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-amber-300 font-heading font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-shield-halved"></i> Claim Bounty Detective Badge
+                        </button>
+                    </div>
+
+                    <!-- Wanted Poster Render Card -->
+                    <div class="lg:col-span-7 flex justify-center">
+                        <div id="wanted-poster-card" class="wanted-bg max-w-md w-full p-6 sm:p-8 rounded-2xl border-8 border-amber-900 shadow-2xl space-y-5 text-stone-900 relative transform rotate-1 transition hover:rotate-0">
+                            <!-- Star Badge Corner -->
+                            <div class="absolute -top-6 -right-6 w-16 h-16 bg-amber-500 rounded-full border-4 border-amber-900 flex items-center justify-center text-amber-950 font-heading text-xl font-bold shadow-lg transform rotate-12">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+
+                            <!-- Header Banner -->
+                            <div class="text-center border-b-4 border-amber-900 pb-3">
+                                <span class="font-heading tracking-widest text-amber-900 text-sm font-bold uppercase block">Safari Sheriff Dept.</span>
+                                <h2 class="font-heading text-4xl sm:text-5xl font-extrabold tracking-tight text-amber-950 uppercase">WANTED!</h2>
+                                <p class="text-xs font-bold uppercase tracking-wider text-amber-800">For Being Excessively Popular on the 100-Chart</p>
+                            </div>
+
+                            <!-- Big Number Display -->
+                            <div class="bg-amber-100/90 border-4 border-dashed border-amber-900 rounded-2xl p-4 text-center space-y-1 shadow-inner">
+                                <span class="text-xs uppercase font-bold text-amber-800">Suspect Number</span>
+                                <div id="poster-number" class="font-heading text-6xl font-extrabold text-amber-950 tracking-wider">
+                                    24
+                                </div>
+                                <span id="poster-alias" class="text-xs font-bold text-emerald-800 italic block">"The Two-Dozen Dynamo"</span>
+                            </div>
+
+                            <!-- Reward Details -->
+                            <div class="flex items-center justify-between text-xs font-bold bg-amber-900 text-amber-200 px-4 py-2 rounded-xl">
+                                <span>BOUNTY REWARD:</span>
+                                <span id="poster-reward" class="text-amber-400 text-sm font-extrabold">$100,000 SAFARI GOLD</span>
+                            </div>
+
+                            <!-- Accomplice Factor Teams -->
+                            <div class="space-y-2">
+                                <span class="text-xs font-heading font-bold uppercase tracking-wider text-amber-950 block">Known Accomplice Factor Teams (2-10):</span>
+                                <div id="poster-factors-list" class="grid grid-cols-2 gap-2 text-xs font-bold">
+                                    <!-- Factor team cards -->
+                                </div>
+                            </div>
+
+                            <!-- Detective Notes -->
+                            <div class="border-t-2 border-amber-900/40 pt-3 space-y-1 text-xs">
+                                <span class="font-bold text-amber-950 uppercase block">Sheriff's Field Notes:</span>
+                                <p id="poster-notes-display" class="italic text-stone-800 leading-snug">
+                                    "Extremely versatile number! Can be partitioned into 2s, 3s, 4s, 6s, and 8s with zero remainder."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: MODULE 4 - 7s KNIGHT'S MOVE ================= -->
+        <section id="view-module4" class="tab-view hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-amber-200/80 space-y-6">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+                    <div>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Extension Challenge</span>
+                        <h2 class="font-heading text-2xl font-bold text-emerald-950 mt-1">The "7s Knight's Move" Pattern</h2>
+                        <p class="text-xs sm:text-sm text-stone-600">Discover why 7 creates a chess knight-like drift across rows and solve the Row 191-200 Challenge!</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-indigo-50 p-2.5 rounded-xl border border-indigo-200 text-xs font-bold text-indigo-900">
+                        <i class="fa-solid fa-chess-knight text-xl text-indigo-600"></i>
+                        <span>Knight Hop Logic: +10 Down, -3 Left = +7 Net Jump!</span>
+                    </div>
+                </div>
+
+                <!-- Visual Explanation & Knight Vector Breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="bg-indigo-900 text-white p-5 rounded-2xl shadow space-y-3">
+                            <h3 class="font-heading text-xl font-bold text-indigo-200 flex items-center gap-2">
+                                <i class="fa-solid fa-chess-knight"></i> Why Does 7 Drift Like a Knight?
+                            </h3>
+                            <p class="text-xs sm:text-sm text-indigo-100 leading-relaxed">
+                                On a 10-wide chart, moving down 1 row adds +10. Since 7 is <strong>(10 - 3)</strong>, taking a step of +7 is identical to jumping:
+                            </p>
+                            <div class="bg-indigo-950/80 p-3 rounded-xl border border-indigo-700 text-xs font-mono space-y-1 text-amber-300">
+                                <div>1. Down 1 Row (+10)</div>
+                                <div>2. Left 3 Columns (-3)</div>
+                                <div class="text-emerald-400 font-bold border-t border-indigo-800 pt-1">Result: +7 Hop! (Chess Knight L-Shape)</div>
+                            </div>
+                        </div>
+
+                        <!-- 7s Interactive Helper -->
+                        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 space-y-2 text-xs">
+                            <span class="font-bold text-amber-900 uppercase block">Try It Yourself:</span>
+                            <p class="text-stone-700">Start at <strong class="text-emerald-800">21</strong>. Move down 1 row (to 31), then move left 3 columns (to 28). You just added +7!</p>
+                        </div>
+                    </div>
+
+                    <!-- Live Mini Grid for 7s Knight Path -->
+                    <div class="lg:col-span-7 bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-stone-700">Knight Drift Paths for Multiples of 7</span>
+                            <span class="text-indigo-700 font-bold">Highlighted in Indigo</span>
+                        </div>
+                        <div id="mod4-knight-grid" class="grid grid-cols-10 gap-1 bg-white p-3 rounded-2xl border border-stone-200">
+                            <!-- Mini grid -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 191-200 Mini-Quiz Prediction Challenge -->
+                <div class="pt-6 border-t border-stone-200 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-heading text-xl font-bold text-emerald-950 flex items-center gap-2">
+                                <i class="fa-solid fa-trophy text-amber-500"></i> Row 191–200 Prediction Mini-Quiz
+                            </h3>
+                            <p class="text-xs text-stone-600">Select ALL numbers in row 191 to 200 that are multiples of 7!</p>
+                        </div>
+
+                        <button onclick="checkMod4Row191Quiz()" class="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-heading font-bold rounded-xl shadow transition flex items-center gap-2 text-xs sm:text-sm">
+                            <i class="fa-solid fa-check"></i> Verify Row 191-200 Predictions
+                        </button>
+                    </div>
+
+                    <!-- Row 191-200 Target Buttons Grid -->
+                    <div class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-200 space-y-3">
+                        <span class="text-xs font-bold text-indigo-900 uppercase tracking-wider block">Click numbers to toggle prediction flags:</span>
+                        <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="mod4-quiz-cells">
+                            <!-- 191 to 200 buttons rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Quiz Feedback & Proof Display -->
+                    <div id="mod4-quiz-feedback" class="hidden p-4 rounded-2xl text-xs sm:text-sm space-y-2">
+                        <!-- Output dynamic verification -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Safari Badges & Achievements Modal -->
+    <div id="badges-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border-4 border-amber-500 overflow-hidden space-y-5 p-6 sm:p-8 transform transition-all">
+            <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-amber-500 text-emerald-950 rounded-2xl flex items-center justify-center text-2xl font-bold shadow">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-heading text-2xl font-bold text-emerald-950">Safari Achievement Badges</h2>
+                        <p class="text-xs text-stone-600">Earn all 5 safari badges to unlock your official Math Master Certificate!</p>
+                    </div>
+                </div>
+                <button onclick="closeBadgesModal()" class="w-9 h-9 bg-stone-100 hover:bg-stone-200 rounded-full text-stone-600 flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- List of 5 Badges -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="badges-list-container">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Certificate Unlock CTA -->
+            <div id="certificate-cta" class="bg-amber-50 p-4 rounded-2xl border border-amber-300 flex items-center justify-between text-xs">
+                <div>
+                    <span class="font-bold text-amber-950 block">Certificate Status:</span>
+                    <span id="cert-status-text" class="text-amber-800">Earn 5/5 Badges to unlock printable safari certificate.</span>
+                </div>
+                <button id="print-cert-btn" onclick="printCertificate()" disabled class="px-4 py-2 bg-stone-300 text-stone-500 rounded-xl font-bold cursor-not-allowed transition">
+                    <i class="fa-solid fa-print"></i> Print Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Safari Certificate Component -->
+    <div id="printable-certificate" class="hidden p-10 bg-amber-50 border-8 border-emerald-800 rounded-3xl max-w-3xl mx-auto text-center space-y-6 wanted-bg text-emerald-950">
+        <div class="border-4 border-dashed border-emerald-800 p-8 rounded-2xl space-y-6">
+            <i class="fa-solid fa-compass text-6xl text-amber-600"></i>
+            <h1 class="font-heading text-4xl font-extrabold text-emerald-900 tracking-wider uppercase">Certificate of Excellence</h1>
+            <p class="text-sm font-semibold uppercase tracking-widest text-emerald-800">This certifies that</p>
+            <h2 class="font-heading text-3xl font-bold text-amber-800 underline decoration-amber-500 underline-offset-8">Safari Math Detective</h2>
+            <p class="text-sm text-stone-800 max-w-md mx-auto leading-relaxed">
+                Has successfully mastered 100 & 200 Chart skip-counting, factor teams, composite heatmap investigations, and the 7s Knight's Move challenge!
+            </p>
+            <div class="flex items-center justify-between pt-8 text-xs font-bold text-emerald-900">
+                <span>Grade 3 Math Safari</span>
+                <span>Date: <span id="cert-date"></span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Component -->
+    <div id="notification-toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm w-full bg-emerald-900 text-white p-4 rounded-2xl shadow-2xl border-2 border-amber-400 flex items-start gap-3 transition-all">
+        <div class="text-amber-400 text-2xl pt-0.5">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="flex-1 text-xs">
+            <h5 id="toast-title" class="font-heading font-bold text-amber-300 text-sm">Notification</h5>
+            <p id="toast-message" class="text-emerald-100 mt-0.5 leading-snug">Message content</p>
+        </div>
+        <button onclick="document.getElementById('notification-toast').classList.add('hidden')" class="text-emerald-300 hover:text-white text-xs">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Web Audio Synthesizer for sound effects
+        let audioCtx = null;
+        let isMuted = false;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'pop') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+
+                    osc.type = 'sine';
+                    osc2.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc2.frequency.setValueAtTime(659.25, now + 0.08); // E5
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    gain2.gain.setValueAtTime(0.2, now + 0.08);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                    osc2.start(now + 0.08);
+                    osc2.stop(now + 0.28);
+                } else if (type === 'fanfare') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+                    notes.forEach((freq, idx) => {
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        g.gain.setValueAtTime(0.2, now + idx * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+                        o.start(now + idx * 0.08);
+                        o.stop(now + idx * 0.08 + 0.25);
+                    });
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('sound-toggle-btn');
+            const icon = document.getElementById('sound-icon');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark';
+                btn.classList.add('opacity-70');
+            } else {
+                icon.className = 'fa-solid fa-volume-high';
+                btn.classList.remove('opacity-70');
+                playSound('click');
+            }
+        }
+
+        // Global Application State
+        const state = {
+            maxGrid: 100, // 100 or 200
+            selectedMultipliers: new Set([2, 5]), // Active toggles in explorer
+            customPattern: null, // { start: 7, step: 10 }
+            heatmapMode: false,
+            selectedInspectorNumber: 24,
+
+            // Badges Tracking
+            badges: {
+                explorer: { unlocked: false, title: "Chart Explorer", icon: "fa-border-all", desc: "Explored grid & inspected number properties" },
+                strange: { unlocked: false, title: "Strange Counter", icon: "fa-footprints", desc: "Completed Module 1 warm-up & quiz" },
+                pattern: { unlocked: false, title: "Pattern Detective", icon: "fa-magnifying-glass-chart", desc: "Analyzed visual patterns & predicted 101-200" },
+                bounty: { unlocked: false, title: "Bounty Hunter", icon: "fa-scroll", desc: "Designed a WANTED poster for a popular composite" },
+                knight: { unlocked: false, title: "Knight's Master", icon: "fa-chess-knight", desc: "Solved the Row 191-200 7s Knight Challenge" }
+            },
+
+            // Module 2 state
+            mod2Multiplier: 3,
+            mod2Extended: false,
+
+            // Module 4 state
+            mod4SelectedCells: new Set()
+        };
+
+        // Multiplier Color Configurations
+        const multiplierConfigs = {
+            2: { name: '2s', color: 'bg-sky-400', badgeClass: 'bg-sky-500 text-white', hex: '#38bdf8' },
+            3: { name: '3s', color: 'bg-emerald-400', badgeClass: 'bg-emerald-500 text-white', hex: '#34d399' },
+            4: { name: '4s', color: 'bg-purple-400', badgeClass: 'bg-purple-500 text-white', hex: '#c084fc' },
+            5: { name: '5s', color: 'bg-amber-400', badgeClass: 'bg-amber-500 text-amber-950', hex: '#fbbf24' },
+            6: { name: '6s', color: 'bg-rose-400', badgeClass: 'bg-rose-500 text-white', hex: '#fb7185' },
+            7: { name: '7s', color: 'bg-indigo-400', badgeClass: 'bg-indigo-500 text-white', hex: '#818cf8' },
+            8: { name: '8s', color: 'bg-orange-400', badgeClass: 'bg-orange-500 text-white', hex: '#fb923c' },
+            9: { name: '9s', color: 'bg-teal-400', badgeClass: 'bg-teal-500 text-white', hex: '#2dd4bf' },
+            10: { name: '10s', color: 'bg-lime-400', badgeClass: 'bg-lime-500 text-lime-950', hex: '#a3e635' }
+        };
+
+        function switchTab(tabId) {
+            playSound('click');
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-emerald-100 hover:bg-emerald-700 flex items-center gap-2 whitespace-nowrap transition";
+            });
+
+            const activeView = document.getElementById(`view-${tabId}`);
+            if (activeView) activeView.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap transition bg-amber-400 text-emerald-950 shadow-md";
+            }
+
+            // Trigger specific module renders
+            if (tabId === 'module1') setupModule1();
+            if (tabId === 'module2') renderMod2Pattern();
+            if (tabId === 'module3') setupModule3();
+            if (tabId === 'module4') setupModule4();
+        }
+
+        function renderMultiplierChips() {
+            const container = document.getElementById('multiplier-chips-container');
+            container.innerHTML = '';
+
+            for (let m = 2; m <= 10; m++) {
+                const config = multiplierConfigs[m];
+                const isSelected = state.selectedMultipliers.has(m);
+
+                const chip = document.createElement('button');
+                chip.onclick = () => toggleMultiplier(m);
+                chip.className = `px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition transform active:scale-95 border ${
+                    isSelected ? `${config.badgeClass} border-transparent shadow-sm scale-105` : 'bg-stone-100 text-stone-600 border-stone-300 hover:bg-stone-200'
+                }`;
+                chip.innerHTML = `
+                    <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${config.hex}"></span>
+                    ${config.name}
+                `;
+                container.appendChild(chip);
+            }
+        }
+
+        function toggleMultiplier(m) {
+            playSound('pop');
+            if (state.selectedMultipliers.has(m)) {
+                state.selectedMultipliers.delete(m);
+            } else {
+                state.selectedMultipliers.add(m);
+            }
+            state.customPattern = null;
+            renderMultiplierChips();
+            renderChartGrid();
+            unlockBadge('explorer');
+        }
+
+        function clearSelectedMultipliers() {
+            playSound('click');
+            state.selectedMultipliers.clear();
+            state.customPattern = null;
+            state.heatmapMode = false;
+            document.getElementById('heatmap-status-text').innerText = 'OFF';
+            renderMultiplierChips();
+            renderChartGrid();
+        }
+
+        function setGridRange(range) {
+            playSound('click');
+            state.maxGrid = range;
+            const btn100 = document.getElementById('grid-100-btn');
+            const btn200 = document.getElementById('grid-200-btn');
+            const textInd = document.getElementById('grid-showing-indicator');
+
+            if (range === 100) {
+                btn100.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-700 text-white shadow-sm";
+                btn200.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-900";
+                textInd.innerText = "Showing 100 Cells";
+            } else {
+                btn200.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-700 text-white shadow-sm";
+                btn100.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-stone-600 hover:text-stone-900";
+                textInd.innerText = "Showing 200 Cells";
+            }
+
+            renderChartGrid();
+            unlockBadge('explorer');
+        }
+
+        function toggleHeatmapMode(forceState) {
+            playSound('pop');
+            if (typeof forceState === 'boolean') {
+                state.heatmapMode = forceState;
+            } else {
+                state.heatmapMode = !state.heatmapMode;
+            }
+            document.getElementById('heatmap-status-text').innerText = state.heatmapMode ? 'ON' : 'OFF';
+            renderChartGrid();
+            if (state.heatmapMode) unlockBadge('explorer');
+        }
+
+        function applyCustomPattern() {
+            playSound('correct');
+            const start = parseInt(document.getElementById('custom-start-input').value) || 1;
+            const step = parseInt(document.getElementById('custom-step-input').value) || 10;
+            state.customPattern = { start, step };
+            state.selectedMultipliers.clear();
+            renderMultiplierChips();
+            renderChartGrid();
+            unlockBadge('explorer');
+        }
+
+        function getFactors(n) {
+            const factors = [];
+            for (let i = 1; i <= n; i++) {
+                if (n % i === 0) factors.push(i);
+            }
+            return factors;
+        }
+
+        function getMultipliersListForNum(n) {
+            const list = [];
+            for (let m = 2; m <= 10; m++) {
+                if (n % m === 0) list.push(m);
+            }
+            return list;
+        }
+
+        function renderChartGrid() {
+            const gridContainer = document.getElementById('chart-grid');
+            gridContainer.innerHTML = '';
+
+            for (let i = 1; i <= state.maxGrid; i++) {
+                const cell = document.createElement('div');
+                cell.className = `grid-cell relative h-9 sm:h-11 rounded-xl flex flex-col items-center justify-center font-bold text-xs sm:text-sm border cursor-pointer select-none bg-white border-stone-200 text-stone-800 shadow-2xs`;
+
+                const factorMatches = getMultipliersListForNum(i);
+                
+                let activeMatches = [];
+                if (state.selectedMultipliers.size > 0) {
+                    activeMatches = factorMatches.filter(m => state.selectedMultipliers.has(m));
+                }
+
+                let isCustomMatch = false;
+                if (state.customPattern) {
+                    const { start, step } = state.customPattern;
+                    if (i >= start && (i - start) % step === 0) {
+                        isCustomMatch = true;
+                    }
+                }
+
+                if (state.heatmapMode) {
+                    const count = factorMatches.length;
+                    if (count >= 5) {
+                        cell.className += ' bg-rose-500 text-white font-extrabold border-rose-600 shadow-md ring-2 ring-rose-300';
+                    } else if (count >= 3) {
+                        cell.className += ' bg-amber-400 text-amber-950 font-bold border-amber-500';
+                    } else if (count >= 1) {
+                        cell.className += ' bg-amber-100 text-amber-900 border-amber-200';
+                    }
+                } else if (isCustomMatch) {
+                    cell.className += ' bg-amber-400 text-emerald-950 font-extrabold border-amber-500 ring-2 ring-amber-300';
+                } else if (activeMatches.length > 0) {
+                    const primaryConfig = multiplierConfigs[activeMatches[0]];
+                    cell.classList.add(primaryConfig.color, 'text-stone-900', 'border-stone-300', 'font-extrabold');
+                }
+
+                if (i === state.selectedInspectorNumber) {
+                    cell.classList.add('ring-4', 'ring-emerald-600', 'z-30', 'scale-105');
+                }
+
+                const numSpan = document.createElement('span');
+                numSpan.innerText = i;
+                cell.appendChild(numSpan);
+
+                if (activeMatches.length > 0 && !state.heatmapMode) {
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'absolute bottom-1 flex gap-0.5 px-1 max-w-full overflow-hidden';
+                    activeMatches.forEach(m => {
+                        const dot = document.createElement('span');
+                        dot.className = 'w-1.5 h-1.5 rounded-full';
+                        dot.style.backgroundColor = multiplierConfigs[m].hex;
+                        dotsContainer.appendChild(dot);
+                    });
+                    cell.appendChild(dotsContainer);
+                }
+
+                cell.onclick = () => selectInspectorNumber(i);
+                gridContainer.appendChild(cell);
+            }
+
+            updateInspectorPanel(state.selectedInspectorNumber);
+        }
+
+        function selectInspectorNumber(n) {
+            playSound('pop');
+            state.selectedInspectorNumber = n;
+            renderChartGrid();
+            unlockBadge('explorer');
+        }
+
+        function updateInspectorPanel(n) {
+            document.getElementById('inspector-number-badge').innerText = n;
+
+            const tens = Math.floor(n / 10);
+            const ones = n % 10;
+            const placeValueStr = tens > 0 ? `${tens} Ten${tens > 1 ? 's' : ''} + ${ones} One${ones !== 1 ? 's' : ''} = ${n}` : `${ones} Ones = ${n}`;
+            document.getElementById('inspector-place-value').innerText = placeValueStr;
+
+            const factors = getFactors(n);
+            const factorsContainer = document.getElementById('inspector-factors');
+            factorsContainer.innerHTML = '';
+            factors.forEach(f => {
+                const chip = document.createElement('span');
+                chip.className = 'px-2 py-1 bg-stone-100 rounded-lg text-stone-700 font-bold border border-stone-200';
+                chip.innerText = f;
+                factorsContainer.appendChild(chip);
+            });
+
+            const matches = getMultipliersListForNum(n);
+            const matchesContainer = document.getElementById('inspector-multipliers');
+            matchesContainer.innerHTML = '';
+            if (matches.length === 0) {
+                matchesContainer.innerHTML = '<span class="text-stone-400 italic">None of 2–10</span>';
+            } else {
+                matches.forEach(m => {
+                    const chip = document.createElement('span');
+                    chip.className = `px-2 py-0.5 rounded-md ${multiplierConfigs[m].badgeClass}`;
+                    chip.innerText = multiplierConfigs[m].name;
+                    matchesContainer.appendChild(chip);
+                });
+            }
+
+            const insightBox = document.getElementById('inspector-insight');
+            let insightText = `Number ${n} has ${factors.length} total factors. `;
+            if (matches.length >= 4) {
+                insightText += `🌟 Super Composite Alert! ${n} is an extremely popular number with factor teams across multiple skip patterns.`;
+            } else if (factors.length === 2) {
+                insightText += `🛡️ Prime Patrol! ${n} is a prime number, divisible only by 1 and itself.`;
+            } else if (n % 10 === 0) {
+                insightText += `🎯 Right Column Anchor! ${n} ends in 0 and sits in the far right pillar.`;
+            } else {
+                const digitSum = n.toString().split('').reduce((acc, curr) => acc + parseInt(curr, 10), 0);
+                insightText += `Digit sum: ${digitSum}. Try selecting multiplier layers above to see if ${n} aligns diagonally!`;
+            }
+            insightBox.innerText = insightText;
+        }
+
+        let mod1ActiveDigit = 7;
+        let mod1AnimInterval = null;
+
+        function setupModule1() {
+            const digitContainer = document.getElementById('mod1-digit-buttons');
+            digitContainer.innerHTML = '';
+            for (let d = 1; d <= 9; d++) {
+                const btn = document.createElement('button');
+                btn.onclick = () => setMod1Digit(d);
+                btn.className = `py-2 rounded-xl font-bold text-sm transition border ${
+                    d === mod1ActiveDigit ? 'bg-emerald-700 text-white border-emerald-800 shadow' : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-100'
+                }`;
+                btn.innerText = d;
+                digitContainer.appendChild(btn);
+            }
+            renderMod1Grid();
+        }
+
+        function setMod1Digit(d) {
+            playSound('click');
+            mod1ActiveDigit = d;
+            if (mod1AnimInterval) clearInterval(mod1AnimInterval);
+            setupModule1();
+        }
+
+        function renderMod1Grid(highlightedSeq = []) {
+            const gridContainer = document.getElementById('mod1-grid');
+            gridContainer.innerHTML = '';
+
+            for (let i = 1; i <= 100; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'h-6 sm:h-7 rounded-md flex items-center justify-center font-bold text-[10px] sm:text-xs border transition-all ';
+
+                if (highlightedSeq.includes(i)) {
+                    if (i === highlightedSeq[highlightedSeq.length - 1]) {
+                        cell.className += 'bg-amber-400 text-emerald-950 border-amber-500 scale-110 z-10 shadow animate-hop';
+                    } else {
+                        cell.className += 'bg-emerald-600 text-white border-emerald-700';
+                    }
+                } else {
+                    cell.className += 'bg-white text-stone-400 border-stone-200';
+                }
+
+                cell.innerText = i;
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        function runStrangeCountingAnimation() {
+            playSound('pop');
+            if (mod1AnimInterval) clearInterval(mod1AnimInterval);
+
+            const sequence = [];
+            let current = mod1ActiveDigit;
+            while (current <= 100) {
+                sequence.push(current);
+                current += 10;
+            }
+
+            const historyBox = document.getElementById('mod1-step-history');
+            historyBox.innerHTML = `<span class="font-bold text-emerald-900 uppercase block mb-1">Pattern Sequence (+10s):</span>`;
+
+            let stepIdx = 0;
+            const currentSeq = [];
+
+            mod1AnimInterval = setInterval(() => {
+                if (stepIdx < sequence.length) {
+                    const num = sequence[stepIdx];
+                    currentSeq.push(num);
+                    playSound('click');
+
+                    renderMod1Grid(currentSeq);
+
+                    const stepTag = document.createElement('span');
+                    stepTag.className = 'inline-block bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded mr-1 mb-1 border border-amber-300';
+                    stepTag.innerText = num;
+                    historyBox.appendChild(stepTag);
+
+                    stepIdx++;
+                } else {
+                    clearInterval(mod1AnimInterval);
+                    playSound('correct');
+
+                    const ruleText = document.getElementById('mod1-rule-text');
+                    ruleText.innerHTML = `
+                        Notice Column ${mod1ActiveDigit}! Every jump adds 10, so the <strong>ones digit stays ${mod1ActiveDigit}</strong> continuously, while the <strong>tens digit grows: 0, 1, 2, 3, 4, 5...</strong>!
+                    `;
+                    unlockBadge('strange');
+                }
+            }, 300);
+        }
+
+        function checkMod1Quiz(answer) {
+            const feedback = document.getElementById('mod1-quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            if (answer === 67) {
+                playSound('correct');
+                feedback.className = 'p-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 bg-emerald-100 text-emerald-900 border border-emerald-300';
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i> Correct! 7 + (6 × 10) = 67! Tens digit increased by 6, ones digit stayed 7.`;
+                unlockBadge('strange');
+            } else {
+                playSound('wrong');
+                feedback.className = 'p-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 bg-rose-100 text-rose-900 border border-rose-300';
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i> Not quite! Remember: 6 tens added to 7 ones gives 67. Try again!`;
+            }
+        }
+
+        const mod2PatternData = {
+            2: {
+                tag: "Checkerboard Columns",
+                desc: "Multiples of 2 form alternating vertical stripes on every even column (2, 4, 6, 8, 10).",
+                why: "Because 10 is divisible by 2, every row repeats the exact same even ones digits: 0, 2, 4, 6, 8!",
+                rule: "Digit Rule: Ones digit is ALWAYS 0, 2, 4, 6, or 8.",
+                predictorNum: 148,
+                predictorAns: true
+            },
+            3: {
+                tag: "Diagonal Steps",
+                desc: "Multiples of 3 form neat diagonal staircases sloping across the chart.",
+                why: "3 is 1 less than 4 (and 10-7). Moving down 1 row (+10) and left 7 (-7) equals +3!",
+                rule: "Digit Sum Rule: Digits always add up to 3, 6, or 9! (e.g. 2+7 = 9)",
+                predictorNum: 123,
+                predictorAns: true
+            },
+            4: {
+                tag: "Alternating Columns",
+                desc: "Multiples of 4 appear in columns 4, 8, 2, 6, 10 in a staggered rhythm.",
+                why: "Since 4 is double 2, it skips every second even column!",
+                rule: "Digit Rule: Ones digit cycles: 4, 8, 2, 6, 0.",
+                predictorNum: 154,
+                predictorAns: false
+            },
+            5: {
+                tag: "Two Vertical Pillars",
+                desc: "Multiples of 5 form two straight vertical pillars down columns 5 and 10.",
+                why: "Since 10 is exactly 2 × 5, the ones digit alternates strictly between 5 and 0!",
+                rule: "Digit Rule: Ends ONLY in 5 or 0.",
+                predictorNum: 185,
+                predictorAns: true
+            },
+            6: {
+                tag: "Steep Diagonal Steps",
+                desc: "Multiples of 6 form steep diagonal staircases.",
+                why: "6 is a multiple of both 2 and 3, so only even multiples of 3 are highlighted!",
+                rule: "Digit Sum Rule: Must be EVEN and digit sum divisible by 3.",
+                predictorNum: 136,
+                predictorAns: false
+            },
+            7: {
+                tag: "Knight's Move Drift",
+                desc: "Multiples of 7 drift diagonally like a Chess Knight hopping across rows!",
+                why: "7 = 10 - 3. Jumping +7 is equal to going down 1 row (+10) and left 3 columns (-3).",
+                rule: "Pattern Secret: Creates a distinct L-shaped drift across every row.",
+                predictorNum: 161,
+                predictorAns: true
+            },
+            8: {
+                tag: "Wide Skew Steps",
+                desc: "Multiples of 8 form wide slanted staircases across the grid.",
+                why: "8 = 10 - 2. Jumping +8 is equal to going down 1 row (+10) and left 2 columns (-2).",
+                rule: "Digit Rule: Ones digits cycle down: 8, 6, 4, 2, 0.",
+                predictorNum: 168,
+                predictorAns: true
+            },
+            9: {
+                tag: "Slanted Down Diagonal",
+                desc: "Multiples of 9 form a perfect continuous diagonal line from top-right to bottom-left!",
+                why: "9 = 10 - 1. Jumping +9 moves down 1 row (+10) and left 1 column (-1), making a clean diagonal!",
+                rule: "Digit Sum Rule: Digits ALWAYS add up to 9! (e.g., 8+1=9, 9+9=18 -> 1+8=9)",
+                predictorNum: 171,
+                predictorAns: true
+            },
+            10: {
+                tag: "Right Pillar Wall",
+                desc: "Multiples of 10 line up along the far-right wall of the chart.",
+                why: "The chart is 10 squares wide, so every multiple of 10 lands on the right boundary!",
+                rule: "Digit Rule: Ones digit is ALWAYS 0.",
+                predictorNum: 190,
+                predictorAns: true
+            }
+        };
+
+        function renderMod2Pattern() {
+            const m = parseInt(document.getElementById('mod2-multiplier-select').value) || 3;
+            state.mod2Multiplier = m;
+            const data = mod2PatternData[m];
+
+            document.getElementById('mod2-shape-tag').innerHTML = `<i class="fa-solid fa-shapes"></i> ${data.tag}`;
+            document.getElementById('mod2-shape-desc').innerText = data.desc;
+            document.getElementById('mod2-why-text').innerText = data.why;
+            document.getElementById('mod2-digit-rule').innerHTML = `<strong>Rule Secret:</strong> ${data.rule}`;
+
+            document.getElementById('mod2-predictor-question').innerHTML = `
+                Will the number <strong class="text-emerald-800 text-sm">${data.predictorNum}</strong> be highlighted as a multiple of ${m}?
+            `;
+            const resultBox = document.getElementById('mod2-prediction-result');
+            resultBox.classList.add('hidden');
+
+            const gridContainer = document.getElementById('mod2-grid');
+            gridContainer.innerHTML = '';
+            const maxVal = state.mod2Extended ? 200 : 100;
+
+            for (let i = 1; i <= maxVal; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'h-5 sm:h-6 rounded-md flex items-center justify-center font-bold text-[9px] sm:text-[10px] border transition ';
+
+                if (i % m === 0) {
+                    const config = multiplierConfigs[m];
+                    cell.className += `${config.color} text-stone-900 border-stone-400 font-extrabold shadow-2xs scale-105 z-10`;
+                } else {
+                    cell.className += 'bg-white text-stone-300 border-stone-200';
+                }
+
+                cell.innerText = i;
+                gridContainer.appendChild(cell);
+            }
+            unlockBadge('pattern');
+        }
+
+        function toggleMod2Extend() {
+            playSound('click');
+            state.mod2Extended = !state.mod2Extended;
+            document.getElementById('mod2-extend-btn').innerText = state.mod2Extended ? 'Show 1–100 Only' : 'Show 101–200 Extension';
+            renderMod2Pattern();
+        }
+
+        function checkMod2Prediction(userSaidYes) {
+            const m = state.mod2Multiplier;
+            const data = mod2PatternData[m];
+            const resultBox = document.getElementById('mod2-prediction-result');
+            resultBox.classList.remove('hidden');
+
+            const isCorrect = (userSaidYes === data.predictorAns);
+            if (isCorrect) {
+                playSound('correct');
+                resultBox.className = 'text-xs p-2.5 rounded-xl font-bold bg-emerald-100 text-emerald-900 border border-emerald-300';
+                resultBox.innerHTML = `
+                    <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Spot On! ${data.predictorNum} ÷ ${m} = ${data.predictorNum / m} (Remainder 0). The pattern holds!
+                `;
+                unlockBadge('pattern');
+            } else {
+                playSound('wrong');
+                resultBox.className = 'text-xs p-2.5 rounded-xl font-bold bg-rose-100 text-rose-900 border border-rose-300';
+                resultBox.innerHTML = `
+                    <i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> Not quite! ${data.predictorNum} ${data.predictorAns ? 'IS' : 'is NOT'} a multiple of ${m}. Try testing digit rules!
+                `;
+            }
+        }
+
+        const popularNumbersData = [
+            { num: 36, alias: "The Super-Square Master", reward: "$150,000", factors: [2, 3, 4, 6, 9] },
+            { num: 24, alias: "The Two-Dozen Dynamo", reward: "$100,000", factors: [2, 3, 4, 6, 8] },
+            { num: 12, alias: "The Dozen Specialist", reward: "$75,000", factors: [2, 3, 4, 6] },
+            { num: 30, alias: "The Triple-Factor Trailblazer", reward: "$120,000", factors: [2, 3, 5, 6, 10] }
+        ];
+
+        function setupModule3() {
+            const grid = document.getElementById('mod3-popular-grid');
+            grid.innerHTML = '';
+
+            popularNumbersData.forEach(item => {
+                const card = document.createElement('button');
+                card.onclick = () => {
+                    playSound('click');
+                    document.getElementById('mod3-target-select').value = item.num;
+                    updateWantedPoster();
+                };
+                card.className = "bg-amber-50 hover:bg-amber-100 p-3 rounded-2xl border border-amber-300 text-left space-y-1 transition transform active:scale-95 shadow-sm";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-heading font-extrabold text-2xl text-amber-950">${item.num}</span>
+                        <span class="bg-amber-500 text-emerald-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full">${item.factors.length} Factors</span>
+                    </div>
+                    <span class="text-xs font-bold text-amber-800 block truncate">${item.alias}</span>
+                `;
+                grid.appendChild(card);
+            });
+
+            updateWantedPoster();
+        }
+
+        function updateWantedPoster() {
+            playSound('pop');
+            const targetVal = parseInt(document.getElementById('mod3-target-select').value) || 24;
+            const data = popularNumbersData.find(d => d.num === targetVal) || {
+                num: targetVal,
+                alias: "The Composite Outlaw",
+                reward: "$80,000",
+                factors: getMultipliersListForNum(targetVal)
+            };
+
+            document.getElementById('poster-number').innerText = data.num;
+            document.getElementById('poster-alias').innerText = `"${data.alias}"`;
+            document.getElementById('poster-reward').innerText = `${data.reward} SAFARI GOLD`;
+
+            const factorsList = document.getElementById('poster-factors-list');
+            factorsList.innerHTML = '';
+
+            const allFactors = getFactors(data.num);
+            const pairs = [];
+            for (let i = 0; i < allFactors.length / 2; i++) {
+                const f1 = allFactors[i];
+                const f2 = data.num / f1;
+                pairs.push(`${f1} × ${f2}`);
+            }
+
+            pairs.forEach(pair => {
+                const chip = document.createElement('div');
+                chip.className = 'bg-amber-200/80 p-1.5 rounded-lg border border-amber-800/40 text-center text-amber-950 font-mono font-bold';
+                chip.innerText = pair;
+                factorsList.appendChild(chip);
+            });
+
+            updateWantedPosterNotes();
+        }
+
+        function updateWantedPosterNotes() {
+            const input = document.getElementById('mod3-notes-input').value;
+            const display = document.getElementById('poster-notes-display');
+            if (display) {
+                display.innerText = input.trim() !== '' ? `"${input.trim()}"` : '"Extremely versatile number! Can be partitioned into multiple equal groups with zero remainder."';
+            }
+        }
+
+        function showNotification(title, message) {
+            const container = document.getElementById('notification-toast');
+            if (!container) return;
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-message').innerText = message;
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 4000);
+        }
+
+        function claimWantedBadge() {
+            playSound('fanfare');
+            unlockBadge('bounty');
+            const targetVal = document.getElementById('mod3-target-select').value;
+            showNotification('Sheriff Badge Awarded!', `You have created a WANTED Bounty Poster for composite number ${targetVal}!`);
+        }
+
+        function setupModule4() {
+            renderMod4KnightGrid();
+            renderMod4QuizCells();
+        }
+
+        function renderMod4KnightGrid() {
+            const container = document.getElementById('mod4-knight-grid');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 70; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'h-6 sm:h-7 rounded-md flex items-center justify-center font-bold text-[10px] sm:text-xs border transition ';
+
+                if (i % 7 === 0) {
+                    cell.className += 'bg-indigo-600 text-white border-indigo-700 font-extrabold shadow scale-105 z-10';
+                } else {
+                    cell.className += 'bg-white text-stone-300 border-stone-200';
+                }
+
+                cell.innerText = i;
+                container.appendChild(cell);
+            }
+        }
+
+        function renderMod4QuizCells() {
+            const container = document.getElementById('mod4-quiz-cells');
+            container.innerHTML = '';
+
+            for (let i = 191; i <= 200; i++) {
+                const btn = document.createElement('button');
+                btn.onclick = () => toggleMod4CellSelect(i);
+                
+                const isSelected = state.mod4SelectedCells.has(i);
+                btn.className = `py-3 rounded-xl font-heading font-extrabold text-sm sm:text-base border transition transform active:scale-95 shadow-sm ${
+                    isSelected ? 'bg-indigo-600 text-white border-indigo-800 ring-2 ring-indigo-300' : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-100'
+                }`;
+                btn.innerText = i;
+                container.appendChild(btn);
+            }
+        }
+
+        function toggleMod4CellSelect(num) {
+            playSound('pop');
+            if (state.mod4SelectedCells.has(num)) {
+                state.mod4SelectedCells.delete(num);
+            } else {
+                state.mod4SelectedCells.add(num);
+            }
+            renderMod4QuizCells();
+        }
+
+        function checkMod4Row191Quiz() {
+            const userSelections = Array.from(state.mod4SelectedCells);
+            const feedback = document.getElementById('mod4-quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            const isPerfect = userSelections.length === 1 && userSelections.includes(196);
+
+            if (isPerfect) {
+                playSound('fanfare');
+                feedback.className = 'p-4 rounded-2xl text-xs sm:text-sm bg-emerald-100 text-emerald-900 border border-emerald-300 space-y-1';
+                feedback.innerHTML = `
+                    <div class="font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-500 text-xl"></i> Perfect Knight's Move Master!
+                    </div>
+                    <p><strong>196</strong> is indeed the ONLY multiple of 7 in Row 191–200! Verification: 196 ÷ 7 = 28 (0 remainder!).</p>
+                `;
+                unlockBadge('knight');
+            } else {
+                playSound('wrong');
+                feedback.className = 'p-4 rounded-2xl text-xs sm:text-sm bg-amber-100 text-amber-950 border border-amber-300 space-y-1';
+                feedback.innerHTML = `
+                    <div class="font-bold text-base flex items-center gap-2 text-amber-900">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Check your division!
+                    </div>
+                    <p>Hint: Test dividing each number by 7. (e.g. 196 = 140 + 56 = 7×20 + 7×8 = 7×28!). Try toggling <strong>196</strong>!</p>
+                `;
+            }
+        }
+
+        function unlockBadge(key) {
+            if (!state.badges[key].unlocked) {
+                state.badges[key].unlocked = true;
+                playSound('fanfare');
+                updateBadgesUI();
+            }
+        }
+
+        function updateBadgesUI() {
+            let count = 0;
+            for (let k in state.badges) {
+                if (state.badges[k].unlocked) count++;
+            }
+            document.getElementById('badge-count-pill').innerText = `${count}/5`;
+
+            const printBtn = document.getElementById('print-cert-btn');
+            const certStatus = document.getElementById('cert-status-text');
+            if (count === 5) {
+                printBtn.disabled = false;
+                printBtn.className = "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-xl shadow cursor-pointer transition transform active:scale-95";
+                certStatus.innerText = "🎉 Congratulations! All 5 Badges unlocked! You are officially a Safari Math Master!";
+            }
+        }
+
+        function openBadgesModal() {
+            playSound('click');
+            const modal = document.getElementById('badges-modal');
+            const container = document.getElementById('badges-list-container');
+            container.innerHTML = '';
+
+            for (let k in state.badges) {
+                const b = state.badges[k];
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border flex items-center gap-3 transition ${
+                    b.unlocked ? 'bg-amber-100/80 border-amber-400 text-amber-950 shadow-sm' : 'bg-stone-50 border-stone-200 text-stone-400 opacity-60'
+                }`;
+                card.innerHTML = `
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-xl ${
+                        b.unlocked ? 'bg-amber-500 text-emerald-950 badge-glow' : 'bg-stone-200 text-stone-500'
+                    }">
+                        <i class="fa-solid ${b.icon}"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-heading font-bold text-sm text-stone-900 flex items-center gap-1.5">
+                            ${b.title}
+                            ${b.unlocked ? '<i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>' : ''}
+                        </h4>
+                        <p class="text-xs text-stone-600">${b.desc}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeBadgesModal() {
+            playSound('click');
+            document.getElementById('badges-modal').classList.add('hidden');
+        }
+
+        function printCertificate() {
+            document.getElementById('cert-date').innerText = new Date().toLocaleDateString();
+            try {
+                window.print();
+            } catch (e) {
+                showNotification('Print Notice', 'Printing is restricted inside the preview iframe. Open in a new window or export to print.');
+            }
+        }
+
+        function resetAllState() {
+            playSound('click');
+            state.maxGrid = 100;
+            state.selectedMultipliers = new Set([2, 5]);
+            state.customPattern = null;
+            state.heatmapMode = false;
+            state.selectedInspectorNumber = 24;
+            state.mod4SelectedCells.clear();
+
+            for (let k in state.badges) {
+                state.badges[k].unlocked = false;
+            }
+
+            updateBadgesUI();
+            renderMultiplierChips();
+            setGridRange(100);
+            showNotification('Safari Reset Complete', 'All highlights and badge progress have been reset.');
+        }
+
+        window.onload = function() {
+            renderMultiplierChips();
+            renderChartGrid();
+            updateBadgesUI();
+        };
+    </script>
+</body>
+</html>

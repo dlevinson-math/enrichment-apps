@@ -10,6 +10,16 @@
     "publishedOn": "2026-10-05"
   },
   {
+    "order": 2,
+    "grade": "Grade 1",
+    "week": 1,
+    "activity": "Counting Collections",
+    "sourceUrl": "https://gemini.google.com/share/d/18Cyf3ot75noh0DTgbeuwkQl-F4HVwCn0?usp=drive_link",
+    "path": "week-01/grade-1-counting-collections/index.html",
+    "builtOn": null,
+    "publishedOn": "2026-10-05"
+  },
+  {
     "order": 3,
     "grade": "Grade 2",
     "week": 1,
@@ -56,6 +66,16 @@
     "activity": "Build the Biggest Number",
     "sourceUrl": "https://claude.ai/artifact/6daJG1muuUMQ7aEPZguZtN",
     "path": "week-02/grade-2-build-the-biggest-number/index.html",
+    "builtOn": "2026-09-28",
+    "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 9,
+    "grade": "Grade 3",
+    "week": 2,
+    "activity": "Hundred-Chart Safari",
+    "sourceUrl": "https://gemini.google.com/share/d/1llNgivkIA5KIXUy4qrEkv2W4VsZL_TUM",
+    "path": "week-02/grade-3-hundred-chart-safari/index.html",
     "builtOn": "2026-09-28",
     "publishedOn": "2026-10-05"
   },
