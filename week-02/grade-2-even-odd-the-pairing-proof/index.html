@@ -1,0 +1,658 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Even &amp; Odd: The Pairing Proof</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one wide "case board" column — a stage where numbers become towers of partners, controls and evidence underneath. */
+:root{
+  --bg:#EDF0F6; --card:#FFFFFF; --ink:#1A2238; --muted:#566079; --line:#D2D8E5; --soft:#E3E8F2;
+  --pA:#12867A; --pB:#3E5BD6; --pC:#8A4FD0; --pD:#B53D78;
+  --loner:#E39A12; --loner-ink:#8A5600; --loner-soft:#FFF2D9;
+  --good:#1D8A4B; --good-soft:#E2F5EA; --nudge-soft:#FFF2D9;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --dot:clamp(20px, 2.6vw, 34px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11172A; --card:#1A2237; --ink:#EAEEF7; --muted:#A4ADC4; --line:#323C58; --soft:#232C45;
+    --pA:#2FC2B0; --pB:#7F97FF; --pC:#B78DF3; --pD:#F07CB0;
+    --loner:#FFB84A; --loner-ink:#FFD089; --loner-soft:#3A2D14;
+    --good:#4FD58D; --good-soft:#173527; --nudge-soft:#3A2D14; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11172A; --card:#1A2237; --ink:#EAEEF7; --muted:#A4ADC4; --line:#323C58; --soft:#232C45;
+  --pA:#2FC2B0; --pB:#7F97FF; --pC:#B78DF3; --pD:#F07CB0;
+  --loner:#FFB84A; --loner-ink:#FFD089; --loner-soft:#3A2D14;
+  --good:#4FD58D; --good-soft:#173527; --nudge-soft:#3A2D14; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{min-height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.35vw,21px); line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--pB); outline-offset:3px}
+.wrap{max-width:1240px; margin:0 auto; padding-inline:clamp(16px,3vw,36px); padding-block:14px 32px; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px}
+.title{min-width:0}
+.eyebrow{font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,48px); line-height:1.02; margin:2px 0 0; text-wrap:balance}
+h1 .amp{color:var(--loner)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:8px; flex-wrap:wrap}
+.tabs button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 20px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.5vw,22px); min-height:52px; color:var(--muted); display:flex; align-items:center; gap:10px}
+.tabs button b{width:30px; height:30px; border-radius:50%; background:var(--soft); display:grid; place-items:center; font-size:16px}
+.tabs button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.tabs button[aria-selected="true"] b{background:var(--loner); color:#1A2238}
+
+.panel{display:flex; flex-direction:column; gap:16px}
+.lead{font-family:var(--display); font-weight:600; font-size:clamp(21px,2vw,30px); line-height:1.25; margin:0; max-width:40em; text-wrap:balance}
+.lead em{font-style:normal; color:var(--loner-ink); background:var(--loner-soft); padding:0 .25em; border-radius:6px}
+.stage{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:clamp(14px,2vw,26px); display:flex; flex-direction:column; gap:14px; min-width:0}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.label{font-size:14px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted)}
+
+.chip{border:2px solid var(--line); background:var(--card); border-radius:16px; min-width:64px; min-height:60px; padding:6px 16px; font-family:var(--display); font-weight:800; font-size:clamp(24px,2.2vw,32px); position:relative}
+.chip[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.chip .ok{position:absolute; top:-9px; right:-9px; width:26px; height:26px; border-radius:50%; background:var(--good); color:#fff; font-size:15px; display:grid; place-items:center; font-family:var(--body)}
+
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; border-radius:16px; padding:14px 24px; min-height:56px; font-size:clamp(17px,1.4vw,21px)}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; border-radius:16px; padding:12px 20px; min-height:56px; font-size:clamp(16px,1.3vw,20px)}
+.primary:disabled,.secondary:disabled,.pick:disabled{opacity:.4; cursor:default}
+.pick{border:3px solid var(--line); background:var(--card); border-radius:18px; padding:12px 22px; min-height:64px; font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px)}
+.pick small{display:block; font-family:var(--body); font-weight:400; font-size:15px; color:var(--muted); margin-top:-4px}
+.pick[aria-pressed="true"]{border-color:var(--ink); background:var(--soft)}
+.pick.sm{font-size:clamp(18px,1.6vw,23px); min-height:56px; padding:8px 18px}
+
+/* Crowd of dots (pairing test) */
+.crowd{position:relative; width:100%; aspect-ratio:16/7; max-width:100%; background:var(--soft); border-radius:18px; overflow:hidden}
+.cdot{position:absolute; width:calc(var(--dot) * 1.6); height:calc(var(--dot) * 1.6); transform:translate(-50%,-50%); border:0; padding:0; border-radius:50%; background:transparent; display:grid; place-items:center}
+.cdot::before{content:""; width:var(--dot); height:var(--dot); border-radius:50%; background:var(--ink); transition:transform .15s}
+.cdot.sel::before{background:var(--pA); transform:scale(1.25); box-shadow:0 0 0 6px color-mix(in srgb, var(--pA) 30%, transparent)}
+.cdot.lonely::before{background:var(--loner); box-shadow:0 0 0 8px color-mix(in srgb, var(--loner) 35%, transparent); animation:glow 1.4s ease-in-out infinite}
+.cdot.lonely::after{content:"no partner!"; position:absolute; top:100%; white-space:nowrap; font-weight:700; font-size:15px; color:var(--loner-ink); background:var(--loner-soft); padding:1px 8px; border-radius:8px}
+.crowd .empty{position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-weight:700}
+@keyframes glow{50%{box-shadow:0 0 0 14px color-mix(in srgb, var(--loner) 15%, transparent)}}
+
+/* Towers of partners */
+.model{display:flex; flex-wrap:wrap; gap:14px 18px; align-items:flex-end; min-height:calc(var(--dot) * 2 + 40px)}
+.grp{display:flex; flex-direction:column; gap:6px; min-width:0}
+.glab{font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px); line-height:1; color:var(--c, var(--ink))}
+.towers{display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end}
+.tower{display:flex; flex-direction:column; gap:4px; padding:4px; border-radius:999px; background:color-mix(in srgb, var(--c, var(--ink)) 16%, transparent)}
+.dot{display:block; width:var(--dot); height:var(--dot); border-radius:50%; background:var(--c, var(--ink))}
+.dot.loner{background:var(--loner)}
+.slot{display:block; width:var(--dot); height:var(--dot); border-radius:50%; border:2.5px dashed var(--loner)}
+.tower.lone{background:var(--loner-soft)}
+.tower.newpair{background:var(--loner-soft); box-shadow:inset 0 0 0 3px var(--loner)}
+.tower.alone{box-shadow:inset 0 0 0 3px var(--loner)}
+.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.4); opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1); opacity:1}}
+.plus{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); color:var(--muted); align-self:center}
+.key{display:flex; flex-wrap:wrap; gap:8px 18px; font-size:15px; color:var(--muted)}
+.key span{display:inline-flex; align-items:center; gap:6px}
+.key i{width:16px; height:16px; border-radius:50%; background:var(--c)}
+.key i.ring{background:var(--loner-soft); box-shadow:inset 0 0 0 3px var(--loner)}
+
+.status{font-size:clamp(18px,1.5vw,22px); font-weight:700; margin:0}
+.fb{margin:0; padding:14px 18px; border-radius:14px; font-size:clamp(18px,1.5vw,22px); max-width:46em}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft)}
+.fb.good::before{content:"✓ "; color:var(--good); font-weight:700}
+.fb.nudge{background:var(--nudge-soft)}
+.fb.info{background:var(--soft)}
+
+/* Steppers */
+.nums{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
+.stepper{display:flex; align-items:center; gap:6px; background:var(--soft); border-radius:18px; padding:6px}
+.stepper button{width:52px; height:52px; border-radius:14px; border:0; background:var(--card); font-size:28px; font-weight:700; line-height:1}
+.stepper output{min-width:2.2ch; text-align:center; font-family:var(--display); font-weight:800; font-size:clamp(30px,2.8vw,40px); color:var(--c, var(--ink)); font-variant-numeric:tabular-nums}
+
+/* Notebook */
+.nb{width:100%; border-collapse:collapse; font-size:clamp(16px,1.3vw,20px)}
+.nbwrap{overflow-x:auto}
+.nb th{text-align:left; font-size:14px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); padding:6px 10px; border-bottom:2px solid var(--line)}
+.nb td{padding:10px; border-bottom:1.5px solid var(--line); vertical-align:top}
+.nb td:first-child{font-family:var(--display); font-weight:800; font-size:clamp(20px,1.8vw,26px); white-space:nowrap}
+.nb td:first-child small{display:block; font-family:var(--body); font-weight:400; font-size:14px; color:var(--muted)}
+.ex{display:inline-block; background:var(--soft); border-radius:10px; padding:2px 10px; margin:2px 6px 2px 0; font-variant-numeric:tabular-nums; white-space:nowrap}
+.ex b.e{color:var(--pA)} .ex b.o{color:var(--loner-ink)}
+.law{display:flex; flex-direction:column; gap:6px; min-width:180px}
+.law .row{gap:8px}
+.law .fbm{font-size:16px; margin:0}
+.lawdone{font-family:var(--display); font-weight:800; font-size:clamp(20px,1.8vw,26px); color:var(--good)}
+.muted{color:var(--muted)}
+
+/* Cases */
+.cases{display:flex; gap:8px; flex-wrap:wrap}
+.cases button{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:8px 16px; min-height:52px; font-weight:700; font-size:clamp(16px,1.3vw,19px)}
+.cases button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.sum{font-family:var(--display); font-weight:800; font-size:clamp(44px,6vw,84px); line-height:1; letter-spacing:.01em; font-variant-numeric:tabular-nums}
+.sum .op{color:var(--muted); margin:0 .2em}
+.sum.spot .ones{color:var(--card); background:var(--loner); border-radius:.15em; padding:0 .06em}
+.sum.spot .ones.ev{background:var(--pA)}
+.sumnav{display:flex; gap:8px}
+.slider{width:min(420px,100%); accent-color:var(--loner); height:36px}
+.hint{font-size:16px; color:var(--muted); margin:0}
+
+@media (max-width:700px){
+  .crowd{aspect-ratio:4/3}
+  .tools{margin-left:0}
+  :root{--dot:22px}
+  .nb thead{display:none}
+  .nb tr{display:block; border-bottom:1.5px solid var(--line); padding:8px 0}
+  .nb td{display:block; border:0; padding:4px 0}
+  .law{min-width:0}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <div class="eyebrow">Grade 2 · Week 2 · Number Detectives</div>
+    <h1>Even <span class="amp">&amp;</span> Odd: The Pairing Proof</h1>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tab1" aria-selected="true"><b>1</b>Pairing test</button>
+  <button role="tab" id="tab2" aria-selected="false"><b>2</b>Addition lab</button>
+  <button role="tab" id="tab3" aria-selected="false"><b>3</b>Detective cases</button>
+</nav>
+
+<!-- 1 · Pairing test -->
+<section class="panel" id="p1">
+  <p class="lead">Tap two dots to make partners. If every dot has a partner, the number is EVEN. If one dot is left alone, it's <em>ODD</em>.</p>
+  <div class="row" id="t1chips" aria-label="Choose a number"></div>
+  <div class="stage">
+    <div class="crowd" id="crowd" aria-label="Dots waiting for a partner"></div>
+    <div class="label">Partners</div>
+    <div class="model"><div class="towers" id="shelf"></div></div>
+    <p class="status" id="t1status" aria-live="polite"></p>
+    <div class="row">
+      <button class="pick" id="vEven" aria-pressed="false">EVEN<small>everyone has a partner</small></button>
+      <button class="pick" id="vOdd" aria-pressed="false">ODD<small>one dot is left alone</small></button>
+    </div>
+    <p class="fb" id="t1fb" aria-live="polite"></p>
+    <div class="row">
+      <button class="secondary" id="autoPair">Pair them for me</button>
+      <button class="secondary" id="redoPair">Unpair and try again</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Addition lab -->
+<section class="panel" id="p2" hidden>
+  <p class="lead">Pick two numbers and put them together. Does the total have a loner? Test every kind of sum at least twice, then write the law.</p>
+  <div class="stage">
+    <div class="nums">
+      <div class="stepper" style="--c:var(--pA)"><button id="aMinus" aria-label="First number down">−</button><output id="aOut">4</output><button id="aPlus" aria-label="First number up">+</button></div>
+      <span class="plus">+</span>
+      <div class="stepper" style="--c:var(--pB)"><button id="bMinus" aria-label="Second number down">−</button><output id="bOut">6</output><button id="bPlus" aria-label="Second number up">+</button></div>
+      <button class="primary" id="combineBtn">Put them together</button>
+      <button class="secondary" id="mixBtn">Mix up the numbers</button>
+    </div>
+    <div class="model" id="labModel"></div>
+    <div class="key" id="labKey"></div>
+    <p class="fb info" id="labFb" aria-live="polite"></p>
+  </div>
+  <div class="stage">
+    <div class="label">Lab notebook</div>
+    <div class="nbwrap"><table class="nb">
+      <thead><tr><th>Experiment</th><th>Your examples</th><th>The law: even or odd?</th></tr></thead>
+      <tbody id="nbBody"></tbody>
+    </table></div>
+    <p class="fb" id="nbFb" aria-live="polite"></p>
+  </div>
+  <div class="stage">
+    <p class="lead" style="font-size:clamp(19px,1.7vw,25px)">Why does odd + odd make an even number? <span class="muted">Hint: what do the two loners do?</span></p>
+    <div class="row"><button class="secondary" id="whyBtn">Show me with 5 + 7</button></div>
+    <p class="fb" id="whyFb" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 3 · Detective cases -->
+<section class="panel" id="p3" hidden>
+  <div class="cases" id="caseNav">
+    <button data-c="1" aria-pressed="true">Case 1 · No computing!</button>
+    <button data-c="2" aria-pressed="false">Case 2 · Three loners</button>
+    <button data-c="3" aria-pressed="false">Case 3 · Four odd numbers</button>
+  </div>
+
+  <div class="stage" id="c1">
+    <p class="lead">Use your laws. Do NOT add these up! Is the answer even or odd, and which law told you?</p>
+    <div class="row">
+      <div class="sum" id="c1sum"></div>
+    </div>
+    <div class="row sumnav" id="c1nav"></div>
+    <div class="label">Even or odd?</div>
+    <div class="row" id="c1guess"></div>
+    <div class="label">Which law told you?</div>
+    <div class="row" id="c1law"></div>
+    <p class="fb" id="c1fb" aria-live="polite"></p>
+    <div class="label">Evidence</div>
+    <div class="row">
+      <button class="secondary" id="c1spot">Spot the ones digits</button>
+      <button class="secondary" id="c1why">Why only the ones digit?</button>
+      <button class="secondary" id="c1check">Check by adding</button>
+    </div>
+    <p class="fb info" id="c1ev" aria-live="polite"></p>
+  </div>
+
+  <div class="stage" id="c2" hidden>
+    <p class="lead">What happens when you add THREE odd numbers? Predict first, then let the loners meet.</p>
+    <div class="nums" id="c2nums"></div>
+    <div class="label">My prediction</div>
+    <div class="row">
+      <button class="pick sm" id="c2even" aria-pressed="false">Even</button>
+      <button class="pick sm" id="c2odd" aria-pressed="false">Odd</button>
+      <button class="primary" id="c2go">Let the loners meet</button>
+      <button class="secondary" id="c2new">Try 3 new odd numbers</button>
+    </div>
+    <div class="model" id="c2model"></div>
+    <p class="fb" id="c2fb" aria-live="polite"></p>
+  </div>
+
+  <div class="stage" id="c3" hidden>
+    <p class="lead">Detective's report. True or false: if you add FOUR odd numbers, the answer is always even.</p>
+    <div class="row">
+      <button class="pick sm" id="c3t" aria-pressed="false">TRUE</button>
+      <button class="pick sm" id="c3f" aria-pressed="false">FALSE</button>
+    </div>
+    <p class="fb" id="c3fb" aria-live="polite"></p>
+    <div class="label">Evidence</div>
+    <div class="row"><button class="secondary" id="c3show">Show me 4 odd numbers</button></div>
+    <div class="model" id="c3model"></div>
+    <p class="fb info" id="c3ev" aria-live="polite"></p>
+    <div class="label">Bonus: what about more odd numbers?</div>
+    <div class="row">
+      <label for="c3k" class="status">Add <span id="c3kOut">5</span> odd numbers</label>
+      <input type="range" class="slider" id="c3k" min="1" max="10" value="5">
+    </div>
+    <div class="model"><div class="towers" id="c3loners"></div></div>
+    <p class="fb info" id="c3kfb" aria-live="polite"></p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const P = ['var(--pA)','var(--pB)','var(--pC)','var(--pD)'];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const parity = n => n % 2 === 0 ? 'even' : 'odd';
+const plural = (k, w) => `${k} ${w}${k === 1 ? '' : 's'}`;
+const half = n => Math.floor(n / 2);
+const randInt = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const randOdd = (a, b) => { let n; do { n = randInt(a, b); } while (n % 2 === 0); return n; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const press = (el, on) => el.setAttribute('aria-pressed', on ? 'true' : 'false');
+let gen = 0;
+
+/* ---------- Towers of partners ---------- */
+function towersHTML(n, color, anim){
+  let h = '';
+  for (let i = 0; i < half(n); i++) h += `<span class="tower${anim ? ' pop' : ''}" style="--c:${color}"><i class="dot"></i><i class="dot"></i></span>`;
+  if (n % 2) h += `<span class="tower lone"><i class="slot"></i><i class="dot loner"></i></span>`;
+  return h;
+}
+function separateHTML(nums){
+  return nums.map((n, i) => `<div class="grp" style="--c:${P[i]}"><div class="glab">${n}</div><div class="towers">${towersHTML(n, P[i])}</div></div>`).join('<div class="plus">+</div>');
+}
+function combinedHTML(nums){
+  let h = '', L = 0;
+  nums.forEach((n, i) => {
+    for (let k = 0; k < half(n); k++) h += `<span class="tower" style="--c:${P[i]}"><i class="dot"></i><i class="dot"></i></span>`;
+    L += n % 2;
+  });
+  for (let k = 0; k < half(L); k++) h += `<span class="tower newpair pop"><i class="dot loner"></i><i class="dot loner"></i></span>`;
+  if (L % 2) h += `<span class="tower lone alone"><i class="slot"></i><i class="dot loner"></i></span>`;
+  const s = nums.reduce((a, b) => a + b, 0);
+  return `<div class="grp"><div class="glab">${nums.join(' + ')} = ${s}</div><div class="towers">${h}</div></div>`;
+}
+function keyHTML(nums, combined){
+  let h = nums.map((n, i) => `<span><i style="--c:${P[i]}"></i>pairs from ${n}</span>`).join('');
+  h += `<span><i style="--c:var(--loner)"></i>loner</span>`;
+  if (combined) h += `<span><i class="ring"></i>loners who found a partner</span>`;
+  return h;
+}
+function lonerStory(nums){
+  const s = nums.reduce((a, b) => a + b, 0);
+  const L = nums.filter(n => n % 2).length;
+  let t = `${nums.join(' + ')} = ${s}. `;
+  if (L === 0) t += `No number brought a loner, so all ${s} dots are in ${half(s)} pairs. <b>EVEN.</b>`;
+  else if (L === 1) t += `Only one loner came along, and nobody can be its partner. ${half(s)} pairs and 1 loner. <b>ODD.</b>`;
+  else {
+    t += `${L} loners came along. `;
+    t += L % 2 === 0
+      ? `They pair up with each other: ${plural(L / 2, 'new pair')}, nobody left alone. ${half(s)} pairs in all. <b>EVEN.</b>`
+      : `${plural(half(L), 'new pair')} form, and 1 loner is still alone. ${half(s)} pairs and 1 loner. <b>ODD.</b>`;
+  }
+  return t;
+}
+
+/* ---------- 1 · Pairing test ---------- */
+const T1 = { list:[7, 10, 13], n:7, own:16, crowd:[], pairs:[], sel:null, pos:[], solved:{}, verdict:null };
+function rng(seed){ return () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+function setupT1(n){
+  gen++;
+  T1.n = n; T1.sel = null; T1.pairs = []; T1.verdict = null;
+  T1.crowd = Array.from({length:n}, (_, i) => i);
+  const narrow = matchMedia('(max-width:700px)').matches;
+  const ratio = narrow ? 4/3 : 16/7;
+  const cols = Math.max(3, Math.ceil(Math.sqrt(n * ratio * 1.6)));
+  const rows = Math.max(2, Math.ceil(n * 1.6 / cols));
+  const r = rng(n * 977 + 13);
+  const cells = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) cells.push([x, y]);
+  for (let i = cells.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [cells[i], cells[j]] = [cells[j], cells[i]]; }
+  T1.pos = cells.slice(0, n).map(([x, y]) => ({ x:(x + 0.3 + 0.4 * r()) / cols * 100, y:(y + 0.3 + 0.4 * r()) / rows * 100 }));
+  $('#t1fb').textContent = ''; $('#t1fb').className = 'fb';
+  renderT1();
+}
+function renderChips(){
+  const box = $('#t1chips');
+  const isOwn = !T1.list.includes(T1.n);
+  box.innerHTML = '<span class="label">Number</span>' + T1.list.map(n =>
+    `<button class="chip" data-n="${n}" aria-pressed="${T1.n === n}">${n}${T1.solved[n] ? '<span class="ok" aria-label="solved">✓</span>' : ''}</button>`).join('') +
+    `<span class="label" style="margin-left:10px">Your own number</span>
+     <div class="stepper"><button id="ownMinus" aria-label="Own number down">−</button><output id="ownOut" style="${isOwn ? 'color:var(--pA)' : ''}">${T1.own}</output><button id="ownPlus" aria-label="Own number up">+</button></div>
+     <button class="secondary" id="ownGo">Test ${T1.own}</button>`;
+  box.querySelectorAll('.chip').forEach(b => b.onclick = () => { setupT1(+b.dataset.n); renderChips(); });
+  const setOwn = d => { T1.own = Math.min(30, Math.max(1, T1.own + d)); renderChips(); };
+  $('#ownMinus').onclick = () => setOwn(-1);
+  $('#ownPlus').onclick = () => setOwn(1);
+  $('#ownGo').onclick = () => { setupT1(T1.own); renderChips(); };
+}
+function renderT1(){
+  const crowd = $('#crowd');
+  const lonely = T1.crowd.length === 1;
+  crowd.innerHTML = T1.crowd.map(id => {
+    const p = T1.pos[id];
+    const cls = 'cdot' + (T1.sel === id ? ' sel' : '') + (lonely ? ' lonely' : '');
+    return `<button class="${cls}" data-id="${id}" style="left:${p.x}%;top:${p.y}%" aria-label="dot${lonely ? ', no partner' : ''}"></button>`;
+  }).join('') + (T1.crowd.length === 0 ? '<div class="empty">Everyone found a partner.</div>' : '');
+  crowd.querySelectorAll('.cdot').forEach(b => b.onclick = () => tapDot(+b.dataset.id));
+  $('#shelf').innerHTML = T1.pairs.map((_, i) => `<span class="tower${i === T1.pairs.length - 1 && T1.justPaired ? ' pop' : ''}" style="--c:var(--pA)"><i class="dot"></i><i class="dot"></i></span>`).join('')
+    || '<span class="muted">Pairs you make will line up here.</span>';
+  T1.justPaired = false;
+  const p = T1.pairs.length, c = T1.crowd.length;
+  $('#t1status').textContent = c >= 2
+    ? `${plural(p, 'pair')} so far. ${c} dots still need a partner.`
+    : c === 1 ? `${plural(p, 'pair')} and 1 dot with no partner.`
+    : `${plural(p, 'pair')}. Every dot has a partner.`;
+  const ready = c <= 1;
+  $('#vEven').disabled = !ready; $('#vOdd').disabled = !ready;
+  press($('#vEven'), T1.verdict === 'even'); press($('#vOdd'), T1.verdict === 'odd');
+  $('#autoPair').disabled = c < 2;
+  $('#redoPair').disabled = p === 0;
+  if (!ready && !$('#t1fb').textContent) { /* keep quiet */ }
+}
+function tapDot(id){
+  if (T1.crowd.length < 2) return;
+  if (T1.sel === null) T1.sel = id;
+  else if (T1.sel === id) T1.sel = null;
+  else {
+    T1.pairs.push([T1.sel, id]);
+    T1.crowd = T1.crowd.filter(x => x !== id && x !== T1.sel);
+    T1.sel = null; T1.justPaired = true;
+  }
+  renderT1();
+}
+async function autoPair(){
+  const g = ++gen;
+  T1.sel = null;
+  while (T1.crowd.length >= 2 && g === gen){
+    T1.pairs.push([T1.crowd[0], T1.crowd[1]]);
+    T1.crowd = T1.crowd.slice(2); T1.justPaired = true;
+    renderT1();
+    await sleep(reduced ? 0 : 220);
+  }
+}
+function verdict(choice){
+  const n = T1.n, p = T1.pairs.length, fb = $('#t1fb');
+  T1.verdict = choice;
+  const truth = parity(n);
+  if (choice === truth){
+    fb.className = 'fb good';
+    fb.textContent = truth === 'even'
+      ? `${n} is EVEN. ${plural(p, 'pair')}, and nobody is left out.`
+      : `${n} is ODD. ${plural(p, 'pair')} and 1 loner.`;
+    T1.solved[n] = true; renderChips();
+  } else {
+    fb.className = 'fb nudge';
+    fb.textContent = truth === 'odd'
+      ? `Look at the glowing dot. It has no partner. When one dot is left alone, the number is odd. Try again.`
+      : `Look again: every dot is in a pair, and no dot is alone. Can you find a dot without a partner? Try again.`;
+  }
+  renderT1();
+}
+
+/* ---------- 2 · Addition lab ---------- */
+const LAWS = [
+  { k:'ee', label:'even + even', law:'even' },
+  { k:'oo', label:'odd + odd', law:'even' },
+  { k:'eo', label:'even + odd', note:'odd + even counts too', law:'odd' }
+];
+const T2 = { a:4, b:6, shown:false, ex:{ee:[], oo:[], eo:[]}, found:{}, msg:{} };
+const kindOf = (a, b) => (a % 2 === 0 && b % 2 === 0) ? 'ee' : (a % 2 && b % 2) ? 'oo' : 'eo';
+function renderLab(){
+  $('#aOut').textContent = T2.a; $('#bOut').textContent = T2.b;
+  const nums = [T2.a, T2.b];
+  $('#labModel').innerHTML = T2.shown ? combinedHTML(nums) : separateHTML(nums);
+  $('#labKey').innerHTML = keyHTML(nums, T2.shown);
+  if (!T2.shown){
+    $('#labFb').innerHTML = `${T2.a} is ${parity(T2.a)}${T2.a % 2 ? ' (it has a loner)' : ''}. ${T2.b} is ${parity(T2.b)}${T2.b % 2 ? ' (it has a loner)' : ''}. What will the total be? Predict, then put them together.`;
+  }
+  renderNotebook();
+}
+function setNum(which, d){
+  T2[which] = Math.min(20, Math.max(1, T2[which] + d));
+  T2.shown = false; renderLab();
+}
+function combine(){
+  T2.shown = true;
+  const a = T2.a, b = T2.b, s = a + b, k = kindOf(a, b);
+  const list = T2.ex[k];
+  const fresh = !list.some(e => e.a === a && e.b === b);
+  if (fresh) list.push({a, b, s});
+  renderLab();
+  const row = LAWS.find(r => r.k === k);
+  $('#labFb').innerHTML = lonerStory([a, b]) + ` <span class="muted">${fresh ? 'Added to the ' + row.label + ' row of your notebook.' : 'Already in your notebook.'}</span>`;
+}
+function renderNotebook(){
+  $('#nbBody').innerHTML = LAWS.map(r => {
+    const ex = T2.ex[r.k];
+    const exHTML = ex.length
+      ? ex.map(e => `<span class="ex">${e.a} + ${e.b} = ${e.s} <b class="${e.s % 2 ? 'o' : 'e'}">${parity(e.s)}</b></span>`).join('')
+      : '<span class="muted">No tests yet.</span>';
+    let lawHTML;
+    if (T2.found[r.k]) lawHTML = `<span class="lawdone">${r.label} = ${r.law.toUpperCase()} ✓</span>`;
+    else if (ex.length < 2) lawHTML = `<span class="muted">Test ${2 - ex.length} more ${ex.length === 1 ? 'example' : 'examples'} first.</span>`;
+    else lawHTML = `<div class="law"><div class="row">
+        <button class="pick sm" data-k="${r.k}" data-v="even">Even</button>
+        <button class="pick sm" data-k="${r.k}" data-v="odd">Odd</button></div>
+        ${T2.msg[r.k] ? `<p class="fbm">${T2.msg[r.k]}</p>` : ''}</div>`;
+    return `<tr><td>${r.label}${r.note ? `<small>${r.note}</small>` : ''}</td><td>${exHTML}</td><td>${lawHTML}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('#nbBody [data-k]').forEach(b => b.onclick = () => writeLaw(b.dataset.k, b.dataset.v));
+  const n = Object.keys(T2.found).length, fb = $('#nbFb');
+  if (n === 3){ fb.className = 'fb good'; fb.textContent = 'All three laws found! even + even = even, odd + odd = even, even + odd = odd. Take them to the Detective cases.'; }
+  else { fb.className = 'fb'; fb.textContent = ''; }
+}
+function writeLaw(k, v){
+  const r = LAWS.find(x => x.k === k);
+  if (v === r.law){ T2.found[k] = true; T2.msg[k] = ''; }
+  else {
+    const ex = T2.ex[k];
+    T2.msg[k] = `Check your evidence: ${ex.map(e => `${e.a} + ${e.b} = ${e.s} is ${parity(e.s)}`).join('; ')}. Did any of them come out ${v}? Try again.`;
+  }
+  renderNotebook();
+}
+function why(){
+  T2.a = 5; T2.b = 7; combine();
+  const fb = $('#whyFb'); fb.className = 'fb info';
+  fb.innerHTML = '5 has 2 pairs and a loner. 7 has 3 pairs and a loner. Put them together and <b>the two loners become partners</b>. Nobody is left alone, so 5 + 7 = 12 is even. Any two odd numbers work the same way: each brings exactly one loner.';
+  $('#labModel').scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'center'});
+}
+
+/* ---------- 3 · Detective cases ---------- */
+const C1 = { items:[[258, 173], [44, 66], [305, 111]], i:0, st:[{}, {}, {}], spot:false };
+const lawKey = (a, b) => kindOf(a, b);
+const lawLabel = k => LAWS.find(r => r.k === k).label;
+function digitsHTML(n){
+  const s = String(n);
+  return `${s.slice(0, -1)}<span class="ones ${n % 2 ? 'od' : 'ev'}">${s.slice(-1)}</span>`;
+}
+function renderC1(){
+  const [a, b] = C1.items[C1.i], st = C1.st[C1.i];
+  const sum = $('#c1sum');
+  sum.className = 'sum' + (C1.spot ? ' spot' : '');
+  sum.innerHTML = `${digitsHTML(a)}<span class="op">+</span>${digitsHTML(b)}`;
+  $('#c1nav').innerHTML = C1.items.map((it, i) => `<button class="chip" data-i="${i}" aria-pressed="${i === C1.i}" aria-label="Problem ${i + 1}">${String.fromCharCode(97 + i)}${C1.st[i].solved ? '<span class="ok" aria-label="solved">✓</span>' : ''}</button>`).join('');
+  $('#c1nav').querySelectorAll('button').forEach(btn => btn.onclick = () => { C1.i = +btn.dataset.i; C1.spot = false; $('#c1ev').textContent = ''; renderC1(); });
+  $('#c1guess').innerHTML = ['even', 'odd'].map(v => `<button class="pick sm" data-v="${v}" aria-pressed="${st.guess === v}">${v === 'even' ? 'Even' : 'Odd'}</button>`).join('');
+  $('#c1law').innerHTML = LAWS.map(r => `<button class="pick sm" data-l="${r.k}" aria-pressed="${st.law === r.k}">${r.label}</button>`).join('');
+  $('#c1guess').querySelectorAll('button').forEach(btn => btn.onclick = () => { st.guess = btn.dataset.v; judgeC1(); });
+  $('#c1law').querySelectorAll('button').forEach(btn => btn.onclick = () => { st.law = btn.dataset.l; judgeC1(); });
+  const fb = $('#c1fb');
+  fb.className = 'fb ' + (st.cls || ''); fb.innerHTML = st.msg || '';
+  $('#c1spot').textContent = C1.spot ? 'Hide the ones digits' : 'Spot the ones digits';
+}
+function judgeC1(){
+  const [a, b] = C1.items[C1.i], st = C1.st[C1.i];
+  const pa = parity(a), pb = parity(b), res = parity(a + b), k = lawKey(a, b);
+  const why = `${a} ends in ${a % 10}, so it is ${pa}. ${b} ends in ${b % 10}, so it is ${pb}.`;
+  if (st.guess && st.guess !== res){
+    st.cls = 'nudge'; st.msg = `Not yet. ${why} Which law fits ${pa} + ${pb}? Try again.`; st.solved = false;
+  } else if (st.law && st.law !== k){
+    st.cls = 'nudge'; st.msg = `${st.guess ? 'Your even/odd answer is right, but check the law. ' : ''}${why} So this is a <b>${lawLabel(k)}</b> problem. Try again.`; st.solved = false;
+  } else if (st.guess && st.law){
+    st.cls = 'good'; st.msg = `Solved without adding! ${pa} + ${pb} = <b>${res}</b>. The ${lawLabel(k)} law told you.`; st.solved = true;
+  } else {
+    st.cls = 'info'; st.msg = st.guess ? 'Good. Now pick the law that told you.' : 'Good. Now decide: even or odd?';
+  }
+  renderC1();
+}
+function c1why(){
+  const [a, b] = C1.items[C1.i];
+  const part = n => `${n} is ${Math.floor(n / 10)} tens and ${n % 10} ones`;
+  $('#c1ev').innerHTML = `${part(a)}. ${part(b)}. Every ten splits into 5 pairs, so the tens never leave a loner. Only the ones digit can. Even ones digits: 0, 2, 4, 6, 8.`;
+}
+function c1check(){
+  const [a, b] = C1.items[C1.i], s = a + b;
+  $('#c1ev').innerHTML = `${a} + ${b} = <b>${s}</b>. It ends in ${s % 10}, so it is <b>${parity(s)}</b>. ${C1.st[C1.i].solved ? 'Your law was right!' : 'Does that match your law?'}`;
+}
+
+const C2 = { nums:[3, 5, 7], guess:null, shown:false };
+function renderC2(){
+  $('#c2nums').innerHTML = C2.nums.map((n, i) => `${i ? '<span class="plus">+</span>' : ''}<div class="stepper" style="--c:${P[i]}"><button data-i="${i}" data-d="-2" aria-label="Odd number ${i + 1} down">−</button><output>${n}</output><button data-i="${i}" data-d="2" aria-label="Odd number ${i + 1} up">+</button></div>`).join('');
+  $('#c2nums').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i; C2.nums[i] = Math.min(15, Math.max(1, C2.nums[i] + +b.dataset.d)); C2.shown = false; renderC2();
+  });
+  press($('#c2even'), C2.guess === 'even'); press($('#c2odd'), C2.guess === 'odd');
+  $('#c2model').innerHTML = C2.shown ? combinedHTML(C2.nums) : separateHTML(C2.nums);
+  const fb = $('#c2fb');
+  if (!C2.shown){ fb.className = 'fb info'; fb.textContent = `Each odd number brings one loner. Count them: 3 loners. What will they do?`; return; }
+  const s = C2.nums.reduce((x, y) => x + y, 0);
+  let msg = lonerStory(C2.nums);
+  if (C2.guess === 'odd') { fb.className = 'fb good'; msg += ' Your prediction was right. Two loners pair up, one loner remains.'; }
+  else if (C2.guess === 'even') { fb.className = 'fb nudge'; msg += ' You predicted even. Look at the last tower: one loner still has an empty spot. Try 3 new odd numbers. Does it ever change?'; }
+  else fb.className = 'fb info';
+  fb.innerHTML = msg;
+}
+
+const C3 = { tf:null, nums:null, k:5 };
+function renderC3(){
+  press($('#c3t'), C3.tf === true); press($('#c3f'), C3.tf === false);
+  const fb = $('#c3fb');
+  if (C3.tf === true){ fb.className = 'fb good'; fb.textContent = 'TRUE. Four odd numbers bring four loners. The loners make 2 new pairs, and nobody is left alone. So the answer is always even.'; }
+  else if (C3.tf === false){ fb.className = 'fb nudge'; fb.textContent = 'Let\'s test that. Tap "Show me 4 odd numbers" a few times and count the loners. Does any loner end up alone? Then decide again.'; }
+  else { fb.className = 'fb'; fb.textContent = ''; }
+  if (C3.nums){
+    $('#c3model').innerHTML = combinedHTML(C3.nums);
+    $('#c3ev').innerHTML = lonerStory(C3.nums);
+  } else { $('#c3model').innerHTML = ''; $('#c3ev').textContent = ''; }
+  const k = C3.k;
+  $('#c3kOut').textContent = k;
+  let h = '';
+  for (let i = 0; i < half(k); i++) h += `<span class="tower newpair"><i class="dot loner"></i><i class="dot loner"></i></span>`;
+  if (k % 2) h += `<span class="tower lone alone"><i class="slot"></i><i class="dot loner"></i></span>`;
+  $('#c3loners').innerHTML = h;
+  $('#c3kfb').innerHTML = k === 1
+    ? `1 odd number brings 1 loner, and it has no partner. The answer is <b>ODD</b>.`
+    : `${k} odd numbers bring ${k} loners. They make ${plural(half(k), 'new pair')}${k % 2 ? ', and 1 loner is still alone' : ', and nobody is left alone'}. The answer is always <b>${k % 2 ? 'ODD' : 'EVEN'}</b>.`;
+}
+
+/* ---------- Tabs, reset, full screen ---------- */
+function tab(t){
+  [1, 2, 3].forEach(i => { $('#tab' + i).setAttribute('aria-selected', i === t); $('#p' + i).hidden = i !== t; });
+}
+function showCase(c){
+  document.querySelectorAll('#caseNav button').forEach(b => press(b, +b.dataset.c === c));
+  [1, 2, 3].forEach(i => $('#c' + i).hidden = i !== c);
+}
+function resetAll(){
+  gen++;
+  T1.solved = {}; T1.own = 16;
+  setupT1(7); renderChips();
+  Object.assign(T2, { a:4, b:6, shown:false, ex:{ee:[], oo:[], eo:[]}, found:{}, msg:{} });
+  $('#whyFb').textContent = ''; $('#whyFb').className = 'fb';
+  renderLab();
+  Object.assign(C1, { i:0, st:[{}, {}, {}], spot:false }); $('#c1ev').textContent = ''; renderC1();
+  Object.assign(C2, { nums:[3, 5, 7], guess:null, shown:false }); renderC2();
+  Object.assign(C3, { tf:null, nums:null, k:5 }); $('#c3k').value = 5; renderC3();
+  tab(1); showCase(1);
+}
+
+$('#tab1').onclick = () => tab(1);
+$('#tab2').onclick = () => tab(2);
+$('#tab3').onclick = () => tab(3);
+document.querySelectorAll('#caseNav button').forEach(b => b.onclick = () => showCase(+b.dataset.c));
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+$('#vEven').onclick = () => verdict('even');
+$('#vOdd').onclick = () => verdict('odd');
+$('#autoPair').onclick = autoPair;
+$('#redoPair').onclick = () => { setupT1(T1.n); };
+
+$('#aMinus').onclick = () => setNum('a', -1);
+$('#aPlus').onclick = () => setNum('a', 1);
+$('#bMinus').onclick = () => setNum('b', -1);
+$('#bPlus').onclick = () => setNum('b', 1);
+$('#combineBtn').onclick = combine;
+$('#mixBtn').onclick = () => { T2.a = randInt(1, 20); T2.b = randInt(1, 20); T2.shown = false; renderLab(); };
+$('#whyBtn').onclick = why;
+
+$('#c1spot').onclick = () => { C1.spot = !C1.spot; renderC1(); };
+$('#c1why').onclick = c1why;
+$('#c1check').onclick = c1check;
+$('#c2even').onclick = () => { C2.guess = 'even'; renderC2(); };
+$('#c2odd').onclick = () => { C2.guess = 'odd'; renderC2(); };
+$('#c2go').onclick = () => { C2.shown = true; renderC2(); };
+$('#c2new').onclick = () => { C2.nums = [randOdd(1, 15), randOdd(1, 15), randOdd(1, 15)]; C2.shown = false; renderC2(); };
+$('#c3t').onclick = () => { C3.tf = true; renderC3(); };
+$('#c3f').onclick = () => { C3.tf = false; renderC3(); };
+$('#c3show').onclick = () => { C3.nums = [0, 0, 0, 0].map(() => randOdd(1, 11)); renderC3(); };
+$('#c3k').oninput = e => { C3.k = +e.target.value; renderC3(); };
+
+resetAll();
+})();
+</script>
+
+</body></html>

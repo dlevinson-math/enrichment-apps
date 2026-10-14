@@ -1,0 +1,678 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Place Value Power</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a card table. Three colored "seats" (hundreds, tens, ones) are the stage; digit cards move into them. Tabs follow the worksheet's numbered tasks. */
+:root{
+  --paper:#EBEFF3; --card:#FFFFFF; --ink:#1D2939; --muted:#566377; --line:#CBD3DD; --soft:#DDE4EC;
+  --h:#C9472F; --t:#2A74B8; --o:#24895D;
+  --h-soft:#F8E1DB; --t-soft:#DCE9F6; --o-soft:#DAF0E5;
+  --gold:#E2A21A; --gold-soft:#FCF0D2; --warn:#B4441E;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131922; --card:#1C2430; --ink:#EDF0F4; --muted:#A3AEBD; --line:#344052; --soft:#263140;
+    --h:#F07A60; --t:#6AAAEC; --o:#4FC793;
+    --h-soft:#3D241F; --t-soft:#1D2F44; --o-soft:#183428;
+    --gold:#F2BC48; --gold-soft:#3A2F15; --warn:#FF8F6B; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131922; --card:#1C2430; --ink:#EDF0F4; --muted:#A3AEBD; --line:#344052; --soft:#263140;
+  --h:#F07A60; --t:#6AAAEC; --o:#4FC793;
+  --h-soft:#3D241F; --t-soft:#1D2F44; --o-soft:#183428;
+  --gold:#F2BC48; --gold-soft:#3A2F15; --warn:#FF8F6B; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.35vw,21px); line-height:1.45; padding-inline:clamp(16px,2.4vw,36px); padding-block:0 32px; -webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-block:16px 10px}
+.ttl h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,50px); line-height:1; margin:0; letter-spacing:-.01em}
+.ttl p{margin:6px 0 0; color:var(--muted); font-size:clamp(14px,1.05vw,17px); letter-spacing:.02em}
+.ttl p b{color:var(--ink)}
+.tools{margin-left:auto; display:flex; gap:10px}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; flex-wrap:wrap; gap:8px; padding-block:6px 14px; border-bottom:2px solid var(--line); margin-bottom:18px}
+nav.tabs button{border:2px solid transparent; background:transparent; border-radius:999px; padding:8px 18px 8px 8px; font-weight:700; font-size:clamp(16px,1.3vw,20px); display:flex; align-items:center; gap:10px; min-height:52px; color:var(--muted)}
+nav.tabs button .n{width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:var(--soft); font-family:var(--display); font-size:20px; color:var(--ink)}
+nav.tabs button[aria-selected="true"]{background:var(--card); border-color:var(--ink); color:var(--ink)}
+nav.tabs button[aria-selected="true"] .n{background:var(--ink); color:var(--card)}
+nav.tabs button.star .n{background:var(--gold-soft); color:var(--ink)}
+
+.view{display:grid; gap:20px}
+.view[hidden]{display:none}
+.lede{font-size:clamp(19px,1.6vw,25px); margin:0; max-width:40em; text-wrap:pretty}
+.lede b{font-family:var(--display); font-weight:700}
+.row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+.split{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:28px; align-items:start}
+@media (max-width:900px){ .split{grid-template-columns:minmax(0,1fr)} }
+.label{font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; margin:0}
+
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:clamp(17px,1.4vw,22px); padding:14px 26px; border-radius:16px; min-height:56px}
+.primary:disabled{opacity:.35; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:11px 20px; border-radius:16px; min-height:52px}
+.secondary:disabled{opacity:.35; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:4px; gap:4px}
+.seg button{border:0; background:none; padding:10px 18px; border-radius:12px; font-weight:700; min-height:46px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+/* Digit cards */
+.hand{display:flex; flex-wrap:wrap; gap:14px; min-height:120px; align-items:center}
+.dcard{width:clamp(72px,7vw,104px); aspect-ratio:5/7; max-width:100%; border-radius:14px; background:var(--card); border:3px solid var(--ink); box-shadow:0 4px 0 var(--ink); font-family:var(--display); font-weight:800; font-size:clamp(46px,4.6vw,72px); line-height:1; display:grid; place-items:center; padding:0; transition:transform .15s}
+.dcard:hover:not(:disabled){transform:translateY(-3px)}
+.dcard:disabled{opacity:.2; box-shadow:none; cursor:default}
+.dcard.big{width:clamp(110px,11vw,150px); font-size:clamp(70px,7vw,110px)}
+
+/* Seats */
+.seats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(8px,1.2vw,16px); max-width:620px}
+.seat{--c:var(--h); --cs:var(--h-soft); border:3px solid var(--c); background:var(--cs); border-radius:18px; padding:0 0 12px; display:flex; flex-direction:column; align-items:center; gap:8px; min-height:200px; overflow:hidden}
+.seat.t{--c:var(--t); --cs:var(--t-soft)} .seat.o{--c:var(--o); --cs:var(--o-soft)}
+.seat .nm{align-self:stretch; background:var(--c); color:#fff; font-weight:700; text-align:center; padding:6px 4px; font-size:clamp(14px,1.2vw,18px); letter-spacing:.03em}
+.seat .mul{font-size:14px; color:var(--muted); font-weight:700}
+.seat .slot{width:clamp(64px,6.4vw,96px); aspect-ratio:5/7; max-width:90%; border-radius:12px; border:3px dashed var(--c); display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:clamp(44px,4.4vw,68px); line-height:1; background:transparent}
+.seat .slot.full{border:3px solid var(--ink); background:var(--card); box-shadow:0 3px 0 var(--ink)}
+.seat .worth{font-family:var(--display); font-weight:700; font-size:clamp(22px,2vw,30px); color:var(--c); min-height:1.3em; font-variant-numeric:tabular-nums}
+button.seat{cursor:pointer}
+button.seat:disabled{cursor:default}
+.seat.open-target{box-shadow:0 0 0 4px var(--gold)}
+.seat.flag{box-shadow:0 0 0 5px var(--gold)}
+.pop{animation:pop .3s ease-out}
+@keyframes pop{from{transform:scale(.6); opacity:.2}to{transform:scale(1); opacity:1}}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+.expanded{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.4vw,36px); display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; min-height:1.4em; font-variant-numeric:tabular-nums}
+.expanded .h{color:var(--h)} .expanded .t{color:var(--t)} .expanded .o{color:var(--o)}
+.expanded .eq{color:var(--muted)}
+
+.msg{border-radius:16px; padding:16px 20px; background:var(--card); border:2px solid var(--line); font-size:clamp(18px,1.45vw,22px); max-width:40em}
+.msg:empty{display:none}
+.msg.good{border-color:var(--o); background:var(--o-soft)}
+.msg.think{border-color:var(--gold); background:var(--gold-soft)}
+.msg p{margin:0 0 8px} .msg p:last-child{margin:0}
+
+/* Score sheet */
+.sheet{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; background:var(--card); border-radius:14px; overflow:hidden}
+.sheet th,.sheet td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line)}
+.sheet th{font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+.sheet td.num{font-family:var(--display); font-weight:700; font-size:1.3em}
+.sheet tr.now td{background:var(--gold-soft)}
+.tag{display:inline-block; font-size:14px; font-weight:700; padding:2px 10px; border-radius:999px; background:var(--o-soft); color:var(--o)}
+.tag.no{background:var(--soft); color:var(--muted)}
+.scroll{overflow-x:auto}
+
+/* Riddles */
+.clues{display:grid; gap:10px; margin:0; padding:0; list-style:none}
+.clue{display:flex; align-items:center; gap:14px; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:10px 14px; min-height:60px}
+.clue.on{border-color:var(--ink)}
+.clue .txt{flex:1; min-width:0}
+.clue .cnt{font-family:var(--display); font-weight:700; color:var(--muted); font-size:15px; white-space:nowrap}
+.toggle{flex:none; width:44px; height:44px; border-radius:12px; border:2px solid var(--ink); background:var(--card); font-weight:800; font-size:22px; display:grid; place-items:center; padding:0}
+.clue.on .toggle{background:var(--ink); color:var(--card)}
+.counter{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.counter b{font-family:var(--display); font-size:clamp(44px,4.6vw,72px); line-height:1; font-variant-numeric:tabular-nums}
+.counter span{color:var(--muted)}
+.grid900{display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 8px; align-items:center; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:10px 12px}
+.grid900 .rl{font-size:13px; color:var(--muted); font-weight:700; font-variant-numeric:tabular-nums; text-align:right}
+.grid900 .strip{display:grid; grid-template-columns:repeat(100,minmax(0,1fr)); gap:1px; height:16px}
+.grid900 .strip i{background:var(--soft); border-radius:1px}
+.grid900 .strip i.on{background:var(--gold)}
+.grid900 .strip i.ten{margin-left:2px}
+.cands{display:flex; flex-wrap:wrap; gap:8px; min-height:10px}
+.cands span{font-family:var(--display); font-weight:700; font-size:22px; background:var(--gold-soft); border:2px solid var(--gold); border-radius:10px; padding:2px 12px}
+.guess{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.guess input{width:7ch; font-family:var(--display); font-weight:800; font-size:36px; padding:4px 12px; border-radius:14px; border:3px solid var(--ink); background:var(--card); text-align:center}
+.checks{list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px}
+.checks li{display:flex; gap:10px}
+.checks .ok{color:var(--o); font-weight:800} .checks .bad{color:var(--warn); font-weight:800}
+
+/* Riddle maker */
+.builder{display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:var(--card); border:2px dashed var(--line); border-radius:16px; padding:12px}
+.builder select,.builder input{border:2px solid var(--line); background:var(--paper); border-radius:12px; padding:8px 10px; min-height:48px; font-weight:700}
+.builder input{width:6ch}
+.x{flex:none; width:44px; height:44px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-size:20px; padding:0}
+
+/* Detective questions */
+.qnav{display:flex; flex-wrap:wrap; gap:8px}
+.qnav button{width:56px; height:56px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 20px; border-radius:28px; font-size:19px}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.3vw,36px); line-height:1.2; margin:0; max-width:28em; text-wrap:balance}
+.evidence{display:grid; gap:14px}
+.bars{display:grid; gap:10px; max-width:640px}
+.bar{display:grid; grid-template-columns:7.5em minmax(0,1fr); gap:12px; align-items:center}
+.bar .bl{font-weight:700}
+.bar .track{background:var(--soft); border-radius:10px; height:40px; position:relative}
+.bar .fill{height:100%; border-radius:10px; background:var(--c); display:flex; align-items:center; justify-content:flex-end; padding-right:10px; color:#fff; font-family:var(--display); font-weight:700; font-size:20px; min-width:4.2em}
+.bar.best .bl::after{content:" ★"; color:var(--gold)}
+.firsts{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px; max-width:720px}
+.firsts div{border-radius:12px; text-align:center; padding:6px 2px; color:#fff; font-weight:700; font-size:13px}
+.firsts div b{display:block; font-family:var(--display); font-size:30px; line-height:1.1}
+.mini{border-collapse:collapse; font-variant-numeric:tabular-nums}
+.mini td,.mini th{padding:8px 16px 8px 0; text-align:left}
+.mini th{font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+.mini td.big{font-family:var(--display); font-weight:700; font-size:1.4em}
+.strike{text-decoration:line-through; color:var(--muted)}
+.slider{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
+.slider input{width:min(320px,100%); accent-color:var(--gold); height:32px}
+.hint{color:var(--muted); font-size:16px; margin:0}
+
+@media (max-width:560px){
+  .seat{min-height:170px}
+  .tools{margin-left:0}
+  nav.tabs button{padding-right:12px}
+  .firsts{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+</style>
+
+<header>
+  <div class="ttl">
+    <h1>Place Value Power</h1>
+    <p><b>Grade 2 · Week 3</b> · Number Detectives worksheet · The hundreds seat is worth ten times the tens seat.</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Worksheet tasks">
+  <button role="tab" data-tab="build" aria-selected="true"><span class="n">1</span>Quick-build</button>
+  <button role="tab" data-tab="greedy" aria-selected="false"><span class="n">2</span>Greedy Game</button>
+  <button role="tab" data-tab="riddles" aria-selected="false"><span class="n">3</span>Mystery riddles</button>
+  <button role="tab" data-tab="maker" aria-selected="false"><span class="n">4</span>Riddle maker</button>
+  <button role="tab" data-tab="detect" aria-selected="false" class="star"><span class="n">★</span>Detective questions</button>
+</nav>
+
+<!-- 1. Quick-build -->
+<section class="view" id="v-build">
+  <p class="lede"><b>Use each card once.</b> Tap a card to seat it. Tap a seat to send its card back.</p>
+  <div class="row">
+    <div class="seg" role="group" aria-label="Card set" id="setSeg">
+      <button data-set="371" aria-pressed="true">Cards 3 · 7 · 1</button>
+      <button data-set="058" aria-pressed="false">Cards 0 · 5 · 8</button>
+      <button data-set="new" aria-pressed="false">New cards</button>
+    </div>
+    <div class="seg" role="group" aria-label="Goal" id="goalSeg">
+      <button data-goal="big" aria-pressed="true">Biggest number</button>
+      <button data-goal="small" aria-pressed="false">Smallest real 3-digit number</button>
+    </div>
+  </div>
+  <div class="split">
+    <div class="view" style="gap:16px">
+      <div class="hand" id="qbHand"></div>
+      <div class="seats" id="qbSeats"></div>
+      <div class="expanded" id="qbExp" aria-live="polite"></div>
+    </div>
+    <div class="view" style="gap:14px">
+      <div class="row">
+        <button class="primary" id="qbCheck">Check my number</button>
+        <button class="secondary" id="qbAll">Show all the ways</button>
+      </div>
+      <div class="msg" id="qbMsg" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Greedy Game -->
+<section class="view" id="v-greedy" hidden>
+  <p class="lede"><b>Draw a card, then seat it before the next card appears.</b> No moving a digit once it’s seated. Biggest number wins. The deck has one card for each digit, 0 to 9.</p>
+  <div class="split">
+    <div class="view" style="gap:16px">
+      <div class="row" style="gap:20px; align-items:flex-end">
+        <div class="view" style="gap:6px">
+          <p class="label">Card in hand</p>
+          <div class="dcard big" id="gCard" aria-live="polite" style="cursor:default">?</div>
+        </div>
+        <div class="view" style="gap:10px">
+          <button class="primary" id="gDraw">Draw a card</button>
+          <button class="secondary" id="gTip">Detective tip</button>
+          <p class="hint" id="gStatus"></p>
+        </div>
+      </div>
+      <div class="seats" id="gSeats"></div>
+      <div class="expanded" id="gExp"></div>
+    </div>
+    <div class="view" style="gap:14px">
+      <div class="msg" id="gMsg" aria-live="polite"></div>
+      <p class="label">Score sheet</p>
+      <div class="scroll"><table class="sheet" id="gSheet"></table></div>
+      <button class="secondary" id="gNext" style="justify-self:start" hidden>Next round</button>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Mystery riddles -->
+<section class="view" id="v-riddles" hidden>
+  <p class="lede"><b>Each riddle has exactly one answer.</b> Turn on the clues one at a time and watch the suspects disappear. Then type your answer to test it against every clue.</p>
+  <div class="seg" role="group" aria-label="Riddle" id="rSeg"></div>
+  <div class="split">
+    <div class="view" style="gap:14px">
+      <ul class="clues" id="rClues"></ul>
+      <div class="guess">
+        <label for="rGuess" class="label" style="width:100%">My answer</label>
+        <input id="rGuess" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Your answer">
+        <button class="primary" id="rCheck">Test it</button>
+      </div>
+      <div class="msg" id="rMsg" aria-live="polite"></div>
+    </div>
+    <div class="view" style="gap:12px">
+      <div class="counter"><b id="rCount">900</b><span id="rCountTxt">3-digit numbers could be the answer</span></div>
+      <div class="grid900" id="rGrid" aria-hidden="true"></div>
+      <div class="cands" id="rCands"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Riddle maker -->
+<section class="view" id="v-maker" hidden>
+  <p class="lede"><b>Write your own riddle.</b> It must have exactly ONE answer. Add clues and test it before you share it.</p>
+  <div class="split">
+    <div class="view" style="gap:14px">
+      <div class="builder" id="mBuilder">
+        <select id="mType" aria-label="Kind of clue"></select>
+        <span id="mParams" class="row" style="gap:8px"></span>
+        <button class="primary" id="mAdd" style="min-height:48px; padding:8px 20px">Add clue</button>
+      </div>
+      <ul class="clues" id="mClues"></ul>
+      <div class="msg" id="mMsg" aria-live="polite"></div>
+    </div>
+    <div class="view" style="gap:12px">
+      <div class="counter"><b id="mCount">900</b><span id="mCountTxt">numbers fit</span></div>
+      <div class="grid900" id="mGrid" aria-hidden="true"></div>
+      <div class="cands" id="mCands"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Detective questions -->
+<section class="view" id="v-detect" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="qtext" id="qtext"></p>
+  <div class="row" id="qacts"></div>
+  <div class="evidence msg think" id="qev" aria-live="polite"></div>
+  <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+</section>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const PV = [100,10,1], NM = ['hundreds','tens','ones'], CL = ['h','t','o'];
+const digitsOf = n => [Math.floor(n/100), Math.floor(n/10)%10, n%10];
+const val = d => d[0]*100 + d[1]*10 + d[2];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const perms = a => a.length<=1 ? [a] : a.flatMap((x,i) => perms([...a.slice(0,i),...a.slice(i+1)]).map(p => [x,...p]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = n => n.toLocaleString('en-US');
+
+/* ---------- Seats ---------- */
+function seats(el, digits, opts={}){
+  el.innerHTML = '';
+  digits.forEach((d,s) => {
+    const b = document.createElement(opts.onSeat ? 'button' : 'div');
+    b.className = 'seat ' + CL[s];
+    if(opts.flag===s) b.classList.add('flag');
+    if(opts.target && opts.target(s)) b.classList.add('open-target');
+    const full = d!==null && d!==undefined;
+    b.innerHTML = `<span class="nm">${NM[s]}</span><span class="mul">worth ×${PV[s]}</span><span class="slot ${full?'full':''} ${full&&opts.popSeat===s&&!reduced?'pop':''}">${full?d:''}</span><span class="worth">${full? fmt(d*PV[s]) : ''}</span>`;
+    if(opts.onSeat){ b.onclick = () => opts.onSeat(s); b.disabled = !!(opts.disabled && opts.disabled(s)); b.setAttribute('aria-label', `${NM[s]} seat${full?', holds '+d+', worth '+d*PV[s]:', empty'}`); }
+    el.appendChild(b);
+  });
+}
+function expanded(el, digits){
+  if(digits.some(d => d===null)){ el.innerHTML = ''; return; }
+  const v = val(digits);
+  el.innerHTML = `<span class="h">${digits[0]*100}</span><span class="eq">+</span><span class="t">${digits[1]*10}</span><span class="eq">+</span><span class="o">${digits[2]}</span><span class="eq">=</span><span>${v}</span>` + (digits[0]===0 ? `<span class="eq" style="font-size:.6em">(only ${String(v).length} digit${v<10?'':'s'})</span>` : '');
+}
+
+/* ---------- 1. Quick-build ---------- */
+const QB = {cards:[3,7,1], used:[false,false,false], seat:[null,null,null], seatFrom:[null,null,null], goal:'big', pop:null};
+function qbTarget(){
+  const ps = perms(QB.cards).filter(p => QB.goal==='big' || p[0]!==0).map(val);
+  return QB.goal==='big' ? Math.max(...ps) : Math.min(...ps);
+}
+function qbRender(){
+  const hand = $('#qbHand'); hand.innerHTML='';
+  QB.cards.forEach((c,i) => {
+    const b = document.createElement('button'); b.className='dcard'; b.textContent=c; b.disabled = QB.used[i];
+    b.setAttribute('aria-label', `card ${c}`);
+    b.onclick = () => { const s = QB.seat.indexOf(null); if(s<0) return; QB.seat[s]=c; QB.seatFrom[s]=i; QB.used[i]=true; QB.pop=s; $('#qbMsg').innerHTML=''; $('#qbMsg').className='msg'; qbRender(); };
+    hand.appendChild(b);
+  });
+  seats($('#qbSeats'), QB.seat, {popSeat:QB.pop, onSeat: s => { if(QB.seat[s]===null) return; QB.used[QB.seatFrom[s]]=false; QB.seat[s]=null; QB.seatFrom[s]=null; QB.pop=null; $('#qbMsg').innerHTML=''; $('#qbMsg').className='msg'; qbRender(); }});
+  QB.pop = null;
+  expanded($('#qbExp'), QB.seat);
+  $('#qbCheck').disabled = QB.seat.includes(null);
+}
+function qbSet(kind){
+  if(kind==='371') QB.cards=[3,7,1];
+  else if(kind==='058') QB.cards=[0,5,8];
+  else QB.cards = shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0,3);
+  if(kind==='058' && QB.goal==='big') { QB.goal='small'; }
+  $$('#goalSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.goal===QB.goal));
+  $$('#setSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.set===kind));
+  qbClear();
+}
+function qbClear(){ QB.used=[false,false,false]; QB.seat=[null,null,null]; QB.seatFrom=[null,null,null]; $('#qbMsg').innerHTML=''; $('#qbMsg').className='msg'; qbRender(); }
+function qbCheck(){
+  const m = $('#qbMsg'), d = QB.seat, v = val(d), target = qbTarget(), td = digitsOf(target);
+  if(QB.goal==='small' && d[0]===0){
+    m.className='msg think';
+    m.innerHTML = `<p>Your number starts with 0. A 0 in the hundreds seat is worth 0 hundreds, so ${String(d.join(''))} is really just <b>${v}</b>, a ${v<10?'1':'2'}-digit number.</p><p>A real 3-digit number needs a digit that isn’t 0 in the hundreds seat. Which card should sit there to keep the number small?</p>`;
+    seats($('#qbSeats'), QB.seat, {flag:0, onSeat: s => { if(QB.seat[s]===null) return; QB.used[QB.seatFrom[s]]=false; QB.seat[s]=null; qbRender(); }});
+    return;
+  }
+  if(v===target){
+    m.className='msg good';
+    const word = QB.goal==='big' ? 'biggest' : 'smallest real 3-digit';
+    m.innerHTML = `<p><b>${v}</b> is the ${word} number you can make with ${QB.cards.join(', ')}.</p><p>How could you prove nothing ${QB.goal==='big'?'beats':'is smaller than'} it? Tap <b>Show all the ways</b> to check every arrangement.</p>`;
+    return;
+  }
+  const s = d.findIndex((x,i) => x!==td[i]);
+  const better = td[s];
+  const goalWord = QB.goal==='big' ? 'bigger' : 'smaller';
+  m.className='msg think';
+  m.innerHTML = `<p>${v} is a good try, and you can make a ${goalWord} number.</p><p>Look at the <b>${NM[s]}</b> seat. Your ${d[s]} there is worth ${d[s]*PV[s]}. The ${better} card would be worth ${better*PV[s]} in that seat. ${s===0?'The hundreds seat is the most powerful seat, so choose it first.':'The seats to its left are already the best they can be.'}</p><p>Tap a seat to send its card back and try again.</p>`;
+  seats($('#qbSeats'), QB.seat, {flag:s, onSeat: x => { if(QB.seat[x]===null) return; QB.used[QB.seatFrom[x]]=false; QB.seat[x]=null; qbRender(); }});
+}
+function qbAll(){
+  const all = [...new Set(perms(QB.cards).map(p=>p.join('')))].map(s => s.split('').map(Number));
+  all.sort((a,b) => val(b)-val(a));
+  const mine = QB.seat.includes(null) ? null : QB.seat.join('');
+  const realOnes = all.filter(p=>p[0]!==0).map(val);
+  const big = Math.max(...realOnes), small = Math.min(...realOnes);
+  const m = $('#qbMsg'); m.className='msg';
+  m.innerHTML = `<p>Every way to arrange ${QB.cards.join(', ')}, biggest first:</p><table class="mini"><tr><th>Number</th><th>Worth</th><th></th></tr>` +
+    all.map(p => { const lead = p[0]===0, s=p.join('');
+      const note = lead ? `only ${val(p)<10?1:2} digits` : val(p)===big ? 'biggest' : val(p)===small ? 'smallest real 3-digit' : '';
+      return `<tr><td class="big ${lead?'strike':''}">${s}${s===mine?' ◀':''}</td><td>${p[0]*100} + ${p[1]*10} + ${p[2]}</td><td>${note?`<span class="tag ${lead?'no':''}">${note}</span>`:''}</td></tr>`; }).join('') + `</table>`;
+}
+
+/* ---------- 2. Greedy Game (expected values computed exactly) ---------- */
+const memo = new Map();
+function E(deck, open){ // expected extra points with the best play: deck & open are bitmasks
+  if(!open) return 0;
+  const k = deck*8+open; if(memo.has(k)) return memo.get(k);
+  let sum=0, n=0;
+  for(let c=0;c<10;c++) if(deck>>c&1){ n++; let best=-1;
+    for(let s=0;s<3;s++) if(open>>s&1){ const v=c*PV[s]+E(deck&~(1<<c), open&~(1<<s)); if(v>best) best=v; }
+    sum+=best; }
+  const r = sum/n; memo.set(k,r); return r;
+}
+function seatValues(card, deck, open){ // average final total (from this decision on) for each open seat
+  const out=[]; for(let s=0;s<3;s++) if(open>>s&1) out.push({s, v: card*PV[s] + E(deck, open&~(1<<s))}); return out;
+}
+const G = {round:1, deck:[], drawn:[], seat:[null,null,null], card:null, rows:[], pop:null};
+function gDeckMask(){ let m=0; for(const c of G.deck) m|=1<<c; return m; }
+function gOpen(){ let m=0; G.seat.forEach((d,s)=>{ if(d===null) m|=1<<s; }); return m; }
+function gNewRound(){ G.deck = shuffle([0,1,2,3,4,5,6,7,8,9]); G.drawn=[]; G.seat=[null,null,null]; G.card=null; $('#gMsg').innerHTML=''; $('#gMsg').className='msg'; gRender(); }
+function gRender(){
+  const c = $('#gCard'); c.textContent = G.card===null ? '?' : G.card;
+  const done = !G.seat.includes(null);
+  $('#gDraw').disabled = G.card!==null || done || G.round>4;
+  $('#gTip').disabled = G.card===null;
+  $('#gNext').hidden = !done || G.round>=4;
+  $('#gStatus').textContent = G.round>4 ? 'Game over.' : `Round ${G.round} of 4 · card ${Math.max(G.drawn.length,1)} of 3`;
+  seats($('#gSeats'), G.seat, {popSeat:G.pop, target: s => G.card!==null && G.seat[s]===null, disabled: s => G.card===null || G.seat[s]!==null, onSeat: gPlace});
+  G.pop=null;
+  expanded($('#gExp'), G.seat);
+  const rows = [];
+  for(let r=1;r<=4;r++){
+    const row = G.rows[r-1];
+    if(row) rows.push(`<tr><td>Round ${r}</td><td class="num">${row.num}</td><td>${row.cards.join(', ')}</td><td class="num">${row.best}</td><td>${row.num===row.best?'<span class="tag">best possible</span>':`<span class="tag no">${row.best-row.num} short</span>`}</td></tr>`);
+    else rows.push(`<tr class="${r===G.round?'now':''}"><td>Round ${r}</td><td class="num">${r===G.round && G.seat.some(x=>x!==null) ? G.seat.map(x=>x===null?'_':x).join('') : ''}</td><td>${r===G.round?G.drawn.join(', '):''}</td><td></td><td></td></tr>`);
+  }
+  $('#gSheet').innerHTML = `<tr><th>Round</th><th>My number</th><th>Cards</th><th>Best possible</th><th></th></tr>` + rows.join('');
+}
+function gDraw(){
+  if(G.card!==null) return;
+  G.card = G.deck.pop(); G.drawn.push(G.card);
+  $('#gMsg').innerHTML = ''; $('#gMsg').className='msg';
+  const open = G.seat.filter(x=>x===null).length;
+  if(open===1){ $('#gMsg').className='msg'; $('#gMsg').innerHTML = `<p>Only one seat is left, so there’s no choice this time. Tap it to seat the ${G.card}.</p>`; }
+  gRender();
+  if(!reduced){ const c=$('#gCard'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+}
+function gPlace(s){
+  if(G.card===null || G.seat[s]!==null) return;
+  G.seat[s] = G.card; G.card = null; G.pop = s;
+  $('#gMsg').innerHTML=''; $('#gMsg').className='msg';
+  if(!G.seat.includes(null)){
+    const num = val(G.seat), best = Number([...G.drawn].sort((a,b)=>b-a).join(''));
+    G.rows[G.round-1] = {num, best, cards:[...G.drawn]};
+    const m = $('#gMsg');
+    if(num===best){ m.className='msg good'; m.innerHTML = `<p><b>${num}</b> is the biggest number these three cards can make.</p>`; }
+    else {
+      const bd = digitsOf(best), bad = G.seat.findIndex((x,i)=>x!==bd[i]);
+      m.className='msg think';
+      m.innerHTML = `<p>You made <b>${num}</b>. With ${G.drawn.join(', ')} the biggest is <b>${best}</b>.</p><p>Look at the ${NM[bad]} seat: the ${bd[bad]} would have been worth ${bd[bad]*PV[bad]} there instead of ${G.seat[bad]*PV[bad]}. Was that bad luck, or a risky choice? You couldn’t see the later cards when you chose.</p>`;
+    }
+    if(G.round===4){
+      const wins = G.rows.filter(r=>r.num===r.best).length;
+      m.innerHTML += `<p><b>Game over.</b> You made the best possible number in ${wins} of 4 rounds. Tap <b>Start over</b> to play again.</p>`;
+      G.round = 5;
+    }
+  }
+  gRender();
+}
+function gTip(){
+  if(G.card===null) return;
+  const c = G.card, left = G.deck;
+  const higher = left.filter(x=>x>c).length, lower = left.filter(x=>x<c).length;
+  const sv = seatValues(c, gDeckMask(), gOpen()); const top = Math.max(...sv.map(x=>x.v));
+  const bestSeats = sv.filter(x => Math.abs(x.v-top)<1e-9).map(x=>NM[x.s]);
+  const m = $('#gMsg'); m.className='msg think';
+  if(sv.length===1){ m.innerHTML = `<p>Only the ${NM[sv[0].s]} seat is open, so the ${c} goes there.</p>`; return; }
+  m.innerHTML = `<p>Cards still in the deck: <b>${left.length}</b>. Bigger than ${c}: <b>${higher}</b>. Smaller than ${c}: <b>${lower}</b>.</p>` +
+    `<p>A detective who plays the odds would put the ${c} in the <b>${bestSeats.join(' or ')}</b> seat.</p>` +
+    `<p class="hint">Average number made from here, choosing each seat: ${sv.map(x=>`${NM[x.s]} about ${Math.round(x.v)}`).join(' · ')}.</p>`;
+}
+
+/* ---------- Riddle engine ---------- */
+const ALL = Array.from({length:900}, (_,i)=>i+100);
+function buildGrid(el){
+  el.innerHTML = '';
+  const cells = {};
+  for(let h=1;h<=9;h++){
+    const lab = document.createElement('span'); lab.className='rl'; lab.textContent = h*100+'s'; el.appendChild(lab);
+    const st = document.createElement('div'); st.className='strip';
+    for(let k=0;k<100;k++){ const i=document.createElement('i'); if(k%10===0 && k) i.className='ten'; st.appendChild(i); cells[h*100+k]=i; }
+    el.appendChild(st);
+  }
+  return cells;
+}
+function paintGrid(cells, list, countEl, txtEl, candEl, txtFor){
+  const set = new Set(list);
+  for(const n of ALL) cells[n].classList.toggle('on', set.has(n));
+  countEl.textContent = list.length;
+  txtEl.textContent = txtFor(list.length);
+  candEl.innerHTML = list.length<=24 ? list.map(n=>`<span>${n}</span>`).join('') : '';
+}
+const sumTxt = n => digitsOf(n).join(' + ') + ' = ' + digitsOf(n).reduce((a,b)=>a+b,0);
+const RIDDLES = {
+  a:{clues:[
+    {t:'My hundreds digit is 5.', f:n=>digitsOf(n)[0]===5, why:n=>`hundreds digit is ${digitsOf(n)[0]}`},
+    {t:'My tens digit is double my ones digit.', f:n=>{const[,t,o]=digitsOf(n); return t===2*o;}, why:n=>{const[,t,o]=digitsOf(n); return `double ${o} is ${2*o}, tens digit is ${t}`;}},
+    {t:'My digits add up to 11.', f:n=>digitsOf(n).reduce((a,b)=>a+b)===11, why:sumTxt}]},
+  b:{clues:[
+    {t:'I am between 300 and 400.', f:n=>n>300&&n<400, why:n=>`${n} is ${n>300&&n<400?'':'not '}between 300 and 400`},
+    {t:'My tens digit is 0.', f:n=>digitsOf(n)[1]===0, why:n=>`tens digit is ${digitsOf(n)[1]}`},
+    {t:'My ones digit is one more than my hundreds digit.', f:n=>{const[h,,o]=digitsOf(n); return o===h+1;}, why:n=>{const[h,,o]=digitsOf(n); return `${h} + 1 = ${h+1}, ones digit is ${o}`;}}]},
+  c:{clues:[
+    {t:'All three of my digits are the same.', f:n=>{const[h,t,o]=digitsOf(n); return h===t&&t===o;}, why:n=>`digits are ${digitsOf(n).join(', ')}`},
+    {t:'My digits add up to 15.', f:n=>digitsOf(n).reduce((a,b)=>a+b)===15, why:sumTxt}]},
+  d:{clues:[
+    {t:'My ones digit is 1.', f:n=>digitsOf(n)[2]===1, why:n=>`ones digit is ${digitsOf(n)[2]}`},
+    {t:'My hundreds digit is 4 more than my tens digit.', f:n=>{const[h,t]=digitsOf(n); return h===t+4;}, why:n=>{const[h,t]=digitsOf(n); return `${t} + 4 = ${t+4}, hundreds digit is ${h}`;}},
+    {t:'My digits add up to 9.', f:n=>digitsOf(n).reduce((a,b)=>a+b)===9, why:sumTxt}]}
+};
+const R = {key:'a', on:{}};
+let rCells;
+function rRender(){
+  const rd = RIDDLES[R.key];
+  $('#rSeg').innerHTML = Object.keys(RIDDLES).map(k=>`<button data-r="${k}" aria-pressed="${k===R.key}">Riddle ${k}</button>`).join('');
+  $$('#rSeg button').forEach(b => b.onclick = () => { R.key=b.dataset.r; R.on={}; $('#rGuess').value=''; $('#rMsg').innerHTML=''; $('#rMsg').className='msg'; rRender(); });
+  let list = ALL;
+  const ul = $('#rClues'); ul.innerHTML='';
+  rd.clues.forEach((c,i) => {
+    const on = !!R.on[i];
+    if(on) list = list.filter(c.f);
+    const li = document.createElement('li'); li.className = 'clue'+(on?' on':'');
+    li.innerHTML = `<button class="toggle" aria-pressed="${on}" aria-label="Use clue ${i+1}">${on?'✓':i+1}</button><span class="txt">${c.t}</span><span class="cnt">${on?`${list.length} left`:''}</span>`;
+    li.querySelector('button').onclick = () => { R.on[i]=!on; rRender(); };
+    ul.appendChild(li);
+  });
+  paintGrid(rCells, list, $('#rCount'), $('#rCountTxt'), $('#rCands'), n => n===900 ? '3-digit numbers could be the answer' : n===1 ? 'suspect left. Case closed!' : 'suspects still fit the clues you turned on');
+}
+function rCheck(){
+  const raw = $('#rGuess').value.trim(), m = $('#rMsg');
+  if(!/^\d{3}$/.test(raw) || raw[0]==='0'){ m.className='msg think'; m.innerHTML = `<p>Type a 3-digit number, like 482. Every answer here has 3 digits, and the first one isn’t 0.</p>`; return; }
+  const n = Number(raw), rd = RIDDLES[R.key];
+  const res = rd.clues.map(c => ({ok:c.f(n), c}));
+  const all = res.every(r=>r.ok);
+  m.className = 'msg ' + (all?'good':'think');
+  m.innerHTML = `<p>${all ? `<b>${n}</b> fits every clue. Case closed!` : `<b>${n}</b> fits ${res.filter(r=>r.ok).length} of ${res.length} clues. Fix the clue with ✗ and test again.`}</p><ul class="checks">` +
+    res.map(r => `<li><span class="${r.ok?'ok':'bad'}">${r.ok?'✓':'✗'}</span><span>${r.c.t} <span class="hint" style="display:inline">(${r.c.why(n)})</span></span></li>`).join('') + `</ul>` +
+    (all ? `<p style="margin-top:10px">How do you know no other number works? Turn on all the clues and look at the board.</p>` : '');
+}
+
+/* ---------- 4. Riddle maker ---------- */
+const PLACE_OPTS = `<option value="0">hundreds</option><option value="1">tens</option><option value="2">ones</option>`;
+const digitOpts = (from,to,sel) => Array.from({length:to-from+1},(_,i)=>from+i).map(d=>`<option ${d===sel?'selected':''}>${d}</option>`).join('');
+const TYPES = {
+  digit:{label:'A digit is…', params:()=>`<span>My</span><select data-p="a" aria-label="place">${PLACE_OPTS}</select><span>digit is</span><select data-p="d" aria-label="digit">${digitOpts(0,9,5)}</select>`,
+    make:p=>({t:`My ${NM[p.a]} digit is ${p.d}.`, f:n=>digitsOf(n)[p.a]===p.d})},
+  sum:{label:'Digits add up to…', params:()=>`<span>My digits add up to</span><select data-p="d" aria-label="sum">${digitOpts(1,27,10)}</select>`,
+    make:p=>({t:`My digits add up to ${p.d}.`, f:n=>digitsOf(n).reduce((a,b)=>a+b)===p.d})},
+  between:{label:'Between two numbers', params:()=>`<span>I am between</span><input data-p="lo" inputmode="numeric" value="200" aria-label="low number"><span>and</span><input data-p="hi" inputmode="numeric" value="300" aria-label="high number">`,
+    make:p=>{ const lo=Math.min(p.lo,p.hi), hi=Math.max(p.lo,p.hi); return {t:`I am between ${lo} and ${hi}.`, f:n=>n>lo&&n<hi}; }},
+  double:{label:'One digit is double another', params:()=>`<span>My</span><select data-p="a" aria-label="place">${PLACE_OPTS}</select><span>digit is double my</span><select data-p="b" aria-label="other place">${PLACE_OPTS}</select><span>digit</span>`,
+    make:p=>({t:`My ${NM[p.a]} digit is double my ${NM[p.b]} digit.`, f:n=>{const d=digitsOf(n); return d[p.a]===2*d[p.b];}, bad:p.a===p.b})},
+  more:{label:'One digit is more than another', params:()=>`<span>My</span><select data-p="a" aria-label="place">${PLACE_OPTS}</select><span>digit is</span><select data-p="d" aria-label="how many more">${digitOpts(1,9,2)}</select><span>more than my</span><select data-p="b" aria-label="other place">${PLACE_OPTS}</select><span>digit</span>`,
+    make:p=>({t:`My ${NM[p.a]} digit is ${p.d} more than my ${NM[p.b]} digit.`, f:n=>{const d=digitsOf(n); return d[p.a]===d[p.b]+p.d;}, bad:p.a===p.b})},
+  same:{label:'All digits the same', params:()=>`<span>All three of my digits are the same.</span>`, make:()=>({t:'All three of my digits are the same.', f:n=>{const[h,t,o]=digitsOf(n); return h===t&&t===o;}})},
+  diff:{label:'All digits different', params:()=>`<span>All three of my digits are different.</span>`, make:()=>({t:'All three of my digits are different.', f:n=>{const[h,t,o]=digitsOf(n); return h!==t&&t!==o&&h!==o;}})},
+  parity:{label:'Even or odd', params:()=>`<span>I am an</span><select data-p="e" aria-label="even or odd"><option value="0">even</option><option value="1">odd</option></select><span>number.</span>`,
+    make:p=>({t:`I am an ${p.e?'odd':'even'} number.`, f:n=>n%2===p.e})}
+};
+const M = {clues:[]};
+let mCells;
+function mInitBuilder(){
+  $('#mType').innerHTML = Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  $('#mType').onchange = mParams; mParams();
+}
+function mParams(){ $('#mParams').innerHTML = TYPES[$('#mType').value].params(); }
+function mAdd(){
+  const k = $('#mType').value, p = {};
+  $$('#mParams [data-p]').forEach(el => p[el.dataset.p] = Number(el.value));
+  const m = $('#mMsg');
+  if(k==='between' && (!Number.isFinite(p.lo) || !Number.isFinite(p.hi) || $('#mParams [data-p="lo"]').value.trim()==='' || $('#mParams [data-p="hi"]').value.trim()==='')){ m.className='msg think'; m.innerHTML='<p>Type two whole numbers for the “between” clue.</p>'; return; }
+  const c = TYPES[k].make(p);
+  if(c.bad){ m.className='msg think'; m.innerHTML = `<p>That clue compares a digit with itself. Pick two different seats.</p>`; return; }
+  M.clues.push(c); mRender();
+}
+function mRender(){
+  let list = ALL; const ul = $('#mClues'); ul.innerHTML='';
+  M.clues.forEach((c,i) => {
+    list = list.filter(c.f);
+    const li = document.createElement('li'); li.className='clue on';
+    li.innerHTML = `<span class="toggle" style="background:var(--ink);color:var(--card)">${i+1}</span><span class="txt">${c.t}</span><span class="cnt">${list.length} left</span><button class="x" aria-label="Remove clue ${i+1}">×</button>`;
+    li.querySelector('.x').onclick = () => { M.clues.splice(i,1); mRender(); };
+    ul.appendChild(li);
+  });
+  paintGrid(mCells, list, $('#mCount'), $('#mCountTxt'), $('#mCands'), n => n===1 ? 'number fits. Exactly one!' : 'numbers fit your clues');
+  const m = $('#mMsg');
+  if(!M.clues.length){ m.className='msg'; m.innerHTML='<p>Add your first clue. All 900 three-digit numbers are suspects right now.</p>'; }
+  else if(list.length===0){ m.className='msg think'; m.innerHTML='<p>No number fits. Two of your clues fight each other. Remove one or change it, then test again.</p>'; }
+  else if(list.length===1){ m.className='msg good'; m.innerHTML=`<p>Your riddle works! The only answer is <b>${list[0]}</b>. Read your clues to a classmate and see if they can solve it.</p>`; }
+  else { m.className='msg think'; m.innerHTML=`<p>${list.length} numbers still fit${list.length<=24?' (shown below the board)':''}. Add a clue that only one of them can pass.</p>`; }
+}
+
+/* ---------- Detective questions ---------- */
+const FULL = 1023;
+function bars(card){
+  const sv = seatValues(card, FULL & ~(1<<card), 7), top = Math.max(...sv.map(x=>x.v));
+  return `<div class="bars">` + sv.map(x => `<div class="bar ${Math.abs(x.v-top)<1e-9?'best':''}"><span class="bl">${NM[x.s]}</span><div class="track"><div class="fill" style="--c:var(--${CL[x.s]}); width:${(x.v/1000*100).toFixed(1)}%">${Math.round(x.v)}</div></div></div>`).join('') + `</div>`;
+}
+function bestFirstSeat(card){ const sv = seatValues(card, FULL & ~(1<<card), 7); return sv.reduce((a,b)=> b.v>a.v ? b : a).s; }
+function riddleTrail(key){
+  let list = ALL; const rows=[`<tr><td>Start</td><td class="big">900</td></tr>`];
+  RIDDLES[key].clues.forEach(c => { list = list.filter(c.f); rows.push(`<tr><td>${c.t}</td><td class="big">${list.length}</td></tr>`); });
+  return {html:`<table class="mini"><tr><th>Clue</th><th>Numbers left</th></tr>${rows.join('')}</table>`, list};
+}
+const Q = [
+  {q:'With the cards 3, 7 and 1, why does 731 beat 713 and 371?', acts:[
+    {l:'Compare the seats', run:()=>`<table class="mini"><tr><th>Number</th><th>hundreds</th><th>tens</th><th>ones</th></tr>${[731,713,371].map(n=>{const d=digitsOf(n); return `<tr><td class="big">${n}</td><td style="color:var(--h)">${d[0]*100}</td><td style="color:var(--t)">${d[1]*10}</td><td style="color:var(--o)">${d[2]}</td></tr>`;}).join('')}</table><p>731 and 713 both get 700 from the hundreds seat. Then 30 beats 10. 371 only gets 300 from its hundreds seat, and no tens or ones can make up the missing 400.</p>`},
+    {l:'Biggest card, biggest seat', run:()=>`<p>The biggest card (7) goes in the most powerful seat (hundreds), the next biggest (3) in tens, the smallest (1) in ones: <b>731</b>.</p>`}]},
+  {q:'With 0, 5 and 8, why isn’t 058 the smallest 3-digit number?', acts:[
+    {l:'What is 058 worth?', run:()=>`<p>0 hundreds + 5 tens + 8 ones = 0 + 50 + 8 = <b>58</b>. That’s a 2-digit number. The zero in front doesn’t count as a digit.</p>`},
+    {l:'Show the real 3-digit ones', run:()=>{ const ps = perms([0,5,8]).map(val).sort((a,b)=>a-b); return `<p>${ps.map(n=> n<100 ? `<span class="strike">${String(n).padStart(3,'0')}</span>` : `<b>${n}</b>`).join(' · ')}</p><p>Crossed-out numbers start with 0, so they only have 2 digits. The smallest real 3-digit number is <b>${ps.find(n=>n>=100)}</b>: the smallest card that isn’t 0 goes in hundreds, then the 0 hides in tens.</p>`; }}]},
+  {q:'Greedy Game: where should a 9 go the moment you see it?', acts:[
+    {l:'Can any card beat a 9?', run:()=>`<p>No. 9 is the biggest digit. In the hundreds seat it is worth 900, and no other card could ever be worth more there.</p>`},
+    {l:'Show the average results', run:()=>`<p>If the first card is 9, here is the average final number for each seat choice, with smart play after that:</p>${bars(9)}`}]},
+  {q:'Greedy Game: what about a 4? Where should it go if it’s the first card?', acts:[
+    {l:'Count the cards left', run:()=>`<p>After the 4, nine cards are left in the deck. <b>5</b> are bigger (5, 6, 7, 8, 9) and <b>4</b> are smaller (0, 1, 2, 3). A bigger card will probably come, so saving the hundreds seat is a good bet.</p>`},
+    {l:'Show the average results', run:()=>`${bars(4)}<p>Putting the 4 in hundreds averages only about ${Math.round(seatValues(4,FULL&~16,7)[0].v)}. The tens seat is the smart choice.</p>`},
+    {l:'Every first card', run:()=>`<p>The best seat for each possible first card:</p><div class="firsts">${[0,1,2,3,4,5,6,7,8,9].map(c=>{const s=bestFirstSeat(c); return `<div style="background:var(--${CL[s]})"><b>${c}</b>${NM[s]}</div>`;}).join('')}</div><p>Small cards go to ones, middle cards to tens, big cards to hundreds.</p>`}]},
+  {q:'Why is the first decision the riskiest?', acts:[
+    {l:'What do you know each time?', run:()=>`<table class="mini"><tr><th>Decision</th><th>Seats to pick from</th><th>Cards you can’t see yet</th></tr><tr><td>1st card</td><td class="big">3</td><td class="big">2</td></tr><tr><td>2nd card</td><td class="big">2</td><td class="big">1</td></tr><tr><td>3rd card</td><td class="big">1</td><td class="big">0</td></tr></table><p>The first time, you have the most choices and the least information. The last card has no choice at all.</p>`},
+    {l:'Strategy showdown', run:()=>`<table class="mini"><tr><th>Strategy</th><th>Average number</th></tr><tr><td>Fill seats in order: hundreds, tens, ones</td><td class="big">${(4.5*111).toFixed(1)}</td></tr><tr><td>Detective strategy (play the odds)</td><td class="big">${E(FULL,7).toFixed(1)}</td></tr></table><p>Thinking about where each card goes adds over 200 points on average.</p>`}]},
+  {q:'How can you be sure a riddle has exactly one answer?', acts:[
+    {l:'Track riddle a', run:()=>{ const r=riddleTrail('a'); return r.html + `<p>Each clue knocks out suspects. Only when the count reaches <b>1</b> do you know the answer is ${r.list[0]} and nothing else.</p>`; }},
+    {l:'Remove a clue', run:()=>{ const two = RIDDLES.a.clues; const list = ALL.filter(two[0].f).filter(two[2].f); return `<p>Riddle a without the “double” clue: hundreds digit is 5, digits add up to 11. That leaves <b>${list.length}</b> answers:</p><div class="cands">${list.map(n=>`<span>${n}</span>`).join('')}</div><p>A riddle with a missing clue has more than one answer. Test yours in the Riddle maker.</p>`; }}]},
+  {q:'Challenge: the hundreds seat is worth ten times the tens seat. Is that true for every digit?', star:true, acts:[
+    {l:'Try any digit', run:()=>`<div class="slider"><label for="chD" class="label">Digit</label><input type="range" id="chD" min="0" max="9" value="7"><b id="chOut" class="expanded"></b></div><div id="chRows"></div>`, after:()=>{
+      const upd = () => { const d = Number($('#chD').value); $('#chOut').textContent = d;
+        $('#chRows').innerHTML = `<table class="mini"><tr><th>Seat</th><th>Worth</th><th></th></tr><tr><td style="color:var(--h)">hundreds</td><td class="big">${d*100}</td><td>= 10 × ${d*10}</td></tr><tr><td style="color:var(--t)">tens</td><td class="big">${d*10}</td><td>= 10 × ${d}</td></tr><tr><td style="color:var(--o)">ones</td><td class="big">${d}</td><td></td></tr></table><p>${d===0?'Even 0 works: 10 × 0 = 0.':`Each seat to the left is worth ten times more for the same ${d}.`}</p>`; };
+      $('#chD').oninput = upd; upd(); }}]}
+];
+let qi = 0;
+function qRender(){
+  $('#qnav').innerHTML = Q.map((x,i)=>`<button data-i="${i}" aria-pressed="${i===qi}" class="${x.star?'star':''}" aria-label="${x.star?'Challenge':'Question '+(i+1)}">${x.star?'★ Challenge':i+1}</button>`).join('');
+  $$('#qnav button').forEach(b => b.onclick = () => { qi=+b.dataset.i; qRender(); });
+  $('#qtext').textContent = Q[qi].q;
+  const box = $('#qacts'); box.innerHTML=''; $('#qev').innerHTML='';
+  Q[qi].acts.forEach((a,i) => { const b=document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=()=>{ $('#qev').innerHTML=a.run(); if(a.after) a.after(); }; box.appendChild(b); });
+}
+
+/* ---------- Tabs, reset, fullscreen ---------- */
+function tab(name){
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===name));
+  ['build','greedy','riddles','maker','detect'].forEach(k => $('#v-'+k).hidden = k!==name);
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => tab(b.dataset.tab));
+$$('#setSeg button').forEach(b => b.onclick = () => qbSet(b.dataset.set));
+$$('#goalSeg button').forEach(b => b.onclick = () => { QB.goal=b.dataset.goal; $$('#goalSeg button').forEach(x=>x.setAttribute('aria-pressed', x===b)); qbClear(); });
+$('#qbCheck').onclick = qbCheck; $('#qbAll').onclick = qbAll;
+$('#gDraw').onclick = gDraw; $('#gTip').onclick = gTip;
+$('#gNext').onclick = () => { G.round++; gNewRound(); };
+$('#rCheck').onclick = rCheck; $('#rGuess').addEventListener('keydown', e => { if(e.key==='Enter') rCheck(); });
+$('#mAdd').onclick = mAdd;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+function resetAll(){
+  QB.goal='big'; qbSet('371');
+  G.round=1; G.rows=[]; gNewRound();
+  R.key='a'; R.on={}; $('#rGuess').value=''; $('#rMsg').innerHTML=''; $('#rMsg').className='msg'; rRender();
+  M.clues=[TYPES.digit.make({a:0,d:7})]; $('#mType').value='digit'; mParams(); mRender();
+  qi=0; qRender();
+}
+$('#resetBtn').onclick = () => { resetAll(); };
+
+rCells = buildGrid($('#rGrid')); mCells = buildGrid($('#mGrid'));
+mInitBuilder(); resetAll();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,778 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>What's My Rule?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a workshop bench. Machine stage on the left, the worksheet you operate on the right; tabs follow the lesson flow. */
+:root{
+  --bg:#E9EEF2; --surface:#FFFFFF; --ink:#16212C; --muted:#536170; --line:#C6D0DA;
+  --steel:#2C5B86; --steel-2:#1F4566; --steel-ink:#F3F7FB;
+  --signal:#F2B200; --signal-soft:#FFF2C7; --card:#FFFDF5; --card-edge:#E4D9B5;
+  --good:#17804A; --good-soft:#DDF3E6; --nudge:#B5470E; --nudge-soft:#FCE8DA;
+  --display:"Fredoka", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151B; --surface:#17212B; --ink:#E7EDF3; --muted:#9AA8B6; --line:#2C3A48;
+    --steel:#3E77AE; --steel-2:#2B5884; --steel-ink:#F3F7FB;
+    --signal:#FFC83A; --signal-soft:#3A3014; --card:#212D39; --card-edge:#3A4A5A;
+    --good:#4CC481; --good-soft:#16362A; --nudge:#FF9A62; --nudge-soft:#3A2416; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151B; --surface:#17212B; --ink:#E7EDF3; --muted:#9AA8B6; --line:#2C3A48;
+  --steel:#3E77AE; --steel-2:#2B5884; --steel-ink:#F3F7FB;
+  --signal:#FFC83A; --signal-soft:#3A3014; --card:#212D39; --card-edge:#3A4A5A;
+  --good:#4CC481; --good-soft:#16362A; --nudge:#FF9A62; --nudge-soft:#3A2416; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 24px}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,.slot:focus-visible{outline:3px solid var(--signal); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding-block:16px 10px; max-width:1360px; margin:0 auto}
+.brand h1{font-size:clamp(28px,3.4vw,46px); font-weight:700; letter-spacing:-.01em; line-height:1}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px}
+.ghost{border:2px solid var(--line); background:var(--surface); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{max-width:1360px; margin:0 auto 14px; display:flex; gap:8px; overflow-x:auto; padding-bottom:4px}
+nav button{flex:none; border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:10px 18px; min-height:52px;
+  font-family:var(--display); font-weight:600; font-size:clamp(16px,1.4vw,20px); display:flex; align-items:center; gap:8px}
+nav button .n{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:15px}
+nav button[aria-selected="true"]{background:var(--steel); border-color:var(--steel); color:var(--steel-ink)}
+nav button[aria-selected="true"] .n{background:var(--signal); color:#1B1B1B}
+
+main{max-width:1360px; margin:0 auto}
+.view{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:24px; align-items:start}
+.col{display:flex; flex-direction:column; gap:16px; min-width:0}
+.panel{background:var(--surface); border:2px solid var(--line); border-radius:20px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.lead{font-size:clamp(20px,1.8vw,26px); line-height:1.35; margin:0; max-width:32em}
+.lead b{font-family:var(--display); font-weight:600}
+.small{font-size:15px; color:var(--muted); margin:0}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--steel); color:var(--steel-ink); border-radius:16px; padding:14px 24px; min-height:56px; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.5vw,22px)}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--steel); background:var(--surface); color:var(--ink); border-radius:16px; padding:12px 20px; min-height:56px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.4vw,20px)}
+.secondary:disabled{opacity:.4; cursor:default}
+
+/* ---------- Machine stage ---------- */
+.stage{position:relative; background:linear-gradient(var(--surface),var(--surface)) padding-box; border:2px solid var(--line); border-radius:24px; padding:22px 16px 18px; overflow:hidden}
+.track{display:grid; grid-template-columns:1fr 1.5fr 1fr; align-items:center; gap:10px}
+.tray{display:flex; flex-direction:column; align-items:center; gap:6px}
+.tray .lbl{font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:.14em; color:var(--muted)}
+.tray .slotbox{width:100%; max-width:150px; aspect-ratio:1.1; border:3px dashed var(--line); border-radius:16px; display:grid; place-items:center}
+.ncard{background:var(--card); border:2px solid var(--card-edge); border-radius:14px; box-shadow:0 3px 0 var(--card-edge);
+  font-family:var(--display); font-weight:700; font-size:clamp(36px,4.4vw,60px); line-height:1; padding:.25em .35em; min-width:2.2em; text-align:center; font-variant-numeric:tabular-nums}
+.ncard.out{background:var(--signal-soft); border-color:var(--signal); box-shadow:0 3px 0 var(--signal)}
+.machine{position:relative; background:var(--steel); border-radius:22px; padding:18px 14px 14px; color:var(--steel-ink); box-shadow:inset 0 -8px 0 var(--steel-2); min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px}
+.machine::before,.machine::after{content:""; position:absolute; top:50%; width:16px; height:46px; margin-top:-23px; background:var(--steel-2)}
+.machine::before{left:-12px; border-radius:6px 0 0 6px} .machine::after{right:-12px; border-radius:0 6px 6px 0}
+.bolt{position:absolute; width:10px; height:10px; border-radius:50%; background:var(--steel-2)}
+.bolt.a{top:10px;left:10px}.bolt.b{top:10px;right:10px}.bolt.c{bottom:16px;left:10px}.bolt.d{bottom:16px;right:10px}
+.mname{font-family:var(--display); font-weight:600; font-size:clamp(15px,1.3vw,19px); letter-spacing:.06em; text-transform:uppercase; opacity:.9}
+.window{background:#0E1E2C; color:#FFD54A; border-radius:12px; width:88%; min-height:4.2em; display:grid; place-items:center; text-align:center; padding:8px;
+  font-family:var(--display); font-weight:600; font-size:clamp(18px,1.9vw,28px); line-height:1.15; box-shadow:inset 0 0 0 3px #071019}
+.window.q{font-size:clamp(40px,4.6vw,64px)}
+.gears{display:flex; gap:10px}
+.gear{width:30px; height:30px; border-radius:50%; background:repeating-conic-gradient(var(--signal) 0 18deg, transparent 18deg 36deg); -webkit-mask:radial-gradient(circle, transparent 5px, #000 6px); mask:radial-gradient(circle, transparent 5px, #000 6px)}
+.machine.run .gear{animation:spin .7s linear infinite}
+.machine.run .gear:nth-child(2){animation-direction:reverse}
+.machine.run{animation:chug .18s ease-in-out 4}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes chug{50%{transform:translateY(-3px) rotate(-.6deg)}}
+.fly{position:absolute; left:0; top:0; pointer-events:none; z-index:5}
+.stage-note{margin:14px 4px 0; font-size:clamp(18px,1.6vw,22px); min-height:1.5em; text-align:center}
+@media (prefers-reduced-motion: reduce){ .machine.run, .machine.run .gear{animation:none} }
+
+/* ---------- Pad & slots ---------- */
+.slot{display:inline-grid; place-items:center; min-width:2.6em; min-height:1.7em; padding:0 .3em; border:3px dashed var(--muted); border-radius:12px; background:var(--surface);
+  font-family:var(--display); font-weight:700; font-size:inherit; font-variant-numeric:tabular-nums; color:var(--ink); cursor:pointer}
+.slot.empty::after{content:"?"; color:var(--muted); font-weight:600}
+.slot.active{border-style:solid; border-color:var(--signal); background:var(--signal-soft)}
+.slot.ok{border-style:solid; border-color:var(--good); background:var(--good-soft); cursor:default}
+.slot.no{border-style:solid; border-color:var(--nudge); background:var(--nudge-soft)}
+.pad{display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:8px}
+.pad button{min-height:56px; border:2px solid var(--line); background:var(--bg); border-radius:14px; font-family:var(--display); font-weight:700; font-size:24px}
+.pad button:active{background:var(--signal-soft)}
+.pad .go{background:var(--steel); color:var(--steel-ink); border-color:var(--steel); font-size:20px}
+.pad .del{font-size:20px}
+
+/* ---------- Tables ---------- */
+.io{border-collapse:separate; border-spacing:0 8px; width:100%; font-family:var(--display); font-size:clamp(26px,2.6vw,36px)}
+.io th{font-size:16px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:700; text-align:center; padding:0 6px}
+.io td{text-align:center; padding:4px 6px; font-weight:700; font-variant-numeric:tabular-nums}
+.io td.arrow{color:var(--muted); font-size:.7em; width:2em}
+.io tr.ex td.v{background:var(--card); border-block:2px solid var(--card-edge)}
+.io tr.ex td.v:first-child{border-left:2px solid var(--card-edge); border-radius:12px 0 0 12px}
+.io tr.ex td.v.o{border-right:2px solid var(--card-edge); border-radius:0 12px 12px 0}
+.io tr.ex{cursor:pointer}
+.io td.mark{width:7.5em; font-family:var(--body); font-size:16px; font-weight:400; text-align:left; color:var(--muted); line-height:1.25}
+.mark .y{color:var(--good); font-weight:700} .mark .x{color:var(--nudge); font-weight:700}
+.dirtag{display:inline-block; font-family:var(--body); font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-left:4px}
+
+/* ---------- Rule builder ---------- */
+.builder{display:flex; flex-direction:column; gap:10px}
+.step{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px; border-radius:14px; background:var(--bg)}
+.step .k{font-family:var(--display); font-weight:600; color:var(--muted); min-width:3.6em}
+.seg{display:inline-flex; background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:3px; gap:2px}
+.seg button{border:0; background:none; border-radius:10px; padding:8px 14px; min-height:46px; font-family:var(--display); font-weight:600; font-size:18px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+.num{display:inline-flex; align-items:center; gap:6px; font-size:26px}
+.num .b{width:46px; height:46px; border-radius:12px; border:2px solid var(--line); background:var(--surface); font-weight:700; font-size:22px}
+.linkish{border:0; background:none; color:var(--steel); font-weight:700; text-decoration:underline; padding:6px 2px; font-size:16px}
+:root[data-theme="dark"] .linkish{color:var(--signal)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .linkish{color:var(--signal)} }
+.say{font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px)}
+
+.fb{margin:0; padding:14px 16px; border-radius:14px; font-size:clamp(18px,1.6vw,22px); line-height:1.4; background:var(--bg)}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft)} .fb.nudge{background:var(--nudge-soft)} .fb.info{background:var(--signal-soft)}
+.fb b{font-family:var(--display); font-weight:600}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chips button{border:2px solid var(--line); background:var(--surface); border-radius:14px; min-height:56px; padding:8px 16px; font-family:var(--display); font-weight:600; font-size:19px; display:flex; flex-direction:column; align-items:flex-start; line-height:1.1}
+.chips button small{font-family:var(--body); font-weight:400; font-size:13px; color:var(--muted)}
+.chips button[aria-pressed="true"]{border-color:var(--steel); box-shadow:inset 0 0 0 2px var(--steel)}
+.chips button.solved::after{content:"✓ solved"; font-family:var(--body); font-size:13px; font-weight:700; color:var(--good)}
+
+.pairs{display:flex; flex-wrap:wrap; gap:12px; align-items:center; font-family:var(--display); font-size:clamp(28px,3vw,42px); font-weight:700}
+.pair{display:flex; align-items:center; gap:10px; background:var(--bg); border-radius:16px; padding:10px 14px}
+.pair .ar{color:var(--muted); font-size:.7em}
+.pair .tl{font-family:var(--body); font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.08em; text-transform:uppercase}
+.history{display:flex; flex-wrap:wrap; gap:8px}
+.history span{font-family:var(--display); font-weight:600; font-size:22px; background:var(--card); border:2px solid var(--card-edge); border-radius:12px; padding:4px 12px; font-variant-numeric:tabular-nums}
+.history span.broke{background:var(--nudge-soft); border-color:var(--nudge)}
+.cmp{border-collapse:collapse; font-family:var(--display); font-size:22px; font-variant-numeric:tabular-nums}
+.cmp th,.cmp td{padding:6px 12px; text-align:center; border-bottom:1.5px solid var(--line)}
+.cmp th{font-size:15px; color:var(--muted); letter-spacing:.06em}
+.cmp tr.same td{background:var(--signal-soft)}
+.scroll{overflow-x:auto}
+.qnav{display:flex; flex-wrap:wrap; gap:8px}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--surface); font-family:var(--display); font-weight:700; font-size:20px; padding:0 18px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.twin{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.mini{background:var(--steel); color:var(--steel-ink); border-radius:16px; padding:12px; text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center}
+.mini .window{min-height:2.6em; font-size:clamp(17px,1.6vw,22px)}
+.mini .outv{font-family:var(--display); font-weight:700; font-size:40px; min-height:1.2em}
+.mini.match{box-shadow:0 0 0 4px var(--signal)}
+.hide-rule .window:not(.q){filter:blur(10px)}
+
+@media (max-width: 920px){
+  .view{grid-template-columns:minmax(0,1fr)}
+  .io td.mark{width:6em; font-size:14px}
+}
+@media (max-width: 480px){
+  .track{grid-template-columns:1fr 1.3fr 1fr; gap:6px}
+  .machine{padding:12px 8px}
+  .pad{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .tools .ghost{padding:8px 12px; font-size:15px}
+  .twin{grid-template-columns:1fr}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <h1>What's My Rule?</h1>
+    <p>Grade 2 · Week 7 · Lesson 2.7</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" id="tabs">
+  <button role="tab" data-v="warm" aria-selected="true"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-v="box" aria-selected="false"><span class="n">2</span>Mystery box</button>
+  <button role="tab" data-v="mach" aria-selected="false"><span class="n">3</span>Machines 1–5</button>
+  <button role="tab" data-v="own" aria-selected="false"><span class="n">4</span>Make a machine</button>
+  <button role="tab" data-v="det" aria-selected="false"><span class="n">5</span>Detective questions</button>
+</nav>
+
+<main>
+  <!-- WARM-UP -->
+  <section class="view" id="v-warm">
+    <div class="col">
+      <div class="panel">
+        <p class="lead" id="warmQ"></p>
+        <div class="pairs" id="warmPairs"></div>
+        <p class="fb" id="warmFb" aria-live="polite"></p>
+        <div class="row"><button class="secondary" id="warmNext">Next round</button></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <p class="small">Tap the <b>?</b> card, then type.</p>
+        <div class="pad" id="warmPad"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MYSTERY BOX -->
+  <section class="view" id="v-box" hidden>
+    <div class="col">
+      <div class="stage" id="boxStage"></div>
+      <div class="panel">
+        <span class="small">Cards that came out</span>
+        <div class="history" id="boxHist"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <p class="lead" id="boxLead"></p>
+        <div class="row" id="boxBtns"></div>
+        <p class="fb" id="boxFb" aria-live="polite"></p>
+      </div>
+      <div class="panel" id="boxTry" hidden>
+        <p class="say">Your turn. Feed in a card: <span id="boxSlotWrap"></span></p>
+        <div class="pad" id="boxPad"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MACHINES -->
+  <section class="view" id="v-mach" hidden>
+    <div class="col">
+      <div class="chips" id="machChips"></div>
+      <div class="stage" id="machStage"></div>
+      <div class="panel">
+        <h2 style="font-size:22px">What's the rule? Build it.</h2>
+        <div class="builder" id="machBuilder"></div>
+        <div class="row"><button class="primary" id="machTest">Test my rule on every pair</button></div>
+        <p class="fb" id="machRuleFb" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <p class="lead" id="machLead"></p>
+        <table class="io" id="machTable"></table>
+        <p class="small">Tap a full row to send it through the machine. Tap a <b>?</b> to fill it in.</p>
+        <p class="fb" id="machFb" aria-live="polite"></p>
+        <div class="pad" id="machPad"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAKE YOUR OWN -->
+  <section class="view" id="v-own" hidden>
+    <div class="col">
+      <div class="stage" id="ownStage"></div>
+      <div class="panel">
+        <span class="small">Example cards</span>
+        <table class="io" id="ownTable"></table>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel" id="ownMake">
+        <p class="lead"><b>Maker:</b> build a secret rule. Pick 3 numbers to feed in.</p>
+        <div class="builder" id="ownBuilder"></div>
+        <p class="say">Feed in: <span id="ownIns"></span></p>
+        <div class="row"><button class="primary" id="ownGo">Make my cards</button></div>
+        <p class="fb" id="ownMakeFb" aria-live="polite"></p>
+      </div>
+      <div class="panel" id="ownGuess" hidden>
+        <p class="lead"><b>Partner:</b> find the rule. Test it before you trust it.</p>
+        <div class="builder" id="guessBuilder"></div>
+        <div class="row">
+          <button class="primary" id="guessTest">Test on the cards</button>
+          <button class="secondary" id="guessCheck">Is it the same machine?</button>
+        </div>
+        <p class="say">Feed a new card: <span id="ownFeedWrap"></span></p>
+        <p class="fb" id="guessFb" aria-live="polite"></p>
+        <div class="row"><button class="linkish" id="ownReveal">Show the secret rule</button><button class="linkish" id="ownNew">Make a new machine</button></div>
+      </div>
+      <div class="panel"><div class="pad" id="ownPad"></div></div>
+    </div>
+  </section>
+
+  <!-- DETECTIVE -->
+  <section class="view" id="v-det" hidden>
+    <div class="col">
+      <div class="qnav" id="qnav"></div>
+      <div class="panel">
+        <p class="lead" id="detQ"></p>
+        <div class="row" id="detBtns"></div>
+        <p class="fb" id="detFb" aria-live="polite"></p>
+      </div>
+      <p class="small">Talk it over first. Then tap a button to put evidence on the screen.</p>
+    </div>
+    <div class="col" id="detEvidence"></div>
+  </section>
+</main>
+
+<script>
+/*LOGIC-START*/
+const OPS = { add:'add', sub:'subtract', dbl:'double' };
+function apply(steps, x){
+  for(const s of steps){
+    if(s.op==='add') x += s.n;
+    else if(s.op==='sub'){ x -= s.n; if(x < 0) return null; }
+    else if(s.op==='dbl') x *= 2;
+  }
+  return x;
+}
+function ruleText(steps){ return steps.map(s => s.op==='dbl' ? 'double' : `${OPS[s.op]} ${s.n}`).join(', then '); }
+function sameMachine(a, b){ for(let x=0; x<=200; x++){ const p=apply(a,x), q=apply(b,x); if(p!==null && q!==null && p!==q) return false; } return true; }
+function firstDiff(a, b, from=0){ for(let x=from; x<=200; x++){ const p=apply(a,x), q=apply(b,x); if(p!==null && q!==null && p!==q) return x; } return null; }
+const MACHINES = [
+  { name:'Machine 1', rule:[{op:'add',n:7}],  rows:[[3,10],[7,14],[12,19],[20,null],[null,30]] },
+  { name:'Machine 2', rule:[{op:'sub',n:6}],  rows:[[15,9],[20,14],[8,2],[30,null],[null,50]] },
+  { name:'Machine 3', rule:[{op:'dbl',n:0}],  rows:[[2,4],[3,6],[5,10],[8,null],[null,20]] },
+  { name:'Machine 4', rule:[{op:'add',n:9}],  rows:[[10,19],[25,34],[41,50],[100,null],[null,9]] },
+  { name:'Machine 5', rule:[{op:'dbl',n:0},{op:'add',n:9}], rows:[[4,17],[10,29],[1,11],[7,null],[null,35]], two:true }
+];
+// answer key from the lesson's teacher notes: [forward blank answer, backward blank answer]
+const KEY = [[27,23],[24,56],[16,10],[109,0],[23,13]];
+const WARM = [
+  { pairs:[[3,8],[5,10]], ask:10, ans:15, rule:'add 5' },
+  { pairs:[[20,12],[9,1]], ask:15, ans:7, rule:'subtract 8' }
+];
+const BOX_RULE = [{op:'add',n:7}];
+const BOX_CARDS = [4,6,10];
+const DECOY = [{op:'dbl',n:0},{op:'add',n:3}];           // fits 4 -> 11 but gives 6 -> 15
+const ONE_PAIR_RULES = [ [{op:'add',n:7}], [{op:'dbl',n:0},{op:'add',n:3}], [{op:'dbl',n:0},{op:'dbl',n:0},{op:'sub',n:5}] ];
+const SNEAKY_CARDS = [4,6,10,15,20,31,42,55];
+const sneaky = x => x < 50 ? x + 7 : x + 8;               // acts like add 7, until it doesn't
+/*LOGIC-END*/
+
+(function(){
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let GEN = 0;
+
+/* ---------- Slots + number pads ---------- */
+let active = null;
+class Slot {
+  constructor({max=3, onEnter, onInput, value=''}={}){
+    this.el = el('button','slot'); this.el.type='button'; this.max=max; this.onEnter=onEnter; this.onInput=onInput; this.locked=false;
+    this.set(value);
+    this.el.addEventListener('click', () => { if(!this.locked) focusSlot(this); });
+  }
+  set(v){ this.value = String(v); this.el.textContent = this.value; this.el.classList.toggle('empty', this.value===''); this.el.setAttribute('aria-label', this.value===''?'empty, tap to type':this.value); }
+  type(d){ if(this.locked) return; let v = this.value; if(v==='0') v=''; if(v.length>=this.max) return; this.set(v+d); this.el.classList.remove('no'); this.onInput && this.onInput(this); }
+  back(){ if(this.locked) return; this.set(this.value.slice(0,-1)); this.el.classList.remove('no'); this.onInput && this.onInput(this); }
+  num(){ return this.value==='' ? null : parseInt(this.value,10); }
+  lock(ok){ this.locked=true; this.el.classList.remove('active','no'); this.el.classList.toggle('ok', !!ok); if(active===this) active=null; }
+}
+function focusSlot(s){ if(active) active.el.classList.remove('active'); active=s; if(s) s.el.classList.add('active'); }
+function makePad(container){
+  container.innerHTML='';
+  for(const d of ['1','2','3','4','5','6','7','8','9','0']){ const b=el('button',null,d); b.onclick=()=>active&&active.type(d); container.appendChild(b); }
+  const del = el('button','del','⌫'); del.setAttribute('aria-label','Delete'); del.onclick=()=>active&&active.back(); container.appendChild(del);
+  const go = el('button','go','Check'); go.onclick=()=>active&&active.onEnter&&active.onEnter(active); container.appendChild(go);
+  return {go};
+}
+document.addEventListener('keydown', e => {
+  if(!active || e.target.tagName==='INPUT') return;
+  if(/^[0-9]$/.test(e.key)){ active.type(e.key); e.preventDefault(); }
+  else if(e.key==='Backspace'){ active.back(); e.preventDefault(); }
+  else if(e.key==='Enter' && active.onEnter){ active.onEnter(active); e.preventDefault(); }
+});
+
+/* ---------- Machine stage ---------- */
+function makeStage(container, name){
+  container.innerHTML = `
+    <div class="track">
+      <div class="tray"><span class="lbl">IN</span><div class="slotbox in"></div></div>
+      <div class="machine"><i class="bolt a"></i><i class="bolt b"></i><i class="bolt c"></i><i class="bolt d"></i>
+        <div class="mname">${name}</div><div class="window q">?</div><div class="gears"><span class="gear"></span><span class="gear"></span></div></div>
+      <div class="tray"><span class="lbl">OUT</span><div class="slotbox out"></div></div>
+    </div>
+    <p class="stage-note" aria-live="polite"></p>`;
+  const st = {
+    root:container, inBox:container.querySelector('.slotbox.in'), outBox:container.querySelector('.slotbox.out'),
+    machine:container.querySelector('.machine'), win:container.querySelector('.window'), nameEl:container.querySelector('.mname'), note:container.querySelector('.stage-note'),
+    setRule(t){ st.win.textContent = t || '?'; st.win.classList.toggle('q', !t); },
+    setName(n){ st.nameEl.textContent = n; },
+    clear(){ st.inBox.innerHTML=''; st.outBox.innerHTML=''; st.note.textContent=''; },
+    async feed(x, y, g=GEN){
+      st.inBox.innerHTML=''; st.outBox.innerHTML='';
+      const card = el('div','ncard', x);
+      if(reduced){ st.inBox.appendChild(el('div','ncard',x)); st.outBox.appendChild(el('div','ncard out', y)); return; }
+      st.inBox.appendChild(card);
+      const r0 = st.root.getBoundingClientRect(), rc = card.getBoundingClientRect(), rm = st.machine.getBoundingClientRect(), ro = st.outBox.getBoundingClientRect();
+      await sleep(250); if(g!==GEN) return;
+      const fly = el('div','ncard fly', x); st.root.appendChild(fly);
+      const fx = rc.left-r0.left, fy = rc.top-r0.top; fly.style.left=fx+'px'; fly.style.top=fy+'px';
+      card.style.visibility='hidden';
+      const mx = rm.left-r0.left + rm.width/2 - rc.width/2 - fx, my = rm.top-r0.top + rm.height/2 - rc.height/2 - fy;
+      await fly.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${mx}px,${my}px) scale(.4)`, opacity:.2}], {duration:450, easing:'ease-in', fill:'forwards'}).finished;
+      fly.remove(); if(g!==GEN) return;
+      st.machine.classList.add('run'); await sleep(720); st.machine.classList.remove('run'); if(g!==GEN) return;
+      card.style.visibility='';
+      const out = el('div','ncard out fly', y); st.root.appendChild(out);
+      const ow = out.getBoundingClientRect();
+      const tx = ro.left-r0.left + ro.width/2 - ow.width/2, ty = ro.top-r0.top + ro.height/2 - ow.height/2;
+      const sx = rm.left-r0.left + rm.width/2 - ow.width/2, sy = rm.top-r0.top + rm.height/2 - ow.height/2;
+      out.style.left='0px'; out.style.top='0px';
+      await out.animate([{transform:`translate(${sx}px,${sy}px) scale(.4)`, opacity:.2},{transform:`translate(${tx}px,${ty}px) scale(1)`, opacity:1}], {duration:450, easing:'ease-out', fill:'forwards'}).finished;
+      out.remove(); if(g!==GEN) return;
+      st.outBox.appendChild(el('div','ncard out', y));
+    }
+  };
+  return st;
+}
+
+/* ---------- Rule builder ---------- */
+function makeBuilder(container, {steps, maxSteps=2, onChange}={}){
+  const B = { steps: steps.map(s=>({...s})) };
+  function render(){
+    container.innerHTML='';
+    B.steps.forEach((s,i) => {
+      const row = el('div','step');
+      row.appendChild(el('span','k', B.steps.length>1 ? (i===0?'First':'Then') : 'Rule'));
+      const seg = el('div','seg'); seg.setAttribute('role','group');
+      for(const [op,lab] of [['add','+ add'],['sub','− subtract'],['dbl','× double']]){
+        const b = el('button',null,lab); b.setAttribute('aria-pressed', s.op===op);
+        b.onclick = () => { s.op=op; render(); onChange&&onChange(); }; seg.appendChild(b);
+      }
+      row.appendChild(seg);
+      if(s.op!=='dbl'){
+        const num = el('span','num');
+        const minus = el('button','b','−'); minus.setAttribute('aria-label','one less');
+        const plus = el('button','b','+'); plus.setAttribute('aria-label','one more');
+        const slot = new Slot({max:2, value:s.n, onInput: sl => { s.n = sl.num() ?? 0; onChange&&onChange(); }});
+        minus.onclick = () => { s.n=Math.max(0,s.n-1); slot.set(s.n); onChange&&onChange(); };
+        plus.onclick = () => { s.n=Math.min(99,s.n+1); slot.set(s.n); onChange&&onChange(); };
+        num.append(minus, slot.el, plus); row.appendChild(num);
+      }
+      container.appendChild(row);
+    });
+    const tools = el('div','row');
+    if(B.steps.length < maxSteps){ const a = el('button','linkish','+ Add a second step'); a.onclick=()=>{ B.steps.push({op:'add',n:1}); render(); onChange&&onChange(); }; tools.appendChild(a); }
+    if(B.steps.length > 1){ const r = el('button','linkish','Use one step'); r.onclick=()=>{ B.steps.pop(); render(); onChange&&onChange(); }; tools.appendChild(r); }
+    container.appendChild(tools);
+  }
+  B.render = render; B.get = () => B.steps.map(s=>({op:s.op, n:s.op==='dbl'?0:s.n}));
+  B.reset = st => { B.steps = st.map(s=>({...s})); render(); };
+  render();
+  return B;
+}
+
+/* ---------- Tabs ---------- */
+let current = 'warm';
+function show(v){
+  current = v; focusSlot(null); GEN++;
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.v===v));
+  document.querySelectorAll('main .view').forEach(s => s.hidden = s.id !== 'v-'+v);
+  if(v==='warm') renderWarm();
+  if(v==='mach') renderMachine();
+  if(v==='det') renderDet();
+}
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => show(b.dataset.v));
+
+/* ================= WARM-UP ================= */
+const W = { round:0, solved:[false,false] };
+makePad($('#warmPad'));
+function renderWarm(){
+  const R = WARM[W.round];
+  $('#warmQ').innerHTML = `<b>Round ${W.round+1} of 2.</b> No machine yet. Look at the pairs. What comes out?`;
+  const box = $('#warmPairs'); box.innerHTML='';
+  R.pairs.forEach(([a,b]) => box.appendChild(el('div','pair', `<span class="tl">In</span>${a}<span class="ar">→</span><span class="tl">Out</span>${b}`)));
+  const p = el('div','pair', `<span class="tl">In</span>${R.ask}<span class="ar">→</span><span class="tl">Out</span>`);
+  const s = new Slot({max:3, onEnter: checkWarm});
+  if(W.solved[W.round]){ s.set(R.ans); s.lock(true); }
+  p.appendChild(s.el); box.appendChild(p);
+  $('#warmFb').className='fb'; $('#warmFb').textContent = W.solved[W.round] ? '' : '';
+  if(W.solved[W.round]) warmGood(); else focusSlot(s);
+  $('#warmNext').textContent = W.round===0 ? 'Next round' : 'On to the mystery box';
+}
+function warmGood(){ const R=WARM[W.round]; const fb=$('#warmFb'); fb.className='fb good'; fb.innerHTML = `<b>Yes, ${R.ask} → ${R.ans}.</b> The rule is <b>${R.rule}</b>. Check it on both pairs: ${R.pairs.map(([a,b])=>`${a} → ${b}`).join(' and ')}.`; }
+function checkWarm(s){
+  const R = WARM[W.round], v = s.num(); const fb=$('#warmFb');
+  if(v===null){ fb.className='fb info'; fb.textContent='Type a number first.'; return; }
+  if(v===R.ans){ W.solved[W.round]=true; s.lock(true); warmGood(); return; }
+  s.el.classList.add('no'); fb.className='fb nudge';
+  const [a,b] = R.pairs[0], [c,d] = R.pairs[1];
+  const bigger = b > a;
+  fb.innerHTML = `Not ${v} yet. Look at ${a} → ${b} and ${c} → ${d}. Is each Out ${bigger?'bigger':'smaller'} than its In? By how much? Do the same to ${R.ask}.`;
+}
+$('#warmNext').onclick = () => { if(W.round===0){ W.round=1; renderWarm(); } else show('box'); };
+
+/* ================= MYSTERY BOX ================= */
+const BX = { step:0, hist:[] };
+const boxStage = makeStage($('#boxStage'), 'Mystery box');
+makePad($('#boxPad'));
+const boxSlot = new Slot({max:3, onEnter: async s => {
+  const x = s.num(); if(x===null) return;
+  const y = apply(BOX_RULE, x); s.set('');
+  await boxStage.feed(x, y); BX.hist.push([x,y]); renderHist();
+  const fb=$('#boxFb'); fb.className='fb info'; fb.innerHTML = `${x} came out as <b>${y}</b>. Does your rule say ${y}?`;
+}});
+$('#boxSlotWrap').appendChild(boxSlot.el);
+function renderHist(){ const h=$('#boxHist'); h.innerHTML = BX.hist.length ? '' : '<span style="opacity:.5">none yet</span>'; BX.hist.forEach(([a,b]) => h.appendChild(el('span',null,`${a} → ${b}`))); }
+const BOX_STEPS = [
+  { lead:'A card goes in. A card comes out. <b>Watch.</b>', btn:'Feed card 4', act: async () => { await feedBox(4); return 'In went 4. Out came <b>11</b>. Any ideas?'; } },
+  { lead:'Here comes another card.', btn:'Feed card 6', act: async () => { await feedBox(6); return 'In went 6. Out came <b>13</b>. <b>What is the rule? Are you sure?</b>'; } },
+  { lead:'<b>Could a different rule fit the first card?</b> Think, then tap.', btn:'Show another rule for 4 → 11', act: async () => {
+      const d4 = apply(DECOY,4), d6 = apply(DECOY,6);
+      return `<b>Double, then add 3</b> also fits the first card: 4 → 8 → ${d4}. But it turns 6 into 12 → ${d6}. The box gave 13. The second card told the rules apart.`; } },
+  { lead:'Give me an input to test. Who has one?', btn:'Feed card 10', act: async () => { await feedBox(10); $('#boxTry').hidden=false; focusSlot(boxSlot); return 'In went 10. Out came <b>17</b>. Did you predict it? Now test your own numbers below.'; } },
+  { lead:'Test as many cards as you like. When everyone agrees, open the box.', btn:'Open the box', act: async () => { boxStage.setRule(ruleText(BOX_RULE)); return `The rule is <b>add 7</b>. Every card fit: ${BX.hist.map(([a,b])=>`${a} → ${b}`).join(', ')}.`; } }
+];
+async function feedBox(x){ const y=apply(BOX_RULE,x); await boxStage.feed(x,y); BX.hist.push([x,y]); renderHist(); }
+function renderBox(){
+  const S = BOX_STEPS[Math.min(BX.step, BOX_STEPS.length-1)];
+  $('#boxLead').innerHTML = BX.step < BOX_STEPS.length ? S.lead : '<b>Box open.</b> Next: the machines on your handout.';
+  const btns = $('#boxBtns'); btns.innerHTML='';
+  if(BX.step < BOX_STEPS.length){
+    const b = el('button','primary', S.btn);
+    b.onclick = async () => { b.disabled=true; const g=GEN; const msg = await S.act(); if(g!==GEN) return; const fb=$('#boxFb'); fb.className='fb info'; fb.innerHTML=msg; BX.step++; renderBox(); };
+    btns.appendChild(b);
+  } else { const b = el('button','primary','Go to Machines 1–5'); b.onclick=()=>show('mach'); btns.appendChild(b); }
+}
+function resetBox(){ BX.step=0; BX.hist=[]; boxStage.clear(); boxStage.setRule(''); $('#boxTry').hidden=true; $('#boxFb').textContent=''; renderHist(); renderBox(); }
+
+/* ================= MACHINES ================= */
+const M = { i:0, state: MACHINES.map(() => ({fw:'', bw:'', fwOk:false, bwOk:false, ruleOk:false, steps:[{op:'add',n:0}]})) };
+const machStage = makeStage($('#machStage'), 'Machine 1');
+makePad($('#machPad'));
+const machBuilder = makeBuilder($('#machBuilder'), {steps:[{op:'add',n:0}], onChange: () => { M.state[M.i].steps = machBuilder.get(); clearMarks(); }});
+function renderChips(){
+  const c=$('#machChips'); c.innerHTML='';
+  MACHINES.forEach((m,i) => {
+    const s=M.state[i]; const b=el('button', s.fwOk&&s.bwOk&&s.ruleOk ? 'solved':'', `${m.name}<small>${m.two?'2 steps':'1 step'}</small>`);
+    b.setAttribute('aria-pressed', i===M.i); b.onclick=()=>{ M.i=i; GEN++; renderMachine(); }; c.appendChild(b);
+  });
+}
+function knownRows(i){ const m=MACHINES[i], s=M.state[i]; return m.rows.map(([a,b]) => [a===null ? (s.bwOk? KEY[i][1] : null) : a, b===null ? (s.fwOk? KEY[i][0] : null) : b]).filter(([a,b]) => a!==null && b!==null); }
+let markCells = [];
+function clearMarks(){ markCells.forEach(c => c.innerHTML=''); $('#machRuleFb').textContent=''; $('#machRuleFb').className='fb'; }
+function renderMachine(){
+  const m = MACHINES[M.i], s = M.state[M.i];
+  renderChips(); machStage.setName(m.name); machStage.clear(); machStage.setRule(s.ruleOk ? ruleText(m.rule) : '');
+  $('#machLead').innerHTML = m.two ? `<b>${m.name} uses two steps.</b> Find the rule. Fill the blanks.` : `<b>${m.name}</b> uses one secret rule on every number. Find it. Some blanks run backward!`;
+  machBuilder.reset(s.steps);
+  const t = $('#machTable'); t.innerHTML = '<tr><th>In</th><th></th><th>Out</th><th></th></tr>'; markCells=[];
+  m.rows.forEach(([a,b], r) => {
+    const tr = el('tr', a!==null && b!==null ? 'ex' : '');
+    const tdA = el('td','v'), tdAr = el('td','arrow','→'), tdB = el('td','v o'), tdM = el('td','mark');
+    if(a===null){
+      const sl = new Slot({max:3, onEnter: sl => checkBack(sl, tdM)}); if(s.bwOk){ sl.set(KEY[M.i][1]); sl.lock(true); } tdA.appendChild(sl.el);
+      tdM.innerHTML = '<span class="dirtag">backward</span>';
+    } else tdA.textContent = a;
+    if(b===null){
+      const sl = new Slot({max:3, onEnter: sl => checkFwd(sl, tdM)}); if(s.fwOk){ sl.set(KEY[M.i][0]); sl.lock(true); } tdB.appendChild(sl.el);
+    } else tdB.textContent = b;
+    if(a!==null && b!==null){ tr.onclick = () => machStage.feed(a,b); tr.title='Send through the machine'; }
+    tr.append(tdA, tdAr, tdB, tdM); t.appendChild(tr); markCells.push(tdM);
+  });
+  $('#machFb').textContent=''; $('#machFb').className='fb'; $('#machRuleFb').textContent=''; $('#machRuleFb').className='fb';
+  if(s.ruleOk && s.fwOk && s.bwOk) solvedMsg();
+}
+function solvedMsg(){ const fb=$('#machFb'); fb.className='fb good'; fb.innerHTML = `<b>${MACHINES[M.i].name} solved.</b> Rule: <b>${ruleText(MACHINES[M.i].rule)}</b>. ${M.i<4?'Tap the next machine.':'All five machines done. Try making your own.'}`; }
+function afterSolveCheck(){ renderChips(); const s=M.state[M.i]; if(s.ruleOk&&s.fwOk&&s.bwOk) solvedMsg(); }
+async function checkFwd(sl, tdM){
+  const m=MACHINES[M.i], s=M.state[M.i], v=sl.num(); const fb=$('#machFb');
+  const x = m.rows.find(r => r[1]===null)[0], ans = apply(m.rule, x);
+  if(v===null){ fb.className='fb info'; fb.textContent='Type a number first.'; return; }
+  if(v===ans){ s.fwOk=true; sl.lock(true); fb.className='fb good'; fb.innerHTML=`<b>${x} → ${ans}.</b> Watch it go through.`; await machStage.feed(x, ans); afterSolveCheck(); return; }
+  sl.el.classList.add('no'); fb.className='fb nudge';
+  const [a,b] = m.rows[0], [c,d] = m.rows[1];
+  if(M.i===2 && v===x+2) fb.innerHTML = `That fits <b>add 2</b>, which works for 2 → 4. Try 5: does add 2 give 10? Test your rule on every pair before you trust it.`;
+  else if(m.two && v===x+(b-a)) fb.innerHTML = `Add ${b-a} works for ${a} → ${b}. Check ${c} → ${d}: does ${c} + ${b-a} make ${d}? This machine uses two steps. Try starting with <b>double</b>.`;
+  else if(m.two) fb.innerHTML = `Not ${v}. This machine uses two steps. Build a two-step rule that works for ${a} → ${b} <i>and</i> ${c} → ${d}, then use it on ${x}.`;
+  else fb.innerHTML = `Not ${v} yet. What does the machine do to ${a} to make ${b}? Does it do the same to ${c} to make ${d}? Do that to ${x}.`;
+}
+async function checkBack(sl, tdM){
+  const m=MACHINES[M.i], s=M.state[M.i], g=sl.num(); const fb=$('#machFb');
+  const y = m.rows.find(r => r[0]===null)[1];
+  if(g===null){ fb.className='fb info'; fb.textContent='Type a number first.'; return; }
+  const out = apply(m.rule, g);
+  if(out===y){ s.bwOk=true; sl.lock(true); fb.className='fb good'; fb.innerHTML=`<b>${g} went in.</b> Feed it forward to check: out comes ${y}.`; await machStage.feed(g, y); afterSolveCheck(); return; }
+  sl.el.classList.add('no'); fb.className='fb nudge';
+  if(out===null){ fb.innerHTML = `This machine can't take ${m.rule[0].n} away from ${g}. Try a bigger number. Ask: what number, minus ${m.rule[0].n}, makes ${y}?`; return; }
+  fb.innerHTML = `Let's check: feed ${g} in, and out comes <b>${out}</b>, not ${y}. Try a ${out < y ? 'bigger' : 'smaller'} number. Can you undo the rule instead of guessing?`;
+  await machStage.feed(g, out);
+}
+$('#machTest').onclick = () => {
+  const m=MACHINES[M.i], s=M.state[M.i], steps = machBuilder.get(); s.steps = steps;
+  const rows = m.rows; let pass=0, fail=0, total=0, firstFail=null;
+  rows.forEach(([a,b], r) => {
+    const kr = [a===null ? (s.bwOk?KEY[M.i][1]:null) : a, b===null ? (s.fwOk?KEY[M.i][0]:null) : b];
+    const cell = markCells[r];
+    if(kr[0]===null || kr[1]===null){ cell.innerHTML = a===null ? '<span class="dirtag">backward</span>' : ''; return; }
+    total++; const got = apply(steps, kr[0]);
+    if(got===kr[1]){ pass++; cell.innerHTML = `<span class="y">✓</span> makes ${got}`; }
+    else { fail++; if(!firstFail) firstFail=[kr[0],kr[1],got]; cell.innerHTML = got===null ? `<span class="x">✗</span> can't go below 0` : `<span class="x">✗</span> makes ${got}`; }
+  });
+  const fb = $('#machRuleFb'); const txt = ruleText(steps);
+  if(fail===0 && sameMachine(steps, m.rule)){
+    s.ruleOk = true; machStage.setRule(ruleText(m.rule)); fb.className='fb good';
+    const same = txt===ruleText(m.rule) ? '' : ` It does the same thing as <b>${ruleText(m.rule)}</b>.`;
+    fb.innerHTML = `<b>“${txt}” works for all ${total} pairs.</b>${same}`; afterSolveCheck();
+  } else if(fail===0){
+    fb.className='fb info'; fb.innerHTML = `“${txt}” fits these ${total} pairs. Fill the blanks and test again.`;
+  } else {
+    fb.className='fb nudge';
+    const [x,y,got] = firstFail;
+    fb.innerHTML = pass ? `“${txt}” works for ${pass} pair${pass===1?'':'s'}, but not ${x} → ${y}${got===null?'':`: it makes ${got}`}. One pair is not enough. Change the rule and test again.`
+                        : `“${txt}” doesn't fit ${x} → ${y}${got===null?'':`: it makes ${got}`}. Look at how each Out compares to its In.`;
+  }
+};
+
+/* ================= MAKE YOUR OWN ================= */
+const OW = { secret:null, ins:[], cards:[], phase:'make' };
+const ownStage = makeStage($('#ownStage'), 'Our machine');
+makePad($('#ownPad'));
+const ownBuilder = makeBuilder($('#ownBuilder'), {steps:[{op:'add',n:4}]});
+const guessBuilder = makeBuilder($('#guessBuilder'), {steps:[{op:'add',n:0}], onChange: () => renderOwnTable()});
+const ownSlots = [new Slot({max:2}), new Slot({max:2}), new Slot({max:2})];
+const iw = $('#ownIns'); ownSlots.forEach((s,i) => { iw.appendChild(s.el); if(i<2) iw.appendChild(document.createTextNode(' ')); });
+const ownFeed = new Slot({max:3, onEnter: async s => {
+  const x=s.num(); if(x===null || !OW.secret) return; const y=apply(OW.secret,x); s.set('');
+  const fb=$('#guessFb');
+  if(y===null){ fb.className='fb info'; fb.innerHTML=`The machine can't use ${x}: it would go below 0. Try a bigger number.`; return; }
+  await ownStage.feed(x,y); const gy = apply(guessBuilder.get(), x);
+  fb.className = gy===y ? 'fb good' : 'fb nudge';
+  fb.innerHTML = `${x} → <b>${y}</b>. Your rule says ${gy===null?'it can’t go':gy}. ${gy===y?'Your rule survived another test.':'This card proves your rule wrong. Change it.'}`;
+}});
+$('#ownFeedWrap').appendChild(ownFeed.el);
+function renderOwnTable(results){
+  const t=$('#ownTable'); t.innerHTML='<tr><th>In</th><th></th><th>Out</th><th></th></tr>';
+  if(!OW.cards.length){ t.insertAdjacentHTML('beforeend','<tr><td colspan="4" class="mark" style="text-align:center">The maker’s cards show up here.</td></tr>'); return; }
+  OW.cards.forEach(([a,b],i) => {
+    const tr=el('tr','ex'); tr.innerHTML=`<td class="v">${a}</td><td class="arrow">→</td><td class="v o">${b}</td><td class="mark">${results?results[i]:''}</td>`;
+    tr.onclick=()=>ownStage.feed(a,b); t.appendChild(tr);
+  });
+}
+$('#ownGo').onclick = () => {
+  const steps = ownBuilder.get(); const ins = ownSlots.map(s=>s.num()); const fb=$('#ownMakeFb');
+  if(ins.some(v=>v===null)){ fb.className='fb info'; fb.textContent='Pick 3 numbers to feed in. Tap each ? and type.'; focusSlot(ownSlots[ins.findIndex(v=>v===null)]); return; }
+  const outs = ins.map(x=>apply(steps,x));
+  const bad = ins.find((x,i)=>outs[i]===null);
+  if(bad!==undefined){ fb.className='fb nudge'; fb.innerHTML=`Your rule can't use ${bad}: it would go below 0. Pick a bigger number, or change the rule.`; return; }
+  OW.secret = steps; OW.cards = ins.map((x,i)=>[x,outs[i]]); OW.phase='guess';
+  $('#ownMake').hidden=true; $('#ownGuess').hidden=false; ownStage.setRule(''); ownStage.clear();
+  guessBuilder.reset([{op:'add',n:0}]); $('#guessFb').textContent=''; $('#guessFb').className='fb'; renderOwnTable();
+  const fb2=$('#guessFb'); fb2.className='fb info'; fb2.innerHTML='Rule hidden. Hand the board to your partner.';
+};
+$('#guessTest').onclick = () => {
+  const g = guessBuilder.get(); let pass=0;
+  const res = OW.cards.map(([a,b]) => { const y=apply(g,a); if(y===b) pass++; return y===b ? `<span class="y">✓</span> makes ${y}` : `<span class="x">✗</span> ${y===null?"can't":'makes '+y}`; });
+  renderOwnTable(res); const fb=$('#guessFb');
+  fb.className = pass===OW.cards.length ? 'fb good' : 'fb nudge';
+  fb.innerHTML = pass===OW.cards.length ? `“${ruleText(g)}” fits all 3 cards. Are you sure? Feed a new card, or ask: is it the same machine?` : `“${ruleText(g)}” fits ${pass} of 3 cards. Every card has to fit.`;
+};
+$('#guessCheck').onclick = () => {
+  const g = guessBuilder.get(); const fb=$('#guessFb');
+  if(sameMachine(g, OW.secret)){
+    fb.className='fb good'; ownStage.setRule(ruleText(OW.secret));
+    fb.innerHTML = ruleText(g)===ruleText(OW.secret) ? `<b>Same machine!</b> The rule is <b>${ruleText(OW.secret)}</b>.` : `<b>Same machine!</b> The maker wrote <b>${ruleText(OW.secret)}</b>. You wrote “${ruleText(g)}”. Different words, same Out for every In.`;
+  } else {
+    const x = firstDiff(g, OW.secret, 1) ?? firstDiff(g, OW.secret, 0);
+    fb.className='fb nudge'; fb.innerHTML = `Not the same machine. Try feeding <b>${x}</b>: the machine makes ${apply(OW.secret,x)}, your rule makes ${apply(g,x)}.`;
+  }
+};
+$('#ownReveal').onclick = () => { if(OW.secret){ ownStage.setRule(ruleText(OW.secret)); } };
+$('#ownNew').onclick = () => resetOwn();
+function resetOwn(){ OW.secret=null; OW.cards=[]; OW.phase='make'; $('#ownMake').hidden=false; $('#ownGuess').hidden=true; ownStage.clear(); ownStage.setRule(''); ownBuilder.reset([{op:'add',n:4}]); ownSlots.forEach(s=>s.set('')); $('#ownMakeFb').textContent=''; $('#ownMakeFb').className='fb'; renderOwnTable(); }
+
+/* ================= DETECTIVE ================= */
+const D = { q:1, sneakyIdx:0 };
+function say(html, cls='info'){ const fb=$('#detFb'); fb.className='fb '+cls; fb.innerHTML=html; }
+function twinMachines(rules, labels){
+  const ev=$('#detEvidence');
+  const wrap = el('div','panel');
+  wrap.innerHTML = `<div class="twin">${rules.map((r,i)=>`<div class="mini" data-i="${i}"><div class="mname">${labels[i]}</div><div class="window">${ruleText(r)}</div><div class="outv">&nbsp;</div></div>`).join('')}</div>`;
+  ev.appendChild(wrap);
+  return {
+    feed(x){ const outs = rules.map(r=>apply(r,x)); wrap.querySelectorAll('.mini').forEach((m,i)=>{ m.querySelector('.outv').textContent = `${x} → ${outs[i]===null?'—':outs[i]}`; }); const same = outs.every(o=>o===outs[0]); wrap.querySelectorAll('.mini').forEach(m=>m.classList.toggle('match', same)); return outs; }
+  };
+}
+function padPanel(label, onEnter){
+  const p = el('div','panel'); p.innerHTML = `<p class="say">${label} <span></span></p><div class="pad"></div>`;
+  const s = new Slot({max:3, onEnter}); p.querySelector('span').appendChild(s.el); makePad(p.querySelector('.pad'));
+  $('#detEvidence').appendChild(p); focusSlot(s); return s;
+}
+const DQ = {
+  1:{ text:`<b>Machine 3 traps people.</b> The first pair, 2 → 4, fits two rules: add 2 and double. <b>Which input tells the two rules apart?</b>`,
+      build(){
+        const tw = twinMachines([[{op:'add',n:2}],[{op:'dbl',n:0}]], ['Rule A','Rule B']);
+        padPanel('Feed both machines:', s => { const x=s.num(); if(x===null) return; const [a,b]=tw.feed(x); s.set('');
+          say(a===b ? `${x} → ${a} on both. <b>${x} can't tell them apart.</b> Try another input.` : `${x} → ${a} with add 2, but ${x} → ${b} with double. <b>${x} tells them apart.</b>`, a===b?'info':'good'); });
+        return [
+          ['Feed 2', () => { tw.feed(2); say('Both make 4. The first pair can’t tell them apart.'); }],
+          ['Feed 3 (the 2nd pair)', () => { tw.feed(3); say('Add 2 makes 5. Double makes 6. Machine 3 says 3 → 6, so <b>add 2 is out</b>.','good'); }],
+          ['Where do they agree?', () => { const rows=[]; for(let x=0;x<=10;x++) rows.push(x);
+              const tbl = `<div class="scroll"><table class="cmp"><tr><th>In</th>${rows.map(x=>`<td>${x}</td>`).join('')}</tr><tr><th>add 2</th>${rows.map(x=>`<td>${x+2}</td>`).join('')}</tr><tr><th>double</th>${rows.map(x=>`<td>${2*x}</td>`).join('')}</tr></table></div>`;
+              say(`${tbl}<p style="margin:10px 0 0">They only agree at <b>2</b>. Every other input tells them apart.</p>`); }]
+        ];
+      }},
+  2:{ text:`<b>How many pairs do you need to be sure?</b> Is any number of pairs enough to be certain? Meet the Sneaky Machine.`,
+      build(){
+        const st = el('div','stage'); $('#detEvidence').appendChild(st); const sg = makeStage(st, 'Sneaky machine');
+        const hp = el('div','panel','<span class="small">Cards so far</span><div class="history"></div>'); $('#detEvidence').appendChild(hp);
+        const hist = hp.querySelector('.history'); D.sneakyIdx=0;
+        const next = async () => {
+          if(D.sneakyIdx >= SNEAKY_CARDS.length) return;
+          const x = SNEAKY_CARDS[D.sneakyIdx++], y = sneaky(x), g=GEN; await sg.feed(x,y); if(g!==GEN) return;
+          const fits = y===x+7; const sp = el('span', fits?'':'broke', `${x} → ${y}`); hist.appendChild(sp);
+          if(fits) say(`${D.sneakyIdx} card${D.sneakyIdx===1?'':'s'} so far, and every one fits <b>add 7</b>. Are you sure yet?`);
+          else say(`<b>${x} → ${y}!</b> Add 7 would make ${x+7}. ${D.sneakyIdx-1} cards fit add 7, and one card broke it. <br><b>No list of pairs can prove a rule for sure. But one new pair can prove a rule wrong.</b>`, 'nudge');
+        };
+        return [['Feed the next card', next], ['Feed all the cards', async () => { while(D.sneakyIdx < SNEAKY_CARDS.length){ const g=GEN; await next(); if(g!==GEN) return; await sleep(reduced?0:250); } }]];
+      }},
+  3:{ text:`<b>Journal:</b> Why isn't one example enough to know the rule? Here is one card: <b>4 → 11</b>.`,
+      build(){
+        const ev=$('#detEvidence'); const p = el('div','panel'); ev.appendChild(p);
+        const rows = ONE_PAIR_RULES.map(r => `<tr><td style="text-align:left">${ruleText(r)}</td><td>4 → ${apply(r,4)}</td><td class="six">?</td></tr>`).join('');
+        p.innerHTML = `<div class="scroll"><table class="cmp" style="width:100%"><tr><th style="text-align:left">Rule</th><th>Card 1</th><th>Card 2</th></tr>${rows}</table></div>`;
+        return [
+          ['Check card 1 on each rule', () => say(`All three rules turn 4 into 11. One card fits all of them.`)],
+          ['Feed card 6', () => { const outs = ONE_PAIR_RULES.map(r=>apply(r,6)); p.querySelectorAll('.six').forEach((c,i)=>c.textContent=`6 → ${outs[i]}`);
+              say(`Now they split: ${outs.join(', ')}. The mystery box gave 6 → 13, so only <b>add 7</b> is left. One example can fit many rules.`,'good'); }]
+        ];
+      }},
+  4:{ text:`<b>★ Challenge:</b> Make a trap of your own. Build two different rules that give the <b>same Out</b> for one In. Then find an input that tells them apart.`,
+      build(){
+        const ev=$('#detEvidence');
+        const p = el('div','panel'); p.innerHTML = '<span class="say">Rule A</span><div class="builder" id="cA"></div><span class="say">Rule B</span><div class="builder" id="cB"></div>'; ev.appendChild(p);
+        const A = makeBuilder(p.querySelector('#cA'), {steps:[{op:'add',n:5}]});
+        const Bb = makeBuilder(p.querySelector('#cB'), {steps:[{op:'dbl',n:0},{op:'add',n:1}]});
+        padPanel('Feed both rules:', s => { const x=s.num(); if(x===null) return; s.set('');
+          const a=apply(A.get(),x), b=apply(Bb.get(),x);
+          if(a===null || b===null){ say(`${x} is too small: one rule would go below 0. Try a bigger number.`); return; }
+          if(a===b){
+            if(sameMachine(A.get(),Bb.get())) say(`${x} → ${a} on both. But look: these two rules match for <b>every</b> input. They are the same machine with different words. Change one rule.`);
+            else { const d = firstDiff(A.get(),Bb.get(),1) ?? firstDiff(A.get(),Bb.get(),0); say(`<b>Trap made!</b> ${x} → ${a} with both rules. Now find an input that tells them apart. (Hint: try ${d}.)`,'good'); }
+          } else say(`${x} → ${a} with Rule A, ${x} → ${b} with Rule B. Not the same Out. Try another input, or change a rule.`);
+        });
+        return [['Show an example trap', () => { A.reset([{op:'add',n:5}]); Bb.reset([{op:'dbl',n:0},{op:'add',n:1}]); say(`Add 5 and “double, then add 1” both turn <b>4 into 9</b>. Feed 5: add 5 makes 10, the other makes 11.`); }]];
+      }}
+};
+function renderDet(){
+  const nav=$('#qnav'); nav.innerHTML='';
+  [1,2,3,4].forEach(i => { const b=el('button',null, i===4?'★ Challenge':String(i)); b.setAttribute('aria-pressed', D.q===i); b.setAttribute('aria-label', i===4?'Challenge':'Question '+i); b.onclick=()=>{ D.q=i; GEN++; focusSlot(null); renderDet(); }; nav.appendChild(b); });
+  const q = DQ[D.q]; $('#detQ').innerHTML = q.text; $('#detEvidence').innerHTML=''; $('#detFb').textContent=''; $('#detFb').className='fb';
+  const acts = q.build(); const box=$('#detBtns'); box.innerHTML='';
+  acts.forEach(([lab,fn],i) => { const b=el('button', i===0?'primary':'secondary', lab); b.onclick=fn; box.appendChild(b); });
+}
+
+/* ---------- Global ---------- */
+function resetAll(){
+  GEN++; focusSlot(null);
+  W.round=0; W.solved=[false,false];
+  resetBox();
+  M.i=0; M.state = MACHINES.map(() => ({fw:'', bw:'', fwOk:false, bwOk:false, ruleOk:false, steps:[{op:'add',n:0}]}));
+  resetOwn(); D.q=1; D.sneakyIdx=0;
+  show('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+resetBox(); resetOwn(); show('warm');
+})();
+</script>
+
+</body></html>

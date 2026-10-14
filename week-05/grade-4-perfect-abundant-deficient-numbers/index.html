@@ -1,0 +1,588 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Perfect, Abundant & Deficient Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a map of number "territories" on the left (the class chart), the factor-sum lab on the right; stacks on narrow screens. */
+:root{
+  --bg:#EFF1F5; --card:#FFFFFF; --ink:#1A1E2C; --muted:#5D6375; --line:#D5D9E2; --wash:#E6E9F0;
+  --perfect:#B87D00; --abund:#0B8566; --defic:#5B4FC4; --wrong:#C7342B;
+  --perfect-soft:#FCEFC9; --abund-soft:#D3F1E6; --defic-soft:#E5E2FB; --wrong-soft:#FBE3E0;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141B; --card:#1C1F29; --ink:#ECEDF2; --muted:#A3A8B8; --line:#353A4A; --wash:#262A36;
+    --perfect:#F0B429; --abund:#38C99C; --defic:#A497FF; --wrong:#FF7A70;
+    --perfect-soft:#3A2F12; --abund-soft:#123629; --defic-soft:#272348; --wrong-soft:#3D1D1B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141B; --card:#1C1F29; --ink:#ECEDF2; --muted:#A3A8B8; --line:#353A4A; --wash:#262A36;
+  --perfect:#F0B429; --abund:#38C99C; --defic:#A497FF; --wrong:#FF7A70;
+  --perfect-soft:#3A2F12; --abund-soft:#123629; --defic-soft:#272348; --wrong-soft:#3D1D1B;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:14px 24px 8px}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.6vw,38px); line-height:1.05; margin:0; letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.seg{display:inline-flex; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 14px; border-radius:9px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:9px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+main{flex:1; min-height:0; display:flex; gap:26px; padding:6px 24px 20px}
+.map-col{flex:none; display:flex; flex-direction:column; gap:12px; width:min(54vw, calc((100dvh - 300px) * 2))}
+.map{display:grid; grid-template-columns:repeat(10,1fr); gap:6px}
+.tile{position:relative; aspect-ratio:1; border:2px solid var(--line); background:var(--card); border-radius:10px; padding:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; container-type:inline-size; transition:background-color .25s, border-color .25s, opacity .25s, transform .15s}
+.tile .n{font-family:var(--display); font-weight:700; font-size:40cqi; line-height:1}
+.tile .s{font-size:20cqi; color:var(--muted); line-height:1.1; min-height:1.1em; font-variant-numeric:tabular-nums}
+.tile .k{position:absolute; top:5%; right:8%; font-size:18cqi; font-weight:700; color:var(--kc)}
+.tile .badge{position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); font-size:12px; font-weight:700; background:var(--ink); color:var(--card); padding:1px 6px; border-radius:8px; white-space:nowrap; display:none; z-index:2}
+.tile.has-badge .badge{display:block}
+.tile:hover{border-color:var(--ink)}
+.tile.P{--kc:var(--perfect); background:var(--perfect-soft); border-color:var(--perfect)}
+.tile.A{--kc:var(--abund); background:var(--abund-soft); border-color:var(--abund)}
+.tile.D{--kc:var(--defic); background:var(--defic-soft); border-color:var(--defic)}
+.tile.P .s,.tile.A .s,.tile.D .s{color:var(--kc); font-weight:700}
+.tile.current{box-shadow:0 0 0 4px var(--ink); transform:scale(1.04); z-index:1}
+.map.focus .tile:not(.hl){opacity:.22}
+.tile.hl{box-shadow:0 0 0 4px var(--hlc,var(--ink))}
+.tile.pop{animation:pop .45s ease-out}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+.counts{display:flex; gap:10px; flex-wrap:wrap}
+.count{flex:1 1 120px; display:flex; align-items:center; gap:10px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:8px 12px}
+.count b{font-family:var(--display); font-size:30px; line-height:1; font-variant-numeric:tabular-nums; color:var(--kc,var(--ink))}
+.count span{font-size:15px; color:var(--muted); line-height:1.2}
+.count.P{--kc:var(--perfect)} .count.A{--kc:var(--abund)} .count.D{--kc:var(--defic)}
+.swatch{width:14px; height:14px; border-radius:4px; background:var(--kc,var(--line)); flex:none}
+
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; overflow:auto; padding-right:4px}
+.tabs{display:flex; gap:4px 20px; border-bottom:2px solid var(--line); flex-wrap:wrap}
+.tabs button{border:0; background:none; padding:10px 2px; font-family:var(--display); font-size:clamp(17px,1.4vw,21px); font-weight:700; color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--ink)}
+.view{display:flex; flex-direction:column; gap:16px}
+.lead{font-size:clamp(19px,1.6vw,24px); line-height:1.45; margin:0; max-width:34em}
+.lead strong{font-weight:700}
+.small{font-size:15px; color:var(--muted); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:13px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.linkish{border:0; background:none; text-decoration:underline; color:var(--muted); font-size:15px; padding:6px 2px}
+
+.kingdoms{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+.kcard{border:2px solid var(--kc); background:var(--ks); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px}
+.kcard h3{margin:0; font-family:var(--display); font-size:22px; color:var(--kc)}
+.kcard .rule{font-family:var(--display); font-weight:700; font-size:20px}
+.kcard p{margin:0; font-size:15px; color:var(--muted)}
+.kP{--kc:var(--perfect); --ks:var(--perfect-soft)} .kA{--kc:var(--abund); --ks:var(--abund-soft)} .kD{--kc:var(--defic); --ks:var(--defic-soft)}
+.vote{display:flex; align-items:center; gap:8px; margin-top:4px}
+.vote button{width:44px; height:44px; border-radius:50%; border:2px solid var(--kc); background:var(--card); font-weight:700; font-size:22px; line-height:1}
+.vote output{font-family:var(--display); font-weight:800; font-size:28px; min-width:2ch; text-align:center; font-variant-numeric:tabular-nums}
+
+.example{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px 18px; display:flex; flex-direction:column; gap:8px}
+.eq{font-family:var(--display); font-weight:700; font-size:clamp(22px,2vw,30px); font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+
+/* Lab */
+.lab-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.big-n{font-family:var(--display); font-weight:800; font-size:clamp(56px,6vw,84px); line-height:.9}
+.step-label{font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:0}
+.tray{display:grid; grid-template-columns:repeat(auto-fill,minmax(54px,1fr)); gap:6px}
+.tray button{min-height:54px; border-radius:10px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px; font-variant-numeric:tabular-nums}
+.tray button.yes{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.tray button.no{background:var(--wrong-soft); border-color:var(--wrong); color:var(--wrong); text-decoration:line-through}
+.tray button.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.msg{font-size:clamp(17px,1.4vw,21px); line-height:1.45; margin:0; padding:12px 16px; border-radius:12px; background:var(--wash); max-width:36em}
+.msg:empty{display:none}
+.msg.good{background:var(--abund-soft)}
+.msg.oops{background:var(--wrong-soft)}
+.choices{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+.choices button{border:2.5px solid var(--kc); background:var(--ks); border-radius:14px; padding:12px 8px; min-height:72px; display:flex; flex-direction:column; align-items:center; gap:2px}
+.choices button b{font-family:var(--display); font-size:21px; color:var(--kc)}
+.choices button span{font-size:15px; color:var(--muted)}
+.choices button:disabled{opacity:.45; cursor:default}
+
+.bars{display:flex; flex-direction:column; gap:8px; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px}
+.bar-row{display:grid; grid-template-columns:96px 1fr; align-items:center; gap:10px}
+.bar-row > span{font-size:15px; color:var(--muted); font-weight:700}
+.track{position:relative; height:42px}
+.seg-bar{position:absolute; top:0; bottom:0; display:flex}
+.seg-bar i{display:flex; align-items:center; justify-content:center; font-style:normal; font-weight:700; font-size:14px; border-right:2px solid var(--card); overflow:hidden; color:var(--card)}
+.seg-bar.num i{background:var(--ink)}
+.seg-bar.sum i{background:var(--kc,var(--muted))}
+.seg-bar.sum i:last-child,.seg-bar.num i:last-child{border-right:0}
+.bar-total{position:absolute; top:50%; transform:translate(8px,-50%); font-family:var(--display); font-weight:800; font-size:22px; white-space:nowrap}
+.mark{position:absolute; top:-6px; bottom:-6px; width:0; border-left:2.5px dashed var(--ink)}
+.bar-note{font-size:15px; color:var(--muted); margin:0}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:21px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:27px}
+.qresult{font-size:clamp(17px,1.45vw,22px); line-height:1.5; margin:0; padding:14px 18px; background:var(--wash); border-radius:12px; max-width:36em}
+.qresult:empty{display:none}
+.qresult .eq{font-size:clamp(19px,1.7vw,25px); margin:4px 0}
+.hunt{font-family:var(--display); font-weight:700; font-variant-numeric:tabular-nums}
+details.teacher{font-size:15px; color:var(--muted); border-top:1.5px solid var(--line); padding-top:10px}
+details.teacher summary{cursor:pointer; font-weight:700; min-height:32px}
+details.teacher p{margin:8px 0 0; max-width:40em; line-height:1.45}
+
+@media (max-width: 960px), (orientation: portrait){
+  html,body{height:auto}
+  main{flex-direction:column; overflow:visible}
+  .map-col{width:100%}
+  .panel{overflow:visible}
+  header,main{padding-left:16px; padding-right:16px}
+}
+@media (max-width: 560px){
+  .map{gap:3px}
+  .tile{border-radius:6px; border-width:1.5px}
+  .tile .s{font-size:22cqi}
+  .tile .k{display:none}
+  .kingdoms,.choices{grid-template-columns:1fr}
+  .choices button{flex-direction:row; justify-content:center; gap:10px; min-height:56px}
+  .bar-row{grid-template-columns:70px 1fr}
+  body{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<header>
+  <div>
+    <h1>Perfect, Abundant &amp; Deficient Numbers</h1>
+    <p class="sub">Grade 4 · Week 5 · Number Theory Detectives</p>
+  </div>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Numbers on the map">
+      <button id="r1" aria-pressed="true">1 to 50</button>
+      <button id="r2" aria-pressed="false">51 to 100</button>
+    </div>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <section class="map-col" aria-label="Class chart">
+    <div class="map" id="map"></div>
+    <div class="counts">
+      <div class="count P"><i class="swatch"></i><b id="cP">0</b><span>perfect</span></div>
+      <div class="count A"><i class="swatch"></i><b id="cA">0</b><span>abundant</span></div>
+      <div class="count D"><i class="swatch"></i><b id="cD">0</b><span>deficient</span></div>
+      <div class="count"><i class="swatch"></i><b id="cU">50</b><span>still to explore</span></div>
+    </div>
+    <p class="small">Tap a number to investigate it. The small number on a mapped tile is the sum of its proper factors.</p>
+  </section>
+
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabW" aria-selected="true">1 · Warm-up</button>
+      <button role="tab" id="tabL" aria-selected="false">2 · Factor-sum lab</button>
+      <button role="tab" id="tabQ" aria-selected="false">3 · Detective questions</button>
+    </div>
+
+    <!-- Warm-up and launch -->
+    <div class="view" id="viewW">
+      <p class="lead">The <strong>proper factors</strong> of a number are all its factors <strong>except the number itself</strong>. Add them up and compare the sum to the number.</p>
+      <div class="example">
+        <p class="step-label">Warm-up: the number 6</p>
+        <div class="eq" id="w6">Proper factors of 6: ?</div>
+        <div class="row">
+          <button class="primary" id="w6Btn">Add the proper factors of 6</button>
+        </div>
+        <p class="small" id="w6Note"></p>
+      </div>
+      <p class="lead">The ancient Greeks sorted every number into one of three kingdoms.</p>
+      <div class="kingdoms">
+        <div class="kcard kP"><h3>Perfect</h3><div class="rule">sum = number</div><p>Like 6: 1 + 2 + 3 = 6</p>
+          <div class="vote"><button data-v="P" data-d="-1" aria-label="One fewer vote for perfect">−</button><output id="vP">0</output><button data-v="P" data-d="1" aria-label="One more vote for perfect">+</button></div></div>
+        <div class="kcard kA"><h3>Abundant</h3><div class="rule">sum &gt; number</div><p>The factors add to more.</p>
+          <div class="vote"><button data-v="A" data-d="-1" aria-label="One fewer vote for abundant">−</button><output id="vA">0</output><button data-v="A" data-d="1" aria-label="One more vote for abundant">+</button></div></div>
+        <div class="kcard kD"><h3>Deficient</h3><div class="rule">sum &lt; number</div><p>The factors add to less.</p>
+          <div class="vote"><button data-v="D" data-d="-1" aria-label="One fewer vote for deficient">−</button><output id="vD">0</output><button data-v="D" data-d="1" aria-label="One more vote for deficient">+</button></div></div>
+      </div>
+      <p class="small"><strong>Predict:</strong> from 1 to 50, which kingdom will be the biggest? Tap + to count the class's votes. Detective question 1 checks the prediction.</p>
+      <div class="row"><button class="primary" id="goLab">Start mapping the kingdoms →</button></div>
+    </div>
+
+    <!-- Lab -->
+    <div class="view" id="viewL" hidden>
+      <div class="lab-head">
+        <div class="big-n" id="labN">12</div>
+        <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+          <p class="small">Tap any number on the map to investigate it.</p>
+          <div class="row"><button class="secondary" id="nextBtn">Next unexplored number</button></div>
+        </div>
+      </div>
+
+      <div class="view" id="stepFind">
+        <p class="step-label" id="findLabel">Step 1 · Find every proper factor</p>
+        <p class="small" id="trayHint"></p>
+        <div class="tray" id="tray"></div>
+        <p class="msg" id="findMsg" aria-live="polite"></p>
+        <div class="row">
+          <button class="primary" id="checkBtn">Have I found them all?</button>
+          <button class="linkish" id="showAllBtn">Show all the factors</button>
+        </div>
+      </div>
+
+      <div class="view" id="stepSort" hidden>
+        <p class="step-label">Step 2 · Add them up and choose a kingdom</p>
+        <div class="eq" id="sumEq"></div>
+        <div class="choices" id="choices">
+          <button data-k="P" class="kP"><b>Perfect</b><span>sum = number</span></button>
+          <button data-k="A" class="kA"><b>Abundant</b><span>sum &gt; number</span></button>
+          <button data-k="D" class="kD"><b>Deficient</b><span>sum &lt; number</span></button>
+        </div>
+        <div class="row"><button class="linkish" id="showSumBtn">Show the sum first</button></div>
+        <div class="bars" id="bars" hidden></div>
+        <p class="msg" id="sortMsg" aria-live="polite"></p>
+      </div>
+
+      <details class="teacher">
+        <summary>Teacher tools</summary>
+        <p>Teams can split up the numbers and enter their results here one at a time. If the class worked on paper, fill in the rest so everyone can explore the finished chart.</p>
+        <div class="row" style="margin-top:8px"><button class="secondary" id="fillBtn">Fill in the rest of the map</button></div>
+      </details>
+    </div>
+
+    <!-- Detective questions -->
+    <div class="view" id="viewQ" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="lead" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div class="qresult" id="qresult" aria-live="polite"></div>
+      <p class="small">Talk it over first. Then tap a button to put evidence on the map.</p>
+      <details class="teacher">
+        <summary>What to look for</summary>
+        <p>Unit checkpoint: students should factor systematically (test 1, 2, 3, … up to half the number, and use factor partners) and reason about factors in the abstract, for example “a prime’s only proper factor is 1, so it must be deficient.” When a student asks “is this right?”, ask “how could you check?”</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const NAME = {P:'perfect', A:'abundant', D:'deficient'};
+const CAP = {P:'Perfect', A:'Abundant', D:'Deficient'};
+const COLOR = {P:'var(--perfect)', A:'var(--abund)', D:'var(--defic)'};
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- Math ---------- */
+const properFactors = n => { const r=[]; for(let d=1; d<=n/2; d++) if(n%d===0) r.push(d); return r; };
+const fsum = n => properFactors(n).reduce((a,b)=>a+b,0);
+const kingdom = n => { const s=fsum(n); return s===n ? 'P' : s>n ? 'A' : 'D'; };
+const isPrime = n => { if(n<2) return false; for(let i=2;i*i<=n;i++) if(n%i===0) return false; return true; };
+const plus = list => list.length ? list.join(' + ') : '(nothing)';
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+
+/* ---------- State ---------- */
+const S = { start:1, done:{}, cur:12, found:new Set(), tried:new Set(), sorted:false, sumShown:false, votes:{P:0,A:0,D:0}, q:1, gen:0 };
+const end = () => S.start + 49;
+const nums = () => Array.from({length:50}, (_,i) => S.start+i);
+
+/* ---------- Map ---------- */
+const map = $('#map'); const tiles = {};
+function buildMap(){
+  map.innerHTML='';
+  for(const n of nums()){
+    const b = document.createElement('button');
+    b.className='tile'; b.dataset.n=n;
+    b.innerHTML = `<span class="k"></span><span class="n">${n}</span><span class="s"></span><span class="badge"></span>`;
+    b.onclick = () => onTile(n);
+    map.appendChild(b); tiles[n]=b;
+  }
+  renderMap();
+}
+function renderTile(n){
+  const el = tiles[n]; if(!el) return;
+  const k = S.done[n];
+  el.classList.remove('P','A','D');
+  if(k){ el.classList.add(k); el.querySelector('.k').textContent = k; el.querySelector('.s').textContent = fsum(n); }
+  else { el.querySelector('.k').textContent=''; el.querySelector('.s').textContent=''; }
+  el.classList.toggle('current', n===S.cur && !$('#viewL').hidden);
+  el.setAttribute('aria-label', k ? `${n}, ${NAME[k]}, proper factors add to ${fsum(n)}` : `${n}, not explored yet`);
+}
+function renderMap(){ nums().forEach(renderTile); renderCounts(); }
+function renderCounts(){
+  const c={P:0,A:0,D:0,U:0};
+  for(const n of nums()) c[S.done[n]||'U']++;
+  $('#cP').textContent=c.P; $('#cA').textContent=c.A; $('#cD').textContent=c.D; $('#cU').textContent=c.U;
+}
+function pop(n){ const el=tiles[n]; if(!el||reduced) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+function clearHL(){
+  map.classList.remove('focus');
+  for(const n of nums()){ const el=tiles[n]; el.classList.remove('hl','has-badge'); el.style.removeProperty('--hlc'); el.querySelector('.badge').textContent=''; }
+}
+function hl(list, color, badgeFn){
+  map.classList.add('focus');
+  for(const n of list){ const el=tiles[n]; if(!el) continue; el.classList.add('hl'); if(color) el.style.setProperty('--hlc', color);
+    if(badgeFn){ const t=badgeFn(n); if(t!=null){ el.classList.add('has-badge'); el.querySelector('.badge').textContent=t; } } }
+}
+function onTile(n){
+  if(!$('#viewQ').hidden){
+    const k = S.done[n];
+    say(k ? `<div class="eq">${n}: ${plus(properFactors(n))} = ${fsum(n)}</div>${fsum(n)} ${k==='P'?'equals':k==='A'?'is more than':'is less than'} ${n}, so ${n} is <b>${NAME[k]}</b>.`
+          : `${n} hasn’t been explored yet. Investigate it in the factor-sum lab.`);
+    return;
+  }
+  selectTab('L'); load(n);
+}
+
+/* ---------- Warm-up ---------- */
+$('#w6Btn').onclick = () => {
+  $('#w6').innerHTML = `1 + 2 + 3 = 6`;
+  $('#w6Note').textContent = '6 ÷ 1 = 6, 6 ÷ 2 = 3, 6 ÷ 3 = 2. The proper factors add back up to 6 itself. The Greeks called this perfect.';
+};
+document.querySelectorAll('.vote button').forEach(b => b.onclick = () => {
+  const k=b.dataset.v; S.votes[k] = Math.max(0, S.votes[k] + (+b.dataset.d)); $('#v'+k).textContent = S.votes[k];
+});
+$('#goLab').onclick = () => { selectTab('L'); load(S.done[12] ? (firstUnexplored() ?? 12) : 12); };
+
+/* ---------- Lab ---------- */
+function firstUnexplored(after){
+  const list = nums();
+  const i0 = after ? list.indexOf(after)+1 : 0;
+  for(let i=0;i<list.length;i++){ const n=list[(i0+i)%list.length]; if(!S.done[n]) return n; }
+  return null;
+}
+function load(n){
+  S.cur=n; S.found=new Set(); S.tried=new Set(); S.sorted=false; S.sumShown=false;
+  $('#labN').textContent=n;
+  $('#findMsg').textContent=''; $('#findMsg').className='msg';
+  $('#sortMsg').textContent=''; $('#sortMsg').className='msg';
+  $('#stepSort').hidden=true; $('#bars').hidden=true;
+  document.querySelectorAll('#choices button').forEach(b=>b.disabled=false);
+  const half = Math.floor(n/2);
+  $('#trayHint').textContent = n===1 ? '' : `Every proper factor of ${n} is ${half===1?'1':'between 1 and ' + half}. (Nothing bigger than half can divide evenly, except ${n} itself.) Tap each number that divides ${n} evenly.`;
+  const tray=$('#tray'); tray.innerHTML='';
+  for(let d=1; d<=half; d++){
+    const b=document.createElement('button'); b.textContent=d; b.dataset.d=d;
+    b.setAttribute('aria-label', `Test ${d}`);
+    b.onclick=()=>tryFactor(d,b); tray.appendChild(b);
+  }
+  if(n===1){
+    $('#findLabel').textContent='Step 1 · Find every proper factor';
+    say1(`1 has only one factor: 1 itself. Proper factors leave the number itself out, so <b>1 has no proper factors</b>. Its sum is 0.`, 'good');
+    showSort();
+  }
+  $('#checkBtn').disabled = n===1; $('#showAllBtn').hidden = n===1;
+  if(S.done[n]){ // already mapped: show everything
+    properFactors(n).forEach(d=>S.found.add(d)); paintTray();
+    say1(`${n} is already on the map. Here are its proper factors. Pick a kingdom again to check.`, 'good');
+    showSort();
+  }
+  renderMap();
+}
+function paintTray(){
+  document.querySelectorAll('#tray button').forEach(b=>{
+    const d=+b.dataset.d; b.classList.toggle('yes', S.found.has(d)); b.classList.toggle('no', S.tried.has(d) && !S.found.has(d));
+  });
+}
+function say1(html, cls){ const m=$('#findMsg'); m.innerHTML=html; m.className='msg'+(cls?' '+cls:''); }
+function tryFactor(d,b){
+  const n=S.cur;
+  if(S.found.has(d)){ say1(`${d} is already in your list. ${n} ÷ ${d} = ${n/d}.`); return; }
+  if(n % d === 0){
+    S.found.add(d); paintTray();
+    const p=n/d;
+    let extra = '';
+    if(d===1) extra = ' 1 is a factor of every number.';
+    else if(p!==n && p!==d && !S.found.has(p)) extra = ` That means its partner <b>${p}</b> is a factor too.`;
+    else if(p===d) extra = ` ${d} × ${d} = ${n}. ${d} is its own partner.`;
+    say1(`Yes! ${n} ÷ ${d} = ${p}, with nothing left over.${extra}`, 'good');
+    if(S.found.size===properFactors(n).length) allFound();
+  } else {
+    S.tried.add(d); paintTray();
+    if(!reduced){ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); }
+    const q=Math.floor(n/d), r=n%d;
+    say1(`Check: ${n} ÷ ${d} = ${q} remainder ${r}. ${d} × ${q} = ${d*q}, which is ${r} short of ${n}. So ${d} is not a factor. Try another number.`, 'oops');
+  }
+}
+function allFound(){
+  const n=S.cur;
+  say1(`You found all ${properFactors(n).length} proper factors of ${n}: ${listText(properFactors(n))}.`, 'good');
+  showSort();
+}
+$('#checkBtn').onclick = () => {
+  const n=S.cur, all=properFactors(n), miss=all.filter(d=>!S.found.has(d));
+  if(!miss.length){ allFound(); return; }
+  const partnerMiss = miss.filter(d => S.found.has(n/d));
+  let hint;
+  if(partnerMiss.length) hint = `Hint: check the <b>partners</b>. For each factor you found, what is ${n} ÷ that factor?`;
+  else hint = `Hint: test the numbers in order, 1, 2, 3, …, all the way up to ${Math.floor(n/2)}. How could you check each one?`;
+  say1(`Not yet. You have ${S.found.size}. <b>${miss.length} more ${miss.length===1?'is':'are'} hiding.</b> ${hint}`, 'oops');
+};
+$('#showAllBtn').onclick = () => { properFactors(S.cur).forEach(d=>S.found.add(d)); paintTray(); allFound(); };
+function showSort(){
+  const n=S.cur, f=properFactors(n);
+  $('#stepSort').hidden=false;
+  $('#sumEq').textContent = n===1 ? `Sum of proper factors of 1 = 0` : `${plus(f)} = ?`;
+}
+$('#showSumBtn').onclick = () => { S.sumShown=true; const n=S.cur; $('#sumEq').textContent = n===1 ? 'Sum = 0' : `${plus(properFactors(n))} = ${fsum(n)}`; drawBars(null); };
+function drawBars(k){
+  const n=S.cur, f=properFactors(n), s=fsum(n), max=Math.max(n,s,1);
+  const pct = v => (v/max*82).toFixed(3)+'%'; // leave room for the total label
+  const kc = k ? COLOR[k] : 'var(--muted)';
+  const sumSegs = f.map(d=>`<i style="width:${(d/s*100).toFixed(3)}%" title="${d}">${d/max>0.035?d:''}</i>`).join('');
+  $('#bars').hidden=false;
+  $('#bars').innerHTML = `
+    <div class="bar-row"><span>The number</span><div class="track"><div class="seg-bar num" style="left:0;width:${pct(n)}"><i style="width:100%"></i></div><b class="bar-total" style="left:${pct(n)}">${n}</b></div></div>
+    <div class="bar-row"><span>Factor sum</span><div class="track"><div class="mark" style="left:${pct(n)}" title="where ${n} is"></div>${s?`<div class="seg-bar sum" style="left:0;width:${pct(s)};--kc:${kc}">${sumSegs}</div>`:''}<b class="bar-total" style="left:${pct(s)}">${s}</b></div></div>
+    <p class="bar-note">Drawn to scale. The dashed line marks ${n}. ${s===n?'The sum lands exactly on it.':s>n?`The sum goes ${s-n} past it.`:`The sum stops ${n-s} short of it.`}</p>`;
+}
+document.querySelectorAll('#choices button').forEach(b => b.onclick = () => {
+  const n=S.cur, s=fsum(n), k=kingdom(n), pick=b.dataset.k, m=$('#sortMsg');
+  $('#sumEq').textContent = n===1 ? 'Sum = 0' : `${plus(properFactors(n))} = ${s}`;
+  drawBars(pick===k ? k : null);
+  if(pick===k){
+    const was = !!S.done[n];
+    S.done[n]=k; renderTile(n); renderCounts(); pop(n);
+    document.querySelectorAll('#choices button').forEach(x=>x.disabled=true);
+    const rel = k==='P'?`${s} equals ${n}`: k==='A'?`${s} is more than ${n}`:`${s} is less than ${n}`;
+    m.innerHTML = `${rel}, so <b>${n} is ${NAME[k]}</b>. ${was?'It was already on the map.':'It joins its kingdom on the map.'}` + (firstUnexplored()?'':' <b>Every number on this map is explored!</b> Try the detective questions.');
+    m.className='msg good';
+  } else {
+    const rel = s===n ? `exactly ${n}` : s>n ? `${s}, which is more than ${n}` : `${s}, which is less than ${n}`;
+    const why = pick==='P' ? `Perfect needs the sum to equal ${n}.` : pick==='A' ? `Abundant needs the sum to be bigger than ${n}.` : `Deficient needs the sum to be smaller than ${n}.`;
+    m.innerHTML = `Look at the bars. The proper factors add to ${rel}. ${why} Which kingdom fits? Try again.`;
+    m.className='msg oops';
+    b.disabled=true;
+  }
+});
+$('#nextBtn').onclick = () => { const n=firstUnexplored(S.cur); if(n==null){ $('#sortMsg').innerHTML='Every number on this map is explored. Try the other range, or the detective questions.'; $('#sortMsg').className='msg good'; return; } load(n); };
+$('#fillBtn').onclick = () => { fillAll(); renderMap(); $('#sortMsg').innerHTML='The rest of the map is filled in.'; $('#sortMsg').className='msg good'; };
+function fillAll(){ let added=0; for(const n of nums()) if(!S.done[n]){ S.done[n]=kingdom(n); added++; } return added>0; }
+
+/* ---------- Detective questions ---------- */
+function say(html){ $('#qresult').innerHTML=html; }
+function ready(){ const filled = fillAll(); renderMap(); return filled ? 'I filled in the rest of the map so the evidence is complete. ' : ''; }
+const inRange = f => nums().filter(f);
+const Q = {
+  1:{ text:()=>`Which kingdom is the most crowded from ${S.start} to ${end()}? Was the class prediction right?`,
+      actions:[{label:'Count each kingdom', run: async pre => {
+        clearHL(); const c={P:[],A:[],D:[]}; nums().forEach(n=>c[S.done[n]].push(n));
+        const order=['P','A','D'].sort((a,b)=>c[b].length-c[a].length);
+        const big=order[0]; hl(c[big], COLOR[big]);
+        const tot = S.votes.P+S.votes.A+S.votes.D;
+        const vote = tot ? ` The class voted: perfect ${S.votes.P}, abundant ${S.votes.A}, deficient ${S.votes.D}.` : '';
+        say(pre + `Perfect: <b>${c.P.length}</b> · Abundant: <b>${c.A.length}</b> · Deficient: <b>${c.D.length}</b>. The <b>${NAME[big]}</b> kingdom is the biggest by far.${vote}`);
+      }}]},
+  2:{ text:()=>`The Greeks knew two perfect numbers under 30. One is 6. Hunt down the other.`,
+      actions:[
+        {label:'Show the perfect numbers', run: pre => {
+          clearHL(); const ps=[6,28];
+          if(S.start!==1){ say(pre+`There are no perfect numbers from 51 to 100. Switch the map to 1 to 50 to see them.`); return; }
+          hl(ps, COLOR.P, n=>`sum ${fsum(n)}`);
+          say(pre+ps.map(n=>`<div class="eq">${plus(properFactors(n))} = ${fsum(n)}</div>`).join('') + `<b>28</b> is the second perfect number. The next one is 496, and the one after that is 8,128.`);
+        }},
+        {label:'Check 496', run: () => { clearHL(); const f=properFactors(496); say(`<div class="eq">${plus(f)} = ${fsum(496)}</div>496 is perfect too. Perfect numbers are rare: only four are smaller than 10,000.`); }}]},
+  3:{ text:()=>`Every prime number lands in the same kingdom. Which one, and why must it?`,
+      actions:[
+        {label:'Highlight the primes', run: pre => {
+          clearHL(); const ps=inRange(isPrime); hl(ps, COLOR.D, n=>`sum ${fsum(n)}`);
+          const ks=[...new Set(ps.map(n=>S.done[n]))];
+          say(pre+`${ps.length} primes on this map, and every one is in the <b>${ks.map(k=>NAME[k]).join(' and ')}</b> kingdom. Read the sums. What do you notice?`);
+        }},
+        {label:'Show why', run: pre => {
+          clearHL(); const ps=inRange(isPrime); hl(ps, COLOR.D, ()=> 'only 1');
+          say(pre+`A prime’s only factors are 1 and itself. Leave out the number itself and <b>1 is the only proper factor</b>. So the sum is always 1, and every prime is bigger than 1. Every prime must be deficient.`);
+        }}]},
+  4:{ text:()=>`What is the first abundant number? Is it even or odd?`,
+      actions:[{label:'Find the first abundant number', run: pre => {
+        clearHL(); let n=1; while(kingdom(n)!=='A') n++;
+        if(S.start===1) hl([n], COLOR.A, ()=> 'first!');
+        say(pre+`<div class="eq">${n}: ${plus(properFactors(n))} = ${fsum(n)}</div>${fsum(n)} is more than ${n}, so <b>${n}</b> is the first abundant number. It is <b>even</b>. Every number below it is deficient, except the perfect number 6.`);
+      }}]},
+  5:{ text:()=>`Every abundant number on the map is even. Why do even numbers go abundant so much more easily? (Hint: what factor does every even number get for free?)`,
+      actions:[
+        {label:'Show the abundant numbers', run: pre => {
+          clearHL(); const a=inRange(n=>S.done[n]==='A'); hl(a, COLOR.A, n=>`sum ${fsum(n)}`);
+          const odd=a.filter(n=>n%2); say(pre+`${a.length} abundant numbers here: ${listText(a)}. Odd ones: <b>${odd.length}</b>.`);
+        }},
+        {label:'The free factor', run: pre => {
+          clearHL(); const ev=inRange(n=>n%2===0 && n>2); hl(ev, COLOR.A, n=>`½=${n/2}`);
+          say(pre+`Every even number has <b>half of itself</b> as a proper factor, because it splits into 2 equal parts. Half plus 1 already reaches more than half the number, so the other factors only need to make up the rest. An odd number can’t use 2, so its biggest proper factor is at most one third of it.`);
+        }},
+        {label:'Hunt for an odd abundant number', run: () => hunt()}]},
+  6:{ star:true, text:()=>`Friendship numbers: Pythagoras found that 220 and 284 are amicable. Each one equals the sum of the OTHER’s proper factors. Verify it.`,
+      actions:[
+        {label:'Factors of 220', run: () => { clearHL(); say(`<div class="eq">${plus(properFactors(220))} = ${fsum(220)}</div>The proper factors of 220 add up to <b>${fsum(220)}</b>, the other friend.`); }},
+        {label:'Factors of 284', run: () => { clearHL(); say(`<div class="eq">${plus(properFactors(284))} = ${fsum(284)}</div>The proper factors of 284 add up to <b>${fsum(284)}</b>. Each number points to the other: they are friends.`); }},
+        {label:'Is a perfect number its own friend?', run: () => { clearHL(); say(`A perfect number’s factors add up to <b>itself</b>. So 6 and 28 are friends with themselves. The next friendly pair after 220 and 284 is 1,184 and 1,210.`); }}]}
+};
+async function hunt(){
+  clearHL(); const g=++S.gen;
+  let n=1, checked=0;
+  while(true){
+    checked++;
+    if(kingdom(n)==='A') break;
+    if(!reduced && n%6===1){ say(`<span class="hunt">Testing odd numbers… ${n}: proper factors add to ${fsum(n)}, ${NAME[kingdom(n)]}. (${checked} checked)</span>`); await sleep(16); if(g!==S.gen) return; }
+    n+=2;
+  }
+  const f=properFactors(n);
+  say(`<span class="hunt">Found it after testing ${checked} odd numbers!</span><div class="eq">${n}: ${plus(f)} = ${fsum(n)}</div>${fsum(n)} is more than ${n}, so <b>${n} is the first odd abundant number</b>. Every odd number before it is deficient.`);
+}
+function renderQuestion(){
+  const nav=$('#qnav');
+  nav.innerHTML = Object.keys(Q).map(i => Q[i].star ? `<button class="star" data-q="${i}" aria-pressed="${S.q==i}">★ Challenge</button>` : `<button data-q="${i}" aria-pressed="${S.q==i}" aria-label="Question ${i}">${i}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{ S.q=+b.dataset.q; S.gen++; clearHL(); say(''); renderQuestion(); });
+  const q=Q[S.q]; $('#qtext').textContent=q.text();
+  const box=$('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label;
+    b.onclick=()=>{ S.gen++; a.run(ready()); }; box.appendChild(b); });
+}
+
+/* ---------- Tabs, range, reset ---------- */
+function selectTab(t){
+  ['W','L','Q'].forEach(x=>{ $('#tab'+x).setAttribute('aria-selected', x===t); $('#view'+x).hidden = x!==t; });
+  S.gen++; clearHL(); say('');
+  if(t==='Q') renderQuestion();
+  renderMap();
+}
+function setRange(start){
+  S.start=start; $('#r1').setAttribute('aria-pressed', start===1); $('#r2').setAttribute('aria-pressed', start!==1);
+  buildMap(); clearHL(); say('');
+  if(!$('#viewQ').hidden) renderQuestion();
+  load(firstUnexplored() ?? S.start);
+}
+function reset(){
+  S.done={}; S.votes={P:0,A:0,D:0}; ['P','A','D'].forEach(k=>$('#v'+k).textContent=0);
+  $('#w6').textContent='Proper factors of 6: ?'; $('#w6Note').textContent='';
+  S.q=1; selectTab('W'); seed(); setRange(1);
+}
+function seed(){ S.done[6]=kingdom(6); } // the warm-up example starts on the map
+$('#tabW').onclick=()=>selectTab('W');
+$('#tabL').onclick=()=>selectTab('L');
+$('#tabQ').onclick=()=>selectTab('Q');
+$('#r1').onclick=()=>setRange(1);
+$('#r2').onclick=()=>setRange(51);
+$('#resetBtn').onclick=reset;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+
+seed(); buildMap(); load(12);
+})();
+</script>
+
+</body></html>

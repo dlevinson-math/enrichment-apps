@@ -1,0 +1,626 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Comparing &amp; Ordering Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: a place-value mat on a classroom table. Five stations follow the lesson flow; tens are blue sticks, ones are yellow cubes, the alligator is green. */
+:root{
+  --bg:#EAF0F4; --card:#FFFFFF; --ink:#18283A; --muted:#556577; --line:#C9D4DE;
+  --tens:#2563C9; --tens-soft:#DCE7FA; --ones:#E59A0B; --ones-soft:#FDF0D3;
+  --gator:#23935A; --gator-soft:#DDF3E6; --hmm:#C2492F; --hmm-soft:#FBE6E0;
+  --back1:#2D4A6B; --back2:#3A5F88; --tooth:#FFFFFF;
+  --display:"Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --u:clamp(8px, 1.45vw, 17px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1822; --card:#192634; --ink:#EAF0F6; --muted:#9FB0C2; --line:#2F4153;
+    --tens:#6EA0F5; --tens-soft:#1C2E4C; --ones:#F5BC45; --ones-soft:#3A2D12;
+    --gator:#4CCB86; --gator-soft:#173827; --hmm:#F2866C; --hmm-soft:#3D2018;
+    --back1:#22364D; --back2:#2E4866; --tooth:#F4F6F8; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1822; --card:#192634; --ink:#EAF0F6; --muted:#9FB0C2; --line:#2F4153;
+  --tens:#6EA0F5; --tens-soft:#1C2E4C; --ones:#F5BC45; --ones-soft:#3A2D12;
+  --gator:#4CCB86; --gator-soft:#173827; --hmm:#F2866C; --hmm-soft:#3D2018;
+  --back1:#22364D; --back2:#2E4866; --tooth:#F4F6F8; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{min-height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:clamp(16px,1.3vw,20px); -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--tens); outline-offset:3px}
+button:disabled{opacity:.38; cursor:default}
+.wrap{padding-inline:clamp(16px,3vw,44px); padding-block:14px 32px; max-width:1500px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.2vw,48px); line-height:1; margin:0; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.1vw,17px); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap}
+nav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.4vw,22px); min-height:54px}
+nav button b{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:18px}
+nav button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav button[aria-selected="true"] b{background:var(--gator); color:#fff}
+
+.stage{background:var(--card); border-radius:24px; padding:clamp(16px,2.4vw,34px); display:flex; flex-direction:column; gap:20px; min-width:0}
+.ask{font-family:var(--display); font-weight:700; font-size:clamp(26px,2.8vw,44px); line-height:1.1; margin:0; text-wrap:balance}
+.ask small{display:block; font-family:var(--body); font-weight:400; font-size:.5em; color:var(--muted); margin-top:6px; line-height:1.3}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.big{border:0; background:var(--gator); color:#fff; font-family:var(--display); font-weight:700; font-size:clamp(20px,1.8vw,28px); padding:12px 28px; border-radius:18px; min-height:60px}
+.soft{border:2.5px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:700; font-size:clamp(18px,1.5vw,24px); padding:10px 22px; border-radius:18px; min-height:56px}
+.soft[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.score{color:var(--muted); font-size:clamp(15px,1.2vw,19px)}
+.score b{color:var(--ink); font-family:var(--display); font-size:1.3em}
+
+/* numerals */
+.num{font-family:var(--display); font-weight:800; line-height:.9; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+.num .t{color:var(--tens)} .num .o{color:var(--ones)}
+
+/* feedback */
+.say{border-radius:18px; padding:16px 20px; font-size:clamp(19px,1.7vw,27px); line-height:1.35; display:flex; gap:14px; align-items:flex-start; max-width:46em}
+.say:empty{display:none}
+.say.yes{background:var(--gator-soft)}
+.say.hmm{background:var(--hmm-soft)}
+.say.info{background:var(--tens-soft)}
+.say .mark{flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:800; color:#fff; font-size:22px}
+.say.yes .mark{background:var(--gator)} .say.hmm .mark{background:var(--hmm)} .say.info .mark{background:var(--tens)}
+.say strong{font-family:var(--display)}
+
+/* base-ten blocks */
+.blocks{display:flex; align-items:flex-end; gap:calc(var(--u)*.35); min-height:calc(var(--u)*10 + 4px); flex-wrap:nowrap}
+.rod{display:grid; grid-template-rows:repeat(10,var(--u)); width:var(--u); border:2px solid var(--tens); border-radius:4px; background:var(--tens); gap:1px; overflow:hidden}
+.rod i{background:color-mix(in srgb, var(--tens) 78%, var(--card))}
+.ones{display:grid; grid-auto-flow:column; grid-template-rows:repeat(5,var(--u)); grid-auto-columns:var(--u); gap:calc(var(--u)*.25); margin-left:calc(var(--u)*.5); align-content:end; transform:scaleY(-1)}
+.ones i{background:var(--ones); border-radius:3px; border:1.5px solid color-mix(in srgb, var(--ones) 70%, var(--ink))}
+.blocks.hl-t .rod{box-shadow:0 0 0 4px var(--tens-soft), 0 0 0 6px var(--tens)}
+.blocks.hl-o .ones i{box-shadow:0 0 0 3px var(--ones)}
+.blocks.dim-o .ones{opacity:.3}
+.blocks.dim-t .rod{opacity:.3}
+.blocks .empty{color:var(--muted); font-size:14px; align-self:center}
+.bcap{font-size:clamp(14px,1.1vw,17px); color:var(--muted)}
+.bcap b{font-family:var(--display); font-size:1.25em}
+.bcap .ct{color:var(--tens)} .bcap .co{color:var(--ones)}
+
+/* playing cards */
+.duel{display:grid; grid-template-columns:1fr auto 1fr; gap:clamp(10px,2vw,28px); align-items:start}
+.side{display:flex; flex-direction:column; align-items:center; gap:14px; min-width:0}
+.pcard{position:relative; width:clamp(130px,17vw,240px); aspect-ratio:5/7; max-width:100%; border-radius:20px; border:3px solid var(--line); background:var(--card); display:grid; place-items:center; box-shadow:0 6px 0 var(--line); transition:transform .15s}
+button.pcard:hover{transform:translateY(-3px)}
+.pcard .num{font-size:clamp(64px,8vw,124px)}
+.pcard .corner{position:absolute; top:10px; left:14px; font-family:var(--display); font-weight:700; color:var(--muted); font-size:clamp(14px,1.2vw,18px)}
+.pcard.picked-yes{border-color:var(--gator); box-shadow:0 6px 0 var(--gator)}
+.pcard.picked-no{border-color:var(--hmm); box-shadow:0 6px 0 var(--hmm)}
+.pcard.flip{animation:flip .38s ease-out}
+@keyframes flip{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+.mid{align-self:center; display:flex; flex-direction:column; align-items:center; gap:10px}
+.slot{width:clamp(70px,8vw,120px); height:clamp(70px,8vw,120px); border-radius:50%; border:3px dashed var(--line); display:grid; place-items:center; font-family:var(--display); font-size:clamp(34px,4vw,60px); font-weight:800; color:var(--muted)}
+.slot.filled{border-style:solid; border-color:var(--gator); background:var(--gator-soft)}
+.slot svg{width:80%; height:80%}
+.slot.pop svg{animation:chomp .45s ease-out}
+@keyframes chomp{0%{transform:scale(.4)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* gator sign buttons */
+.signs{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+.sign{border:3px solid var(--line); background:var(--card); border-radius:20px; width:clamp(96px,10vw,140px); padding:10px 6px 6px; display:flex; flex-direction:column; align-items:center; gap:2px}
+.sign svg{width:72%; height:auto}
+.sign span{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,46px); line-height:1}
+.sign em{font-style:normal; font-size:13px; color:var(--muted)}
+.sign:hover{border-color:var(--gator)}
+.sign.no{border-color:var(--hmm); animation:wob .4s}
+@keyframes wob{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* build mats */
+.mat{border-radius:20px; border:2px solid var(--line); padding:14px; display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; min-width:0}
+.mat .num{font-size:clamp(60px,7vw,110px)}
+.cols{display:grid; grid-template-columns:auto auto; gap:6px 10px; justify-content:center}
+.cols button{min-width:96px; min-height:52px; border-radius:14px; border:2.5px solid; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.4vw,21px); background:var(--card)}
+.cols .bt{border-color:var(--tens); color:var(--tens)}
+.cols .bo{border-color:var(--ones); color:color-mix(in srgb, var(--ones) 70%, var(--ink))}
+.cols .lab{text-align:center; font-weight:700; font-size:14px; letter-spacing:.06em; text-transform:uppercase}
+.cols .lt{color:var(--tens)} .cols .lo{color:color-mix(in srgb, var(--ones) 70%, var(--ink))}
+.presets{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.presets span{color:var(--muted); font-size:15px}
+.presets button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 16px; font-family:var(--display); font-weight:700; min-height:46px}
+.presets button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+
+/* line up */
+.hand{display:flex; gap:clamp(8px,1.4vw,18px); flex-wrap:wrap; justify-content:center; min-height:clamp(110px,12vw,170px)}
+.hand .pcard{width:clamp(78px,10vw,140px)}
+.hand .pcard .num{font-size:clamp(40px,4.8vw,72px)}
+.hand .pcard.gone{visibility:hidden}
+.hand .pcard.no{border-color:var(--hmm); animation:wob .4s}
+.chain{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:center; min-height:64px; font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,52px)}
+.chain .lt{color:var(--gator)}
+.chain .ph{width:clamp(48px,5vw,76px); height:clamp(48px,5vw,76px); border-radius:14px; border:3px dashed var(--line)}
+.nline{width:100%; overflow-x:auto}
+.nline svg{width:100%; min-width:520px; height:auto; display:block}
+.nline text{font-family:var(--display)}
+
+/* think */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:56px; height:56px; border-radius:50%; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:22px}
+.qnav button.star{width:auto; padding:0 20px; border-radius:28px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.evid{display:flex; gap:clamp(14px,3vw,48px); flex-wrap:wrap; align-items:flex-end; justify-content:center}
+.evid:empty{display:none}
+.evid .e{display:flex; flex-direction:column; align-items:center; gap:8px}
+.evid .e .num{font-size:clamp(48px,5.5vw,84px)}
+.evid .sym{font-family:var(--display); font-weight:800; font-size:clamp(48px,5vw,80px); color:var(--gator); align-self:center}
+.rule{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.6vw,40px); line-height:1.2; text-align:center; padding:18px; border-radius:18px; border:3px solid var(--gator); max-width:22em; margin:0 auto}
+.rule .t{color:var(--tens)} .rule .o{color:color-mix(in srgb, var(--ones) 75%, var(--ink))}
+
+/* challenge */
+.tiles{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+.tile{width:clamp(60px,6vw,84px); height:clamp(60px,6vw,84px); border-radius:16px; border:3px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:800; font-size:clamp(32px,3.2vw,46px); box-shadow:0 4px 0 var(--ink)}
+.tile:disabled{opacity:.2; box-shadow:none}
+.sub2{display:grid; grid-template-columns:auto auto auto; gap:8px; justify-content:center; align-items:center; font-family:var(--display); font-weight:800}
+.sub2 .op{font-size:clamp(36px,3.4vw,52px); text-align:right; padding-right:6px; color:var(--muted)}
+.dslot{width:clamp(64px,6.4vw,90px); height:clamp(72px,7vw,100px); border-radius:14px; border:3px dashed var(--line); background:var(--card); font-size:clamp(40px,4vw,62px); font-family:var(--display); font-weight:800}
+.dslot.t{color:var(--tens)} .dslot.o{color:var(--ones)}
+.dslot.full{border-style:solid; border-color:var(--ink)}
+.dslot.next{border-color:var(--gator)}
+.gapbar{width:100%; overflow-x:auto}
+.gapbar svg{width:100%; min-width:480px; height:auto; display:block}
+.gapbar text{font-family:var(--display)}
+.best{color:var(--muted)}
+.best b{color:var(--ink); font-family:var(--display); font-size:1.3em}
+.hint{color:var(--muted); font-size:15px; margin:0}
+
+@media (max-width:760px){
+  .duel{grid-template-columns:1fr; justify-items:center}
+  .mid{order:0}
+  .side.a{order:-1}
+  .side.b{order:1}
+  nav button{padding-right:14px}
+}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Comparing &amp; Ordering Numbers</h1>
+      <p class="sub">Grade 1 · Week 5 · Number Explorers checkpoint</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav role="tablist" aria-label="Stations">
+    <button role="tab" data-tab="draw" aria-selected="true"><b>1</b>Quick Draw</button>
+    <button role="tab" data-tab="build" aria-selected="false"><b>2</b>Build &amp; Compare</button>
+    <button role="tab" data-tab="war" aria-selected="false"><b>3</b>Number War</button>
+    <button role="tab" data-tab="line" aria-selected="false"><b>4</b>Line Up</button>
+    <button role="tab" data-tab="think" aria-selected="false"><b>5</b>Think Together</button>
+  </nav>
+
+  <!-- 1 QUICK DRAW -->
+  <section class="stage" id="v-draw">
+    <p class="ask">Who has more?<small>Tap the bigger card. Can you tell fast, without counting?</small></p>
+    <div class="duel">
+      <div class="side a"><button class="pcard" id="dA" aria-label="Card A"></button><div id="dAb"></div></div>
+      <div class="mid"><button class="soft" id="dSame">Same</button></div>
+      <div class="side b"><button class="pcard" id="dB" aria-label="Card B"></button><div id="dBb"></div></div>
+    </div>
+    <div class="say" id="dSay" aria-live="polite"></div>
+    <div class="row">
+      <button class="big" id="dNext">Flip new cards</button>
+      <span class="score" id="dScore"></span>
+    </div>
+  </section>
+
+  <!-- 2 BUILD -->
+  <section class="stage" id="v-build" hidden>
+    <p class="ask">Build both numbers. Which is more?<small>Tap the alligator that fits. The open mouth eats the bigger number.</small></p>
+    <div class="presets" id="presets"><span>Try:</span></div>
+    <div class="duel">
+      <div class="side a" id="matA"></div>
+      <div class="mid"><div class="slot" id="bSlot">?</div></div>
+      <div class="side b" id="matB"></div>
+    </div>
+    <div class="signs" id="bSigns"></div>
+    <div class="say" id="bSay" aria-live="polite"></div>
+  </section>
+
+  <!-- 3 WAR -->
+  <section class="stage" id="v-war" hidden>
+    <p class="ask" id="wAsk">Which alligator goes in the middle?</p>
+    <div class="duel">
+      <div class="side a"><div class="pcard" id="wA"></div><div id="wAb" hidden></div></div>
+      <div class="mid"><div class="slot" id="wSlot">?</div></div>
+      <div class="side b"><div class="pcard" id="wB"></div><div id="wBb" hidden></div></div>
+    </div>
+    <div class="signs" id="wSigns"></div>
+    <div class="signs" id="wWhy" hidden>
+      <button class="soft" data-why="tens">The tens digit</button>
+      <button class="soft" data-why="ones">The ones digit</button>
+      <button class="soft" data-why="same">They are the same</button>
+    </div>
+    <div class="say" id="wSay" aria-live="polite"></div>
+    <div class="row">
+      <button class="big" id="wNext">Next round</button>
+      <button class="soft" id="wShow" aria-pressed="false">Show the blocks</button>
+      <span class="score" id="wScore"></span>
+    </div>
+  </section>
+
+  <!-- 4 LINE UP -->
+  <section class="stage" id="v-line" hidden>
+    <p class="ask">Line them up: smallest first.<small>Tap the smallest card. Then the next smallest. Watch each one land on the number line.</small></p>
+    <div class="hand" id="lHand"></div>
+    <div class="chain" id="lChain" aria-live="polite"></div>
+    <div class="nline" id="lLine"></div>
+    <div class="say" id="lSay" aria-live="polite"></div>
+    <div class="row">
+      <button class="soft" id="lHandout" aria-pressed="true">Worksheet cards</button>
+      <button class="big" id="lNew">New cards</button>
+    </div>
+  </section>
+
+  <!-- 5 THINK -->
+  <section class="stage" id="v-think" hidden>
+    <div class="qnav" id="qnav"></div>
+    <p class="ask" id="qText"></p>
+    <div class="row" id="qBtns"></div>
+    <div class="evid" id="qEvid"></div>
+    <div class="say" id="qSay" aria-live="polite"></div>
+    <div id="chBox" hidden>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="tiles" id="chTiles"></div>
+        <div class="sub2" id="chSub"></div>
+        <div class="gapbar" id="chBar"></div>
+        <div class="row" style="justify-content:center">
+          <button class="soft" id="chClear">Clear</button>
+          <button class="big" id="chProve">Prove it</button>
+          <span class="best" id="chBest"></span>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Talk first. Then tap a button to put the evidence up.</p>
+  </section>
+</div>
+
+<script>
+/* ===== pure math (checked) ===== */
+const T = n => Math.floor(n/10), O = n => n % 10;
+const cmp = (a,b) => a>b ? '>' : a<b ? '<' : '=';
+const decider = (a,b) => T(a)!==T(b) ? 'tens' : O(a)!==O(b) ? 'ones' : 'same';
+const tw = k => k===1 ? 'ten' : 'tens';
+const ow = k => k===1 ? 'one' : 'ones';
+const words = s => s==='>' ? 'is greater than' : s==='<' ? 'is less than' : 'is equal to';
+function why(a,b){
+  if(T(a)!==T(b)){ const hi=Math.max(a,b), lo=Math.min(a,b);
+    return `${T(hi)} ${tw(T(hi))} is more than ${T(lo)} ${tw(T(lo))}. So ${hi} is more.`; }
+  if(O(a)!==O(b)){ const hi=Math.max(a,b), lo=Math.min(a,b);
+    return `Same tens: ${T(a)} and ${T(b)}. So check the ones. ${O(hi)} ${ow(O(hi))} is more than ${O(lo)}. So ${hi} is more.`; }
+  return `Same tens. Same ones. ${a} = ${b}.`;
+}
+function allGaps(){ // every way to use 4 different digits from 1–6
+  let max=-1, ways=0, best=[];
+  for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)for(let c=1;c<=6;c++)for(let d=1;d<=6;d++){
+    if(new Set([a,b,c,d]).size<4) continue; ways++;
+    const g=Math.abs((10*a+b)-(10*c+d));
+    if(g>max){max=g; best=[[10*a+b,10*c+d]];} else if(g===max) best.push([10*a+b,10*c+d]);
+  }
+  return {max, ways, best};
+}
+const GAPS = allGaps();
+const rnd = (lo,hi) => lo + Math.floor(Math.random()*(hi-lo+1));
+function pair(){
+  const a = rnd(10,99), r = Math.random(); let b;
+  if(r<0.1) b = a;
+  else if(r<0.38){ do{ b = T(a)*10 + rnd(0,9); }while(b===a); }
+  else if(r<0.52 && O(a)>0 && O(a)!==T(a)) b = O(a)*10 + T(a);
+  else { do{ b = rnd(10,99); }while(T(b)===T(a)); }
+  return Math.random()<.5 ? [a,b] : [b,a];
+}
+function handSet(){ // 5 different numbers, at least 3 apart, some sharing tens
+  for(;;){
+    const t = rnd(1,8), s = new Set([t*10+rnd(0,3), t*10+rnd(6,9)]);
+    while(s.size<5) s.add(rnd(1,99));
+    const arr=[...s], so=[...arr].sort((x,y)=>x-y);
+    if(so.every((v,i)=> i===0 || v-so[i-1]>=3)) return arr;
+  }
+}
+const HANDOUT = [63,36,60,6,66];
+</script>
+<script>
+/* ===== UI ===== */
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function numHTML(n){ return `<span class="num">${T(n)>0?`<span class="t">${T(n)}</span>`:''}<span class="o">${O(n)}</span></span>`; }
+function blocksHTML(n, cls=''){
+  const t=T(n), o=O(n);
+  let h = `<div class="blocks ${cls}" aria-label="${t} ${tw(t)} and ${o} ${ow(o)}">`;
+  for(let i=0;i<t;i++) h += `<div class="rod">${'<i></i>'.repeat(10)}</div>`;
+  if(o) h += `<div class="ones">${'<i></i>'.repeat(o)}</div>`;
+  if(!t && !o) h += `<span class="empty">nothing yet</span>`;
+  return h + `</div><div class="bcap"><b class="ct">${t}</b> ${tw(t)} &nbsp; <b class="co">${o}</b> ${ow(o)}</div>`;
+}
+function blocksBox(n, cls){ return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">${blocksHTML(n,cls)}</div>`; }
+function gator(sign){
+  if(sign==='=') return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="14" y="28" width="72" height="14" rx="7" fill="var(--gator)"/><rect x="14" y="58" width="72" height="14" rx="7" fill="var(--gator)"/></svg>`;
+  let teeth='';
+  for(const t of [.22,.42,.62]){
+    const ux=10+78*t, uy=12+38*t, ly=88-38*t;
+    teeth += `<polygon points="${ux-5},${uy+5} ${ux+5},${uy+5} ${ux},${uy+15}" fill="var(--tooth)"/>`;
+    teeth += `<polygon points="${ux-5},${ly-5} ${ux+5},${ly-5} ${ux},${ly-15}" fill="var(--tooth)"/>`;
+  }
+  const g = `${teeth}<path d="M10 12 L88 50 L10 88" fill="none" stroke="var(--gator)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle cx="62" cy="22" r="8" fill="var(--tooth)" stroke="var(--gator)" stroke-width="3"/><circle cx="60" cy="22" r="3.5" fill="var(--ink)"/>`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${sign==='>' ? g : `<g transform="translate(100,0) scale(-1,1)">${g}</g>`}</svg>`;
+}
+function say(el, tone, html){
+  const m = {yes:'✓', hmm:'?', info:'i'}[tone];
+  el.className = 'say ' + tone;
+  el.innerHTML = `<span class="mark" aria-hidden="true">${m}</span><div>${html}</div>`;
+}
+function clearSay(el){ el.className='say'; el.innerHTML=''; }
+function anim(el, cls){ if(reduced) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+function signButtons(box, onPick){
+  box.innerHTML = [['>','greater than'],['<','less than'],['=','equal to']].map(([s,w]) =>
+    `<button class="sign" data-s="${s}" aria-label="${w}">${gator(s)}<span>${s}</span><em>${w}</em></button>`).join('');
+  box.querySelectorAll('.sign').forEach(b => b.onclick = () => onPick(b.dataset.s, b));
+}
+function wrongSign(a,b,picked){
+  const right = cmp(a,b);
+  if(right==='=') return `Look again. Same tens and same ones. Is one really bigger? Try again.`;
+  if(picked==='=') return `They are not the same. Look at the tens: ${T(a)} and ${T(b)}${T(a)===T(b)?`. Same! Now the ones: ${O(a)} and ${O(b)}`:''}. Try again.`;
+  const big = Math.max(a,b);
+  return `This mouth is eating the smaller number. The alligator always eats the bigger one. Which is bigger? ${decider(a,b)==='tens' ? `Look at the tens: ${T(a)} and ${T(b)}.` : `Same tens. Look at the ones: ${O(a)} and ${O(b)}.`} Try again.`;
+}
+
+/* ===== state ===== */
+let S;
+function fresh(){
+  return {
+    tab:'draw',
+    draw:{a:56, b:38, done:false, tries:0, rounds:0, first:0},
+    build:{a:47, b:52, done:false, preset:0},
+    war:{a:71, b:74, stage:'sign', tries:0, rounds:0, first:0, show:false},
+    line:{set:[...HANDOUT], placed:[], handout:true, misses:0},
+    think:{q:1},
+    ch:{slots:[null,null,null,null], best:null}
+  };
+}
+
+/* ===== tabs ===== */
+function setTab(t){
+  S.tab = t;
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  for(const k of ['draw','build','war','line','think']) $('#v-'+k).hidden = k!==t;
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ===== 1 Quick draw ===== */
+function renderDraw(flip){
+  const d=S.draw;
+  for(const [k,n] of [['A',d.a],['B',d.b]]){
+    const c=$('#d'+k); c.className='pcard'; c.innerHTML = `<span class="corner">${k}</span>${numHTML(n)}`;
+    c.setAttribute('aria-label', `Card ${k}: ${n}`);
+    if(flip) anim(c,'flip');
+  }
+  $('#dAb').innerHTML=''; $('#dBb').innerHTML=''; clearSay($('#dSay'));
+  $('#dScore').innerHTML = d.rounds ? `Rounds <b>${d.rounds}</b> · right on first try <b>${d.first}</b>` : '';
+}
+function pickDraw(p){
+  const d=S.draw; if(d.done) return;
+  const right = d.a>d.b ? 'A' : d.a<d.b ? 'B' : 'same';
+  d.tries++;
+  const hl = decider(d.a,d.b)==='tens' ? 'hl-t' : decider(d.a,d.b)==='ones' ? 'hl-o' : '';
+  $('#dAb').innerHTML = blocksBox(d.a, hl); $('#dBb').innerHTML = blocksBox(d.b, hl);
+  ['A','B'].forEach(k => $('#d'+k).classList.remove('picked-yes','picked-no'));
+  if(p===right){
+    d.done=true; d.rounds++; if(d.tries===1) d.first++;
+    if(p!=='same') $('#d'+p).classList.add('picked-yes');
+    say($('#dSay'),'yes', `<strong>Yes!</strong> ${why(d.a,d.b)}`);
+    $('#dScore').innerHTML = `Rounds <b>${d.rounds}</b> · right on first try <b>${d.first}</b>`;
+  } else {
+    if(p!=='same') $('#d'+p).classList.add('picked-no');
+    const tip = p==='same' ? `They look close! Count the ten-sticks on each side.`
+      : right==='same' ? `Count the ten-sticks on both. Then the ones. Is one really bigger?`
+      : decider(d.a,d.b)==='tens' ? `Count the blue ten-sticks. Who has more tens?` : `Same number of ten-sticks! Now count the yellow ones.`;
+    say($('#dSay'),'hmm', `<strong>Let's check.</strong> ${tip} Tap again.`);
+  }
+}
+$('#dA').onclick = () => pickDraw('A');
+$('#dB').onclick = () => pickDraw('B');
+$('#dSame').onclick = () => pickDraw('same');
+$('#dNext').onclick = () => { const [a,b]=pair(); Object.assign(S.draw,{a,b,done:false,tries:0}); renderDraw(true); };
+
+/* ===== 2 Build ===== */
+const PRESETS = [[47,52],[68,68],[90,89],[36,29],[81,18]];
+function renderPresets(){
+  $('#presets').innerHTML = '<span>Try:</span>' + PRESETS.map((p,i)=>`<button data-i="${i}" aria-pressed="${S.build.preset===i}">${p[0]} and ${p[1]}</button>`).join('');
+  $('#presets').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const [a,c]=PRESETS[+b.dataset.i]; Object.assign(S.build,{a,b:c,done:false,preset:+b.dataset.i}); renderBuild(); });
+}
+function matHTML(k,n){
+  return `<div class="mat">${numHTML(n)}${blocksHTML(n)}
+    <div class="cols"><div class="lab lt">Tens</div><div class="lab lo">Ones</div>
+    <button class="bt" data-k="${k}" data-d="10" ${n+10>99?'disabled':''} aria-label="Add a ten">+ ten</button>
+    <button class="bo" data-k="${k}" data-d="1" ${n>=99?'disabled':''} aria-label="Add a one">+ one</button>
+    <button class="bt" data-k="${k}" data-d="-10" ${n<10?'disabled':''} aria-label="Take away a ten">− ten</button>
+    <button class="bo" data-k="${k}" data-d="-1" ${n<=0?'disabled':''} aria-label="Take away a one">− one</button></div></div>`;
+}
+function renderBuild(keepSay){
+  const B=S.build;
+  $('#matA').innerHTML = matHTML('a',B.a); $('#matB').innerHTML = matHTML('b',B.b);
+  document.querySelectorAll('#matA button, #matB button').forEach(btn => btn.onclick = () => {
+    const k=btn.dataset.k, d=+btn.dataset.d, before=B[k];
+    B[k] = Math.min(99, Math.max(0, B[k]+d)); B.done=false; B.preset=-1;
+    renderBuild(true); renderPresets();
+    if(d===1 && O(before)===9) say($('#bSay'),'info', `10 ones make a new ten! ${before} and one more is <strong>${B[k]}</strong>.`);
+    else if(d===-1 && O(before)===0) say($('#bSay'),'info', `No loose ones, so we open a ten. ${before} take away one is <strong>${B[k]}</strong>.`);
+    else clearSay($('#bSay'));
+  });
+  const slot=$('#bSlot');
+  if(B.done){ slot.className='slot filled'; slot.innerHTML=gator(cmp(B.a,B.b)); }
+  else { slot.className='slot'; slot.textContent='?'; }
+  if(!keepSay) clearSay($('#bSay'));
+}
+signButtons($('#bSigns'), (s,btn) => {
+  const B=S.build;
+  if(s===cmp(B.a,B.b)){
+    B.done=true; renderBuild(true); anim($('#bSlot'),'pop');
+    say($('#bSay'),'yes', `<strong>${B.a} ${s} ${B.b}.</strong> ${B.a} ${words(s)} ${B.b}. ${why(B.a,B.b)}`);
+  } else { anim(btn,'no'); setTimeout(()=>btn.classList.remove('no'),500); say($('#bSay'),'hmm', wrongSign(B.a,B.b,s)); }
+});
+
+/* ===== 3 War ===== */
+function renderWar(flip){
+  const W=S.war;
+  for(const [k,n] of [['A',W.a],['B',W.b]]){ const c=$('#w'+k); c.innerHTML=`<span class="corner">${k==='A'?'Player 1':'Player 2'}</span>${numHTML(n)}`; c.setAttribute('aria-label',`${k==='A'?'Player 1':'Player 2'}: ${n}`); if(flip) anim(c,'flip'); }
+  $('#wAb').innerHTML=blocksBox(W.a); $('#wBb').innerHTML=blocksBox(W.b);
+  $('#wAb').hidden = $('#wBb').hidden = !W.show;
+  $('#wShow').setAttribute('aria-pressed', W.show); $('#wShow').textContent = W.show ? 'Hide the blocks' : 'Show the blocks';
+  const slot=$('#wSlot');
+  if(W.stage==='sign'){ slot.className='slot'; slot.textContent='?'; }
+  else { slot.className='slot filled'; slot.innerHTML=gator(cmp(W.a,W.b)); }
+  $('#wSigns').hidden = W.stage!=='sign'; $('#wWhy').hidden = W.stage!=='why';
+  $('#wAsk').textContent = W.stage==='sign' ? 'Which alligator goes in the middle?' : W.stage==='why' ? 'How did you know? Which digit told you?' : 'Round done!';
+  $('#wNext').hidden = W.stage!=='done';
+  $('#wScore').innerHTML = W.rounds ? `Rounds <b>${W.rounds}</b> · right on first try <b>${W.first}</b>` : '';
+}
+signButtons($('#wSigns'), (s,btn) => {
+  const W=S.war; W.tries++;
+  if(s===cmp(W.a,W.b)){ W.stage='why'; renderWar(); anim($('#wSlot'),'pop'); say($('#wSay'),'yes', `<strong>${W.a} ${s} ${W.b}.</strong> ${W.a} ${words(s)} ${W.b}.`); }
+  else { anim(btn,'no'); setTimeout(()=>btn.classList.remove('no'),500); say($('#wSay'),'hmm', wrongSign(W.a,W.b,s)); }
+});
+document.querySelectorAll('#wWhy button').forEach(b => b.onclick = () => {
+  const W=S.war, right=decider(W.a,W.b), p=b.dataset.why;
+  if(p===right){
+    W.stage='done'; W.rounds++; if(W.tries===1) W.first++; W.show=true; renderWar();
+    const hl = right==='tens'?'hl-t':right==='ones'?'hl-o':'';
+    $('#wAb').innerHTML=blocksBox(W.a,hl); $('#wBb').innerHTML=blocksBox(W.b,hl);
+    say($('#wSay'),'yes', `<strong>Right!</strong> ${why(W.a,W.b)}`);
+  } else {
+    W.tries++;
+    const msg = p==='ones' && right==='tens' ? `Look at the tens first: ${T(W.a)} and ${T(W.b)}. Are they different? Then the tens already told you.`
+      : p==='tens' && right==='ones' ? `The tens are both ${T(W.a)}. A tie! So which digit had to break the tie?`
+      : p==='same' ? `Are they really the same? Check the tens: ${T(W.a)} and ${T(W.b)}. Then the ones: ${O(W.a)} and ${O(W.b)}.`
+      : `Both numbers are ${W.a}. Every digit matches. What does that tell you?`;
+    say($('#wSay'),'hmm', msg + ' Try again.');
+  }
+});
+$('#wNext').onclick = () => { const [a,b]=pair(); Object.assign(S.war,{a,b,stage:'sign',tries:0,show:false}); renderWar(true); clearSay($('#wSay')); };
+$('#wShow').onclick = () => { S.war.show=!S.war.show; $('#wAb').hidden=$('#wBb').hidden=!S.war.show; $('#wShow').setAttribute('aria-pressed',S.war.show); $('#wShow').textContent=S.war.show?'Hide the blocks':'Show the blocks'; };
+
+/* ===== 4 Line up ===== */
+const NX = n => 40 + n*9.2;
+function renderLine(){
+  const L=S.line, sorted=[...L.set].sort((x,y)=>x-y);
+  $('#lHand').innerHTML = L.set.map((n,i)=>`<button class="pcard ${L.placed.includes(n)?'gone':''}" data-n="${n}" aria-label="${n}" ${L.placed.includes(n)?'tabindex="-1"':''}>${numHTML(n)}</button>`).join('');
+  $('#lHand').querySelectorAll('.pcard').forEach(b => b.onclick = () => tapLine(+b.dataset.n, b));
+  let ch='';
+  for(let i=0;i<5;i++){
+    if(i>0) ch += `<span class="lt">${i<L.placed.length?'&lt;':''}</span>`;
+    ch += i<L.placed.length ? numHTML(L.placed[i]) : `<span class="ph"></span>`;
+  }
+  $('#lChain').innerHTML = ch;
+  let svg = `<svg viewBox="0 0 1000 170" role="img" aria-label="Number line from 0 to 100"><line x1="40" y1="80" x2="960" y2="80" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>`;
+  for(let v=0; v<=100; v++){ const x=NX(v), big=v%10===0;
+    if(big || v%5===0) svg += `<line x1="${x}" y1="${big?66:72}" x2="${x}" y2="${big?94:88}" stroke="var(--muted)" stroke-width="${big?3:2}"/>`;
+    if(big) svg += `<text x="${x}" y="116" text-anchor="middle" font-size="20" fill="var(--muted)">${v}</text>`; }
+  L.placed.forEach((n,i)=>{ const x=NX(n), up=i%2===0;
+    svg += `<line x1="${x}" y1="${up?50:110}" x2="${x}" y2="80" stroke="var(--gator)" stroke-width="3"/><circle cx="${x}" cy="80" r="11" fill="var(--gator)"/>`;
+    svg += `<text x="${x}" y="${up?40:158}" text-anchor="middle" font-size="34" font-weight="800" fill="var(--ink)">${n}</text>`; });
+  $('#lLine').innerHTML = svg + `</svg>`;
+  $('#lHandout').setAttribute('aria-pressed', L.handout);
+  if(L.placed.length===5) say($('#lSay'),'yes', `<strong>All lined up!</strong> Smallest to greatest: ${sorted.join(', ')}. See how the line goes left to right, small to big?`);
+}
+function tapLine(n, btn){
+  const L=S.line, left=L.set.filter(x=>!L.placed.includes(x)), m=Math.min(...left);
+  if(n===m){ L.placed.push(n); clearSay($('#lSay')); renderLine(); return; }
+  L.misses++; anim(btn,'no');
+  const msg = T(m)<T(n) ? `Is there a smaller one? ${n} has ${T(n)} ${tw(T(n))}. Look for a card with fewer tens.`
+    : `Close! Another card also has ${T(n)} ${tw(T(n))}. When the tens match, check the ones.`;
+  say($('#lSay'),'hmm', msg + ' Try again.');
+}
+$('#lHandout').onclick = () => { Object.assign(S.line,{set:[...HANDOUT],placed:[],handout:true,misses:0}); clearSay($('#lSay')); renderLine(); };
+$('#lNew').onclick = () => { Object.assign(S.line,{set:handSet(),placed:[],handout:false,misses:0}); clearSay($('#lSay')); renderLine(); };
+
+/* ===== 5 Think together ===== */
+const pairEvid = (a,b,hl) => `<div class="e">${numHTML(a)}${blocksBox(a,hl)}</div><span class="sym">${cmp(a,b)}</span><div class="e">${numHTML(b)}${blocksBox(b,hl)}</div>`;
+const Q = {
+  1:{ text:'Which digit do you check FIRST: the tens or the ones?',
+      btns:[
+        ['Test 81 and 18', () => { $('#qEvid').innerHTML = pairEvid(81,18,'hl-t');
+          say($('#qSay'),'info', `18 has more ones (8). But 81 has 8 tens! 8 tens is way more than 1 ten. <strong>81 &gt; 18.</strong> The tens decided.`); }],
+        ['Test 90 and 89', () => { $('#qEvid').innerHTML = pairEvid(90,89,'hl-t');
+          say($('#qSay'),'info', `89 has two big digits. But 90 has 9 tens and 89 has only 8 tens. <strong>90 &gt; 89.</strong> The tens decided again.`); }]]},
+  2:{ text:'When do we need to look at the ones?',
+      btns:[
+        ['Test 47 and 43', () => { $('#qEvid').innerHTML = pairEvid(47,43,'hl-o');
+          say($('#qSay'),'info', `Both have 4 tens. A tie! So the ones break the tie: 7 is more than 3. <strong>47 &gt; 43.</strong>`); }],
+        ['Test 68 and 68', () => { $('#qEvid').innerHTML = pairEvid(68,68,'');
+          say($('#qSay'),'info', `Same tens (6). Same ones (8). <strong>68 = 68.</strong> The ones only matter when the tens tie.`); }]]},
+  3:{ text:'Why does 1 ten beat a big pile of ones?',
+      btns:[
+        ['9 ones or 1 ten?', () => { $('#qEvid').innerHTML = pairEvid(9,10,'');
+          say($('#qSay'),'info', `9 ones is the most ones you can have. 1 ten is 10. <strong>9 &lt; 10.</strong> So more tens always wins.`); }],
+        ['Our class rule', () => { $('#qEvid').innerHTML = `<p class="rule">Check the <span class="t">tens</span> first.<br>Same tens? Check the <span class="o">ones</span>.</p>`;
+          say($('#qSay'),'info', `Test the rule on 34 and 43. Does it work? How could you check?`); }]]},
+  4:{ text:'Challenge: use the digits 1 to 6, each only once. Make two numbers that are as far apart as you can.', btns:[] }
+};
+function renderQ(){
+  const q=S.think.q;
+  $('#qnav').innerHTML = [1,2,3].map(i=>`<button data-q="${i}" aria-pressed="${q===i}" aria-label="Question ${i}">${i}</button>`).join('') + `<button class="star" data-q="4" aria-pressed="${q===4}">★ Challenge</button>`;
+  $('#qnav').querySelectorAll('button').forEach(b => b.onclick = () => { S.think.q=+b.dataset.q; renderQ(); });
+  $('#qText').textContent = Q[q].text;
+  $('#qBtns').innerHTML=''; $('#qEvid').innerHTML=''; clearSay($('#qSay'));
+  Q[q].btns.forEach(([label,fn],i) => { const b=document.createElement('button'); b.className=i?'soft':'big'; b.textContent=label; b.onclick=fn; $('#qBtns').appendChild(b); });
+  $('#chBox').hidden = q!==4;
+  if(q===4) renderCh();
+}
+
+/* challenge */
+function renderCh(){
+  const C=S.ch, s=C.slots, used=s.filter(v=>v!==null), next=s.indexOf(null);
+  $('#chTiles').innerHTML = [1,2,3,4,5,6].map(d=>`<button class="tile" data-d="${d}" ${used.includes(d)||next<0?'disabled':''}>${d}</button>`).join('');
+  $('#chTiles').querySelectorAll('.tile').forEach(b => b.onclick = () => { C.slots[C.slots.indexOf(null)] = +b.dataset.d; renderCh(); });
+  const sl = i => `<button class="dslot ${i%2?'o':'t'} ${s[i]!==null?'full':''} ${i===next?'next':''}" data-i="${i}" aria-label="${i<2?'Top':'Bottom'} number ${i%2?'ones':'tens'} digit">${s[i]??''}</button>`;
+  $('#chSub').innerHTML = `<span class="op"></span>${sl(0)}${sl(1)}<span class="op">−</span>${sl(2)}${sl(3)}`;
+  $('#chSub').querySelectorAll('.dslot').forEach(b => b.onclick = () => { C.slots[+b.dataset.i]=null; renderCh(); });
+  $('#chBar').innerHTML='';
+  if(next<0){
+    const top=10*s[0]+s[1], bot=10*s[2]+s[3], hi=Math.max(top,bot), lo=Math.min(top,bot), g=hi-lo;
+    if(C.best===null || g>C.best.g) C.best={g,hi,lo};
+    const x1=40+lo*9.2, x2=40+hi*9.2;
+    let svg=`<svg viewBox="0 0 1000 130" role="img" aria-label="Gap from ${lo} to ${hi} is ${g}"><line x1="40" y1="80" x2="960" y2="80" stroke="var(--line)" stroke-width="4"/>`;
+    for(let v=0;v<=100;v+=10) svg+=`<line x1="${40+v*9.2}" y1="70" x2="${40+v*9.2}" y2="90" stroke="var(--muted)" stroke-width="2"/><text x="${40+v*9.2}" y="118" text-anchor="middle" font-size="18" fill="var(--muted)">${v}</text>`;
+    svg+=`<rect x="${x1}" y="70" width="${x2-x1}" height="20" rx="6" fill="var(--gator)" opacity=".85"/><circle cx="${x1}" cy="80" r="9" fill="var(--ink)"/><circle cx="${x2}" cy="80" r="9" fill="var(--ink)"/>`;
+    svg+=`<text x="${(x1+x2)/2}" y="54" text-anchor="middle" font-size="30" font-weight="800" fill="var(--ink)">gap ${g}</text></svg>`;
+    $('#chBar').innerHTML=svg;
+    if(top<bot) say($('#qSay'),'hmm', `${top} is less than ${bot}. Put the bigger number on top so you can take away. The gap is still <strong>${g}</strong>.`);
+    else if(g===GAPS.max) say($('#qSay'),'yes', `<strong>${top} − ${bot} = ${g}.</strong> Wow! Can anyone beat it? Tap “Prove it” to check.`);
+    else say($('#qSay'),'info', `<strong>${top} − ${bot} = ${g}.</strong> Can you make the gap bigger? Which digits make the biggest number? The smallest?`);
+  } else clearSay($('#qSay'));
+  $('#chBest').innerHTML = C.best ? `Best gap so far: <b>${C.best.g}</b> (${C.best.hi} − ${C.best.lo})` : 'Tap digits to fill the boxes.';
+}
+$('#chClear').onclick = () => { S.ch.slots=[null,null,null,null]; renderCh(); };
+$('#chProve').onclick = () => {
+  const [hi,lo]=GAPS.best.find(p=>p[0]>p[1]);
+  S.ch.slots=[T(hi),O(hi),T(lo),O(lo)]; renderCh();
+  say($('#qSay'),'yes', `Biggest number: the two biggest digits, biggest in the tens place: <strong>${hi}</strong>. Smallest number: the two smallest digits, smallest in the tens: <strong>${lo}</strong>. ${hi} − ${lo} = <strong>${GAPS.max}</strong>. We tried all ${GAPS.ways} ways to pick the four boxes. None beats ${GAPS.max}.`);
+};
+
+/* ===== global ===== */
+function renderAll(){ setTab(S.tab); renderDraw(); renderPresets(); renderBuild(); renderWar(); clearSay($('#wSay')); renderLine(); clearSay($('#lSay')); renderQ(); }
+$('#resetBtn').onclick = () => { S=fresh(); renderAll(); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+S=fresh(); renderAll();
+</script>
+
+</body></html>

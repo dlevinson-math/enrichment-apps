@@ -1,0 +1,754 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Number Pyramids</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a play-mat stage (the pyramid, big and centred) beside a slim teacher panel; stacks to one column on narrow screens. */
+:root{
+  --mat:#E7F1EE; --card:#FFFFFF; --ink:#1E2A45; --muted:#56637A; --line:#C9D6D6;
+  --given:#D7E7FA; --given-ink:#1E2A45;
+  --filled:#1F9C8E; --filled-ink:#FFFFFF;
+  --accent:#F0703E; --accent-ink:#FFFFFF; --accent-soft:#FDE6DA;
+  --glow:#F6B93B; --hmm:#7A5AC8; --hmm-soft:#EEE8FA; --ok-soft:#DDF3EE;
+  --c0:#E8513F; --c1:#2F6FD8; --c2:#D9940C; --c3:#8A4FD1;
+  --display:"Fredoka", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --mat:#121A22; --card:#1C2630; --ink:#EAF0F2; --muted:#9AA9B6; --line:#33424F;
+    --given:#2A3E58; --given-ink:#EAF0F2; --filled:#26A797; --filled-ink:#08130F;
+    --accent:#FF8A57; --accent-ink:#1A0D06; --accent-soft:#3D2418;
+    --glow:#F6C04F; --hmm:#B79BFF; --hmm-soft:#2B2442; --ok-soft:#173631;
+    --c0:#FF7563; --c1:#6FA0FF; --c2:#F2B53A; --c3:#B88AF5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --mat:#121A22; --card:#1C2630; --ink:#EAF0F2; --muted:#9AA9B6; --line:#33424F;
+  --given:#2A3E58; --given-ink:#EAF0F2; --filled:#26A797; --filled-ink:#08130F;
+  --accent:#FF8A57; --accent-ink:#1A0D06; --accent-soft:#3D2418;
+  --glow:#F6C04F; --hmm:#B79BFF; --hmm-soft:#2B2442; --ok-soft:#173631;
+  --c0:#FF7563; --c1:#6FA0FF; --c2:#F2B53A; --c3:#B88AF5;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--mat); color:var(--ink); font-family:var(--body); font-size:17px; padding-inline:16px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1500px; margin:0 auto; padding-block:12px 24px; display:flex; flex-direction:column; gap:12px; min-height:100%}
+
+header{display:flex; align-items:center; gap:12px 20px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.logo{width:52px; height:44px; flex:none}
+h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3.2vw,44px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:800; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:8px; flex-wrap:wrap}
+nav.tabs button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 18px; min-height:52px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,21px); display:flex; align-items:center; gap:8px}
+nav.tabs button .n{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--mat); font-size:15px}
+nav.tabs button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav.tabs button[aria-selected="true"] .n{background:var(--accent); color:var(--accent-ink)}
+
+.app{flex:1; display:grid; grid-template-columns:minmax(0,1.65fr) minmax(300px,1fr); gap:16px; align-items:start}
+.stage{background:var(--card); border-radius:24px; padding:20px 16px 18px; display:flex; flex-direction:column; align-items:center; gap:14px; min-width:0; box-shadow:0 2px 0 var(--line)}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel h2{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(24px,2.3vw,34px); line-height:1.15; text-wrap:balance}
+.panel p{margin:0; font-size:clamp(18px,1.5vw,22px); line-height:1.4; max-width:30em}
+.panel .small{font-size:15px; color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:800; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; min-height:56px; border-radius:16px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:800; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; min-height:56px; border-radius:16px}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.chooser{display:flex; gap:8px; flex-wrap:wrap}
+.chooser button{min-width:64px; min-height:56px; border-radius:16px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:20px; padding:0 14px; position:relative}
+.chooser button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.chooser button.done::after{content:"✓"; position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%; background:var(--filled); color:var(--filled-ink); font-size:14px; display:grid; place-items:center}
+.toggle{display:flex; align-items:center; gap:10px; font-weight:700; font-size:17px; cursor:pointer; min-height:44px}
+.toggle input{width:26px; height:26px; accent-color:var(--filled)}
+
+/* Pyramid */
+.area{width:100%; container-type:inline-size; display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:22px 28px; min-height:200px}
+.pyr{--gap:clamp(4px,1.2cqi,10px); --bw:min(var(--max), calc((100cqi - (var(--n) - 1) * var(--gap)) / var(--n))); display:flex; flex-direction:column; align-items:center; gap:var(--gap)}
+.pyr.mid{--gap:5px; --bw:var(--max)}
+.prow{display:flex; gap:var(--gap)}
+.blk{width:var(--bw); min-height:calc(var(--bw) * .66); border-radius:calc(var(--bw) * .12); border:3px solid transparent; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:4px; font-family:var(--display); font-weight:700; font-size:calc(var(--bw) * .4); line-height:1; position:relative; transition:transform .15s, box-shadow .2s, background-color .2s}
+.pyr.mid .blk{border-width:2px}
+.blk.given{background:var(--given); color:var(--given-ink); box-shadow:inset 0 -5px 0 color-mix(in srgb, var(--given-ink) 12%, transparent)}
+.blk.filled{background:var(--filled); color:var(--filled-ink); box-shadow:inset 0 -5px 0 rgba(0,0,0,.14)}
+.blk.empty{border:3px dashed var(--ink); opacity:.85}
+.blk.empty .q{opacity:.35}
+.blk.ghost{border:3px dashed var(--line); color:var(--muted)}
+.blk.slot{border:3px dashed var(--accent)}
+.blk.sel{border:4px solid var(--accent); opacity:1; transform:scale(1.04); box-shadow:0 0 0 6px var(--accent-soft)}
+.blk.hl{box-shadow:0 0 0 5px var(--hmm); }
+.blk.glow{animation:glow 1.2s ease-in-out infinite; border-color:var(--glow); border-style:solid}
+.blk.mark{outline:4px solid var(--accent); outline-offset:3px}
+.blk.trace{background:var(--card); color:var(--ink); border:2px solid var(--line)}
+.blk.pop{animation:pop .45s ease-out}
+.blk.shake{animation:shake .4s ease-out}
+@keyframes glow{0%,100%{box-shadow:0 0 0 3px var(--glow)}50%{box-shadow:0 0 0 10px color-mix(in srgb, var(--glow) 35%, transparent)}}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.dots{display:flex; flex-wrap:wrap; justify-content:center; gap:2px; max-width:100%; padding:0 2px}
+.dot{width:calc(var(--bw) * .075); height:calc(var(--bw) * .075); min-width:5px; min-height:5px; border-radius:2px; background:currentColor; opacity:.7}
+.dot.c0{background:var(--c0); opacity:1}.dot.c1{background:var(--c1); opacity:1}.dot.c2{background:var(--c2); opacity:1}.dot.c3{background:var(--c3); opacity:1}
+.dot.brk{margin-right:calc(var(--bw) * .04)}
+.cap{font-family:var(--display); font-weight:600; font-size:20px; text-align:center; margin-top:6px}
+.cap small{display:block; font-family:var(--body); font-size:14px; color:var(--muted); font-weight:700}
+.fig{display:flex; flex-direction:column; align-items:center; padding:8px; border-radius:16px}
+.fig.best{background:var(--accent-soft)}
+
+/* Feedback bubble */
+.bubble{width:100%; max-width:760px; border-radius:18px; padding:14px 18px; font-size:clamp(19px,1.7vw,25px); line-height:1.4; background:var(--mat); text-align:center; min-height:1.4em}
+.bubble:empty{display:none}
+.bubble.ok{background:var(--ok-soft)}
+.bubble.hmm{background:var(--hmm-soft)}
+.bubble b{font-family:var(--display); font-weight:700}
+.bubble .eq{font-family:var(--display); font-weight:600; display:block; font-size:1.15em}
+
+/* Number pad */
+.pad{display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:8px; width:100%; max-width:640px}
+.pad button{min-height:56px; border-radius:14px; border:2px solid var(--line); background:var(--mat); font-family:var(--display); font-weight:600; font-size:clamp(20px,2vw,28px)}
+.pad button:hover{border-color:var(--ink)}
+.pad[hidden]{display:none}
+
+/* Tiles for building */
+.tiles{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+.tile{width:76px; height:76px; border-radius:18px; border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:700; font-size:40px; box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
+.tile:disabled{opacity:.25; cursor:default}
+
+/* Warm-up frames */
+.frames{display:flex; flex-direction:column; gap:16px; align-items:center; width:100%}
+.eqn{font-family:var(--display); font-weight:700; font-size:clamp(44px,7cqi,84px); line-height:1}
+.frame{display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:6px; width:min(100%, 640px); padding:8px; border-radius:16px; background:var(--mat)}
+.frame .cell{aspect-ratio:1; border-radius:10px; border:2px dashed var(--line); display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:clamp(14px,2.4cqi,24px); padding:0; background:transparent}
+.frame .cell.cube{border:0; color:#fff; box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.frame .cell.cube.a{background:var(--c0)} .frame .cell.cube.b{background:var(--c1)}
+.frame .cell.extra{outline:4px solid var(--glow); outline-offset:2px}
+.frame .cell.counted{outline:4px solid var(--ink); outline-offset:1px}
+.flabel{font-weight:800; font-size:16px; color:var(--muted); align-self:center}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:56px; height:56px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.tally{display:flex; gap:10px; flex-wrap:wrap}
+.tally .stat{background:var(--card); border-radius:16px; padding:10px 16px; min-width:120px}
+.tally .stat b{display:block; font-family:var(--display); font-size:34px; line-height:1}
+.tally .stat span{font-size:14px; color:var(--muted); font-weight:700}
+.legend{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; font-weight:800}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:16px; height:16px; border-radius:4px; display:inline-block}
+
+@media (max-width: 960px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .panel{order:-1}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  nav.tabs button{padding:8px 12px; min-height:48px}
+  nav.tabs button .lbl{font-size:16px}
+  .tile{width:64px; height:64px; font-size:34px}
+  .pad{gap:5px} .pad button{min-height:50px}
+  .stage{padding:16px 10px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 52 44" aria-hidden="true">
+      <rect x="15" y="1" width="22" height="13" rx="3" fill="var(--accent)"/>
+      <rect x="4" y="16" width="22" height="13" rx="3" fill="var(--filled)"/>
+      <rect x="27" y="16" width="22" height="13" rx="3" fill="var(--filled)"/>
+      <rect x="0" y="31" width="16" height="12" rx="3" fill="var(--c1)"/>
+      <rect x="18" y="31" width="16" height="12" rx="3" fill="var(--c1)"/>
+      <rect x="36" y="31" width="16" height="12" rx="3" fill="var(--c1)"/>
+    </svg>
+    <div>
+      <h1>Number Pyramids</h1>
+      <p class="sub">Grade 1 · Week 7 · Lesson 1.7</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" id="tabs"></nav>
+
+<div class="app">
+  <section class="stage" aria-label="Pyramid">
+    <div class="area" id="area"></div>
+    <div class="bubble" id="bubble" aria-live="polite"></div>
+    <div class="pad" id="pad" hidden></div>
+  </section>
+  <aside class="panel" id="panel"></aside>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ================= MATH (pure) ================= */
+const key=(r,i)=>r+'-'+i;
+function buildVals(bottom){
+  const R=bottom.length, v=[]; v[R-1]=bottom.slice();
+  for(let r=R-2;r>=0;r--){ v[r]=[]; for(let i=0;i<=r;i++) v[r][i]=v[r+1][i]+v[r+1][i+1]; }
+  return v;
+}
+// how many times each bottom block is counted inside block (r,i)
+function coeffs(R){
+  const c=[]; c[R-1]=[];
+  for(let i=0;i<R;i++) c[R-1][i]=Array.from({length:R},(_,j)=>j===i?1:0);
+  for(let r=R-2;r>=0;r--){ c[r]=[]; for(let i=0;i<=r;i++) c[r][i]=c[r+1][i].map((x,j)=>x+c[r+1][i+1][j]); }
+  return c;
+}
+function makePuzzle(label,bottom,givens){
+  const R=bottom.length, vals=buildVals(bottom);
+  const given=vals.map((row,r)=>row.map((_,i)=> givens==='bottom' ? r===R-1 : givens.includes(key(r,i))));
+  return {label,R,bottom:bottom.slice(),vals,given,known:given.map(x=>x.slice()),tries:{}};
+}
+// a way to find (r,i) from blocks already known
+function relation(K,R,r,i){
+  if(r<R-1 && K[r+1][i] && K[r+1][i+1]) return {type:'sum', a:[r+1,i], b:[r+1,i+1]};
+  if(r>0 && i<=r-1 && K[r-1][i] && K[r][i+1]) return {type:'part', whole:[r-1,i], part:[r,i+1]};
+  if(r>0 && i>=1 && K[r-1][i-1] && K[r][i-1]) return {type:'part', whole:[r-1,i-1], part:[r,i-1]};
+  return null;
+}
+function solveSteps(p){
+  const K=p.known.map(x=>x.slice()), steps=[];
+  let moved=true;
+  while(moved){
+    moved=false;
+    for(let r=0;r<p.R && !moved;r++) for(let i=0;i<=r && !moved;i++){
+      if(K[r][i]) continue;
+      const rel=relation(K,p.R,r,i);
+      if(rel){ steps.push({r,i,rel}); K[r][i]=true; moved=true; }
+    }
+  }
+  return steps;
+}
+function perms(a){ if(a.length<=1) return [a.slice()]; const out=[]; a.forEach((x,k)=>perms(a.filter((_,j)=>j!==k)).forEach(p=>out.push([x,...p]))); return out; }
+const topOf=b=>buildVals(b)[0][0];
+/* ================= END MATH ================= */
+
+const $=s=>document.querySelector(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const V=(p,c)=>p.vals[c[0]][c[1]];
+
+const TABS=[
+  {id:'warm', n:'1', lbl:'Warm-up'},
+  {id:'build', n:'2', lbl:'Build up'},
+  {id:'miss', n:'3', lbl:'Missing blocks'},
+  {id:'mix', n:'4', lbl:'Mix it up'},
+  {id:'q', n:'?', lbl:'Detective'},
+  {id:'ch', n:'★', lbl:'Challenge'}
+];
+
+function freshBuild(){ return [
+  makePuzzle('Start',[2,3,4],'bottom'),
+  makePuzzle('A1',[3,4,5],'bottom'),
+  makePuzzle('A2',[6,2,7],'bottom'),
+  makePuzzle('A3',[4,1,3],'bottom')
+];}
+function freshMiss(){ return [
+  makePuzzle('Start',[2,3,4],['2-0','2-2','1-0','0-0']),
+  makePuzzle('B1',[2,4,4],['0-0','1-0','2-0']),
+  makePuzzle('B2',[5,4,3],['0-0','2-0','2-2']),
+  makePuzzle('B3',[5,6,3],['1-0','1-1','2-1'])
+];}
+let S;
+function freshState(){
+  return {
+    tab:S?S.tab:'warm', cubes:false, sel:null, hl:[], glow:[], pop:null, shake:null,
+    msg:null, showMe:false,
+    warm:{mode:null, counted:0},
+    build:{idx:0, list:freshBuild()},
+    miss:{idx:0, list:freshMiss()},
+    mix:{slots:[null,null,null], p:null, found:[]},
+    q:{n:1, ev:null, order:[1,3,2], step:0},
+    ch:{slots:[null,null,null,null], p:null, big:null, small:null, why:false, tried:0}
+  };
+}
+S=freshState();
+
+function active(){
+  if(S.tab==='build') return S.build.list[S.build.idx];
+  if(S.tab==='miss') return S.miss.list[S.miss.idx];
+  if(S.tab==='mix') return S.mix.p;
+  if(S.tab==='ch') return S.ch.p;
+  return null;
+}
+const isDone=p=>p && p.known.every(r=>r.every(Boolean));
+function say(html,tone){ S.msg={html,tone:tone||'info'}; }
+function clearMarks(){ S.hl=[]; S.glow=[]; S.showMe=false; }
+
+/* ================= Pyramid renderer ================= */
+function dotsHTML(parts){
+  // parts: [[count, colorIndex|null], ...]
+  let k=0, h='';
+  for(const [n,c] of parts) for(let j=0;j<n;j++){ k++; h+=`<i class="dot${c!=null?' c'+c:''}${k%5===0?' brk':''}"></i>`; }
+  return h ? `<span class="dots" aria-hidden="true">${h}</span>` : '';
+}
+function pyrHTML(cfg){
+  // cfg: {R, cell(r,i)->{text,state,dots,label}, size:'big'|'mid', max, tappable}
+  const size=cfg.size||'big', max=cfg.max||(size==='big'?'9.5rem':'3rem');
+  let h=`<div class="pyr ${size}" style="--n:${cfg.R}; --max:${max}" role="group" aria-label="${cfg.aria||'Number pyramid'}">`;
+  for(let r=0;r<cfg.R;r++){
+    h+='<div class="prow">';
+    for(let i=0;i<=r;i++){
+      const c=cfg.cell(r,i), k=key(r,i);
+      const cls=['blk',c.state];
+      if(cfg.tappable){
+        if(S.sel===k) cls.push('sel');
+        if(S.hl.includes(k)) cls.push('hl');
+        if(S.glow.includes(k)) cls.push('glow');
+        if(S.pop===k && !reduced) cls.push('pop');
+        if(S.shake===k && !reduced) cls.push('shake');
+      }
+      if(c.mark) cls.push('mark');
+      const inner=`<span>${c.text}</span>${c.dots?dotsHTML(c.dots):''}`;
+      h+= cfg.tappable
+        ? `<button class="${cls.join(' ')}" data-k="${k}" aria-label="${c.label||c.text||'empty block'}">${inner}</button>`
+        : `<div class="${cls.join(' ')}" aria-label="${c.label||c.text}">${inner}</div>`;
+    }
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function puzzleCell(p,opts={}){
+  const co = opts.trace ? coeffs(p.R) : null;
+  return (r,i)=>{
+    const k=key(r,i), v=p.vals[r][i];
+    if(p.known[r][i]){
+      let dots=null;
+      if(opts.trace) dots=co[r][i].map((m,j)=>[m*p.bottom[j], j]);
+      else if(S.cubes || S.hl.includes(k)) dots=[[v,null]];
+      return {text:v, state: opts.trace?'trace':(p.given[r][i]?'given':'filled'), dots, label:String(v)};
+    }
+    return {text:'<span class="q">?</span>', state:'empty', label:'empty block, tap to fill'};
+  };
+}
+
+/* ================= Entering numbers ================= */
+function tapBlock(k){
+  const p=active(); if(!p) return;
+  const [r,i]=k.split('-').map(Number);
+  clearMarks();
+  if(p.known[r][i]){
+    S.sel=null;
+    const rel = r<p.R-1 ? {a:[r+1,i],b:[r+1,i+1]} : null;
+    if(rel && p.known[r+1][i] && p.known[r+1][i+1]){ S.hl=[key(...rel.a),key(...rel.b)]; say(`<span class="eq">${V(p,rel.a)} + ${V(p,rel.b)} = ${p.vals[r][i]}</span>`); }
+    else say(`This block is <b>${p.vals[r][i]}</b>.`);
+  } else {
+    S.sel=k; say('What number goes here? Tap it below.');
+  }
+  render();
+}
+function enter(v){
+  const p=active(); if(!p || !S.sel) return;
+  const k=S.sel, [r,i]=k.split('-').map(Number), right=p.vals[r][i];
+  const rel=relation(p.known,p.R,r,i);
+  clearMarks();
+  if(v===right){
+    p.known[r][i]=true; S.sel=null; S.pop=k;
+    if(rel && rel.type==='sum') say(`Yes! <span class="eq">${V(p,rel.a)} + ${V(p,rel.b)} = ${v}</span>`,'ok');
+    else if(rel) say(`Yes! <span class="eq">${V(p,rel.part)} and ${v} make ${V(p,rel.whole)}</span>`,'ok');
+    else say(`Yes, <b>${v}</b> works!${trialText(p,r,i,v,true)}`,'ok');
+    afterSolve(p);
+  } else {
+    p.tries[k]=(p.tries[k]||0)+1; S.shake=k;
+    if(rel && rel.type==='sum'){
+      S.hl=[key(...rel.a),key(...rel.b)];
+      say(`Not ${v}. Look under it: <b>${V(p,rel.a)}</b> and <b>${V(p,rel.b)}</b>. Put them together. Try again!`,'hmm');
+    } else if(rel){
+      S.hl=[key(...rel.whole),key(...rel.part)];
+      say(`Not ${v}. The block above is <b>${V(p,rel.whole)}</b>. Its neighbor is <b>${V(p,rel.part)}</b>.<span class="eq">${V(p,rel.part)} and what make ${V(p,rel.whole)}?</span>`,'hmm');
+    } else {
+      const t=trialText(p,r,i,v,false);
+      say(t || `This block is tricky right now. Tap <b>Where can I start?</b> to find an easier block.`,'hmm');
+    }
+    S.showMe = p.tries[k]>=2;
+  }
+  render();
+}
+// Guess-and-check for a bottom block (e.g. B2): build up with the guess and compare with a given block.
+function trialText(p,r,i,v,correct){
+  if(r!==p.R-1) return '';
+  const others=p.bottom.every((_,j)=>j===i || p.known[r][j]);
+  if(!others) return '';
+  const b=p.bottom.slice(); b[i]=v; const tv=buildVals(b);
+  let target=null;
+  for(let rr=0;rr<p.R-1 && !target;rr++) for(let ii=0;ii<=rr;ii++) if(p.given[rr][ii]){ target=[rr,ii]; break; }
+  if(!target) return '';
+  const lines=[];
+  for(let rr=p.R-2;rr>=target[0];rr--) for(let ii=0;ii<=rr;ii++) lines.push(`${tv[rr+1][ii]} + ${tv[rr+1][ii+1]} = ${tv[rr][ii]}`);
+  const got=tv[target[0]][target[1]], want=p.vals[target[0]][target[1]];
+  if(correct) return `<span class="eq">${lines.join(' · ')}</span>`;
+  const which = target[0]===0 ? 'top' : 'block';
+  const hint = got<want ? 'Try a bigger number.' : 'Try a smaller number.';
+  return `Let’s check ${v}: <span class="eq">${lines.join(' · ')}</span>The ${which} would be <b>${got}</b>, but it must be <b>${want}</b>. ${hint}`;
+}
+function showMe(){
+  const p=active(); if(!p||!S.sel) return;
+  const [r,i]=S.sel.split('-').map(Number);
+  enter(p.vals[r][i]);
+}
+function hint(){
+  const p=active(); if(!p) return;
+  clearMarks(); S.sel=null;
+  const g=[];
+  for(let r=0;r<p.R;r++) for(let i=0;i<=r;i++) if(!p.known[r][i] && relation(p.known,p.R,r,i)) g.push(key(r,i));
+  if(g.length){ S.glow=g; say(g.length===1?'This glowing block is ready. You know two blocks that touch it.':'The glowing blocks are ready. You know two blocks that touch each one.'); }
+  else if(!isDone(p)) say('No block is ready yet! Try a number in an empty bottom block. Then check the top.');
+  render();
+}
+function afterSolve(p){
+  if(!isDone(p)) return;
+  if(S.tab==='mix'){
+    const o=p.bottom.join(',');
+    const isNew=!S.mix.found.includes(o);
+    if(isNew) S.mix.found.push(o);
+    say(`Top: <b>${p.vals[0][0]}</b>! ${isNew?'A new order for our wall.':'We found that order already.'} Tap a bottom block to take it away and try a new order.`,'ok');
+  } else if(S.tab==='ch'){
+    const t=p.vals[0][0]; S.ch.tried++;
+    if(S.ch.big==null || t>S.ch.big.t) S.ch.big={t,b:p.bottom.slice()};
+    if(S.ch.small==null || t<S.ch.small.t) S.ch.small={t,b:p.bottom.slice()};
+    say(`Top: <b>${t}</b>. Can you make it bigger? Smaller? Tap a bottom block to change it.`,'ok');
+  } else {
+    say(`You filled every block! Top: <b>${p.vals[0][0]}</b>.`,'ok');
+  }
+}
+
+/* ================= Builders (Mix it up, Challenge) ================= */
+function builderCell(B){
+  if(B.p) return puzzleCell(B.p, {trace: S.tab==='ch' && S.ch.why});
+  const R=B.slots.length;
+  return (r,i)=>{
+    if(r===R-1) return B.slots[i]!=null ? {text:B.slots[i], state:'given', label:String(B.slots[i])} : {text:'', state:'slot', label:'empty spot'};
+    return {text:'', state:'ghost', label:'not ready yet'};
+  };
+}
+function placeTile(B,n){
+  const j=B.slots.indexOf(null); if(j<0) return;
+  B.slots[j]=n; clearMarks(); S.sel=null;
+  if(!B.slots.includes(null)){
+    B.p=makePuzzle('',B.slots,'bottom');
+    say('Now add up! Tap an empty block.');
+  } else say(`Put ${B.slots.length===3?'1, 2 and 3':'1, 2, 3 and 4'} in the bottom row.`);
+  render();
+}
+function tapBuilder(B,k){
+  const [r,i]=k.split('-').map(Number), R=B.slots.length;
+  if(r===R-1){
+    if(B.slots[i]==null) return;
+    B.slots[i]=null; B.p=null; S.sel=null; clearMarks(); if(S.tab==='ch') S.ch.why=false;
+    say('Pick a number to put back.'); render(); return;
+  }
+  if(B.p) tapBlock(k);
+}
+function fillAll(){
+  const p=active(); if(!p) return;
+  if(isDone(p)) return;
+  for(let r=0;r<p.R;r++) for(let i=0;i<=r;i++) p.known[r][i]=true;
+  S.sel=null; clearMarks(); afterSolve(p); render();
+}
+function setBuilder(B,b){
+  B.slots=b.slice(); B.p=makePuzzle('',b,'bottom');
+  for(const r of B.p.known) r.fill(true);
+}
+
+/* ================= Views ================= */
+const area=$('#area'), panel=$('#panel'), pad=$('#pad'), bubble=$('#bubble');
+
+function renderTabs(){
+  $('#tabs').innerHTML=TABS.map(t=>`<button role="tab" data-tab="${t.id}" aria-selected="${S.tab===t.id}"><span class="n">${t.n}</span><span class="lbl">${t.lbl}</span></button>`).join('');
+}
+
+/* ---- Warm-up: 7 + 8 ---- */
+function renderWarm(){
+  const W=S.warm;
+  let A=Array(10).fill(null), B=Array(10).fill(null);
+  for(let j=0;j<7;j++) A[j]='a';
+  for(let j=0;j<8;j++) B[j]='b';
+  let la='7', lb='8', eq='7 + 8 = ?';
+  if(W.mode==='double'){ eq='7 + 7 + 1'; la='7'; lb='7 + 1'; }
+  if(W.mode==='ten'){ A=['a','a','a','a','a','a','a','b','b','b']; B=['b','b','b','b','b',null,null,null,null,null]; la='10'; lb='5'; eq='10 + 5'; }
+  if(W.mode==='on'){ eq= W.counted===7 ? '8 … 15' : '8 …'; }
+  if(W.mode==='answer'){ eq='7 + 8 = 15'; }
+  const cell=(c,j,row)=>{
+    if(!c) return `<div class="cell"></div>`;
+    let cls='cell cube '+c, txt='';
+    if(W.mode==='double' && row==='B' && j===7) cls+=' extra';
+    if(W.mode==='on' && row==='A'){ if(j<W.counted){ cls+=' counted'; txt=9+j; } return `<button class="${cls}" data-count="${j}" aria-label="${txt||'tap to count on'}">${txt}</button>`; }
+    if(W.mode==='on' && row==='B' && j===7) txt='8';
+    return `<div class="${cls}">${txt}</div>`;
+  };
+  area.innerHTML=`<div class="frames">
+    <div class="eqn">${eq}</div>
+    <div class="frame" aria-label="${la} cubes">${A.map((c,j)=>cell(c,j,'A')).join('')}</div>
+    <div class="flabel">${la}</div>
+    <div class="frame" aria-label="${lb} cubes">${B.map((c,j)=>cell(c,j,'B')).join('')}</div>
+    <div class="flabel">${lb}</div>
+  </div>`;
+  panel.innerHTML=`
+    <h2>Number talk: 7 + 8</h2>
+    <p>How did you think about it? Tap a way to see it with cubes.</p>
+    <div class="row">
+      <button class="secondary" data-w="double" aria-pressed="${W.mode==='double'}">Doubles plus one</button>
+      <button class="secondary" data-w="ten" aria-pressed="${W.mode==='ten'}">Make ten</button>
+      <button class="secondary" data-w="on" aria-pressed="${W.mode==='on'}">Count on</button>
+    </div>
+    <div class="row"><button class="primary" data-w="answer">Show the answer</button></div>
+    <p class="small">Every way lands on the same number. Then start building pyramids.</p>`;
+  const msgs={
+    double:'<span class="eq">7 + 7 = 14</span>One more is <b>15</b>.',
+    ten:'Move 3 cubes up to fill the ten.<span class="eq">7 + 3 = 10 &nbsp;·&nbsp; 10 + 5 = 15</span>',
+    on: W.counted===7 ? 'Start at 8 and count on 7 more: <b>15</b>!' : 'Start at <b>8</b>. Tap the red cubes to count on.',
+    answer:'<span class="eq">7 + 8 = 15</span>Doubles plus one, make ten and counting on all give 15.'
+  };
+  bubble.className='bubble'+(W.mode==='answer'||(W.mode==='on'&&W.counted===7)?' ok':'');
+  bubble.innerHTML=W.mode?msgs[W.mode]:'';
+  pad.hidden=true;
+}
+
+/* ---- Build up / Missing blocks ---- */
+function renderPuzzleTab(which){
+  const T=S[which], p=T.list[T.idx];
+  area.innerHTML=pyrHTML({R:p.R, cell:puzzleCell(p), tappable:true, aria:`Pyramid ${p.label}`});
+  const intro = which==='build'
+    ? {h:'Build up the pyramid', p:'Each block is the sum of the two blocks under it. Tap an empty block.'}
+    : {h:'Some blocks are missing', p:'Which block do you know for sure? Start there.'};
+  panel.innerHTML=`
+    <h2>${intro.h}</h2>
+    <p>${intro.p}</p>
+    <div class="chooser" aria-label="Pick a pyramid">${T.list.map((q,j)=>`<button data-pick="${j}" aria-pressed="${j===T.idx}" class="${isDone(q)?'done':''}">${q.label}</button>`).join('')}</div>
+    <div class="row">
+      <button class="secondary" id="hintBtn">Where can I start?</button>
+      ${S.showMe?'<button class="secondary" id="showMeBtn">Show me</button>':''}
+      ${isDone(p) && T.idx<T.list.length-1 ? '<button class="primary" id="nextBtn">Next pyramid</button>':''}
+    </div>
+    <label class="toggle"><input type="checkbox" id="cubeTog" ${S.cubes?'checked':''}> Show cubes</label>
+    <p class="small">${which==='build'?'Start and A3 are extra pyramids. A1 and A2 match the handout.':'B1, B2 and B3 match the handout. B2 has no easy block: guess, build up and check the top.'}</p>`;
+  renderMsgAndPad(p);
+}
+function renderMsgAndPad(p){
+  if(!S.msg){
+    say(p && !isDone(p) ? 'Tap an empty block.' : '');
+  }
+  bubble.className='bubble '+(S.msg?S.msg.tone:'');
+  bubble.innerHTML=S.msg?S.msg.html:'';
+  pad.hidden=!(p && S.sel);
+}
+
+/* ---- Mix it up (Part C) ---- */
+function renderMix(){
+  const B=S.mix;
+  area.innerHTML=pyrHTML({R:3, cell:builderCell(B), tappable:true, aria:'Your pyramid'})+
+    `<div class="tiles" style="width:100%">${[1,2,3].map(n=>`<button class="tile" data-tile="${n}" ${B.slots.includes(n)?'disabled':''} aria-label="Place ${n}">${n}</button>`).join('')}</div>`;
+  const all=perms([1,2,3]);
+  panel.innerHTML=`
+    <h2>Mix it up: 1, 2, 3</h2>
+    <p>Put 1, 2 and 3 in the bottom row. Find the top. Then try a new order!</p>
+    <div class="row">
+      ${B.p && !isDone(B.p)?'<button class="secondary" id="hintBtn">Where can I start?</button><button class="secondary" id="fillBtn">Fill it in for us</button>':''}
+      ${S.showMe?'<button class="secondary" id="showMeBtn">Show me</button>':''}
+    </div>
+    <div class="tally"><div class="stat"><b>${B.found.length} of 6</b><span>orders found</span></div></div>
+    <div class="area" style="min-height:0; justify-content:flex-start; gap:10px">${all.map(o=>{
+      const s=o.join(','), got=B.found.includes(s);
+      return got ? `<div class="fig">${pyrHTML({R:3,size:'mid',max:'2.3rem',cell:(r,i)=>({text:buildVals(o)[r][i],state:r===2?'given':'filled'})})}</div>`
+                 : `<div class="fig">${pyrHTML({R:3,size:'mid',max:'2.3rem',cell:()=>({text:'',state:'ghost',label:'not found yet'})})}</div>`;
+    }).join('')}</div>`;
+  if(!B.p && !S.msg) say('Tap 1, 2 and 3 to fill the bottom row.');
+  renderMsgAndPad(B.p);
+}
+
+/* ---- Detective questions ---- */
+const QS={
+  1:{t:'When is the top the biggest?', a:[['Show all 6 orders','all'],['Sort by the top','sort']]},
+  2:{t:'Why does the middle number matter most?', a:[['Follow the cubes','trace']]},
+  3:{t:'Does the order of the bottom row matter?', a:[['Try 1, 2, 3 and 2, 1, 3','diff'],['Find two with the same top','same']]},
+  4:{t:'When some blocks are missing, where do you start?', a:[['Show the first step','step'],['Next step','next']]}
+};
+function fig(b,opts={}){
+  const v=buildVals(b), R=b.length, co=coeffs(R);
+  return `<div class="fig ${opts.best?'best':''}">${pyrHTML({R,size:'mid',max:opts.max||'3.4rem',cell:(r,i)=>({
+    text:v[r][i], state:opts.trace?'trace':(r===R-1?'given':'filled'),
+    mark: opts.markMid && r===R-1 && i===1,
+    dots: opts.trace ? co[r][i].map((m,j)=>[m*b[j],j]) : null
+  })})}<div class="cap">Top ${v[0][0]}${opts.sub?`<small>${opts.sub}</small>`:''}</div></div>`;
+}
+function renderQ(){
+  const Q=S.q, q=QS[Q.n];
+  panel.innerHTML=`
+    <div class="qnav">${[1,2,3,4].map(n=>`<button data-q="${n}" aria-pressed="${Q.n===n}" aria-label="Question ${n}">${n}</button>`).join('')}</div>
+    <h2>${q.t}</h2>
+    ${Q.n===2?`<div class="chooser" aria-label="Pick an order">${perms([1,2,3]).map(o=>`<button data-order="${o.join(',')}" aria-pressed="${o.join(',')===Q.order.join(',')}">${o.join(' ')}</button>`).join('')}</div>`:''}
+    <div class="row">${q.a.map(([l,id],j)=>`<button class="${j===0?'primary':'secondary'}" data-ev="${id}" ${id==='next'&&!(Q.ev==='steps')?'disabled':''}>${l}</button>`).join('')}</div>
+    <p class="small">Talk it over first. Then tap a button to put the evidence up.</p>`;
+  let html='', msg='';
+  const all=perms([1,2,3]);
+  if(Q.ev==='all'){
+    html=all.map(o=>fig(o,{markMid:true})).join('');
+    msg='Six orders. Look at the middle bottom block (circled). What do you notice?';
+  } else if(Q.ev==='sort'){
+    const s=all.slice().sort((a,b)=>topOf(a)-topOf(b) || a.join('').localeCompare(b.join('')));
+    html=s.map(o=>fig(o,{markMid:true,best:o[1]===3,sub:`middle ${o[1]}`})).join('');
+    msg='Middle 1 → top 7. Middle 2 → top 8. Middle 3 → top <b>9</b>.<span class="eq">The biggest top has the biggest number in the middle.</span>';
+  } else if(Q.ev==='trace'){
+    const o=Q.order, v=buildVals(o);
+    html=fig(o,{trace:true,max:'7rem'});
+    html+=`<div class="legend" style="width:100%">${o.map((n,j)=>`<span><i style="background:var(--c${j})"></i>${['left','middle','right'][j]} ${n}</span>`).join('')}</div>`;
+    msg=`The middle <b>${o[1]}</b> goes up both sides, so the top counts it <b>two times</b>.<span class="eq">${o[0]} + ${o[1]} + ${o[1]} + ${o[2]} = ${v[0][0]}</span>`;
+  } else if(Q.ev==='diff'){
+    html=fig([1,2,3])+fig([2,1,3]);
+    msg=`Same numbers, different tops: <b>${topOf([1,2,3])}</b> and <b>${topOf([2,1,3])}</b>. The order matters!`;
+  } else if(Q.ev==='same'){
+    html=fig([1,2,3],{markMid:true})+fig([3,2,1],{markMid:true});
+    msg=`Flip it around: the middle stays 2, so the top stays <b>${topOf([3,2,1])}</b>.`;
+  } else if(Q.ev==='steps'){
+    const p=makePuzzle('B1',[2,4,4],['0-0','1-0','2-0']);
+    const steps=solveSteps(p), shown=steps.slice(0,Q.step);
+    shown.forEach(s=>p.known[s.r][s.i]=true);
+    const cur=shown[shown.length-1];
+    html=pyrHTML({R:3,cell:(r,i)=>{
+      const k=key(r,i), isCur=cur && cur.r===r && cur.i===i;
+      if(!p.known[r][i]) return {text:'<span class="q">?</span>',state:'empty'};
+      return {text:p.vals[r][i], state:p.given[r][i]?'given':'filled', mark:isCur};
+    }, aria:'Pyramid B1'});
+    if(!cur) msg='Look for a block where you already know two blocks that touch it.';
+    else{
+      const rl=cur.rel, val=p.vals[cur.r][cur.i];
+      msg = rl.type==='sum'
+        ? `Step ${Q.step}: under it are ${V(p,rl.a)} and ${V(p,rl.b)}.<span class="eq">${V(p,rl.a)} + ${V(p,rl.b)} = ${val}</span>`
+        : `Step ${Q.step}: the block above is ${V(p,rl.whole)} and its neighbor is ${V(p,rl.part)}.<span class="eq">${V(p,rl.part)} and ${val} make ${V(p,rl.whole)}</span>`;
+      if(Q.step===steps.length) msg+='Done! One step at a time.';
+    }
+  }
+  area.innerHTML=html||`<div class="eqn" style="font-size:clamp(80px,16cqi,160px); opacity:.18">?</div>`;
+  bubble.className='bubble '+(msg?'ok':'');
+  bubble.innerHTML=msg;
+  pad.hidden=true;
+  const nb=panel.querySelector('[data-ev="next"]');
+  if(nb && Q.ev==='steps'){ const total=solveSteps(makePuzzle('B1',[2,4,4],['0-0','1-0','2-0'])).length; nb.disabled=Q.step>=total; }
+}
+
+/* ---- Challenge: four in a row ---- */
+function renderCh(){
+  const C=S.ch;
+  area.innerHTML=pyrHTML({R:4, cell:builderCell(C), tappable:true, aria:'Four-row pyramid', max:'8rem'})+
+    `<div class="tiles" style="width:100%">${[1,2,3,4].map(n=>`<button class="tile" data-tile="${n}" ${C.slots.includes(n)?'disabled':''} aria-label="Place ${n}">${n}</button>`).join('')}</div>`+
+    (C.why && C.p ? `<div class="legend" style="width:100%">${C.p.bottom.map((n,j)=>`<span><i style="background:var(--c${j})"></i>${n}</span>`).join('')}</div>`:'');
+  const best=bestWorst();
+  panel.innerHTML=`
+    <h2>Challenge: 1, 2, 3, 4</h2>
+    <p>Four blocks on the bottom. Make the <b>biggest</b> top you can. Then the <b>smallest</b>.</p>
+    <div class="tally">
+      <div class="stat"><b>${C.big && (!C.small || C.small.t!==C.big.t || C.tried<2) ? C.big.t : (C.big?C.big.t:'–')}</b><span>biggest so far</span></div>
+      <div class="stat"><b>${C.small && C.big && C.small.t!==C.big.t ? C.small.t : '–'}</b><span>smallest so far</span></div>
+    </div>
+    <div class="row">
+      ${C.p && !isDone(C.p)?'<button class="secondary" id="fillBtn">Fill it in for us</button>':''}
+      ${S.showMe?'<button class="secondary" id="showMeBtn">Show me</button>':''}
+    </div>
+    <div class="row">
+      <button class="secondary" data-cx="big">Show the biggest</button>
+      <button class="secondary" data-cx="small">Show the smallest</button>
+      <button class="primary" data-cx="why" ${C.p&&isDone(C.p)?'':'disabled'}>Why? Follow the cubes</button>
+    </div>
+    <p class="small">The biggest possible top is ${best.max}, the smallest is ${best.min}.</p>`;
+  panel.querySelector('.small').hidden = !(C.revealed);
+  if(!C.p && !S.msg) say('Tap 1, 2, 3 and 4 to fill the bottom row.');
+  renderMsgAndPad(C.p);
+}
+function bestWorst(){
+  const all=perms([1,2,3,4]).map(b=>({b,t:topOf(b)}));
+  const max=Math.max(...all.map(x=>x.t)), min=Math.min(...all.map(x=>x.t));
+  return {max,min};
+}
+
+/* ================= Main render ================= */
+function render(){
+  renderTabs();
+  if(S.tab==='warm') renderWarm();
+  else if(S.tab==='build'||S.tab==='miss') renderPuzzleTab(S.tab);
+  else if(S.tab==='mix') renderMix();
+  else if(S.tab==='q') renderQ();
+  else if(S.tab==='ch') renderCh();
+  S.pop=null; S.shake=null;
+}
+
+pad.innerHTML=Array.from({length:21},(_,n)=>`<button data-num="${n}">${n}</button>`).join('');
+
+/* ================= Events ================= */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,input'); if(!t) return;
+  const d=t.dataset;
+  if(d.tab){ S.tab=d.tab; S.sel=null; clearMarks(); S.msg=null; render(); return; }
+  if(d.num!=null && t.closest('#pad')){ enter(+d.num); return; }
+  if(d.k){
+    if(S.tab==='mix') return tapBuilder(S.mix,d.k);
+    if(S.tab==='ch') return tapBuilder(S.ch,d.k);
+    return tapBlock(d.k);
+  }
+  if(d.tile){ placeTile(S.tab==='ch'?S.ch:S.mix, +d.tile); return; }
+  if(d.pick!=null){ const T=S[S.tab]; T.idx=+d.pick; S.sel=null; clearMarks(); S.msg=null; render(); return; }
+  if(t.id==='hintBtn') return hint();
+  if(t.id==='showMeBtn') return showMe();
+  if(t.id==='fillBtn') return fillAll();
+  if(t.id==='nextBtn'){ const T=S[S.tab]; T.idx=Math.min(T.idx+1,T.list.length-1); S.sel=null; clearMarks(); S.msg=null; render(); return; }
+  if(t.id==='cubeTog'){ S.cubes=t.checked; render(); return; }
+  if(d.w){ S.warm.mode=d.w; S.warm.counted=0; render(); return; }
+  if(d.count!=null){ const j=+d.count; if(j===S.warm.counted){ S.warm.counted++; render(); } return; }
+  if(d.q){ S.q.n=+d.q; S.q.ev=null; S.q.step=0; render(); return; }
+  if(d.order){ S.q.order=d.order.split(',').map(Number); if(S.q.ev==='trace') render(); else { S.q.ev='trace'; render(); } return; }
+  if(d.ev){
+    if(d.ev==='step'){ S.q.ev='steps'; S.q.step=1; }
+    else if(d.ev==='next'){ S.q.step++; }
+    else S.q.ev=d.ev;
+    render(); return;
+  }
+  if(d.cx){
+    const C=S.ch;
+    if(d.cx==='why'){ C.why=!C.why; if(C.why) { const b=C.p.bottom; say(`The two inside numbers go up 3 times each. The ends go up once.<span class="eq">${b[0]} + ${b[1]} + ${b[1]} + ${b[1]} + ${b[2]} + ${b[2]} + ${b[2]} + ${b[3]} = ${C.p.vals[0][0]}</span>`,'ok'); } else say(''); render(); return; }
+    const all=perms([1,2,3,4]).map(b=>({b,t:topOf(b)}));
+    const want=d.cx==='big'?Math.max(...all.map(x=>x.t)):Math.min(...all.map(x=>x.t));
+    const pick=all.find(x=>x.t===want);
+    setBuilder(C,pick.b); C.revealed=true; C.why=false; clearMarks(); S.sel=null;
+    if(C.big==null||want>C.big.t) C.big={t:want,b:pick.b};
+    if(C.small==null||want<C.small.t) C.small={t:want,b:pick.b};
+    const others=all.filter(x=>x.t===want).map(x=>x.b.join(', '));
+    say(`${d.cx==='big'?'Biggest':'Smallest'} top: <b>${want}</b>. It works with ${others.join(' or ')}. Look at the two inside numbers!`,'ok');
+    render(); return;
+  }
+});
+$('#resetBtn').onclick=()=>{ S=freshState(); render(); };
+$('#fsBtn').onclick=()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else { const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); if(r&&r.catch) r.catch(()=>{}); } }catch(err){} };
+document.addEventListener('fullscreenchange',()=>{ $('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen'; });
+document.addEventListener('keydown',e=>{
+  if(!pad.hidden && /^[0-9]$/.test(e.key)){
+    // two-digit typing: wait briefly for a second digit
+    const d=+e.key;
+    if(window.__np && Date.now()-window.__np.t<900){ const v=window.__np.v*10+d; window.__np=null; if(v<=20) enter(v); return; }
+    if(d>=3){ window.__np=null; enter(d); return; }
+    window.__np={v:d,t:Date.now()};
+    setTimeout(()=>{ if(window.__np && window.__np.v===d){ window.__np=null; enter(d); } },900);
+  }
+});
+
+render();
+})();
+</script>
+
+</body></html>

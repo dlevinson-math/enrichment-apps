@@ -1,0 +1,703 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Product Detectives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: an evidence board. Work surface on the left (number map / tiles), case notes on the right. Numbers are pinned case cards; arrays are built from yellow square tiles. */
+:root{
+  --bg:#E8ECF1; --surface:#FFFFFF; --ink:#18202E; --muted:#566074; --line:#CBD2DC; --raise:#F4F6F9;
+  --tile:#F0B429; --tile-edge:#B47F0B;
+  --pin:#C8372D; --pin-soft:#F9E1DE;
+  --loner:#0B7C84; --loner-soft:#D8F0F1;
+  --square:#6A4CC6; --square-soft:#E8E2FA;
+  --ok:#1D7F46; --ok-soft:#DCF1E4; --warn-soft:#FCEFD3;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151C; --surface:#1A2029; --ink:#ECEEF2; --muted:#A3ABBA; --line:#323B4A; --raise:#222935;
+    --tile:#E9AA25; --tile-edge:#8E6206;
+    --pin:#FF6F61; --pin-soft:#3D2220;
+    --loner:#3CC3CB; --loner-soft:#163437;
+    --square:#A88DFF; --square-soft:#2A2442;
+    --ok:#4FD08A; --ok-soft:#173326; --warn-soft:#3A3019;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151C; --surface:#1A2029; --ink:#ECEEF2; --muted:#A3ABBA; --line:#323B4A; --raise:#222935;
+  --tile:#E9AA25; --tile-edge:#8E6206;
+  --pin:#FF6F61; --pin-soft:#3D2220;
+  --loner:#3CC3CB; --loner-soft:#163437;
+  --square:#A88DFF; --square-soft:#2A2442;
+  --ok:#4FD08A; --ok-soft:#173326; --warn-soft:#3A3019;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--pin); outline-offset:2px}
+.wrap{padding-inline:clamp(16px,2.6vw,36px); padding-block:14px 32px; max-width:1500px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px}
+.ttl{min-width:0}
+.eyebrow{font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,50px); line-height:1; margin:4px 0 0; letter-spacing:-.01em; text-wrap:balance}
+h1 .stamp{display:inline-block; font-size:.36em; vertical-align:middle; border:2.5px solid var(--pin); color:var(--pin); padding:.15em .5em; border-radius:6px; transform:rotate(-4deg); margin-left:.4em; letter-spacing:.06em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--surface); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line)}
+nav.tabs button{border:0; background:none; padding:12px 14px 10px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,22px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--pin)}
+nav.tabs .n{display:inline-grid; place-items:center; width:1.5em; height:1.5em; border-radius:50%; background:var(--raise); font-size:.8em; margin-right:6px}
+nav.tabs button[aria-selected="true"] .n{background:var(--pin); color:#fff}
+
+.view{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start}
+.view[hidden]{display:none}
+.col{display:flex; flex-direction:column; gap:14px; min-width:0}
+.lead{font-size:clamp(18px,1.5vw,22px); margin:0; max-width:36em}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+
+/* buttons */
+.primary{border:0; background:var(--pin); color:#fff; font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--surface); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+/* number pads / map */
+.pad{display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px}
+.nb{position:relative; aspect-ratio:1; max-width:100%; border:2px solid var(--line); background:var(--surface); border-radius:10px; font-family:var(--display); font-weight:600; font-size:clamp(17px,2vw,28px); display:flex; align-items:center; justify-content:center; padding:0; font-variant-numeric:tabular-nums; transition:transform .12s, background-color .2s, border-color .2s}
+.nb:hover{border-color:var(--ink)}
+.nb.sel{border-color:var(--pin); box-shadow:0 0 0 3px var(--pin) inset}
+.nb.out{opacity:.35; text-decoration:line-through}
+.nb.match{background:var(--ok-soft); border-color:var(--ok)}
+.nb.lit{background:var(--warn-soft); border-color:var(--tile-edge)}
+.pad.dimmed .nb:not(.lit):not(.match){opacity:.3}
+.nb .meta{position:absolute; left:0; right:0; bottom:6%; display:flex; justify-content:center; gap:2px}
+.nb .meta i{width:clamp(4px,.5vw,7px); height:clamp(4px,.5vw,7px); background:var(--tile); border:1px solid var(--tile-edge); border-radius:1px}
+.nb .tag{position:absolute; top:4%; right:6%; font-family:var(--body); font-size:clamp(9px,.75vw,12px); font-weight:700; letter-spacing:.03em}
+.nb.filed{border-style:solid}
+.nb.k-loner{background:var(--loner-soft); border-color:var(--loner)}
+.nb.k-loner .tag{color:var(--loner)}
+.nb.k-square{background:var(--square-soft); border-color:var(--square)}
+.nb.k-square .tag{color:var(--square)}
+.nb.k-plain{background:var(--raise); border-color:var(--ink)}
+.nb.k-plain .tag{color:var(--muted)}
+.nb.lead-star::after{content:"★"; position:absolute; top:2%; left:7%; font-size:clamp(11px,1vw,16px); color:var(--pin)}
+
+.legend{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:15px; color:var(--muted); align-items:center}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend b{width:16px; height:16px; border-radius:4px; border:2px solid; display:inline-block}
+
+/* case files */
+.cases{display:flex; gap:8px; flex-wrap:wrap}
+.cases button{border:2px solid var(--line); background:var(--surface); border-radius:12px; padding:10px 16px; font-weight:700; min-height:52px; font-size:17px}
+.cases button[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.cases button .done{color:var(--ok); margin-left:4px}
+.cases button[aria-pressed="true"] .done{color:var(--ok)}
+.file{background:var(--surface); border:2px solid var(--line); border-radius:16px; padding:18px 20px; display:flex; flex-direction:column; gap:12px; position:relative}
+.file h2{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px)}
+.clues{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.clues li{display:grid; grid-template-columns:36px minmax(0,1fr); gap:10px; align-items:start; font-size:clamp(18px,1.55vw,23px)}
+.clues .mk{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--raise); font-weight:700; font-size:18px; color:var(--muted)}
+.clues li.yes .mk{background:var(--ok); color:#fff}
+.clues li.no .mk{background:var(--pin); color:#fff}
+.clues .why{display:block; font-size:clamp(15px,1.2vw,18px); color:var(--muted); margin-top:2px}
+.clues li.no .why{color:var(--ink)}
+.verdict{margin:0; padding:12px 16px; border-radius:12px; font-size:clamp(17px,1.4vw,21px)}
+.verdict:empty{display:none}
+.verdict.good{background:var(--ok-soft)}
+.verdict.try{background:var(--warn-soft)}
+.verdict.info{background:var(--raise)}
+.builder{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.builder label{display:flex; flex-direction:column; gap:4px; font-size:15px; color:var(--muted); font-weight:700}
+.builder select{min-height:48px; border:2px solid var(--line); border-radius:10px; background:var(--surface); padding:6px 10px; font-size:17px; color:var(--ink)}
+
+/* array builder */
+.bhead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.bhead h2{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,2.6vw,38px)}
+.stepper{display:inline-flex; align-items:center; border:2px solid var(--ink); border-radius:14px; overflow:hidden; background:var(--surface)}
+.stepper button{border:0; background:none; width:52px; height:52px; font-size:26px; font-weight:700}
+.stepper output{min-width:3.8em; text-align:center; font-family:var(--display); font-weight:800; font-size:24px; font-variant-numeric:tabular-nums}
+.stepper output small{display:block; font-family:var(--body); font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-top:-4px}
+.stage{background:var(--raise); border:2px dashed var(--line); border-radius:14px; height:clamp(200px,36vh,360px); display:flex; align-items:center; justify-content:center; padding:12px; overflow:hidden}
+.tiles{display:grid}
+.t{background:var(--tile); border:1.5px solid var(--tile-edge); border-radius:3px}
+.t.x{background:var(--pin-soft); border:2px dashed var(--pin)}
+.t.gap{visibility:hidden}
+.t.loose{opacity:.85}
+.tiles.pop .t{animation:drop .28s ease-out both}
+@keyframes drop{from{transform:translateY(-10px) scale(.6); opacity:0}to{transform:none; opacity:1}}
+.trail{display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:15px; color:var(--muted); min-height:34px}
+.trail span.c{padding:4px 10px; border-radius:20px; border:2px solid var(--line); background:var(--surface); color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums}
+.trail span.c.rect{border-color:var(--ok); background:var(--ok-soft)}
+.trail span.c.left{border-color:var(--pin); background:var(--pin-soft)}
+.trail span.c.turn{border-style:dashed}
+.found{display:flex; flex-wrap:wrap; gap:8px; min-height:44px; align-items:center}
+.found .chip{font-family:var(--display); font-weight:600; font-size:20px; padding:6px 14px; border-radius:10px; background:var(--surface); border:2px solid var(--tile-edge)}
+.found .chip.sq{border-color:var(--square); color:var(--square)}
+.progress{font-size:16px; color:var(--muted)}
+.progress b{color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* evidence */
+.viz{background:var(--surface); border:2px solid var(--line); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.viz h3{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,23px)}
+.chart{display:grid; gap:2px; height:clamp(200px,34vh,320px); align-items:end; padding-top:6px}
+.colm{border:0; background:none; padding:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:stretch; gap:2px; min-width:0; transition:opacity .2s}
+.colm .blk{height:var(--bh); background:var(--tile); border:1px solid var(--tile-edge); border-radius:2px}
+.colm .lab{font-size:clamp(9px,.85vw,13px); color:var(--muted); text-align:center; height:1.4em; line-height:1.4em; font-variant-numeric:tabular-nums; overflow:visible; white-space:nowrap}
+.chart.focus .colm:not(.hl){opacity:.22}
+.colm.hl .blk{background:var(--hc,var(--pin)); border-color:var(--hc,var(--pin))}
+.colm.hl .lab{color:var(--ink); font-weight:700}
+.colm.odd .blk{background:var(--loner); border-color:var(--loner)}
+.axis{display:flex; justify-content:space-between; font-size:14px; color:var(--muted)}
+.vinfo{min-height:1.5em; font-size:clamp(16px,1.3vw,19px)}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--surface); font-weight:700; font-size:19px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(21px,1.9vw,28px); line-height:1.25; margin:0; text-wrap:balance}
+.qresult{margin:0; padding:14px 18px; background:var(--warn-soft); border-radius:12px; font-size:clamp(17px,1.4vw,21px)}
+.qresult:empty{display:none}
+.tester{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.tester input{width:6em; min-height:52px; border:2px solid var(--ink); border-radius:12px; background:var(--surface); font-size:22px; font-family:var(--display); font-weight:600; padding:4px 12px}
+svg text{fill:var(--ink); font-family:var(--display); font-weight:600}
+svg .arc{fill:none; stroke-width:3}
+.foot{font-size:14px; color:var(--muted); margin:0}
+
+@media (max-width: 900px){
+  .view{grid-template-columns:1fr}
+  .stage{height:clamp(180px,40vh,300px)}
+}
+@media (max-width: 480px){
+  body{font-size:17px}
+  nav.tabs button{font-size:16px; padding:10px 6px 8px}
+  nav.tabs .lg{display:none}
+  .pad{gap:4px}
+  .nb{border-radius:7px}
+  .nb .tag{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="ttl">
+      <div class="eyebrow">Grade 3 · Week 5 · Unit 1 checkpoint</div>
+      <h1>Product Detectives<span class="stamp">Case open</span></h1>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tab-cases" aria-selected="true"><span class="n">1</span>Mystery Cases</button>
+    <button role="tab" id="tab-map" aria-selected="false"><span class="n">2</span><span class="lg">Build the </span>Product Map</button>
+    <button role="tab" id="tab-ev" aria-selected="false"><span class="n">3</span><span class="lg">Read the </span>Evidence</button>
+  </nav>
+
+  <!-- 1: Mystery cases -->
+  <section class="view" id="view-cases">
+    <div class="col">
+      <div class="cases" id="caseBtns" role="group" aria-label="Case files"></div>
+      <div class="file" id="caseFile">
+        <h2 id="caseTitle"></h2>
+        <div id="ownBuilder" hidden>
+          <p class="small muted" style="margin:0 0 8px">Pick clues. The suspects light up on the board. A fair mystery has exactly one answer.</p>
+          <div class="builder" id="builder"></div>
+        </div>
+        <ul class="clues" id="clueList"></ul>
+        <p class="verdict" id="verdict" aria-live="polite"></p>
+        <div class="row" id="caseActions"></div>
+      </div>
+    </div>
+    <div class="col">
+      <p class="lead" id="padLead">Tap a suspect to test it against every clue.</p>
+      <div class="pad" id="suspectPad" aria-label="Suspects 1 to 40"></div>
+    </div>
+  </section>
+
+  <!-- 2: Product Map -->
+  <section class="view" id="view-map" hidden>
+    <div class="col">
+      <p class="lead">The class Product Map, 1 to 40. Tap a number, find <b>every</b> array, then file it.</p>
+      <div class="pad" id="mapPad" aria-label="Product Map 1 to 40"></div>
+      <div class="legend">
+        <span><b style="border-color:var(--loner);background:var(--loner-soft)"></b>Loner: one array</span>
+        <span><b style="border-color:var(--square);background:var(--square-soft)"></b>Square: has a middle array</span>
+        <span><b style="border-color:var(--ink);background:var(--raise)"></b>Filed</span>
+        <span style="color:var(--pin)">★ most arrays so far</span>
+      </div>
+      <div class="row">
+        <span class="progress">Filed: <b id="filedCount">0</b> of 40</span>
+        <button class="secondary" id="fillAll" style="margin-left:auto">Fill in the whole map</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="bhead"><h2 id="bTitle">12 tiles</h2><span class="progress" id="bProg"></span></div>
+      <div class="row">
+        <div class="stepper" aria-label="Number of rows">
+          <button id="rowsDown" aria-label="Fewer rows">−</button>
+          <output id="rowsOut">1<small>rows</small></output>
+          <button id="rowsUp" aria-label="More rows">+</button>
+        </div>
+        <button class="primary" id="buildBtn">Build it</button>
+      </div>
+      <div class="stage" id="stage"><div class="tiles" id="tiles"></div></div>
+      <p class="verdict info" id="bMsg" aria-live="polite"></p>
+      <div class="trail" id="trail"></div>
+      <div>
+        <div class="small muted" style="font-weight:700;margin-bottom:6px">ARRAYS FOUND</div>
+        <div class="found" id="foundList"></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="closeCase">I found them all</button>
+        <button class="secondary" id="revealCase">Show every array</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: Evidence -->
+  <section class="view" id="view-ev" hidden>
+    <div class="viz">
+      <h3 id="vTitle">How many arrays? Every number from 1 to 40</h3>
+      <div id="vBody"></div>
+      <div class="vinfo" id="vInfo" aria-live="polite">Tap a column to see its arrays.</div>
+    </div>
+    <div class="col">
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div class="qresult" id="qresult" aria-live="polite"></div>
+      <p class="foot">Talk it over first. Then tap a button to put the evidence on the board.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Math ---------- */
+const pairs = n => { const r=[]; for(let a=1;a*a<=n;a++) if(n%a===0) r.push([a,n/a]); return r; };
+const ways = n => pairs(n).length;
+const isSq = n => { const r=Math.round(Math.sqrt(n)); return r*r===n; };
+const factors = n => { const r=[]; for(let a=1;a<=n;a++) if(n%a===0) r.push(a); return r; };
+const px = p => `${p[0]} × ${p[1]}`;
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+const range = (a,b) => Array.from({length:b-a+1},(_,i)=>a+i);
+const plural = (k,w,ws) => `${k} ${k===1?w:(ws||w+'s')}`;
+const MAX = 40;
+const kind = n => isSq(n) ? 'square' : ways(n)===1 ? 'loner' : 'plain';
+
+/* ---------- Clues ---------- */
+const CL = {
+  square:(t)=>({text:t||'I am a square number.', test:isSq,
+    why:n=>{ const r=Math.floor(Math.sqrt(n)); return isSq(n) ? `${n} = ${r} × ${r}. It makes a square array.` : `${r} × ${r} = ${r*r} and ${r+1} × ${r+1} = ${(r+1)*(r+1)}. ${n} is in between, so it is not a square.`; }}),
+  notSquare:()=>({text:'I am not a square number.', test:n=>!isSq(n),
+    why:n=>{ const r=Math.floor(Math.sqrt(n)); return isSq(n) ? `${n} = ${r} × ${r}, so it is a square.` : `No number times itself makes ${n}.`; }}),
+  even:(t)=>({text:t||'I am even.', test:n=>n%2===0,
+    why:n=> n%2===0 ? `${n} = 2 × ${n/2}. Two equal rows work, so it is even.` : `${n} in 2 rows: ${(n-1)/2} in each row and 1 left over. It is odd.`}),
+  odd:()=>({text:'I am odd.', test:n=>n%2===1,
+    why:n=> n%2===1 ? `${n} in 2 rows leaves 1 over, so it is odd.` : `${n} = 2 × ${n/2}, so it is even.`}),
+  lt:(k,t)=>({text:t||`I am less than ${k}.`, test:n=>n<k, why:n=> n<k ? `${n} is less than ${k}.` : `${n} is not less than ${k}.`}),
+  gt:(k)=>({text:`I am more than ${k}.`, test:n=>n>k, why:n=> n>k ? `${n} is more than ${k}.` : `${n} is not more than ${k}.`}),
+  between:(a,b,t)=>({text:t||`I am between ${a} and ${b}.`, test:n=>n>a&&n<b, why:n=> (n>a&&n<b) ? `${n} is between ${a} and ${b}.` : `${n} is not between ${a} and ${b}.`}),
+  ways:(k,t)=>({text:t||`I can be built exactly ${plural(k,'way')}.`, test:n=>ways(n)===k,
+    why:n=>{ const p=pairs(n); return `${n} can be built ${plural(p.length,'way')}: ${p.map(px).join(', ')}.`; }}),
+  rows:(r,t)=>({text:t||`One of my arrays has ${r} rows.`, test:n=>n%r===0&&r<=n,
+    why:n=> r>n ? `${n} tiles can’t even fill ${r} rows.` : n%r===0 ? `${r} rows of ${n/r}: ${r} × ${n/r} = ${n}.` : `${n} in ${r} rows: ${Math.floor(n/r)} in each row and ${n%r} left over.`}),
+  notRows:(r,t)=>({text:t||`None of my arrays has ${r} rows.`, test:n=>!(n%r===0&&r<=n),
+    why:n=> (n%r===0&&r<=n) ? `${n} = ${r} × ${n/r}, so ${n} does have a ${r}-row array.` : r>n ? `${n} tiles can’t fill ${r} rows.` : `${n} in ${r} rows leaves ${n%r} over. No ${r}-row array.`}),
+};
+
+const CASES = [
+  {id:'1', title:'Case 1', clues:[CL.square(), CL.even(), CL.lt(20)]},
+  {id:'2', title:'Case 2', clues:[CL.ways(1,'I can be built as a rectangle exactly ONE way.'), CL.between(20,25)]},
+  {id:'3', title:'Case 3', clues:[CL.rows(3,'My arrays include 3 rows…'), CL.rows(4,'…and 4 rows…'), CL.notRows(5,'…but not 5 rows.'), CL.lt(15)]},
+  {id:'own', title:'Your own case', own:true, clues:[]},
+];
+const OWN_OPTS = [
+  {k:'par', label:'Even or odd', opts:[['','Any'],['even','I am even'],['odd','I am odd']]},
+  {k:'sq', label:'Square?', opts:[['','Any'],['yes','I am a square'],['no','I am not a square']]},
+  {k:'ways', label:'Ways to build me', opts:[['','Any'],...[1,2,3,4,5].map(k=>[String(k),`Exactly ${plural(k,'way')}`])]},
+  {k:'gt', label:'More than', opts:[['','No clue'],...range(1,39).map(k=>[String(k),`More than ${k}`])]},
+  {k:'lt', label:'Less than', opts:[['','No clue'],...range(2,40).map(k=>[String(k),`Less than ${k}`])]},
+  {k:'has', label:'Has an array with…', opts:[['','No clue'],...range(2,10).map(k=>[String(k),`${k} rows`])]},
+  {k:'not', label:'Has NO array with…', opts:[['','No clue'],...range(2,10).map(k=>[String(k),`${k} rows`])]},
+];
+function ownClues(){
+  const o=S.own, c=[];
+  if(o.par==='even') c.push(CL.even()); if(o.par==='odd') c.push(CL.odd());
+  if(o.sq==='yes') c.push(CL.square()); if(o.sq==='no') c.push(CL.notSquare());
+  if(o.ways) c.push(CL.ways(+o.ways));
+  if(o.gt) c.push(CL.gt(+o.gt));
+  if(o.lt) c.push(CL.lt(+o.lt));
+  if(o.has) c.push(CL.rows(+o.has));
+  if(o.not) c.push(CL.notRows(+o.not));
+  return c;
+}
+const caseClues = c => c.own ? ownClues() : c.clues;
+const suspects = c => { const cl=caseClues(c); return cl.length ? range(1,MAX).filter(n=>cl.every(x=>x.test(n))) : []; };
+
+/* ---------- State ---------- */
+let S;
+function fresh(){
+  S = { tab:'cases', caseId:'1', cases:{}, own:{par:'',sq:'',ways:'',gt:'',lt:'',has:'',not:''},
+        map:{}, sel:12, rows:1, last:null, q:1 };
+  CASES.forEach(c => S.cases[c.id] = {tested:{}, pick:null, showAll:false});
+  range(1,MAX).forEach(n => S.map[n] = {found:new Set(), tried:{}, filed:false});
+}
+
+/* ---------- Tabs ---------- */
+function setTab(t){
+  S.tab=t;
+  ['cases','map','ev'].forEach(k => { $('#tab-'+k).setAttribute('aria-selected', k===t); $('#view-'+k).hidden = k!==t; });
+  if(t==='map') renderMap(); if(t==='ev') renderQuestion(); if(t==='cases') renderCases();
+}
+
+/* ---------- Mystery cases ---------- */
+function renderCases(){
+  const box=$('#caseBtns');
+  box.innerHTML = CASES.map(c => {
+    const st=S.cases[c.id]; const sus=suspects(c);
+    const solved = !c.own && sus.every(n=>st.tested[n]===true);
+    return `<button data-c="${c.id}" aria-pressed="${S.caseId===c.id}">${c.title}${solved?'<span class="done">✓</span>':''}</button>`;
+  }).join('');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => { S.caseId=b.dataset.c; renderCases(); });
+  const c = CASES.find(x=>x.id===S.caseId), st=S.cases[c.id], cl=caseClues(c), sus=suspects(c);
+  $('#caseTitle').textContent = c.own ? 'Your own case: “Who am I?”' : `${c.title}: Who am I?`;
+  $('#ownBuilder').hidden = !c.own;
+  if(c.own) renderBuilder();
+  const n = st.pick;
+  $('#clueList').innerHTML = cl.length ? cl.map(x => {
+    const cls = n==null ? '' : x.test(n) ? 'yes' : 'no';
+    const mk = n==null ? '?' : x.test(n) ? '✓' : '✗';
+    return `<li class="${cls}"><span class="mk" aria-hidden="true">${mk}</span><span>${x.text}${n!=null?`<span class="why">${x.why(n)}</span>`:''}</span></li>`;
+  }).join('') : '<li><span class="mk">?</span><span class="muted">No clues yet. Pick some above.</span></li>';
+
+  // verdict
+  const v=$('#verdict'); v.className='verdict';
+  if(c.own){
+    if(!cl.length){ v.textContent=''; }
+    else if(sus.length===0){ v.classList.add('try'); v.textContent='No number from 1 to 40 fits all these clues. Two clues may be fighting each other. Loosen one.'; }
+    else if(sus.length===1){ v.classList.add('good'); v.innerHTML=`<b>A fair case!</b> Exactly one number fits: ${sus[0]}. Read it to a partner and see if they can crack it.`; }
+    else { v.classList.add('info'); v.innerHTML=`<b>${sus.length} suspects</b> still fit: ${listText(sus)}. Add a clue to narrow it down.`; }
+  } else if(st.showAll){
+    if(sus.length>1){ v.classList.add('good'); v.innerHTML=`<b>${sus.length} numbers fit every clue: ${listText(sus)}.</b> A fair mystery needs exactly one answer. What clue could you add so only one is left?`; }
+    else { v.classList.add('good'); v.innerHTML=`<b>Only ${sus[0]} fits every clue.</b> Every other number from 1 to 40 breaks at least one clue.`; }
+  } else if(n==null){ v.textContent=''; }
+  else if(cl.every(x=>x.test(n))){
+    v.classList.add('good');
+    const others = sus.filter(k=>st.tested[k]!==true);
+    v.innerHTML = `<b>${n} fits every clue!</b> ` + (others.length ? `Case closed? A good detective checks: could any other suspect fit too?` : sus.length>1 ? `You found all ${sus.length} suspects: ${listText(sus)}. A fair mystery needs one answer. What clue would you add?` : `Is it the only one? Tap “Show all suspects” to check.`);
+  } else {
+    const bad = cl.filter(x=>!x.test(n)).length;
+    v.classList.add('try');
+    v.innerHTML = `${n} breaks ${plural(bad,'clue')} (marked ✗). Read why, then try another suspect.`;
+  }
+
+  // actions
+  const a=$('#caseActions'); a.innerHTML='';
+  if(!c.own){
+    const b1=document.createElement('button'); b1.className='secondary'; b1.textContent='Show all suspects';
+    b1.onclick=()=>{ st.showAll=true; renderCases(); }; a.appendChild(b1);
+  }
+  const b2=document.createElement('button'); b2.className='secondary'; b2.textContent= c.own ? 'Clear my clues' : 'Clear this case';
+  b2.onclick=()=>{ if(c.own) Object.keys(S.own).forEach(k=>S.own[k]=''); S.cases[c.id]={tested:{},pick:null,showAll:false}; renderCases(); };
+  a.appendChild(b2);
+
+  // pad
+  $('#padLead').textContent = c.own ? 'Suspects that fit your clues light up. Tap one to see each clue checked.' : 'Tap a suspect to test it against every clue.';
+  const pad=$('#suspectPad');
+  pad.classList.toggle('dimmed', (c.own && cl.length>0) || st.showAll);
+  pad.innerHTML = range(1,MAX).map(k => {
+    let cls='nb';
+    if(st.pick===k) cls+=' sel';
+    if(c.own){ if(cl.length && sus.includes(k)) cls+=' lit'; }
+    else {
+      if(st.showAll && sus.includes(k)) cls+=' match';
+      else if(st.tested[k]===true) cls+=' match';
+      else if(st.tested[k]===false) cls+=' out';
+    }
+    return `<button class="${cls}" data-n="${k}" aria-label="${k}">${k}</button>`;
+  }).join('');
+  pad.querySelectorAll('.nb').forEach(b => b.onclick = () => {
+    const k=+b.dataset.n; st.pick=k;
+    if(cl.length) st.tested[k] = cl.every(x=>x.test(k));
+    renderCases();
+  });
+}
+function renderBuilder(){
+  const b=$('#builder');
+  if(b.dataset.built!=='1'){
+    b.innerHTML = OWN_OPTS.map(o => `<label for="own-${o.k}">${o.label}<select id="own-${o.k}" data-k="${o.k}">${o.opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`).join('');
+    b.querySelectorAll('select').forEach(s => s.onchange = () => { S.own[s.dataset.k]=s.value; S.cases.own.tested={}; renderCases(); });
+    b.dataset.built='1';
+  }
+  b.querySelectorAll('select').forEach(s => s.value = S.own[s.dataset.k]);
+}
+
+/* ---------- Product Map ---------- */
+const keyOf = (a,b) => `${Math.min(a,b)}x${Math.max(a,b)}`;
+function renderMap(){
+  const filed = range(1,MAX).filter(n=>S.map[n].filed);
+  const top = filed.length ? Math.max(...filed.map(ways)) : 0;
+  $('#filedCount').textContent = filed.length;
+  $('#mapPad').innerHTML = range(1,MAX).map(n => {
+    const m=S.map[n]; let cls='nb'; let tag='';
+    if(m.filed){ const k=kind(n); cls+=' filed k-'+k; tag = k==='loner'?'LONER':k==='square'?'SQUARE':''; if(ways(n)===top && top>=2) cls+=' lead-star'; }
+    if(S.sel===n) cls+=' sel';
+    const dots = m.found.size ? `<span class="meta">${'<i></i>'.repeat(m.found.size)}</span>` : '';
+    const label = `${n}${m.filed?`, filed, ${plural(ways(n),'array')}`:m.found.size?`, ${plural(m.found.size,'array')} found so far`:''}`;
+    return `<button class="${cls}" data-n="${n}" aria-label="${label}">${n}${tag?`<span class="tag">${tag}</span>`:''}${dots}</button>`;
+  }).join('');
+  $('#mapPad').querySelectorAll('.nb').forEach(b => b.onclick = () => { S.sel=+b.dataset.n; S.rows=1; S.last=null; renderMap(); });
+  renderBuilderPanel();
+}
+function renderBuilderPanel(){
+  const n=S.sel, m=S.map[n];
+  $('#bTitle').textContent = `${n} ${n===1?'tile':'tiles'}`;
+  $('#bProg').innerHTML = m.filed ? `Case closed: <b>${plural(ways(n),'array')}</b>` : `Arrays found: <b>${m.found.size}</b>`;
+  $('#rowsOut').innerHTML = `${S.rows}<small>${S.rows===1?'row':'rows'}</small>`;
+  $('#rowsDown').disabled = S.rows<=1; $('#rowsUp').disabled = S.rows>=n;
+  const tried = Object.keys(m.tried).map(Number).sort((a,b)=>a-b);
+  $('#trail').innerHTML = tried.length ? '<span>Rows tried:</span>' + tried.map(r => {
+    const t=m.tried[r]; const sym = t==='left'?'✗':t==='turn'?'↻':'✓';
+    const title = t==='left'?'leftovers':t==='turn'?'same rectangle turned':'rectangle';
+    return `<span class="c ${t==='turn'?'rect turn':t}" title="${title}">${r} ${sym}</span>`;
+  }).join('') : '<span>Rows tried: none yet. Start with 1 row, then 2, then 3…</span>';
+  const fl = pairs(n).filter(p=>m.found.has(keyOf(p[0],p[1])));
+  $('#foundList').innerHTML = fl.length ? fl.map(p=>`<span class="chip ${p[0]===p[1]?'sq':''}">${px(p)}</span>`).join('') : '<span class="muted small">None yet.</span>';
+  $('#closeCase').disabled = m.filed;
+  drawTiles();
+  if(!S.last) $('#bMsg').innerHTML = m.filed ? closedMsg(n) : `How many different rectangles can you make with ${n} tiles? Pick a number of rows and build.`;
+}
+function drawTiles(animate){
+  const n=S.sel, r=S.last ? S.last.r : null;
+  const box=$('#tiles'), stage=$('#stage');
+  let rows, cols, cells=[];
+  if(r==null){ // a loose, jumbled pile of tiles before anything is built
+    cols=Math.ceil(Math.sqrt(n*1.6)); rows=Math.ceil(n/cols);
+    for(let i=0;i<rows*cols;i++) cells.push(i<n?'t loose':'t gap');
+  } else {
+    const q=Math.floor(n/r), rem=n%r;
+    rows=r; cols = rem ? q+1 : q;
+    for(let i=0;i<r;i++) for(let j=0;j<cols;j++) cells.push(j<q ? 't' : (i<rem ? 't x' : 't gap'));
+  }
+  const W=stage.clientWidth-28, H=stage.clientHeight-28;
+  const size=Math.max(4, Math.floor(Math.min(W/cols, H/rows, 54)));
+  const gap=Math.max(1, Math.round(size*0.1));
+  const t=size-gap;
+  box.style.gridTemplateColumns=`repeat(${cols}, ${t}px)`; box.style.gridAutoRows=`${t}px`; box.style.gap=`${gap}px`;
+  box.classList.remove('pop'); void box.offsetWidth;
+  const step = Math.min(14, 500/Math.max(1,n));
+  const jig = i => { const a=Math.sin(i*12.9898)*43758.5453; return a-Math.floor(a); };
+  box.innerHTML = cells.map((c,i)=>`<div class="${c}" style="animation-delay:${animate?Math.round(i*step):0}ms${c==='t loose'?`;transform:translate(${Math.round((jig(i)-.5)*gap*3)}px,${Math.round((jig(i+7)-.5)*gap*3)}px) rotate(${Math.round((jig(i+3)-.5)*40)}deg)`:''}"></div>`).join('');
+  if(animate && !reduced) box.classList.add('pop');
+  box.setAttribute('aria-label', r==null ? `${n} loose tiles` : `${n} tiles dealt into ${r} rows`);
+  box.setAttribute('role','img');
+}
+function closedMsg(n){
+  const p=pairs(n), s=Math.floor(Math.sqrt(n));
+  if(n===1) return `<b>Case closed.</b> 1 has just one array: 1 × 1. It is a square, but mathematicians don’t call 1 prime.`;
+  const extra = isSq(n) ? ` ${s} × ${s} is the middle array: it has no turned twin.` : p.length===1 ? ` Only 1 × ${n}. A loner! Mathematicians call these numbers prime.` : '';
+  return `<b>Case closed.</b> ${n} has ${plural(p.length,'array')}: ${p.map(px).join(', ')}.${extra} You could stop after ${plural(s,'row')}: with more rows than columns, any array is one you already have, turned.`;
+}
+function build(){
+  const n=S.sel, r=S.rows, m=S.map[n];
+  const q=Math.floor(n/r), rem=n%r;
+  S.last={r};
+  let msg;
+  if(rem===0){
+    const c=n/r, k=keyOf(r,c);
+    const had=m.found.has(k);
+    if(r>c){
+      m.tried[r]='turn';
+      if(had) msg=`${r} rows of ${c}. That’s the ${c} × ${r} rectangle turned. Same rectangle, already on your list.`;
+      else { m.found.add(k); msg=`${r} rows of ${c} works! It’s the same rectangle as ${c} × ${r}, turned, so it goes on the list once as ${c} × ${r}.`; }
+    } else {
+      m.tried[r]='rect';
+      if(had) msg=`${r} rows of ${c} again. ${r} × ${c} is already on your list.`;
+      else { m.found.add(k); msg = r===c ? `<b>A square array!</b> ${r} rows of ${c}: ${r} × ${r} = ${n}. This is the middle array.` : `<b>A rectangle!</b> ${r} rows of ${c}: ${r} × ${c} = ${n}.`; }
+    }
+  } else {
+    m.tried[r]='left';
+    msg=`Deal ${n} tiles into ${r} rows: ${q} in each row and ${plural(rem,'tile')} left over (dashed). The edge is ragged, so ${r} rows doesn’t make a rectangle. Check: ${r} × ${q} = ${r*q}, and ${n} − ${r*q} = ${rem}.`;
+  }
+  renderMap(); drawTiles(true);
+  $('#bMsg').innerHTML = msg;
+}
+function closeCase(){
+  const n=S.sel, m=S.map[n], all=pairs(n), s=Math.floor(Math.sqrt(n));
+  const missing = all.filter(p=>!m.found.has(keyOf(p[0],p[1])));
+  if(!missing.length){ m.filed=true; S.last=null; renderMap(); $('#bMsg').innerHTML=closedMsg(n); return; }
+  const skipped = range(1,s).filter(r=>!(r in m.tried));
+  $('#bMsg').innerHTML = `<b>Not yet.</b> ${missing.length===1?'One array is':`${missing.length} arrays are`} still hiding. A detective tries every row count from 1 up to ${s}` + (s*s===n?` (${s} × ${s} = ${n})`:` (${s} × ${s} = ${s*s}, and ${s+1} × ${s+1} = ${(s+1)*(s+1)} is too big)`) + `. ` + (skipped.length ? `You haven’t tried ${listText(skipped.map(r=>plural(r,'row')))} yet.` : '');
+}
+function revealCase(){
+  const n=S.sel, m=S.map[n];
+  pairs(n).forEach(p=>{ m.found.add(keyOf(p[0],p[1])); m.tried[p[0]]='rect'; });
+  m.filed=true; S.last=null; renderMap(); $('#bMsg').innerHTML=closedMsg(n);
+}
+function fillAll(){
+  range(1,MAX).forEach(n=>{ const m=S.map[n]; pairs(n).forEach(p=>{ m.found.add(keyOf(p[0],p[1])); m.tried[p[0]]='rect'; }); m.filed=true; });
+  S.last=null; renderMap();
+  $('#bMsg').innerHTML = `The whole map is filed. Head to <b>Read the evidence</b> to find the champions, loners and squares.`;
+}
+
+/* ---------- Evidence: chart and diagrams ---------- */
+let V = {N:40, hl:{}, focus:false, from:1, odd:false};
+function chart(opts){
+  V = Object.assign({N:40, hl:{}, focus:false, from:1, odd:false}, opts||{});
+  const N=V.N, top=Math.max(...range(1,N).map(ways));
+  const unit = `calc((100% - 1.6em) / ${top+0.4})`;
+  const lab = n => N<=40 || n%10===0 || V.hl[n] || n===1;
+  $('#vTitle').textContent = `How many arrays? Every number from 1 to ${N}`;
+  $('#vBody').innerHTML = `<div class="chart ${V.focus?'focus':''}" id="chart" style="grid-template-columns:repeat(${N},minmax(0,1fr))">` +
+    range(1,N).map(n => {
+      const w=ways(n); const h=V.hl[n];
+      const cls = 'colm' + (h?' hl':'') + (V.odd && n%2===1 && !h ? ' odd':'');
+      return `<button class="${cls}" data-n="${n}" style="--bh:calc((clamp(200px,34vh,320px) - 1.6em - ${2*top}px) / ${top});${h?`--hc:${h}`:''}" aria-label="${n}: ${plural(w,'array')}">${'<span class="blk"></span>'.repeat(w)}<span class="lab">${lab(n)?n:''}</span></button>`;
+    }).join('') + `</div><div class="axis"><span>Each block = one array</span><span>${V.odd?'<span style="color:var(--loner)">■</span> odd &nbsp; <span style="color:var(--tile-edge)">■</span> even':''}</span></div>`;
+  $('#vBody').querySelectorAll('.colm').forEach(b => b.onclick = () => {
+    const n=+b.dataset.n; $('#vInfo').innerHTML = `<b>${n}</b>: ${plural(ways(n),'array')}: ${pairs(n).map(px).join(', ')}.`;
+  });
+}
+function partnerSVG(n, y0, color){
+  const f=factors(n), W=640, pad=34, step=(W-2*pad)/(f.length-1||1);
+  const x = i => pad + i*step;
+  let s='';
+  const half=Math.ceil(f.length/2);
+  for(let i=0;i<Math.floor(f.length/2);i++){
+    const j=f.length-1-i, x1=x(i), x2=x(j), h=Math.min(110, 18+(x2-x1)*0.32);
+    s+=`<path class="arc" stroke="${color}" d="M${x1} ${y0} C ${x1} ${y0-h}, ${x2} ${y0-h}, ${x2} ${y0}"/>`;
+  }
+  if(f.length%2===1){ const i=(f.length-1)/2; s+=`<circle cx="${x(i)}" cy="${y0-24}" r="15" fill="none" stroke="var(--square)" stroke-width="3" stroke-dasharray="5 4"/><text x="${x(i)}" y="${y0+48}" text-anchor="middle" style="fill:var(--square);font-size:15px">its own partner</text>`; }
+  s+= f.map((d,i)=>`<text x="${x(i)}" y="${y0+24}" text-anchor="middle" style="font-size:${f.length>9?18:21}px">${d}</text>`).join('');
+  return s;
+}
+function partners(list){
+  const rows=list.length;
+  const H = rows*190;
+  $('#vTitle').textContent = `Factor partners: ${list.map(n=>n).join(' and ')}`;
+  $('#vBody').innerHTML = `<svg viewBox="0 0 640 ${H}" width="100%" role="img" aria-label="Factors of ${list.join(' and ')} joined to their partners">` +
+    list.map((n,i)=>{ const y=i*190+140; return `<text x="0" y="${i*190+22}" style="font-size:20px">${n} <tspan style="fill:var(--muted);font-family:var(--body);font-weight:400;font-size:15px">${factors(n).length} factors, ${plural(ways(n),'array')}</tspan></text>` + partnerSVG(n,y, isSq(n)?'var(--square)':'var(--tile-edge)'); }).join('') + `</svg>`;
+  $('#vInfo').textContent = 'Each arc joins a factor to its partner: rows × columns.';
+}
+
+/* ---------- Questions ---------- */
+const COL = {pin:'var(--pin)', loner:'var(--loner)', square:'var(--square)', ok:'var(--ok)', gold:'var(--tile-edge)'};
+const H = (list,c) => Object.fromEntries(list.map(n=>[n,c]));
+const say = h => $('#qresult').innerHTML = h;
+const r40 = range(1,40);
+const maxW = (a,b) => Math.max(...range(a,b).map(ways));
+const Q = {
+  1:{ text:'Which numbers are champions? Which have the most arrays from 1 to 40?', actions:[
+      {label:'Show the champion', run:()=>{
+        const t=maxW(1,40), champs=r40.filter(n=>ways(n)===t), next=r40.filter(n=>ways(n)===t-1);
+        chart({N:40, focus:true, hl:{...H(next,COL.gold), ...H(champs,COL.pin)}});
+        say(`<b>${listText(champs)}</b> ${champs.length===1?'is the champion':'are the champions'} with ${plural(t,'array')}: ${pairs(champs[0]).map(px).join(', ')}. Next come ${listText(next)} with ${t-1} each.`);
+      }},
+      {label:'What do champions have in common?', run:()=>{
+        const top=r40.filter(n=>ways(n)>=4);
+        chart({N:40, focus:true, hl:H(top,COL.pin)});
+        const small = n => range(2,6).filter(r=>n%r===0);
+        say(`Every number with 4 or more arrays here is even. Look at the small row counts that work: ${top.map(n=>`${n} (${small(n).join(', ')} rows)`).join('; ')}. Lots of small factors means lots of arrays.`);
+      }}]},
+  2:{ text:'Loners can be built only ONE way. Who are they?', actions:[
+      {label:'Show the loners', run:()=>{
+        const lon=r40.filter(n=>n>1&&ways(n)===1);
+        chart({N:40, focus:true, hl:{...H(lon,COL.loner), 1:COL.square}});
+        say(`<b>${lon.length} loners</b>: ${listText(lon)}. Each one can only be built as a single long row. Mathematicians call them <b>prime</b>. 1 is special: its one array is 1 × 1, a square, and mathematicians don’t count 1 as prime.`);
+      }},
+      {label:'Is any loner even?', run:()=>{
+        chart({N:40, focus:true, hl:{2:COL.loner}});
+        say(`Only 2. Every other even number can be built as 1 row AND as 2 rows, so it has at least two arrays.`);
+      }}]},
+  3:{ text:'Squares are the only numbers with a “middle” array, like 6 × 6. Why does that make sense?', actions:[
+      {label:'Show the squares', run:()=>{
+        const sq=r40.filter(isSq);
+        chart({N:40, focus:true, hl:H(sq,COL.square)});
+        say(`The squares to 40: ${listText(sq.map(n=>`${n} (${Math.sqrt(n)} × ${Math.sqrt(n)})`))}.`);
+      }},
+      {label:'Pair up the factors of 24 and 36', run:()=>{
+        partners([24,36]);
+        say(`Every factor has a partner (rows × columns). In 24, all ${factors(24).length} factors pair with a <i>different</i> number. In 36, 6 is its own partner: 6 × 6. That lonely middle factor is the middle array, and only a square number has one.`);
+      }}]},
+  4:{ text:'Prediction: if we mapped every number to 100, would the biggest champion be even or odd?', actions:[
+      {label:'Map 1 to 100', run:()=>{
+        const t=maxW(1,100), ch=range(1,100).filter(n=>ways(n)===t);
+        chart({N:100, odd:true, hl:H(ch,COL.pin)});
+        const odds=range(1,100).filter(n=>n%2===1), bo=Math.max(...odds.map(ways)), boN=odds.filter(n=>ways(n)===bo);
+        say(`The champions to 100 are <b>${listText(ch)}</b>, with ${plural(t,'array')} each. ${ch.every(n=>n%2===0)?'Every one is even.':''} The best any odd number manages is ${plural(bo,'array')} (${listText(boN)}).`);
+      }},
+      {label:'Why do even numbers win?', run:()=>{
+        chart({N:100, odd:true, hl:{}});
+        say(`An odd number can never be built with 2 rows, 4 rows, 6 rows, or any even number of rows. Dealing an odd number of tiles into an even number of rows always leaves some over. Even numbers can use those row counts, so they have more chances to make rectangles.`);
+      }}]},
+  5:{ text:'Back to the warm-up. Which mystery cases can the map now solve instantly?', actions:[
+      {label:'Solve the cases with the map', run:()=>{
+        const a=suspects(CASES[0]), b=suspects(CASES[1]), c=suspects(CASES[2]);
+        chart({N:40, focus:true, hl:{...H(a,COL.square), ...H(b,COL.loner), ...H(c,COL.pin)}});
+        say(`Case 1 (even square under 20): <b>${listText(a)}</b>. Two answers, so that case needs one more clue! Case 2 (loner between 20 and 25): <b>${listText(b)}</b>. Case 3 (3 rows and 4 rows but not 5, under 15): <b>${listText(c)}</b>.`);
+      }}]},
+  6:{ star:true, text:'Challenge: 36 can be built five ways. Find the FIRST number past 36 that can be built SIX ways. Prove nothing smaller works.', actions:[
+      {label:'Scan 37 to 60', run:()=>{
+        let f=37; while(ways(f)<6) f++;
+        const best=Math.max(...range(37,f-1).map(ways)), bestN=range(37,f-1).filter(n=>ways(n)===best);
+        chart({N:60, focus:true, hl:{...H(range(37,f-1),'var(--muted)'), ...H(bestN,COL.gold), 36:COL.square, [f]:COL.pin}});
+        say(`Every number from 37 to ${f-1} has ${best} or fewer arrays (${listText(bestN)} ${bestN.length===1?'comes':'come'} closest with ${best}). <b>${f}</b> is the first with 6: ${pairs(f).map(px).join(', ')}.`);
+      }}], tester:true},
+};
+function renderQuestion(){
+  const nav=$('#qnav');
+  nav.innerHTML = Object.keys(Q).map(k => `<button data-q="${k}" aria-pressed="${S.q==k}" ${Q[k].star?'':`aria-label="Question ${k}"`}>${Q[k].star?'★ Challenge':k}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; renderQuestion(); });
+  const q=Q[S.q];
+  $('#qtext').textContent=q.text;
+  const box=$('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=a.run; box.appendChild(b); });
+  if(q.tester){
+    const d=document.createElement('div'); d.className='tester';
+    d.innerHTML=`<label for="testN" class="small muted" style="font-weight:700">Test a number</label><input id="testN" type="number" min="1" max="999" value="48" inputmode="numeric"><button class="secondary" id="testGo">Count its arrays</button>`;
+    box.appendChild(d);
+    const go=()=>{ const n=Math.floor(+$('#testN').value); if(!(n>=1&&n<=999)){ say('Type a whole number from 1 to 999.'); return; }
+      const p=pairs(n); say(`<b>${n}</b> can be built ${plural(p.length,'way')}: ${p.map(px).join(', ')}.` + (p.length===6?' Six ways!':p.length>6?' More than six!':'')); };
+    $('#testGo').onclick=go; $('#testN').onkeydown=e=>{ if(e.key==='Enter') go(); };
+  }
+  say(''); chart({N:40}); $('#vInfo').textContent='Tap a column to see its arrays.';
+}
+
+/* ---------- Wire up ---------- */
+$('#tab-cases').onclick=()=>setTab('cases');
+$('#tab-map').onclick=()=>setTab('map');
+$('#tab-ev').onclick=()=>setTab('ev');
+$('#rowsDown').onclick=()=>{ if(S.rows>1){ S.rows--; renderBuilderPanel(); } };
+$('#rowsUp').onclick=()=>{ if(S.rows<S.sel){ S.rows++; renderBuilderPanel(); } };
+$('#buildBtn').onclick=build;
+$('#closeCase').onclick=closeCase;
+$('#revealCase').onclick=revealCase;
+$('#fillAll').onclick=fillAll;
+$('#resetBtn').onclick=()=>{ const t=S.tab; fresh(); $('#builder').dataset.built=''; setTab(t); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+let rt; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(S.tab==='map') drawTiles(false); },120); });
+
+fresh(); renderCases();
+
+
+})();
+</script>
+
+</body></html>

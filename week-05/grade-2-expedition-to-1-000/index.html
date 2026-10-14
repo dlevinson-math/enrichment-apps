@@ -1,0 +1,774 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Expedition to 1,000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: a trail map of six stops across the top; each stop is one big working board with its keypad and a detective box beside it. */
+:root{
+  --snow:#EDF3F5; --card:#FFFFFF; --ink:#14302D; --muted:#55716C; --line:#C7D7DA; --soft:#E1ECEE;
+  --accent:#C9432C; --accent-ink:#FFFFFF; --sky:#2471C0; --good:#1C7F55; --good-bg:#E2F3EA; --warn:#9A6410; --warn-bg:#FBF0DC;
+  --f1:#2471C0; --f2:#8A3FC2; --f3:#C9432C; --f4:#1C7F55;
+  --flat:#E8B54A; --rod:#2E8F6E;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"DM Mono",ui-monospace,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --snow:#0F1B1D; --card:#172A2D; --ink:#E5EFED; --muted:#9BB3AF; --line:#2F4649; --soft:#1F3538;
+    --accent:#FF6E55; --accent-ink:#1A0B07; --sky:#6DB0F2; --good:#4CC890; --good-bg:#173A2C; --warn:#EDB653; --warn-bg:#3A2E15;
+    --f1:#6DB0F2; --f2:#C08AF0; --f3:#FF6E55; --f4:#4CC890; --flat:#D9A63C; --rod:#3FB287;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --snow:#0F1B1D; --card:#172A2D; --ink:#E5EFED; --muted:#9BB3AF; --line:#2F4649; --soft:#1F3538;
+  --accent:#FF6E55; --accent-ink:#1A0B07; --sky:#6DB0F2; --good:#4CC890; --good-bg:#173A2C; --warn:#EDB653; --warn-bg:#3A2E15;
+  --f1:#6DB0F2; --f2:#C08AF0; --f3:#FF6E55; --f4:#4CC890; --flat:#D9A63C; --rod:#3FB287;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--snow); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4; padding:0 clamp(16px,2.5vw,32px) 28px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--sky); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); font-weight:600; margin:0; text-wrap:balance}
+
+header{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; padding-block:16px 8px}
+.brand h1{font-size:clamp(28px,3.4vw,46px); line-height:1.05; letter-spacing:-.01em}
+.brand p{margin:4px 0 0; font-size:15px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* trail map */
+nav.trail{position:relative; display:flex; gap:6px; overflow-x:auto; padding:10px 2px 14px; scrollbar-width:thin}
+nav.trail::before{content:""; position:absolute; left:30px; right:30px; top:38px; border-top:3px dashed var(--line); z-index:0}
+.stop{position:relative; z-index:1; flex:1 0 108px; display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:none; padding:2px 4px; min-height:48px}
+.stop .dot{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background:var(--card); border:3px solid var(--line); font-family:var(--display); font-weight:700; font-size:24px; transition:transform .2s}
+.stop .lbl{font-weight:700; font-size:15px; text-align:center; line-height:1.15; color:var(--muted)}
+.stop[aria-current="step"] .dot{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); transform:scale(1.08)}
+.stop[aria-current="step"] .lbl{color:var(--ink)}
+.stop.done .dot{border-color:var(--good); color:var(--good)}
+.stop.summit .dot{border-radius:12px; transform:rotate(45deg)}
+.stop.summit .dot span{transform:rotate(-45deg)}
+.stop.summit[aria-current="step"] .dot{transform:rotate(45deg) scale(1.08)}
+
+/* stage */
+main{max-width:1280px; margin:0 auto}
+section.view{display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,360px); gap:22px; align-items:start}
+section.view.wide{grid-template-columns:minmax(0,1fr)}
+section.view[hidden]{display:none !important}
+.board{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:clamp(16px,2.2vw,28px); display:flex; flex-direction:column; gap:18px; min-width:0}
+.side{display:flex; flex-direction:column; gap:16px; min-width:0}
+.task-no{font-family:var(--display); font-weight:600; color:var(--accent); font-size:16px; letter-spacing:.08em; text-transform:uppercase}
+.board h2{font-size:clamp(26px,2.6vw,36px)}
+.lead{margin:0; font-size:clamp(19px,1.6vw,23px); max-width:40em}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:19px; padding:13px 24px; border-radius:16px; min-height:54px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:17px; padding:10px 18px; border-radius:16px; min-height:52px}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px; font-weight:700; font-size:19px; min-height:50px; font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.fb{margin:0; padding:14px 18px; border-radius:14px; font-size:19px; background:var(--soft); max-width:44em}
+.fb:empty{display:none}
+.fb.good{background:var(--good-bg)}
+.fb.warn{background:var(--warn-bg)}
+.fb ul{margin:6px 0 0; padding-left:22px}
+.fb li{margin:4px 0}
+.fb b.g{color:var(--good)} .fb b.w{color:var(--warn)}
+
+/* detective box */
+.detective{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:18px 20px; display:flex; flex-direction:column; gap:12px}
+.detective h3{font-size:20px; display:flex; align-items:center; gap:10px}
+.detective h3::before{content:""; width:22px; height:22px; border-radius:50%; border:4px solid var(--accent); box-shadow:7px 7px 0 -4px var(--accent)}
+.detective .q{margin:0; font-size:19px; font-weight:700}
+.detective .q + .q{margin-top:6px}
+.evi{margin:0; font-size:18px; padding:12px 14px; background:var(--soft); border-radius:12px}
+.evi:empty{display:none}
+
+/* keypad */
+.keypad{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; background:var(--card); border:2px solid var(--line); border-radius:22px; padding:12px}
+.keypad button{min-height:60px; border:0; border-radius:14px; background:var(--soft); font-family:var(--display); font-weight:600; font-size:28px}
+.keypad button:active{background:var(--line)}
+.keypad .wide{font-size:19px; font-family:var(--body); font-weight:700}
+.keypad .go{background:var(--sky); color:var(--card)}
+.keytip{font-size:15px; color:var(--muted); margin:0; text-align:center}
+
+/* answer slots */
+.slot{min-width:3.4em; min-height:58px; padding:6px 10px; border-radius:14px; border:3px dashed var(--muted); background:var(--card); font-family:var(--display); font-weight:600; font-size:28px; font-variant-numeric:tabular-nums}
+.slot:empty::before{content:"?"; opacity:.35}
+.slot.active{border-style:solid; border-color:var(--sky); box-shadow:0 0 0 4px color-mix(in srgb,var(--sky) 25%,transparent)}
+.slot.ok{border-style:solid; border-color:var(--good); background:var(--good-bg); color:var(--good)}
+.slot.no{border-style:solid; border-color:var(--warn); background:var(--warn-bg)}
+
+/* number lines */
+.nl{position:relative; padding:0 26px; touch-action:none; cursor:crosshair; user-select:none}
+.nl .area{position:relative; height:250px}
+.nl .bar{position:absolute; left:0; right:0; top:150px; height:8px; border-radius:4px; background:var(--ink)}
+.nl .bar::before,.nl .bar::after{content:""; position:absolute; top:-12px; width:4px; height:32px; background:var(--ink); border-radius:2px}
+.nl .bar::before{left:-2px} .nl .bar::after{right:-2px}
+.nl .endlbl{position:absolute; top:184px; transform:translateX(-50%); font-family:var(--display); font-weight:600; font-size:24px}
+.tick{position:absolute; top:142px; width:2px; height:24px; background:var(--muted); transform:translateX(-1px)}
+.tick.small{top:146px; height:16px; opacity:.6}
+.ticklbl{position:absolute; top:172px; transform:translateX(-50%); font-size:16px; color:var(--muted); font-variant-numeric:tabular-nums}
+.pin{position:absolute; bottom:80px; width:0; pointer-events:none}
+.pin .pole{position:absolute; left:-2px; bottom:0; width:4px; background:var(--c); border-radius:2px}
+.pin .flag{position:absolute; left:2px; padding:4px 10px 4px 8px; background:var(--c); color:var(--card); font-family:var(--display); font-weight:600; font-size:20px; border-radius:0 10px 10px 0; white-space:nowrap}
+.pin.right .flag{left:auto; right:2px; border-radius:10px 0 0 10px; padding:4px 8px 4px 10px}
+.pin.sel .flag{outline:3px solid var(--ink); outline-offset:2px}
+.truth{position:absolute; top:160px; width:0}
+.truth i{position:absolute; left:-9px; top:0; border:9px solid transparent; border-bottom:14px solid var(--c); border-top:0}
+.truth b{position:absolute; top:52px; transform:translateX(-50%); font-family:var(--display); font-size:18px; color:var(--c); white-space:nowrap}
+.flagchips .chip{display:inline-flex; gap:8px; align-items:center}
+.flagchips .chip i{width:16px; height:16px; border-radius:4px; background:var(--c)}
+.flagchips .chip.placed{border-color:var(--c)}
+.zoom{display:flex; flex-direction:column; gap:6px}
+.zoomline{position:relative; height:70px; margin:0 26px}
+.zoomline .bar{position:absolute; left:0; right:0; top:20px; height:6px; background:var(--ink); border-radius:3px}
+.zoomline .tick{top:12px; height:22px}
+.zoomline .ticklbl{top:40px}
+.zoomline .hot{background:var(--accent); width:4px; transform:translateX(-2px)}
+
+/* trails */
+.trails{display:flex; flex-direction:column; gap:22px}
+.trailcard{display:flex; flex-direction:column; gap:10px; padding-bottom:18px; border-bottom:2px dashed var(--line)}
+.trailcard:last-child{border-bottom:0; padding-bottom:0}
+.trailhead{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.trailhead h3{font-size:24px}
+.stones{display:flex; flex-wrap:wrap; align-items:center; gap:6px 4px}
+.stone{min-width:3.4em; min-height:58px; display:grid; place-items:center; padding:6px 10px; border-radius:16px; background:var(--soft); font-family:var(--display); font-weight:600; font-size:28px; font-variant-numeric:tabular-nums}
+.jump{border:0; background:none; font-size:15px; font-weight:700; color:var(--muted); padding:4px 2px; min-width:40px; min-height:48px; border-radius:10px; display:flex; flex-direction:column; align-items:center; line-height:1}
+.jump::after{content:"→"; font-size:24px}
+.trails.hunting .jump{color:var(--sky); outline:2px dashed var(--sky)}
+.jump.border{background:var(--accent); color:var(--accent-ink); outline:none !important}
+.jump.miss{background:var(--warn-bg)}
+.blocks{display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; min-height:84px}
+.flatb{width:72px; height:72px; background:var(--flat); border-radius:4px; background-image:linear-gradient(rgba(0,0,0,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.18) 1px,transparent 1px); background-size:7.2px 7.2px}
+.rodb{width:9px; height:72px; background:var(--rod); border-radius:3px; background-image:linear-gradient(rgba(0,0,0,.2) 1px,transparent 1px); background-size:9px 7.2px}
+.rods{display:flex; gap:3px; padding:4px; border-radius:8px}
+.rods.full{outline:3px solid var(--accent)}
+.rodb.new{outline:3px solid var(--sky); outline-offset:1px}
+.newflat{outline:3px solid var(--accent); outline-offset:2px}
+.bigval{font-family:var(--display); font-weight:700; font-size:40px; font-variant-numeric:tabular-nums}
+
+/* halfway */
+.scout{position:absolute; top:42px; width:0; pointer-events:none}
+.scout .body{position:absolute; left:0; transform:translateX(-50%); background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:700; font-size:26px; padding:6px 14px; border-radius:14px; white-space:nowrap}
+.scout .body::after{content:""; position:absolute; left:50%; bottom:-12px; transform:translateX(-50%); border:10px solid transparent; border-top:12px solid var(--accent); border-bottom:0}
+.scout .stem{position:absolute; left:-1px; top:56px; width:3px; height:54px; background:var(--accent)}
+.arc{position:absolute; top:96px; height:54px; border:4px solid var(--c); border-bottom:0; border-radius:50% 50% 0 0 / 100% 100% 0 0}
+.arc b{position:absolute; top:-30px; left:50%; transform:translateX(-50%); font-family:var(--display); font-size:20px; color:var(--c); white-space:nowrap; background:var(--card); padding:0 6px}
+.meet{position:absolute; top:150px; width:0}
+.meet i{position:absolute; left:-10px; top:-10px; width:20px; height:20px; border-radius:50%; background:var(--c); border:3px solid var(--card)}
+.walkrow{display:flex; flex-wrap:wrap; gap:10px; font-family:var(--display); font-size:22px}
+.walkrow span{padding:6px 14px; border-radius:12px; background:var(--soft)}
+.walkrow span.meetup{background:var(--accent); color:var(--accent-ink)}
+
+/* odometer */
+.odo{display:inline-flex; gap:6px; padding:14px; background:#161C1E; border-radius:18px; box-shadow:inset 0 4px 12px rgba(0,0,0,.5); align-self:flex-start}
+.wheel{width:clamp(56px,7vw,82px); height:clamp(80px,10vw,112px); border-radius:10px; background:linear-gradient(#2B3437,#F4F4EE 22%,#FFFFFF 50%,#F4F4EE 78%,#2B3437); display:grid; place-items:center; overflow:hidden; font-family:var(--mono); font-weight:500; font-size:clamp(46px,6vw,72px); color:#14191A}
+.wheel.lead0 span{opacity:.28}
+.wheel.roll span{animation:roll .45s ease-out}
+.wheel.flash{box-shadow:0 0 0 4px #FF6E55}
+@keyframes roll{from{transform:translateY(-70%); opacity:0}to{transform:translateY(0); opacity:1}}
+.odolabel{font-size:15px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.readings{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.readings .given{font-family:var(--display); font-weight:600; font-size:28px; padding:6px 12px; background:var(--soft); border-radius:14px}
+.chain{margin:0; padding-left:24px; display:flex; flex-direction:column; gap:6px}
+
+/* windows */
+.win{display:grid; grid-template-columns:repeat(3,minmax(0,8.4rem)); grid-template-rows:repeat(3,auto); gap:8px; align-self:center}
+.win .cell{min-height:84px; display:grid; place-items:center; border-radius:14px}
+.win .c{background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:700; font-size:34px; font-variant-numeric:tabular-nums}
+.win .n{background:var(--soft); font-family:var(--display); font-weight:600; font-size:30px; font-variant-numeric:tabular-nums}
+.win .slot{width:100%; min-height:84px; font-size:30px; min-width:0}
+.win .tag{font-size:14px; color:var(--muted); font-weight:700; text-align:center}
+.win .empty{visibility:hidden}
+.win .c .slot{background:var(--card); color:var(--ink)}
+.movekey{display:grid; grid-template-columns:repeat(2,auto); gap:4px 16px; font-size:17px; color:var(--muted); align-self:center}
+.movekey b{color:var(--ink); font-family:var(--display)}
+
+/* summit */
+.predict .chip{font-size:20px}
+.findings{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px}
+.finding{border:2px solid var(--line); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.finding h3{font-size:19px}
+.finding .win{grid-template-columns:repeat(3,minmax(0,1fr)); align-self:stretch}
+.finding .win .cell{min-height:58px}
+.finding .win .c,.finding .win .n{font-size:clamp(17px,1.6vw,22px)}
+.finding .stone{font-size:20px; min-height:44px; min-width:0}
+.finding .odo{padding:8px}
+.finding .wheel{width:40px; height:58px; font-size:36px}
+.verdict{font-family:var(--display); font-size:clamp(22px,2vw,28px); font-weight:600; margin:0; padding:16px 20px; border-radius:16px; background:var(--good-bg)}
+.verdict:empty{display:none}
+
+.foot{font-size:14px; color:var(--muted); text-align:center; margin-top:18px}
+
+@media (max-width:900px){
+  section.view{grid-template-columns:minmax(0,1fr)}
+  .nl{padding:0 18px}
+  .stop{flex-basis:92px}
+  .stop .lbl{font-size:13px}
+}
+@media (max-width:520px){
+  body{font-size:17px}
+  .slot,.stone{font-size:22px; min-height:50px; min-width:2.9em}
+  .jump{min-width:30px}
+  .nl .endlbl{font-size:18px}
+  .ticklbl{font-size:12px}
+  .pin .flag{font-size:16px; padding:3px 6px}
+  .win .c,.win .n,.win .slot{font-size:22px}
+  .win .cell,.win .slot{min-height:64px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important}}
+</style>
+
+<header>
+  <div class="brand">
+    <h1>Expedition to 1,000</h1>
+    <p>Grade 2 · Week 5 · Number Detectives worksheet</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn" type="button">Start over</button>
+    <button class="ghost" id="fsBtn" type="button">Full screen</button>
+  </div>
+</header>
+
+<nav class="trail" id="trail" aria-label="Expedition stops"></nav>
+
+<main id="stage"></main>
+<p class="foot">Every pattern from the hundred chart still works past 100. The numbers just get bigger.</p>
+
+<script>
+(function(){
+const $ = (s,r=document) => r.querySelector(s);
+const fmt = n => Number(n).toLocaleString('en-US');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+const btn = (cls, text, fn) => { const b=el('button',cls); b.type='button'; b.textContent=text; if(fn) b.onclick=fn; return b; };
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const more = (v, ref) => { const d=v-ref; return d===0 ? `the same as ${fmt(ref)}` : `${fmt(Math.abs(d))} ${d>0?'more':'less'} than ${fmt(ref)}`; };
+
+/* ---------- answer slots + keypad ---------- */
+let active = null;
+function slot(group, answer, label){
+  const b = el('button','slot'); b.type='button'; b.dataset.group=group; b.dataset.v=''; b.answer=answer;
+  b.setAttribute('aria-label', label);
+  b.onclick = () => setActive(b);
+  return b;
+}
+function setActive(b){ if(active) active.classList.remove('active'); active=b; if(b) b.classList.add('active'); }
+function setVal(b, v){ b.dataset.v=v; b.textContent = v==='' ? '' : fmt(+v); b.classList.remove('ok','no'); }
+const val = b => b.dataset.v==='' ? null : +b.dataset.v;
+function groupSlots(g){ return [...document.querySelectorAll(`.slot[data-group="${g}"]`)]; }
+function typeDigit(d){
+  if(!active || !active.isConnected) return;
+  let v = active.dataset.v; if(v.length>=5) return; if(v==='0') v='';
+  setVal(active, v+d);
+}
+function backspace(){ if(active && active.isConnected) setVal(active, active.dataset.v.slice(0,-1)); }
+function nextSlot(){
+  if(!active) return; const s = groupSlots(active.dataset.group).filter(x=>!x.classList.contains('ok'));
+  const i = s.indexOf(active); setActive(s[(i+1)%s.length] || null);
+}
+function keypad(scope){
+  const k = el('div','keypad'); k.setAttribute('aria-label','Number keypad');
+  const ensure = () => { if(!active || !active.isConnected || !scope().contains(active)){ const f=[...scope().querySelectorAll('.slot')].find(s=>!s.classList.contains('ok')); setActive(f||null); } };
+  ['1','2','3','4','5','6','7','8','9'].forEach(d => k.appendChild(btn('',d,()=>{ensure(); typeDigit(d);})));
+  const bk = btn('wide','⌫ Back',()=>{ensure(); backspace();}); bk.setAttribute('aria-label','Delete a digit'); k.appendChild(bk);
+  k.appendChild(btn('','0',()=>{ensure(); typeDigit('0');}));
+  k.appendChild(btn('wide go','Next ›',()=>{ensure(); nextSlot();}));
+  const wrap = el('div','side-keys'); wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.gap='6px';
+  wrap.appendChild(k); wrap.appendChild(el('p','keytip','Tap a ? box, then type.'));
+  return wrap;
+}
+document.addEventListener('keydown', e => {
+  if(!active || !active.isConnected || active.offsetParent===null) return;
+  if(/^[0-9]$/.test(e.key)){ typeDigit(e.key); e.preventDefault(); }
+  else if(e.key==='Backspace'){ backspace(); e.preventDefault(); }
+  else if(e.key==='Enter'){ nextSlot(); e.preventDefault(); }
+});
+
+function detective(questions){
+  const d = el('div','detective'); d.appendChild(el('h3','', 'Detective questions'));
+  questions.forEach(q => {
+    d.appendChild(el('p','q', q.q));
+    const r = el('div','row'); const out = el('p','evi');
+    q.btns.forEach(([label,fn]) => r.appendChild(btn('secondary', label, () => fn(out))));
+    d.appendChild(r); d.appendChild(out);
+  });
+  return d;
+}
+
+/* ---------- STOP 1: Base camp predictions ---------- */
+const FLAGS = [{v:500,c:'var(--f1)',hint:'500 is the exact middle of the trail.'},
+               {v:750,c:'var(--f2)',hint:'750 is halfway between 500 and 1,000.'},
+               {v:999,c:'var(--f3)',hint:'999 is only 1 step from 1,000. It lives right at the end.'},
+               {v:250,c:'var(--f4)',hint:'250 is halfway between 0 and 500.'}];
+function stopCamp(root){
+  const S = {sel:0, pos:{}, truth:false, marks:false};
+  root.className='view wide';
+  const b = el('div','board');
+  b.append(el('div','task-no','Task 1 · Base camp predictions'), el('h2','','Where does each number live on the trail?'),
+    el('p','lead','Pick a flag. Tap the trail where you think that number lives. You can tap again to move it.'));
+  const chips = el('div','row flagchips'); b.appendChild(chips);
+  const nl = el('div','nl'); const area = el('div','area'); nl.appendChild(area); b.appendChild(nl);
+  const acts = el('div','row'); const fb = el('div','fb');
+  acts.append(btn('primary','Check my flags',check), btn('secondary','Show where they live',()=>{S.truth=!S.truth; draw();}), btn('secondary','Clear flags',()=>{S.pos={}; S.sel=0; S.truth=false; fb.innerHTML=''; fb.className='fb'; draw();}));
+  b.append(acts, fb);
+  root.appendChild(b);
+
+  const zoomBox = el('div','zoom');
+  root.appendChild(detective([
+    {q:'Which flag was easiest to place? Which numbers helped you?', btns:[['Show the helper marks', out => { S.marks=!S.marks; draw(); out.textContent = S.marks ? '500 cuts the trail in half. 250 cuts the first half in half. 750 cuts the second half in half. The small marks count by 100s.' : ''; }]]},
+    {q:'Why is 999 so hard to see apart from 1,000?', btns:[['Zoom in near 1,000', out => {
+      out.innerHTML=''; out.appendChild(zoomBox); zoomBox.innerHTML='';
+      const zl = el('div','zoomline'); zl.appendChild(el('div','bar'));
+      for(let n=990;n<=1000;n++){ const p=(n-990)*10; const t=el('div','tick'+(n===999?' hot':'')); t.style.left=p+'%'; zl.appendChild(t);
+        if(n===990||n===995||n===999||n===1000){ const l=el('div','ticklbl',fmt(n)); l.style.left=p+'%'; if(n===999){l.style.color='var(--accent)'; l.style.fontWeight='700';} zl.appendChild(l);} }
+      zoomBox.append(el('div','',''), zl, el('div','','Zoomed in, each mark is 1 step. 999 is just 1 step before 1,000. On the whole trail there are 1,000 steps, so 1 step is a tiny space.'));
+    }]]}
+  ]));
+
+  function setPos(e){
+    const r = area.getBoundingClientRect();
+    let v = Math.round((e.clientX - r.left) / r.width * 1000); v = Math.max(0, Math.min(1000, v));
+    S.pos[S.sel] = v; draw();
+  }
+  let dragging=false;
+  nl.addEventListener('pointerdown', e => {
+    const r = area.getBoundingClientRect(); const v = (e.clientX - r.left)/r.width*1000;
+    // grab an existing flag if tapping right on it
+    for(const [i,p] of Object.entries(S.pos)){ if(Math.abs(p-v)<=12){ S.sel=+i; break; } }
+    dragging=true; try{nl.setPointerCapture(e.pointerId);}catch(_){} setPos(e);
+  });
+  nl.addEventListener('pointermove', e => { if(dragging) setPos(e); });
+  const up = () => { if(!dragging) return; dragging=false;
+    const nextFree = FLAGS.findIndex((f,i)=>S.pos[i]==null); if(nextFree>=0) { S.sel=nextFree; draw(); } };
+  nl.addEventListener('pointerup', up); nl.addEventListener('pointercancel', up);
+
+  function check(){
+    const lines=[]; let good=0;
+    FLAGS.forEach((f,i)=>{
+      const g=S.pos[i];
+      if(g==null){ lines.push(`<li><b class="w">${fmt(f.v)}:</b> place this flag first.</li>`); return; }
+      const d=Math.abs(g-f.v), near=fmt(Math.round(g/10)*10);
+      if(d<=30){ good++; lines.push(`<li><b class="g">${fmt(f.v)}: right on target!</b> ${f.hint}</li>`); }
+      else if(d<=80) lines.push(`<li><b class="w">${fmt(f.v)}: close.</b> Your flag is near ${near}. ${f.hint} Nudge it a little ${g<f.v?'right':'left'}.</li>`);
+      else lines.push(`<li><b class="w">${fmt(f.v)}: not yet.</b> Your flag is near ${near}. ${f.hint} Slide it ${g<f.v?'right':'left'} and try again.</li>`);
+    });
+    fb.className = 'fb ' + (good===4 ? 'good' : 'warn');
+    fb.innerHTML = (good===4 ? 'All four flags are on target. Great scouting!' : `${good} of 4 flags on target.`) + `<ul>${lines.join('')}</ul>`;
+  }
+  function draw(){
+    chips.innerHTML='';
+    FLAGS.forEach((f,i)=>{ const c=el('button','chip'+(S.pos[i]!=null?' placed':'')); c.type='button'; c.style.setProperty('--c',f.c);
+      c.innerHTML=`<i></i>${fmt(f.v)}`; c.setAttribute('aria-pressed', S.sel===i); c.setAttribute('aria-label',`Flag ${fmt(f.v)}`);
+      c.onclick=()=>{S.sel=i; draw();}; chips.appendChild(c); });
+    area.innerHTML=''; area.appendChild(el('div','bar'));
+    [[0,'0'],[100,'1,000']].forEach(([p,t])=>{ const l=el('div','endlbl',t); l.style.left=p+'%'; area.appendChild(l); });
+    if(S.marks){ for(let n=100;n<1000;n+=100){ const t=el('div','tick'+(n%500?' small':'')); t.style.left=n/10+'%'; area.appendChild(t);
+        const l=el('div','ticklbl',fmt(n)); l.style.left=n/10+'%'; area.appendChild(l);} }
+    FLAGS.forEach((f,i)=>{ const g=S.pos[i]; if(g==null) return;
+      const p=el('div','pin'+(S.sel===i?' sel':'')+(g>820?' right':'')); p.style.left=g/10+'%'; p.style.setProperty('--c',f.c);
+      const h = 34 + i*30; p.innerHTML=`<div class="pole" style="height:${h+30}px"></div><div class="flag" style="bottom:${h}px">${fmt(f.v)}</div>`;
+      area.appendChild(p); });
+    if(S.truth){ FLAGS.forEach((f,i)=>{ const t=el('div','truth'); t.style.left=f.v/10+'%'; t.style.setProperty('--c',f.c);
+      t.innerHTML=`<i></i><b style="top:${52+(i%2)*24}px">${fmt(f.v)}</b>`; area.appendChild(t); }); }
+  }
+  draw();
+  return {done:()=>Object.keys(S.pos).length===4};
+}
+
+/* ---------- STOP 2: Skip-count trails ---------- */
+const TRAILS = [
+  {name:'By 10s', step:10, seq:[340,350,360,null,null,null,null,410]},
+  {name:'By 100s', step:100, seq:[250,350,null,null,null,null,850]},
+  {name:'By 5s', step:5, seq:[485,490,null,null,null,null,515]}
+];
+function stopTrails(root){
+  root.className='view';
+  const b = el('div','board');
+  b.append(el('div','task-no','Task 2 · Skip-count trails'), el('h2','','Fill in each trail'),
+    el('p','lead','Watch what happens when you cross a hundreds border!'));
+  const wrap = el('div','trails'); b.appendChild(wrap);
+  const huntFb = el('div','fb');
+  TRAILS.forEach((t,ti)=>{
+    const ans = t.seq.map((_,i)=>t.seq[0]+i*t.step);
+    const card = el('div','trailcard'); const head = el('div','trailhead'); head.appendChild(el('h3','',t.name));
+    const fb = el('div','fb');
+    head.appendChild(btn('secondary','Check this trail',()=>{
+      const slots = groupSlots('t'+ti); const lines=[]; let ok=0, empty=0;
+      slots.forEach(s=>{ const i=+s.dataset.i, v=val(s);
+        if(v==null){ empty++; return; }
+        if(v===ans[i]){ s.classList.add('ok'); ok++; return; }
+        s.classList.add('no');
+        const prevStone = t.seq[i-1]!=null ? t.seq[i-1] : null;
+        const prevSlot = slots.find(x=>+x.dataset.i===i-1);
+        const prev = prevStone!=null ? prevStone : (prevSlot && val(prevSlot)!=null ? val(prevSlot) : null);
+        if(prev!=null) lines.push(`<li>Your ${fmt(v)} is ${more(v,prev)}, the stone before it. Each jump on this trail is <b>+${t.step}</b>.</li>`);
+        else lines.push(`<li>${fmt(v)} doesn't fit yet. Each jump on this trail is <b>+${t.step}</b>.</li>`);
+      });
+      if(!lines.length && !empty){ fb.className='fb good'; fb.innerHTML=`Trail complete! ${ans.map(fmt).join(' → ')}`; }
+      else if(!lines.length){ fb.className='fb'; fb.textContent=`So far so good. ${empty} stone${empty===1?' is':'s are'} still empty.`; }
+      else { fb.className='fb warn'; fb.innerHTML=`Some stones need another look:<ul>${lines.join('')}</ul>Try again. How could you check? Count on from a stone you know.`; }
+    }));
+    card.appendChild(head);
+    const stones = el('div','stones');
+    t.seq.forEach((v,i)=>{
+      if(i>0){ const j=el('button','jump'); j.type='button'; j.innerHTML=`+${t.step}`; j.dataset.t=ti; j.dataset.i=i-1; j.setAttribute('aria-label',`Jump ${i} on the ${t.name} trail`); j.onclick=()=>hunt(j,ti,i-1); stones.appendChild(j); }
+      if(v!=null) stones.appendChild(el('div','stone',fmt(v)));
+      else { const s=slot('t'+ti, ans[i], `${t.name} trail, stone ${i+1}`); s.dataset.i=i; stones.appendChild(s); }
+    });
+    card.append(stones, fb); wrap.appendChild(card);
+  });
+  b.appendChild(huntFb);
+  root.appendChild(b);
+
+  let hunting=false;
+  function hunt(j, ti, i){
+    if(!hunting) return;
+    const t=TRAILS[ti]; const a=t.seq[0]+i*t.step, c=a+t.step;
+    const ha=Math.floor(a/100), hc=Math.floor(c/100);
+    if(ha!==hc){ j.classList.add('border');
+      huntFb.className='fb good';
+      huntFb.innerHTML = ti===1 ? `${fmt(a)} → ${fmt(c)}: the hundreds digit changes from ${ha} to ${hc}. On the by-100s trail, <b>every</b> jump crosses a border, because every jump is one hundred.`
+        : `Yes! ${fmt(a)} → ${fmt(c)}. The hundreds digit changes from ${ha} to ${hc}. That's the border.`;
+    } else { j.classList.add('miss'); setTimeout(()=>j.classList.remove('miss'),900);
+      huntFb.className='fb warn'; huntFb.innerHTML=`From ${fmt(a)} to ${fmt(c)}, the hundreds digit stays ${ha}. Keep looking for the jump where it changes.`; }
+  }
+
+  const side = el('div','side'); side.appendChild(keypad(()=>root));
+  const blocks = el('div',''); let stage=0;
+  function drawBlocks(out){
+    out.innerHTML=''; const box=el('div','',''); box.style.display='flex'; box.style.flexDirection='column'; box.style.gap='10px';
+    const bl = el('div','blocks');
+    const flats = stage===2 ? 4 : 3, rods = stage===0 ? 9 : stage===1 ? 10 : 0;
+    for(let i=0;i<flats;i++){ const f=el('div','flatb'+(stage===2&&i===3?' newflat':'')); bl.appendChild(f); }
+    if(rods){ const r=el('div','rods'+(stage===1?' full':'')); for(let i=0;i<rods;i++) r.appendChild(el('div','rodb'+(stage===1&&i===9?' new':''))); bl.appendChild(r); }
+    const cap = ['<span class="bigval">390</span><br>3 hundreds and 9 tens.',
+                 '<span class="bigval">390 + 10</span><br>Add one more ten. Now there are <b>10 tens</b>!',
+                 '<span class="bigval">400</span><br>Ten tens make one hundred. Trade them for a flat: 4 hundreds, 0 tens. The hundreds digit changes!'][stage];
+    const nb = btn('primary', ['Add one ten','Bundle the tens','Start again'][stage], ()=>{ stage=(stage+1)%3; drawBlocks(out); });
+    box.append(bl, el('div','',cap), nb); out.appendChild(box);
+  }
+  side.appendChild(detective([
+    {q:'On the by-10s trail, when did the hundreds digit change?', btns:[['Hunt for the border', out=>{ hunting=!hunting; wrap.classList.toggle('hunting',hunting);
+        out.textContent = hunting ? 'Tap the jump arrow (→) where the hundreds digit changes. Try the other trails too!' : ''; if(!hunting){ document.querySelectorAll('.jump.border').forEach(j=>j.classList.remove('border')); huntFb.textContent=''; huntFb.className='fb'; } }]]},
+    {q:'Why does it change there?', btns:[['Show it with blocks', out=>{ stage=0; drawBlocks(out); }]]}
+  ]));
+  root.appendChild(side);
+  return {};
+}
+
+/* ---------- STOP 3: Halfway scout ---------- */
+const PAIRS = [[300,500],[200,600],[500,700],[0,1000],[650,750]];
+function stopHalf(root){
+  const S = {p:0, g:null, walk:false};
+  root.className='view wide';
+  const b = el('div','board');
+  b.append(el('div','task-no','Task 3 · The halfway scout'), el('h2','','Send the scout to the halfway point'));
+  const lead = el('p','lead'); b.appendChild(lead);
+  const chips = el('div','row'); b.appendChild(chips);
+  const nl = el('div','nl'); const area = el('div','area'); nl.appendChild(area); b.appendChild(nl);
+  const acts = el('div','row'); const fb = el('div','fb');
+  acts.append(btn('primary','Check the scout',check));
+  b.append(acts, fb); root.appendChild(b);
+  const ab = () => PAIRS[S.p]; const span = () => ab()[1]-ab()[0]; const stepOf = () => span()/20;
+
+  root.appendChild(detective([
+    {q:'How do you know it is exactly halfway?', btns:[
+      ['Show both walks', out=>{ S.walk='arcs'; draw(); const [a,c]=ab(), m=(a+c)/2; out.textContent=`From ${fmt(a)} to ${fmt(m)} is ${fmt(m-a)} steps. From ${fmt(m)} to ${fmt(c)} is ${fmt(c-m)} steps. Same distance from each end, so ${fmt(m)} is halfway.`; }],
+      ['Walk in from both ends', out=>{ S.walk='meet'; draw(); const [a,c]=ab(); const s=span()/4; const rows=[]; for(let k=0;k<=2;k++) rows.push([a+k*s, c-k*s]);
+          out.innerHTML=''; const w=el('div','walkrow'); rows.forEach(([x,y],k)=>{ w.appendChild(el('span', k===2?'meetup':'', k===2?`meet at ${fmt(x)}`:`${fmt(x)} & ${fmt(y)}`)); }); out.append(w, el('div','',`Take equal steps of ${fmt(s)} from each end. Where the two walkers meet is the middle.`)); }]
+    ]}
+  ]));
+
+  function check(){
+    const [a,c]=ab(); const g=S.g;
+    if(g==null){ fb.className='fb'; fb.textContent='Tap the trail to place the scout first.'; return; }
+    const d1=g-a, d2=c-g;
+    if(d1===d2){ fb.className='fb good'; fb.innerHTML=`Yes! From ${fmt(a)} to ${fmt(g)} is ${fmt(d1)} steps, and from ${fmt(g)} to ${fmt(c)} is ${fmt(d2)} steps. Equal walks, so ${fmt(g)} is exactly halfway.`; }
+    else { fb.className='fb warn'; fb.innerHTML=`From ${fmt(a)} to ${fmt(g)} is <b>${fmt(Math.abs(d1))}</b> steps. From ${fmt(g)} to ${fmt(c)} is <b>${fmt(Math.abs(d2))}</b> steps. The two walks must be equal. Move the scout toward ${fmt(d1<d2?c:a)} and check again.`; }
+  }
+  function setPos(e){
+    const r=area.getBoundingClientRect(); const [a,c]=ab(); const st=stepOf();
+    let v = a + Math.round(((e.clientX-r.left)/r.width*span())/st)*st; v=Math.max(a,Math.min(c,v));
+    S.g=v; S.walk=false; fb.textContent=''; fb.className='fb'; draw();
+  }
+  let drag=false;
+  nl.addEventListener('pointerdown', e=>{ drag=true; try{nl.setPointerCapture(e.pointerId);}catch(_){} setPos(e); });
+  nl.addEventListener('pointermove', e=>{ if(drag) setPos(e); });
+  nl.addEventListener('pointerup', ()=>drag=false); nl.addEventListener('pointercancel', ()=>drag=false);
+
+  function draw(){
+    const [a,c]=ab(); const st=stepOf(); const pct = v => (v-a)/span()*100;
+    lead.textContent = `What number is exactly halfway between ${fmt(a)} and ${fmt(c)}? Tap the trail to move the scout.`;
+    chips.innerHTML='';
+    PAIRS.forEach(([x,y],i)=>{ const ch=btn('chip', `${fmt(x)} and ${fmt(y)}`, ()=>{ S.p=i; S.g=null; S.walk=false; fb.textContent=''; fb.className='fb'; root.querySelectorAll('.evi').forEach(o=>o.innerHTML=''); draw(); }); ch.setAttribute('aria-pressed', S.p===i); chips.appendChild(ch); });
+    area.innerHTML=''; area.appendChild(el('div','bar'));
+    for(let k=1;k<20;k++){ const v=a+k*st; const t=el('div','tick'+(k%5?' small':'')); t.style.left=pct(v)+'%'; area.appendChild(t);
+      if(k%5===0){ const l=el('div','ticklbl',fmt(v)); l.style.left=pct(v)+'%'; area.appendChild(l);} }
+    [[a,0],[c,100]].forEach(([v,p])=>{ const l=el('div','endlbl',fmt(v)); l.style.left=p+'%'; area.appendChild(l); });
+    const m=(a+c)/2;
+    if(S.walk==='arcs'){ [[a,m,'var(--f1)'],[m,c,'var(--f2)']].forEach(([x,y,col])=>{ const r=el('div','arc'); r.style.left=pct(x)+'%'; r.style.width=(pct(y)-pct(x))+'%'; r.style.setProperty('--c',col); r.innerHTML=`<b>${fmt(y-x)} steps</b>`; area.appendChild(r); }); }
+    if(S.walk==='meet'){ const s=span()/4; [[a,'var(--f1)'],[a+s,'var(--f1)'],[c,'var(--f2)'],[c-s,'var(--f2)'],[m,'var(--accent)']].forEach(([v,col])=>{ const d=el('div','meet'); d.style.left=pct(v)+'%'; d.style.setProperty('--c',col); d.innerHTML='<i></i>'; area.appendChild(d); }); }
+    if(S.g!=null){ const sc=el('div','scout'); sc.style.left=pct(S.g)+'%'; sc.innerHTML=`<div class="body">${fmt(S.g)}</div><div class="stem"></div>`; area.appendChild(sc); }
+  }
+  draw();
+  return {};
+}
+
+/* ---------- STOP 4: Odometer puzzles ---------- */
+function odoEl(n, digits){
+  const o = el('div','odo'); const s = String(n).padStart(digits,'0'); const lead = String(n).length;
+  [...s].forEach((d,i)=>{ const w=el('div','wheel'+(i < digits-lead ? ' lead0':'')); w.innerHTML=`<span>${d}</span>`; o.appendChild(w); });
+  o.setAttribute('aria-label', `Odometer reads ${fmt(n)}`); return o;
+}
+function chainSteps(n){
+  const places=['ones','tens','hundreds','thousands','ten thousands']; const ds=String(n).split('').reverse().map(Number);
+  const steps=[]; let i=0;
+  while(ds[i]===9){ steps.push(`The <b>${places[i]}</b> wheel is at 9. One more makes ten ${places[i]}. It rolls back to 0 and pushes 1 into the ${places[i+1]}.`); i++; }
+  const d = ds[i]||0; steps.push(`The <b>${places[i]}</b> wheel goes from ${d} to ${d+1}.`);
+  return {steps, changed:i+1};
+}
+function stopOdo(root){
+  const STARTS=[399,509,999];
+  const S={start:399, cur:399};
+  root.className='view';
+  const b = el('div','board');
+  b.append(el('div','task-no','Task 4 · Odometer puzzles'), el('h2','','A car’s counter clicks up 1 every mile'));
+  const chips=el('div','row'); b.appendChild(chips);
+  b.appendChild(el('p','lead','Write the next three readings. Then drive to check!'));
+  const readings=el('div','readings'); b.appendChild(readings);
+  const acts=el('div','row'); const fb=el('div','fb'); acts.append(btn('primary','Check my readings',check)); b.append(acts, fb);
+  b.appendChild(el('div','odolabel','Miles'));
+  const odoBox=el('div',''); b.appendChild(odoBox);
+  const driveRow=el('div','row'); const driveMsg=el('div','fb');
+  driveRow.append(btn('primary','Drive 1 mile',drive), btn('secondary','Back to start',()=>{S.cur=S.start; driveMsg.textContent=''; driveMsg.className='fb'; drawOdo();}));
+  b.append(driveRow, driveMsg);
+  root.appendChild(b);
+
+  const side=el('div','side'); side.appendChild(keypad(()=>root));
+  side.appendChild(detective([
+    {q:'At 399 → 400, three digits changed at once. Why?', btns:[['Show the chain reaction', out=>{
+      const n = S.start; const c = chainSteps(n);
+      out.innerHTML = `<b>${fmt(n)} → ${fmt(n+1)}</b><ol class="chain">${c.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div style="margin-top:6px">${c.changed} digit${c.changed===1?'':'s'} changed. ${c.changed>1?'Each full wheel pushed the next one: a chain reaction.':'No wheel was full, so nothing else moved.'}</div>`;
+    }]]},
+    {q:'Which start makes the MOST digits change?', btns:[['Compare all three', out=>{
+      out.innerHTML = STARTS.map(n=>`${fmt(n)} → ${fmt(n+1)}: <b>${chainSteps(n).changed}</b> digit${chainSteps(n).changed===1?'':'s'} changed`).join('<br>') + '<br>The more 9s at the end, the longer the chain. At 999 → 1,000, all four digits change!';
+    }]]}
+  ]));
+  root.appendChild(side);
+
+  function check(){
+    const slots=groupSlots('odo'); const lines=[]; let empty=0;
+    slots.forEach((s,i)=>{ const v=val(s); const want=S.start+i+1; const prev=S.start+i;
+      if(v==null){ empty++; return; }
+      if(v===want){ s.classList.add('ok'); return; }
+      s.classList.add('no');
+      lines.push(`<li>Reading ${i+1}: your ${fmt(v)} is ${more(v,prev)}${i?' (the reading before)':''}. Each mile adds exactly 1.</li>`);
+    });
+    if(!lines.length && !empty){ fb.className='fb good'; fb.innerHTML=`All three readings are right: ${[1,2,3].map(k=>fmt(S.start+k)).join(', ')}. Now drive and watch the wheels.`; }
+    else if(!lines.length){ fb.className='fb'; fb.textContent=`So far so good. ${empty} reading${empty===1?' is':'s are'} still empty.`; }
+    else { fb.className='fb warn'; fb.innerHTML=`Take another look:<ul>${lines.join('')}</ul>Drive 1 mile at a time to check.`; }
+  }
+  function drawOdo(changed){
+    odoBox.innerHTML=''; const o=odoEl(S.cur,4); odoBox.appendChild(o);
+    if(changed){ const ws=[...o.children]; changed.forEach(i=>{ ws[i].classList.add('roll','flash'); }); }
+  }
+  function drive(){
+    if(S.cur>=9999) return;
+    const a=String(S.cur).padStart(4,'0'), c=String(S.cur+1).padStart(4,'0');
+    const ch=[]; for(let i=0;i<4;i++) if(a[i]!==c[i]) ch.push(i);
+    S.cur++; drawOdo(ch);
+    driveMsg.className='fb'+(ch.length>1?' good':'');
+    driveMsg.innerHTML = `${fmt(S.cur-1)} → <b>${fmt(S.cur)}</b>: ${ch.length===1?'1 digit changed.':`<b>${ch.length} digits changed at once!</b>`}`;
+  }
+  function setup(){
+    chips.innerHTML='';
+    STARTS.forEach(n=>{ const c=btn('chip',`Start at ${fmt(n)}`,()=>{S.start=n; setup();}); c.setAttribute('aria-pressed',S.start===n); chips.appendChild(c); });
+    S.cur=S.start; readings.innerHTML=''; readings.appendChild(el('div','given',fmt(S.start)));
+    for(let i=1;i<=3;i++){ readings.appendChild(el('span','','→')); readings.appendChild(slot('odo',S.start+i,`Reading ${i} after ${fmt(S.start)}`)); }
+    fb.textContent=''; fb.className='fb'; driveMsg.textContent=''; driveMsg.className='fb';
+    root.querySelectorAll('.evi').forEach(o=>o.innerHTML='');
+    drawOdo();
+  }
+  setup();
+  return {};
+}
+
+/* ---------- STOP 5: Windows at high altitude ---------- */
+const MOVES = [['above','Above',-10],['left','Left',-1],['right','Right',1],['below','Below',10]];
+function moveName(d){ const m=MOVES.find(x=>x[2]===d); return m ? m[1].toLowerCase() : null; }
+function windowGrid(center, mode, group){
+  // mode: 'fill' (center shown, neighbors as slots), 'mystery' (neighbors shown, center slot), 'show' (all shown)
+  const w = el('div','win'); const pos={above:[1,2],left:[2,1],right:[2,3],below:[3,2]};
+  for(let r=1;r<=3;r++) for(let c=1;c<=3;c++){
+    const key = Object.keys(pos).find(k=>pos[k][0]===r&&pos[k][1]===c);
+    if(r===2&&c===2){ const cell=el('div','cell c'); if(mode==='mystery'){ const s=slot(group,center,'Mystery center'); s.dataset.dir='center'; cell.appendChild(s);} else cell.textContent=fmt(center); w.appendChild(cell); }
+    else if(key){ const d=MOVES.find(m=>m[0]===key)[2]; const cell=el('div','cell'+(mode==='fill'?'':' n'));
+      if(mode==='fill'){ const s=slot(group,center+d,`${key} ${fmt(center)}`); s.dataset.dir=key; cell.appendChild(s); }
+      else cell.textContent=fmt(center+d);
+      w.appendChild(cell); }
+    else w.appendChild(el('div','cell empty'));
+  }
+  return w;
+}
+function stopWin(root){
+  const S={mode:'fill', center:447};
+  root.className='view';
+  const b=el('div','board');
+  b.append(el('div','task-no','Task 5 · Window at high altitude'), el('h2','','The chart-window moves still work up here'));
+  const chips=el('div','row'); b.appendChild(chips);
+  const lead=el('p','lead'); b.appendChild(lead);
+  const stageRow=el('div','row'); stageRow.style.gap='28px'; b.appendChild(stageRow);
+  const acts=el('div','row'); const fb=el('div','fb'); b.append(acts, fb);
+  root.appendChild(b);
+  const side=el('div','side'); side.appendChild(keypad(()=>root));
+  side.appendChild(detective([
+    {q:'Which window crossed a border?', btns:[['Show the border crossings', out=>{
+      out.innerHTML = `995 → below is <b>1,005</b>. Down adds 10, so we climb past 1,000.<br>650 → left is <b>649</b>. Taking 1 from 0 ones borrows a ten: two digits change.<br>The moves never change. Only the digits roll over.`; }]]},
+    {q:'Pick your own secret center. Cover it. Can a partner figure it out?', btns:[['Make my own', ()=>{ S.mode='own'; draw(); }]]}
+  ]));
+  root.appendChild(side);
+
+  function draw(){
+    chips.innerHTML='';
+    [447,650,995].forEach(n=>{ const c=btn('chip',fmt(n),()=>{S.mode='fill'; S.center=n; draw();}); c.setAttribute('aria-pressed', S.mode==='fill'&&S.center===n); chips.appendChild(c); });
+    const mc=btn('chip','Mystery window',()=>{ S.mode='mystery'; S.center=rand(111,988); draw(); }); mc.setAttribute('aria-pressed', S.mode==='mystery'); chips.appendChild(mc);
+    stageRow.innerHTML=''; acts.innerHTML=''; fb.textContent=''; fb.className='fb';
+    if(S.mode==='fill'){
+      lead.textContent=`Fill in the numbers above, below, left and right of ${fmt(S.center)}.`;
+      stageRow.appendChild(windowGrid(S.center,'fill','win'));
+      acts.appendChild(btn('primary','Check my window',checkFill));
+    } else if(S.mode==='mystery'){
+      lead.textContent='The center is covered! Use its neighbors to figure it out.';
+      stageRow.appendChild(windowGrid(S.center,'mystery','win'));
+      acts.append(btn('primary','Check the center',checkMystery), btn('secondary','New mystery',()=>{S.center=rand(111,988); draw();}));
+    } else {
+      lead.textContent='Type a secret center number (11 to 9,989). Then hide it and let a partner solve the window.';
+      const s=slot('own',null,'Your secret center'); stageRow.appendChild(s); setActive(s);
+      acts.appendChild(btn('primary','Hide it and show the window',()=>{ const v=val(s);
+        if(v==null||v<11||v>9989){ fb.className='fb warn'; fb.textContent='Pick a number from 11 to 9,989 so every neighbor fits.'; return; }
+        S.mode='mystery'; S.center=v; setActive(null); draw(); lead.textContent='Secret center hidden! Partner: use the neighbors to find it.'; }));
+    }
+    const key=el('div','movekey'); key.innerHTML='<b>Up</b><span>−10</span><b>Down</b><span>+10</span><b>Left</b><span>−1</span><b>Right</b><span>+1</span>';
+    stageRow.appendChild(key);
+  }
+  function checkFill(){
+    const c=S.center; const lines=[]; let empty=0;
+    groupSlots('win').forEach(s=>{ const v=val(s); const dir=s.dataset.dir; const want=c+MOVES.find(m=>m[0]===dir)[2];
+      if(v==null){ empty++; return; }
+      if(v===want){ s.classList.add('ok'); return; }
+      s.classList.add('no'); const d=v-c; const other=moveName(d);
+      const rule = {above:'Going up a row is 10 less.',below:'Going down a row is 10 more.',left:'One square left is 1 less.',right:'One square right is 1 more.'}[dir];
+      lines.push(`<li><b>${dir[0].toUpperCase()+dir.slice(1)}:</b> your ${fmt(v)} is ${more(v,c)}${other&&other!==dir?`. That is the move for <b>${other.toUpperCase()}</b>`:''}. ${rule}</li>`);
+    });
+    if(!lines.length && !empty){ fb.className='fb good'; fb.textContent=`All four neighbors are right. The moves work at high altitude!`; }
+    else if(!lines.length){ fb.className='fb'; fb.textContent=`So far so good. ${empty} square${empty===1?' is':'s are'} still empty.`; }
+    else { fb.className='fb warn'; fb.innerHTML=`Check these squares:<ul>${lines.join('')}</ul>Try again.`; }
+  }
+  function checkMystery(){
+    const s=groupSlots('win')[0]; const g=val(s); const c=S.center;
+    if(g==null){ fb.className='fb'; fb.textContent='Type your guess for the center first.'; return; }
+    if(g===c){ s.classList.add('ok'); fb.className='fb good'; fb.innerHTML=`Yes, it’s ${fmt(c)}! Check: ${fmt(c)} − 10 = ${fmt(c-10)} above, and ${fmt(c)} + 1 = ${fmt(c+1)} on the right. Every neighbor fits.`; return; }
+    s.classList.add('no');
+    const [k,,d]=MOVES[0]; // g !== c, so the 'above' clue always disagrees
+    fb.className='fb warn';
+    fb.innerHTML=`If the center were ${fmt(g)}, the square ${k==='above'?'above':k} would be ${fmt(g)} ${d<0?'−':'+'} ${Math.abs(d)} = <b>${fmt(g+d)}</b>. But the window shows <b>${fmt(c+d)}</b>. Try again. Which neighbor is just 1 away from the center?`;
+  }
+  draw();
+  return {};
+}
+
+/* ---------- STOP 6: Summit challenge ---------- */
+function stopSummit(root){
+  const S={pred:null, tests:0};
+  root.className='view wide';
+  const b=el('div','board');
+  b.append(el('div','task-no','Challenge · The summit'), el('h2','','Would the patterns survive on a 10,000 banner?'),
+    el('p','lead','Make your prediction first. Then test it with big numbers.'));
+  const pr=el('div','row predict'); b.appendChild(pr);
+  const acts=el('div','row'); b.appendChild(acts);
+  const finds=el('div','findings'); b.appendChild(finds);
+  const verdict=el('p','verdict'); b.appendChild(verdict);
+  root.appendChild(b);
+
+  function drawPred(){
+    pr.innerHTML='';
+    [['yes','Yes, they still work'],['no','No, they break'],['unsure','Not sure yet']].forEach(([k,t])=>{ const c=btn('chip',t,()=>{S.pred=k; drawPred();}); c.setAttribute('aria-pressed',S.pred===k); pr.appendChild(c); });
+  }
+  acts.append(btn('primary','Test with big numbers',test), btn('secondary','What did we find?',conclude));
+  function test(){
+    S.tests++; finds.innerHTML=''; verdict.textContent='';
+    const n=rand(1011,9989);
+    const f1=el('div','finding'); f1.appendChild(el('h3','',`Window around ${fmt(n)}`)); f1.appendChild(windowGrid(n,'show'));
+    f1.appendChild(el('div','',`Up −10, down +10, left −1, right +1. Same moves!`));
+    const T=rand(2,9)*1000; const seq=[T-30,T-20,T-10,T,T+10];
+    const f2=el('div','finding'); f2.appendChild(el('h3','','Skip by 10s across a thousands border'));
+    const st=el('div','stones'); seq.forEach((v,i)=>{ if(i){ const j=el('span','jump'+(v===T?' border':'')); j.innerHTML='+10'; st.appendChild(j);} st.appendChild(el('div','stone',fmt(v))); });
+    f2.append(st, el('div','',`${fmt(T-10)} → ${fmt(T)}: the tens and hundreds both roll over to 0, and the thousands digit goes up by 1. A chain reaction!`));
+    const f3=el('div','finding'); f3.appendChild(el('h3','','Odometer: 9,999 → 10,000'));
+    const o1=odoEl(9999,5), o2=odoEl(10000,5); [...o2.children].forEach(w=>w.classList.add('flash'));
+    const r=el('div','row'); r.append(o1, el('span','','→'), o2); f3.append(r, el('div','','The same chain reaction, one wheel longer. Every 9 rolls to 0 and a new 1 appears.'));
+    finds.append(f1,f2,f3);
+  }
+  function conclude(){
+    if(!S.tests) test();
+    const said = S.pred==='yes' ? 'Your prediction was right! ' : S.pred ? 'Look at the evidence above. ' : '';
+    verdict.textContent = `${said}Yes, the patterns survive. The moves are about place value, not about how big the chart is. Ten of any place always makes one of the next place.`;
+  }
+  drawPred();
+  return {};
+}
+
+/* ---------- Navigation ---------- */
+const STOPS=[
+  {id:'camp', icon:'1', label:'Base camp', make:stopCamp},
+  {id:'trails', icon:'2', label:'Skip-count trails', make:stopTrails},
+  {id:'half', icon:'3', label:'Halfway scout', make:stopHalf},
+  {id:'odo', icon:'4', label:'Odometer', make:stopOdo},
+  {id:'win', icon:'5', label:'High windows', make:stopWin},
+  {id:'summit', icon:'★', label:'Summit challenge', make:stopSummit, summit:true}
+];
+let cur=0; const visited=new Set();
+const stage=$('#stage'), trail=$('#trail');
+const views=[];
+function build(){
+  stage.innerHTML=''; views.length=0; setActive(null);
+  STOPS.forEach((s,i)=>{ const v=el('section','view'); v.id='stop-'+s.id; v.setAttribute('aria-label',s.label); s.make(v); v.hidden=i!==cur; stage.appendChild(v); views.push(v); });
+}
+function drawTrail(){
+  trail.innerHTML='';
+  STOPS.forEach((s,i)=>{ const b=el('button','stop'+(s.summit?' summit':'')+(visited.has(i)&&i!==cur?' done':'')); b.type='button';
+    b.innerHTML=`<span class="dot"><span>${s.icon}</span></span><span class="lbl">${s.label}</span>`;
+    if(i===cur) b.setAttribute('aria-current','step');
+    b.onclick=()=>go(i); trail.appendChild(b); });
+}
+function go(i){ visited.add(cur); cur=i; views.forEach((v,k)=>v.hidden=k!==i); setActive(null); drawTrail(); try{ history.replaceState(null,'','#'+STOPS[i].id); }catch(_){} }
+$('#resetBtn').onclick=()=>{ visited.clear(); cur=0; build(); drawTrail(); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(_){} };
+document.addEventListener('fullscreenchange',()=>{ $('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen'; });
+const h=location.hash.slice(1); const hi=STOPS.findIndex(s=>s.id===h); if(hi>=0) cur=hi;
+build(); drawTrail();
+
+/* ---------- Answer-key cross-check (console) ---------- */
+window.__selfTest = () => {
+  const r=[];
+  const tr = TRAILS.map(t=>t.seq.map((_,i)=>t.seq[0]+i*t.step));
+  r.push(JSON.stringify(tr[0].slice(3,7))==='[370,380,390,400]');
+  r.push(JSON.stringify(tr[1].slice(2,6))==='[450,550,650,750]');
+  r.push(JSON.stringify(tr[2].slice(2,6))==='[495,500,505,510]');
+  TRAILS.forEach((t,k)=>t.seq.forEach((v,i)=>{ if(v!=null) r.push(v===tr[k][i]); }));
+  r.push((300+500)/2===400);
+  r.push(chainSteps(399).changed===3 && chainSteps(509).changed===2 && chainSteps(999).changed===4);
+  const w = c => MOVES.map(m=>c+m[2]);
+  r.push(JSON.stringify(w(447))==='[437,446,448,457]', JSON.stringify(w(650))==='[640,649,651,660]', JSON.stringify(w(995))==='[985,994,996,1005]');
+  return r.every(Boolean) ? 'ok' : r;
+};
+})();
+</script>
+
+</body></html>

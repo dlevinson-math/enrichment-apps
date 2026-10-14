@@ -11,7 +11,9 @@ Two subcommands, run from the repo root:
 
   build --tracker DIR [--fetched FILE] [--flagged ORDERS] [--today YYYY-MM-DD]
       FILE is JSON {"<order>": "<path to fetched index.html>", ...} for the
-      apps to (re)publish. Writes each page to week-NN/<grade>-<activity>/,
+      apps to (re)publish (orders may be fractional, e.g. "25.1"). Writes each
+      page to week-NN/<grade>-<activity>/ (week 11 -> set3-projects/,
+      week 12 -> set4-projects/),
       updates apps.json, and rebuilds the home page index.html.
       ORDERS is a comma-separated list of orders that were flagged (e.g. they
       call window.claude) and must not be published.
@@ -27,10 +29,19 @@ import os
 import re
 import sys
 
-TOTAL = 55
 GRADES = ["K", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5"]
 MANIFEST = "apps.json"
 RUNTIME_PATTERNS = [r"window\.claude", r"\bclaude\.(complete|ask|storage|db)\b", r"window\.storage\b", r"sendPrompt\s*\("]
+
+
+# Project sets live after the ten weekly sections, under their own folders.
+PROJECT_SETS = {11: ("set3-projects", "Set 3 projects"), 12: ("set4-projects", "Set 4 projects")}
+
+
+def okey(x):
+    """Normalize an order value so 7, 7.0 and "7" match, and 25.1 stays 25.1."""
+    f = float(x)
+    return int(f) if f.is_integer() else f
 
 
 def slug(s):
@@ -39,7 +50,9 @@ def slug(s):
 
 
 def app_path(doc):
-    return f"week-{int(doc['week']):02d}/{slug(doc['grade'])}-{slug(doc['activity'])}/index.html"
+    week = int(doc["week"])
+    folder = PROJECT_SETS[week][0] if week in PROJECT_SETS else f"week-{week:02d}"
+    return f"{folder}/{slug(doc['grade'])}-{slug(doc['activity'])}/index.html"
 
 
 def load_tracker(d):
@@ -49,6 +62,7 @@ def load_tracker(d):
             doc = json.load(fh)
         doc = doc.get("data", doc)
         doc.setdefault("id", os.path.splitext(os.path.basename(f))[0])
+        doc["order"] = okey(doc["order"])
         docs.append(doc)
     return docs
 
@@ -57,7 +71,10 @@ def load_manifest():
     if not os.path.exists(MANIFEST):
         return []
     with open(MANIFEST) as fh:
-        return json.load(fh)
+        manifest = json.load(fh)
+    for m in manifest:
+        m["order"] = okey(m["order"])
+    return manifest
 
 
 def is_artifact(url):
@@ -168,14 +185,24 @@ footer{margin-top:48px; padding-top:18px; border-top:1.5px solid var(--line); di
 """
 
 
-def render_index(manifest, notes, today):
+def render_index(manifest, notes, labels, total, today):
     rows = sorted(manifest, key=lambda m: (m["week"], GRADES.index(m["grade"]) if m["grade"] in GRADES else 99, m["order"]))
-    weeks = {w: [m for m in rows if m["week"] == w] for w in range(1, 11)}
+    # Weeks 1-10 always show; a project set shows once one of its apps is published.
+    shown = list(range(1, 11)) + [w for w in sorted(PROJECT_SETS) if any(m["week"] == w for m in rows)]
+    weeks = {w: [m for m in rows if m["week"] == w] for w in shown}
+
+    def anchor(w):
+        return f"set-{w - 8}" if w in PROJECT_SETS else f"week-{w}"
+
+    def short(w):
+        return PROJECT_SETS[w][1] if w in PROJECT_SETS else f"Week {w}"
+
     empty = ' class="empty"'
-    nav = "".join(f'<a href="#week-{w}"{"" if weeks[w] else empty}>Week {w}</a>' for w in range(1, 11))
+    nav = "".join(f'<a href="#{anchor(w)}"{"" if weeks[w] else empty}>{short(w)}</a>' for w in shown)
     sections = []
-    for w in range(1, 11):
+    for w in shown:
         apps = weeks[w]
+        title = html.escape(labels.get(w) or short(w))
         if apps:
             cards = []
             for m in apps:
@@ -195,7 +222,7 @@ def render_index(manifest, notes, today):
         else:
             body = '<p class="soon">Apps for this week are on the way.</p>'
             count = ""
-        sections.append(f'<section id="week-{w}"><h2>Week {w} {count}</h2>{body}</section>')
+        sections.append(f'<section id="{anchor(w)}"><h2>{title} {count}</h2>{body}</section>')
     updated = nice_date(today)
     return f"""<!doctype html>
 <html lang="en">
@@ -203,7 +230,7 @@ def render_index(manifest, notes, today):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Enrichment Apps</title>
-<meta name="description" content="Interactive K–5 math enrichment apps, organized by week.">
+<meta name="description" content="Interactive K–5 math enrichment apps, organized by week and project set.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet">
@@ -219,7 +246,7 @@ def render_index(manifest, notes, today):
 <main>
 {chr(10).join(sections)}
 </main>
-<footer><span>Updated {updated}</span><span>{len(manifest)} of {TOTAL} apps</span></footer>
+<footer><span>Updated {updated}</span><span>{len(manifest)} of {total} apps</span></footer>
 </div>
 </body>
 </html>
@@ -241,8 +268,8 @@ def main():
     a = ap.parse_args()
 
     docs = load_tracker(a.tracker)
-    if len(docs) != TOTAL:
-        print(f"warning: tracker has {len(docs)} documents, expected {TOTAL}", file=sys.stderr)
+    if not docs:
+        sys.exit(f"no tracker documents found in {a.tracker}")
     manifest = load_manifest()
 
     if a.cmd == "plan":
@@ -253,8 +280,8 @@ def main():
     fetched = {}
     if a.fetched:
         with open(a.fetched) as fh:
-            fetched = {int(k): v for k, v in json.load(fh).items()}
-    flagged = {int(x) for x in a.flagged.split(",") if x.strip()}
+            fetched = {okey(k): v for k, v in json.load(fh).items()}
+    flagged = {okey(x) for x in a.flagged.split(",") if x.strip()}
     pending = {i["order"] for k in ("new", "rebuilt") for i in plan(docs, manifest)[k]}
     if a.manual:
         pending |= {d["order"] for d in docs if d.get("status") == "done" and (d.get("url") or "").strip()}
@@ -294,8 +321,12 @@ def main():
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     notes = {d["order"]: d.get("note", "") for d in docs}
+    labels = {}
+    for d in docs:
+        if d.get("weekLabel"):
+            labels.setdefault(int(d["week"]), d["weekLabel"])
     with open("index.html", "w", encoding="utf-8") as fh:
-        fh.write(render_index(manifest, notes, a.today))
+        fh.write(render_index(manifest, notes, labels, len(docs), a.today))
     print(json.dumps({"added": added, "flaggedRuntime": runtime, "published": len(manifest)}, indent=2, ensure_ascii=False))
 
 

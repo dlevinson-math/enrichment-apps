@@ -1,0 +1,786 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>How Many Are Hiding?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a spring meadow beside a stone cave — the scene is the board, the number bond + answer pad sit beside it. */
+:root{
+  --bg:#EAF3EF; --card:#FFFFFF; --ink:#1E2B2E; --muted:#56696A; --line:#CBDCD5;
+  --accent:#0F7A70; --accent-ink:#FFFFFF; --sun:#F2B33D;
+  --bear:#8B5530; --muzzle:#E3B98A; --eye:#1E1A17;
+  --rock:#4C4F6E; --rock2:#5D6082; --cave:#262840; --meadow:#CFE8C5; --leaf:#7DB86C; --leaf2:#5E9E52;
+  --good:#257F45; --good-soft:#DCF1E2; --oops:#B05E0E; --oops-soft:#FCEBD5;
+  --display:"Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Lexend", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A19; --card:#1B2624; --ink:#E8F0EE; --muted:#9FB3AE; --line:#2E3E3B;
+    --accent:#3CC3B4; --accent-ink:#0B1514; --sun:#F2B33D;
+    --bear:#B57749; --muzzle:#EBC79C; --eye:#1E1A17;
+    --rock:#565A80; --rock2:#666A93; --cave:#15162A; --meadow:#22402C; --leaf:#3F7A3A; --leaf2:#356B31;
+    --good:#62CF86; --good-soft:#1C3826; --oops:#F2A552; --oops-soft:#3A2915;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A19; --card:#1B2624; --ink:#E8F0EE; --muted:#9FB3AE; --line:#2E3E3B;
+  --accent:#3CC3B4; --accent-ink:#0B1514; --sun:#F2B33D;
+  --bear:#B57749; --muzzle:#EBC79C; --eye:#1E1A17;
+  --rock:#565A80; --rock2:#666A93; --cave:#15162A; --meadow:#22402C; --leaf:#3F7A3A; --leaf2:#356B31;
+  --good:#62CF86; --good-soft:#1C3826; --oops:#F2A552; --oops-soft:#3A2915;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; padding-inline:16px; padding-block:0 24px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:4px solid var(--sun); outline-offset:2px}
+.wrap{max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding-top:14px}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,50px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.title p{margin:4px 0 0; font-size:15px; color:var(--muted); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:8px; flex-wrap:wrap}
+nav.tabs button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 20px 8px 8px; font-weight:600; font-size:clamp(16px,1.5vw,20px); min-height:56px}
+nav.tabs button b{display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:var(--bg); font-family:var(--display); font-size:22px}
+nav.tabs button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav.tabs button[aria-selected="true"] b{background:var(--sun); color:#1E2B2E}
+
+.view{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:22px; align-items:start}
+.view[hidden]{display:none}
+.col{display:flex; flex-direction:column; gap:14px; min-width:0}
+
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:4px; gap:2px}
+.seg button{border:0; background:none; border-radius:12px; padding:8px 16px; min-height:46px; font-weight:500; font-size:17px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); font-weight:600}
+.ctl{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center}
+.ctl label{font-size:15px; color:var(--muted); font-weight:500}
+
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:clamp(18px,1.6vw,22px); padding:14px 26px; border-radius:16px; min-height:58px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(16px,1.4vw,19px); padding:11px 20px; border-radius:16px; min-height:54px}
+.secondary:disabled{opacity:.4; cursor:default}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+
+/* ---------- Scene ---------- */
+.scene{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:end}
+.zone{position:relative; border-radius:24px; min-height:clamp(220px,30vw,330px); overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end; padding:16px}
+.meadow{background:
+  radial-gradient(circle at 85% 18%, var(--sun) 0 26px, transparent 27px),
+  linear-gradient(to top, var(--leaf) 0 16px, var(--meadow) 16px)}
+.cave{background:var(--rock); border-radius:48% 48% 22px 22px / 34% 34% 22px 22px; padding:clamp(26px,4vw,44px) 18px 16px}
+.cave-in{position:relative; flex:1; background:var(--cave); border-radius:46% 46% 14px 14px / 30% 30% 14px 14px; display:flex; flex-direction:column; justify-content:flex-end; padding:16px 10px 12px; overflow:hidden; min-height:clamp(170px,23vw,260px)}
+.ztag{position:absolute; top:12px; left:14px; font-size:15px; font-weight:600; background:var(--card); color:var(--ink); border-radius:999px; padding:3px 12px; z-index:4}
+.cave .ztag{left:50%; transform:translateX(-50%); top:8px; background:var(--cave); color:#fff}
+.bears{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; align-content:end; justify-items:center; position:relative; z-index:1}
+.bear{position:relative; border:0; background:none; padding:0; width:100%; max-width:84px; aspect-ratio:1; display:block}
+.bear svg{width:100%; height:100%; display:block}
+.bear.tappable{cursor:pointer}
+.bear.tappable:hover svg{transform:translateY(-4px)}
+.bear .n{position:absolute; top:-6px; right:-4px; min-width:28px; height:28px; border-radius:14px; padding:0 6px; background:var(--sun); color:#1E2B2E; font-family:var(--display); font-weight:800; font-size:19px; line-height:28px; text-align:center; z-index:3}
+.bear.pulse svg{animation:pulse .7s ease-in-out 2}
+.bear.drop svg{animation:drop .35s ease-out}
+@keyframes pulse{50%{transform:scale(1.18)}}
+@keyframes drop{from{transform:translateY(-30px); opacity:0}to{transform:none; opacity:1}}
+
+.door{position:absolute; inset:0; z-index:2; background:
+  radial-gradient(ellipse 30% 18% at 30% 30%, var(--rock2) 0 98%, transparent),
+  radial-gradient(ellipse 26% 16% at 70% 62%, var(--rock2) 0 98%, transparent),
+  radial-gradient(ellipse 20% 12% at 28% 80%, var(--rock2) 0 98%, transparent),
+  var(--rock);
+  display:grid; place-items:center; transition:transform .7s cubic-bezier(.5,0,.2,1)}
+.door.open{transform:translateY(-112%)}
+.bush{position:absolute; inset:0; z-index:2; background:
+  radial-gradient(circle at 15% 30%, var(--leaf2) 0 22%, transparent 23%),
+  radial-gradient(circle at 50% 22%, var(--leaf) 0 26%, transparent 27%),
+  radial-gradient(circle at 85% 35%, var(--leaf2) 0 22%, transparent 23%),
+  radial-gradient(circle at 30% 70%, var(--leaf) 0 30%, transparent 31%),
+  radial-gradient(circle at 75% 75%, var(--leaf2) 0 30%, transparent 31%),
+  var(--leaf);
+  display:grid; place-items:center; transition:transform .7s cubic-bezier(.5,0,.2,1)}
+.bush.open{transform:translateY(112%)}
+.sign{font-family:var(--display); font-weight:800; font-size:clamp(56px,7vw,96px); line-height:1; color:#fff; background:rgba(0,0,0,.28); border-radius:22px; padding:6px 26px 0; min-width:1.4em; text-align:center}
+
+.strip{background:var(--card); border:2px dashed var(--line); border-radius:20px; padding:12px 16px; display:flex; flex-direction:column; gap:8px}
+.strip[hidden]{display:none}
+.strip .train{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.strip .bear{width:56px}
+.strip .bear.ghost svg{opacity:.38}
+.strip .grp{display:flex; gap:4px; padding:4px 8px; border-radius:14px; background:var(--bg)}
+.strip p{margin:0; font-size:18px}
+
+/* ---------- Bond + pad ---------- */
+.card{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:16px 18px}
+.bond{width:100%; max-width:360px; display:block; margin:0 auto}
+.bond circle{stroke:var(--ink); stroke-width:3}
+.bond line{stroke:var(--ink); stroke-width:3}
+.bond text{font-family:var(--display); font-weight:800; fill:var(--ink); text-anchor:middle; dominant-baseline:central}
+.bond .lab{font-family:var(--body); font-weight:500; font-size:15px; fill:var(--muted)}
+.bond .whole{fill:var(--bg)}
+.bond .out{fill:var(--meadow)}
+.bond .in{fill:var(--cave)}
+.bond .in-t{fill:#fff}
+.bond .q{fill:var(--oops)}
+.bond .q-in{fill:var(--sun)}
+.bondline{font-family:var(--display); font-weight:700; font-size:clamp(26px,2.6vw,36px); text-align:center; margin:4px 0 0}
+.ask{font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,42px); line-height:1.1; margin:0; text-wrap:balance}
+.pad{display:grid; grid-template-columns:repeat(6,1fr); gap:8px}
+.pad button{min-height:64px; border-radius:16px; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:clamp(28px,2.6vw,36px); line-height:1}
+.pad button:hover:not(:disabled){border-color:var(--accent)}
+.pad button.tried{border-style:dashed; color:var(--muted)}
+.pad button.right{background:var(--good); border-color:var(--good); color:var(--card)}
+.pad button:disabled{cursor:default}
+.fb{border-radius:18px; padding:14px 18px; font-size:clamp(18px,1.6vw,22px); line-height:1.4; display:flex; flex-direction:column; gap:10px}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft)}
+.fb.oops{background:var(--oops-soft)}
+.fb b{font-family:var(--display); font-size:1.25em}
+.mini{display:flex; flex-wrap:wrap; gap:3px; align-items:center}
+.mini .bear{width:34px}
+.mini .bear.ghost svg{opacity:.38}
+.log{display:flex; flex-wrap:wrap; gap:8px}
+.log span{background:var(--bg); border:1.5px solid var(--line); border-radius:999px; padding:4px 14px; font-family:var(--display); font-weight:700; font-size:19px}
+.hint{font-size:15px; color:var(--muted); margin:0}
+h2{font-family:var(--display); font-weight:800; font-size:22px; margin:0}
+
+/* ---------- Hands ---------- */
+.hands{display:flex; justify-content:center; gap:clamp(8px,3vw,40px); background:var(--card); border:2px solid var(--line); border-radius:24px; padding:20px 12px 10px}
+.hand{width:clamp(130px,22vw,240px)}
+.hand .skin{fill:var(--muzzle); stroke:var(--bear); stroke-width:3}
+.hand .down{fill:var(--muzzle); stroke:var(--bear); stroke-width:3; opacity:.75}
+.hand .tagc{fill:var(--sun)}
+.hand .tagt{font-family:var(--display); font-weight:800; font-size:22px; fill:#1E2B2E; text-anchor:middle; dominant-baseline:central}
+.hand .fing{transition:height .25s, y .25s}
+
+/* ---------- All the ways ---------- */
+.ways{display:flex; flex-direction:column; gap:6px}
+.way{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:center; padding:6px 10px; border-radius:14px; border:2px solid transparent}
+.way .lbl{font-family:var(--display); font-weight:700; font-size:clamp(20px,2vw,26px); white-space:nowrap}
+.cubes{display:flex; gap:3px; flex-wrap:nowrap; min-width:0}
+.cube{width:clamp(16px,2.4vw,30px); aspect-ratio:1; border-radius:5px; flex:none}
+.cube.o{background:var(--bear)}
+.cube.i{background:var(--cave); box-shadow:inset 0 0 0 2px var(--rock2)}
+.way.miss .cube{background:transparent; box-shadow:inset 0 0 0 2px var(--line)}
+.way.miss .lbl{color:var(--muted)}
+.way.shown{opacity:.75}
+.way.found{background:var(--good-soft)}
+.way.flag{border-color:var(--oops); border-style:dashed}
+.way .try{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:6px 14px; min-height:44px; font-weight:600; font-size:15px}
+.big{font-family:var(--display); font-weight:800; font-size:clamp(48px,6vw,80px); line-height:1}
+
+/* ---------- Detective ---------- */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:58px; height:58px; border-radius:50%; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:26px}
+.qnav button.star{width:auto; padding:0 20px; border-radius:30px; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:700; font-size:clamp(28px,3vw,42px); line-height:1.15; margin:0; text-wrap:balance}
+.stage{min-height:260px; display:flex; flex-direction:column; gap:12px; justify-content:center}
+.stage .fb{font-size:clamp(20px,1.8vw,26px)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+@media (max-width: 920px){
+  .view{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  .scene{gap:8px}
+  .zone{padding:10px; min-height:190px}
+  .cave{padding:22px 8px 8px}
+  .cave-in{padding:12px 6px 8px; min-height:150px}
+  .bears{gap:3px}
+  .pad{grid-template-columns:repeat(4,1fr)}
+  nav.tabs button{padding-right:14px; font-size:15px}
+  .way{grid-template-columns:auto minmax(0,1fr); }
+  .way .try{grid-column:1 / -1; justify-self:start}
+  .bear .n{min-width:22px; height:22px; font-size:15px; line-height:22px}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="bearSym" viewBox="0 0 64 64">
+    <circle cx="17" cy="16" r="9" style="fill:var(--bear)"/>
+    <circle cx="47" cy="16" r="9" style="fill:var(--bear)"/>
+    <circle cx="17" cy="16" r="4.5" style="fill:var(--muzzle)"/>
+    <circle cx="47" cy="16" r="4.5" style="fill:var(--muzzle)"/>
+    <circle cx="32" cy="36" r="23" style="fill:var(--bear)"/>
+    <ellipse cx="32" cy="44" rx="11" ry="8.5" style="fill:var(--muzzle)"/>
+    <circle cx="24" cy="31" r="3" style="fill:var(--eye)"/>
+    <circle cx="40" cy="31" r="3" style="fill:var(--eye)"/>
+    <ellipse cx="32" cy="40" rx="4.5" ry="3.2" style="fill:var(--eye)"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1>How Many Are Hiding?</h1>
+      <p>Kindergarten · Week 7 · Lesson K.7</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Lesson parts">
+    <button role="tab" id="tab-flash" aria-selected="false" data-tab="flash"><b>1</b>Finger flash</button>
+    <button role="tab" id="tab-cave" aria-selected="true" data-tab="cave"><b>2</b>Bears in the cave</button>
+    <button role="tab" id="tab-ways" aria-selected="false" data-tab="ways"><b>3</b>All the ways</button>
+    <button role="tab" id="tab-q" aria-selected="false" data-tab="q"><b>4</b>Detective questions</button>
+  </nav>
+
+  <!-- 1. Finger flash -->
+  <section class="view" id="view-flash" hidden>
+    <div class="col">
+      <div class="hands" id="hands"></div>
+      <div class="row">
+        <button class="primary" id="flashNext">Next flash</button>
+        <button class="secondary" id="flashCount">Count the ones down</button>
+      </div>
+      <p class="hint">Warm-up. Students show it with their own fingers first, then say the number.</p>
+    </div>
+    <div class="col">
+      <div class="card"><div id="flashBond"></div></div>
+      <p class="ask">How many fingers are down?</p>
+      <div class="pad" id="flashPad"></div>
+      <div class="fb" id="flashFb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- 2. Bears in the cave -->
+  <section class="view" id="view-cave">
+    <div class="col">
+      <div class="scene">
+        <div class="zone meadow" id="meadow">
+          <span class="ztag">Out</span>
+          <div class="bears" id="outBears"></div>
+          <div class="bush" id="bush"><span class="sign">?</span></div>
+        </div>
+        <div class="zone cave">
+          <span class="ztag">Cave</span>
+          <div class="cave-in">
+            <div class="bears" id="inBears"></div>
+            <div class="door" id="door"><span class="sign" id="doorSign">?</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="strip" id="strip" hidden aria-live="polite"></div>
+      <div class="ctl">
+        <label for="totSeg">Bears</label>
+        <div class="seg" id="totSeg" role="group" aria-label="How many bears">
+          <button data-tot="5">5</button><button data-tot="8" aria-pressed="true">8</button><button data-tot="10">10</button>
+        </div>
+        <label for="whoSeg">Who hides?</label>
+        <div class="seg" id="whoSeg" role="group" aria-label="Who hides the bears">
+          <button data-who="computer" aria-pressed="true">The computer</button><button data-who="friend">A friend</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <label for="askSeg">Find</label>
+        <div class="seg" id="askSeg" role="group" aria-label="What to find">
+          <button data-ask="hide" aria-pressed="true">How many hiding</button><button data-ask="out">How many out</button>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card"><div id="bond"></div><p class="bondline" id="bondLine"></p></div>
+      <p class="ask" id="askText"></p>
+      <div class="pad" id="pad"></div>
+      <div class="row">
+        <button class="primary" id="doneHide" hidden>Done hiding</button>
+        <button class="secondary" id="countUp">Count up with me</button>
+        <button class="primary" id="newRound">New round</button>
+      </div>
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <h2>Our number bonds</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. All the ways -->
+  <section class="view" id="view-ways" hidden>
+    <div class="col">
+      <div class="ctl">
+        <label for="waysTot">Bears</label>
+        <div class="seg" id="waysTot" role="group" aria-label="How many bears">
+          <button data-tot="5">5</button><button data-tot="8" aria-pressed="true">8</button><button data-tot="10">10</button>
+        </div>
+      </div>
+      <div class="card"><div class="ways" id="ways"></div></div>
+    </div>
+    <div class="col">
+      <p class="ask" id="waysAsk">Did we find them all?</p>
+      <div class="row">
+        <button class="primary" id="waysCheck">Did we find them all?</button>
+        <button class="secondary" id="waysAll">Show every way</button>
+      </div>
+      <div class="fb" id="waysFb" aria-live="polite"></div>
+      <p class="hint">Every round from “Bears in the cave” lands here, in order from 0 out to all out. Tap “Try it” on an empty row to play that one.</p>
+    </div>
+  </section>
+
+  <!-- 4. Detective questions -->
+  <section class="view" id="view-q" hidden>
+    <div class="col">
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+    </div>
+    <div class="col">
+      <div class="card stage" id="stage" aria-live="polite"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+
+/* ---------- pure math ---------- */
+const bondText = (T, a, b) => `${T} is ${a} and ${b}`;
+function judge(T, known, unknown, a){
+  // returns {ok, kind, sum}
+  if(a === unknown) return {ok:true};
+  if(a === known && known !== unknown) return {ok:false, kind:'known'};
+  const sum = known + a;
+  return {ok:false, kind: sum < T ? 'few' : 'many', sum};
+}
+
+/* ---------- state ---------- */
+let S;
+function fresh(){
+  return {
+    tab:'cave', total:8, who:'computer', ask:'hide',
+    v:3, h:5, phase:'answer', tried:new Set(), lastH:5, gen:0,
+    found:{5:new Set(), 8:new Set(), 10:new Set()}, showAll:{}, log:[],
+    waysFlag:false,
+    flash:{seq:[6,8,3], i:0, up:6, solved:false, tried:new Set(), counted:false},
+    q:1
+  };
+}
+
+/* ---------- helpers ---------- */
+const bearSVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><use href="#bearSym"/></svg>';
+function bearHTML(cls='', n=null, attrs=''){
+  return `<span class="bear ${cls}" ${attrs}>${bearSVG}${n!=null?`<span class="n">${n}</span>`:''}</span>`;
+}
+function miniTrain(solid, ghost){
+  let h=''; for(let i=0;i<solid;i++) h+=bearHTML(); for(let i=0;i<ghost;i++) h+=bearHTML('ghost');
+  return `<div class="mini">${h}</div>`;
+}
+function bondSVG(whole, left, right, opts={}){
+  const L = opts.leftLab || 'out', R = opts.rightLab || 'in the cave';
+  const t = v => v==='?' ? `class="q"` : '';
+  return `<svg class="bond" viewBox="0 0 320 236" role="img" aria-label="Number bond: ${whole} is ${left} and ${right}">
+    <line x1="160" y1="58" x2="78" y2="150"/><line x1="160" y1="58" x2="242" y2="150"/>
+    <circle class="whole" cx="160" cy="52" r="44"/>
+    <circle class="out" cx="78" cy="156" r="40"/>
+    <circle class="in" cx="242" cy="156" r="40"/>
+    <text x="160" y="56" font-size="50">${whole}</text>
+    <text x="78" y="160" font-size="46" ${t(left)}>${left}</text>
+    <text x="242" y="160" font-size="46" class="${right==='?'?'q-in':'in-t'}">${right}</text>
+    <text class="lab" x="78" y="220">${L}</text><text class="lab" x="242" y="220">${R}</text>
+  </svg>`;
+}
+
+/* ---------- tabs ---------- */
+function selectTab(t){
+  S.tab = t;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['flash','cave','ways','q'].forEach(k => $('#view-'+k).hidden = k!==t);
+  if(t==='ways') renderWays();
+  if(t==='q') renderQ();
+  if(t==='flash') renderFlash();
+}
+
+/* =========================================================
+   1. FINGER FLASH
+   ========================================================= */
+// finger geometry for a left hand (viewBox 0 0 170 200): pinky, ring, middle, index, thumb
+const FING = [
+  {x:22, w:22, up:58}, {x:47, w:23, up:72}, {x:73, w:23, up:80}, {x:99, w:23, up:70}
+];
+function handSVG(upArr, mirror, labelDown){
+  // upCount fingers up on this hand (0..5); order for left hand: pinky,ring,middle,index,thumb
+  // labelDown: numbers to put on down fingers (array aligned to finger index) or null
+  const base = 100;
+  let s = `<svg class="hand" viewBox="0 0 170 210" aria-hidden="true"><g ${mirror?'transform="translate(170,0) scale(-1,1)"':''}>`;
+  s += `<rect class="skin" x="18" y="${base-6}" width="110" height="96" rx="30"/>`;
+  const order = [0,1,2,3,4];
+  order.forEach(i => {
+    const isUp = upArr[i];
+    if(i < 4){
+      const f = FING[i]; const hgt = isUp ? f.up : 16;
+      s += `<rect class="${isUp?'skin':'down'} fing" x="${f.x}" y="${base-hgt}" width="${f.w}" height="${hgt+14}" rx="11"/>`;
+      if(!isUp && labelDown && labelDown[i]!=null){
+        s += `<circle class="tagc" cx="${f.x+f.w/2}" cy="${base-34}" r="15"/><text class="tagt" x="${f.x+f.w/2}" y="${base-33}" ${mirror?`transform="translate(${2*(f.x+f.w/2)},0) scale(-1,1)"`:''}>${labelDown[i]}</text>`;
+      }
+    } else {
+      // thumb
+      if(isUp) s += `<rect class="skin fing" x="122" y="78" width="24" height="64" rx="12" transform="rotate(28 134 142)"/>`;
+      else {
+        s += `<rect class="down fing" x="96" y="130" width="40" height="22" rx="11"/>`;
+        if(labelDown && labelDown[4]!=null) s += `<circle class="tagc" cx="150" cy="128" r="15"/><text class="tagt" x="150" y="129" ${mirror?'transform="translate(300,0) scale(-1,1)"':''}>${labelDown[4]}</text>`;
+      }
+    }
+  });
+  s += `</g></svg>`;
+  return s;
+}
+function renderFlash(){
+  const F = S.flash, up = F.up, down = 10 - up;
+  const leftUp = Math.min(up,5), rightUp = Math.max(up-5,0);
+  // left hand counts pinky(0) -> thumb(4); right hand counts thumb(4) -> pinky(0)
+  const upL = [0,1,2,3,4].map(i => i < leftUp);
+  const upR = [0,1,2,3,4].map(i => (4-i) < rightUp);
+  let labL=null, labR=null;
+  if(F.counted || F.solved){
+    // number the down fingers left to right as they appear on screen
+    labL=[null,null,null,null,null]; labR=[null,null,null,null,null];
+    let k = 1;
+    for(let i=0;i<5;i++) if(!upL[i]) labL[i]=k++;          // left hand on screen: pinky..thumb
+    for(let i=4;i>=0;i--) if(!upR[i]) labR[i]=k++;         // right hand on screen: thumb..pinky
+  }
+  $('#hands').innerHTML = handSVG(upL, false, labL) + handSVG(upR, true, labR);
+  $('#flashBond').innerHTML = bondSVG(10, up, F.solved ? down : '?', {leftLab:'up', rightLab:'down'});
+  const pad = $('#flashPad'); pad.innerHTML='';
+  for(let n=0;n<=10;n++){
+    const b = document.createElement('button'); b.textContent=n; b.setAttribute('aria-label', `${n} down`);
+    if(F.tried.has(n)) b.classList.add('tried');
+    if(F.solved && n===down) b.classList.add('right');
+    b.disabled = F.solved;
+    b.onclick = () => flashAnswer(n); pad.appendChild(b);
+  }
+}
+function flashAnswer(a){
+  const F = S.flash, up = F.up, down = 10-up, fb = $('#flashFb');
+  const r = judge(10, up, down, a);
+  if(r.ok){
+    F.solved = true; renderFlash();
+    fb.className='fb good';
+    fb.innerHTML = `<b>Yes! ${down} are down.</b><span>${bondText(10, up, down)}.</span>`;
+    return;
+  }
+  F.tried.add(a); renderFlash(); fb.className='fb oops';
+  if(r.kind==='known') fb.innerHTML = `<span><b>${a}</b> fingers are <b>up</b>.</span><span>How many are <b>down</b>? Try again.</span>`;
+  else fb.innerHTML = `<span>${up} up and ${a} down make <b>${r.sum}</b>.</span><span>We have <b>10</b> fingers. ${r.kind==='few'?'Too few.':'Too many.'} Try again.</span>`;
+}
+function nextFlash(){
+  const F = S.flash;
+  F.i++;
+  if(F.i < F.seq.length) F.up = F.seq[F.i];
+  else { let n; do { n = 1 + Math.floor(Math.random()*9); } while(n===F.up); F.up = n; }
+  F.solved=false; F.counted=false; F.tried=new Set(); $('#flashFb').textContent=''; $('#flashFb').className='fb';
+  renderFlash();
+}
+
+/* =========================================================
+   2. BEARS IN THE CAVE
+   ========================================================= */
+function unknownVal(){ return S.ask==='hide' ? S.h : S.v; }
+function knownVal(){ return S.ask==='hide' ? S.v : S.h; }
+
+function renderCave(anim){
+  const T = S.total, solved = S.phase==='solved', hiding = S.phase==='hiding';
+  // bears
+  const outEl = $('#outBears'), inEl = $('#inBears');
+  let o='', i='';
+  for(let k=0;k<S.v;k++){
+    const num = solved && S.ask==='out' ? S.h + k + 1 : null;
+    o += bearHTML(hiding?'tappable':'', num, hiding?`role="button" tabindex="0" data-side="out" aria-label="Bear out. Tap to hide it."`:'');
+  }
+  for(let k=0;k<S.h;k++){
+    const num = solved && S.ask==='hide' ? S.v + k + 1 : null;
+    i += bearHTML((hiding?'tappable ':'') + (anim==='drop'&&k===S.h-1?'drop':''), num, hiding?`role="button" tabindex="0" data-side="in" aria-label="Bear in the cave. Tap to bring it out."`:'');
+  }
+  outEl.innerHTML = o; inEl.innerHTML = i;
+  if(hiding){
+    $$('#outBears .bear, #inBears .bear').forEach(b => {
+      const go = () => moveBear(b.dataset.side);
+      b.onclick = go; b.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } };
+    });
+  }
+  // covers
+  const doorOpen = hiding || solved;
+  $('#door').classList.toggle('open', doorOpen);
+  $('#doorSign').textContent = S.ask==='out' ? S.h : '?';
+  $('#bush').classList.toggle('open', !(S.ask==='out' && S.phase==='answer'));
+  // bond
+  let L, R;
+  if(hiding){ L='?'; R='?'; }
+  else if(solved){ L=S.v; R=S.h; }
+  else if(S.ask==='hide'){ L=S.v; R='?'; }
+  else { L='?'; R=S.h; }
+  $('#bond').innerHTML = bondSVG(T, L, R);
+  $('#bondLine').textContent = solved ? bondText(T, S.v, S.h) : `${T} is ${L==='?'?'__':L} and ${R==='?'?'__':R}`;
+  // prompt
+  $('#askText').textContent = hiding ? 'Friend: tap bears to hide them!' : (S.ask==='hide' ? 'How many are hiding?' : 'How many are out?');
+  $('#doneHide').hidden = !hiding;
+  $('#countUp').hidden = hiding || solved;
+  // pad
+  const pad = $('#pad'); pad.innerHTML='';
+  for(let n=0;n<=T;n++){
+    const b = document.createElement('button'); b.textContent = n;
+    b.setAttribute('aria-label', `${n}`);
+    if(S.tried.has(n)) b.classList.add('tried');
+    if(solved && n===unknownVal()) b.classList.add('right');
+    b.disabled = solved || hiding;
+    b.style.opacity = hiding ? .35 : '';
+    b.onclick = () => answer(n);
+    pad.appendChild(b);
+  }
+  renderLog();
+}
+function renderLog(){
+  const items = S.log.slice(-12);
+  $('#log').innerHTML = items.length ? items.map(r => `<span>${bondText(r.T, r.v, r.h)}</span>`).join('') : '<p class="hint">Each round you solve shows up here.</p>';
+}
+function moveBear(side){
+  if(S.phase!=='hiding') return;
+  if(side==='out' && S.v>0){ S.v--; S.h++; renderCave('drop'); }
+  else if(side==='in' && S.h>0){ S.h--; S.v++; renderCave(); }
+  $('#fb').className='fb'; $('#fb').innerHTML = `<span>${S.h} in the cave. Tap <b>Done hiding</b> when you are ready.</span>`;
+}
+function doneHiding(){
+  S.phase='answer'; S.tried=new Set();
+  $('#fb').className='fb'; $('#fb').textContent='';
+  $('#strip').hidden = true;
+  renderCave();
+}
+function newRound(opts={}){
+  S.gen++;
+  const T = S.total;
+  S.tried = new Set(); $('#strip').hidden = true;
+  $('#fb').className='fb'; $('#fb').textContent='';
+  if(opts.v!=null){ S.v = opts.v; S.h = T - opts.v; S.phase='answer'; S.lastH=S.h; renderCave(); return; }
+  if(S.who==='friend'){
+    S.v = T; S.h = 0; S.phase='hiding';
+    $('#fb').innerHTML = '<span>Everyone else: close your eyes!</span>';
+  } else {
+    let h; do { h = Math.floor(Math.random()*(T+1)); } while(h===S.lastH);
+    S.h = h; S.v = T - h; S.lastH = h; S.phase='answer';
+  }
+  renderCave();
+}
+function answer(a){
+  if(S.phase!=='answer') return;
+  const T = S.total, known = knownVal(), unk = unknownVal();
+  const r = judge(T, known, unk, a);
+  const fb = $('#fb');
+  if(r.ok){
+    S.phase='solved'; S.gen++;
+    S.found[T].add(S.v);
+    S.log.push({T, v:S.v, h:S.h});
+    $('#strip').hidden = true;
+    renderCave();
+    fb.className='fb good';
+    const look = S.ask==='hide' ? 'Lift the cave… look!' : 'Move the bush… look!';
+    fb.innerHTML = `<b>Yes! ${a} ${S.ask==='hide'?'are hiding':'are out'}.</b><span>${look} ${bondText(T, S.v, S.h)}.</span>`;
+    return;
+  }
+  S.tried.add(a); renderCave();
+  fb.className='fb oops';
+  if(r.kind==='known'){
+    if(S.ask==='hide'){
+      fb.innerHTML = `<span><b>${a}</b> is how many you can <b>see</b>.</span><span>How many can't you see? Try again.</span>`;
+      $$('#outBears .bear').forEach(b => b.classList.add('pulse'));
+    } else {
+      fb.innerHTML = `<span><b>${a}</b> is how many are <b>hiding</b>.</span><span>How many are out? Try again.</span>`;
+    }
+    return;
+  }
+  const knownWord = S.ask==='hide' ? 'out' : 'hiding', guessWord = S.ask==='hide' ? 'hiding' : 'out';
+  fb.innerHTML = `${miniTrain(known, a)}<span>${known} ${knownWord} and ${a} ${guessWord} make <b>${r.sum}</b>.</span><span>We have <b>${T}</b> bears. ${r.kind==='few' ? 'Too few!' : 'Too many!'} Try again.</span>`;
+}
+async function countUp(){
+  if(S.phase!=='answer') return;
+  const g = ++S.gen, T = S.total, known = knownVal();
+  const strip = $('#strip'); strip.hidden = false;
+  const knownWord = S.ask==='hide' ? 'out' : 'hiding';
+  strip.innerHTML = `<p>Start at <b>${known}</b> (${knownWord}). Count up to <b>${T}</b>.</p><div class="train"><span class="grp" id="kg"></span><span id="gg" class="train"></span></div><p id="sp"></p>`;
+  let k=''; for(let i=0;i<known;i++) k+=bearHTML('', i===known-1 ? known : null);
+  $('#kg').innerHTML = k || '<span style="font-family:var(--display);font-weight:800;font-size:28px;padding:0 8px">0</span>';
+  const gg = $('#gg'), sp = $('#sp');
+  const said = [String(known)+'…'];
+  sp.textContent = said.join(' ');
+  await sleep(700);
+  for(let n=known+1;n<=T;n++){
+    if(g!==S.gen) return;
+    gg.insertAdjacentHTML('beforeend', bearHTML('ghost drop', n));
+    said.push(n); sp.textContent = said.join(', ');
+    await sleep(750);
+  }
+  if(g!==S.gen) return;
+  sp.innerHTML = `${said.join(', ')}. <b>How many dotted bears did we count?</b>`;
+}
+
+/* =========================================================
+   3. ALL THE WAYS
+   ========================================================= */
+function cubesHTML(o, i){ let s=''; for(let k=0;k<o;k++) s+='<span class="cube o"></span>'; for(let k=0;k<i;k++) s+='<span class="cube i"></span>'; return `<div class="cubes" aria-hidden="true">${s}</div>`; }
+function renderWays(){
+  const T = S.total, F = S.found[T], all = S.showAll[T];
+  $$('#waysTot button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.tot===T));
+  let h='';
+  for(let s=0;s<=T;s++){
+    const got = F.has(s), show = got || all;
+    const cls = got ? 'found' : all ? 'shown' : 'miss';
+    const flag = S.waysFlag && !got ? ' flag' : '';
+    h += `<div class="way ${cls}${flag}">
+      <span class="lbl">${show ? bondText(T, s, T-s) : `${T} is ? and ?`}</span>
+      ${show ? cubesHTML(s, T-s) : cubesHTML(0,0).replace('</div>', Array(T).fill('<span class="cube"></span>').join('')+'</div>')}
+      ${got ? '<span></span>' : `<button class="try" data-s="${s}">Try it</button>`}
+    </div>`;
+  }
+  $('#ways').innerHTML = h;
+  $$('#ways .try').forEach(b => b.onclick = () => {
+    S.who='computer'; syncSegs(); selectTab('cave'); newRound({v:+b.dataset.s});
+  });
+  $('#waysAsk').textContent = `Ways to make ${T}`;
+}
+function waysCheck(){
+  const T = S.total, n = S.found[T].size, all = T+1, fb = $('#waysFb');
+  S.waysFlag = true; renderWays();
+  if(n===all){ fb.className='fb good'; fb.innerHTML = `<span class="big">${n}</span><span><b>We found them all!</b> There are ${all} ways to make ${T}, from 0 out to ${T} out.</span>`; }
+  else { fb.className='fb oops'; fb.innerHTML = `<span class="big">${n} <span style="font-size:.5em">of ${all}</span></span><span>We found ${n} way${n===1?'':'s'}. ${all-n} still missing. Look for the dashed rows.</span>`; }
+}
+function waysAll(){
+  const T = S.total; S.showAll[T] = true; S.waysFlag=false; renderWays();
+  const fb=$('#waysFb'); fb.className='fb good';
+  fb.innerHTML = `<span class="big">${T+1}</span><span>${T+1} ways to make ${T}. Go down the list: one more out, one less hiding.</span>`;
+}
+
+/* =========================================================
+   4. DETECTIVE QUESTIONS
+   ========================================================= */
+function stage(html){ $('#stage').innerHTML = html; }
+function staircase(T, onlyFound){
+  let h='<div class="ways">';
+  for(let s=0;s<=T;s++){
+    if(onlyFound && !S.found[T].has(s)) continue;
+    h += `<div class="way found" style="grid-template-columns:auto minmax(0,1fr)"><span class="lbl">${bondText(T,s,T-s)}</span>${cubesHTML(s,T-s)}</div>`;
+  }
+  return h+'</div>';
+}
+const Q = {
+  1:{ text:'How did you know without peeking?',
+      sub:'8 bears. 3 came out.',
+      actions:[
+        {label:'Count up', run: async () => {
+          const g = ++S.gen;
+          stage(`<p class="qtext" style="font-size:26px">3 are out. Start at 3.</p><div class="mini" id="qm"></div><p class="fb good" id="qs" style="margin:0"></p>`);
+          const qm = $('#qm'), qs = $('#qs');
+          for(let i=1;i<=3;i++) qm.insertAdjacentHTML('beforeend', bearHTML('', i===3?3:null));
+          qs.textContent = '3…'; await sleep(700);
+          const said=['3…'];
+          for(let n=4;n<=8;n++){ if(g!==S.gen) return; qm.insertAdjacentHTML('beforeend', bearHTML('ghost drop', n)); said.push(n); qs.textContent = said.join(' '); await sleep(700); }
+          if(g!==S.gen) return;
+          qs.innerHTML = `3… 4, 5, 6, 7, 8.<br><b>5 counts. 5 are hiding.</b>`;
+        }},
+        {label:'Just know the pair', run: () => {
+          S.gen++;
+          stage(`${bondSVG(8,3,5)}<p class="fb good" style="margin:0"><b>3 and 5 make 8.</b> If you know the pair, you know who is hiding.</p>`);
+        }}
+      ]},
+  2:{ text:'Did we find them all?',
+      sub:'Ways to make 8.',
+      actions:[
+        {label:'Put ours in order', run: () => {
+          S.gen++; const n = S.found[8].size;
+          stage(n ? `${staircase(8,true)}<p class="fb oops" style="margin:0">We found <b>${n}</b> of 9. Any missing?</p>` : `<p class="fb oops" style="margin:0">No rounds with 8 bears yet. Play a few in “Bears in the cave.”</p>`);
+        }},
+        {label:'Show every way', run: () => {
+          S.gen++;
+          stage(`${staircase(8,false)}<p class="fb good" style="margin:0"><b>9 ways to make 8.</b> One more out, one less hiding.</p>`);
+        }}
+      ]},
+  3:{ text:'My friend hid more. Does the answer change?',
+      sub:'',
+      actions:[
+        {label:'Compare two rounds', run: () => {
+          S.gen++;
+          stage(`<div class="way found" style="grid-template-columns:auto minmax(0,1fr)"><span class="lbl">${bondText(8,6,2)}</span>${cubesHTML(6,2)}</div>
+                 <div class="way found" style="grid-template-columns:auto minmax(0,1fr)"><span class="lbl">${bondText(8,3,5)}</span>${cubesHTML(3,5)}</div>
+                 <p class="fb good" style="margin:0"><b>Yes, it changes.</b> 2 hiding, then 5 hiding. Fewer out means more hiding.</p>`);
+        }}
+      ]},
+  4:{ text:'Play with 10. Find every way to make 10.',
+      sub:'Challenge',
+      actions:[
+        {label:'Play with 10', run: () => { S.total=10; S.who='computer'; syncSegs(); selectTab('cave'); newRound(); }},
+        {label:'Show all the ways', run: () => {
+          S.gen++;
+          stage(`${staircase(10,false)}<p class="fb good" style="margin:0"><b>11 ways to make 10.</b> From 0 and 10 to 10 and 0.</p>`);
+        }}
+      ]},
+  5:{ text:'Now I tell you how many are hiding. You tell me how many are out!',
+      sub:'Easier or harder? Why?',
+      actions:[
+        {label:'Try it', run: () => { S.ask='out'; S.who='computer'; syncSegs(); selectTab('cave'); newRound(); }}
+      ]}
+};
+function renderQ(){
+  const nav = $('#qnav');
+  nav.innerHTML = [1,2,3].map(i => `<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="Question ${i}">${i}</button>`).join('') +
+    `<button class="star" data-q="4" aria-pressed="${S.q===4}">★ 10 bears</button><button class="star" data-q="5" aria-pressed="${S.q===5}">★ Switch it</button>`;
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; S.gen++; renderQ(); });
+  const q = Q[S.q];
+  $('#qtext').textContent = q.text;
+  const box = $('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i) => {
+    const b = document.createElement('button');
+    b.className = i===0 ? 'primary' : 'secondary'; b.textContent = a.label; b.onclick = a.run; box.appendChild(b);
+  });
+  stage(`<p class="hint" style="font-size:20px">${q.sub || 'Talk it over.'}</p>`);
+}
+
+/* ---------- controls ---------- */
+function syncSegs(){
+  $$('#totSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.tot===S.total));
+  $$('#whoSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.who===S.who));
+  $$('#askSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.ask===S.ask));
+}
+$$('#totSeg button').forEach(b => b.onclick = () => { S.total=+b.dataset.tot; syncSegs(); newRound(); });
+$$('#waysTot button').forEach(b => b.onclick = () => { S.total=+b.dataset.tot; S.waysFlag=false; $('#waysFb').textContent=''; $('#waysFb').className='fb'; syncSegs(); newRound(); renderWays(); });
+$$('#whoSeg button').forEach(b => b.onclick = () => { S.who=b.dataset.who; syncSegs(); newRound(); });
+$$('#askSeg button').forEach(b => b.onclick = () => { S.ask=b.dataset.ask; syncSegs(); newRound(); });
+$$('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+$('#newRound').onclick = () => newRound();
+$('#doneHide').onclick = doneHiding;
+$('#countUp').onclick = countUp;
+$('#flashNext').onclick = nextFlash;
+$('#flashCount').onclick = () => { S.flash.counted = true; renderFlash(); };
+$('#waysCheck').onclick = waysCheck;
+$('#waysAll').onclick = waysAll;
+$('#resetBtn').onclick = () => { boot(S ? S.tab : 'cave'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+function boot(tab){
+  S = fresh();
+  syncSegs();
+  $('#fb').className='fb'; $('#fb').textContent=''; $('#strip').hidden=true;
+  $('#flashFb').className='fb'; $('#flashFb').textContent='';
+  $('#waysFb').className='fb'; $('#waysFb').textContent='';
+  renderCave(); renderFlash();
+  selectTab(tab || 'cave');
+}
+boot('cave');
+})();
+</script>
+
+</body></html>

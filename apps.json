@@ -168,5 +168,205 @@
     "path": "week-04/grade-2-mystery-digits-cryptarithm-puzzles/index.html",
     "builtOn": "2026-10-05",
     "publishedOn": "2026-10-05"
+  },
+  {
+    "order": 19,
+    "grade": "Grade 3",
+    "week": 4,
+    "activity": "The Leftovers Game",
+    "sourceUrl": "https://claude.ai/artifact/W23axLFxsLeNZuE6ganYzj",
+    "path": "week-04/grade-3-the-leftovers-game/index.html",
+    "builtOn": "2026-10-06",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 20,
+    "grade": "Grade 4",
+    "week": 4,
+    "activity": "Factor Trees & Prime Factorization",
+    "sourceUrl": "https://claude.ai/artifact/Vkp2wy2SFWrm1oMrJX1mwQ",
+    "path": "week-04/grade-4-factor-trees-prime-factorization/index.html",
+    "builtOn": "2026-10-06",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 21,
+    "grade": "K",
+    "week": 5,
+    "activity": "Patterns in the Count: The Number Chart Hunt",
+    "sourceUrl": "https://claude.ai/artifact/M6reyZ1DckKF1oKuAJPr3p",
+    "path": "week-05/k-patterns-in-the-count-the-number-chart-hunt/index.html",
+    "builtOn": "2026-10-06",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 22,
+    "grade": "Grade 1",
+    "week": 5,
+    "activity": "Comparing & Ordering Numbers",
+    "sourceUrl": "https://claude.ai/artifact/GPa6wX9PEr9hEJtsDbHvTr",
+    "path": "week-05/grade-1-comparing-ordering-numbers/index.html",
+    "builtOn": "2026-10-06",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 23,
+    "grade": "Grade 2",
+    "week": 5,
+    "activity": "Open Middle: Number Puzzle Tournament",
+    "sourceUrl": "https://claude.ai/artifact/LQVNUAokc3cb9uXt5DbW3K",
+    "path": "week-05/grade-2-open-middle-number-puzzle-tournament/index.html",
+    "builtOn": "2026-10-07",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 24,
+    "grade": "Grade 3",
+    "week": 5,
+    "activity": "Product Detectives",
+    "sourceUrl": "https://claude.ai/artifact/4odndJSfopNWQo9rJNamFM",
+    "path": "week-05/grade-3-product-detectives/index.html",
+    "builtOn": "2026-10-07",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 25,
+    "grade": "Grade 4",
+    "week": 5,
+    "activity": "Perfect, Abundant & Deficient Numbers",
+    "sourceUrl": "https://claude.ai/artifact/AYmX2w8nad9EmJYBzdiSgw",
+    "path": "week-05/grade-4-perfect-abundant-deficient-numbers/index.html",
+    "builtOn": "2026-10-07",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 25.1,
+    "grade": "Grade 2",
+    "week": 2,
+    "activity": "Even & Odd: The Pairing Proof",
+    "sourceUrl": "https://claude.ai/artifact/1rBnQPVjGsButpFsKdLHty",
+    "path": "week-02/grade-2-even-odd-the-pairing-proof/index.html",
+    "builtOn": "2026-10-08",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 25.2,
+    "grade": "Grade 2",
+    "week": 3,
+    "activity": "Place Value Power",
+    "sourceUrl": "https://claude.ai/artifact/DUKKV5AfepHAKgtpq6sUwk",
+    "path": "week-03/grade-2-place-value-power/index.html",
+    "builtOn": "2026-10-08",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 25.3,
+    "grade": "Grade 2",
+    "week": 4,
+    "activity": "Arrays & Rectangle Numbers",
+    "sourceUrl": "https://claude.ai/artifact/2i3b48F1bmWZvyMqiaaeMa",
+    "path": "week-04/grade-2-arrays-rectangle-numbers/index.html",
+    "builtOn": "2026-10-08",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 25.4,
+    "grade": "Grade 2",
+    "week": 5,
+    "activity": "Expedition to 1,000",
+    "sourceUrl": "https://claude.ai/artifact/Vf7L8VpLzeJLsAgMFcfy4R",
+    "path": "week-05/grade-2-expedition-to-1-000/index.html",
+    "builtOn": "2026-10-09",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 26,
+    "grade": "K",
+    "week": 6,
+    "activity": "The Estimation Jar",
+    "sourceUrl": "https://claude.ai/artifact/4gYXDuKAYoLczbB7YEvCgy",
+    "path": "week-06/k-the-estimation-jar/index.html",
+    "builtOn": "2026-10-09",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 27,
+    "grade": "Grade 1",
+    "week": 6,
+    "activity": "Guess My Number",
+    "sourceUrl": "https://claude.ai/artifact/5K2U3wxbLvnaeHNMJGf8T4",
+    "path": "week-06/grade-1-guess-my-number/index.html",
+    "builtOn": "2026-10-09",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 28,
+    "grade": "Grade 2",
+    "week": 6,
+    "activity": "The Broken Calculator",
+    "sourceUrl": "https://claude.ai/artifact/QRZPhGkuadbhVhCF7F7Weo",
+    "path": "week-06/grade-2-the-broken-calculator/index.html",
+    "builtOn": "2026-10-10",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 29,
+    "grade": "Grade 3",
+    "week": 6,
+    "activity": "The Magic Square",
+    "sourceUrl": "https://claude.ai/artifact/A6otS3gETDGWXR8A4JUskE",
+    "path": "week-06/grade-3-the-magic-square/index.html",
+    "builtOn": "2026-10-11",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 30,
+    "grade": "Grade 4",
+    "week": 6,
+    "activity": "How Many Blades of Grass?",
+    "sourceUrl": "https://claude.ai/artifact/QZSLXtL5jTn3hhqsEDbPHW",
+    "path": "week-06/grade-4-how-many-blades-of-grass/index.html",
+    "builtOn": "2026-10-12",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 31,
+    "grade": "Grade 5",
+    "week": 6,
+    "activity": "Four Fours",
+    "sourceUrl": "https://claude.ai/artifact/37RRWG2h3g1dNMcCC5CHHD",
+    "path": "week-06/grade-5-four-fours/index.html",
+    "builtOn": "2026-10-12",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 32,
+    "grade": "K",
+    "week": 7,
+    "activity": "How Many Are Hiding?",
+    "sourceUrl": "https://claude.ai/artifact/QixtD42ppja4RN4JTg2Toj",
+    "path": "week-07/k-how-many-are-hiding/index.html",
+    "builtOn": "2026-10-13",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 33,
+    "grade": "Grade 1",
+    "week": 7,
+    "activity": "Number Pyramids",
+    "sourceUrl": "https://claude.ai/artifact/TD2taYoZ8fTP5hvaw4adJK",
+    "path": "week-07/grade-1-number-pyramids/index.html",
+    "builtOn": "2026-10-13",
+    "publishedOn": "2026-10-14"
+  },
+  {
+    "order": 34,
+    "grade": "Grade 2",
+    "week": 7,
+    "activity": "What's My Rule?",
+    "sourceUrl": "https://claude.ai/artifact/SenLtb2EAH7V8gtD5P2pXq",
+    "path": "week-07/grade-2-whats-my-rule/index.html",
+    "builtOn": "2026-10-14",
+    "publishedOn": "2026-10-14"
   }
 ]

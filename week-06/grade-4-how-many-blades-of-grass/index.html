@@ -1,0 +1,886 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>How Many Blades of Grass?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one-screen classroom tool. Header, tab strip, then a visual "stage" beside a step panel; stacks to one column under 900px. */
+:root{
+  --bg:#EDF1E8; --card:#FFFFFF; --ink:#17231A; --muted:#55635A; --line:#D2DBCD;
+  --turf:#2C7A3C; --tape:#F2B705; --tape-ink:#3A2C00; --tape-soft:#FFF3C8;
+  --ok:#1D7443; --ok-soft:#DFF2E5; --try:#A9500C; --try-soft:#FBE9D8; --bad:#C0392B;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1511; --card:#18211B; --ink:#E7EEE5; --muted:#9CAB9F; --line:#2D3A31;
+    --turf:#5BBE6E; --tape:#F5C431; --tape-ink:#251B00; --tape-soft:#3A3112;
+    --ok:#62D693; --ok-soft:#163222; --try:#F3A562; --try-soft:#3A2414; --bad:#FF7B6B; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1511; --card:#18211B; --ink:#E7EEE5; --muted:#9CAB9F; --line:#2D3A31;
+  --turf:#5BBE6E; --tape:#F5C431; --tape-ink:#251B00; --tape-soft:#3A3112;
+  --ok:#62D693; --ok-soft:#163222; --try:#F3A562; --try-soft:#3A2414; --bad:#FF7B6B; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4; -webkit-tap-highlight-color:transparent; font-variant-numeric:tabular-nums}
+.app{min-height:100%; display:flex; flex-direction:column; padding-inline:24px; padding-block:12px 20px; gap:12px; max-width:1500px; margin:0 auto}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tape); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap}
+.brand h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,42px); line-height:1.05; letter-spacing:-.01em; text-wrap:balance}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px; overflow-x:auto; border-bottom:2px solid var(--line); scrollbar-width:thin}
+.tabs button{flex:none; border:0; background:none; padding:12px 16px 10px; font-weight:700; font-size:clamp(16px,1.4vw,20px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--tape)}
+.tabs .n{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--line); color:var(--ink); font-size:14px; margin-right:8px}
+.tabs button[aria-selected="true"] .n{background:var(--tape); color:var(--tape-ink)}
+
+.view{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:24px; align-items:start}
+.view[hidden]{display:none}
+.stage{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.lead{font-size:clamp(19px,1.6vw,24px); margin:0; max-width:36em; text-wrap:pretty}
+.lead b{font-family:var(--display); font-weight:800}
+.small{font-size:15px; color:var(--muted); margin:0}
+canvas{display:block; width:100%; touch-action:manipulation; border-radius:10px}
+
+.primary{border:0; background:var(--tape); color:var(--tape-ink); font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:12px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:17px; padding:10px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.choice{border:2px solid var(--line); background:var(--card); border-radius:14px; font-weight:700; font-size:clamp(18px,1.7vw,24px); padding:10px 18px; min-height:56px; min-width:72px}
+.choice:hover{border-color:var(--ink)}
+.choice[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.choice.right{background:var(--ok-soft); border-color:var(--ok); color:var(--ink)}
+.choice.off{background:var(--try-soft); border-color:var(--try); color:var(--ink)}
+.fb{margin:0; padding:12px 16px; border-radius:12px; font-size:clamp(17px,1.4vw,21px); line-height:1.45; border-left:6px solid transparent}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft); border-left-color:var(--ok)}
+.fb.try{background:var(--try-soft); border-left-color:var(--try)}
+.fb.info{background:var(--tape-soft); border-left-color:var(--tape)}
+.numin{width:min(240px,100%); font-size:clamp(22px,2vw,28px); font-weight:700; padding:8px 14px; border:2px solid var(--line); border-radius:12px; background:var(--card); min-height:56px}
+.numin:focus{border-color:var(--ink); outline:none}
+label.sl{display:flex; flex-direction:column; gap:4px; font-weight:700; flex:1 1 240px}
+label.sl span{display:flex; justify-content:space-between; gap:8px}
+label.sl output{font-family:var(--display); font-size:24px}
+input[type=range]{width:100%; height:44px; accent-color:var(--turf)}
+
+/* Steps list (mirrors the handout table) */
+.steps{display:flex; flex-direction:column; gap:6px}
+.srow{border:2px solid var(--line); border-radius:14px; background:var(--card); overflow:hidden}
+.srow.active{border-color:var(--ink)}
+.shead{width:100%; display:grid; grid-template-columns:36px 1fr auto; align-items:center; gap:12px; border:0; background:none; padding:10px 14px; text-align:left; min-height:52px}
+.snum{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--line); font-weight:700; font-size:15px}
+.srow.done .snum{background:var(--turf); color:var(--card)}
+.srow.active .snum{background:var(--tape); color:var(--tape-ink)}
+.slabel{font-weight:700; font-size:clamp(16px,1.3vw,19px)}
+.sval{font-family:var(--display); font-weight:800; font-size:clamp(18px,1.6vw,24px); text-align:right}
+.sval small{display:block; font-family:var(--body); font-weight:400; font-size:12px; color:var(--muted)}
+.sbody{padding:4px 16px 16px; display:flex; flex-direction:column; gap:12px; border-top:1px dashed var(--line)}
+.sbody .lead{font-size:clamp(17px,1.4vw,21px)}
+.result{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px; padding:14px 18px; border-radius:14px; background:var(--tape-soft); border:2px solid var(--tape)}
+.result b{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.4vw,36px)}
+.result:empty{display:none}
+
+/* Chain of factors */
+.chain{display:flex; flex-wrap:wrap; align-items:stretch; gap:8px}
+.link{flex:1 1 130px; border:2px solid var(--line); border-radius:14px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; min-width:0}
+.link b{font-family:var(--display); font-weight:800; font-size:clamp(20px,1.9vw,28px); line-height:1.1; white-space:nowrap}
+.link.total{flex:2 1 190px}
+.link span{font-size:14px; color:var(--muted)}
+.link.total{border-color:var(--tape); background:var(--tape-soft)}
+.op{align-self:center; font-family:var(--display); font-size:28px; font-weight:800; color:var(--muted)}
+
+/* Warm-up */
+.big{font-family:var(--display); font-weight:800; font-size:clamp(48px,7vw,104px); line-height:1; text-align:center; margin:10px 0 0; letter-spacing:-.02em}
+.pills{display:flex; gap:8px; flex-wrap:wrap}
+.pill{border:2px solid var(--line); background:var(--card); border-radius:999px; min-width:52px; min-height:52px; padding:0 16px; font-weight:700; font-size:18px}
+.pill[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.timer{display:flex; align-items:center; gap:12px; justify-content:center}
+.timer .t{font-family:var(--display); font-weight:800; font-size:40px; min-width:2ch; text-align:center}
+.bar{height:12px; border-radius:6px; background:var(--line); overflow:hidden; flex:1; min-width:70px; max-width:320px}
+.bar i{display:block; height:100%; background:var(--tape); width:100%; transform-origin:left}
+
+svg text{font-family:var(--body); fill:var(--ink)}
+.svgwrap{overflow-x:auto}
+.svgwrap svg{min-width:540px; display:block}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:15px; color:var(--muted)}
+.legend i{display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:6px; vertical-align:-2px}
+.teams{display:flex; flex-wrap:wrap; gap:6px}
+.team{display:inline-flex; align-items:center; gap:6px; border:2px solid var(--line); border-radius:999px; padding:4px 6px 4px 12px; font-size:15px; background:var(--card)}
+.team button{border:0; background:var(--line); border-radius:50%; width:30px; height:30px; font-weight:700}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:18px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.quote{margin:0; padding:10px 16px; border-left:4px solid var(--tape); font-style:italic; color:var(--muted)}
+.cardhead{font-family:var(--display); font-weight:800; font-size:clamp(20px,1.8vw,26px); margin:0}
+.split{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+
+@media (max-width:900px){
+  .app{padding-inline:16px}
+  .view{grid-template-columns:minmax(0,1fr)}
+  .split{grid-template-columns:1fr}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+</style>
+
+<div class="app">
+<header>
+  <div class="brand">
+    <h1>How Many Blades of Grass?</h1>
+    <p>Grade 4 · Week 6 · Lesson 4.6 · Fermi estimation</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><span class="n">1</span>Ballpark warm-up</button>
+  <button role="tab" data-tab="lab" aria-selected="false"><span class="n">2</span>Grass lab</button>
+  <button role="tab" data-tab="paper" aria-selected="false"><span class="n">3</span>Paper plan</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span class="n">4</span>Detective questions</button>
+  <button role="tab" data-tab="chal" aria-selected="false"><span class="n">★</span>Challenge</button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm">
+  <div class="stage">
+    <div class="pills" id="wPills"></div>
+    <div class="big" id="wProb">47 × 21</div>
+    <div class="timer"><button class="secondary" id="wTimerBtn">Start 10-second timer</button><div class="bar"><i id="wBar"></i></div><span class="t" id="wT">10</span></div>
+    <div class="svgwrap" id="wLine"></div>
+  </div>
+  <div class="panel">
+    <p class="lead"><b>Which is it closest to?</b> Decide in ten seconds. The skill is the ballpark, not the digits.</p>
+    <div class="row" id="wChoices"></div>
+    <p class="fb" id="wFb" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="wNext">Next problem</button><button class="secondary" id="wNew">Make a new one</button></div>
+  </div>
+</section>
+
+<!-- LAB -->
+<section class="view" id="v-lab" hidden>
+  <div class="stage" id="labStage"></div>
+  <div class="panel">
+    <p class="lead"><b>Nobody can count every blade.</b> Count a tiny square, measure the field, and multiply. Keep your units matched up.</p>
+    <div class="steps" id="steps"></div>
+    <div class="result" id="labResult"></div>
+  </div>
+</section>
+
+<!-- PAPER -->
+<section class="view" id="v-paper" hidden>
+  <div class="stage">
+    <p class="cardhead">How many sheets of paper does our school use in a year?</p>
+    <div class="chain" id="pChain"></div>
+    <canvas id="pBoxes" height="240" aria-label="Boxes of paper"></canvas>
+    <p class="small" id="pBoxNote"></p>
+  </div>
+  <div class="panel">
+    <p class="lead"><b>Plan it the same way.</b> What do you need to know? Set each estimate, then decide where your answer lands.</p>
+    <div class="row">
+      <label class="sl" for="pS"><span>Students in our school <output id="pSo">300</output></span><input type="range" id="pS" min="100" max="1000" step="25" value="300"></label>
+      <label class="sl" for="pK"><span>Sheets per student per day <output id="pKo">5</output></span><input type="range" id="pK" min="1" max="10" step="1" value="5"></label>
+    </div>
+    <div class="row">
+      <label class="sl" for="pD"><span>School days in a year <output id="pDo">180</output></span><input type="range" id="pD" min="160" max="200" step="5" value="180"></label>
+      <label class="sl" for="pE"><span>Extra sheets per day (teachers, office, copies) <output id="pEo">0</output></span><input type="range" id="pE" min="0" max="4000" step="100" value="0"></label>
+    </div>
+    <p class="lead" style="font-size:19px"><b>Our answer is closest to…</b></p>
+    <div class="row" id="pChoices"></div>
+    <p class="fb" id="pFb" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="pBall">Show the ballpark math</button><button class="secondary" id="pRain">Use the sample plan</button></div>
+    <p class="small">Least sure of a number? Double it in your head. What happens to the answer?</p>
+  </div>
+</section>
+
+<!-- DETECTIVES -->
+<section class="view" id="v-det" hidden>
+  <div class="stage">
+    <div class="qnav" id="qnav"></div>
+    <div class="svgwrap" id="dViz"></div>
+    <div class="legend" id="dLegend"></div>
+  </div>
+  <div class="panel">
+    <p class="lead" id="dQ"></p>
+    <div id="dExtra" class="panel"></div>
+    <div class="row" id="dActions"></div>
+    <p class="fb" id="dFb" aria-live="polite"></p>
+    <p class="small">Talk it over first. Then tap a button to put evidence on the screen.</p>
+  </div>
+</section>
+
+<!-- CHALLENGE -->
+<section class="view" id="v-chal" hidden>
+  <div class="stage">
+    <p class="cardhead">How many heartbeats have you had in your whole life?</p>
+    <div class="chain" id="hChain"></div>
+    <div class="row">
+      <label class="sl" for="hB"><span>Heartbeats in one minute <output id="hBo">90</output></span><input type="range" id="hB" min="60" max="120" step="5" value="90"></label>
+      <label class="sl" for="hA"><span>My age in years <output id="hAo">9</output></span><input type="range" id="hA" min="8" max="11" step="1" value="9"></label>
+    </div>
+    <p class="small">Find your pulse on your wrist. Count for 15 seconds, then multiply by 4.</p>
+    <div class="row" id="hChoices"></div>
+    <p class="fb" id="hFb" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="hShaky">What's the shakiest assumption?</button></div>
+  </div>
+  <div class="panel">
+    <p class="cardhead">Count the stars</p>
+    <blockquote class="quote">"Look toward heaven and count the stars, if you are able to count them." Genesis 15:5 (optional connection)</blockquote>
+    <canvas id="sky" aria-label="A night sky divided into 100 patches. Tap a patch to count its stars."></canvas>
+    <p class="lead" style="font-size:19px" id="skyMsg"><b>Tap a patch of sky.</b> Count its stars, then multiply by the number of patches.</p>
+    <div class="row"><button class="secondary" id="skyReveal">Reveal the real total</button><button class="secondary" id="skyNew">New sky</button></div>
+    <p class="fb" id="skyFb" aria-live="polite"></p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>Math.round(n).toLocaleString('en-US');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const parseNum=s=>{const t=String(s).replace(/[,\s_]/g,''); return /^\d+$/.test(t)?Number(t):NaN;};
+const sig1=n=>{ if(n<10) return n; const p=10**Math.floor(Math.log10(n)); return Math.round(n/p)*p; };
+const sig2=n=>{ if(n<100) return Math.round(n); const p=10**(Math.floor(Math.log10(n))-1); return Math.round(n/p)*p; };
+const roundTo=(n,s)=>Math.round(n/s)*s;
+function core(n){let z=0;while(n>0&&n%10===0){n/=10;z++;}return [n,z];}
+function zeroTalk(a,b){const [ca,za]=core(a),[cb,zb]=core(b),z=za+zb; return `${fmt(ca)} × ${fmt(cb)} = ${fmt(ca*cb)}`+(z?`, then tack on ${z} zero${z>1?'s':''}`:'');}
+const other=(v,right)=>v<right?right/10:right*10;
+const nearest=(n,opts)=>opts.reduce((b,o)=>Math.abs(n-o)<Math.abs(n-b)?o:b,opts[0]);
+const trim=x=>String(+x.toFixed(2));
+function words(n){const s=sig2(n); if(s>=1e9) return trim(s/1e9)+' billion'; if(s>=1e6) return trim(s/1e6)+' million'; if(s>=1e4) return trim(s/1e3)+' thousand'; return fmt(s);}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fb(el,cls,html){el.className='fb '+(cls||''); el.innerHTML=html||'';}
+function pctOff(a,e){return Math.round(Math.abs(a-e)/e*100);}
+function setupCanvas(cv,w,h){const d=Math.min(window.devicePixelRatio||1,2); cv.width=w*d; cv.height=h*d; const c=cv.getContext('2d'); c.setTransform(d,0,0,d,0,0); return c;}
+function closerTalk(v,a,b){return `${fmt(v)} is ${fmt(Math.abs(v-a))} away from ${fmt(a)} but ${fmt(Math.abs(b-v))} away from ${fmt(b)}`;}
+
+/* ====================== TABS ====================== */
+let tab='warm';
+function selectTab(t){
+  tab=t;
+  $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  $$('.view').forEach(v=>v.hidden=v.id!=='v-'+t);
+  redrawAll();
+}
+$$('.tabs button').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+
+/* ====================== WARM-UP ====================== */
+const WARM_FIXED=[[47,21,[100,1000,10000]],[312,48,[1000,10000,100000]],[1296,2400,[100000,1000000,10000000]]];
+const W={list:[],i:0,pick:null,timer:null,seed:7};
+function makeWarm(){
+  const r=rng(W.seed++);
+  for(let tries=0;tries<500;tries++){
+    const la=2+Math.floor(r()*3), lb=2+Math.floor(r()*2);
+    const a=Math.floor(10**(la-1)*(1+r()*8.9)), b=Math.floor(10**(lb-1)*(1+r()*8.9));
+    const p=a*b, P=10**Math.round(Math.log10(p));
+    if(P<100) continue;
+    const ok=x=>x>=0.6*P&&x<=3*P;
+    if(!ok(p)||!ok(sig1(a)*sig1(b))) continue;
+    return [a,b,[P/10,P,P*10]];
+  }
+  return [23,41,[100,1000,10000]];
+}
+function warmReset(){W.list=WARM_FIXED.map(x=>x.slice()); W.i=0; W.pick=null; stopTimer(); renderWarm();}
+function renderWarm(){
+  const [a,b,ch]=W.list[W.i];
+  $('#wPills').innerHTML=W.list.map((x,i)=>`<button class="pill" data-i="${i}" aria-pressed="${i===W.i}">${i+1}</button>`).join('');
+  $$('#wPills .pill').forEach(p=>p.onclick=()=>{W.i=+p.dataset.i; W.pick=null; stopTimer(); renderWarm();});
+  $('#wProb').textContent=`${fmt(a)} × ${fmt(b)}`;
+  const right=nearest(a*b,ch);
+  $('#wChoices').innerHTML=ch.map(c=>{let cls=''; if(W.pick!=null){ if(c===W.pick) cls=c===right?'right':'off'; } return `<button class="choice ${cls}" data-c="${c}">${fmt(c)}</button>`;}).join('');
+  $$('#wChoices .choice').forEach(btn=>btn.onclick=()=>{W.pick=+btn.dataset.c; stopTimer(); renderWarm();});
+  const f=$('#wFb');
+  if(W.pick==null){ fb(f,'',''); }
+  else{
+    const ra=sig1(a), rb=sig1(b), est=ra*rb, p=a*b;
+    if(W.pick===right){
+      fb(f,'ok',`<b>Yes, closest to ${fmt(right)}.</b> Round first: ${fmt(a)} is about ${fmt(ra)} and ${fmt(b)} is about ${fmt(rb)}. ${zeroTalk(ra,rb)}: about <b>${fmt(est)}</b>. Calculator check: ${fmt(a)} × ${fmt(b)} = ${fmt(p)}.`);
+    } else {
+      const other=nearest(est,ch.filter(c=>c!==W.pick));
+      fb(f,'try',`Round first: ${fmt(a)} is about ${fmt(ra)} and ${fmt(b)} is about ${fmt(rb)}. ${zeroTalk(ra,rb)}, so the product is about <b>${fmt(est)}</b>. Is that nearer to ${fmt(W.pick)} or to ${fmt(other)}? Try again.`);
+    }
+  }
+  $('#wLine').innerHTML=warmLine(ch, W.pick===right?a*b:null);
+}
+function warmLine(ch,p){
+  const max=ch[2], x0=30, x1=610, X=v=>x0+(x1-x0)*v/max;
+  let s=`<svg viewBox="0 0 640 120" width="100%" role="img" aria-label="Number line from 0 to ${fmt(max)}"><line x1="${x0}" y1="60" x2="${x1}" y2="60" stroke="var(--muted)" stroke-width="3"/>`;
+  s+=`<line x1="${x0}" y1="48" x2="${x0}" y2="72" stroke="var(--muted)" stroke-width="3"/><text x="${x0}" y="100" text-anchor="middle" font-size="20">0</text>`;
+  ch.forEach((c,i)=>{ const x=X(c); s+=`<line x1="${x}" y1="44" x2="${x}" y2="76" stroke="var(--ink)" stroke-width="4"/><text x="${x}" y="${i===0?30:100}" text-anchor="middle" font-size="22" font-weight="700">${fmt(c)}</text>`; });
+  if(p!=null){ const x=X(p); s+=`<circle cx="${x}" cy="60" r="12" fill="var(--tape)" stroke="var(--tape-ink)" stroke-width="2"/><text x="${x}" y="${p>max*0.06?30:100}" text-anchor="${p>max*0.06?'middle':'start'}" dx="${p>max*0.06?0:14}" font-size="18" font-weight="700" fill="var(--ink)">${fmt(p)}</text>`; }
+  s+='</svg>';
+  return s+`<p class="small">Measured on a ruler-style line from 0 to ${fmt(max)}${p!=null?'. The dot shows the exact product.':'. Answer to see where the exact product lands.'}</p>`;
+}
+function stopTimer(){ if(W.timer){clearInterval(W.timer); W.timer=null;} $('#wT').textContent='10'; $('#wBar').style.transform='scaleX(1)'; $('#wTimerBtn').textContent='Start 10-second timer'; }
+$('#wTimerBtn').onclick=()=>{
+  if(W.timer){stopTimer(); return;}
+  const t0=Date.now(); $('#wTimerBtn').textContent='Stop timer';
+  W.timer=setInterval(()=>{const left=Math.max(0,10-(Date.now()-t0)/1000); $('#wT').textContent=Math.ceil(left); $('#wBar').style.transform=`scaleX(${left/10})`; if(left<=0){clearInterval(W.timer); W.timer=null; $('#wTimerBtn').textContent='Start 10-second timer'; $('#wT').textContent='0';}},100);
+};
+$('#wNext').onclick=()=>{ W.i=(W.i+1)%W.list.length; W.pick=null; stopTimer(); renderWarm(); };
+$('#wNew').onclick=()=>{ W.list.push(makeWarm()); W.i=W.list.length-1; W.pick=null; stopTimer(); renderWarm(); };
+
+/* ====================== GRASS LAB ====================== */
+const L={};
+const SPOT_RANGES=[[16,24],[34,42],[46,54]]; // bare-ish, typical, thick
+function makeSpot(n,seed){
+  const r=rng(seed), blades=[], g=Math.ceil(Math.sqrt(n*1.4)), cells=[];
+  for(let i=0;i<g*g;i++) cells.push(i);
+  for(let i=cells.length-1;i>0;i--){const j=Math.floor(r()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]];}
+  const pad=40, size=520, cw=size/g;
+  for(let k=0;k<n;k++){
+    const c=cells[k], cx=c%g, cy=Math.floor(c/g);
+    const bx=pad+cx*cw+cw*(0.2+0.6*r()), by=pad+cy*cw+cw*(0.55+0.35*r());
+    const ang=-Math.PI/2+(r()-0.5)*1.6, len=cw*(0.75+0.5*r());
+    const tx=Math.min(pad+size-6,Math.max(pad+6,bx+Math.cos(ang)*len)), ty=Math.min(pad+size-6,Math.max(pad+6,by+Math.sin(ang)*len));
+    const bend=(r()-0.5)*cw*0.5;
+    blades.push({bx,by,tx,ty,mx:(bx+tx)/2+bend,my:(by+ty)/2,shade:r(),w:5+r()*4,mark:0});
+  }
+  return {n,blades,marked:0};
+}
+function labReset(){
+  L.seed=(L.seed||11)+101;
+  const r=rng(L.seed), order=[0,1,2];
+  for(let i=2;i>0;i--){const j=Math.floor(r()*(i+1)); [order[i],order[j]]=[order[j],order[i]];}
+  L.spots=order.map((k,i)=>{const [lo,hi]=SPOT_RANGES[k]; const n=lo+Math.floor(r()*(hi-lo+1)); return makeSpot(n,L.seed*7+i);});
+  L.spot=0; L.medPick=null; L.med=null;
+  L.len=60; L.wid=40; L.done={};
+  L.area=null; L.yard=null; L.ra=null; L.ry=null; L.p6=null; L.rm=null; L.p7=null; L.pow=null; L.shaky=null;
+  L.step=1; L.typed={}; L.fb={}; L.counting=false; L.yardFill=0;
+  renderLab();
+}
+const counts=()=>L.spots.map(s=>s.n);
+const middleCount=()=>counts().slice().sort((a,b)=>a-b)[1];
+const allCounted=()=>L.spots.every(s=>s.marked===s.n);
+const exactBlades=()=>L.med*L.len*L.wid*1296;
+
+const STEPS=[
+  {k:1,label:'Blades in one square inch',unit:'blades per sq in',val:()=>L.med},
+  {k:2,label:'Length of the field',unit:'yards',val:()=>L.done[2]?L.len:null},
+  {k:3,label:'Width of the field',unit:'yards',val:()=>L.done[3]?L.wid:null},
+  {k:4,label:'Area of the field',unit:'square yards',val:()=>L.area},
+  {k:5,label:'Square inches in one square yard',unit:'36 × 36',val:()=>L.yard},
+  {k:6,label:'Area of the field in square inches',unit:'rounded first',val:()=>L.p6},
+  {k:7,label:'Blades of grass on the field',unit:'blades',val:()=>L.p7},
+];
+function invalidateFrom(k){
+  if(k<=1){ L.rm=null; L.p7=null; L.pow=null; }
+  if(k<=4 && k>1){ L.area=null; L.ra=null; L.p6=null; L.rm=null; L.p7=null; L.pow=null; }
+  if(k===4){ L.ra=null; L.p6=null; L.rm=null; L.p7=null; L.pow=null; }
+  if(k===6){ L.rm=null; L.p7=null; L.pow=null; }
+}
+function renderLab(){
+  const box=$('#steps');
+  box.innerHTML=STEPS.map(s=>{
+    const v=s.val(), done=v!=null, act=L.step===s.k;
+    return `<div class="srow ${done?'done':''} ${act?'active':''}" data-k="${s.k}">
+      <button class="shead" data-k="${s.k}" aria-expanded="${act}"><span class="snum">${done&&!act?'✓':s.k}</span><span class="slabel">${s.label}</span><span class="sval">${done?fmt(v):'—'}<small>${s.unit}</small></span></button>
+      ${act?`<div class="sbody" id="sbody"></div>`:''}</div>`;
+  }).join('');
+  $$('#steps .shead').forEach(b=>b.onclick=()=>{L.step=+b.dataset.k; renderLab();});
+  stepBody[L.step]($('#sbody'));
+  renderLabStage();
+  const res=$('#labResult');
+  if(L.p7!=null) res.innerHTML=`<span>Our estimate:</span><b>about ${words(L.p7)}</b><span>blades of grass (${fmt(L.p7)})</span>`;
+  else res.innerHTML='';
+}
+function go(k){L.step=k; renderLab(); const el=$(`.srow[data-k="${k}"]`); if(el&&el.scrollIntoView) el.scrollIntoView({block:'nearest',behavior:reduced?'auto':'smooth'});}
+function numStep(el,{prompt,key,check,after}){
+  el.innerHTML=`<p class="lead">${prompt}</p>
+   <div class="row"><input class="numin" id="in${key}" inputmode="numeric" autocomplete="off" aria-label="Your answer" value="${esc(L.typed[key]||'')}"><button class="primary" id="chk${key}">Check</button></div>
+   <p class="fb ${L.fb[key]?L.fb[key][0]:''}" id="fb${key}" aria-live="polite">${L.fb[key]?L.fb[key][1]:''}</p>${after||''}`;
+  const inp=$('#in'+key);
+  inp.oninput=()=>L.typed[key]=inp.value;
+  const run=()=>{const v=parseNum(inp.value); let res; if(isNaN(v)) res=['try','Type a whole number. Commas are fine (like 2,400).']; else res=check(v); L.fb[key]=[res[0],res[1]]; if(res[2]) res[2](); renderLab();};
+  $('#chk'+key).onclick=run;
+  inp.onkeydown=e=>{if(e.key==='Enter') run();};
+}
+const stepBody={
+  1(el){
+    const sp=L.spots[L.spot];
+    let h=`<p class="lead">Count <b>three spots</b>. Tap each blade inside the square to mark it.</p>
+      <div class="row">${L.spots.map((s,i)=>`<button class="choice" data-sp="${i}" aria-pressed="${i===L.spot}">Spot ${i+1}${s.marked===s.n?` ✓ ${s.n}`:s.marked?` · ${s.marked}`:''}</button>`).join('')}</div>
+      <div class="row"><button class="secondary" id="countFor">Count this spot for me</button><button class="secondary" id="clearSpot">Clear this spot</button></div>`;
+    if(sp.marked===sp.n) h+=`<p class="fb ok">Spot ${L.spot+1} is done: <b>${sp.n} blades</b> in one square inch.</p>`;
+    else if(sp.marked) h+=`<p class="fb info">${sp.marked} marked so far. Look for green blades without a yellow dot.</p>`;
+    if(allCounted()){
+      const c=counts();
+      h+=`<p class="lead"><b>Take the middle one.</b> Which count is in the middle?</p><div class="row">${c.map((n,i)=>`<button class="choice ${L.medPick===i?(n===middleCount()?'right':'off'):''}" data-mp="${i}">${n}</button>`).join('')}</div><p class="fb" id="medFb"></p>`;
+    }
+    el.innerHTML=h;
+    $$('[data-sp]').forEach(b=>b.onclick=()=>{L.spot=+b.dataset.sp; renderLab();});
+    $('#countFor').onclick=countForMe;
+    $('#clearSpot').onclick=()=>{L.fb.med=null; L.medPick=null; sp.blades.forEach(b=>b.mark=0); sp.marked=0; if(L.med!=null){L.med=null; L.medPick=null; invalidateFrom(1);} renderLab();};
+    $$('[data-mp]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.mp, n=counts()[i], m=middleCount(), c=counts().slice().sort((a,b)=>a-b);
+      L.medPick=i;
+      if(n===m){ L.med=m; invalidateFrom(1); L.fb.med=['ok',`<b>${m} is the middle count.</b> In order: ${c.join(', ')}. One bare patch or one thick clump can't pull the middle around. Use <b>${m} blades per square inch</b>.`]; }
+      else if(n===c[2]){ L.fb.med=['try',`${n} is the biggest. Why not the biggest? One thick clump would make the whole field look thicker than it is. Put the counts in order: ${c.join(', ')}. Which one sits in the middle?`]; }
+      else { L.fb.med=['try',`${n} is the smallest. That spot may be a bare patch, so it would make the whole field look thin. Put the counts in order: ${c.join(', ')}. Which one sits in the middle?`]; }
+      renderLab();
+    });
+    if(L.fb.med && $('#medFb')) fb($('#medFb'),L.fb.med[0],L.fb.med[1]+(L.med!=null?' <br><button class="primary" id="to2" style="margin-top:8px">Next: measure the field</button>':''));
+    const t2=$('#to2'); if(t2) t2.onclick=()=>go(2);
+  },
+  2(el){ fieldSlider(el,'len','Length',40,120,'A football field is 100 yards from goal line to goal line. One big step is about 1 yard.',3); },
+  3(el){ fieldSlider(el,'wid','Width',20,80,'Pace it: walk along the short side and count your big steps.',4); },
+  4(el){
+    if(!L.done[2]||!L.done[3]){ el.innerHTML=`<p class="fb info">Set the length and width first (steps 2 and 3).</p>`; return; }
+    const A=L.len*L.wid;
+    numStep(el,{key:'area',prompt:`Area = length × width. What is <b>${L.len} × ${L.wid}</b> in square yards?`,
+      check:v=>{
+        if(v===A) return ['ok',`<b>${fmt(A)} square yards.</b> ${zeroTalk(L.len,L.wid)}. Each yard-by-yard square is one square yard.`,()=>{L.area=A; invalidateFrom(4); L.area=A;}];
+        if(v===L.len+L.wid) return ['try',`${fmt(v)} is ${L.len} + ${L.wid}. Adding finds a distance, not the space inside. The field is ${L.len} rows of ${L.wid} square yards. Multiply and try again.`];
+        if(v===2*(L.len+L.wid)) return ['try',`${fmt(v)} yards is the distance all the way around (the perimeter). Area counts the squares inside: ${L.len} rows of ${L.wid}. Try again.`];
+        const tens=Math.floor(L.len/10)*10, ones=L.len-tens;
+        const split=ones?`Split it: ${tens} × ${L.wid} and ${ones} × ${L.wid}, then add.`:`${zeroTalk(L.len,L.wid)}.`;
+        return ['try',`${fmt(v)} is ${v>A?'too big':'too small'}. Ballpark: about ${fmt(sig1(L.len))} × ${fmt(sig1(L.wid))} = ${fmt(sig1(L.len)*sig1(L.wid))}. ${split} Try again.`];
+      },
+      after:L.area!=null?`<button class="primary" id="to5">Next: change units</button>`:''});
+    const b=$('#to5'); if(b) b.onclick=()=>go(5);
+  },
+  5(el){
+    numStep(el,{key:'yard',prompt:`Our blade count is per <b>square inch</b>, but the field is in <b>square yards</b>. There are 36 inches in a yard. How many square inches fit in one square yard?`,
+      check:v=>{
+        if(v===1296) return ['ok',`<b>36 × 36 = 1,296 square inches.</b> A square yard is 36 rows with 36 square inches in each row. Check another way: 9 square feet × 144 square inches each = 1,296.`,()=>{L.yard=1296;}];
+        if(v===36) return ['try',`36 is how many inches fit along <b>one edge</b>. A square yard is 36 rows, and each row holds 36 square inches. How many in all?`];
+        if(v===72||v===144) return ['try',`${v} comes from adding edges (${v===72?'36 + 36':'36 + 36 + 36 + 36'}). That measures around the square, not the inside. Count rows × squares in each row. Try again.`];
+        if(v===9) return ['try',`9 is the number of square <b>feet</b> in a square yard. Each square foot holds 12 × 12 = 144 square inches. Keep going.`];
+        return ['try',`Look at the picture: 36 rows, 36 squares in each row. Think 36 × 36 = 30 × 36 + 6 × 36. Try again.`];
+      },
+      after:`<div class="row"><button class="secondary" id="fillRows">Fill the rows</button>${L.yard?'<button class="primary" id="to6">Next: round first, then multiply</button>':''}</div>`});
+    $('#fillRows').onclick=fillRows;
+    const b=$('#to6'); if(b) b.onclick=()=>go(6);
+  },
+  6(el){
+    if(L.area==null||L.yard==null){ el.innerHTML=`<p class="fb info">Finish steps 4 and 5 first. Step 6 multiplies them.</p>`; return; }
+    const A=L.area, optsA=[...new Set([sig1(A),roundTo(A,500),roundTo(A,100)])].filter(x=>x>0), optsY=[1000,1300,1296];
+    let h=`<p class="lead"><b>Round first!</b> Pick friendly numbers, then multiply.</p>
+      <p class="small">Field area, ${fmt(A)} sq yd, is about…</p><div class="row">${optsA.map(o=>`<button class="choice" data-ra="${o}" aria-pressed="${L.ra===o}">${fmt(o)}${o===A?' (exact)':''}</button>`).join('')}</div>
+      <p class="small">Square inches in a square yard, 1,296, is about…</p><div class="row">${optsY.map(o=>`<button class="choice" data-ry="${o}" aria-pressed="${L.ry===o}">${fmt(o)}${o===1296?' (exact)':''}</button>`).join('')}</div><div id="p6box"></div>`;
+    el.innerHTML=h;
+    $$('[data-ra]').forEach(b=>b.onclick=()=>{L.ra=+b.dataset.ra; L.p6=null; L.fb.p6=null; L.typed.p6=''; invalidateFrom(6); renderLab();});
+    $$('[data-ry]').forEach(b=>b.onclick=()=>{L.ry=+b.dataset.ry; L.p6=null; L.fb.p6=null; L.typed.p6=''; invalidateFrom(6); renderLab();});
+    if(L.ra!=null&&L.ry!=null){
+      const target=L.ra*L.ry, exact=A*1296;
+      numStep($('#p6box'),{key:'p6',prompt:`Now multiply: <b>${fmt(L.ra)} × ${fmt(L.ry)}</b> = ? square inches`,
+        check:v=>{
+          if(v===target) return ['ok',`<b>${fmt(target)} square inches.</b> ${zeroTalk(L.ra,L.ry)}. Calculator check with the exact numbers: ${fmt(A)} × 1,296 = ${fmt(exact)}. Your rounded answer is ${pctOff(target,exact)===0?'exact':`only ${pctOff(target,exact)}% off`}. Close enough for a ballpark.`,()=>{L.p6=target;}];
+          return ['try',`${fmt(v)} is ${v>target?'too big':'too small'}${(v*10===target||v===target*10)?' by one zero':''}. ${zeroTalk(L.ra,L.ry)}. Count the zeros carefully and try again.`];
+        },
+        after:L.p6!=null?`<button class="primary" id="to7">Next: how many blades?</button>`:''});
+      const b=$('#to7'); if(b) b.onclick=()=>go(7);
+    }
+  },
+  7(el){
+    if(L.med==null||L.p6==null){ el.innerHTML=`<p class="fb info">Finish step 1 and step 6 first. Step 7 multiplies them.</p>`; return; }
+    const m=L.med, opts=[...new Set([roundTo(m,10),m])];
+    el.innerHTML=`<p class="lead">Blades = blades per square inch × square inches. <b>${m}</b> blades is about…</p>
+      <div class="row">${opts.map(o=>`<button class="choice" data-rm="${o}" aria-pressed="${L.rm===o}">${o}${o===m?' (exact)':''}</button>`).join('')}</div><div id="p7box"></div><div id="powbox"></div>`;
+    $$('[data-rm]').forEach(b=>b.onclick=()=>{L.rm=+b.dataset.rm; L.p7=null; L.pow=null; L.fb.p7=null; L.typed.p7=''; renderLab();});
+    if(L.rm==null) return;
+    const target=L.rm*L.p6, exact=exactBlades();
+    numStep($('#p7box'),{key:'p7',prompt:`Multiply: <b>${fmt(L.rm)} × ${fmt(L.p6)}</b> = ? blades`,
+      check:v=>{
+        if(v===target) return ['ok',`<b>${fmt(target)} blades.</b> ${zeroTalk(L.rm,L.p6)}. Calculator check with every exact number: ${m} × ${fmt(L.len*L.wid)} × 1,296 = ${fmt(exact)}. Your estimate is ${pctOff(target,exact)===0?'exact':pctOff(target,exact)+'% off'}.`,()=>{L.p7=target; L.pow=null;}];
+        return ['try',`${fmt(v)} is ${v>target?'too big':'too small'}. ${zeroTalk(L.rm,L.p6)}. Check your zeros and try again.`];
+      }});
+    if(L.p7==null) return;
+    const right=nearest(L.p7,[1e5,1e6,1e7,1e8,1e9]);
+    let h=`<p class="lead"><b>Our answer is closest to…</b></p><div class="row">${[1e5,1e6,1e7,1e8,1e9].map(o=>`<button class="choice ${L.pow===o?(o===right?'right':'off'):''}" data-pow="${o}">${fmt(o)}</button>`).join('')}</div>`;
+    if(L.pow!=null){
+      const i=[1e5,1e6,1e7,1e8,1e9].indexOf(right), nb=[1e5,1e6,1e7,1e8,1e9][L.pow>right?i+1:Math.max(0,i-1)]||1e9;
+      if(L.pow===right) h+=`<p class="fb ok"><b>Closest to ${fmt(right)}</b> (${words(right)}). ${closerTalk(L.p7,right,other(L.p7,right))}.</p>`;
+      else h+=`<p class="fb try">Compare the distances: ${fmt(L.p7)} is ${fmt(Math.abs(L.p7-L.pow))} away from ${fmt(L.pow)} and ${fmt(Math.abs(L.p7-right))} away from ${fmt(right)}. Which is closer? Try again.</p>`;
+    }
+    if(L.pow===right){
+      h+=`<p class="lead"><b>The number we are least sure about is step…</b></p><div class="row">${[1,2,3,4,5,6].map(k=>`<button class="choice" data-sh="${k}" aria-pressed="${L.shaky===k}">${k}</button>`).join('')}</div><p class="fb" id="shFb"></p>`;
+    }
+    $('#powbox').innerHTML=h;
+    $$('[data-pow]').forEach(b=>b.onclick=()=>{L.pow=+b.dataset.pow; renderLab();});
+    $$('[data-sh]').forEach(b=>b.onclick=()=>{L.shaky=+b.dataset.sh; renderLab();});
+    if(L.shaky&&$('#shFb')){
+      const k=L.shaky, d=fmt(L.p7*2);
+      const msg={1:`Blade counts change a lot from spot to spot. If the real number were twice ${L.rm}, the answer would double too: ${d}.`,
+        2:`Pacing can be off. If the field were twice as long, the area would double, and so would the answer: ${d}.`,
+        3:`If the field were twice as wide, the area would double, and so would the answer: ${d}. (Twice as long AND twice as wide would make it 4 times bigger.)`,
+        4:`Step 4 is computed from steps 2 and 3. It is only as shaky as those measurements.`,
+        5:`1,296 is exact. Every square yard holds exactly 36 × 36 square inches. This one is solid.`,
+        6:`Step 6 is shaky only because we rounded. The calculator check showed how far off the rounding made it.`}[k];
+      fb($('#shFb'),k===5?'ok':'info',msg);
+    }
+  }
+};
+function fieldSlider(el,key,name,min,max,tip,next){
+  el.innerHTML=`<p class="lead">${tip}</p>
+    <label class="sl" for="sl${key}"><span>${name} in yards <output id="o${key}">${L[key]}</output></span><input type="range" id="sl${key}" min="${min}" max="${max}" step="5" value="${L[key]}"></label>
+    <div class="row"><button class="secondary" id="rain${key}">Rain plan: ${key==='len'?60:40} yards</button><button class="primary" id="use${key}">Use ${L[key]} yards</button></div>`;
+  const s=$('#sl'+key);
+  const upd=()=>{L[key]=+s.value; $('#o'+key).textContent=L[key]; $('#use'+key).textContent=`Use ${L[key]} yards`; if(L.done[next-1]){ L.done[next-1]=false; invalidateFrom(2); refreshHeads(); } renderLabStage();};
+  s.oninput=upd;
+  $('#rain'+key).onclick=()=>{s.value=key==='len'?60:40; upd();};
+  $('#use'+key).onclick=()=>{L.done[next-1]=true; invalidateFrom(2); L.typed.area=''; L.fb.area=null; go(next===4&&!L.done[2]?2:next);};
+}
+function refreshHeads(){ STEPS.forEach(s=>{const row=$(`.srow[data-k="${s.k}"]`); if(!row) return; const v=s.val(); row.classList.toggle('done',v!=null); row.querySelector('.sval').innerHTML=`${v!=null?fmt(v):'—'}<small>${s.unit}</small>`; if(L.step!==s.k) row.querySelector('.snum').textContent=v!=null?'✓':s.k;}); }
+
+/* ---- lab stage ---- */
+let grassCv=null;
+function renderLabStage(){
+  const st=$('#labStage'), k=L.step;
+  const mode=k===1?'grass':k<=4?'field':k===5?'yard':'chain';
+  if(st.dataset.mode!==mode){
+    st.dataset.mode=mode;
+    if(mode==='grass') st.innerHTML=`<p class="cardhead" id="gHead"></p><canvas id="grassCv" aria-label="Close-up of one square inch of lawn seen through a hole in an index card. Tap blades to count them."></canvas><p class="small">Seen through the 1-inch hole in an index card. Tap a blade to mark it.</p>`;
+    else if(mode==='field') st.innerHTML=`<p class="cardhead" id="fHead"></p><canvas id="fieldCv" aria-label="Top view of the field drawn to scale"></canvas><p class="small" id="fNote"></p>`;
+    else if(mode==='yard') st.innerHTML=`<p class="cardhead">One square yard, in square inches</p><canvas id="yardCv" aria-label="A 36 by 36 grid of square inches"></canvas><p class="small">Each tiny square is 1 inch by 1 inch. The yellow row has 36 of them.</p>`;
+    else st.innerHTML=`<p class="cardhead">Matching up the units</p><div class="chain" id="lChain"></div><div class="svgwrap" id="lLine"></div>`;
+    if(mode==='grass'){ grassCv=$('#grassCv'); grassCv.addEventListener('pointerdown',onGrassTap); }
+  }
+  if(mode==='grass') drawGrass();
+  if(mode==='field') drawField();
+  if(mode==='yard') drawYard();
+  if(mode==='chain') drawChain();
+}
+function drawGrass(){
+  const cv=$('#grassCv'); if(!cv) return;
+  const W=cv.clientWidth||500, H=W; cv.style.height=H+'px';
+  const c=setupCanvas(cv,W,H), s=W/600, sp=L.spots[L.spot];
+  $('#gHead').textContent=`Spot ${L.spot+1}: ${sp.marked===sp.n?`${sp.n} blades counted`:`${sp.marked} marked`}`;
+  c.save(); c.scale(s,s);
+  // card
+  c.fillStyle='#F7F3E8'; c.fillRect(0,0,600,600);
+  // ruler ticks along top and left: 1 inch = 520 px, 16ths
+  c.strokeStyle='#6B6455'; c.fillStyle='#4A4436'; c.lineWidth=1.5;
+  for(let i=0;i<=16;i++){const x=40+520*i/16, l=i%16===0?18:i%8===0?14:i%4===0?10:6; c.beginPath(); c.moveTo(x,40); c.lineTo(x,40-l); c.stroke(); c.beginPath(); c.moveTo(40,x); c.lineTo(40-l,x); c.stroke();}
+  c.font='bold 18px Atkinson Hyperlegible, sans-serif'; c.textAlign='center'; c.fillText('1 inch',300,580);
+  c.save(); c.translate(580,300); c.rotate(Math.PI/2); c.fillText('1 inch',0,0); c.restore();
+  // soil
+  c.beginPath(); c.rect(40,40,520,520); c.clip();
+  c.fillStyle='#6E4C2E'; c.fillRect(40,40,520,520);
+  const rr=rng(L.seed+L.spot*13);
+  for(let i=0;i<260;i++){c.fillStyle=rr()<0.5?'rgba(40,24,10,.35)':'rgba(160,120,80,.3)'; c.beginPath(); c.arc(40+rr()*520,40+rr()*520,1+rr()*3,0,7); c.fill();}
+  // blades
+  sp.blades.forEach(b=>{
+    c.lineCap='round'; c.lineWidth=b.w;
+    c.strokeStyle=b.mark?'#F5C431':`hsl(${100+b.shade*30},${45+b.shade*20}%,${30+b.shade*18}%)`;
+    c.beginPath(); c.moveTo(b.bx,b.by); c.quadraticCurveTo(b.mx,b.my,b.tx,b.ty); c.stroke();
+  });
+  sp.blades.forEach(b=>{ if(!b.mark) return;
+    c.fillStyle='#F5C431'; c.strokeStyle='#2A1F00'; c.lineWidth=2; c.beginPath(); c.arc(b.bx,b.by,13,0,7); c.fill(); c.stroke();
+    c.fillStyle='#2A1F00'; c.font='bold 14px Atkinson Hyperlegible, sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(b.mark,b.bx,b.by+1);
+  });
+  c.restore(); c.restore();
+  c.strokeStyle='#2A2418'; c.lineWidth=3; c.strokeRect(40*s,40*s,520*s,520*s);
+}
+function segDist(px,py,b){
+  let best=1e9; for(let t=0;t<=1;t+=0.1){const x=(1-t)*(1-t)*b.bx+2*(1-t)*t*b.mx+t*t*b.tx, y=(1-t)*(1-t)*b.by+2*(1-t)*t*b.my+t*t*b.ty; best=Math.min(best,Math.hypot(px-x,py-y));} return best;
+}
+function onGrassTap(e){
+  if(L.counting) return;
+  const r=grassCv.getBoundingClientRect(), s=600/r.width, x=(e.clientX-r.left)*s, y=(e.clientY-r.top)*s;
+  const sp=L.spots[L.spot];
+  let best=null, bd=34;
+  sp.blades.forEach(b=>{ if(b.mark) return; const d=segDist(x,y,b); if(d<bd){bd=d; best=b;} });
+  if(!best) return;
+  best.mark=++sp.marked;
+  if(sp.marked===sp.n) renderLab(); else { drawGrass(); refreshSpotButtons(); }
+}
+function refreshSpotButtons(){ $$('[data-sp]').forEach(b=>{const i=+b.dataset.sp, s=L.spots[i]; b.textContent=`Spot ${i+1}${s.marked===s.n?` ✓ ${s.n}`:s.marked?` · ${s.marked}`:''}`;}); }
+async function countForMe(){
+  if(L.counting) return; L.counting=true;
+  const sp=L.spots[L.spot], g=L.seed, idx=L.spot;
+  const order=sp.blades.filter(b=>!b.mark).sort((a,b)=>a.by-b.by||a.bx-b.bx);
+  for(const b of order){ if(L.seed!==g||L.spot!==idx) break; b.mark=++sp.marked; if(L.step===1){drawGrass(); refreshSpotButtons();} if(!reduced) await sleep(70); }
+  L.counting=false; renderLab();
+}
+function drawField(){
+  const cv=$('#fieldCv'); if(!cv) return;
+  const W=cv.clientWidth||500, H=Math.round(W*0.62); cv.style.height=H+'px';
+  const c=setupCanvas(cv,W,H), pad=48, sc=Math.min((W-2*pad)/120,(H-2*pad)/80);
+  const fw=L.len*sc, fh=L.wid*sc, x0=(W-fw)/2, y0=(H-fh)/2;
+  c.clearRect(0,0,W,H);
+  for(let i=0;i<Math.ceil(L.len/5);i++){c.fillStyle=i%2?'#3E8E47':'#46994F'; c.fillRect(x0+i*5*sc,y0,Math.min(5*sc,fw-i*5*sc),fh);}
+  c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=3; c.strokeRect(x0,y0,fw,fh);
+  if(L.step===4){
+    c.strokeStyle='rgba(255,255,255,.55)'; c.lineWidth=1.5;
+    for(let x=10;x<L.len;x+=10){c.beginPath(); c.moveTo(x0+x*sc,y0); c.lineTo(x0+x*sc,y0+fh); c.stroke();}
+    for(let y=10;y<L.wid;y+=10){c.beginPath(); c.moveTo(x0,y0+y*sc); c.lineTo(x0+fw,y0+y*sc); c.stroke();}
+    c.fillStyle='rgba(245,196,49,.85)'; c.fillRect(x0,y0,10*sc,10*sc);
+    c.fillStyle='#2A1F00'; c.font=`bold ${Math.max(11,sc*2.6)}px Atkinson Hyperlegible, sans-serif`; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('100',x0+5*sc,y0+4*sc); c.fillText('sq yd',x0+5*sc,y0+7*sc);
+  }
+  const ink=css('--ink');
+  c.fillStyle=ink; c.strokeStyle=ink; c.lineWidth=2; c.font='bold 18px Atkinson Hyperlegible, sans-serif'; c.textAlign='center'; c.textBaseline='alphabetic';
+  c.beginPath(); c.moveTo(x0,y0-14); c.lineTo(x0+fw,y0-14); c.stroke();
+  c.fillText(`${L.len} yards`,x0+fw/2,y0-22);
+  c.save(); c.translate(x0-16,y0+fh/2); c.rotate(-Math.PI/2); c.beginPath(); c.moveTo(-fh/2,0); c.lineTo(fh/2,0); c.stroke(); c.fillText(`${L.wid} yards`,0,-8); c.restore();
+  $('#fHead').textContent=`Our field: ${L.len} yards by ${L.wid} yards`;
+  $('#fNote').textContent=L.step===4?`Each 10-by-10 block holds 10 × 10 = 100 square yards.`:`Drawn to scale. The stripes are 5 yards wide.`;
+}
+function drawYard(){
+  const cv=$('#yardCv'); if(!cv) return;
+  const W=Math.min(cv.clientWidth||460,560), H=W; cv.style.height=H+'px'; cv.style.maxWidth='560px';
+  const c=setupCanvas(cv,W,H), pad=30, cell=(W-2*pad)/36;
+  c.clearRect(0,0,W,H);
+  const fill=L.yardFill;
+  for(let r=0;r<36;r++) for(let k=0;k<36;k++){
+    c.fillStyle=r===0?'#F5C431':r<fill?'#5BBE6E':'rgba(127,140,130,.18)';
+    c.fillRect(pad+k*cell+0.5,pad+r*cell+0.5,cell-1,cell-1);
+  }
+  const ink=css('--ink'); c.fillStyle=ink; c.font='bold 15px Atkinson Hyperlegible, sans-serif'; c.textAlign='center';
+  c.fillText('36 inches',W/2,20);
+  c.save(); c.translate(16,H/2); c.rotate(-Math.PI/2); c.fillText('36 inches',0,0); c.restore();
+  if(fill>0){ c.fillStyle=ink; c.fillText(`${Math.min(fill,36)} rows × 36 = ${fmt(Math.min(fill,36)*36)}`,W/2,H-6); }
+}
+async function fillRows(){
+  for(let r=1;r<=36;r++){ L.yardFill=r; if(L.step!==5) return; drawYard(); if(!reduced) await sleep(45); }
+}
+function drawChain(){
+  const box=$('#lChain'); if(!box) return;
+  const m=L.rm??L.med, a=L.ra??L.area, y=L.ry??1296;
+  box.innerHTML=`<div class="link"><b>${m??'?'}</b><span>blades in 1 sq in</span></div><span class="op">×</span>
+    <div class="link"><b>${fmt(y)}</b><span>sq in in 1 sq yd</span></div><span class="op">×</span>
+    <div class="link"><b>${a!=null?fmt(a):'?'}</b><span>sq yd in the field</span></div><span class="op">=</span>
+    <div class="link total"><b>${L.p7!=null?fmt(L.p7):'?'}</b><span>blades on the field</span></div>`;
+  const pts=[]; if(L.p7!=null) pts.push({v:L.p7,label:'Our estimate',col:'var(--tape)'});
+  if(L.p7!=null && L.pow===nearest(L.p7,[1e5,1e6,1e7,1e8,1e9])) pts.push({v:exactBlades(),label:'Calculator, exact inputs',col:'var(--turf)',below:true});
+  $('#lLine').innerHTML=logLine(pts,{min:4,max:10})+`<p class="small">Each step on this line is ten times the one before.${L.p7==null?' Your estimate will land here.':''}</p>`;
+}
+
+/* ====================== LOG LINE (shared) ====================== */
+const POWLBL={4:'10 thousand',5:'100 thousand',6:'1 million',7:'10 million',8:'100 million',9:'1 billion',10:'10 billion',11:'100 billion'};
+function logLine(points,{min=4,max=11,band=null,h=null}={}){
+  const x0=40,x1=600,X=v=>x0+(x1-x0)*(Math.log10(v)-min)/(max-min);
+  const above=points.filter(p=>!p.below), below=points.filter(p=>p.below);
+  const place=list=>{const rows=[]; return list.slice().sort((a,b)=>a.v-b.v).map(p=>{const x=Math.min(x1,Math.max(x0,X(p.v))), w=Math.max(60,p.label.length*9.6); let r=0; while(rows[r]!=null&&rows[r]>x-w/2-6) r++; rows[r]=x+w/2; return {...p,x,r};});};
+  const A=place(above), B=place(below);
+  const ra=Math.max(0,...A.map(p=>p.r+1)), rb=Math.max(0,...B.map(p=>p.r+1));
+  const top=20+ra*24, axisY=top+30, H=axisY+66+rb*24;
+  let s=`<svg viewBox="0 0 640 ${H}" width="100%" role="img" aria-label="Number line with powers of ten">`;
+  if(band){const bx=X(band[0]),bw=X(band[1])-bx; s+=`<rect x="${bx}" y="${axisY-22}" width="${bw}" height="44" rx="8" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2"/><text x="${bx+bw/2}" y="${axisY+40}" text-anchor="middle" font-size="15" fill="var(--ok)" font-weight="700">${band[2]||''}</text>`;}
+  s+=`<line x1="${x0}" y1="${axisY}" x2="${x1}" y2="${axisY}" stroke="var(--muted)" stroke-width="3"/>`;
+  for(let e=min;e<=max;e++){const x=X(10**e); s+=`<line x1="${x}" y1="${axisY-10}" x2="${x}" y2="${axisY+10}" stroke="var(--muted)" stroke-width="3"/><text x="${x}" y="${axisY+(band?62:28)}" text-anchor="middle" font-size="15" fill="var(--muted)"><tspan x="${x}">${POWLBL[e].split(' ')[0]}</tspan><tspan x="${x}" dy="16">${POWLBL[e].split(' ')[1]}</tspan></text>`;}
+  const off=band?20:0;
+  A.forEach(p=>{const ly=top-p.r*24; s+=`<line x1="${p.x}" y1="${ly+4}" x2="${p.x}" y2="${axisY}" stroke="${p.col}" stroke-width="2" stroke-dasharray="3 3"/><circle cx="${p.x}" cy="${axisY}" r="11" fill="${p.col}" stroke="var(--card)" stroke-width="2"/><text x="${p.x}" y="${ly}" text-anchor="middle" font-size="16" font-weight="700">${esc(p.label)}</text>`;});
+  B.forEach(p=>{const ly=axisY+66+off+p.r*24; s+=`<circle cx="${p.x}" cy="${axisY}" r="8" fill="${p.col}" stroke="var(--card)" stroke-width="2"/><line x1="${p.x}" y1="${axisY+10}" x2="${p.x}" y2="${ly-14}" stroke="${p.col}" stroke-width="2" stroke-dasharray="3 3"/><text x="${p.x}" y="${ly}" text-anchor="middle" font-size="16" font-weight="700">${esc(p.label)}</text>`;});
+  if(band) s=s.replace(`viewBox="0 0 640 ${H}"`,`viewBox="0 0 640 ${H+off+24}"`);
+  return s+'</svg>';
+}
+
+/* ====================== PAPER ====================== */
+const P={pick:null};
+function paperTotal(){const s=+$('#pS').value,k=+$('#pK').value,d=+$('#pD').value,e=+$('#pE').value; return {s,k,d,e,t:(s*k+e)*d};}
+const PCH=[1e4,1e5,1e6,1e7];
+function renderPaper(keepFb){
+  const {s,k,d,e,t}=paperTotal();
+  ['S','K','D','E'].forEach(x=>$('#p'+x+'o').textContent=fmt(+$('#p'+x).value));
+  $('#pChain').innerHTML=`<div class="link"><b>${fmt(s)}</b><span>students</span></div><span class="op">×</span><div class="link"><b>${k}</b><span>sheets each per day</span></div>${e?`<span class="op">+</span><div class="link"><b>${fmt(e)}</b><span>extra sheets per day</span></div>`:''}<span class="op">×</span><div class="link"><b>${d}</b><span>school days</span></div><span class="op">=</span><div class="link total"><b>${fmt(t)}</b><span>sheets in a year</span></div>`;
+  const right=nearest(t,PCH);
+  $('#pChoices').innerHTML=PCH.map(c=>`<button class="choice ${P.pick===c?(c===right?'right':'off'):''}" data-pc="${c}">${fmt(c)}</button>`).join('');
+  $$('[data-pc]').forEach(b=>b.onclick=()=>{P.pick=+b.dataset.pc; renderPaper(); paperFb();});
+  if(!keepFb && P.pick!=null) paperFb();
+  drawBoxes(t);
+}
+function paperFb(){
+  const {t}=paperTotal(), right=nearest(t,PCH);
+  if(P.pick===right) fb($('#pFb'),'ok',`<b>Closest to ${fmt(right)}.</b> ${closerTalk(t,right,other(t,right))}. That's ${fmt(t/500)} reams of 500 sheets.`);
+  else fb($('#pFb'),'try',`${fmt(t)} is ${fmt(Math.abs(t-P.pick))} away from ${fmt(P.pick)}. Is another choice closer? Count the digits: ${fmt(t)} has ${String(Math.round(t)).length} digits. Try again.`);
+}
+function drawBoxes(t){
+  const cv=$('#pBoxes'), W=cv.clientWidth||500, boxes=t/5000, n=Math.ceil(boxes);
+  const per=Math.max(10,Math.ceil(Math.sqrt(n*W/200)));
+  const sz=Math.min(36,(W-4)/per), rows=Math.ceil(n/per), H=Math.max(60,rows*sz+8);
+  cv.style.height=H+'px';
+  const c=setupCanvas(cv,W,H); c.clearRect(0,0,W,H);
+  for(let i=0;i<n;i++){const x=(i%per)*sz, y=Math.floor(i/per)*sz, f=Math.min(1,boxes-i);
+    c.fillStyle='rgba(127,140,130,.18)'; c.fillRect(x+2,y+2,sz-4,sz-4);
+    c.fillStyle='#C9A66B'; c.fillRect(x+2,y+2+(sz-4)*(1-f),sz-4,(sz-4)*f);
+    c.strokeStyle='#7A5A2C'; c.lineWidth=1.5; c.strokeRect(x+2.5,y+2.5,sz-5,sz-5);}
+  $('#pBoxNote').textContent=`Each box is one case of paper: 10 reams × 500 sheets = 5,000 sheets. ${fmt(t)} sheets fill about ${trim(+boxes.toFixed(1))} cases.`;
+}
+['pS','pK','pD','pE'].forEach(id=>$('#'+id).oninput=()=>{P.pick=null; fb($('#pFb'),'',''); renderPaper(true);});
+$('#pRain').onclick=()=>{$('#pS').value=300; $('#pK').value=5; $('#pD').value=180; $('#pE').value=0; P.pick=null; fb($('#pFb'),'',''); renderPaper(true);};
+$('#pBall').onclick=()=>{
+  const {s,k,d,e,t}=paperTotal(), rs=sig1(s), rd=sig1(d), re=e?sig1(e):0, perDay=rs*k+re, est=perDay*rd;
+  fb($('#pFb'),'info',`<b>Ballpark:</b> ${rs!==s?`${fmt(s)} students is about ${fmt(rs)}. `:''}${fmt(rs)} × ${k}${e?` + ${fmt(re)} extra`:''} = ${fmt(perDay)} sheets a day. ${d} days is about ${rd}. ${zeroTalk(perDay,rd)}: about <b>${fmt(est)}</b>. Exact with your numbers: ${fmt(t)}.`);
+};
+
+/* ====================== DETECTIVES ====================== */
+const BASE={m:40,A:2400,y:1296}; const BASEV=BASE.m*BASE.A*BASE.y; // 124,416,000
+const D={q:1,teams:[],showBand:false,mist:[],dbl:{m:false,l:false,w:false},sim:null,typed:''};
+function detReset(){D.q=1; D.teams=[{name:'Example: Robins',v:75000000},{name:'Example: Oaks',v:100000000},{name:'Example: Comets',v:130000000},{name:'Example: Tigers',v:210000000},{name:'Example: Owls',v:3456000}]; D.showBand=false; D.mist=[]; D.dbl={m:false,l:false,w:false}; D.sim=null; renderDet();}
+const MISTAKES=[
+  {id:'yd',short:'No square inches',label:'Forgot to change to square inches',v:BASE.m*BASE.A,how:`40 × 2,400`},
+  {id:'36',short:'Used 36',label:'Used 36 instead of 1,296',v:BASE.m*BASE.A*36,how:`40 × 2,400 × 36`},
+  {id:'add',short:'Added L + W',label:'Added length and width (100)',v:BASE.m*100*BASE.y,how:`40 × 100 × 1,296`},
+  {id:'bare',short:'Bare patch',label:'Counted a bare patch: 4 blades',v:4*BASE.A*BASE.y,how:`4 × 2,400 × 1,296`},
+  {id:'ft',short:'Square foot',label:'Counted a square foot as a square inch',v:BASE.m*144*BASE.A*BASE.y,how:`5,760 × 2,400 × 1,296`},
+];
+const QS={
+  1:{t:`<b>Every team's answer is different.</b> They differ by two or three times. Are they all reasonable?`,
+     extra:()=>`<div class="row"><input class="numin" id="tIn" inputmode="numeric" placeholder="Team answer" aria-label="Add a team answer" value="${esc(D.typed)}"><button class="secondary" id="tAdd">Add team</button></div><div class="teams">${D.teams.map((t,i)=>`<span class="team">${esc(t.name)}: ${fmt(t.v)}<button data-del="${i}" aria-label="Remove ${esc(t.name)}">×</button></span>`).join('')}${L.p7!=null?`<span class="team">Our class lab: ${fmt(L.p7)}</span>`:''}</div>`,
+     acts:[{label:'Shade the reasonable range',run:()=>{D.showBand=true; renderDet(); fb($('#dFb'),'info',`For a field like the rain-plan field, anything from <b>50 million to 300 million</b> blades is reasonable. Which answers land inside? Which one doesn't, and what might that team have done?`);}},
+           {label:'How far apart are the reasonable ones?',run:()=>{D.showBand=true; renderDet(); const r=allTeams().filter(t=>t.v>=5e7&&t.v<=3e8).map(t=>t.v); if(r.length<2){fb($('#dFb'),'info','Add at least two answers inside the green range to compare them.'); return;} const lo=Math.min(...r), hi=Math.max(...r); fb($('#dFb'),'ok',`Biggest ÷ smallest: ${fmt(hi)} ÷ ${fmt(lo)} is about <b>${trim(+(hi/lo).toFixed(1))} times</b>. They all land near the same power of ten, so they agree on the ballpark.`);}},
+           {label:'Agree on a ballpark',run:()=>{D.showBand=true; renderDet(); const r=allTeams().filter(t=>t.v>=5e7&&t.v<=3e8).map(t=>t.v); if(!r.length){fb($('#dFb'),'info','No answers are inside the green range yet.'); return;} const pw=[1e6,1e7,1e8,1e9], votes=pw.map(p=>r.filter(v=>nearest(v,pw)===p).length), best=pw[votes.indexOf(Math.max(...votes))]; fb($('#dFb'),'ok',`${r.filter(v=>nearest(v,pw)===best).length} of ${r.length} reasonable answers are closest to <b>${fmt(best)}</b> (${words(best)}). That's our ballpark: not one exact number, but the right power of ten.`);}}]},
+  2:{t:`<b>What mistake would make an answer off by a hundred times or more?</b> Start from 40 blades × 2,400 sq yd × 1,296 = ${fmt(BASEV)}.`,
+     extra:()=>`<div class="row">${MISTAKES.map(m=>`<button class="choice" data-mi="${m.id}" aria-pressed="${D.mist.includes(m.id)}" style="font-size:17px">${m.label}</button>`).join('')}</div>`,
+     acts:[{label:'Show all mistakes',run:()=>{D.mist=MISTAKES.map(m=>m.id); renderDet(); mistakeFb();}},{label:'Clear',run:()=>{D.mist=[]; renderDet(); fb($('#dFb'),'','');}}]},
+  3:{t:`<b>Which number are you least sure of?</b> If it doubled, what would happen to your answer?`,
+     extra:()=>`<div class="row">${[['m','Double the blades'],['l','Double the length'],['w','Double the width']].map(([k,l])=>`<button class="choice" data-db="${k}" aria-pressed="${D.dbl[k]}" style="font-size:18px">${l}</button>`).join('')}</div>`,
+     acts:[{label:'Undo all',run:()=>{D.dbl={m:false,l:false,w:false}; renderDet(); dblFb();}}]},
+  4:{t:`<b>Why count three spots and take the middle one?</b> Test it on 30 pretend lawns. Which way of choosing lands closest to the real average?`,
+     extra:()=>'',
+     acts:[{label:'Test 30 lawns',run:()=>{runSim(); renderDet(); simFb();}}]},
+};
+function allTeams(){return D.teams.concat(L.p7!=null?[{name:'Our class lab',v:L.p7}]:[]);}
+function mistakeFb(){
+  if(!D.mist.length){fb($('#dFb'),'','');return;}
+  const lines=MISTAKES.filter(m=>D.mist.includes(m.id)).map(m=>{const big=m.v>BASEV, f=big?m.v/BASEV:BASEV/m.v; return `${m.label}: ${m.how} = ${fmt(m.v)}, which is <b>${fmt(f)} times too ${big?'big':'small'}</b>.`;});
+  fb($('#dFb'),'info',lines.join('<br>')+`<br>Unit mix-ups make the biggest misses. That's why we match up the units.`);
+}
+function dblFb(){
+  const f=(D.dbl.m?2:1)*(D.dbl.l?2:1)*(D.dbl.w?2:1);
+  if(f===1){fb($('#dFb'),'info','Tap a button to double one of the numbers.'); return;}
+  const parts=[D.dbl.m&&'blades',D.dbl.l&&'length',D.dbl.w&&'width'].filter(Boolean);
+  fb($('#dFb'),'ok',`Doubling the ${parts.join(' and the ')} makes the answer <b>${f} times</b> as big: ${fmt(BASEV)} × ${f} = ${fmt(BASEV*f)}.${D.dbl.l&&D.dbl.w?' Twice as long and twice as wide makes the area 4 times bigger.':''} That moves the dot only a short hop. A unit mix-up moves it much farther (see question 2).`);
+}
+function spotDensity(r){const u=r(); if(u<0.15) return 3+Math.floor(r()*15); if(u<0.25) return 55+Math.floor(r()*20); return Math.round(32+r()*8+r()*8);}
+function runSim(){
+  const r=rng(Date.now()%100000);
+  let sum=0; const N=20000; const rr=rng(4242); for(let i=0;i<N;i++) sum+=spotDensity(rr); const avg=sum/N;
+  const one=[],big=[],mid=[];
+  for(let i=0;i<30;i++){const a=[spotDensity(r),spotDensity(r),spotDensity(r)].sort((x,y)=>x-y); one.push(a[Math.floor(r()*3)]); big.push(a[2]); mid.push(a[1]);}
+  const miss=arr=>arr.reduce((s,v)=>s+Math.abs(v-avg),0)/arr.length;
+  D.sim={avg,rows:[{name:'One spot',vals:one,miss:miss(one)},{name:'Biggest of 3',vals:big,miss:miss(big)},{name:'Middle of 3',vals:mid,miss:miss(mid)}]};
+}
+function simFb(){
+  if(!D.sim) return; const rows=D.sim.rows, best=rows.reduce((a,b)=>b.miss<a.miss?b:a);
+  fb($('#dFb'),'ok',`The real average is about <b>${Math.round(D.sim.avg)} blades</b> per square inch (the line). Average miss: ${rows.map(r=>`${r.name.toLowerCase()} ${trim(+r.miss.toFixed(1))}`).join(', ')}. <b>${best.name}</b> hugged the line best this time. Notice where the "biggest" dots pile up. Run it again to see if that holds.`);
+}
+function simViz(){
+  const s=D.sim; if(!s) return `<p class="lead" style="padding:30px 0;text-align:center">Tap <b>Test 30 lawns</b> to sample three spots on each pretend lawn.</p>`;
+  const x0=170,x1=960,X=v=>x0+(x1-x0)*v/80; let h=`<svg viewBox="0 0 1000 300" width="100%" role="img" aria-label="Dot plots comparing three ways to choose a sample count">`;
+  s.rows.forEach((row,i)=>{const y=60+i*80; h+=`<text x="10" y="${y+6}" font-size="18" font-weight="700">${row.name}</text><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--line)" stroke-width="2"/>`;
+    const stack={}; row.vals.forEach(v=>{const k=Math.round(v/2); stack[k]=(stack[k]||0)+1; h+=`<circle cx="${X(v)}" cy="${y-(stack[k]-1)*9}" r="6" fill="${['var(--muted)','var(--bad)','var(--turf)'][i]}" opacity=".85"/>`;});});
+  const ax=X(s.avg); h+=`<line x1="${ax}" y1="20" x2="${ax}" y2="250" stroke="var(--tape)" stroke-width="4"/><text x="${ax}" y="16" text-anchor="middle" font-size="15" font-weight="700">real average</text>`;
+  for(let v=0;v<=80;v+=20) h+=`<text x="${X(v)}" y="285" text-anchor="middle" font-size="15" fill="var(--muted)">${v}</text>`;
+  return h+`<text x="${x0}" y="285" font-size="15" fill="var(--muted)" text-anchor="end" dx="-14">blades/sq in</text></svg>`;
+}
+function renderDet(){
+  $('#qnav').innerHTML=[1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${D.q===i}" aria-label="Question ${i}">${i}</button>`).join('');
+  $$('#qnav button').forEach(b=>b.onclick=()=>{D.q=+b.dataset.q; fb($('#dFb'),'',''); renderDet(); if(D.q===3) dblFb(); if(D.q===2) mistakeFb(); if(D.q===4) simFb();});
+  const q=QS[D.q]; $('#dQ').innerHTML=q.t; $('#dExtra').innerHTML=q.extra();
+  $('#dActions').innerHTML=''; q.acts.forEach((a,i)=>{const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=a.run; $('#dActions').appendChild(b);});
+  let viz='', leg='';
+  if(D.q===1){ viz=logLine(allTeams().map(t=>({v:t.v,label:t.name.replace('Example: ',''),col:t.name==='Our class lab'?'var(--tape)':(D.showBand&&(t.v<5e7||t.v>3e8))?'var(--bad)':'var(--turf)'})),{min:5,max:10,band:D.showBand?[5e7,3e8,'reasonable: 50 to 300 million']:null}); leg=`<span>Example teams are made up for discussion. Add your class's real answers.</span>`; }
+  if(D.q===2){ viz=logLine([{v:BASEV,label:'Careful answer',col:'var(--turf)'}].concat(MISTAKES.filter(m=>D.mist.includes(m.id)).map(m=>({v:m.v,label:m.short,col:'var(--bad)',below:true}))),{min:4,max:11}); leg=`<span><i style="background:var(--turf)"></i>careful answer</span><span><i style="background:var(--bad)"></i>a mistake</span><span>Each step is ten times the last.</span>`; }
+  if(D.q===3){ const f=(D.dbl.m?2:1)*(D.dbl.l?2:1)*(D.dbl.w?2:1); viz=logLine([{v:BASEV,label:'Start: '+words(BASEV),col:'var(--turf)'}].concat(f>1?[{v:BASEV*f,label:`× ${f}: ${words(BASEV*f)}`,col:'var(--tape)',below:true}]:[]),{min:6,max:10}); leg=`<span>Start: 40 blades, 60 × 40 yards. Doubling moves the dot only a short hop.</span>`; }
+  if(D.q===4){ viz=simViz(); leg=D.sim?`<span><i style="background:var(--tape)"></i>real average of the pretend lawns</span><span>Each dot is one lawn's estimate.</span>`:''; }
+  $('#dViz').innerHTML=viz; $('#dLegend').innerHTML=leg;
+  const add=$('#tAdd'); if(add){ const inp=$('#tIn'); inp.oninput=()=>D.typed=inp.value; const doAdd=()=>{const v=parseNum(inp.value); if(isNaN(v)||v<1e4||v>1e11){fb($('#dFb'),'try','Type a whole number between 10,000 and 100,000,000,000, like 120,000,000.'); return;} D.teams.push({name:'Team '+(D.teams.filter(t=>!t.name.startsWith('Example')).length+1),v}); D.typed=''; renderDet();}; add.onclick=doAdd; inp.onkeydown=e=>{if(e.key==='Enter') doAdd();}; }
+  $$('[data-del]').forEach(b=>b.onclick=()=>{D.teams.splice(+b.dataset.del,1); renderDet();});
+  $$('[data-mi]').forEach(b=>b.onclick=()=>{const id=b.dataset.mi; D.mist=D.mist.includes(id)?D.mist.filter(x=>x!==id):D.mist.concat(id); renderDet(); mistakeFb();});
+  $$('[data-db]').forEach(b=>b.onclick=()=>{const k=b.dataset.db; D.dbl[k]=!D.dbl[k]; renderDet(); dblFb();});
+}
+
+/* ====================== CHALLENGE ====================== */
+const H={pick:null}; const HCH=[1e6,1e7,1e8,1e9];
+function heart(){const b=+$('#hB').value,a=+$('#hA').value; return {b,a,hr:b*60,day:b*60*24,yr:b*60*24*365,t:b*60*24*365*a};}
+function renderHeart(){
+  const h=heart(); $('#hBo').textContent=h.b; $('#hAo').textContent=h.a;
+  $('#hChain').innerHTML=`<div class="link"><b>${h.b}</b><span>beats per minute</span></div><span class="op">× 60</span><div class="link"><b>${fmt(h.hr)}</b><span>per hour</span></div><span class="op">× 24</span><div class="link"><b>${fmt(h.day)}</b><span>per day</span></div><span class="op">× 365</span><div class="link"><b>${fmt(h.yr)}</b><span>per year</span></div><span class="op">× ${h.a}</span><div class="link total"><b>${fmt(h.t)}</b><span>beats so far</span></div>`;
+  const right=nearest(h.t,HCH);
+  $('#hChoices').innerHTML=`<span style="font-weight:700">Closest to…</span>`+HCH.map(c=>`<button class="choice ${H.pick===c?(c===right?'right':'off'):''}" data-hc="${c}">${fmt(c)}</button>`).join('');
+  $$('[data-hc]').forEach(b=>b.onclick=()=>{H.pick=+b.dataset.hc; renderHeart(); const t=heart().t, r=nearest(t,HCH);
+    if(H.pick===r) fb($('#hFb'),'ok',`<b>Closest to ${fmt(r)}</b> (${words(r)}). Ballpark: ${h.b} × 60 is about ${fmt(sig1(h.b*60))} an hour, × 24 is about ${fmt(sig1(sig1(h.b*60)*24))} a day, × 365 is about ${fmt(sig1(sig1(sig1(h.b*60)*24)*365))} a year, × ${h.a} years is about ${fmt(sig1(sig1(sig1(h.b*60)*24)*365)*h.a)}.`);
+    else fb($('#hFb'),'try',`${fmt(t)} is ${fmt(Math.abs(t-H.pick))} away from ${fmt(H.pick)}. Count its digits: ${String(t).length}. Which choice is nearer? Try again.`);});
+}
+['hB','hA'].forEach(id=>$('#'+id).oninput=()=>{H.pick=null; fb($('#hFb'),'',''); renderHeart();});
+$('#hShaky').onclick=()=>fb($('#hFb'),'info',`Your heart did not always beat at ${heart().b}. A baby's heart beats about 120 to 160 times a minute, so the early years had more beats. And months count too: are you ${heart().a}, or nearly ${heart().a+1}? Which way would each change push the answer?`);
+
+const SK={seed:3,stars:[],picks:[],revealed:false};
+function makeSky(){const r=rng(SK.seed); SK.stars=[]; for(let i=0;i<1400;i++){ let x=r(),y=r(); if(r()<0.35){ const t=r(); x=t; y=Math.min(0.999,Math.max(0,0.85-0.7*t+(r()-0.5)*0.22)); } SK.stars.push({x,y,m:r()}); } SK.picks=[]; SK.revealed=false;}
+const patchOf=s=>Math.min(9,Math.floor(s.x*10))+10*Math.min(9,Math.floor(s.y*10));
+const patchCount=p=>SK.stars.filter(s=>patchOf(s)===p).length;
+function drawSky(){
+  const cv=$('#sky'); const W=cv.clientWidth||400, Hh=W; cv.style.height=Hh+'px';
+  const c=setupCanvas(cv,W,Hh); c.fillStyle='#0B1026'; c.fillRect(0,0,W,Hh);
+  c.strokeStyle='rgba(255,255,255,.12)'; c.lineWidth=1; for(let i=1;i<10;i++){c.beginPath(); c.moveTo(i*W/10,0); c.lineTo(i*W/10,Hh); c.stroke(); c.beginPath(); c.moveTo(0,i*Hh/10); c.lineTo(W,i*Hh/10); c.stroke();}
+  SK.picks.forEach(p=>{const x=(p%10)*W/10,y=Math.floor(p/10)*Hh/10; c.fillStyle='rgba(245,196,49,.22)'; c.fillRect(x,y,W/10,Hh/10); c.strokeStyle='#F5C431'; c.lineWidth=3; c.strokeRect(x+1.5,y+1.5,W/10-3,Hh/10-3);});
+  SK.stars.forEach(s=>{const inP=SK.picks.includes(patchOf(s)); c.fillStyle=inP?'#FFE58A':'rgba(255,255,255,'+(0.5+s.m*0.5)+')'; c.beginPath(); c.arc(s.x*W,s.y*Hh,inP?2.6:0.8+s.m*1.4,0,7); c.fill();});
+}
+function skyMsg(){
+  if(!SK.picks.length){$('#skyMsg').innerHTML='<b>Tap a patch of sky.</b> Count its stars, then multiply by the number of patches.'; fb($('#skyFb'),'',''); return;}
+  const cs=SK.picks.map(patchCount);
+  let h=`Patch counts: <b>${cs.join(', ')}</b>. `;
+  if(cs.length<3) h+=`There are 100 patches, so one patch says about ${fmt(cs[cs.length-1]*100)} stars. Pick ${3-cs.length} more patch${3-cs.length>1?'es':''}, like we did with the grass.`;
+  else { const m=cs.slice().sort((a,b)=>a-b)[1]; h+=`Middle count ${m} × 100 patches = <b>about ${fmt(m*100)} stars</b>.`; }
+  $('#skyMsg').innerHTML=h;
+}
+$('#sky').addEventListener('pointerdown',e=>{const r=e.currentTarget.getBoundingClientRect(), p=Math.min(9,Math.floor((e.clientX-r.left)/r.width*10))+10*Math.min(9,Math.floor((e.clientY-r.top)/r.height*10)); if(SK.picks.includes(p)) return; if(SK.picks.length>=3) SK.picks=[]; SK.picks.push(p); drawSky(); skyMsg();});
+$('#skyReveal').onclick=()=>{const t=SK.stars.length; let msg=`This sky really has <b>${fmt(t)} stars</b>.`; if(SK.picks.length===3){const m=SK.picks.map(patchCount).sort((a,b)=>a-b)[1]*100; msg+=` Our estimate, ${fmt(m)}, is ${pctOff(m,t)}% off. The bright band of stars makes some patches much busier than others.`;} else msg+=' Pick three patches first to compare an estimate.'; fb($('#skyFb'),'info',msg);};
+$('#skyNew').onclick=()=>{SK.seed++; makeSky(); drawSky(); skyMsg(); fb($('#skyFb'),'','');};
+
+/* ====================== GLOBAL ====================== */
+function redrawAll(){
+  if(tab==='lab') renderLabStage();
+  if(tab==='paper') drawBoxes(paperTotal().t);
+  if(tab==='chal') drawSky();
+  if(tab==='warm') renderWarm();
+}
+function startOver(){
+  W.list=WARM_FIXED.map(x=>x.slice()); warmReset(); L.seed=11; labReset(); P.pick=null; fb($('#pFb'),'',''); $('#pRain').click();
+  detReset(); fb($('#dFb'),'','');
+  $('#hB').value=90; $('#hA').value=9; H.pick=null; fb($('#hFb'),'',''); renderHeart();
+  SK.seed=3; makeSky(); skyMsg(); fb($('#skyFb'),'','');
+  redrawAll();
+}
+$('#resetBtn').onclick=startOver;
+$('#fsBtn').onclick=()=>{try{ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+let rz; window.addEventListener('resize',()=>{clearTimeout(rz); rz=setTimeout(redrawAll,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
+new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---- math self-check (console) ---- */
+function selfTest(){
+  const ok=(c,m)=>{if(!c) console.error('Self-test failed: '+m);};
+  ok(47*21===987 && nearest(987,[100,1000,10000])===1000,'warm 1');
+  ok(312*48===14976 && nearest(14976,[1000,10000,100000])===10000,'warm 2');
+  ok(1296*2400===3110400 && nearest(3110400,[1e5,1e6,1e7])===1e6,'warm 3');
+  WARM_FIXED.forEach(([a,b,ch])=>ok(nearest(sig1(a)*sig1(b),ch)===nearest(a*b,ch),'warm rounding agrees '+a));
+  ok(36*36===1296 && 9*144===1296,'square yard');
+  ok(60*40===2400 && 2400*1296===3110400,'sample field');
+  ok(BASEV===124416000 && nearest(BASEV,[1e5,1e6,1e7,1e8,1e9])===1e8,'sample blades');
+  ok(MISTAKES.every(m=>{const f=m.v>BASEV?m.v/BASEV:BASEV/m.v; return Number.isInteger(f);}),'mistake factors integer');
+  ok(300*5*180===270000,'paper');
+  ok(90*60*24*365*9===425736000,'heartbeats');
+  ok(sig2(124416000)===120000000 && words(124416000)==='120 million','words');
+}
+selfTest();
+
+startOver(); selectTab('warm');
+})();
+</script>
+
+</body></html>

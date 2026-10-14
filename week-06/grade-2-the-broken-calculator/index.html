@@ -1,0 +1,810 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Broken Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lexend:wght@400;500;600&family=Share+Tech+Mono&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a real calculator on the left (the instrument), the lesson's parts as tabs on the right. Broken keys are taped over. */
+:root{
+  --paper:#ECEFE9; --card:#FFFFFF; --ink:#1E2A2C; --muted:#5A6764; --line:#CDD4CE;
+  --body:#2F3D41; --body-edge:#1F2A2D; --key:#F7F3E8; --key-ink:#1E2A2C; --key-shadow:#B9B19C;
+  --op:#F1B33C; --op-ink:#2A1E05; --eq:#DD5B33; --eq-ink:#FFFFFF;
+  --lcd:#C6D3AE; --lcd-ink:#1D2618; --lcd-dim:#8E9C78;
+  --tape:#E4CF9A; --tape-ink:#6B4A12;
+  --accent:#DD5B33; --accent-soft:#FBE6DC;
+  --good:#1F8A5B; --good-soft:#DDF2E7; --warn:#B4520F; --warn-soft:#FCEBDC;
+  --five:#2B64C8; --five-soft:#DFE9FB; --seven:#8A3FC0; --seven-soft:#EFE2FA;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --sans:"Lexend", "Segoe UI", system-ui, sans-serif;
+  --mono:"Share Tech Mono", "Consolas", ui-monospace, monospace;
+  --hand:"Caveat", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121819; --card:#1B2325; --ink:#E9ECE6; --muted:#A0ACA8; --line:#334043;
+    --body:#0E1416; --body-edge:#060A0B; --key:#2C383B; --key-ink:#EEF0EA; --key-shadow:#11191B;
+    --op:#E8A92F; --op-ink:#231803; --eq:#E8683F; --eq-ink:#FFFFFF;
+    --lcd:#A9B98C; --lcd-ink:#172013; --lcd-dim:#75855C;
+    --tape:#CDB57C; --tape-ink:#4E340A;
+    --accent:#F07A4F; --accent-soft:#3A2219;
+    --good:#4CC48A; --good-soft:#173527; --warn:#F09A55; --warn-soft:#3A2414;
+    --five:#7EA6F2; --five-soft:#1C2A45; --seven:#C38AF0; --seven-soft:#2F1F40;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121819; --card:#1B2325; --ink:#E9ECE6; --muted:#A0ACA8; --line:#334043;
+  --body:#0E1416; --body-edge:#060A0B; --key:#2C383B; --key-ink:#EEF0EA; --key-shadow:#11191B;
+  --op:#E8A92F; --op-ink:#231803; --eq:#E8683F; --eq-ink:#FFFFFF;
+  --lcd:#A9B98C; --lcd-ink:#172013; --lcd-dim:#75855C;
+  --tape:#CDB57C; --tape-ink:#4E340A;
+  --accent:#F07A4F; --accent-soft:#3A2219;
+  --good:#4CC48A; --good-soft:#173527; --warn:#F09A55; --warn-soft:#3A2414;
+  --five:#7EA6F2; --five-soft:#1C2A45; --seven:#C38AF0; --seven-soft:#2F1F40;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1500px; margin:0 auto; padding-inline:clamp(16px,2.4vw,32px); padding-block:14px 28px; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap}
+h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3.2vw,46px); line-height:1.05; letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase; font-weight:500}
+.dq{margin:6px 0 0; font-size:clamp(17px,1.4vw,21px)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:6px; flex-wrap:wrap; border-bottom:2px solid var(--line)}
+.tabs button{border:0; background:none; padding:10px 14px 12px; font-family:var(--display); font-weight:600; font-size:clamp(16px,1.35vw,20px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tabs .tag{display:inline-block; font-family:var(--sans); font-size:12px; font-weight:600; border-radius:6px; padding:1px 6px; margin-right:6px; background:var(--line); color:var(--ink); vertical-align:2px}
+
+main{display:grid; grid-template-columns:minmax(300px,400px) minmax(0,1fr); gap:clamp(18px,2.4vw,36px); align-items:start}
+
+/* ---------- Calculator ---------- */
+.calc{background:var(--body); border-radius:28px; padding:20px 18px 20px; box-shadow:0 2px 0 var(--body-edge), 0 18px 40px -18px rgba(0,0,0,.45); position:sticky; top:calc(env(safe-area-inset-top,0px) + 10px)}
+.brand{display:flex; justify-content:space-between; align-items:center; color:#C9D2CE; font-family:var(--mono); font-size:13px; letter-spacing:.14em; margin:0 4px 10px; text-transform:uppercase}
+.brand .solar{display:flex; gap:3px}
+.brand .solar i{width:16px; height:10px; background:#3A2B22; border-radius:2px; box-shadow:inset 0 0 0 1px #57423A}
+.lcd{background:var(--lcd); color:var(--lcd-ink); border-radius:12px; padding:10px 14px 8px; box-shadow:inset 0 3px 8px rgba(0,0,0,.28); min-height:132px; display:flex; flex-direction:column; justify-content:space-between}
+.lcd .expr{font-family:var(--mono); font-size:clamp(17px,1.5vw,21px); min-height:1.3em; color:var(--lcd-ink); opacity:.78; word-break:break-all}
+.lcd .big{font-family:var(--mono); font-size:clamp(46px,4.6vw,64px); text-align:right; line-height:1; letter-spacing:.04em}
+.lcd .big.dim{color:var(--lcd-dim)}
+.lcd .meta{display:flex; justify-content:space-between; align-items:center; gap:8px; font-family:var(--mono); font-size:15px}
+.dots{display:flex; flex-wrap:wrap; gap:3px; max-width:70%}
+.dots i{width:9px; height:9px; border-radius:50%; background:var(--lcd-ink); opacity:.8}
+.keys{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px}
+.key{position:relative; border:0; border-radius:14px; background:var(--key); color:var(--key-ink); font-family:var(--display); font-weight:600; font-size:clamp(28px,2.6vw,36px); min-height:68px; box-shadow:0 5px 0 var(--key-shadow); transition:transform .06s, box-shadow .06s}
+.key:active{transform:translateY(4px); box-shadow:0 1px 0 var(--key-shadow)}
+.key.op{background:var(--op); color:var(--op-ink); box-shadow:0 5px 0 color-mix(in srgb, var(--op) 55%, #000)}
+.key.eq{background:var(--eq); color:var(--eq-ink); box-shadow:0 5px 0 color-mix(in srgb, var(--eq) 55%, #000); grid-column:span 2}
+.key.zero{grid-column:span 2}
+.key.clr{background:transparent; color:#E4EAE6; border:2px solid #5D6E72; box-shadow:none; font-size:22px}
+.key.broken{color:transparent}
+.key.broken::after{content:"broken"; position:absolute; inset:6px -3px; background:
+  repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 2px, transparent 2px 7px), var(--tape);
+  color:var(--tape-ink); font-family:var(--hand); font-size:24px; display:grid; place-items:center; transform:rotate(-7deg); border-radius:3px; box-shadow:0 2px 3px rgba(0,0,0,.25); clip-path:polygon(2% 6%,8% 0,20% 5%,34% 0,50% 4%,66% 0,82% 5%,94% 0,100% 8%,98% 94%,90% 100%,74% 95%,58% 100%,42% 96%,26% 100%,10% 95%,0 100%)}
+.key.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.calc-note{margin-top:14px; color:#C9D2CE; font-size:15px; text-align:center; min-height:1.4em}
+.calc-note b{color:#FFFFFF}
+
+/* ---------- Panel ---------- */
+.panel{min-width:0; display:flex; flex-direction:column; gap:16px}
+.view{display:flex; flex-direction:column; gap:16px; min-width:0}
+.view[hidden]{display:none}
+.lead{font-size:clamp(19px,1.65vw,25px); line-height:1.4; margin:0; max-width:36em}
+.lead b{font-weight:600}
+.small{font-size:15px; color:var(--muted); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:600; font-size:clamp(17px,1.4vw,20px); padding:13px 22px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(16px,1.3vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.45; cursor:default}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:10px 18px; border-radius:11px; font-weight:600; font-size:17px; color:var(--muted); min-height:48px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+.msg{margin:0; padding:14px 18px; border-radius:14px; font-size:clamp(17px,1.45vw,21px); line-height:1.45; background:var(--card); border:2px solid var(--line); max-width:38em}
+.msg:empty{display:none}
+.msg.good{background:var(--good-soft); border-color:var(--good)}
+.msg.try{background:var(--warn-soft); border-color:var(--warn)}
+.msg.info{background:var(--accent-soft); border-color:transparent}
+.mono{font-family:var(--mono); font-size:1.08em; white-space:nowrap}
+
+.target{display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+.target .num{font-family:var(--mono); font-size:clamp(56px,6vw,88px); line-height:.9; background:var(--card); border:3px dashed var(--accent); border-radius:16px; padding:8px 18px}
+.target .lab{font-family:var(--display); font-weight:600; font-size:20px; color:var(--muted)}
+
+table.routes{border-collapse:collapse; font-size:clamp(17px,1.4vw,21px); min-width:min(100%,420px)}
+.routes th{text-align:left; font-size:14px; color:var(--muted); font-weight:500; padding:4px 22px 6px 0; border-bottom:2px solid var(--line)}
+.routes td{padding:8px 22px 8px 0; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+.routes td.p{font-weight:600}
+.routes tr.best td{color:var(--good)}
+.routes .star{font-size:13px; font-weight:600; background:var(--good-soft); color:var(--good); border-radius:8px; padding:2px 8px; margin-left:8px; white-space:nowrap}
+.scroll{overflow-x:auto; max-width:100%}
+
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px}
+.card{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; text-align:left}
+.card[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset}
+.card .q{font-family:var(--mono); font-size:clamp(28px,2.6vw,38px)}
+.card .a{font-size:16px; color:var(--muted); min-height:1.4em}
+.card .a b{color:var(--ink); font-family:var(--mono); font-size:22px}
+.card .st{font-size:15px; font-weight:600}
+.card .st.ok{color:var(--good)}
+
+.grid{display:grid; grid-template-columns:repeat(10,1fr); gap:6px; max-width:640px}
+.grid.h{gap:3px; max-width:560px}
+.cell{aspect-ratio:1; border:2px solid var(--line); background:var(--card); border-radius:10px; font-family:var(--display); font-weight:600; font-size:clamp(16px,2vw,26px); position:relative; display:grid; place-items:center; padding:0}
+.grid.h .cell{border-width:1px; border-radius:5px; font-size:clamp(11px,1.15vw,16px); font-weight:500}
+.cell.made{background:var(--five-soft); border-color:var(--five)}
+.cell.made::before{content:""; position:absolute; inset:16%; border:3px solid var(--five); border-radius:50%}
+.grid.h .cell.made{background:var(--seven-soft); border-color:var(--seven)}
+.grid.h .cell.made::before{border-color:var(--seven); border-width:2px; inset:10%}
+.cell.circ::after,.cell.cross::after{content:""; position:absolute; pointer-events:none}
+.cell.circ::after{inset:8%; border:3.5px solid var(--good); border-radius:50%}
+.cell.cross::after{left:18%; right:18%; top:calc(50% - 2px); height:4px; background:var(--warn); border-radius:3px; transform:rotate(-40deg)}
+.cell.cross{color:var(--muted)}
+.cell.wrong{background:repeating-linear-gradient(45deg, var(--warn-soft) 0 7px, var(--card) 7px 14px); border-color:var(--warn)}
+.cell.hl{background:var(--accent-soft); border-color:var(--accent)}
+.cell.gap{background:var(--warn-soft); border-color:var(--warn); border-style:dashed}
+.cell .end{color:var(--five); text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:3px}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:15px; color:var(--muted)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:20px; height:20px; border-radius:50%; display:inline-block}
+
+.evid{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:10px}
+.evid:empty{display:none}
+.evid svg{width:100%; height:auto; display:block}
+.evid p{margin:0; font-size:clamp(17px,1.4vw,20px); max-width:38em}
+.pv{display:flex; gap:10px; flex-wrap:wrap; align-items:stretch}
+.pv div{background:var(--paper); border-radius:12px; padding:10px 18px; text-align:center; font-family:var(--mono); font-size:34px; min-width:96px; position:relative}
+.pv small{display:block; font-family:var(--sans); font-size:13px; color:var(--muted)}
+.pv .taped{background:var(--tape); color:var(--tape-ink)}
+.pv .taped::after{content:"has a 4!"; position:absolute; right:-6px; top:-12px; font-family:var(--hand); font-size:22px; color:var(--warn); transform:rotate(8deg)}
+.sumtab{border-collapse:collapse; font-family:var(--mono); font-size:clamp(20px,1.8vw,26px)}
+.sumtab td{padding:4px 14px 4px 0}
+.sumtab .last{color:var(--five); text-decoration:underline; text-decoration-thickness:3px; text-underline-offset:4px}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font-weight:600; font-size:19px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+
+@media (max-width: 920px){
+  main{grid-template-columns:minmax(0,1fr)}
+  .calc{position:static; max-width:440px; width:100%; margin-inline:auto}
+}
+@media (max-width: 480px){
+  .key{min-height:58px}
+  .grid{gap:4px}
+  .cell{border-radius:7px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>The Broken Calculator</h1>
+      <p class="sub">Grade 2 · Week 6 · Lesson 2.6</p>
+      <p class="dq">How many ways can you reach a number when some keys are broken?</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="warm" aria-selected="true">Warm-up</button>
+    <button role="tab" data-tab="a" aria-selected="false"><span class="tag">A</span>No 4 key</button>
+    <button role="tab" data-tab="b" aria-selected="false"><span class="tag">B</span>Only 1 and 0</button>
+    <button role="tab" data-tab="c" aria-selected="false"><span class="tag">C</span>Only 5</button>
+    <button role="tab" data-tab="x" aria-selected="false"><span class="tag">★</span>Only 7</button>
+    <button role="tab" data-tab="q" aria-selected="false">Detective questions</button>
+  </nav>
+
+  <main>
+    <section class="calc" aria-label="Calculator">
+      <div class="brand"><span id="calcName">Class calculator</span><span class="solar"><i></i><i></i><i></i><i></i></span></div>
+      <div class="lcd" aria-live="polite">
+        <div class="expr" id="expr"></div>
+        <div class="big" id="big">0</div>
+        <div class="meta"><span class="dots" id="dots" aria-hidden="true"></span><span id="pressCount">0 presses</span></div>
+      </div>
+      <div class="keys" id="keys"></div>
+      <div class="calc-note" id="calcNote"></div>
+    </section>
+
+    <section class="panel">
+      <!-- Warm-up -->
+      <div class="view" id="v-warm">
+        <p class="lead"><b>Number talk.</b> Solve each one in your head. Tell a partner how you did it. Then tap the card to check.</p>
+        <div class="cards" id="warmCards"></div>
+        <p class="msg info" id="warmMsg"></p>
+        <p class="small">Every key works during the warm-up. You can check an answer on the calculator too.</p>
+      </div>
+
+      <!-- Part A -->
+      <div class="view" id="v-a" hidden>
+        <div class="target">
+          <div class="num" id="aTarget">347</div>
+          <div>
+            <div class="lab">The 4 key is broken.</div>
+            <div class="seg" role="group" aria-label="Target" style="margin-top:8px">
+              <button id="aT347" aria-pressed="true">Target 347</button>
+              <button id="aT47" aria-pressed="false">Easier: 47</button>
+            </div>
+          </div>
+        </div>
+        <p class="lead">Get <b id="aTxt">347</b> on the screen <b>three different ways</b>. Every press counts, even <span class="mono">+ − =</span>.</p>
+        <p class="msg" id="aMsg"></p>
+        <div class="scroll"><table class="routes" id="aTable"></table></div>
+        <div class="row">
+          <button class="secondary" id="aFewest">Fewest presses?</button>
+          <button class="secondary" id="aWhy">Why can’t it be shorter?</button>
+        </div>
+        <div class="evid" id="aEvid"></div>
+      </div>
+
+      <!-- Part B -->
+      <div class="view" id="v-b" hidden>
+        <p class="lead">Only <span class="mono">1 0 + − =</span> work. Pick a target and make it. Can you use fewer presses?</p>
+        <div class="cards" id="bCards"></div>
+        <p class="msg" id="bMsg"></p>
+        <div class="row">
+          <button class="secondary" id="bHint">Which place first?</button>
+          <button class="secondary" id="bBest">Fewest presses?</button>
+        </div>
+        <div class="evid" id="bEvid"></div>
+      </div>
+
+      <!-- Part C -->
+      <div class="view" id="v-c" hidden>
+        <p class="lead">Only the <b>5</b> key works (and <span class="mono">+ − =</span>). Which numbers from 1 to 30 can you make?</p>
+        <p class="small">Every number you make lights up blue. Tap a square to circle it (I can make it), tap again to cross it out (I can’t), a third time to clear.</p>
+        <div class="grid" id="cGrid" aria-label="Numbers 1 to 30"></div>
+        <div class="legend"><span><i style="background:var(--five-soft); border:3px solid var(--five)"></i>made on the calculator</span><span><i style="border:3px solid var(--good)"></i>circled: I can make it</span><span><i style="background:var(--warn); height:4px; border-radius:2px"></i>crossed: I can’t</span></div>
+        <p class="msg" id="cMsg"></p>
+        <div class="row">
+          <button class="primary" id="cCheck">Check my circles</button>
+          <button class="secondary" id="cCommon">What do they have in common?</button>
+          <button class="secondary" id="c23">Why never 23?</button>
+        </div>
+        <div class="evid" id="cEvid"></div>
+      </div>
+
+      <!-- Challenge -->
+      <div class="view" id="v-x" hidden>
+        <p class="lead"><b>Challenge.</b> Only the <b>7</b> key works (and <span class="mono">+ − =</span>). Can you make <b>100</b>? Prove your answer.</p>
+        <div class="row">
+          <span class="small" style="font-size:17px">I think…</span>
+          <div class="seg" role="group" aria-label="Your prediction">
+            <button id="xYes" aria-pressed="false">Yes, I can</button>
+            <button id="xNo" aria-pressed="false">No, I can’t</button>
+          </div>
+        </div>
+        <p class="msg" id="xMsg"></p>
+        <div class="grid h" id="xGrid" aria-label="Numbers 1 to 100"></div>
+        <div class="row">
+          <button class="secondary" id="xUnder30">Which numbers under 30?</button>
+          <button class="secondary" id="xJump">Jump by 7s to 100</button>
+        </div>
+        <div class="evid" id="xEvid"></div>
+      </div>
+
+      <!-- Detective questions -->
+      <div class="view" id="v-q" hidden>
+        <div class="qnav" id="qnav"></div>
+        <p class="lead" id="qText"></p>
+        <div class="row" id="qActs"></div>
+        <div class="evid" id="qEvid"></div>
+        <p class="small">Talk it over first. Then tap a button to put evidence on the screen.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const MINUS = '−';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ALL = ['0','1','2','3','4','5','6','7','8','9','+',MINUS,'='];
+const isDigit = k => /^[0-9]$/.test(k);
+const isOp = k => k==='+' || k===MINUS;
+const plural = (n,w) => `${n} ${w}${n===1?'':'es'}`;
+
+/* ---------- Part settings ---------- */
+const PART = {
+  warm:{name:'Class calculator', works:ALL},
+  a:{name:'Broken: 4 key', works:ALL.filter(k=>k!=='4')},
+  b:{name:'Only 1 and 0', works:['1','0','+',MINUS,'=']},
+  c:{name:'Only 5', works:['5','+',MINUS,'=']},
+  x:{name:'Only 7', works:['7','+',MINUS,'=']},
+  q:{name:'Class calculator', works:ALL}
+};
+
+/* ---------- State ---------- */
+let S;
+function fresh(){
+  return {
+    tab:S?S.tab:'warm', keys:[],
+    warm:{open:{}},
+    a:{target:347, routes:{347:[],47:[]}},
+    b:{sel:50, best:{50:null,99:null,230:null}},
+    c:{made:{}, mark:{}},
+    x:{made:{}, guess:null},
+    q:1
+  };
+}
+S = fresh();
+
+/* ---------- Calculator ---------- */
+const LAYOUT = ['7','8','9','C','4','5','6',MINUS,'1','2','3','+','0','='];
+const keyEls = {};
+function buildKeys(){
+  const box = $('#keys'); box.innerHTML='';
+  for(const k of LAYOUT){
+    const b = document.createElement('button');
+    b.className = 'key' + (isOp(k)?' op':'') + (k==='='?' eq':'') + (k==='0'?' zero':'') + (k==='C'?' clr':'');
+    b.textContent = k; b.dataset.k = k;
+    b.addEventListener('click', () => press(k));
+    box.appendChild(b); keyEls[k]=b;
+  }
+}
+function works(k){ return k==='C' || PART[S.tab].works.includes(k); }
+function renderKeys(){
+  for(const k of LAYOUT){
+    const el = keyEls[k], ok = works(k);
+    el.classList.toggle('broken', !ok);
+    el.setAttribute('aria-label', ok ? (k==='C'?'Clear':k) : `${k}, broken`);
+  }
+  $('#calcName').textContent = PART[S.tab].name;
+}
+function shake(k){ const el=keyEls[k]; if(!el||reduced) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+function note(html){ $('#calcNote').innerHTML = html; }
+
+/* Turn the key list into numbers and operators (the "=" presses still count, but don't change the value). */
+function parse(keys){
+  const parts=[]; let cur='';
+  for(const k of keys){
+    if(isDigit(k)) cur+=k;
+    else { if(cur){ parts.push(cur); cur=''; } parts.push(k); }
+  }
+  if(cur) parts.push(cur);
+  return parts;
+}
+function value(keys){
+  let v=null, op='+';
+  for(const p of parse(keys)){
+    if(p==='=') continue;
+    if(isOp(p)){ op=p; continue; }
+    const n = parseInt(p,10);
+    v = v===null ? n : (op==='+' ? v+n : v-n);
+  }
+  return v;
+}
+function routeText(keys){
+  const parts = parse(keys);
+  // drop the final "=" for display; keep any "=" pressed in the middle
+  const show = parts[parts.length-1]==='=' ? parts.slice(0,-1) : parts;
+  return show.map(p => /^\d+$/.test(p) ? String(parseInt(p,10)) : p).join(' ');
+}
+function currentNumber(){
+  const parts = parse(S.keys);
+  for(let i=parts.length-1;i>=0;i--) if(/^\d+$/.test(parts[i])) return parts[i];
+  return null;
+}
+function renderLCD(){
+  const k = S.keys, ended = k[k.length-1]==='=';
+  $('#expr').textContent = k.length ? routeText(k) + (ended ? ' =' : '') : '';
+  const big = $('#big');
+  if(!k.length){ big.textContent='0'; big.classList.add('dim'); }
+  else if(ended){ big.textContent = String(value(k)); big.classList.remove('dim'); }
+  else { const n=currentNumber(); big.textContent = n===null?'0':String(parseInt(n,10)); big.classList.toggle('dim', isOp(k[k.length-1])); }
+  $('#dots').innerHTML = '<i></i>'.repeat(k.length);
+  $('#pressCount').textContent = `${k.length} press${k.length===1?'':'es'}`;
+}
+function brokenMsg(k){
+  if(S.tab==='a' && k==='4') return S.a.target===347 ? 'The 4 key is taped over. Is there another way to get the 40?' : 'The 4 key is taped over. What number close to 47 can you type?';
+  if(S.tab==='b') return `<b>${k}</b> is broken. Only 1, 0, + , − and = work.`;
+  if(S.tab==='c') return `<b>${k}</b> is broken. Only 5, +, − and = work.`;
+  if(S.tab==='x') return `<b>${k}</b> is broken. Only 7, +, − and = work.`;
+  return 'That key is broken.';
+}
+function press(k){
+  if(k==='C'){ S.keys=[]; note(''); renderLCD(); return; }
+  if(!works(k)){ shake(k); note(brokenMsg(k)); return; }
+  const last = S.keys[S.keys.length-1];
+  if(isDigit(k)){
+    if(last==='='){ S.keys=[]; }
+    const n = currentNumber(); const typing = S.keys.length && isDigit(S.keys[S.keys.length-1]);
+    if(typing && n.length>=4){ shake(k); note('Four digits is plenty for today.'); return; }
+    S.keys.push(k); note('');
+  } else if(isOp(k)){
+    if(!S.keys.length || isOp(last)){ shake(k); note('Type a number first.'); return; }
+    S.keys.push(k); note(last==='=' ? 'Keep going from the answer. Every press still counts.' : '');
+  } else if(k==='='){
+    if(!S.keys.length || isOp(last) || last==='='){ shake(k); note(!S.keys.length ? 'Type a number first.' : last==='=' ? 'Already done. Press C to start a new route.' : 'Type a number after the sign.'); return; }
+    S.keys.push('='); note('');
+    renderLCD();
+    onEquals(value(S.keys), routeText(S.keys), S.keys.length);
+    return;
+  }
+  renderLCD();
+}
+function onEquals(v, text, presses){
+  const h = HANDLERS[S.tab]; if(h) h(v, text, presses);
+}
+function say(id, html, cls){ const el=$(id); el.className = 'msg' + (cls?' '+cls:''); el.innerHTML = html; }
+
+/* ---------- Warm-up ---------- */
+const WARM = [
+  {q:'250 + 250', a:500, how:'200 + 200 = 400 and 50 + 50 = 100. Together that’s 500.'},
+  {q:'300 − 1', a:299, how:'One less than 300. The hundreds drop to 2 and the tens and ones become 9s: 299.'},
+  {q:'199 + 1', a:200, how:'One more than 199. The 9s roll over to 0s: 200.'},
+  {q:'500 − 10', a:490, how:'Ten less than 500. Count back one ten: 490.'}
+];
+function renderWarm(){
+  const box=$('#warmCards'); box.innerHTML='';
+  WARM.forEach((w,i) => {
+    const b=document.createElement('button'); b.className='card'; b.setAttribute('aria-pressed', !!S.warm.open[i]);
+    b.innerHTML = `<span class="q">${w.q}</span><span class="a">${S.warm.open[i] ? `= <b>${w.a}</b>` : 'Tap to check'}</span>`;
+    b.onclick = () => { S.warm.open[i]=true; renderWarm(); say('#warmMsg', `<b>${w.q} = ${w.a}.</b> One way: ${w.how} Did someone think about it a different way?`, 'info'); };
+    box.appendChild(b);
+  });
+}
+const warmHandler = (v,text) => {
+  const hit = WARM.find(w => w.q.replace(/\s/g,'')===text.replace(/\s/g,''));
+  say('#warmMsg', hit ? `The calculator agrees: <b>${text} = ${v}</b>.` : `<span class="mono">${text} = ${v}</span>`, 'info');
+};
+
+/* ---------- Part A ---------- */
+function aRoutes(){ return S.a.routes[S.a.target]; }
+function renderA(){
+  const t=S.a.target;
+  $('#aTarget').textContent=t; $('#aTxt').textContent=t;
+  $('#aT347').setAttribute('aria-pressed', t===347); $('#aT47').setAttribute('aria-pressed', t===47);
+  const r=aRoutes();
+  if(!r.length){ $('#aTable').innerHTML = `<tr><th>Route to ${t}</th><th>Presses</th></tr><tr><td colspan="2" style="color:var(--muted)">Your routes will appear here.</td></tr>`; return; }
+  const min = Math.min(...r.map(x=>x.p));
+  $('#aTable').innerHTML = `<tr><th>Route to ${t} (no 4 key)</th><th>Presses</th></tr>` +
+    r.map(x => `<tr class="${x.p===min?'best':''}"><td class="mono">${x.text} =</td><td class="p">${x.p}${x.p===min?'<span class="star">fewest so far</span>':''}</td></tr>`).join('');
+}
+const aHandler = (v,text,p) => {
+  const t=S.a.target, r=aRoutes();
+  if(v===t){
+    const sig = S.keys.join('');
+    if(r.some(x=>x.sig===sig)){ say('#aMsg', `You already found <span class="mono">${text}</span>. Can you find a different route?`, 'try'); return; }
+    r.push({text, p, sig}); renderA();
+    const left = Math.max(0, 3-r.length);
+    say('#aMsg', `<b>${t}!</b> <span class="mono">${text} =</span> took <b>${p} presses</b>. ` + (left ? `Find ${left} more way${left===1?'':'s'}.` : 'Which route is shortest? Why is it short?'), 'good');
+  } else {
+    const d = v-t;
+    const how = d>0 ? `${d} more than ${t}` : `${-d} less than ${t}`;
+    say('#aMsg', `The screen shows <b>${v}</b>. That’s ${how}. Press ${d>0?'−':'+'} to keep going from ${v}, or press C to start a new route.`, 'try');
+  }
+};
+/* every shortest route a ± b with a typeable number and a one-digit number (checked by brute force) */
+function shortPairs(t, bad){
+  const ok = n => !String(n).includes(bad);
+  const out=[]; const lo = t>=100?100:10, hi = t>=100?999:99;
+  for(let a=lo;a<=hi;a++) for(let b=0;b<=9;b++){
+    if(!ok(a)||!ok(b)) continue;
+    if(a+b===t){ out.push(`${a} + ${b}`); out.push(`${b} + ${a}`); }
+    if(a-b===t) out.push(`${a} − ${b}`);
+  }
+  return out;
+}
+const pressesOf = text => text.replace(/\s/g,'').length + 1; // every digit and sign, plus "="
+function aFewest(){
+  const t=S.a.target, list=shortPairs(t,'4'), p=pressesOf(list[0]);
+  const r=aRoutes(), mine = r.length ? Math.min(...r.map(x=>x.p)) : null;
+  const intro = mine===null ? '' : mine===p ? `<p>Your fewest was <b>${mine}</b>. That ties the fewest possible!</p>` : `<p>Your fewest so far is <b>${mine}</b>. Can you get to ${p}?</p>`;
+  $('#aEvid').innerHTML = intro + `<p>The fewest possible is <b>${p} presses</b>. Here is every ${p}-press route to ${t}:</p>` +
+    `<p class="mono" style="white-space:normal; line-height:1.9">${list.map(x=>`<span style="white-space:nowrap">${x} =</span>`).join(' &nbsp;·&nbsp; ')}</p>` +
+    `<p>Each one uses a number close to ${t} and a one-digit number to fix the ones.</p>`;
+}
+function aWhy(){
+  const t=S.a.target;
+  $('#aEvid').innerHTML = t===347
+    ? `<p><b>4 presses?</b> That’s <span class="mono">347 =</span>, and it needs the 4 key.</p><p><b>5 presses?</b> Take away the “+” or “−” and the “=”, and only 3 digits are left for two numbers. The biggest you can make is <span class="mono">99 + 9 = 108</span>. Too small!</p><p>So <b>6 presses</b> is the fewest.</p>`
+    : `<p><b>3 presses?</b> That’s <span class="mono">47 =</span>, and it needs the 4 key.</p><p><b>4 presses?</b> Only 2 digits are left for two numbers. The biggest is <span class="mono">9 + 9 = 18</span>. Too small!</p><p>So <b>5 presses</b> is the fewest.</p>`;
+}
+
+/* ---------- Part B ---------- */
+const B_TARGETS=[50,99,230];
+/* Fewest presses using only 1, 0, +, − (shortest-path search over the values you can reach). */
+function bSearch(target){
+  const toks=[];
+  for(let L=1;L<=4;L++) for(let m=0;m<(1<<L);m++){
+    let s=''; for(let i=L-1;i>=0;i--) s += (m>>i)&1 ? '1':'0';
+    if(s.length>1 && s[0]==='0') continue; toks.push({v:parseInt(s,10), L, s});
+  }
+  const LIM=3000, dist=new Map(), prev=new Map();
+  const heap=[]; const push=(c,v)=>{heap.push([c,v]); heap.sort((a,b)=>a[0]-b[0]);};
+  for(const t of toks){ if(!dist.has(t.v) || t.L<dist.get(t.v)){ dist.set(t.v,t.L); prev.set(t.v,[null,t.s,'']); push(t.L,t.v);} }
+  while(heap.length){
+    const [c,v]=heap.shift(); if(c>dist.get(v)) continue; if(v===target) break;
+    for(const t of toks) for(const [op,nv] of [['+',v+t.v],[MINUS,v-t.v]]){
+      if(Math.abs(nv)>LIM) continue; const nc=c+1+t.L;
+      if(!dist.has(nv) || nc<dist.get(nv)){ dist.set(nv,nc); prev.set(nv,[v,t.s,op]); push(nc,nv); }
+    }
+  }
+  const parts=[]; let v=target;
+  while(true){ const [p,s,op]=prev.get(v); parts.unshift(s); if(op) parts.unshift(op); if(p===null) break; v=p; }
+  return {presses:dist.get(target)+1, text:parts.join(' ')};
+}
+const B_BEST = {};
+function renderB(){
+  const box=$('#bCards'); box.innerHTML='';
+  B_TARGETS.forEach(t => {
+    const b=document.createElement('button'); b.className='card'; b.setAttribute('aria-pressed', S.b.sel===t);
+    const m=S.b.best[t];
+    b.innerHTML = `<span class="q">${t}</span><span class="a">${m ? `<span class="mono" style="font-size:18px">${m.text} =</span>` : 'Not made yet'}</span><span class="st ${m?'ok':''}">${m ? `✓ ${m.p} presses` : '&nbsp;'}</span>`;
+    b.onclick = () => { S.b.sel=t; $('#bEvid').innerHTML=''; renderB(); };
+    box.appendChild(b);
+  });
+}
+const bHandler = (v,text,p) => {
+  const t=S.b.sel;
+  if(B_TARGETS.includes(v)){
+    const old=S.b.best[v];
+    if(!old || p<old.p) S.b.best[v]={text,p};
+    S.b.sel=v; renderB();
+    const better = old && p<old.p ? ` That beats your old route (${old.p} presses).` : old && p>=old.p ? ` Your best is still ${old.p} presses.` : '';
+    say('#bMsg', `<b>${v}!</b> <span class="mono">${text} =</span> took <b>${p} presses</b>.${better} Is there a shorter way? How could you check?`, 'good');
+  } else {
+    const d=v-t;
+    say('#bMsg', `The screen shows <b>${v}</b>. That’s ${d>0?`${d} more`:`${-d} less`} than ${t}. Press ${d>0?'−':'+'} to keep going from ${v}, or C to start again.`, 'try');
+  }
+};
+function bHint(){
+  const t=S.b.sel;
+  const H = {
+    50:'<p><b>50 is 5 tens.</b> Which key-number is a ten? <span class="mono">10</span>. How many 10s do you need?</p>',
+    99:'<p><b>99 is just 1 less than 100.</b> Can you type 100? Then what?</p>',
+    230:'<p><b>Build the hundreds first.</b> 230 is 2 hundreds, 3 tens. You can type <span class="mono">100</span>, <span class="mono">110</span> and <span class="mono">10</span>. Which ones add up to 230?</p>'
+  };
+  $('#bEvid').innerHTML = H[t];
+}
+function bBest(){
+  const t=S.b.sel, best=B_BEST[t]||(B_BEST[t]=bSearch(t)), m=S.b.best[t];
+  let head;
+  if(!m) head = `<p>Make ${t} first. Then come back and compare.</p><p>Here’s a clue: the fewest possible is <b>${best.presses} presses</b>.</p>`;
+  else if(m.p===best.presses) head = `<p>You made ${t} in <b>${m.p} presses</b>. That ties the fewest possible!</p>`;
+  else head = `<p>You made ${t} in ${m.p} presses. The fewest possible is <b>${best.presses}</b>. Want to try before you peek?</p>`;
+  $('#bEvid').innerHTML = head + `<div class="row"><button class="secondary" id="bPeek">Show a ${best.presses}-press route</button></div>`;
+  $('#bPeek').onclick = () => { $('#bEvid').insertAdjacentHTML('beforeend', `<p class="mono" style="font-size:24px">${best.text} = ${t}</p><p class="small">A computer checked every route. None is shorter.</p>`); $('#bPeek').disabled=true; };
+}
+
+/* ---------- Part C ---------- */
+const C_MAX=30;
+const canC = n => n%5===0;
+function renderC(){
+  const g=$('#cGrid'); g.innerHTML='';
+  for(let n=1;n<=C_MAX;n++){
+    const b=document.createElement('button'); b.className='cell'; b.textContent=n; b.dataset.n=n;
+    if(S.c.made[n]) b.classList.add('made');
+    const m=S.c.mark[n]; if(m) b.classList.add(m);
+    b.setAttribute('aria-label', `${n}${S.c.made[n]?', made':''}${m==='circ'?', circled':m==='cross'?', crossed out':''}`);
+    b.onclick = () => { S.c.mark[n] = !m ? 'circ' : m==='circ' ? 'cross' : undefined; renderC();
+      if(S.c.made[n]) say('#cMsg', `You made ${n}: <span class="mono">${S.c.made[n]} = ${n}</span>`, 'info'); };
+    g.appendChild(b);
+  }
+}
+const cHandler = (v,text) => {
+  if(v>=1 && v<=C_MAX){
+    const old=S.c.made[v]; if(!old || text.length<old.length) S.c.made[v]=text;
+    renderC();
+    const all = Object.keys(S.c.made).map(Number).sort((a,b)=>a-b);
+    say('#cMsg', `<b>You made ${v}!</b> It lights up blue. Made so far: ${all.join(', ')}.`, 'good');
+  } else if(v>C_MAX){
+    say('#cMsg', `You made <b>${v}</b>. That’s bigger than 30. Look at its last digit. Try something smaller.`, 'try');
+  } else {
+    say('#cMsg', `You made <b>${v}</b>. We’re looking for 1 to 30. Try adding instead.`, 'try');
+  }
+};
+function cCheck(){
+  $('#cEvid').innerHTML='';
+  const els=[...document.querySelectorAll('#cGrid .cell')]; let right=0, wrongs=[], unmarked=0;
+  els.forEach(el => el.classList.remove('wrong'));
+  for(let n=1;n<=C_MAX;n++){
+    const m=S.c.mark[n];
+    if(!m){ unmarked++; continue; }
+    const ok = m==='circ' ? canC(n) : !canC(n);
+    if(ok) right++; else { wrongs.push(n); els[n-1].classList.add('wrong'); }
+  }
+  if(!wrongs.length && !unmarked){ say('#cMsg', `All 30 are right! You can make 5, 10, 15, 20, 25 and 30. What do they have in common?`, 'good'); return; }
+  if(!wrongs.length){ say('#cMsg', `Everything you marked is right (${right}). ${unmarked} number${unmarked===1?' is':'s are'} not marked yet.`, 'good'); return; }
+  const n=wrongs[0];
+  let why;
+  if(S.c.mark[n]==='circ'){
+    const lo=Math.floor(n/5)*5;
+    why = `You circled <b>${n}</b>. Try to make it! Count by 5s: ${lo===0?'0':lo}, ${lo+5}… You land on ${lo===0?'5':lo} and ${lo+5}, and jump right over ${n}.`;
+  } else {
+    const k=n/5;
+    why = `You crossed out <b>${n}</b>. Try <span class="mono">${Array(k).fill('5').join(' + ')} =</span> on the calculator${n===30?' (or 55 − 5 − 5 − 5 − 5 − 5)':''}.`;
+  }
+  say('#cMsg', `${right} right so far. ${wrongs.length} need${wrongs.length===1?'s':''} another look (striped). ${why}`, 'try');
+}
+function cCommon(){
+  document.querySelectorAll('#cGrid .cell').forEach(el => {
+    const n=+el.dataset.n; el.classList.remove('wrong');
+    if(canC(n)){ const s=String(n); el.innerHTML = s.slice(0,-1) + `<span class="end">${s.slice(-1)}</span>`; }
+  });
+  $('#cEvid').innerHTML = `<p>Look at the last digit of 5, 10, 15, 20, 25, 30. <b>Every one ends in 5 or 0.</b></p><p>They are the numbers you say when you count by 5s. Can you make 35? 100? How do you know before you try?</p>`;
+}
+function c23(){
+  $('#cEvid').innerHTML = `<p><b>Count by 5s from 0.</b> Where do you land?</p>` + numberLine({max:30, step:5, mark:23, color:'var(--five)'}) +
+    `<p>You land on 20, then 25. <b>23 is in the gap.</b> Every number you can type (5, 55, 555) ends in 5. Adding or taking away 5s keeps you on the 5s path. So the answer always ends in 5 or 0, never 3.</p>`;
+}
+
+/* ---------- Number line (SVG) ---------- */
+function numberLine({min=0, max, step, mark, color, from=0, labelEvery}){
+  const W=760, H=150, padL=26, padR=26, y=96;
+  const x = n => padL + (n-min)/(max-min)*(W-padL-padR);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Number line from ${min} to ${max}, jumps of ${step}">`;
+  s+=`<line x1="${x(min)}" y1="${y}" x2="${x(max)}" y2="${y}" stroke="var(--ink)" stroke-width="3"/>`;
+  const lab = labelEvery || step;
+  for(let n=min;n<=max;n++){
+    const big = n%lab===0;
+    s+=`<line x1="${x(n)}" y1="${y-(big?9:5)}" x2="${x(n)}" y2="${y+(big?9:5)}" stroke="var(--muted)" stroke-width="${big?2:1}"/>`;
+  }
+  for(let n=from;n+step<=max;n+=step){
+    if(n<min) continue;
+    const a=x(n), b=x(n+step), mid=(a+b)/2;
+    s+=`<path d="M${a} ${y-12} Q${mid} ${y-62} ${b} ${y-12}" fill="none" stroke="${color}" stroke-width="3"/>`;
+    s+=`<polygon points="${b-7},${y-22} ${b+1},${y-11} ${b-10},${y-12}" fill="${color}"/>`;
+  }
+  for(let n=Math.max(from,min);n<=max;n+=step){
+    s+=`<circle cx="${x(n)}" cy="${y}" r="7" fill="${color}"/>`;
+    s+=`<text x="${x(n)}" y="${y+34}" text-anchor="middle" font-family="Lexend, sans-serif" font-size="20" font-weight="600" fill="var(--ink)">${n}</text>`;
+  }
+  if(mark!=null){
+    s+=`<line x1="${x(mark)}" y1="${y-30}" x2="${x(mark)}" y2="${y+12}" stroke="var(--warn)" stroke-width="3" stroke-dasharray="5 4"/>`;
+    s+=`<text x="${x(mark)}" y="${y-36}" text-anchor="middle" font-family="Lexend, sans-serif" font-size="22" font-weight="600" fill="var(--warn)">${mark}?</text>`;
+  }
+  return s+'</svg>';
+}
+
+/* ---------- Challenge (7s) ---------- */
+function renderX(){
+  const g=$('#xGrid'); g.innerHTML='';
+  for(let n=1;n<=100;n++){
+    const b=document.createElement('div'); b.className='cell'; b.textContent=n; b.dataset.n=n;
+    if(S.x.made[n]) b.classList.add('made');
+    g.appendChild(b);
+  }
+  $('#xYes').setAttribute('aria-pressed', S.x.guess==='yes'); $('#xNo').setAttribute('aria-pressed', S.x.guess==='no');
+}
+const xHandler = (v,text) => {
+  if(v>=1 && v<=100){ S.x.made[v]=true; renderX(); }
+  if(v===100) return; // cannot happen: every result is a multiple of 7
+  const near = v>=1 && v<=120 ? ` It lights up purple.` : '';
+  const close = Math.abs(v-100)<=7 ? ` So close! ${v} is ${Math.abs(v-100)} ${v<100?'less':'more'} than 100. Can any 7-key move fix that?` : '';
+  say('#xMsg', `You made <b>${v}</b>.${near}${close} Look at all the purple numbers. What do they have in common?`, close?'try':'info');
+};
+async function xJump(){
+  const cells=[...document.querySelectorAll('#xGrid .cell')];
+  cells.forEach(c=>c.classList.remove('hl','gap'));
+  for(let n=7;n<=98;n+=7){ cells[n-1].classList.add('hl'); if(!reduced) await new Promise(r=>setTimeout(r,90)); }
+  cells[99].classList.add('gap');
+  $('#xEvid').innerHTML = `<p><b>Count by 7s:</b> 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105.</p>` +
+    numberLine({min:84, max:105, step:7, from:84, mark:100, color:'var(--seven)', labelEvery:7}) +
+    `<p><b>98 + 7 = 105.</b> The jump goes right over 100. You can type 98 as <span class="mono">77 + 7 + 7 + 7</span>, but 100 is never a landing spot.</p><p>Every number you can type (7, 77, 777) is on the 7s path, and adding or taking away 7s keeps you on it. <b>So 100 is impossible.</b></p>`;
+}
+function xUnder30(){
+  const cells=[...document.querySelectorAll('#xGrid .cell')];
+  cells.forEach(c=>c.classList.remove('hl','gap'));
+  [7,14,21,28].forEach(n=>cells[n-1].classList.add('hl'));
+  $('#xEvid').innerHTML = `<p>Under 30 you can make <b>7, 14, 21 and 28</b>. That’s it!</p>` + numberLine({max:30, step:7, color:'var(--seven)', labelEvery:10}) + `<p>Compare with the 5-only calculator. What’s the same? What’s different?</p>`;
+}
+function xGuess(g){
+  S.x.guess=g; renderX();
+  say('#xMsg', g==='yes'
+    ? 'You think yes. Prove it! Make 100 on the calculator, or tap “Jump by 7s” to check.'
+    : 'You think no. A proof says why it can never happen, not just “I tried.” Tap “Jump by 7s” for evidence.', 'info');
+}
+
+/* ---------- Detective questions ---------- */
+const QS = {
+  1:{text:'Which route to 347 used the fewest presses? Why is it short?', acts:[
+    {label:'Line up the routes', run(){
+      const mine = S.a.routes[347];
+      const rows = (mine.length ? mine.map(r=>({text:r.text,p:r.p})) : ['350 − 3','357 − 10','300 + 50 − 3'].map(t=>({text:t,p:pressesOf(t)})))
+        .slice().sort((a,b)=>a.p-b.p);
+      const min=rows[0].p;
+      $('#qEvid').innerHTML = `<p>${mine.length?'Your class’s routes':'Three example routes'}, shortest first:</p><div class="scroll"><table class="routes">
+        <tr><th>Route</th><th>Presses</th></tr>${rows.map(r=>`<tr class="${r.p===min?'best':''}"><td class="mono">${r.text} =</td><td class="p">${r.p}</td></tr>`).join('')}</table></div>
+        <p>The short routes start with a number that is already close to 347 and use small numbers to fix it.</p>`;
+    }},
+    {label:'Could 5 presses work?', run(){ S.a.target=347; aWhy(); $('#qEvid').innerHTML = $('#aEvid').innerHTML; $('#aEvid').innerHTML=''; renderA(); }}
+  ]},
+  2:{text:'Which place are you building first? 347 = 300 + 40 + 7, but the 4 key is broken.', acts:[
+    {label:'Break 347 apart', run(){
+      $('#qEvid').innerHTML = `<div class="pv"><div>300<small>hundreds</small></div><div class="taped">40<small>tens</small></div><div>7<small>ones</small></div></div>
+        <p>The hundreds and ones are easy. The <b>40</b> is the problem. Is there another way to get the 40?</p>`;
+    }},
+    {label:'Ways around the 40', run(){
+      $('#qEvid').innerHTML = `<p class="mono" style="font-size:24px; white-space:normal; line-height:1.8">350 − 3 = 347<br>357 − 10 = 347<br>338 + 9 = 347<br>300 + 50 − 3 = 347</p>
+        <p>Each route jumps to a nearby number without a 4, like 350, then fixes it.</p>`;
+    }}
+  ]},
+  3:{text:'With only the 5 key, every number you type ends in 5. What happens when you add or subtract two of them?', acts:[
+    {label:'Add them', run(){ fiveTable([[5,5],[55,5],[55,55],[555,5],[555,55]],'+'); }},
+    {label:'Subtract them', run(){ fiveTable([[55,5],[555,5],[555,55],[55,5,5]],MINUS); }}
+  ]},
+  4:{text:'Why can a 5-only calculator never show 23?', acts:[
+    {label:'Jump by 5s', run(){ c23(); $('#qEvid').innerHTML=$('#cEvid').innerHTML; $('#cEvid').innerHTML=''; }}
+  ]},
+  5:{text:'★ Only the 7 key works. Can you make 100? Prove your answer.', acts:[
+    {label:'Jump by 7s to 100', run(){
+      $('#qEvid').innerHTML = numberLine({max:105, step:7, mark:100, color:'var(--seven)', labelEvery:7}) +
+        `<p>The 7s path lands on 98, then 105. <b>100 is skipped.</b> Every number you can type is on the 7s path, and adding or taking away 7s keeps you on it.</p>`;
+    }}
+  ]}
+};
+function fiveTable(rows, op){
+  const html = rows.map(r => {
+    const v = op==='+' ? r.reduce((a,b)=>a+b) : r.slice(1).reduce((a,b)=>a-b, r[0]);
+    const s=String(v);
+    return `<tr><td>${r.join(` ${op} `)}</td><td>=</td><td>${s.slice(0,-1)}<span class="last">${s.slice(-1)}</span></td></tr>`;
+  }).join('');
+  $('#qEvid').innerHTML = `<div class="scroll"><table class="sumtab">${html}</table></div><p>Every answer ends in <b>0 or 5</b>. ${op==='+'?'5 + 5 = 10 ends in 0. 0 + 5 ends in 5.':'Taking away 5 from a number that ends in 5 or 0 leaves an ending of 0 or 5.'} You can never land on a number ending in 3.</p>`;
+}
+function renderQ(){
+  const nav=$('#qnav');
+  nav.innerHTML = [1,2,3,4,5].map(i=>`<button data-q="${i}" aria-pressed="${S.q===i}">${i===5?'★ Challenge':i}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{ S.q=+b.dataset.q; $('#qEvid').innerHTML=''; renderQ(); });
+  $('#qText').textContent = QS[S.q].text;
+  const acts=$('#qActs'); acts.innerHTML='';
+  QS[S.q].acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i?'secondary':'primary'; b.textContent=a.label; b.onclick=()=>a.run(); acts.appendChild(b); });
+}
+
+const HANDLERS = {warm:warmHandler, a:aHandler, b:bHandler, c:cHandler, x:xHandler, q:(v,text)=>note(`${text} = ${v}`)};
+
+/* ---------- Tabs / reset ---------- */
+function setTab(t){
+  S.tab=t; S.keys=[]; note('');
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','a','b','c','x','q'].forEach(v=>$('#v-'+v).hidden = v!==t);
+  renderKeys(); renderLCD();
+  if(t==='q') renderQ();
+}
+function renderAll(){ renderWarm(); renderA(); renderB(); renderC(); renderX(); renderQ(); }
+function reset(){
+  S = fresh();
+  ['#warmMsg','#aMsg','#bMsg','#cMsg','#xMsg'].forEach(id=>{ $(id).innerHTML=''; $(id).className='msg'; });
+  ['#aEvid','#bEvid','#cEvid','#xEvid','#qEvid'].forEach(id=>$(id).innerHTML='');
+  renderAll(); setTab(S.tab);
+}
+
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+$('#aT347').onclick=()=>{ S.a.target=347; S.keys=[]; renderLCD(); $('#aEvid').innerHTML=''; say('#aMsg',''); renderA(); };
+$('#aT47').onclick=()=>{ S.a.target=47; S.keys=[]; renderLCD(); $('#aEvid').innerHTML=''; say('#aMsg',''); renderA(); };
+$('#aFewest').onclick=aFewest; $('#aWhy').onclick=aWhy;
+$('#bHint').onclick=bHint; $('#bBest').onclick=bBest;
+$('#cCheck').onclick=cCheck; $('#cCommon').onclick=cCommon; $('#c23').onclick=c23;
+$('#xJump').onclick=xJump; $('#xUnder30').onclick=xUnder30;
+$('#xYes').onclick=()=>xGuess('yes'); $('#xNo').onclick=()=>xGuess('no');
+$('#resetBtn').onclick=reset;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('input,textarea')) return;
+  let k = e.key; if(k==='-') k=MINUS; if(k==='Enter') k='='; if(k==='Escape'||k==='Backspace') k='C';
+  if(LAYOUT.includes(k)){ e.preventDefault(); press(k); }
+});
+
+buildKeys(); renderAll(); setTab('warm');
+})();
+</script>
+
+</body></html>

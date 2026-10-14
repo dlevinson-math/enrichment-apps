@@ -1,0 +1,764 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Patterns in the Count: The Number Chart Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom hundred chart on the left (the counting tape folds into it), a short talk-and-tap panel on the right. Tens are blue, ones are orange, bumps are pink, the hunt uses highlighter yellow. */
+:root{
+  --paper:#F5F7FB; --card:#FFFFFF; --ink:#1E2A44; --muted:#5B6580; --line:#D3D9E6; --soft:#EBEFF7;
+  --tens:#2765D6; --ones:#D9620F; --bump:#D6336F; --bump-soft:#FCE3EC;
+  --hl:#FFE14D; --hl-ink:#1E2A44; --good:#17895A; --good-soft:#DDF3E8; --try-soft:#FFEEDD;
+  --display:"Fredoka","Nunito","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --chart:max(280px, min(100%, calc(100dvh - 210px)));
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111726; --card:#1A2234; --ink:#EEF1F8; --muted:#A3ADC4; --line:#323C55; --soft:#222B40;
+    --tens:#73A6FF; --ones:#FF9B4F; --bump:#FF6FA3; --bump-soft:#3E2132;
+    --hl:#F2D33B; --good:#45CF8F; --good-soft:#173A2C; --try-soft:#3B2A1A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111726; --card:#1A2234; --ink:#EEF1F8; --muted:#A3ADC4; --line:#323C55; --soft:#222B40;
+  --tens:#73A6FF; --ones:#FF9B4F; --bump:#FF6FA3; --bump-soft:#3E2132;
+  --hl:#F2D33B; --good:#45CF8F; --good-soft:#173A2C; --try-soft:#3B2A1A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; -webkit-tap-highlight-color:transparent}
+.app{padding-inline:clamp(16px,2.5vw,32px); padding-block:12px 24px; display:flex; flex-direction:column; gap:12px; min-height:100%}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--tens); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.title{min-width:0}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(22px,2.4vw,34px); line-height:1.1; text-wrap:balance}
+.sub{margin:3px 0 0; color:var(--muted); font-weight:700; font-size:14px; letter-spacing:.06em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px}
+nav button{flex:none; border:2px solid var(--line); background:var(--card); border-radius:16px; padding:6px 16px 8px; min-height:60px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; text-align:left}
+nav button small{font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+nav button span{font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,22px); line-height:1.1}
+nav button[aria-selected="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+nav button[aria-selected="true"] small{color:var(--card); opacity:.75}
+
+.station{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr); gap:clamp(16px,2.5vw,32px); align-items:start}
+.stage{min-width:0; display:flex; flex-direction:column; gap:12px; align-items:flex-start}
+.panel{min-width:0; display:flex; flex-direction:column; gap:14px}
+.prompt{display:flex; gap:12px; align-items:flex-start}
+.prompt p{margin:0; font-family:var(--display); font-weight:500; font-size:clamp(24px,2.4vw,36px); line-height:1.2; text-wrap:balance}
+.say{flex:none; width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); display:grid; place-items:center}
+.say svg{width:26px; height:26px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px); padding:14px 26px; border-radius:18px; min-height:64px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(18px,1.5vw,22px); padding:10px 20px; border-radius:18px; min-height:56px}
+.secondary:disabled{opacity:.4; cursor:default}
+.secondary[aria-pressed="true"]{background:var(--soft)}
+.fb{margin:0; padding:14px 18px; border-radius:16px; font-size:clamp(19px,1.6vw,24px); line-height:1.35; background:var(--soft); font-weight:600}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft)}
+.fb.try{background:var(--try-soft)}
+.fb.bump{background:var(--bump-soft)}
+.fb b.big{font-family:var(--display); font-size:1.4em; font-weight:600}
+.look{margin:4px 0 0; font-size:14px; color:var(--muted); line-height:1.4; border-top:1.5px solid var(--line); padding-top:10px}
+.look b{font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:12px}
+.t{color:var(--tens)} .o{color:var(--ones)} .h{color:var(--ink)}
+.count{font-family:var(--display); font-size:clamp(20px,1.8vw,26px); font-weight:500}
+.count b{font-size:1.3em; font-weight:600}
+
+/* hundred chart */
+.chart{width:var(--chart); max-width:100%; aspect-ratio:1; display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr); background:var(--card); border:3px solid var(--ink); border-radius:10px; overflow:hidden; container-type:inline-size}
+.cell{position:relative; border:0; padding:0; background:var(--card); border-right:1.5px solid var(--line); border-bottom:1.5px solid var(--line); display:grid; place-items:center; font-family:var(--display); font-weight:500; font-size:4.3cqi; font-variant-numeric:tabular-nums; transition:background-color .2s, opacity .2s}
+.cell:nth-child(10n){border-right:0}
+.cell:nth-child(n+91){border-bottom:0}
+.chart.three .cell{font-size:3.5cqi}
+.cell .num{position:relative; z-index:1; line-height:1}
+.cell .t,.cell .o,.cell .h{color:inherit}
+.chart.colored .cell .t, .cell.showt .t{color:var(--tens); font-weight:600}
+.chart.colored .cell .o, .cell.showo .o{color:var(--ones); font-weight:600}
+.cell.hi{background:var(--hl); color:var(--hl-ink)}
+.cell.hi .t,.cell.hi .o{color:var(--hl-ink)}
+.cell.hi.showt .t{color:#1747A6}
+.cell.lit{background:var(--soft)}
+.cell.now{background:var(--ink); color:var(--card)}
+.cell.now .t,.cell.now .o{color:var(--card)}
+.cell.bumped{background:var(--bump-soft); box-shadow:inset 0 0 0 .14em var(--bump)}
+.cell.nbr{box-shadow:inset 0 0 0 .16em var(--tens); background:var(--soft)}
+.cell.there{box-shadow:inset 0 0 0 .14em var(--ones)}
+.cell.col{box-shadow:inset 0 0 0 .14em var(--ones)}
+.cell.dec{background:var(--soft)}
+.cell.dec.col{background:var(--hl); color:var(--hl-ink)}
+.cell.sel{box-shadow:inset 0 0 0 .18em var(--ink)}
+.cell.guess{background:var(--bump-soft)}
+.cell.guess::after{content:""; position:absolute; top:10%; right:10%; width:.42em; height:.42em; border-radius:50%; background:var(--bump)}
+.cell.right{background:var(--good-soft); box-shadow:inset 0 0 0 .14em var(--good)}
+.cell.nope{background:var(--try-soft); box-shadow:inset 0 0 0 .14em var(--ones)}
+.cell.missed{box-shadow:inset 0 0 0 .12em var(--bump); outline:none; background:repeating-linear-gradient(45deg,transparent 0 6px,var(--bump-soft) 6px 12px)}
+.cell .cover{position:absolute; inset:6%; z-index:2; border-radius:.3em; background:var(--tens); color:#fff; display:grid; place-items:center; font-size:1.1em; font-weight:600; transition:transform .35s, opacity .35s}
+.cell.sel .cover{box-shadow:0 0 0 .12em var(--ink), 0 0 0 .2em var(--card); transform:scale(1.04)}
+.cell.found .cover{transform:rotateX(90deg); opacity:0}
+.cell.found{background:var(--good-soft)}
+.cell.shake{animation:shake .35s}
+.cell.pulse{animation:pulse .9s ease-in-out 2}
+@keyframes shake{25%{transform:translateX(-5%)}75%{transform:translateX(5%)}}
+@keyframes pulse{50%{background:var(--hl)}}
+.chart.dim .cell:not(.lit):not(.now){opacity:.55}
+
+/* counting tape that folds into the chart */
+.tapewrap{width:100%; max-width:100%}
+.tape{position:relative; display:flex; overflow-x:auto; overflow-y:hidden; background:var(--card); border:3px solid var(--ink); border-radius:10px; padding:26px 0 0; scrollbar-width:thin; container-type:inline-size}
+.tape .cell{flex:none; width:clamp(64px,7vw,92px); height:clamp(64px,7vw,92px); font-size:clamp(26px,2.8vw,38px); border-bottom:0; border-right:1.5px dashed var(--line)}
+.tape .cell.bumped::before{content:"bump!"; position:absolute; top:-24px; left:50%; transform:translateX(-50%); font-family:var(--body); font-size:13px; font-weight:800; color:#fff; background:var(--bump); padding:1px 7px; border-radius:8px; white-space:nowrap}
+.tape.folded{display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr); width:var(--chart); aspect-ratio:1; padding:0; overflow:hidden}
+.tape.folded .cell{width:auto; height:auto; font-size:4.3cqi; border-right:1.5px solid var(--line); border-bottom:1.5px solid var(--line)}
+.tape.folded .cell:nth-child(10n){border-right:0}
+.tape.folded .cell.bumped::before{display:none}
+#st1 .tape.folded{width:max(260px, min(100%, calc(100dvh - 400px)))}
+@media (max-width: 900px), (orientation: portrait){ #st1 .tape.folded{width:100%} }
+.tape.folded .cell:nth-child(n+91){border-bottom:0}
+
+/* the counter (odometer) */
+.odo{display:flex; gap:10px; align-items:flex-end}
+.wheel{width:1.05em; height:1.35em; font-size:clamp(70px,9vw,130px); font-family:var(--display); font-weight:600; line-height:1; border-radius:.16em; background:var(--card); border:4px solid currentColor; display:grid; place-items:center; overflow:hidden; font-variant-numeric:tabular-nums}
+.wheel span{display:block}
+.wheel.roll span{animation:roll .45s cubic-bezier(.2,.8,.2,1)}
+.wheel.wh{color:var(--ink)} .wheel.wt{color:var(--tens)} .wheel.wo{color:var(--ones)}
+.odo.small .wheel{font-size:clamp(54px,6vw,84px)}
+.odo.dim .wheel{opacity:.35}
+.wlabel{display:flex; gap:10px; font-size:14px; font-weight:800; letter-spacing:.08em; text-transform:uppercase}
+.wlabel span{width:clamp(74px,9.45vw,137px); text-align:center}
+.odo.small + .wlabel span{width:clamp(57px,6.3vw,88px)}
+@keyframes roll{from{transform:translateY(-80%); opacity:0}to{transform:none; opacity:1}}
+.stamp{font-family:var(--display); font-weight:700; color:var(--bump); font-size:clamp(28px,3vw,44px); min-height:1.2em; margin:0}
+.stamp.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.4); opacity:0}70%{transform:scale(1.12)}100%{transform:none; opacity:1}}
+.readout{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+
+.chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.chip{font-family:var(--display); font-size:22px; font-weight:600; padding:4px 14px; border-radius:12px; background:var(--bump-soft); border:2px solid var(--bump)}
+.digits button{width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:22px; color:var(--ones)}
+.digits button[aria-pressed="true"]{background:var(--ones); color:var(--card); border-color:var(--ones)}
+.choices{display:flex; gap:12px; flex-wrap:wrap}
+.choices button{min-width:120px; min-height:96px; padding:8px 20px; border-radius:22px; border:3px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(40px,4vw,56px)}
+.choices button.word{font-size:clamp(24px,2.2vw,32px)}
+.choices button:disabled{opacity:.3; cursor:default; text-decoration:line-through; text-decoration-thickness:3px}
+.choices button.yes{background:var(--good-soft); border-color:var(--good)}
+.qbig{font-family:var(--display); font-weight:600; font-size:clamp(60px,7vw,104px); line-height:1; margin:0; display:flex; align-items:center; gap:.3em}
+.qbig .arrow{color:var(--muted); font-size:.7em}
+.qbig .q{color:var(--bump)}
+.dots{display:flex; gap:8px; flex-wrap:wrap}
+.dots span{width:16px; height:16px; border-radius:50%; background:var(--line)}
+.dots span.done{background:var(--good)}
+.dots span.on{box-shadow:0 0 0 3px var(--ink)}
+.idea{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(28px,3vw,44px); line-height:1.15; padding:16px 20px; border-radius:18px; background:var(--card); border:3px solid var(--ink)}
+.idea .o{color:var(--ones)} .idea .t{color:var(--tens)}
+.speed{display:inline-flex; border:2px solid var(--line); border-radius:14px; padding:3px; background:var(--card)}
+.speed button{border:0; background:none; padding:8px 14px; border-radius:10px; font-weight:700; color:var(--muted); min-height:44px}
+.speed button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+@media (max-width: 900px), (orientation: portrait){
+  .station{grid-template-columns:minmax(0,1fr)}
+  :root{--chart:min(100%, 70dvh)}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="app">
+<header>
+  <div class="title">
+    <h1>Patterns in the Count: The Number Chart Hunt</h1>
+    <p class="sub">Kindergarten · Week 5 · Unit 1 checkpoint</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn" type="button">Start over</button>
+    <button class="ghost" id="fsBtn" type="button">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Parts of the lesson">
+  <button role="tab" data-tab="1" aria-selected="true" type="button"><small>Warm-up</small><span>1 · Bumps</span></button>
+  <button role="tab" data-tab="2" aria-selected="false" type="button"><small>Hunt</small><span>2 · Fives</span></button>
+  <button role="tab" data-tab="3" aria-selected="false" type="button"><small>Hunt</small><span>3 · Hiding</span></button>
+  <button role="tab" data-tab="4" aria-selected="false" type="button"><small>Hunt</small><span>4 · After 9</span></button>
+  <button role="tab" data-tab="5" aria-selected="false" type="button"><small>Share</small><span>5 · To 100</span></button>
+  <button role="tab" data-tab="6" aria-selected="false" type="button"><small>Challenge</small><span>★ Past 100</span></button>
+</nav>
+
+<!-- 1: count on from 24, find the bumps, fold the tape -->
+<section class="station" id="st1">
+  <div class="stage">
+    <div class="readout">
+      <div>
+        <div class="odo dim" id="odo1"></div>
+        <div class="wlabel" id="odo1lab"></div>
+      </div>
+      <p class="stamp" id="stamp1" aria-live="polite"></p>
+    </div>
+    <div class="tapewrap"><div class="tape" id="tape" aria-label="Counting tape from 1 to 100"></div></div>
+  </div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p1">Count on from 24. Listen for a bump!</p></div>
+    <div class="row">
+      <button class="primary" id="next1" type="button">Next number</button>
+      <button class="secondary" id="auto1" type="button">Keep going</button>
+    </div>
+    <p class="fb" id="fb1" aria-live="polite"></p>
+    <div class="chips" id="bumps1"></div>
+    <div class="row"><button class="secondary" id="fold1" type="button">Fold the tape into a chart</button></div>
+    <p class="look"><b>Look for</b> · Who slows down at 29, 39, 49? Tap any number on the tape to count from somewhere new.</p>
+  </div>
+</section>
+
+<!-- 2: highlight every number ending in 5 -->
+<section class="station" id="st2" hidden>
+  <div class="stage"><div class="chart" id="chart2" aria-label="Hundred chart"></div></div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p2">Find every number that ends in <span class="o">5</span>.</p></div>
+    <p class="count" id="count2"></p>
+    <p class="fb" id="fb2" aria-live="polite"></p>
+    <div class="row">
+      <button class="secondary" id="hint2" type="button">Show me one</button>
+      <button class="secondary" id="tens2" type="button" hidden>What changes going down?</button>
+    </div>
+    <div class="chips digits" id="digits2" aria-label="Hunt for another ending"><span style="font-weight:700;color:var(--muted)">Ends in:</span></div>
+    <p class="look"><b>Look for</b> · Do students look at the last digit, or hunt one by one? Who notices the straight line?</p>
+  </div>
+</section>
+
+<!-- 3: mystery numbers under cover cards -->
+<section class="station" id="st3" hidden>
+  <div class="stage"><div class="chart" id="chart3" aria-label="Hundred chart with hidden numbers"></div></div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p3">Some numbers are hiding! Tap a blue card.</p></div>
+    <div class="choices" id="choices3"></div>
+    <p class="fb" id="fb3" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="new3" type="button">New hiding numbers</button></div>
+    <p class="look"><b>Look for</b> · Do partners use the neighbors (before, after, above, below) to name it? The first set matches the worksheet: 13, 25, 29, 38, 42, 47.</p>
+  </div>
+</section>
+
+<!-- 4: what comes after every nine -->
+<section class="station" id="st4" hidden>
+  <div class="stage">
+    <div class="dots" id="dots4" aria-label="Progress"></div>
+    <p class="qbig" id="q4"></p>
+    <div>
+      <div class="odo small" id="odo4"></div>
+      <div class="wlabel" id="odo4lab"></div>
+    </div>
+    <div class="row">
+      <button class="secondary" id="plus4" type="button">+1 on the counter</button>
+      <button class="secondary" id="back4" type="button">Back</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p4">What comes after?</p></div>
+    <div class="choices" id="choices4"></div>
+    <p class="fb" id="fb4" aria-live="polite"></p>
+    <div class="row"><button class="primary" id="nextq4" type="button" hidden>Next one</button></div>
+    <p class="look"><b>Look for</b> · Self-correction at the decade turn. “Fifty-ten” is the classic slip; the counter shows why it can’t be.</p>
+  </div>
+</section>
+
+<!-- 5: circle count to 100 and name the discovery -->
+<section class="station" id="st5" hidden>
+  <div class="stage"><div class="chart" id="chart5" aria-label="Hundred chart"></div></div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p5">Count to 100 together. Stop at every bump!</p></div>
+    <div class="row">
+      <button class="primary" id="go5" type="button">Count to 100</button>
+      <div class="speed" role="group" aria-label="Speed">
+        <button data-speed="900" aria-pressed="false" type="button">Slow</button>
+        <button data-speed="500" aria-pressed="true" type="button">Medium</button>
+        <button data-speed="180" aria-pressed="false" type="button">Fast</button>
+      </div>
+    </div>
+    <p class="fb" id="fb5" aria-live="polite"></p>
+    <div class="row">
+      <button class="secondary" id="color5" type="button" aria-pressed="false">Color the tens and ones</button>
+      <button class="secondary" id="idea5" type="button">Say the big idea</button>
+    </div>
+    <p class="idea" id="ideaText" hidden>The <span class="o">ones</span> repeat.<br>The <span class="t">tens</span> change.</p>
+    <p class="look"><b>Look for</b> · Unit checkpoint: fluent counting with self-correction at the decade turns. Tap any number to light its column and its tens.</p>
+  </div>
+</section>
+
+<!-- 6: past 100 -->
+<section class="station" id="st6" hidden>
+  <div class="stage"><div class="chart three" id="chart6" aria-label="Chart from 101 to 200"></div></div>
+  <div class="panel">
+    <div class="prompt"><button class="say" type="button" aria-label="Read aloud"></button><p id="p6">Past 100! Where are the bumps? Tap them.</p></div>
+    <p class="count" id="count6"></p>
+    <div class="row">
+      <button class="primary" id="check6" type="button">Check</button>
+      <button class="secondary" id="show6" type="button">Show all bumps</button>
+      <button class="secondary" id="big6" type="button">After 199?</button>
+    </div>
+    <p class="fb" id="fb6" aria-live="polite"></p>
+    <p class="look"><b>Look for</b> · Students who predict the 9s column before checking are using the pattern, not counting. Try after 100 and after 109 in “After 9” too.</p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rand = n => Math.floor(Math.random()*n);
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const TENS_WORD = {2:'twenty',3:'thirty',4:'forty',5:'fifty',6:'sixty',7:'seventy',8:'eighty',9:'ninety'};
+const isBump = n => n % 10 === 9;          // after a number ending in 9, a new ten starts
+
+function digits(n){
+  const s = String(n), o = s.slice(-1), t = s.length>1 ? s.slice(-2,-1) : '', h = s.length>2 ? s.slice(0,-2) : '';
+  return `${h?`<span class="h">${h}</span>`:''}${t?`<span class="t">${t}</span>`:''}<span class="o">${o}</span>`;
+}
+function fb(el, html, kind){ el.className = 'fb' + (kind ? ' '+kind : ''); el.innerHTML = html; }
+function makeChart(el, start, onTap){
+  el.innerHTML = ''; const cells = {};
+  for(let n=start; n<start+100; n++){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'cell'; b.dataset.n = n;
+    b.innerHTML = `<span class="num">${digits(n)}</span>`;
+    b.setAttribute('aria-label', String(n));
+    b.addEventListener('click', () => onTap(n, b));
+    el.appendChild(b); cells[n] = b;
+  }
+  return cells;
+}
+function flash(el, cls, ms=700){ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls), ms); }
+
+/* Counter with a tens wheel and a ones wheel */
+function makeOdo(el, labEl){
+  let cur = null;
+  return {
+    get value(){ return cur; },
+    set(n, animate){
+      const s = String(n).padStart(2,'0');
+      const kinds = s.length===3 ? ['wh','wt','wo'] : ['wt','wo'];
+      const old = cur==null ? null : String(cur).padStart(2,'0');
+      const sameShape = old && old.length===s.length;
+      if(!sameShape){
+        el.innerHTML = kinds.map((k,i)=>`<div class="wheel ${k}"><span>${s[i]}</span></div>`).join('');
+        labEl.innerHTML = kinds.map(k=>`<span class="${k==='wh'?'h':k==='wt'?'t':'o'}">${k==='wh'?'hundreds':k==='wt'?'tens':'ones'}</span>`).join('');
+      } else {
+        const ws = el.children;
+        for(let i=0;i<s.length;i++){
+          if(s[i]!==old[i]){
+            ws[i].innerHTML = `<span>${s[i]}</span>`;
+            if(animate && !reduced){ ws[i].classList.remove('roll'); void ws[i].offsetWidth; ws[i].classList.add('roll'); }
+          }
+        }
+      }
+      el.setAttribute('aria-label', `Counter shows ${n}`);
+      cur = n;
+    }
+  };
+}
+
+/* Read aloud */
+const canSpeak = 'speechSynthesis' in window;
+function speak(text){ try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = .9; speechSynthesis.speak(u); }catch(e){} }
+const SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+$$('.say').forEach(b => {
+  if(!canSpeak){ b.hidden = true; return; }
+  b.innerHTML = SPEAKER;
+  b.addEventListener('click', () => { const p = b.parentElement.querySelector('p'); const f = b.closest('.panel').querySelector('.fb'); speak(p.textContent + (f && f.textContent ? '. ' + f.textContent : '')); });
+});
+
+/* ============ 1 · Bumps (warm-up + tape fold) ============ */
+const tape = $('#tape');
+const odo1 = makeOdo($('#odo1'), $('#odo1lab'));
+const S1 = {start:24, cur:null, bumps:[], folded:false, timer:null};
+const cells1 = {};
+for(let n=1;n<=100;n++){
+  const b = document.createElement('button'); b.type='button'; b.className='cell'; b.dataset.n=n;
+  b.innerHTML = `<span class="num">${digits(n)}</span>`; b.setAttribute('aria-label', String(n));
+  b.addEventListener('click', () => s1Reset(n));
+  tape.appendChild(b); cells1[n] = b;
+}
+function s1Scroll(n){
+  if(S1.folded) return;
+  const c = cells1[n];
+  tape.scrollTo({left: c.offsetLeft - tape.clientWidth/2 + c.offsetWidth/2, behavior: reduced ? 'auto' : 'smooth'});
+}
+function s1Stop(){ clearInterval(S1.timer); S1.timer=null; $('#auto1').textContent = 'Keep going'; }
+function s1Reset(start=24){
+  s1Stop();
+  S1.start = start; S1.cur = null; S1.bumps = [];
+  Object.values(cells1).forEach(c => c.classList.remove('lit','now','bumped'));
+  $('#odo1').classList.add('dim'); odo1.set(start, false);
+  $('#stamp1').textContent = '';
+  $('#p1').textContent = `Count on from ${start}. Listen for a bump!`;
+  fb($('#fb1'), ''); renderBumps1();
+  $('#next1').disabled = false; $('#auto1').disabled = false;
+  cells1[start].classList.add('now');
+  s1Scroll(start);
+}
+function renderBumps1(){
+  $('#bumps1').innerHTML = S1.bumps.length ? '<span style="font-weight:700;color:var(--muted)">Bumps:</span>' + S1.bumps.map(b=>`<span class="chip">${digits(b)} → ${digits(b+1)}</span>`).join('') : '';
+}
+function s1Next(){
+  if(S1.cur === 100) return false;
+  const prev = S1.cur;
+  S1.cur = prev===null ? S1.start : prev+1;
+  const n = S1.cur;
+  if(prev!==null){ cells1[prev].classList.remove('now'); cells1[prev].classList.add('lit'); }
+  cells1[n].classList.add('now');
+  $('#odo1').classList.remove('dim');
+  odo1.set(n, prev!==null);
+  const stamp = $('#stamp1');
+  if(prev!==null && isBump(prev)){
+    S1.bumps.push(prev); cells1[prev].classList.add('bumped'); renderBumps1();
+    stamp.textContent = n===100 ? 'BIG bump!' : 'Bump!'; if(!reduced){ stamp.classList.remove('pop'); void stamp.offsetWidth; stamp.classList.add('pop'); }
+    const t0 = Math.floor(prev/10)%10, t1 = Math.floor(n/10)%10;
+    let msg;
+    if(n===100) msg = `<b class="big">99 → 100</b><br>The ones go back to 0. The tens go back to 0. A new hundred!`;
+    else if(S1.bumps.length===1) msg = `<b class="big">${digits(prev)} → ${digits(n)}</b><br>The <span class="o">ones</span> go back to 0. The <span class="t">tens</span> go up: ${t0} → ${t1}.`;
+    else msg = `<b class="big">${digits(prev)} → ${digits(n)}</b><br>The SAME bump again! Every bump comes after a <span class="o">9</span>.`;
+    fb($('#fb1'), msg, 'bump');
+  } else {
+    stamp.textContent = '';
+    if(prev===null) fb($('#fb1'), `Start: <b class="big">${digits(n)}</b>. What comes next?`);
+    else if(isBump(n)) fb($('#fb1'), `<b class="big">${digits(n)}</b> ends in <span class="o">9</span>. Careful! What comes next?`);
+    else fb($('#fb1'), `<b class="big">${digits(n)}</b>`);
+  }
+  if(n===100){ s1Stop(); $('#next1').disabled = true; $('#auto1').disabled = true;
+    fb($('#fb1'), `<b class="big">100!</b> You counted to 100. ${S1.bumps.length} bumps, and every one came after a <span class="o">9</span>.${S1.folded?'':' Now fold the tape!'}`, 'good'); }
+  s1Scroll(n);
+  if(S1.folded) foldCaption();
+  return n < 100;
+}
+function foldCaption(){
+  if(S1.bumps.length >= 2) $('#p1').innerHTML = 'Look at the pink bumps. They line up!';
+  else $('#p1').textContent = 'Count some more, then look for the bumps.';
+}
+$('#next1').addEventListener('click', () => { s1Stop(); s1Next(); });
+$('#auto1').addEventListener('click', () => {
+  if(S1.timer){ s1Stop(); return; }
+  $('#auto1').textContent = 'Pause';
+  S1.timer = setInterval(() => { if(!s1Next()) s1Stop(); }, 750);
+});
+$('#fold1').addEventListener('click', () => {
+  const els = Object.values(cells1);
+  const first = els.map(e => e.getBoundingClientRect());
+  S1.folded = !S1.folded;
+  tape.classList.toggle('folded', S1.folded);
+  tape.scrollLeft = 0;
+  if(!reduced){
+    els.forEach((e,i) => {
+      const l = e.getBoundingClientRect();
+      e.style.transition = 'none'; e.style.transformOrigin = 'top left';
+      e.style.transform = `translate(${first[i].left-l.left}px, ${first[i].top-l.top}px) scale(${first[i].width/l.width}, ${first[i].height/l.height})`;
+    });
+    void tape.offsetWidth;
+    els.forEach((e,i) => { e.style.transition = `transform 750ms cubic-bezier(.2,.8,.2,1) ${Math.floor(i/10)*70}ms`; e.style.transform = ''; });
+  }
+  $('#fold1').textContent = S1.folded ? 'Unroll the tape' : 'Fold the tape into a chart';
+  if(S1.folded){
+    foldCaption();
+    if(S1.bumps.length >= 2) fb($('#fb1'), `We cut the tape after every 10. Now all the bumps sit in one column: ${S1.bumps.map(b=>digits(b)).join(', ')}. They all end in <span class="o">9</span>!`, 'bump');
+    else fb($('#fb1'), 'We cut the tape after every 10. This is the hundred chart!');
+  } else {
+    $('#p1').textContent = S1.cur===null ? `Count on from ${S1.start}. Listen for a bump!` : 'Keep counting. Listen for a bump!';
+    fb($('#fb1'), ''); if(S1.cur) s1Scroll(S1.cur); else s1Scroll(S1.start);
+  }
+});
+
+/* ============ 2 · Fives ============ */
+const S2 = {d:5, found:new Set()};
+const cells2 = makeChart($('#chart2'), 1, s2Tap);
+const targets2 = () => Object.keys(cells2).map(Number).filter(n => n%10===S2.d);
+function s2Count(){ $('#count2').innerHTML = `Found <b>${S2.found.size}</b> of ${targets2().length}`; }
+function s2Tap(n, b){
+  if(n%10 === S2.d){
+    if(S2.found.has(n)){ fb($('#fb2'), `${digits(n)} is already marked. Find another!`); return; }
+    S2.found.add(n); b.classList.add('hi'); s2Count();
+    if(S2.found.size === targets2().length){
+      fb($('#fb2'), `You found all ${S2.found.size}! They make a straight line going down. Every one ends in <span class="o">${S2.d}</span>.`, 'good');
+      $('#tens2').hidden = false; $('#hint2').hidden = true;
+    } else fb($('#fb2'), `<b class="big">${digits(n)}</b> ends in <span class="o">${S2.d}</span>. Yes!`, 'good');
+  } else {
+    flash(b, 'shake', 400); b.classList.add('showo'); setTimeout(()=>b.classList.remove('showo'), 1600);
+    fb($('#fb2'), `<b class="big">${digits(n)}</b> ends in <span class="o">${n%10}</span>. We want numbers that end in <span class="o">${S2.d}</span>. Look at the last number and try again!`, 'try');
+  }
+}
+function s2Reset(d=S2.d){
+  S2.d = d; S2.found.clear();
+  Object.values(cells2).forEach(c => c.classList.remove('hi','showt','showo','pulse'));
+  $('#p2').innerHTML = `Find every number that ends in <span class="o">${d}</span>.`;
+  $('#tens2').hidden = true; $('#hint2').hidden = false; fb($('#fb2'), ''); s2Count();
+  $$('#digits2 button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.d===d));
+}
+for(let d=0; d<=9; d++){ const b=document.createElement('button'); b.type='button'; b.dataset.d=d; b.textContent=d; b.setAttribute('aria-label',`Numbers that end in ${d}`); b.onclick=()=>s2Reset(d); $('#digits2').appendChild(b); }
+$('#hint2').addEventListener('click', () => {
+  const n = targets2().find(x => !S2.found.has(x)); if(n==null) return;
+  flash(cells2[n], 'pulse', 1900);
+  fb($('#fb2'), 'Look at the blinking one. What is its last number?');
+});
+$('#tens2').addEventListener('click', () => {
+  targets2().forEach(n => { cells2[n].classList.add('showt','showo'); });
+  fb($('#fb2'), `Going down, the <span class="o">ones</span> stay ${S2.d}. The <span class="t">tens</span> count up, one more each row!`, 'good');
+});
+
+/* ============ 3 · Hiding ============ */
+const HANDOUT_HIDDEN = [13,25,29,38,42,47];
+const S3 = {hidden:new Set(), sel:null, wrong:[]};
+const cells3 = makeChart($('#chart3'), 1, s3Tap);
+function s3Clear(){ Object.values(cells3).forEach(c => c.classList.remove('nbr','there','sel')); }
+function s3Setup(list){
+  S3.hidden = new Set(list); S3.sel = null;
+  Object.values(cells3).forEach(c => { c.classList.remove('found','nbr','there','sel'); const cv = c.querySelector('.cover'); if(cv) cv.remove(); });
+  list.forEach(n => { const cv = document.createElement('span'); cv.className='cover'; cv.textContent='?'; cells3[n].appendChild(cv); cells3[n].setAttribute('aria-label','hidden number'); });
+  Object.keys(cells3).forEach(k => { if(!S3.hidden.has(+k)) cells3[k].setAttribute('aria-label', k); });
+  $('#choices3').innerHTML = ''; fb($('#fb3'), '');
+  $('#p3').textContent = 'Some numbers are hiding! Tap a blue card.';
+}
+function s3NewRound(){
+  // 6 numbers, never next to each other on the chart (so every hidden number keeps its neighbors)
+  for(let tries=0; tries<500; tries++){
+    const pick = [];
+    for(let k=0;k<300 && pick.length<6;k++){
+      const n = 2 + rand(98); // 2..99
+      if(pick.every(p => ![0,1,10].includes(Math.abs(p-n)))) pick.push(n);
+    }
+    if(pick.length===6) return s3Setup(pick.sort((a,b)=>a-b));
+  }
+}
+function s3Choices(n){
+  const pool = [n+1, n-1, n+10, n-10];
+  if(n>=12 && n<100 && n%10!==0 && n%10!==Math.floor(n/10)) pool.push((n%10)*10 + Math.floor(n/10));
+  const ok = [...new Set(pool)].filter(x => x>=1 && x<=100 && x!==n && !S3.hidden.has(x));
+  return shuffle([n, ...shuffle(ok).slice(0,2)]);
+}
+function s3Select(n){
+  s3Clear(); S3.sel = n; cells3[n].classList.add('sel');
+  $('#p3').textContent = 'What number is hiding?';
+  fb($('#fb3'), '');
+  const box = $('#choices3'); box.innerHTML = '';
+  s3Choices(n).forEach(c => {
+    const b = document.createElement('button'); b.type='button'; b.innerHTML = digits(c); b.setAttribute('aria-label', String(c));
+    b.onclick = () => s3Pick(c, b); box.appendChild(b);
+  });
+}
+function seq(a){ return a.map(x => x==null ? '<b class="big" style="color:var(--bump)">?</b>' : `<b class="big">${digits(x)}</b>`).join(', '); }
+function s3Pick(c, btn){
+  const n = S3.sel; if(n==null) return;
+  s3Clear(); cells3[n].classList.add('sel');
+  if(c === n){
+    S3.hidden.delete(n); cells3[n].classList.remove('sel'); cells3[n].classList.add('found'); cells3[n].setAttribute('aria-label', String(n));
+    $('#choices3').innerHTML = '';
+    const before = n>1 ? n-1 : null, after = n<100 ? n+1 : null;
+    const parts = [before, n, after].filter(x => x!=null);
+    S3.sel = null;
+    if(S3.hidden.size === 0){
+      fb($('#fb3'), `Yes! ${seq(parts)}<br>You found every hiding number!`, 'good');
+      $('#p3').textContent = 'All found! Want new hiding numbers?';
+    } else {
+      fb($('#fb3'), `Yes! ${seq(parts)}`, 'good');
+      $('#p3').textContent = 'Tap another blue card.';
+    }
+  } else {
+    btn.disabled = true;
+    const before = n-1, after = n+1;
+    if(before>=1) cells3[before].classList.add('nbr');
+    if(after<=100) cells3[after].classList.add('nbr');
+    cells3[c].classList.add('there');
+    const row = n===1 ? [null, 2, 3] : n===100 ? [98, 99, null] : [before, null, after];
+    const where = c===n+1 ? `${digits(c)} comes right AFTER it.` : c===n-1 ? `${digits(c)} comes right BEFORE it.` : `${digits(c)} lives over there (orange box).`;
+    fb($('#fb3'), `Not ${digits(c)}. ${where}<br>Count the neighbors: ${seq(row)}`, 'try');
+  }
+}
+function s3Tap(n){
+  if(S3.hidden.has(n)) s3Select(n);
+  else if(S3.sel==null) fb($('#fb3'), `That is <b class="big">${digits(n)}</b>. Tap a blue card to find a hiding number.`);
+}
+$('#new3').addEventListener('click', s3NewRound);
+
+/* ============ 4 · After 9 ============ */
+const Q4 = [29,39,59,79,69,89,99,109];
+const S4 = {i:0, solved:new Set()};
+const odo4 = makeOdo($('#odo4'), $('#odo4lab'));
+function q4Choices(n){
+  const right = n+1, low = n-9;
+  const third = n<100 ? {v:`${TENS_WORD[Math.floor(n/10)]}-ten`, word:true} : {v: n+11};
+  return shuffle([{v:right, right:true}, {v:low}, third]);
+}
+function s4Render(){
+  const n = Q4[S4.i];
+  $('#dots4').innerHTML = Q4.map((q,i)=>`<span class="${S4.solved.has(i)?'done':''} ${i===S4.i?'on':''}" title="${q}"></span>`).join('');
+  $('#q4').innerHTML = `<span>${digits(n)}</span><span class="arrow">→</span><span class="q">?</span>`;
+  $('#p4').textContent = n>=99 ? `Challenge! What comes after ${n}?` : `What comes after ${n}?`;
+  odo4.set(n, false);
+  fb($('#fb4'), ''); $('#nextq4').hidden = true;
+  const box = $('#choices4'); box.innerHTML = '';
+  q4Choices(n).forEach(ch => {
+    const b = document.createElement('button'); b.type='button';
+    if(ch.word){ b.className='word'; b.textContent = ch.v; } else b.innerHTML = digits(ch.v);
+    b.setAttribute('aria-label', String(ch.v));
+    b.onclick = () => s4Pick(n, ch, b); box.appendChild(b);
+  });
+}
+function s4Explain(n){
+  const m = n+1, t0 = Math.floor(n/10)%10, t1 = Math.floor(m/10)%10;
+  if(t1===0) return `The <span class="o">ones</span>: 9 → 0. The <span class="t">tens</span>: 9 → 0. The hundreds go up!`;
+  return `The <span class="o">ones</span>: 9 → 0. The <span class="t">tens</span> go up: ${t0} → ${t1}.`;
+}
+function s4Pick(n, ch, btn){
+  if(ch.right){
+    btn.classList.add('yes'); $$('#choices4 button').forEach(b => b.disabled = b!==btn ? true : b.disabled);
+    btn.disabled = false; btn.style.textDecoration = 'none';
+    odo4.set(n+1, true);
+    $('#q4').innerHTML = `<span>${digits(n)}</span><span class="arrow">→</span><span>${digits(n+1)}</span>`;
+    S4.solved.add(S4.i);
+    fb($('#fb4'), `Yes! <b class="big">${digits(n)} → ${digits(n+1)}</b><br>${s4Explain(n)}`, 'good');
+    $('#nextq4').hidden = false;
+    $('#nextq4').textContent = S4.solved.size===Q4.length ? 'Start again' : 'Next one';
+    $('#dots4').innerHTML = Q4.map((q,i)=>`<span class="${S4.solved.has(i)?'done':''} ${i===S4.i?'on':''}" title="${q}"></span>`).join('');
+  } else {
+    btn.disabled = true;
+    let msg;
+    if(ch.word) msg = `There is no “${ch.v}”! After 9 <span class="o">ones</span>, the ones go back to 0 and the <span class="t">tens</span> go up. Tap +1 on the counter to check.`;
+    else if(ch.v < n) msg = `${digits(ch.v)} comes BEFORE ${digits(n)}. We want one MORE. Tap +1 on the counter to check.`;
+    else msg = `${digits(ch.v)} jumps too far. One more than ${digits(n)} is just one step. Tap +1 on the counter to check.`;
+    fb($('#fb4'), msg, 'try');
+  }
+}
+$('#plus4').addEventListener('click', () => { const v = odo4.value; if(v < 999) odo4.set(v+1, true); });
+$('#back4').addEventListener('click', () => odo4.set(Q4[S4.i], false));
+$('#nextq4').addEventListener('click', () => {
+  if(S4.solved.size===Q4.length){ S4.solved.clear(); S4.i = 0; }
+  else { do { S4.i = (S4.i+1) % Q4.length; } while(S4.solved.has(S4.i)); }
+  s4Render();
+});
+$('#dots4').addEventListener('click', e => { const i = [...$('#dots4').children].indexOf(e.target); if(i>=0){ S4.i = i; s4Render(); } });
+
+/* ============ 5 · To 100 ============ */
+const S5 = {cur:0, timer:null, speed:500, bumps:0};
+const cells5 = makeChart($('#chart5'), 1, s5Tap);
+function s5Clear(){ Object.values(cells5).forEach(c => c.classList.remove('col','dec','sel')); }
+function s5Stop(){ clearTimeout(S5.timer); S5.timer = null; $('#go5').textContent = S5.cur>=100 ? 'Count again' : S5.cur>0 ? 'Keep counting' : 'Count to 100'; }
+function s5Step(){
+  if(S5.cur>0){ cells5[S5.cur].classList.remove('now'); cells5[S5.cur].classList.add('lit'); }
+  S5.cur++;
+  const n = S5.cur, c = cells5[n];
+  c.classList.add('now');
+  const prev = n-1;
+  let wait = S5.speed;
+  if(prev>=1 && isBump(prev)){
+    S5.bumps++; cells5[prev].classList.add('bumped');
+    fb($('#fb5'), n===100 ? `<b class="big">99 → 100</b> The BIG bump. One hundred!` : `<b class="big">${digits(prev)} → ${digits(n)}</b> Bump! The <span class="t">tens</span> go up.`, 'bump');
+    wait = S5.speed * 2.5;
+  } else fb($('#fb5'), `<b class="big">${digits(n)}</b>`);
+  if(n>=100){
+    c.classList.remove('now'); c.classList.add('lit');
+    fb($('#fb5'), `We counted to 100! ${S5.bumps} bumps, all after a number ending in <span class="o">9</span>.`, 'good');
+    s5Stop(); return;
+  }
+  S5.timer = setTimeout(s5Step, wait);
+}
+$('#go5').addEventListener('click', () => {
+  if(S5.timer){ s5Stop(); return; }
+  if(S5.cur>=100){ s5ResetCount(); }
+  s5Clear(); $('#chart5').classList.add('dim');
+  $('#go5').textContent = 'Pause';
+  S5.timer = setTimeout(s5Step, 150);
+});
+function s5ResetCount(){ S5.cur = 0; S5.bumps = 0; Object.values(cells5).forEach(c => c.classList.remove('lit','now','bumped')); }
+$$('#st5 .speed button').forEach(b => b.addEventListener('click', () => { S5.speed = +b.dataset.speed; $$('#st5 .speed button').forEach(x => x.setAttribute('aria-pressed', x===b)); }));
+$('#color5').addEventListener('click', e => { const on = !$('#chart5').classList.contains('colored'); $('#chart5').classList.toggle('colored', on); e.currentTarget.setAttribute('aria-pressed', on); });
+$('#idea5').addEventListener('click', () => { $('#ideaText').hidden = false; speak('The ones repeat. The tens change.'); });
+function s5Tap(n){
+  if(S5.timer) return;
+  $('#chart5').classList.remove('dim');
+  s5Clear();
+  const o = n%10, t = Math.floor(n/10);
+  Object.values(cells5).forEach(c => { const x = +c.dataset.n; if(x%10===o) c.classList.add('col'); if(Math.floor(x/10)===t) c.classList.add('dec'); });
+  cells5[n].classList.add('sel');
+  if(n===100){ fb($('#fb5'), `<b class="big">100</b> is ten tens. A hundred!<br>Going down this column, every number ends in <span class="o">0</span>.`); return; }
+  const tensLine = `The gray numbers all have <span class="t">${t} tens</span>.`;
+  fb($('#fb5'), `<b class="big">${digits(n)}</b> = <span class="t">${t} tens</span> and <span class="o">${o} ones</span>.<br>Going down, every number ends in <span class="o">${o}</span>. ${tensLine}`);
+}
+
+/* ============ ★ Past 100 ============ */
+const S6 = {guess:new Set(), checked:false};
+const cells6 = makeChart($('#chart6'), 101, s6Tap);
+const bumps6 = Object.keys(cells6).map(Number).filter(isBump); // 109, 119, … 199
+function s6Count(){ $('#count6').innerHTML = `Bumps tapped: <b>${S6.guess.size}</b>`; }
+function s6Clear(){ Object.values(cells6).forEach(c => c.classList.remove('right','nope','missed','bumped','pulse')); }
+function s6Tap(n, b){
+  if(S6.checked){ s6Clear(); S6.checked = false; }
+  if(S6.guess.has(n)){ S6.guess.delete(n); b.classList.remove('guess'); }
+  else { S6.guess.add(n); b.classList.add('guess'); }
+  s6Count(); fb($('#fb6'), '');
+}
+$('#check6').addEventListener('click', () => {
+  s6Clear(); S6.checked = true;
+  let right = 0; const wrong = [];
+  S6.guess.forEach(n => { if(isBump(n)){ right++; cells6[n].classList.add('right'); } else { wrong.push(n); cells6[n].classList.add('nope'); } });
+  const missed = bumps6.filter(n => !S6.guess.has(n));
+  missed.forEach(n => cells6[n].classList.add('missed'));
+  let msg = `You found <b class="big">${right}</b> of ${bumps6.length} bumps.`;
+  if(wrong.length){
+    const w = wrong.sort((a,b)=>a-b)[0];
+    if(w%10===0) msg += `<br>${digits(w)} comes right AFTER a bump. The bump is at ${digits(w-1)}: ${digits(w-1)} → ${digits(w)}.`;
+    else msg += `<br>${digits(w)} is not a bump. After ${digits(w)} comes ${digits(w+1)}. Same <span class="t">tens</span>.`;
+  }
+  if(missed.length) msg += `<br>Striped boxes are bumps you missed. Look at their last number!`;
+  else if(!wrong.length) msg += `<br>Every bump ends in <span class="o">9</span>, just like before 100!`;
+  fb($('#fb6'), msg, missed.length||wrong.length ? 'try' : 'good');
+});
+$('#show6').addEventListener('click', () => {
+  s6Clear(); S6.checked = true;
+  bumps6.forEach(n => cells6[n].classList.add('bumped'));
+  fb($('#fb6'), `The bumps: ${bumps6.map(digits).join(', ')}. They all end in <span class="o">9</span>, the same column as before 100.`, 'bump');
+});
+$('#big6').addEventListener('click', () => {
+  s6Clear(); S6.checked = true;
+  cells6[199].classList.add('bumped'); cells6[200].classList.add('right');
+  fb($('#fb6'), `<b class="big">199 → 200</b><br>The BIGGEST bump: ones 9 → 0, tens 9 → 0, and the hundreds go up: 1 → 2!`, 'bump');
+});
+function s6Reset(){ S6.guess.clear(); S6.checked=false; Object.values(cells6).forEach(c => c.classList.remove('guess')); s6Clear(); s6Count(); fb($('#fb6'), ''); }
+
+/* ============ tabs, reset, full screen ============ */
+function stopAll(){ s1Stop(); s5Stop(); try{ canSpeak && speechSynthesis.cancel(); }catch(e){} }
+function showTab(t){
+  stopAll();
+  $$('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===String(t)));
+  for(let i=1;i<=6;i++) $('#st'+i).hidden = i!==t;
+  if(t===1 && !S1.folded) s1Scroll(S1.cur || S1.start);
+}
+$$('nav button').forEach(b => b.addEventListener('click', () => showTab(+b.dataset.tab)));
+function resetAll(){
+  stopAll();
+  if(S1.folded){ S1.folded=false; tape.classList.remove('folded'); $('#fold1').textContent='Fold the tape into a chart'; }
+  s1Reset(24);
+  s2Reset(5);
+  s3Setup(HANDOUT_HIDDEN);
+  S4.i = 0; S4.solved.clear(); s4Render();
+  s5ResetCount(); s5Clear(); $('#chart5').classList.remove('dim','colored'); $('#color5').setAttribute('aria-pressed','false'); $('#ideaText').hidden = true; fb($('#fb5'),''); $('#go5').textContent='Count to 100';
+  s6Reset();
+  showTab(1);
+}
+$('#resetBtn').addEventListener('click', resetAll);
+$('#fsBtn').addEventListener('click', () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} });
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+document.addEventListener('keydown', e => {
+  if($('#st1').hidden) return;
+  if(e.key==='ArrowRight' || (e.key===' ' && e.target===document.body)){ e.preventDefault(); s1Stop(); s1Next(); }
+});
+
+resetAll();
+})();
+</script>
+
+</body></html>

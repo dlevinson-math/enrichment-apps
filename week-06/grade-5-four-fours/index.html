@@ -1,0 +1,674 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Four Fours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a workbench. Left = the expression builder (display, 4s meter, keypad); right = the 1–20 target chart. Tabs switch to the Parentheses Lab and Detective questions. */
+:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#162033; --muted:#596379; --line:#D3D9E3;
+  --tile:#F2B630; --tile-ink:#2A1E00; --tile-edge:#C98F0E;
+  --accent:#2F5BD3; --accent-soft:#E3EAFB;
+  --good:#1E8A57; --good-soft:#DDF3E7; --warn:#B4561A; --warn-soft:#FBE9DC; --dec:#8A3FC2; --dec-soft:#F0E5FA;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10151F; --card:#1A2130; --ink:#E9EDF5; --muted:#A3ADC2; --line:#323C52;
+  --tile:#E9AE2A; --tile-ink:#231800; --tile-edge:#9C6E08;
+  --accent:#7FA2FF; --accent-soft:#1F2C4D;
+  --good:#4CCB8A; --good-soft:#163527; --warn:#F09A5E; --warn-soft:#3A2416; --dec:#C392F0; --dec-soft:#2E1F40;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151F; --card:#1A2130; --ink:#E9EDF5; --muted:#A3ADC2; --line:#323C52;
+  --tile:#E9AE2A; --tile-ink:#231800; --tile-edge:#9C6E08;
+  --accent:#7FA2FF; --accent-soft:#1F2C4D;
+  --good:#4CCB8A; --good-soft:#163527; --warn:#F09A5E; --warn-soft:#3A2416; --dec:#C392F0; --dec-soft:#2E1F40;
+  color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; padding-inline:clamp(16px,2.4vw,32px); padding-block:12px 28px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.num4{font-variant-numeric:tabular-nums}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-block:6px 10px}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.logo{display:grid; grid-template-columns:repeat(4,auto); gap:4px}
+.logo span{width:30px; height:36px; border-radius:7px; background:var(--tile); color:var(--tile-ink); font:800 24px/36px var(--display); text-align:center; box-shadow:0 3px 0 var(--tile-edge)}
+h1{margin:0; font:800 clamp(30px,3.4vw,46px)/1 var(--display); letter-spacing:-.02em}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px 22px; flex-wrap:wrap; border-bottom:2px solid var(--line); margin-bottom:16px}
+.tabs button{border:0; background:none; padding:10px 2px; font:700 clamp(17px,1.4vw,21px) var(--display); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--tile)}
+
+.question{font:700 clamp(20px,1.9vw,28px)/1.25 var(--display); margin:0 0 12px; text-wrap:balance}
+.lead{margin:0 0 14px; color:var(--muted); max-width:62ch}
+
+/* Builder */
+.bench{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:24px; align-items:start}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; min-width:0}
+.meter{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; font-weight:700}
+.pips{display:flex; gap:6px}
+.pip{width:30px; height:36px; border-radius:7px; border:2.5px dashed var(--line); display:grid; place-items:center; font:800 20px var(--display); color:transparent}
+.pip.on{border:0; background:var(--tile); color:var(--tile-ink); box-shadow:0 3px 0 var(--tile-edge)}
+.pip.over{background:var(--warn); color:#fff; box-shadow:none; border:0}
+.display{min-height:84px; border-radius:14px; background:var(--bg); padding:12px 16px; font:700 clamp(30px,3.3vw,46px)/1.2 var(--display); display:flex; flex-wrap:wrap; align-items:center; gap:2px 6px; word-break:break-all; letter-spacing:.01em}
+.display .ph{color:var(--muted); font-weight:500; font-size:.55em; letter-spacing:0}
+.display .op{color:var(--accent)}
+.display .par{color:var(--muted)}
+.display .dec{color:var(--dec)}
+.value{margin:10px 0 0; min-height:2.2em; font-size:clamp(18px,1.5vw,22px)}
+.value b{font:800 1.5em var(--display)}
+.keys{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:12px}
+.key{min-height:64px; border-radius:14px; border:2px solid var(--line); background:var(--card); font:800 clamp(24px,2.2vw,32px) var(--display); display:grid; place-items:center; padding:4px}
+.key:active{transform:translateY(2px)}
+.key.four{background:var(--tile); color:var(--tile-ink); border-color:var(--tile-edge); box-shadow:0 4px 0 var(--tile-edge)}
+.key.four small{display:block; font:700 12px var(--body); opacity:.8}
+.key.op{color:var(--accent)}
+.key.decimal{border-color:var(--dec); color:var(--dec)}
+.key[disabled]{opacity:.35; cursor:not-allowed}
+.key.wide{grid-column:span 2; font-size:20px}
+.blocks{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; align-items:center}
+.blocks span{font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+.chipbtn{border:2px solid var(--line); background:var(--bg); border-radius:999px; padding:8px 14px; font-weight:700; font-size:17px; min-height:44px}
+.chipbtn:hover{border-color:var(--accent)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:700; font-size:clamp(18px,1.5vw,21px); padding:14px 24px; border-radius:14px; min-height:56px}
+:root[data-theme="dark"] .primary{color:#0D1426}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .primary{color:#0D1426}}
+.primary[disabled]{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:17px; padding:11px 18px; border-radius:14px; min-height:52px}
+.feedback{margin:12px 0 0; padding:12px 16px; border-radius:12px; font-size:clamp(17px,1.4vw,20px); background:var(--accent-soft)}
+.feedback:empty{display:none}
+.feedback.good{background:var(--good-soft)}
+.feedback.warn{background:var(--warn-soft)}
+.toggle{display:flex; align-items:center; gap:10px; font-weight:700; cursor:pointer; min-height:44px}
+.toggle input{width:24px; height:24px; accent-color:var(--dec)}
+.steps{margin:10px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:clamp(17px,1.4vw,21px)}
+.steps li{display:flex; gap:12px; flex-wrap:wrap; align-items:baseline}
+.steps .ex{font:700 1.05em var(--display)}
+.steps .why{color:var(--muted); font-size:.85em}
+.steps .hot{background:var(--tile); color:var(--tile-ink); border-radius:6px; padding:0 4px}
+
+/* Chart */
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--bg); border:2px solid var(--line); border-radius:12px; padding:3px; gap:2px}
+.seg button{border:0; background:none; padding:9px 14px; border-radius:9px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.chart{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:12px}
+.cell{display:grid; grid-template-columns:3.1em minmax(0,1fr); align-items:center; gap:8px; text-align:left; border:2px solid var(--line); background:var(--card); border-radius:12px; padding:6px 10px; min-height:52px}
+.cell .t{font:800 26px/1 var(--display); text-align:center}
+.cell .e{font-size:16px; font-weight:700; overflow-wrap:anywhere; color:var(--muted)}
+.cell.found{border-color:var(--good); background:var(--good-soft)}
+.cell.found .e{color:var(--ink)}
+.cell.found.usesdec{border-color:var(--dec); background:var(--dec-soft)}
+.cell.shown{border-style:dashed}
+.cell.sel{box-shadow:0 0 0 3px var(--accent)}
+.cell.flash{animation:pop .5s ease-out}
+.cell.dim{opacity:.35}
+.cell.mark{box-shadow:0 0 0 3px var(--warn)}
+@keyframes pop{0%{transform:scale(1.08)}100%{transform:scale(1)}}
+.tally{margin-top:10px; font-weight:700; color:var(--muted)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:14px; color:var(--muted); margin-top:8px}
+.legend i{display:inline-block; width:16px; height:16px; border-radius:4px; vertical-align:-3px; margin-right:5px; border:2px solid}
+.detail{margin-top:12px; padding:12px 14px; border-radius:12px; background:var(--bg); font-size:17px}
+.detail:empty{display:none}
+.detail ul{margin:6px 0; padding-left:20px}
+
+/* Lab */
+.labrow{display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:18px; background:var(--bg); border-radius:16px; min-height:110px}
+.ltile{min-width:72px; height:84px; padding:0 10px; border-radius:12px; border:0; background:var(--tile); color:var(--tile-ink); box-shadow:0 4px 0 var(--tile-edge); font:800 44px/84px var(--display)}
+.ltile.pick{outline:4px solid var(--accent); outline-offset:3px}
+.lop{font:800 40px var(--display); color:var(--accent); padding:0 4px}
+.lpar{font:500 64px/1 var(--display); color:var(--ink); margin:0 -2px}
+.lpar.c1{color:var(--accent)} .lpar.c2{color:var(--good)} .lpar.c3{color:var(--dec)}
+.trees{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:8px; margin-top:12px}
+.trees div{background:var(--card); border:2px solid var(--line); border-radius:12px; padding:10px 14px; font:700 20px var(--display)}
+.trees b{float:right}
+.trees .same{border-color:var(--good)}
+.cols{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:24px; align-items:start}
+
+/* Questions */
+.qnav{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font:800 20px var(--display); padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.evidence{margin-top:14px; padding:16px 18px; border-radius:14px; background:var(--accent-soft); font-size:clamp(17px,1.45vw,21px); max-width:70ch}
+.evidence:empty{display:none}
+.evidence table{border-collapse:collapse; margin-top:6px}
+.evidence td{padding:3px 16px 3px 0}
+.nums{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.nums span{min-width:44px; text-align:center; padding:6px 8px; border-radius:8px; background:var(--card); font:800 20px var(--display)}
+.nums span.miss{background:var(--warn); color:#fff}
+.hint{color:var(--muted); font-size:15px}
+
+@media (max-width: 920px){
+  .bench,.cols{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 520px){
+  .chart{grid-template-columns:minmax(0,1fr)}
+  .keys{gap:6px} .key{min-height:56px}
+  .ltile{min-width:54px; height:64px; font-size:32px; line-height:64px}
+  .lpar{font-size:46px} .lop{font-size:30px}
+  .logo{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important}}
+</style>
+
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><span>4</span><span>4</span><span>4</span><span>4</span></div>
+    <div>
+      <h1>Four Fours</h1>
+      <p class="sub">Grade 5 · Week 6 · Lesson 5.6 · Can you make every number from 1 to 20 with exactly four 4s?</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tab-lab" aria-selected="false">1 · Warm-up: Parentheses Lab</button>
+  <button role="tab" id="tab-build" aria-selected="true">2 · Fill the chart</button>
+  <button role="tab" id="tab-q" aria-selected="false">3 · Detective questions</button>
+</nav>
+
+<!-- LAB -->
+<section id="view-lab" hidden>
+  <p class="question" id="labQ">4 + 4 × 4 − 4. What is it? Where could parentheses change it?</p>
+  <p class="lead">Tap a 4 where the parentheses should start, then tap the 4 where they should end. Tap the same pair again to remove it.</p>
+  <div class="cols">
+    <div>
+      <div class="labrow" id="labRow" aria-label="Expression tiles"></div>
+      <p class="feedback" id="labMsg" aria-live="polite"></p>
+      <ol class="steps" id="labSteps" aria-live="polite"></ol>
+    </div>
+    <div class="panel">
+      <div class="row" style="margin-bottom:10px">
+        <button class="secondary" id="labClear">Remove parentheses</button>
+        <button class="secondary" id="labLtr">What if we go left to right?</button>
+      </div>
+      <div class="row">
+        <button class="primary" id="labAll">Show every placement</button>
+      </div>
+      <div class="trees" id="labTrees"></div>
+      <p class="hint" id="labSrc" style="margin-top:12px">Expression: the warm-up. Send one of your own from the chart with “Move its parentheses.”</p>
+      <button class="chipbtn" id="labBack" hidden>Back to the warm-up</button>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD -->
+<section id="view-build">
+  <div class="bench">
+    <div class="panel">
+      <div class="meter"><span>4s used</span><div class="pips" id="pips"></div><span id="pipText" class="num4"></span></div>
+      <div class="display" id="display" aria-live="polite"></div>
+      <div class="value" id="value" aria-live="polite"></div>
+      <div class="keys" id="keys">
+        <button class="key four" data-k="4" aria-label="4">4</button>
+        <button class="key four" data-k="44" aria-label="44, counts as two fours"><span>44<small>two 4s</small></span></button>
+        <button class="key decimal" data-k=".4" id="decKey" aria-label="point 4, four tenths" disabled>.4</button>
+        <button class="key par" data-k="(">(</button>
+        <button class="key par" data-k=")">)</button>
+        <button class="key op" data-k="+">+</button>
+        <button class="key op" data-k="-" aria-label="minus">−</button>
+        <button class="key op" data-k="*" aria-label="times">×</button>
+        <button class="key op" data-k="/" aria-label="divided by">÷</button>
+        <button class="key" data-k="back" aria-label="Delete last">⌫</button>
+      </div>
+      <div class="blocks" id="blocks"><span>Building blocks</span></div>
+      <div class="row" style="margin-top:14px">
+        <button class="primary" id="postBtn">Post to the chart</button>
+        <button class="secondary" id="clearBtn">Clear</button>
+        <button class="secondary" id="toLabBtn">Move its parentheses</button>
+      </div>
+      <p class="feedback" id="fb" aria-live="polite"></p>
+      <ol class="steps" id="steps"></ol>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="seg" role="group" aria-label="Which targets">
+          <button data-set="main" aria-pressed="true">Targets 1–20</button>
+          <button data-set="ceil" aria-pressed="false">21–30</button>
+          <button data-set="five" aria-pressed="false">Five 4s</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="decToggle"> Decimal tool (.4)</label>
+      </div>
+      <p class="hint" id="setNote" style="margin:10px 0 0"></p>
+      <div class="chart" id="chart"></div>
+      <div class="legend"><span><i style="border-color:var(--good);background:var(--good-soft)"></i>found</span><span><i style="border-color:var(--dec);background:var(--dec-soft)"></i>used .4</span><span><i style="border-color:var(--line);border-style:dashed"></i>revealed by teacher</span></div>
+      <div class="tally num4" id="tally"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUESTIONS -->
+<section id="view-q" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="question" id="qtext"></p>
+  <div class="row" id="qactions"></div>
+  <div class="evidence" id="evidence" aria-live="polite"></div>
+  <p class="hint" style="margin-top:14px">Talk it over with your partner first. Then tap a button to put evidence on the screen.</p>
+</section>
+
+<script>
+/*CORE*/
+// ---------- exact fractions ----------
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1}
+function R(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return {n:n/g,d:d/g}}
+const add=(a,b)=>R(a.n*b.d+b.n*a.d,a.d*b.d), sub=(a,b)=>R(a.n*b.d-b.n*a.d,a.d*b.d),
+      mul=(a,b)=>R(a.n*b.n,a.d*b.d), div=(a,b)=>b.n===0?null:R(a.n*b.d,a.d*b.n);
+const key=r=>r.n+'/'+r.d;
+function fmt(r){
+  if(r.d===1) return String(r.n).replace('-','−');
+  let d=r.d,t2=0,t5=0; while(d%2===0){d/=2;t2++} while(d%5===0){d/=5;t5++}
+  if(d===1 && Math.max(t2,t5)<=3){ let s=(r.n/r.d).toFixed(Math.max(t2,t5)).replace(/0+$/,''); s=s.replace(/^(-?)0\./,'$1.'); return s.replace('-','−'); }
+  return (r.n<0?'−':'')+Math.abs(r.n)+'/'+r.d;
+}
+const NUMS={'4':{v:R(4),fours:1},'44':{v:R(44),fours:2},'.4':{v:R(2,5),fours:1}};
+const SYM={'+':'+','-':'−','*':'×','/':'÷','(':'(',')':')'};
+const isNum=t=>t in NUMS, isOp=t=>'+-*/'.includes(t)&&t.length===1;
+function countFours(tokens){return tokens.reduce((s,t)=>s+(isNum(t)?NUMS[t].fours:0),0)}
+function show(tokens){return tokens.map(t=>isNum(t)?t:SYM[t]).join(' ').replace(/\( /g,'(').replace(/ \)/g,')')}
+// grammar check: returns {ok} or {ok:false,msg}
+function check(tokens){
+  if(!tokens.length) return {ok:false,msg:'Tap 4s and operations to build an expression.'};
+  let depth=0, prev=null;
+  for(const t of tokens){
+    if(isNum(t)){ if(prev && (isNum(prev)||prev===')')) return {ok:false,msg:'Two numbers sit side by side. Put an operation between them, or use the 44 key.'}; }
+    else if(isOp(t)){ if(!prev||isOp(prev)||prev==='(') return {ok:false,msg:'An operation needs a number on each side.'}; }
+    else if(t==='('){ if(prev && (isNum(prev)||prev===')')) return {ok:false,msg:'Put an operation before the “(”. In this puzzle, numbers never multiply just by touching.'}; depth++; }
+    else if(t===')'){ if(!prev||isOp(prev)||prev==='(') return {ok:false,msg:'Something is missing before the “)”.'}; depth--; if(depth<0) return {ok:false,msg:'There is a “)” with no “(” to match it.'}; }
+    prev=t;
+  }
+  if(isOp(prev)||prev==='(') return {ok:false,msg:'The expression ends with an operation. Finish it with a number.'};
+  if(depth>0) return {ok:false,msg:`${depth===1?'One “(” is':depth+' “(” are'} still open. Close ${depth===1?'it':'them'} with “)”.`};
+  return {ok:true};
+}
+// step-by-step order of operations. items: {num:R,src} | op/paren strings
+function evaluate(tokens){
+  const c=check(tokens); if(!c.ok) return {ok:false,msg:c.msg};
+  let it=tokens.map(t=>isNum(t)?{r:NUMS[t].v,s:t}:t);
+  const str=a=>a.map(x=>typeof x==='object'?x.s:SYM[x]).join(' ').replace(/\( /g,'(').replace(/ \)/g,')');
+  const steps=[];
+  const collapse=()=>{let ch=true;while(ch){ch=false;for(let i=0;i+2<it.length;i++){if(it[i]==='('&&typeof it[i+1]==='object'&&it[i+2]===')'){it.splice(i,3,it[i+1]);ch=true;break}}}};
+  collapse();
+  let guard=0;
+  while(it.length>1 && guard++<200){
+    let j=it.indexOf(')'), i=-1, lo=0, hi=it.length;
+    if(j>=0){ i=it.lastIndexOf('(',j); lo=i+1; hi=j; }
+    let k=-1;
+    for(let p=lo;p<hi;p++) if(it[p]==='*'||it[p]==='/'){k=p;break}
+    let why;
+    if(k<0){ for(let p=lo;p<hi;p++) if(it[p]==='+'||it[p]==='-'){k=p;break} }
+    const inPar=j>=0;
+    const a=it[k-1], op=it[k], b=it[k+1];
+    let r;
+    if(op==='+') r=add(a.r,b.r); else if(op==='-') r=sub(a.r,b.r); else if(op==='*') r=mul(a.r,b.r); else r=div(a.r,b.r);
+    const hot=`${a.s} ${SYM[op]} ${b.s}`;
+    if(r===null) return {ok:false,divZero:true,msg:`${hot}: you can’t divide by 0, so this expression has no value. Can you move the 4 − 4 somewhere else?`,steps};
+    if(inPar) why='inside parentheses first';
+    else if(op==='*'||op==='/') why='× and ÷ before + and −';
+    else why='+ and − from left to right';
+    const before=str(it.map((x,q)=>q===k-1?(typeof x==='object'?{s:'\u0001'+x.s}:x):q===k+1?(typeof x==='object'?{s:x.s+'\u0002'}:x):x));
+    it.splice(k-1,3,{r,s:fmt(r)});
+    collapse();
+    steps.push({hot, res:fmt(r), why, after:str(it), before});
+  }
+  return {ok:true,value:it[0].r,steps};
+}
+// all values reachable with exactly n fours (binary trees over 4, 44, optional .4)
+function reachable(n,dec){
+  const S={};
+  for(let k=1;k<=n;k++){
+    const m=new Map();
+    if(k===1){m.set(key(R(4)),R(4)); if(dec) m.set(key(R(2,5)),R(2,5));}
+    if(k===2) m.set(key(R(44)),R(44));
+    for(let a=1;a<k;a++){ for(const x of S[a].values()) for(const y of S[k-a].values()){
+      for(const v of [add(x,y),sub(x,y),mul(x,y),div(x,y)]) if(v) m.set(key(v),v);
+    }}
+    S[k]=m;
+  }
+  return S[n];
+}
+// tokenizer for solution strings like "(4 + 4) / 4"
+function tok(s){return s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').match(/\.4|44|4|[()+\-*/]/g)}
+const SOL={
+ 1:'44 ÷ 44',2:'4 ÷ 4 + 4 ÷ 4',3:'(4 + 4 + 4) ÷ 4',4:'4 + (4 − 4) × 4',5:'(4 × 4 + 4) ÷ 4',
+ 6:'(4 + 4) ÷ 4 + 4',7:'44 ÷ 4 − 4',8:'4 + 4 + 4 − 4',9:'4 + 4 + 4 ÷ 4',10:'(44 − 4) ÷ 4',
+ 11:'4 ÷ .4 + 4 ÷ 4',12:'(44 + 4) ÷ 4',13:'4 + (4 − .4) ÷ .4',14:'4 × (4 − .4) − .4',15:'44 ÷ 4 + 4',
+ 16:'4 + 4 + 4 + 4',17:'4 × 4 + 4 ÷ 4',18:'.4 × 44 + .4',19:'(4 + 4 − .4) ÷ .4',20:'4 × (4 + 4 ÷ 4)',
+ 21:'(4 + 4 + .4) ÷ .4',24:'4 × 4 + 4 + 4',26:'4 × 4 + 4 ÷ .4',28:'44 − 4 × 4',29:'4 + 4 ÷ (.4 × .4)',30:'(4 + 4 + 4) ÷ .4'
+};
+const SOL5={11:'44 ÷ 4 + 4 − 4',13:'(4 + 4 + 44) ÷ 4',14:'4 + (44 − 4) ÷ 4',18:'4 × 4 + (4 + 4) ÷ 4',19:'44 ÷ 4 + 4 + 4'};
+const SETS={
+  main:{targets:[...Array(20)].map((_,i)=>i+1), fours:4, sol:SOL},
+  ceil:{targets:[21,22,23,24,25,26,27,28,29,30], fours:4, sol:SOL},
+  five:{targets:[11,13,14,18,19], fours:5, sol:SOL5, noDec:true}
+};
+/*ENDCORE*/
+
+(function(){
+const $=s=>document.querySelector(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// reachability tables (computed once, exact)
+const REACH={ four:reachable(4,false), fourDec:reachable(4,true), five:reachable(5,false) };
+const can=(t,set,dec)=>{const k=key(R(t)); if(set==='five') return REACH.five.has(k); return (dec?REACH.fourDec:REACH.four).has(k);};
+
+const S={tokens:[], set:'main', dec:false, found:{}, sel:null, tab:'build', q:1, lab:null};
+function freshFound(){ return {main:{1:[{e:'44 ÷ 44',dec:false,shown:false,example:true}]}, ceil:{}, five:{}}; }
+S.found=freshFound();
+
+/* ---------- builder ---------- */
+const BLOCKS=[['4 ÷ 4','1'],['4 − 4','0'],['4 + 4','8'],['4 × 4','16'],['44 ÷ 4','11'],['4 ÷ .4','10']];
+function renderBlocks(){
+  const box=$('#blocks'); box.innerHTML='<span>Building blocks</span>';
+  for(const [e,v] of BLOCKS){
+    if(e.includes('.4') && !decOn()) continue;
+    const b=document.createElement('button'); b.className='chipbtn'; b.textContent=`${e} = ${v}`;
+    b.onclick=()=>{ insertTokens(tok(e)); };
+    box.appendChild(b);
+  }
+}
+function decOn(){ return S.dec && S.set!=='five'; }
+function target(){ return SETS[S.set].fours; }
+function insertTokens(ts){
+  const prev=S.tokens[S.tokens.length-1];
+  const add=[...ts];
+  if(prev && (isNum(prev)||prev===')')) add.unshift('+');
+  S.tokens.push(...add); renderBuilder();
+}
+function press(k){
+  if(k==='back') S.tokens.pop();
+  else if(k==='.4' && !decOn()) return;
+  else S.tokens.push(k);
+  renderBuilder();
+}
+function renderBuilder(){
+  const n=countFours(S.tokens), T=target();
+  const pips=$('#pips'); pips.innerHTML='';
+  for(let i=0;i<Math.max(T,n);i++){ const p=document.createElement('span'); p.className='pip'+(i<n?(n>T?' over':' on'):''); p.textContent='4'; pips.appendChild(p); }
+  $('#pipText').textContent=`${n} of ${T}`;
+  const d=$('#display');
+  d.innerHTML = S.tokens.length ? S.tokens.map(t=>`<span class="${isNum(t)?(t==='.4'?'dec':''):(t==='('||t===')'?'par':'op')}">${isNum(t)?t:SYM[t]}</span>`).join('') : `<span class="ph">Build an expression with exactly ${T} fours</span>`;
+  const v=$('#value');
+  const c=check(S.tokens);
+  if(S.tokens.length && c.ok){ const r=evaluate(S.tokens); v.innerHTML = r.ok ? `= <b>${fmt(r.value)}</b>` : `<span style="color:var(--warn)">${r.msg}</span>`; }
+  else v.textContent='';
+  $('#decKey').disabled=!decOn();
+  $('#steps').innerHTML=''; $('#fb').textContent=''; $('#fb').className='feedback';
+}
+function stepsHTML(steps){
+  return steps.map(s=>`<li><span class="ex">${s.before.replace('\u0001','<span class="hot">').replace('\u0002','</span>')}</span><span class="why">${s.hot} = ${s.res} · ${s.why}</span></li>`).join('');
+}
+function say(html,kind){ const f=$('#fb'); f.innerHTML=html; f.className='feedback'+(kind?' '+kind:''); }
+function post(){
+  const T=target(), n=countFours(S.tokens);
+  const c=check(S.tokens);
+  if(!c.ok){ say(c.msg,'warn'); return; }
+  const r=evaluate(S.tokens);
+  if(!r.ok){ say(r.msg,'warn'); $('#steps').innerHTML=stepsHTML(r.steps||[]); return; }
+  $('#steps').innerHTML=stepsHTML(r.steps);
+  const val=r.value, set=SETS[S.set];
+  if(n!==T){
+    const has44=S.tokens.includes('44');
+    say(`Count your 4s: this uses <b>${n}</b>, and the rule is exactly ${T}.${has44?' Remember, 44 counts as two.':''} It does make ${fmt(val)}. Can you ${n<T?'fit in another 4 without changing the value':'make it with one fewer 4'}?`,'warn'); return;
+  }
+  if(val.d!==1){ const lo=Math.floor(val.n/val.d); say(`This makes <b>${fmt(val)}</b>, which is between ${lo} and ${lo+1}. The chart needs whole numbers. Could moving the parentheses help?`,'warn'); return; }
+  const t=val.n;
+  if(!set.targets.includes(t)){
+    const where = t>=1&&t<=20 ? 'Targets 1–20' : t>=21&&t<=30 ? 'Targets 21–30' : null;
+    say(`That's a correct four-4s expression for <b>${t}</b>, but ${t} isn't on this chart.${where&&S.set!=='five'?` Switch to ${where} to post it.`:''}`); return;
+  }
+  const e=show(S.tokens), list=(S.found[S.set][t]=S.found[S.set][t]||[]);
+  if(list.some(x=>!x.shown && x.e===e)){ say(`${e} is already posted for ${t}. Can you find a different way?`); return; }
+  // replace a teacher reveal with the student's own
+  for(let i=list.length-1;i>=0;i--) if(list[i].shown) list.splice(i,1);
+  list.push({e,dec:S.tokens.includes('.4'),shown:false}); S.last=e;
+  const fresh=list.length===1;
+  say(`<b>${e} = ${t}</b> ✓ Exactly ${T} fours. ${fresh?`Posted to ${t}.`:`That's way #${list.length} to make ${t}.`}`,'good');
+  S.sel=t; renderChart(t);
+}
+
+/* ---------- chart ---------- */
+function setNote(){
+  const n=$('#setNote');
+  if(S.set==='main') n.textContent='The handout chart. 1 is done for you.';
+  else if(S.set==='ceil') n.textContent='Raise the ceiling: which of these need the decimal tool?';
+  else n.textContent='Ceiling challenge: FIVE 4s, no decimal point. Can you make the stubborn five?';
+}
+function renderChart(flash){
+  const set=SETS[S.set], ch=$('#chart'); ch.innerHTML='';
+  if(S.set==='five') ch.style.gridTemplateColumns='repeat(1,minmax(0,1fr))'; else ch.style.gridTemplateColumns='';
+  const order = S.set==='main' ? [...Array(10)].flatMap((_,i)=>[i+1,i+11]) : S.set==='ceil' ? [21,26,22,27,23,28,24,29,25,30] : set.targets;
+  for(const t of order){
+    const list=S.found[S.set][t]||[];
+    const b=document.createElement('button');
+    const own=list.filter(x=>!x.shown);
+    b.className='cell'+(list.length?' found':'')+(list.length&&list[0].dec?' usesdec':'')+(list.length&&!own.length?' shown':'')+(S.sel===t?' sel':'')+(flash===t&&!reduced?' flash':'');
+    b.dataset.t=t;
+    const first=list[0];
+    b.innerHTML=`<span class="t">${t}</span><span class="e">${first?first.e+(list.length>1?`  <small>+${list.length-1} more</small>`:''):''}</span>`;
+    b.setAttribute('aria-label', `Target ${t}: ${first?first.e:'not found yet'}`);
+    b.onclick=()=>{ S.sel=t; renderChart(); renderDetail(); };
+    ch.appendChild(b);
+  }
+  const done=set.targets.filter(t=>(S.found[S.set][t]||[]).length).length;
+  $('#tally').textContent=`${done} of ${set.targets.length} targets filled`;
+  if(S.sel!=null) renderDetail();
+}
+function renderDetail(){
+  const t=S.sel, box=$('#detail');
+  if(t==null || !SETS[S.set].targets.includes(t)){ box.innerHTML=''; return; }
+  const list=S.found[S.set][t]||[];
+  const sol=SETS[S.set].sol[t];
+  let h=`<b>Target ${t}</b>`;
+  if(list.length) h+=`<ul>${list.map(x=>`<li>${x.e}${x.dec?' <small>(used .4)</small>':''}${x.shown?' <small>(revealed)</small>':''}${x.example?' <small>(example from the handout)</small>':''}</li>`).join('')}</ul>`;
+  else h+=' is still empty.';
+  const possible=can(t,S.set,decOn());
+  if(!possible){
+    if(S.set!=='five' && !decOn() && can(t,S.set,true)) h+=`<div>Stubborn! No expression with four 4s, + − × ÷, parentheses and 44 makes ${t}. Turn on the decimal tool and try again.</div>`;
+    else h+=`<div>Even with every tool on this page, no expression with ${SETS[S.set].fours} fours makes ${t}. (The app checked every possible expression.) Mathematicians add new tools, like square roots, to reach it.</div>`;
+  } else if(sol && !list.length){
+    h+=`<div class="row" style="margin-top:8px"><button class="chipbtn" id="revealBtn">Teacher: reveal a way</button></div>`;
+  }
+  box.innerHTML=h;
+  const rb=$('#revealBtn');
+  if(rb) rb.onclick=()=>{ (S.found[S.set][t]=S.found[S.set][t]||[]).push({e:sol,dec:sol.includes('.4'),shown:true}); renderChart(t); };
+}
+
+/* ---------- Parentheses Lab ---------- */
+const WARM='4 + 4 × 4 − 4';
+function labFrom(tokens, label){
+  // flatten to numbers + ops, record bracket pairs as number-index ranges
+  const nums=[], ops=[], pairs=[], stack=[];
+  for(const t of tokens){
+    if(isNum(t)) nums.push(t);
+    else if(isOp(t)) ops.push(t);
+    else if(t==='(') stack.push(nums.length);
+    else if(t===')'){ const s=stack.pop(); pairs.push([s,nums.length-1]); }
+  }
+  S.lab={nums,ops,pairs:pairs.filter(p=>p[1]>p[0]),pick:null,label};
+}
+function labTokens(pairs=S.lab.pairs){
+  const L=S.lab, out=[];
+  for(let i=0;i<L.nums.length;i++){
+    pairs.filter(p=>p[0]===i).sort((a,b)=>b[1]-a[1]).forEach(()=>out.push('('));
+    out.push(L.nums[i]);
+    pairs.filter(p=>p[1]===i).forEach(()=>out.push(')'));
+    if(i<L.ops.length) out.push(L.ops[i]);
+  }
+  return out;
+}
+function renderLab(){
+  const L=S.lab, row=$('#labRow'); row.innerHTML='';
+  const depthColor=p=>{ // nesting depth -> color class
+    const d=L.pairs.filter(q=>q!==p && q[0]<=p[0] && q[1]>=p[1]).length; return 'c'+((d%3)+1); };
+  for(let i=0;i<L.nums.length;i++){
+    L.pairs.filter(p=>p[0]===i).sort((a,b)=>b[1]-a[1]).forEach(p=>{ const s=document.createElement('span'); s.className='lpar '+depthColor(p); s.textContent='('; row.appendChild(s); });
+    const b=document.createElement('button'); b.className='ltile'+(L.pick===i?' pick':''); b.textContent=L.nums[i];
+    b.setAttribute('aria-label',`Number ${L.nums[i]}, position ${i+1}`);
+    b.onclick=()=>labTap(i); row.appendChild(b);
+    L.pairs.filter(p=>p[1]===i).sort((a,b)=>b[0]-a[0]).forEach(p=>{ const s=document.createElement('span'); s.className='lpar '+depthColor(p); s.textContent=')'; row.appendChild(s); });
+    if(i<L.ops.length){ const o=document.createElement('span'); o.className='lop'; o.textContent=SYM[L.ops[i]]; row.appendChild(o); }
+  }
+  const r=evaluate(labTokens());
+  $('#labSteps').innerHTML = r.ok ? stepsHTML(r.steps)+`<li><span class="ex">= <span class="hot">${fmt(r.value)}</span></span></li>` : stepsHTML(r.steps||[]);
+  const m=$('#labMsg');
+  if(L.pick!=null){ m.className='feedback'; m.textContent='Now tap the 4 where the parentheses end.'; }
+  else if(!r.ok){ m.className='feedback warn'; m.textContent=r.msg; }
+  else { m.className='feedback'; m.innerHTML=`${show(labTokens())} = <b>${fmt(r.value)}</b>`; }
+  $('#labSrc').textContent = L.label;
+  $('#labBack').hidden = L.label.startsWith('Expression: the warm-up');
+  $('#labQ').textContent = L.label.startsWith('Expression: the warm-up') ? '4 + 4 × 4 − 4. What is it? Where could parentheses change it?' : `Move the parentheses in ${show(labTokens())}. How does the value change?`;
+}
+function labTap(i){
+  const L=S.lab;
+  if(L.pick==null){ L.pick=i; renderLab(); return; }
+  if(L.pick===i){ L.pick=null; renderLab(); return; }
+  const p=[Math.min(L.pick,i),Math.max(L.pick,i)]; L.pick=null;
+  const idx=L.pairs.findIndex(q=>q[0]===p[0]&&q[1]===p[1]);
+  if(idx>=0){ L.pairs.splice(idx,1); renderLab(); return; }
+  const crosses=L.pairs.some(q=>(q[0]<p[0]&&p[0]<=q[1]&&q[1]<p[1])||(p[0]<q[0]&&q[0]<=p[1]&&p[1]<q[1]));
+  if(crosses){ renderLab(); const m=$('#labMsg'); m.className='feedback warn'; m.textContent='Those parentheses would cross another pair. Pairs can sit side by side or one inside the other. Remove a pair first.'; return; }
+  L.pairs.push(p); $('#labTrees').innerHTML=''; renderLab();
+}
+function allTrees(lo,hi){ // every full parenthesization of numbers lo..hi -> [{pairs, str}]
+  if(lo===hi) return [{pairs:[]}];
+  const out=[];
+  for(let k=lo;k<hi;k++) for(const a of allTrees(lo,k)) for(const b of allTrees(k+1,hi)){
+    const pairs=[...a.pairs,...b.pairs];
+    if(k>lo) pairs.push([lo,k]); if(hi>k+1) pairs.push([k+1,hi]);
+    out.push({pairs});
+  }
+  return out;
+}
+function labAll(){
+  const L=S.lab, n=L.nums.length;
+  if(n>6){ $('#labTrees').innerHTML='<div>Too many placements to list. Try an expression with 6 numbers or fewer.</div>'; return; }
+  const plain=evaluate(labTokens([]));
+  const seen=new Set(), rows=[];
+  for(const t of allTrees(0,n-1)){
+    const toks=labTokens(t.pairs); const r=evaluate(toks);
+    const s=show(toks); if(seen.has(s)) continue; seen.add(s);
+    rows.push({s, v:r.ok?fmt(r.value):'no value (÷ 0)', same:r.ok&&plain.ok&&key(r.value)===key(plain.value)});
+  }
+  const distinct=new Set(rows.map(r=>r.v));
+  $('#labTrees').innerHTML = rows.map(r=>`<div class="${r.same?'same':''}">${r.s} <b>${r.v}</b></div>`).join('') +
+    `<div style="grid-column:1/-1;font:400 17px var(--body)">${rows.length} ways to group, ${distinct.size} different results. Green ones match the answer with no parentheses (${plain.ok?fmt(plain.value):'—'}).</div>`;
+}
+function labLtr(){
+  const L=S.lab; let v=NUMS[L.nums[0]].v, ok=true; const parts=[fmt(v)];
+  for(let i=0;i<L.ops.length;i++){ const b=NUMS[L.nums[i+1]].v, o=L.ops[i];
+    v = o==='+'?add(v,b):o==='-'?sub(v,b):o==='*'?mul(v,b):div(v,b); if(!v){ok=false;break} parts.push(`${SYM[o]} ${L.nums[i+1]} → ${fmt(v)}`); }
+  const plain=evaluate(labTokens([]));
+  const m=$('#labMsg'); m.className='feedback warn';
+  if(!ok){ m.textContent='Left to right runs into ÷ 0 here.'; return; }
+  m.innerHTML = `Left to right: ${parts.join(', ')}. That gives <b>${fmt(v)}</b>. ` + (plain.ok ? (key(v)===key(plain.value) ? `The order of operations also gives ${fmt(plain.value)} here, but only by luck.` : `The order of operations gives <b>${fmt(plain.value)}</b>, because × and ÷ come first. To get ${fmt(v)}, which parentheses would you need?`) : '');
+}
+
+/* ---------- Detective questions ---------- */
+function ev(html){ $('#evidence').innerHTML=html; }
+function evalStr(s){ return evaluate(tok(s)); }
+function stepsBlock(s){ const r=evalStr(s); return `<ol class="steps">${stepsHTML(r.steps)}<li><span class="ex">= <span class="hot">${fmt(r.value)}</span></span></li></ol>`; }
+const STUBBORN=SETS.main.targets.filter(t=>!can(t,'main',false));
+const Q={
+ 1:{t:'Which targets are stubborn? What blocks could reach them?', a:[
+   ['Show our class chart', ()=>{ const miss=SETS.main.targets.filter(t=>!(S.found.main[t]||[]).length); ev(miss.length?`Still empty on the 1–20 chart: <b>${miss.join(', ')}</b>.<div class="nums">${SETS.main.targets.map(t=>`<span class="${miss.includes(t)?'miss':''}">${t}</span>`).join('')}</div>`:'Every target from 1 to 20 is filled. Nice work.'); }],
+   ['Test every possible expression', ()=>{ const four=REACH.four; const whole=[...four.values()].filter(r=>r.d===1&&r.n>=0&&r.n<=20).map(r=>r.n).sort((a,b)=>a-b);
+      ev(`The app tried <b>every</b> expression with exactly four 4s, + − × ÷, parentheses and 44. They make <b>${four.size}</b> different numbers. From 1 to 20, these never show up: <b>${STUBBORN.join(', ')}</b>.<div class="nums">${SETS.main.targets.map(t=>`<span class="${STUBBORN.includes(t)?'miss':''}">${t}</span>`).join('')}</div>`); }]
+ ]},
+ 2:{t:'Check 4 + 4 × 4 ÷ 4 with the order of operations. Is it 8 or 16?', a:[
+   ['Step through it', ()=>ev(stepsBlock('4 + 4 × 4 ÷ 4')+`<p style="margin:8px 0 0">× and ÷ go first, from left to right. Then add.</p>`)],
+   ['Could parentheses make it 16?', ()=>{ const s='(4 + 4) × 4 ÷ 4', s2='(4 + 4 × 4) ÷ 4'; const a=evalStr(s), b=evalStr('4 + 4 × (4 ÷ 4)'); const c=evalStr(s2);
+      ev(`Try a few groupings:<table><tr><td>${s}</td><td><b>${fmt(a.value)}</b></td></tr><tr><td>4 + 4 × (4 ÷ 4)</td><td><b>${fmt(b.value)}</b></td></tr><tr><td>${s2}</td><td><b>${fmt(c.value)}</b></td></tr></table><p style="margin:8px 0 0">None of these is 16. Open the Parentheses Lab to see every possible grouping of this expression.</p><button class="chipbtn" id="qLab">Open in the Parentheses Lab</button>`);
+      $('#qLab').onclick=()=>{ labFrom(tok('4 + 4 × 4 ÷ 4'),'Expression: 4 + 4 × 4 ÷ 4 (from question 2)'); selectTab('lab'); labAll(); }; }]
+ ]},
+ 3:{t:'Why is 11 so hard without the decimal tool?', a:[
+   ['44 ÷ 4 uses three 4s', ()=>ev(stepsBlock('44 ÷ 4')+'<p style="margin:8px 0 0">So 11 takes only three 4s. The trouble is the fourth one.</p>')],
+   ['Attach a fourth 4', ()=>{ const list=['44 ÷ 4 + 4','44 ÷ 4 − 4','44 ÷ 4 × 4','44 ÷ 4 ÷ 4','(44 + 4) ÷ 4','(44 − 4) ÷ 4','44 ÷ (4 + 4)','44 ÷ (4 × 4)','44 ÷ (4 ÷ 4)'];
+      ev(`A fourth 4 always changes the value:<table>${list.map(s=>{const r=evalStr(s);return `<tr><td>${s}</td><td><b>${fmt(r.value)}</b></td></tr>`}).join('')}</table><p style="margin:8px 0 0">Adding, subtracting, multiplying or dividing by 4 can never leave a number alone. You need a 0 or a 1 to do that, and making 0 (4 − 4) or 1 (4 ÷ 4) takes <b>two</b> 4s. For the full proof, see question 1: “Test every possible expression.”</p>`); }],
+   ['Allow .4', ()=>ev(stepsBlock('4 ÷ .4 + 4 ÷ 4')+'<p style="margin:8px 0 0">.4 is four tenths, so 4 ÷ .4 = 10 uses only two 4s. That leaves two 4s to make the 1.</p>')],
+   ['Allow a fifth 4', ()=>ev(stepsBlock('44 ÷ 4 + 4 − 4')+'<p style="margin:8px 0 0">With five 4s, + 4 − 4 adds zero. Try the “Five 4s” chart for the rest of the stubborn targets.</p>')]
+ ]},
+ 4:{t:'Which targets needed the decimal tool?', a:[
+   ['Show them', ()=>{ ev(`With four 4s, only <b>${STUBBORN.join(', ')}</b> need the decimal tool. Here is one way for each:<table>${STUBBORN.map(t=>{const r=evalStr(SOL[t]);return `<tr><td><b>${t}</b></td><td>${SOL[t]}</td><td>= ${fmt(r.value)}</td></tr>`}).join('')}</table>`); }],
+   ['Which of 21–30 can be made at all?', ()=>{ const T=SETS.ceil.targets; const no=T.filter(t=>!can(t,'ceil',false)), dec=no.filter(t=>can(t,'ceil',true)), never=no.filter(t=>!can(t,'ceil',true));
+      ev(`No decimal needed: <b>${T.filter(t=>can(t,'ceil',false)).join(', ')}</b>.<br>Need .4: <b>${dec.join(', ')}</b>.<br>Can't be made with any tool on this page: <b>${never.join(', ')}</b> (the app checked every expression).`); }]
+ ]},
+ 5:{t:'Pick one of your expressions. Show how its value changes when you move the parentheses.', a:[
+   ['Use my latest chart expression', ()=>{ const e=S.last||'(44 − 4) ÷ 4';
+      labFrom(tok(e), `Expression: ${e}${S.last?' (your latest post)':' (no posts yet, so here is a way to make 10)'}`); selectTab('lab'); }],
+   ['Back to the warm-up', ()=>{ labFrom(tok(WARM),'Expression: the warm-up. Send one of your own from the chart with “Move its parentheses.”'); selectTab('lab'); }]
+ ]},
+ 6:{t:'Challenge: with FIVE 4s and no decimal point, can you make 11, 13, 14, 18 and 19?', star:true, a:[
+   ['Go to the Five 4s chart', ()=>{ setSet('five'); selectTab('build'); }],
+   ['Is it possible?', ()=>{ const ok=SETS.five.targets.filter(t=>can(t,'five',false)); ev(`The app checked: with five 4s, all of <b>${ok.join(', ')}</b> can be made without a decimal point. Keep hunting.`); }]
+ ]}
+};
+function renderQ(){
+  const nav=$('#qnav');
+  nav.innerHTML=Object.keys(Q).map(i=>`<button data-q="${i}" aria-pressed="${S.q==i}">${Q[i].star?'★ Challenge':i}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{ S.q=+b.dataset.q; ev(''); renderQ(); });
+  const q=Q[S.q]; $('#qtext').textContent=q.t;
+  const box=$('#qactions'); box.innerHTML='';
+  q.a.forEach(([label,fn],i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=label; b.onclick=fn; box.appendChild(b); });
+}
+
+/* ---------- tabs, sets, reset ---------- */
+function selectTab(t){
+  S.tab=t;
+  for(const k of ['lab','build','q']){ $('#tab-'+k).setAttribute('aria-selected',k===t); $('#view-'+k).hidden=k!==t; }
+  if(t==='lab'){ $('#labTrees').innerHTML=''; renderLab(); }
+  if(t==='q') renderQ();
+}
+function setSet(s){
+  S.set=s; S.sel=null; $('#detail').innerHTML='';
+  document.querySelectorAll('[data-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.set===s));
+  $('#decToggle').disabled = s==='five';
+  if(s==='five') S.tokens=S.tokens.filter(t=>t!=='.4');
+  setNote(); renderBlocks(); renderBuilder(); renderChart();
+}
+function resetAll(){
+  S.tokens=[]; S.found=freshFound(); S.sel=null; S.last=null; S.dec=false; $('#decToggle').checked=false; S.q=1;
+  labFrom(tok(WARM),'Expression: the warm-up. Send one of your own from the chart with “Move its parentheses.”');
+  ev(''); setSet('main'); selectTab('build');
+}
+
+document.querySelectorAll('#keys .key').forEach(b=>b.onclick=()=>press(b.dataset.k));
+$('#postBtn').onclick=post;
+$('#clearBtn').onclick=()=>{ S.tokens=[]; renderBuilder(); };
+$('#toLabBtn').onclick=()=>{
+  const c=check(S.tokens);
+  if(!c.ok || S.tokens.filter(isNum).length<2){ say(c.ok?'Build an expression with at least two numbers first.':c.msg,'warn'); return; }
+  labFrom(S.tokens.slice(), `Expression: ${show(S.tokens)} (from your builder)`); selectTab('lab');
+};
+$('#decToggle').onchange=e=>{ S.dec=e.target.checked; if(!S.dec) S.tokens=S.tokens.filter(t=>t!=='.4'); renderBlocks(); renderBuilder(); renderDetail(); };
+document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>setSet(b.dataset.set));
+$('#tab-lab').onclick=()=>selectTab('lab'); $('#tab-build').onclick=()=>selectTab('build'); $('#tab-q').onclick=()=>selectTab('q');
+$('#labClear').onclick=()=>{ S.lab.pairs=[]; S.lab.pick=null; $('#labTrees').innerHTML=''; renderLab(); };
+$('#labAll').onclick=labAll; $('#labLtr').onclick=labLtr;
+$('#labBack').onclick=()=>{ labFrom(tok(WARM),'Expression: the warm-up. Send one of your own from the chart with “Move its parentheses.”'); $('#labTrees').innerHTML=''; renderLab(); };
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+document.addEventListener('keydown',e=>{
+  if(S.tab!=='build' || e.target.tagName==='INPUT') return;
+  const m={'4':'4','+':'+','-':'-','*':'*','x':'*','/':'/','(':'(',')':')','.':'.4','Backspace':'back'};
+  if(e.key==='Enter'){ e.preventDefault(); post(); return; }
+  if(m[e.key]){ e.preventDefault(); press(m[e.key]); }
+});
+
+resetAll();
+})();
+</script>
+
+</body></html>

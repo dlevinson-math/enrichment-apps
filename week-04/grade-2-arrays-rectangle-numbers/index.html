@@ -1,0 +1,591 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Arrays &amp; Rectangle Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: grid-paper work mat (left) where tiles are dealt into rows; clipboard panel (right) for the worksheet task, collection and checks. */
+:root{
+  --paper:#EEF3F6; --card:#FFFFFF; --ink:#18263F; --muted:#56657A; --line:#CFDAE3; --grid:#DCE5EC;
+  --tile:#158A8A; --tile-edge:#0D6767; --left:#E0533A; --left-soft:#FCE6E1;
+  --accent:#2F5BD3; --accent-ink:#FFFFFF; --soft:#E4ECFA; --good:#1C7F47; --good-soft:#DFF2E7; --hl:#F4B400;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F151E; --card:#18212E; --ink:#E8EEF5; --muted:#9DABBC; --line:#2C394B; --grid:#1B2533;
+    --tile:#2EB0AB; --tile-edge:#1B807C; --left:#FF7A5E; --left-soft:#3A221E;
+    --accent:#86A6FF; --accent-ink:#0F151E; --soft:#1F2B44; --good:#55CF8C; --good-soft:#163325; --hl:#FFCB45;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F151E; --card:#18212E; --ink:#E8EEF5; --muted:#9DABBC; --line:#2C394B; --grid:#1B2533;
+  --tile:#2EB0AB; --tile-edge:#1B807C; --left:#FF7A5E; --left-soft:#3A221E;
+  --accent:#86A6FF; --accent-ink:#0F151E; --soft:#1F2B44; --good:#55CF8C; --good-soft:#163325; --hl:#FFCB45;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{padding:14px 24px 28px; max-width:1500px; margin:0 auto}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,46px); line-height:1; margin:0; letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase; font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:8px; margin:16px 0 14px; flex-wrap:wrap}
+nav.tabs button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:8px 16px 8px 8px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.5vw,21px); min-height:54px}
+nav.tabs button i{font-style:normal; width:34px; height:34px; border-radius:9px; display:grid; place-items:center; background:var(--grid); font-size:18px}
+nav.tabs button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+nav.tabs button[aria-selected="true"] i{background:var(--tile); color:#fff}
+
+.view{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:20px; align-items:start}
+.view[hidden]{display:none}
+@media (max-width: 900px){ .view{grid-template-columns:minmax(0,1fr)} .wrap{padding:12px 16px 24px} }
+@media (max-width: 620px){ nav.tabs{display:grid; grid-template-columns:1fr 1fr} nav.tabs button{font-size:16px; padding:6px 10px 6px 6px} .tools{margin-left:0} }
+
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.eyebrow{font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--muted); margin:0}
+h2{font-family:var(--display); font-weight:700; font-size:clamp(22px,2vw,30px); line-height:1.1; margin:0; text-wrap:balance}
+.task{font-size:clamp(18px,1.5vw,22px); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; border-radius:14px; min-height:54px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:54px}
+.pick{border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px; min-width:64px; min-height:56px; border-radius:14px; padding:4px 14px}
+.pick[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.pick.done{box-shadow:inset 0 -5px 0 var(--good)}
+.say{margin:0; padding:12px 16px; border-radius:12px; background:var(--soft); font-size:clamp(17px,1.4vw,21px)}
+.say.good{background:var(--good-soft)}
+.say.hmm{background:var(--left-soft)}
+.say:empty{display:none}
+
+/* Builder */
+.bld{display:flex; flex-direction:column; gap:12px; min-width:0}
+.bld-top{display:flex; align-items:center; gap:12px 18px; flex-wrap:wrap}
+.count{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); line-height:1}
+.count small{font-size:.5em; font-weight:600; color:var(--muted)}
+.stepper{display:flex; align-items:center; gap:6px; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:4px}
+.stepper button{width:56px; height:56px; border:0; border-radius:12px; background:var(--grid); font-size:30px; font-weight:700; line-height:1}
+.stepper button:disabled{opacity:.35; cursor:default}
+.stepper span{min-width:96px; text-align:center; font-weight:700; font-size:18px}
+.stepper b{font-family:var(--display); font-size:30px; display:block; line-height:1}
+.mat{position:relative; border:2px solid var(--line); border-radius:18px; height:clamp(240px,46vh,500px); padding:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; overflow:hidden;
+  background-color:var(--card);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:24px 24px}
+.arr{display:grid; gap:var(--g)}
+.tile{width:var(--s); height:var(--s); border-radius:calc(var(--s) * .16); background:var(--tile); box-shadow:inset 0 calc(var(--s) * -.1) 0 var(--tile-edge)}
+.tile.lo{background:var(--left); box-shadow:none; outline:2px dashed var(--left); outline-offset:2px}
+.pile{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-width:90%}
+.pile .tile:nth-child(3n){transform:rotate(9deg)} .pile .tile:nth-child(4n+1){transform:rotate(-7deg) translateY(4px)}
+.lorow{display:flex; align-items:center; gap:var(--g)}
+.lorow em{font-style:normal; font-weight:700; color:var(--left); margin-left:12px; font-size:16px}
+.dims{position:absolute; top:10px; left:14px; font-family:var(--display); font-weight:800; font-size:clamp(22px,2.4vw,34px); background:var(--card); padding:0 10px; border-radius:10px}
+.dims.no{color:var(--left)}
+.fresh .tile{animation:pop .28s ease-out both}
+@keyframes pop{from{transform:scale(.6); opacity:.2}to{transform:none; opacity:1}}
+.msg{margin:0; font-size:clamp(17px,1.45vw,22px); min-height:2.9em}
+.msg b{font-family:var(--display)}
+.tried{display:flex; flex-direction:column; gap:6px}
+.tried .eyebrow{font-size:13px}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{width:44px; height:44px; border-radius:10px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:17px; padding:0; position:relative}
+.chip.ok{background:var(--tile); border-color:var(--tile); color:#fff}
+.chip.no{color:var(--left); border-color:var(--left); background:var(--left-soft)}
+.chip.no::after{content:""; position:absolute; left:8px; right:8px; top:50%; height:2px; background:var(--left); transform:rotate(-30deg)}
+.chip.cur{outline:3px solid var(--accent); outline-offset:2px}
+.turn[disabled]{opacity:.4; cursor:default}
+
+/* Collection */
+.coll{display:flex; flex-wrap:wrap; gap:10px}
+.coll:empty::before{content:"Nothing yet. Make a rectangle on the mat."; color:var(--muted)}
+.rcard{display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 12px; border:2px solid var(--line); border-radius:14px; background:var(--card); min-width:84px}
+.rcard b{font-family:var(--display); font-size:22px; line-height:1}
+.rcard.new{border-color:var(--hl)}
+svg .t{fill:var(--tile)} svg .lo{fill:var(--left)} svg .g{fill:var(--grid)} svg .hl{fill:var(--hl)}
+svg text{fill:var(--ink); font-family:var(--body)} svg .mut{fill:var(--muted)}
+svg .ax{stroke:var(--line); stroke-width:1}
+
+/* Census */
+.census{display:flex; flex-direction:column; gap:10px}
+.crow{display:grid; grid-template-columns:64px minmax(0,1fr) auto; gap:6px 14px; align-items:center; padding:10px 12px; border:2px solid var(--line); border-radius:14px}
+.crow.cur{border-color:var(--accent)}
+.crow .n{font-family:var(--display); font-weight:800; font-size:34px; line-height:1; text-align:center; border:0; background:none; padding:0; min-height:48px}
+.crow .found{font-size:16px; color:var(--muted); min-width:0}
+.crow .found b{color:var(--ink); font-family:var(--display); font-size:19px}
+.crow .hm{font-family:var(--display); font-weight:800; font-size:26px; text-align:center; min-width:52px}
+.crow .hm small{display:block; font-family:var(--body); font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.05em; text-transform:uppercase}
+.yn{grid-column:1 / -1; display:flex; gap:8px 18px; flex-wrap:wrap; align-items:center; font-size:16px}
+.yn span{font-weight:700}
+.yn button{border:2px solid var(--line); background:var(--card); border-radius:10px; padding:6px 14px; font-weight:700; min-height:44px; min-width:58px}
+.yn button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.cfb{grid-column:1 / -1; margin:0; font-size:16px; padding:8px 12px; border-radius:10px; background:var(--left-soft)}
+.cfb.good{background:var(--good-soft)}
+.cfb:empty{display:none}
+
+/* Wall */
+.wall{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px}
+.wcard{aspect-ratio:1/1; max-width:100%; border:2px solid var(--line); background:var(--card); border-radius:14px; font-family:var(--display); font-weight:800; font-size:clamp(22px,2.6vw,38px); position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; padding:4px}
+.wcard[disabled]{opacity:.35; cursor:default}
+.wcard.mark{background:var(--tile); border-color:var(--tile); color:#fff}
+.wcard.sq.mark{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.wcard.bad{border-color:var(--left); border-style:dashed; box-shadow:inset 0 0 0 3px var(--left)}
+.wcard.miss{box-shadow:inset 0 0 0 3px var(--hl)}
+.wcard .ev{font-family:var(--body); font-size:12px; font-weight:700; margin-top:4px; opacity:.85}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:4px; gap:4px}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:10px; font-weight:700; font-size:17px; color:var(--muted); min-height:48px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+/* Questions */
+.qlist{display:flex; flex-direction:column; gap:8px}
+.qlist button{text-align:left; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px 14px; font-size:17px; display:flex; gap:12px; align-items:flex-start; min-height:56px}
+.qlist button i{font-style:normal; font-family:var(--display); font-weight:800; font-size:20px; min-width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--grid); flex:none; padding:0 6px}
+.qlist button[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 4px 0 0 var(--ink)}
+.qlist button.star i{background:var(--hl); color:#1a1a1a}
+.qtext{font-family:var(--display); font-weight:700; font-size:clamp(22px,2.2vw,32px); line-height:1.2; margin:0; text-wrap:balance}
+.evidence{min-height:160px; border:2px solid var(--line); border-radius:16px; padding:14px; display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:safe center; overflow-x:auto;
+  background-color:var(--card); background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:24px 24px}
+.evidence:empty::before{content:"Talk it over first. Then tap a button to put evidence here."; color:var(--muted); align-self:center; text-align:center}
+.ecard{display:flex; flex-direction:column; align-items:center; gap:6px; background:var(--card); border-radius:12px; padding:8px 10px; font-size:15px; text-align:center}
+.ecard b{font-family:var(--display); font-size:19px}
+.turnbox{transition:transform .6s ease}
+.hint{font-size:15px; color:var(--muted); margin:0}
+
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Arrays &amp; Rectangle Numbers</h1>
+    <p class="sub">Grade 2 · Week 4 · Number Detectives</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><i>1</i>Rectangle warm-up</button>
+  <button role="tab" data-tab="census" aria-selected="false"><i>2</i>Rectangle census</button>
+  <button role="tab" data-tab="wall" aria-selected="false"><i>3</i>Stubborn &amp; square</button>
+  <button role="tab" data-tab="q" aria-selected="false"><i>?</i>Detective questions</button>
+</nav>
+
+<!-- 1. Warm-up -->
+<section class="view" id="v-warm">
+  <div id="bWarm"></div>
+  <div class="panel">
+    <p class="eyebrow">Task 1</p>
+    <h2>How many rectangles can you make?</h2>
+    <p class="task" id="warmTask"></p>
+    <div class="row">
+      <button class="pick" data-warm="12" aria-pressed="true">12 tiles</button>
+      <button class="pick" data-warm="7" aria-pressed="false">7 tiles</button>
+    </div>
+    <p class="eyebrow">My rectangles</p>
+    <div class="coll" id="warmColl"></div>
+    <div class="row"><button class="primary" id="warmCheck">I think I found them all</button></div>
+    <p class="say" id="warmSay" aria-live="polite"></p>
+    <p class="hint">Rule: a 2 × 6 and a 6 × 2 count as the same rectangle. One is just turned.</p>
+  </div>
+</section>
+
+<!-- 2. Census -->
+<section class="view" id="v-census" hidden>
+  <div id="bCensus"></div>
+  <div class="panel">
+    <p class="eyebrow">Task 2</p>
+    <h2>The great rectangle census</h2>
+    <p class="task">Pick a number. Find every rectangle. Then decide: is it a line number? A square number?</p>
+    <div class="census" id="census"></div>
+    <div class="row"><button class="primary" id="censusCheck">Check my census</button></div>
+    <p class="say" id="censusSay" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 3. Wall -->
+<section class="view" id="v-wall" hidden>
+  <div class="panel">
+    <div class="seg" role="group" aria-label="Which hunt">
+      <button id="mLine" aria-pressed="true">Task 3 · Stubborn numbers</button>
+      <button id="mSq" aria-pressed="false">Task 4 · Square hunters</button>
+    </div>
+    <p class="task" id="wallTask"></p>
+    <div class="wall" id="wall"></div>
+    <div class="row">
+      <button class="primary" id="wallCheck">Check my list</button>
+      <button class="secondary" id="wallEv">Show rectangle counts</button>
+    </div>
+    <p class="say" id="wallSay" aria-live="polite"></p>
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Test any number</p>
+    <div class="row" id="wallPick"></div>
+    <div id="bWall"></div>
+  </div>
+</section>
+
+<!-- 4. Questions -->
+<section class="view" id="v-q" hidden>
+  <div class="panel">
+    <p class="qtext" id="qtext"></p>
+    <div class="row" id="qact"></div>
+    <div class="evidence" id="evi"></div>
+    <p class="say" id="qsay" aria-live="polite"></p>
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Detective questions</p>
+    <div class="qlist" id="qlist"></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Math (all answers come from here) ---------- */
+const rects = n => { const r=[]; for(let a=1;a*a<=n;a++) if(n%a===0) r.push([a,n/a]); return r; };
+const isSquare = n => Number.isInteger(Math.sqrt(n));
+const isLine = n => n>=2 && rects(n).length===1;
+const key = (a,b) => Math.min(a,b)+'x'+Math.max(a,b);
+const nm = (a,b) => `${Math.min(a,b)} × ${Math.max(a,b)}`;
+const list = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+const CENSUS = [5,9,12,16,18,24];
+const hint = u => u.length>6 ? u.slice(0,6).join(', ') + ', …' : list(u) + '.';
+
+/* ---------- State ---------- */
+let S;
+function fresh(){
+  S = { tab:'warm', nums:{}, warmN:12, censusN:5, census:{}, wallMode:'line', marks:{line:new Set(), square:new Set()}, wallEv:false, wallN:10, q:1, last:null };
+  CENSUS.forEach(n => S.census[n] = {line:null, square:null, fb:'', ok:false});
+}
+const rec = n => S.nums[n] || (S.nums[n] = {rows:0, tried:{}, found:new Set()});
+
+/* ---------- Tiny SVG arrays ---------- */
+function mini(rows, cols, max=96, left=0){
+  const wC = Math.max(cols, left), hR = rows + (left?1:0);
+  const s = Math.max(4, Math.min(18, max / Math.max(wC, hR)));
+  const gap = left ? s*.5 : 0;
+  let r = '';
+  for(let i=0;i<rows;i++) for(let j=0;j<cols;j++) r += `<rect class="t" x="${j*s+.5}" y="${i*s+.5}" width="${s-1.5}" height="${s-1.5}" rx="${s*.15}"/>`;
+  for(let j=0;j<left;j++) r += `<rect class="lo" x="${j*s+.5}" y="${rows*s+gap+.5}" width="${s-1.5}" height="${s-1.5}" rx="${s*.15}"/>`;
+  const W = wC*s, H = hR*s + gap;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${r}</svg>`;
+}
+
+/* ---------- Tile builder (shared by tasks 1, 2, 3) ---------- */
+function Builder(root, onChange){
+  root.innerHTML = `<div class="bld">
+    <div class="bld-top">
+      <div class="count"><span class="nv"></span> <small>tiles</small></div>
+      <div class="stepper"><button class="mi" aria-label="One fewer row">−</button><span>Rows<b class="rv">–</b></span><button class="pl" aria-label="One more row">+</button></div>
+      <button class="secondary turn">Turn it</button>
+    </div>
+    <div class="mat"><div class="dims"></div><div class="tiles"></div></div>
+    <p class="msg" aria-live="polite"></p>
+    <div class="tried"><p class="eyebrow">Rows tried · tap a number to try it</p><div class="chips"></div></div>
+  </div>`;
+  const q = s => root.querySelector(s);
+  let n = 12, prevKey = '';
+  function setRows(r){
+    const R = rec(n); R.rows = r;
+    if(r>0){
+      const w = Math.floor(n/r), left = n - r*w;
+      const was = R.tried[r];
+      R.tried[r] = left===0 ? 'ok' : 'no';
+      if(left===0){
+        const k = key(r,w), had = R.found.has(k);
+        S.last = {n, rows:r, status: had ? (was ? 'same' : 'turned') : 'new'};
+        if(!had) R.found.add(k);
+        if(had && was==='ok') S.last.status='same';
+        if(had && !was) S.last.status='turned';
+      } else S.last = {n, rows:r, status:'left'};
+    }
+    render(true); onChange && onChange();
+  }
+  function render(anim){
+    const R = rec(n), r = R.rows, mat = q('.mat'), box = q('.tiles');
+    q('.nv').textContent = n;
+    q('.rv').textContent = r || '–';
+    q('.mi').disabled = r<=1; q('.pl').disabled = r>=n;
+    const W = mat.clientWidth - 40, H = mat.clientHeight - 70;
+    let html = '', s, g;
+    const dims = q('.dims');
+    if(!r){
+      s = Math.max(18, Math.min(48, Math.sqrt(W*H/n)*.55));
+      html = `<div class="pile" style="--s:${s}px">` + '<div class="tile"></div>'.repeat(n) + '</div>';
+      dims.textContent = ''; dims.hidden = true;
+      q('.msg').innerHTML = `Here are <b>${n}</b> tiles in a pile. Press <b>+</b> or tap a row number to put them into equal rows.`;
+    } else {
+      const w = Math.floor(n/r), left = n - r*w;
+      const cols = Math.max(w, left + 3), hR = r + (left ? 1.5 : 0);
+      s = Math.floor(Math.min(W/cols, H/hR, 84));
+      g = s > 22 ? Math.round(s*.1) : 2; s = Math.max(6, s - g);
+      html = `<div class="arr" style="--s:${s}px; --g:${g}px; grid-template-columns:repeat(${w}, ${s}px)">` + '<div class="tile"></div>'.repeat(r*w) + '</div>';
+      if(left) html += `<div class="lorow" style="--s:${s}px; --g:${g}px">` + '<div class="tile lo"></div>'.repeat(left) + `<em>${left} left over</em></div>`;
+      dims.hidden = false;
+      dims.className = 'dims' + (left ? ' no' : '');
+      dims.textContent = left ? `${r} rows of ${w} + ${left}` : `${r} × ${w}`;
+      q('.msg').innerHTML = message(r, w, left);
+    }
+    box.innerHTML = html;
+    box.classList.toggle('fresh', !!anim && !reduced);
+    box.style.display='flex'; box.style.flexDirection='column'; box.style.alignItems='center'; box.style.gap='14px';
+    const canTurn = r>0 && n % r === 0 && r !== n/r;
+    q('.turn').disabled = !canTurn;
+    q('.chips').innerHTML = Array.from({length:n}, (_,i) => { const k=i+1, t=R.tried[k];
+      return `<button class="chip ${t||''} ${k===r?'cur':''}" data-r="${k}" aria-label="${k} rows${t==='ok'?', makes a rectangle':t==='no'?', tiles left over':''}">${k}</button>`; }).join('');
+    q('.chips').querySelectorAll('button').forEach(b => b.onclick = () => setRows(+b.dataset.r));
+  }
+  function message(r, w, left){
+    if(left){
+      return `<b>${r} rows of ${w}</b>, but <b>${left}</b> tile${left===1?' is':'s are'} left over. Every row must be the same length, so this is not a rectangle. Try a different number of rows.`;
+    }
+    const L = S.last && S.last.n===n && S.last.rows===r ? S.last.status : 'same';
+    const base = `<b>${r} row${r===1?'':'s'} of ${w}</b> makes a <b>${r} × ${w}</b> rectangle${r===1||w===1?' (a line)':''}${r===w?' (a square!)':''}.`;
+    if(L==='new') return base + ' New one for the collection!';
+    if(L==='turned') return base + ` That's the same as <b>${nm(r,w)}</b>, just turned. It doesn't count twice.`;
+    return base + ' Already in your collection.';
+  }
+  q('.mi').onclick = () => setRows(Math.max(1, rec(n).rows - 1));
+  q('.pl').onclick = () => setRows(Math.min(n, rec(n).rows + 1));
+  q('.turn').onclick = () => { const r = rec(n).rows; if(r && n%r===0) setRows(n/r); };
+  new ResizeObserver(() => render(false)).observe(q('.mat'));
+  return { setN(v){ n=v; render(true); }, get n(){ return n; }, render };
+}
+
+/* ---------- Task 1: warm-up ---------- */
+let bWarm, bCensus, bWall;
+function renderWarm(){
+  const n = S.warmN, R = rec(n);
+  document.querySelectorAll('[data-warm]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.warm===n));
+  $('#warmTask').textContent = n===12 ? 'Use all 12 tiles. Make every different rectangle you can.' : 'Now try 7 tiles. What happens?';
+  $('#warmColl').innerHTML = [...R.found].map(k => k.split('x').map(Number)).sort((a,b)=>a[0]-b[0])
+    .map(([a,b]) => `<div class="rcard">${mini(a,b,90)}<b>${a} × ${b}</b></div>`).join('');
+}
+$('#warmCheck').onclick = () => {
+  const n = S.warmN, R = rec(n), all = rects(n), say = $('#warmSay');
+  const missing = all.filter(([a,b]) => !R.found.has(key(a,b)));
+  if(!missing.length){
+    say.className = 'say good';
+    say.innerHTML = n===12
+      ? `Yes! 12 makes exactly <b>3</b> rectangles: ${list(all.map(([a,b])=>nm(a,b)))}. Every other number of rows leaves tiles over.`
+      : `Yes! 7 only makes <b>1 × 7</b>, a line. 2, 3, 4, 5 and 6 rows all leave tiles over. 7 is a <b>line number</b>.`;
+  } else {
+    const untried = Array.from({length:n},(_,i)=>i+1).filter(k => !R.tried[k]);
+    say.className = 'say hmm';
+    say.innerHTML = `Not yet. There is more to find. Rows you haven't tried: <b>${hint(untried)}</b>`;
+  }
+};
+document.querySelectorAll('[data-warm]').forEach(b => b.onclick = () => { S.warmN = +b.dataset.warm; $('#warmSay').textContent=''; bWarm.setN(S.warmN); renderWarm(); });
+
+/* ---------- Task 2: census ---------- */
+function renderCensus(){
+  $('#census').innerHTML = CENSUS.map(n => {
+    const R = rec(n), c = S.census[n];
+    const f = [...R.found].map(k=>k.split('x').map(Number)).sort((a,b)=>a[0]-b[0]).map(([a,b])=>`<b>${a} × ${b}</b>`);
+    const yn = (field, label) => `<span>${label}</span>` + ['yes','no'].map(v => `<button data-n="${n}" data-f="${field}" data-v="${v}" aria-pressed="${c[field]===v}">${v==='yes'?'Yes':'No'}</button>`).join('');
+    return `<div class="crow ${n===S.censusN?'cur':''}">
+      <button class="n" data-pick="${n}" aria-label="Build ${n}">${n}</button>
+      <div class="found">${f.length ? f.join(', ') : 'Tap the number to start building'}</div>
+      <div class="hm">${R.found.size}<small>found</small></div>
+      <div class="yn">${yn('line','Line number?')}<span style="width:6px"></span>${yn('square','Square number?')}</div>
+      <p class="cfb ${c.ok?'good':''}">${c.fb}</p>
+    </div>`;
+  }).join('');
+  $('#census').querySelectorAll('[data-pick]').forEach(b => b.onclick = () => { S.censusN = +b.dataset.pick; bCensus.setN(S.censusN); renderCensus(); });
+  $('#census').querySelectorAll('.yn button').forEach(b => b.onclick = () => { const c = S.census[b.dataset.n]; c[b.dataset.f] = b.dataset.v; c.fb=''; renderCensus(); });
+}
+$('#censusCheck').onclick = () => {
+  let good = 0;
+  CENSUS.forEach(n => {
+    const R = rec(n), c = S.census[n], all = rects(n), msgs = [];
+    const missing = all.filter(([a,b]) => !R.found.has(key(a,b)));
+    if(missing.length){
+      const untried = Array.from({length:n},(_,i)=>i+1).filter(k => !R.tried[k]);
+      msgs.push(R.found.size===0 ? `Build ${n} first.` : `More rectangles are hiding. Rows not tried yet: ${hint(untried)}`);
+    }
+    const line = isLine(n), sq = isSquare(n);
+    if(c.line===null) msgs.push('Decide: line number?');
+    else if((c.line==='yes') !== line){
+      const other = all.find(([a]) => a>1);
+      msgs.push(line ? `${n} IS a line number: every way except 1 row leaves tiles over.` : `${n} is not a line number. It also makes ${nm(other[0],other[1])}.`);
+    }
+    if(c.square===null) msgs.push('Decide: square number?');
+    else if((c.square==='yes') !== sq){
+      const k = Math.floor(Math.sqrt(n));
+      msgs.push(sq ? `${n} IS a square number: ${k} rows of ${k} makes ${k} × ${k} = ${n}.` : `No square: ${k} × ${k} = ${k*k} and ${k+1} × ${k+1} = ${(k+1)*(k+1)}. ${n} is in between.`);
+    }
+    c.ok = msgs.length===0;
+    c.fb = c.ok ? `Checked: ${all.length} rectangle${all.length>1?'s':''}${line?', line number':''}${sq?', square number':''}.` : msgs.join(' ');
+    if(c.ok) good++;
+  });
+  renderCensus();
+  const say = $('#censusSay');
+  say.className = 'say ' + (good===CENSUS.length ? 'good' : '');
+  say.innerHTML = good===CENSUS.length
+    ? `Census complete! <b>24</b> made the most rectangles of these numbers: 4 of them.`
+    : `<b>${good} of ${CENSUS.length}</b> rows are fully checked. Read the notes on the others and keep building.`;
+};
+
+/* ---------- Tasks 3 & 4: wall ---------- */
+function renderWall(){
+  const line = S.wallMode==='line';
+  $('#mLine').setAttribute('aria-pressed', line); $('#mSq').setAttribute('aria-pressed', !line);
+  $('#wallTask').innerHTML = line
+    ? 'Tap every <b>line number</b> from 2 to 25: the stubborn ones that only make a straight line.'
+    : 'Tap every number up to 25 that can make a perfect <b>square</b>.';
+  $('#wallEv').textContent = S.wallEv ? 'Hide rectangle counts' : 'Show rectangle counts';
+  const M = S.marks[S.wallMode];
+  $('#wall').innerHTML = Array.from({length:25},(_,i)=>i+1).map(n => {
+    const dis = line && n===1;
+    const ev = S.wallEv ? `<span class="ev">${rects(n).length} rect${rects(n).length>1?'s':''}</span>` : '';
+    return `<button class="wcard ${line?'':'sq'} ${M.has(n)?'mark':''}" data-w="${n}" ${dis?'disabled aria-label="1, not part of this hunt"':''} aria-pressed="${M.has(n)}">${n}${ev}</button>`;
+  }).join('');
+  $('#wall').querySelectorAll('[data-w]').forEach(b => b.onclick = () => { const n=+b.dataset.w; M.has(n)?M.delete(n):M.add(n); $('#wallSay').textContent=''; renderWall(); });
+  $('#wallPick').innerHTML = `<div class="stepper"><button id="wpM" aria-label="Smaller number">−</button><span>Number<b>${S.wallN}</b></span><button id="wpP" aria-label="Bigger number">+</button></div>`;
+  $('#wpM').disabled = S.wallN<=1; $('#wpP').disabled = S.wallN>=29;
+  $('#wpM').onclick = () => { S.wallN--; bWall.setN(S.wallN); renderWall(); };
+  $('#wpP').onclick = () => { S.wallN++; bWall.setN(S.wallN); renderWall(); };
+}
+$('#mLine').onclick = () => { S.wallMode='line'; $('#wallSay').textContent=''; renderWall(); };
+$('#mSq').onclick = () => { S.wallMode='square'; $('#wallSay').textContent=''; renderWall(); };
+$('#wallEv').onclick = () => { S.wallEv = !S.wallEv; renderWall(); };
+$('#wallCheck').onclick = () => {
+  renderWall();
+  const line = S.wallMode==='line', M = S.marks[S.wallMode];
+  const range = Array.from({length:25},(_,i)=>i+1).filter(n => !line || n>=2);
+  const test = line ? isLine : isSquare;
+  const wrong = range.filter(n => M.has(n) && !test(n));
+  const missed = range.filter(n => !M.has(n) && test(n));
+  wrong.forEach(n => $(`[data-w="${n}"]`).classList.add('bad'));
+  const say = $('#wallSay'); const parts = [];
+  if(wrong.length){
+    parts.push('Dashed cards need another look: ' + wrong.map(n => {
+      if(line){ const o = rects(n).find(([a])=>a>1); return `<b>${n}</b> also makes ${nm(o[0],o[1])}`; }
+      const k = Math.floor(Math.sqrt(n)); return `<b>${n}</b> sits between ${k*k} and ${(k+1)*(k+1)}`;
+    }).join('; ') + '.');
+  }
+  if(missed.length) parts.push(`${missed.length===1?'One more number is':missed.length+' more numbers are'} still hiding. Test some with the tiles.`);
+  if(!parts.length){
+    const all = range.filter(test);
+    say.className = 'say good';
+    say.innerHTML = line
+      ? `You found all ${all.length}: <b>${list(all)}</b>. What do you notice about them? (Someday you'll call them <b>primes</b>.)`
+      : `You found all ${all.length}: <b>${list(all)}</b>. They are 1 × 1, 2 × 2, 3 × 3, 4 × 4 and 5 × 5.`;
+  } else { say.className = 'say hmm'; say.innerHTML = parts.join(' '); }
+};
+
+/* ---------- Detective questions ---------- */
+const evi = () => $('#evi');
+function ans(html, good){ const s=$('#qsay'); s.className='say'+(good?' good':''); s.innerHTML=html; }
+const Q = [
+  { t:'Why can 7 tiles only make a line?', a:[
+    {l:'Deal 7 into rows', run(){
+      evi().innerHTML = [1,2,3,4,5,6,7].map(r => { const w=Math.floor(7/r), left=7-r*w;
+        return `<div class="ecard">${mini(r,w,84,left)}<b>${r} row${r>1?'s':''}</b>${left?`<span>${left} left over</span>`:'<span>no leftovers</span>'}</div>`; }).join('');
+      ans('Only <b>1 row of 7</b> (or 7 rows of 1, the same line turned) uses every tile with no leftovers. Every other way leaves loners. 7 is a <b>line number</b>.', true);
+    }}]},
+  { t:'Is a 2 × 6 a different rectangle from a 6 × 2?', a:[
+    {l:'Show both', run(){
+      evi().innerHTML = `<div class="ecard">${mini(2,6,140)}<b>2 rows of 6</b></div><div class="ecard"><div class="turnbox" id="tb">${mini(6,2,140)}</div><b>6 rows of 2</b></div>`;
+      ans('Count the tiles in each: both are 12. Now turn one.');
+    }},
+    {l:'Turn the 6 × 2', run(){
+      if(!$('#tb')) Q[1].a[0].run();
+      const tb = $('#tb'); tb.style.transform = tb.style.transform ? '' : 'rotate(90deg)';
+      ans('Turned on its side, 6 rows of 2 lands right on top of 2 rows of 6. Same tiles, same shape. That is why it only counts <b>once</b>.', true);
+    }}]},
+  { t:'How do you KNOW you found every rectangle for 24?', a:[
+    {l:'Try every row number', run(){
+      evi().innerHTML = Array.from({length:24},(_,i)=>i+1).map(r => { const ok = 24%r===0;
+        return `<div class="ecard" style="min-width:48px"><b style="color:var(${ok?'--tile':'--left'})">${r}</b><span>${ok?'✓':'✗'}</span></div>`; }).join('');
+      ans('Rows that work: <b>1, 2, 3, 4, 6, 8, 12, 24</b>. That is 8 ways, but you only get 4 rectangles. Why?');
+    }},
+    {l:'Pair them up', run(){
+      evi().innerHTML = rects(24).map(([a,b]) => `<div class="ecard">${mini(a,b,110)}<b>${a} rows ↔ ${b} rows</b><span>${a} × ${b}</span></div>`).join('');
+      ans('Every rectangle shows up twice: 1 row ↔ 24 rows, 2 ↔ 12, 3 ↔ 8, 4 ↔ 6. After 4 rows, every rectangle that works is one you already have, turned. So <b>24 makes exactly 4</b>.', true);
+    }}]},
+  { t:'What do you notice about the stubborn line numbers?', a:[
+    {l:'Show them', run(){
+      const ls = Array.from({length:24},(_,i)=>i+2).filter(isLine);
+      evi().innerHTML = ls.map(n => `<div class="ecard">${mini(1,n,150)}<b>${n}</b></div>`).join('');
+      ans(`From 2 to 25 the line numbers are <b>${list(ls)}</b>. What do they have in common? What about their ones digits?`);
+    }},
+    {l:'Why is 2 the only even one?', run(){
+      evi().innerHTML = [4,6,8,10,12].map(n => `<div class="ecard">${mini(2,n/2,110)}<b>${n} = 2 rows of ${n/2}</b></div>`).join('') + `<div class="ecard">${mini(1,2,40)}<b>2 = 1 row of 2</b></div>`;
+      ans('Every even number can be shared into <b>2 equal rows</b>, so it makes a 2-row rectangle and is not a line. 2 rows of 1 is just the 1 × 2 line turned, so 2 stays stubborn.', true);
+    }}]},
+  { t:'Square numbers: how does each square grow from the one before?', a:[
+    {l:'Grow the squares', run(){
+      evi().innerHTML = [1,2,3,4,5].map(k => {
+        const s=18; let r='';
+        for(let i=0;i<k;i++) for(let j=0;j<k;j++){ const neu = k>1 && (i===k-1 || j===k-1); r += `<rect class="${neu?'hl':'t'}" x="${j*s+.5}" y="${i*s+.5}" width="${s-1.5}" height="${s-1.5}" rx="3"/>`; }
+        return `<div class="ecard"><svg width="${k*s}" height="${k*s}" viewBox="0 0 ${k*s} ${k*s}" aria-hidden="true">${r}</svg><b>${k} × ${k} = ${k*k}</b><span>${k>1?`+${2*k-1} new`:'start'}</span></div>`; }).join('');
+      ans('1, 4, 9, 16, 25. To grow the next square you add a corner of tiles (yellow): <b>3, then 5, then 7, then 9</b>. What would come next?', true);
+    }}]},
+  { t:'Challenge: which number under 30 makes the MOST rectangles? How do you know nothing beats it?', star:true, a:[
+    {l:'Stack up every number', run(){ chart(false); ans('Each column shows how many rectangles that number makes, one tile per rectangle. Which column is tallest?'); }},
+    {l:'Find the winner', run(){ chart(true);
+      const rivals = Array.from({length:29},(_,i)=>i+1).filter(n => rects(n).length===3);
+      ans(`<b>24 makes 4 rectangles</b> (1 × 24, 2 × 12, 3 × 8, 4 × 6). Its closest rivals, ${list(rivals)}, make only 3 each. Every number under 30 is on the chart, and no other column reaches 4.`, true); }}]}
+];
+function chart(win){
+  const N=29, cw=22, s=20, top=10, H=4*s+top, W=N*cw+30;
+  let r='';
+  for(let y=1;y<=4;y++){ const yy=top+H-top-y*s; r+=`<line class="ax" x1="26" x2="${W}" y1="${yy}" y2="${yy}"/><text class="mut" x="18" y="${yy+s/2+5}" font-size="12" text-anchor="end">${y}</text>`; }
+  for(let n=1;n<=N;n++){ const c=rects(n).length, x=30+(n-1)*cw, hl = win && n===24;
+    for(let k=0;k<c;k++) r+=`<rect class="${hl?'hl':'t'}" x="${x}" y="${H-(k+1)*s+1}" width="${cw-4}" height="${s-3}" rx="3" opacity="${win&&!hl?.45:1}"/>`;
+    r+=`<text x="${x+(cw-4)/2}" y="${H+16}" font-size="12" text-anchor="middle" ${hl?'font-weight="700"':''}>${n}</text>`; }
+  evi().innerHTML = `<svg viewBox="0 0 ${W} ${H+22}" width="100%" style="max-width:${W*1.6}px; min-width:520px" role="img" aria-label="Rectangles made by each number from 1 to 29">${r}</svg>`;
+}
+function renderQ(){
+  $('#qlist').innerHTML = Q.map((q,i) => `<button data-q="${i}" class="${q.star?'star':''}" aria-pressed="${S.q===i}"><i>${q.star?'★':i+1}</i><span>${q.t}</span></button>`).join('');
+  $('#qlist').querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; evi().innerHTML=''; $('#qsay').textContent=''; renderQ(); });
+  const q = Q[S.q];
+  $('#qtext').textContent = q.t;
+  const box = $('#qact'); box.innerHTML='';
+  q.a.forEach((a,i) => { const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=()=>a.run(); box.appendChild(b); });
+}
+
+/* ---------- Tabs, reset, full screen ---------- */
+function selectTab(t){
+  S.tab = t;
+  document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','census','wall','q'].forEach(v => $('#v-'+v).hidden = v!==t);
+  if(t==='warm'){ bWarm.setN(S.warmN); renderWarm(); }
+  if(t==='census'){ bCensus.setN(S.censusN); renderCensus(); }
+  if(t==='wall'){ bWall.setN(S.wallN); renderWall(); }
+  if(t==='q') renderQ();
+}
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+function boot(){
+  fresh();
+  ['#warmSay','#censusSay','#wallSay','#qsay'].forEach(s => $(s).textContent='');
+  evi().innerHTML='';
+  selectTab('warm');
+}
+$('#resetBtn').onclick = boot;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+fresh();
+bWarm = Builder($('#bWarm'), renderWarm);
+bCensus = Builder($('#bCensus'), renderCensus);
+bWall = Builder($('#bWall'), null);
+boot();
+})();
+</script>
+
+</body></html>

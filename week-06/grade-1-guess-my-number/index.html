@@ -1,0 +1,786 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Guess My Number</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: classroom hundred chart on the left (the "board" everyone shares), step panel on the right; stacks on narrow screens. */
+:root{
+  --bg:#EDF1F7; --card:#FFFFFF; --ink:#1B2540; --muted:#56607A; --line:#C9D2E1;
+  --crayon:#6447DB; --crayon-soft:#E7E1FF; --sun:#FFC23A; --sun-soft:#FFF1C4;
+  --yes:#1A9660; --yes-soft:#DDF4E8; --oops:#D96A12; --oops-soft:#FDE8D5;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121827; --card:#1B2337; --ink:#EEF1F8; --muted:#A5AFC7; --line:#33405C;
+    --crayon:#A893FF; --crayon-soft:#2E2752; --sun:#FFD35E; --sun-soft:#3B3218;
+    --yes:#41CC8C; --yes-soft:#183A2A; --oops:#FF9E50; --oops-soft:#3E2814; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121827; --card:#1B2337; --ink:#EEF1F8; --muted:#A5AFC7; --line:#33405C;
+  --crayon:#A893FF; --crayon-soft:#2E2752; --sun:#FFD35E; --sun-soft:#3B3218;
+  --yes:#41CC8C; --yes-soft:#183A2A; --oops:#FF9E50; --oops-soft:#3E2814; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--crayon); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding:14px 24px 8px}
+.title h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3vw,42px); line-height:1; letter-spacing:-.01em}
+.title p{margin:4px 0 0; color:var(--muted); font-size:15px}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; padding:4px 24px 10px; flex-wrap:wrap}
+nav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 20px 10px 10px; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,22px); display:flex; align-items:center; gap:10px; min-height:56px}
+nav button b{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:18px}
+nav button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav button[aria-selected="true"] b{background:var(--sun); color:#1B2540}
+
+main{flex:1; min-height:0; display:flex; gap:26px; padding:4px 24px 20px}
+.chart-col{flex:none; display:flex; flex-direction:column; gap:10px}
+.chart{--size:min(calc(100dvh - 230px), 52vw); --rows:10; width:var(--size); aspect-ratio:10 / var(--rows); max-width:100%;
+  display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(var(--rows),1fr);
+  background:var(--card); border:3px solid var(--ink); border-radius:10px; overflow:hidden; container-type:inline-size}
+.cell{position:relative; border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--card); padding:0;
+  display:flex; align-items:center; justify-content:center; font-family:var(--display); font-weight:600; font-size:3.7cqw; transition:background-color .25s, opacity .25s}
+.chart.small .cell{font-size:4.6cqw}
+.cell:nth-child(10n){border-right:0}
+.num{position:relative; z-index:1; line-height:1}
+.cell.out .num{opacity:.32}
+.cell.out::after{content:""; position:absolute; left:14%; right:14%; top:calc(50% - .09em); height:.18em; border-radius:.1em; z-index:2;
+  background:repeating-linear-gradient(90deg,var(--crayon) 0 6px, color-mix(in srgb,var(--crayon) 75%, transparent) 6px 9px); transform:rotate(-35deg)}
+.cell.pop::after{animation:stroke .3s ease-out}
+@keyframes stroke{from{transform:rotate(-35deg) scaleX(0)}to{transform:rotate(-35deg) scaleX(1)}}
+.cell.hl{background:var(--sun-soft)}
+.cell.hl2{background:var(--crayon-soft)}
+.cell.pick{box-shadow:inset 0 0 0 .2em var(--crayon)}
+.cell.found{background:var(--yes-soft); box-shadow:inset 0 0 0 .22em var(--yes)}
+.cell.found .num{font-weight:700}
+.cell.miss{background:var(--sun-soft); box-shadow:inset 0 0 0 .18em var(--sun); animation:pulse 1.1s ease-in-out 3}
+.cell.oops{background:var(--oops-soft); box-shadow:inset 0 0 0 .18em var(--oops)}
+@keyframes pulse{50%{box-shadow:inset 0 0 0 .3em var(--sun)}}
+.badge{position:absolute; top:6%; right:7%; font-family:var(--body); font-weight:700; font-size:.42em; color:var(--muted); z-index:3}
+.chart-note{font-size:16px; color:var(--muted); min-height:1.4em}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:15px; color:var(--muted)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:20px; height:20px; border-radius:5px; border:2px solid var(--line); display:inline-block}
+
+.panel{flex:1; min-width:0; overflow:auto; display:flex; flex-direction:column; gap:16px; padding-right:2px}
+.view{display:flex; flex-direction:column; gap:16px}
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.4vw,34px); line-height:1.2; margin:0; text-wrap:balance}
+.sub{margin:0; color:var(--muted); font-size:17px; max-width:36em}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--crayon); color:#fff; border-radius:16px; padding:14px 26px; font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,24px); min-height:60px}
+:root[data-theme="dark"] .primary{color:#14112A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .primary{color:#14112A}}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); border-radius:16px; padding:12px 20px; font-weight:700; font-size:17px; min-height:56px}
+.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; gap:2px}
+.seg button{border:0; background:none; border-radius:10px; padding:9px 14px; font-weight:700; font-size:16px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.label{font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+
+/* warm-up */
+.bignum{font-family:var(--display); font-weight:700; font-size:clamp(72px,8vw,120px); line-height:1}
+.blocks{display:flex; gap:6px; align-items:flex-end; flex-wrap:wrap; min-height:130px}
+.rod{display:grid; grid-template-rows:repeat(10,12px); gap:1px; padding:2px; background:var(--crayon); border-radius:4px}
+.rod i,.cube{width:14px; height:12px; background:var(--crayon-soft); border-radius:2px; display:block}
+.cubes{display:flex; flex-direction:column-reverse; gap:3px; margin-left:10px}
+.cube{width:18px; height:18px; border:2px solid var(--crayon); background:var(--sun)}
+.facts{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px}
+.fact{border:2px dashed var(--line); background:var(--card); border-radius:16px; padding:14px; min-height:84px; font-family:var(--display); font-weight:600; font-size:22px; text-align:left; display:flex; align-items:center; gap:10px}
+.fact .q{width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; flex:none; font-size:18px}
+.fact.on{border-style:solid; border-color:var(--crayon)}
+.fact.on .q{background:var(--crayon); color:var(--card)}
+.fact.sel{background:var(--sun-soft); border-color:var(--sun)}
+.step{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+.step button{min-width:56px; min-height:56px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:18px}
+.step output{min-width:84px; text-align:center; font-family:var(--display); font-weight:700; font-size:36px}
+
+/* riddles */
+.dots{display:flex; gap:8px; flex-wrap:wrap}
+.dots button{width:56px; height:56px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px}
+.dots button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.dots button.solved{border-color:var(--yes); color:var(--yes)}
+.dots button.solved[aria-pressed="true"]{background:var(--yes); color:var(--card)}
+.clues{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.clue{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:12px 14px; display:grid; grid-template-columns:auto 1fr auto; gap:4px 12px; align-items:center}
+.clue .n{width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; font-weight:700}
+.clue .t{font-family:var(--display); font-weight:600; font-size:clamp(20px,1.9vw,26px); line-height:1.2}
+.clue .why{grid-column:2 / 4; font-size:17px; color:var(--muted)}
+.clue .why:empty{display:none}
+.clue.ok{border-color:var(--yes)} .clue.ok .n{background:var(--yes); color:var(--card)}
+.clue.no{border-color:var(--oops)} .clue.no .n{background:var(--oops); color:var(--card)}
+.clue .use{border:2px solid var(--crayon); color:var(--crayon); background:none; border-radius:12px; padding:8px 12px; font-weight:700; min-height:48px}
+.clue .use:disabled{opacity:.4}
+.say{padding:14px 18px; border-radius:16px; background:var(--card); border:2px solid var(--line); font-size:19px; line-height:1.4; max-width:36em}
+.say:empty{display:none}
+.say.good{background:var(--yes-soft); border-color:var(--yes)}
+.say.think{background:var(--sun-soft); border-color:var(--sun)}
+.say b{font-family:var(--display)}
+.slot{display:flex; flex-wrap:wrap; gap:8px; align-items:center; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:10px 12px}
+.slot select{min-height:52px; border-radius:12px; border:2px solid var(--line); background:var(--card); padding:6px 10px; font-weight:700; font-size:17px}
+.slot .step button{min-width:48px; min-height:48px}
+.slot .step output{font-size:28px; min-width:56px}
+
+/* play */
+.qtypes{display:flex; flex-wrap:wrap; gap:8px}
+.qtypes button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 16px; font-weight:700; font-size:17px; min-height:52px}
+.qtypes button[aria-pressed="true"]{border-color:var(--crayon); background:var(--crayon-soft); color:var(--ink)}
+.digits{display:flex; flex-wrap:wrap; gap:6px}
+.digits button{width:52px; height:52px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:24px}
+.digits button[aria-pressed="true"]{background:var(--crayon); color:var(--card); border-color:var(--crayon)}
+.ask{display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px; border-radius:18px; background:var(--card); border:3px solid var(--crayon)}
+.ask .bubble{font-family:var(--display); font-weight:700; font-size:clamp(26px,2.6vw,38px); flex:1; min-width:200px}
+.yn{display:flex; gap:10px}
+.yn button{min-width:110px; min-height:64px; border-radius:16px; border:0; font-family:var(--display); font-weight:700; font-size:26px; color:#fff}
+.yn .y{background:var(--yes)} .yn .n{background:var(--muted)}
+:root[data-theme="dark"] .yn button{color:#121827}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .yn button{color:#121827}}
+.stats{display:flex; gap:28px; flex-wrap:wrap}
+.stat b{display:block; font-family:var(--display); font-weight:700; font-size:clamp(36px,3.4vw,52px); line-height:1; font-variant-numeric:tabular-nums}
+.stat span{font-size:15px; color:var(--muted)}
+.log{width:100%; border-collapse:collapse; font-size:17px}
+.log td,.log th{padding:8px 10px 8px 0; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle}
+.log th{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+.log td:last-child{font-variant-numeric:tabular-nums; font-weight:700}
+.pill{display:inline-block; padding:3px 12px; border-radius:999px; font-weight:700; font-size:15px}
+.pill.y{background:var(--yes-soft); color:var(--yes)} .pill.n{background:var(--bg); color:var(--muted)}
+tr.best td{background:var(--sun-soft)}
+.star{color:var(--oops)}
+details.settings{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:10px 14px}
+details.settings summary{font-weight:700; cursor:pointer; min-height:36px; display:flex; align-items:center}
+details.settings .grid{display:flex; flex-direction:column; gap:10px; padding-top:8px}
+.tablewrap{overflow-x:auto}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.two .say{max-width:none}
+
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none !important; transition:none !important} }
+@media (max-width: 960px), (orientation: portrait){
+  main{flex-direction:column; overflow:auto}
+  .chart{--size:min(calc(100vw - 32px), 72dvh)}
+  header,nav,main{padding-left:16px; padding-right:16px}
+  .panel{overflow:visible}
+  .two{grid-template-columns:1fr}
+}
+@media (max-width: 520px){
+  nav button{padding:8px 14px 8px 8px; font-size:17px; min-height:50px}
+  .bignum{font-size:72px}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>Guess My Number</h1>
+    <p>Grade 1 · Week 6 · Lesson 1.6 · Which question gets rid of the most numbers?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="speakBtn">🔊 Read it to me</button>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><b>1</b>Warm-up</button>
+  <button role="tab" data-tab="riddle" aria-selected="false"><b>2</b>Riddles</button>
+  <button role="tab" data-tab="play" aria-selected="false"><b>3</b>Play</button>
+  <button role="tab" data-tab="det" aria-selected="false"><b>4</b>Detective</button>
+</nav>
+
+<main>
+  <div class="chart-col">
+    <div class="chart" id="chart" aria-label="Hundred chart"></div>
+    <div class="legend" id="legend"></div>
+    <div class="chart-note" id="chartNote" aria-live="polite"></div>
+  </div>
+
+  <section class="panel">
+    <!-- WARM-UP -->
+    <div class="view" id="v-warm">
+      <p class="prompt" id="warmPrompt"></p>
+      <div class="row" style="gap:24px; align-items:flex-end">
+        <div class="bignum" id="warmNum">64</div>
+        <div class="blocks" id="blocks" aria-label="Tens and ones blocks"></div>
+      </div>
+      <div class="facts" id="facts"></div>
+      <div class="row">
+        <div class="step" aria-label="Change the number">
+          <button id="wm10" aria-label="10 less">−10</button>
+          <button id="wm1" aria-label="1 less">−1</button>
+          <button id="wp1" aria-label="1 more">+1</button>
+          <button id="wp10" aria-label="10 more">+10</button>
+        </div>
+        <button class="secondary" id="warmNew">New number</button>
+        <button class="secondary" id="warmAll">Show all</button>
+      </div>
+    </div>
+
+    <!-- RIDDLES -->
+    <div class="view" id="v-riddle" hidden>
+      <div class="seg" role="group" aria-label="Riddle mode" style="align-self:flex-start">
+        <button id="rmSolve" aria-pressed="true">Solve a riddle</button>
+        <button id="rmMake" aria-pressed="false">Make a riddle</button>
+      </div>
+      <div class="view" id="solveBox">
+        <div class="dots" id="rdots" aria-label="Choose a riddle"></div>
+        <p class="prompt">Find the secret number.</p>
+        <ol class="clues" id="clues"></ol>
+        <p class="sub">Tap a number on the chart to guess. Or use a clue to cross out numbers that can’t be it.</p>
+        <div class="say" id="rsay" aria-live="polite"></div>
+        <div class="row"><button class="secondary" id="rclear">Clear the chart</button></div>
+      </div>
+      <div class="view" id="makeBox" hidden>
+        <p class="prompt">Write a riddle with 3 clues.</p>
+        <p class="sub">Only one number should fit. The chart lights up every number that fits all your clues.</p>
+        <div id="slots" class="view" style="gap:10px"></div>
+        <div class="say" id="msay" aria-live="polite"></div>
+        <p class="sub"><b>Challenge:</b> make a riddle with exactly <b>two</b> answers.</p>
+      </div>
+    </div>
+
+    <!-- PLAY -->
+    <div class="view" id="v-play" hidden>
+      <div class="stats">
+        <div class="stat"><b id="pQ">0</b><span>questions asked</span></div>
+        <div class="stat"><b id="pLeft">100</b><span>numbers left</span></div>
+      </div>
+      <div class="say" id="psay" aria-live="polite"></div>
+      <div id="builder" class="view" style="gap:12px">
+        <div class="label">Build a yes-or-no question</div>
+        <div class="qtypes" id="qtypes"></div>
+        <div id="qval"></div>
+        <div class="ask">
+          <div class="bubble" id="qtext"></div>
+          <div id="askArea" class="row"></div>
+        </div>
+        <div class="row"><button class="secondary" id="peekBtn">How many could it cross out?</button></div>
+      </div>
+      <div class="row" id="endRow"></div>
+      <div class="tablewrap"><table class="log" id="log"></table></div>
+      <details class="settings" id="settings">
+        <summary>Game settings</summary>
+        <div class="grid">
+          <div class="row"><span class="label" style="min-width:150px">Chart</span>
+            <div class="seg" role="group" aria-label="Chart size"><button data-max="100" aria-pressed="true">1 to 100</button><button data-max="20" aria-pressed="false">1 to 20</button></div></div>
+          <div class="row"><span class="label" style="min-width:150px">Who answers</span>
+            <div class="seg" role="group" aria-label="Who answers"><button data-who="app" aria-pressed="true">The app keeps a secret</button><button data-who="teacher" aria-pressed="false">Teacher answers</button></div></div>
+          <div class="row"><span class="label" style="min-width:150px">Who crosses out</span>
+            <div class="seg" role="group" aria-label="Who crosses out"><button data-cross="app" aria-pressed="true">The app</button><button data-cross="kids" aria-pressed="false">We do</button></div></div>
+          <div class="row"><button class="secondary" id="revealBtn">Show the secret number</button></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- DETECTIVE -->
+    <div class="view" id="v-det" hidden>
+      <div class="dots" id="ddots" aria-label="Choose a question"></div>
+      <p class="prompt" id="dq"></p>
+      <div class="row" id="dacts"></div>
+      <div id="dout" class="view" style="gap:12px" aria-live="polite"></div>
+      <p class="sub">Talk it over first. Then tap a button to put evidence on the chart.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+const range = (a,b) => { const r=[]; for(let i=a;i<=b;i++) r.push(i); return r; };
+const tensOf = n => Math.floor(n/10);          // how many tens (100 has 10 tens)
+const tensDigit = n => Math.floor(n/10) % 10;  // the digit in the tens place
+const onesDigit = n => n % 10;
+const digits = n => String(n).split('').map(Number);
+const digitSum = n => digits(n).reduce((a,b)=>a+b,0);
+const plural = (k,w) => `${k} ${w}${k===1?'':'s'}`;
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + ' and ' + a[a.length-1];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------------- Speech ---------------- */
+const canSpeak = 'speechSynthesis' in window;
+if(!canSpeak) $('#speakBtn').hidden = true;
+function speak(text){ try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = .88; speechSynthesis.speak(u); }catch(e){} }
+
+/* ---------------- Questions (Play + Detective) ---------------- */
+const QT = {
+  gt:  {chip:'More than…?', num:true,  text:v=>`Is it more than ${v}?`, test:(n,v)=>n>v, desc:(n,v)=>`${n} is ${n>v?'':'not '}more than ${v}`},
+  lt:  {chip:'Less than…?', num:true,  text:v=>`Is it less than ${v}?`, test:(n,v)=>n<v, desc:(n,v)=>`${n} is ${n<v?'':'not '}less than ${v}`},
+  tens:{chip:'Tens digit…?', digit:true, text:v=>`Is the tens digit ${v}?`, test:(n,v)=>tensDigit(n)===v, desc:n=>`${n} has tens digit ${tensDigit(n)}`},
+  ones:{chip:'Ones digit…?', digit:true, text:v=>`Is the ones digit ${v}?`, test:(n,v)=>onesDigit(n)===v, desc:n=>`${n} has ones digit ${onesDigit(n)}`},
+  even:{chip:'Even?', text:()=>`Is it even?`, test:n=>n%2===0, desc:n=>`${n} is ${n%2?'odd':'even'}`},
+  odd: {chip:'Odd?',  text:()=>`Is it odd?`,  test:n=>n%2===1, desc:n=>`${n} is ${n%2?'odd':'even'}`},
+  eq:  {chip:'Is it…?', num:true, text:v=>`Is it ${v}?`, test:(n,v)=>n===v, desc:(n,v)=>`${n} ${n===v?'is':'is not'} ${v}`}
+};
+const qText = q => QT[q.t].text(q.v);
+const qTest = (q,n) => QT[q.t].test(n,q.v);
+// numbers that a given answer crosses out, from the numbers still possible
+const crossedBy = (q, ans, alive) => [...alive].filter(n => qTest(q,n) !== ans);
+
+/* ---------------- Chart ---------------- */
+const chart = $('#chart'); let chartMax = 0; const cellEls = {};
+function buildChart(max){
+  chart.innerHTML = ''; chartMax = max;
+  chart.style.setProperty('--rows', max/10); chart.classList.toggle('small', max===20);
+  for(const n of range(1,max)){
+    const b = document.createElement('button');
+    b.className = 'cell'; b.dataset.n = n;
+    b.innerHTML = `<span class="num">${n}</span><span class="badge"></span>`;
+    b.addEventListener('click', () => { const v = VIEWS[S.tab]; if(v.tap) v.tap(n); });
+    chart.appendChild(b); cellEls[n] = b;
+  }
+  for(const k in cellEls) if(+k>max) delete cellEls[k];
+}
+function paint(){
+  const m = VIEWS[S.tab].model();
+  if(m.max !== chartMax) buildChart(m.max);
+  for(const n of range(1,m.max)){
+    const c = m.cell(n) || {}, e = cellEls[n];
+    const wasOut = e.classList.contains('out');
+    for(const k of ['out','hl','hl2','pick','found','miss','oops']) e.classList.toggle(k, !!c[k]);
+    if(c.out && !wasOut && !reduced){ e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); }
+    e.querySelector('.badge').textContent = c.badge ?? '';
+    e.setAttribute('aria-label', `${n}${c.out?', crossed out':''}${c.found?', the secret number':''}`);
+  }
+  $('#legend').innerHTML = m.legend || '';
+  $('#chartNote').textContent = m.note || '';
+}
+const LEG = {
+  out:'<span><i style="background:var(--card);position:relative;overflow:hidden"><svg viewBox="0 0 20 20" width="16" height="16" style="position:absolute;inset:0"><line x1="4" y1="15" x2="16" y2="5" stroke="var(--crayon)" stroke-width="3" stroke-linecap="round"/></svg></i>can’t be it</span>',
+  hl:t=>`<span><i style="background:var(--sun-soft);border-color:var(--sun)"></i>${t}</span>`,
+  hl2:t=>`<span><i style="background:var(--crayon-soft);border-color:var(--crayon)"></i>${t}</span>`,
+  found:'<span><i style="background:var(--yes-soft);border-color:var(--yes)"></i>the secret number</span>'
+};
+
+/* ---------------- State ---------------- */
+let S;
+function freshState(){
+  return {
+    tab:'warm',
+    warm:{n:64, shown:new Set(), sel:null},
+    rid:{mode:'solve', i:0, used:[new Set(),new Set(),new Set(),new Set(),new Set()], tried:[new Set(),new Set(),new Set(),new Set(),new Set()], guess:[null,null,null,null,null], solved:new Set()},
+    make:{slots:[{t:'gt',v:40},{t:'lt',v:50},{t:'sum',v:7}]},
+    play:newGame(100,'app','app'),
+    det:{q:1, gen:0, model:null}
+  };
+}
+function newGame(max, who, cross){
+  return {max, who, cross, secret: 1 + Math.floor(Math.random()*max), alive:new Set(range(1,max)), log:[],
+          q:{t:'gt', v: max===100 ? 50 : 10}, pending:null, marked:new Set(), check:null, peek:false, msg:'', msgKind:'', revealed:false, done:false};
+}
+
+/* ================= WARM-UP ================= */
+function warmFacts(n){
+  const t = tensOf(n), o = onesDigit(n);
+  const row = range(t*10, Math.min(t*10+10,100)).filter(x=>x>=1);
+  return [
+    {text:`${plural(t,'ten')} and ${plural(o,'one')}`, cells:[n], say:`${n} has ${t} tens and ${o} ones.`},
+    o===0 ? {text:`Exactly ${plural(t,'ten')}`, cells:[n], say:`${n} is exactly ${t} tens.`}
+          : {text:`Between ${t*10} and ${t*10+10}`, cells:row, say:`${n} is between ${t*10} and ${t*10+10}.`},
+    {text: n%2 ? `Odd: it ends in ${o}` : `Even: it ends in ${o}`, cells:row.filter(x=>x%2===n%2), say:`${n} is ${n%2?'odd':'even'}.`},
+    {text:`10 more than ${n-10}`, cells:[n-10,n], say:`${n} is 10 more than ${n-10}.`},
+    {text:`1 more than ${n-1}`, cells:[n-1,n], say:`${n} is 1 more than ${n-1}.`}
+  ];
+}
+function renderWarm(){
+  const W = S.warm, n = W.n;
+  $('#warmPrompt').textContent = `Tell me everything you know about ${n}.`;
+  $('#warmNum').textContent = n;
+  const t = tensOf(n), o = onesDigit(n);
+  $('#blocks').innerHTML = Array.from({length:t}, () => `<span class="rod" aria-hidden="true">${'<i></i>'.repeat(10)}</span>`).join('') +
+    (o ? `<span class="cubes" aria-hidden="true">${'<span class="cube"></span>'.repeat(o)}</span>` : '');
+  $('#blocks').setAttribute('aria-label', `${t} tens and ${o} ones`);
+  const F = warmFacts(n);
+  $('#facts').innerHTML = F.map((f,i) => `<button class="fact ${W.shown.has(i)?'on':''} ${W.sel===i?'sel':''}" data-i="${i}"><span class="q">${W.shown.has(i)?'✓':'?'}</span><span>${W.shown.has(i)?esc(f.text):'Tap to show'}</span></button>`).join('');
+  $$('#facts .fact').forEach(b => b.onclick = () => { const i=+b.dataset.i; W.shown.add(i); W.sel=i; renderWarm(); paint(); if(canSpeak && S.voice) speak(F[i].say); });
+}
+function setWarm(n){ S.warm.n = Math.max(11, Math.min(99, n)); S.warm.shown.clear(); S.warm.sel=null; renderWarm(); paint(); }
+
+/* ================= RIDDLES ================= */
+const twoDigit = n => n>=10 && n<100;
+const RIDDLES = [
+  {answer:75, clues:[
+    {t:'I have 7 tens.', f:n=>tensOf(n)===7, why:n=>`${n} has ${plural(tensOf(n),'ten')}.`},
+    {t:'My ones digit is 2 less than my tens digit.', f:n=>twoDigit(n) && onesDigit(n)===tensDigit(n)-2,
+     why:n=> !twoDigit(n) || tensDigit(n)<2 ? `${n}: 2 less than its tens digit (${tensDigit(n)}) is not a digit.` : `${tensDigit(n)} − 2 = ${tensDigit(n)-2}. ${n} has ${onesDigit(n)} ones.`}]},
+  {answer:43, clues:[
+    {t:'I am between 40 and 50.', f:n=>n>40&&n<50, why:n=>`${n} is ${n>40&&n<50?'':'not '}between 40 and 50.`},
+    {t:'My two digits add up to 7.', f:n=>twoDigit(n)&&digitSum(n)===7, why:n=> n<10 ? `${n} has only one digit.` : `${digits(n).join(' + ')} = ${digitSum(n)}.`}]},
+  {answer:38, clues:[
+    {t:'I am even.', f:n=>n%2===0, why:n=>`${n} is ${n%2?'odd':'even'}.`},
+    {t:'I have 3 tens.', f:n=>tensOf(n)===3, why:n=>`${n} has ${plural(tensOf(n),'ten')}.`},
+    {t:'My ones digit is bigger than 7.', f:n=>onesDigit(n)>7, why:n=>`${n} has ${onesDigit(n)} ones. ${onesDigit(n)} is ${onesDigit(n)>7?'':'not '}bigger than 7.`}]},
+  {answer:30, clues:[
+    {t:'My digits add up to 3.', f:n=>digitSum(n)===3, why:n=> n<10 ? `${n} has one digit: ${n}.` : `${digits(n).join(' + ')} = ${digitSum(n)}.`},
+    {t:'I am bigger than 25.', f:n=>n>25, why:n=>`${n} is ${n>25?'':'not '}bigger than 25.`}]},
+  {answer:55, clues:[
+    {t:'My tens digit and my ones digit are the same.', f:n=>twoDigit(n)&&tensDigit(n)===onesDigit(n),
+     why:n=> n<10 ? `${n} has only one digit.` : n===100 ? `100 has three digits.` : `Tens digit ${tensDigit(n)}, ones digit ${onesDigit(n)}: ${tensDigit(n)===onesDigit(n)?'the same':'not the same'}.`},
+    {t:'I am between 50 and 60.', f:n=>n>50&&n<60, why:n=>`${n} is ${n>50&&n<60?'':'not '}between 50 and 60.`}]}
+];
+// Math check: every riddle must have exactly its answer-key number (1 to 100).
+RIDDLES.forEach((r,i) => { const fit = range(1,100).filter(n => r.clues.every(c=>c.f(n))); if(fit.length!==1 || fit[0]!==r.answer) console.error('Riddle', i+1, 'fits', fit); });
+
+function ridOut(i){ // numbers crossed out on riddle i
+  const R = S.rid, r = RIDDLES[i], out = new Set(R.tried[i]);
+  for(const ci of R.used[i]) for(const n of range(1,100)) if(!r.clues[ci].f(n)) out.add(n);
+  return out;
+}
+function renderRiddle(){
+  const R = S.rid;
+  $('#rmSolve').setAttribute('aria-pressed', R.mode==='solve'); $('#rmMake').setAttribute('aria-pressed', R.mode==='make');
+  $('#solveBox').hidden = R.mode!=='solve'; $('#makeBox').hidden = R.mode!=='make';
+  if(R.mode==='make'){ renderMaker(); return; }
+  $('#rdots').innerHTML = RIDDLES.map((_,i)=>`<button data-i="${i}" aria-pressed="${R.i===i}" class="${R.solved.has(i)?'solved':''}" aria-label="Riddle ${i+1}${R.solved.has(i)?', solved':''}">${R.solved.has(i)?'✓':i+1}</button>`).join('');
+  $$('#rdots button').forEach(b => b.onclick = () => { R.i=+b.dataset.i; $('#rsay').innerHTML=''; $('#rsay').className='say'; renderRiddle(); paint(); });
+  const r = RIDDLES[R.i], g = R.guess[R.i];
+  $('#clues').innerHTML = r.clues.map((c,ci) => {
+    const st = g==null ? '' : (c.f(g)?'ok':'no');
+    return `<li class="clue ${st}"><span class="n">${st==='ok'?'✓':st==='no'?'✗':ci+1}</span><span class="t">${esc(c.t)}</span>
+      <button class="use" data-ci="${ci}" ${R.used[R.i].has(ci)?'disabled':''}>${R.used[R.i].has(ci)?'Used':'Use this clue'}</button>
+      <span class="why">${g==null?'':esc(c.why(g))}</span></li>`;
+  }).join('');
+  $$('#clues .use').forEach(b => b.onclick = () => useClue(+b.dataset.ci));
+}
+function useClue(ci){
+  const R = S.rid, i = R.i, before = ridOut(i);
+  R.used[i].add(ci);
+  const after = ridOut(i), added = after.size - before.size, left = 100 - after.size;
+  const say = $('#rsay');
+  if(left===1){ const ans = range(1,100).find(n=>!after.has(n)); say.className='say think'; say.innerHTML = `That clue crossed out <b>${added}</b> more. Only one number is left. Tap it!`; void ans; }
+  else { say.className='say'; say.innerHTML = `Clue ${ci+1} crossed out <b>${added}</b> number${added===1?'':'s'}. <b>${left}</b> left.`; }
+  R.guess[i] = null; renderRiddle(); paint();
+}
+function guessRiddle(n){
+  const R = S.rid, r = RIDDLES[R.i], say = $('#rsay');
+  R.guess[R.i] = n;
+  const bad = r.clues.map((c,ci)=>c.f(n)?null:ci+1).filter(x=>x);
+  if(!bad.length){
+    R.solved.add(R.i);
+    say.className = 'say good';
+    say.innerHTML = `<b>Yes! ${n}</b> fits every clue.` + (R.i<RIDDLES.length-1 ? ' Try the next riddle.' : ' You solved them all!');
+    if(S.voice) speak(`Yes! ${n} fits every clue.`);
+  } else {
+    R.tried[R.i].add(n);
+    say.className = 'say think';
+    say.innerHTML = `<b>${n}</b> doesn’t fit clue ${listText(bad)}. Look at the reason under the clue, then try another number.`;
+  }
+  renderRiddle(); paint();
+}
+
+/* Riddle maker */
+const MK = {
+  gt:  {label:'I am more than…', min:0, max:99, f:(n,v)=>n>v, text:v=>`I am more than ${v}.`},
+  lt:  {label:'I am less than…', min:2, max:100, f:(n,v)=>n<v, text:v=>`I am less than ${v}.`},
+  tens:{label:'I have … tens', min:0, max:10, f:(n,v)=>tensOf(n)===v, text:v=>`I have ${plural(v,'ten')}.`},
+  ones:{label:'My ones digit is…', min:0, max:9, f:(n,v)=>onesDigit(n)===v, text:v=>`My ones digit is ${v}.`},
+  sum: {label:'My digits add up to…', min:1, max:18, f:(n,v)=>digitSum(n)===v, text:v=>`My digits add up to ${v}.`},
+  even:{label:'I am even', f:n=>n%2===0, text:()=>`I am even.`},
+  odd: {label:'I am odd', f:n=>n%2===1, text:()=>`I am odd.`},
+  none:{label:'(no clue)', f:()=>true, text:()=>''}
+};
+function makerFit(){ return range(1,100).filter(n => S.make.slots.every(s => MK[s.t].f(n,s.v))); }
+function renderMaker(){
+  const box = $('#slots');
+  box.innerHTML = S.make.slots.map((s,i) => {
+    const m = MK[s.t], hasV = m.min!=null;
+    return `<div class="slot"><span class="label">Clue ${i+1}</span>
+      <select id="mk${i}" data-i="${i}" aria-label="Clue ${i+1} type">${Object.entries(MK).map(([k,o])=>`<option value="${k}" ${k===s.t?'selected':''}>${o.label}</option>`).join('')}</select>
+      ${hasV?`<span class="step"><button data-i="${i}" data-d="-10" aria-label="10 less">−10</button><button data-i="${i}" data-d="-1" aria-label="1 less">−1</button><output>${s.v}</output><button data-i="${i}" data-d="1" aria-label="1 more">+1</button><button data-i="${i}" data-d="10" aria-label="10 more">+10</button></span>`:''}</div>`;
+  }).join('');
+  $$('#slots select').forEach(sel => sel.onchange = () => { const s=S.make.slots[+sel.dataset.i], m=MK[sel.value]; s.t=sel.value; if(m.min!=null) s.v=Math.max(m.min,Math.min(m.max,s.v??m.min)); renderMaker(); paint(); });
+  $$('#slots .step button').forEach(b => b.onclick = () => { const s=S.make.slots[+b.dataset.i], m=MK[s.t]; s.v=Math.max(m.min,Math.min(m.max,s.v+ +b.dataset.d)); renderMaker(); paint(); });
+  const fit = makerFit(), say = $('#msay'), used = S.make.slots.filter(s=>s.t!=='none').length;
+  const riddle = S.make.slots.map(s=>MK[s.t].text(s.v)).filter(Boolean).join(' ');
+  if(!fit.length){ say.className='say think'; say.innerHTML=`No number fits all ${used} clues. Change one clue so a number can fit.`; }
+  else if(fit.length===1){ say.className='say good'; say.innerHTML=`<b>Exactly one answer: ${fit[0]}.</b> ${used===3?'Great riddle! ':''}${used<3?`You used ${used} clue${used===1?'':'s'}. Can you add a third?`:''}<br><span style="color:var(--muted)">“${esc(riddle)}”</span>`; }
+  else if(fit.length===2){ say.className='say'; say.innerHTML=`<b>Two answers: ${fit[0]} and ${fit[1]}.</b> That solves the challenge! For a one-answer riddle, change a clue.`; }
+  else { say.className='say'; say.innerHTML=`<b>${fit.length} numbers</b> fit. Add or change a clue to cross more out.`; }
+}
+
+/* ================= PLAY ================= */
+function renderPlay(){
+  const P = S.play;
+  $('#pQ').textContent = P.log.length; $('#pLeft').textContent = P.alive.size;
+  $$('[data-max]').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.max===P.max));
+  $$('[data-who]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.who===P.who));
+  $$('[data-cross]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.cross===P.cross));
+  $('#revealBtn').hidden = P.who!=='app';
+  $('#revealBtn').textContent = P.revealed ? `The secret is ${P.secret}` : 'Show the secret number';
+  const say = $('#psay'); say.className = 'say ' + (P.msgKind||''); say.innerHTML = P.msg || '';
+  $('#builder').hidden = P.done;
+  // question type chips
+  $('#qtypes').innerHTML = Object.entries(QT).map(([k,o])=>`<button data-t="${k}" aria-pressed="${P.q.t===k}" ${P.pending?'disabled':''}>${o.chip}</button>`).join('');
+  $$('#qtypes button').forEach(b => b.onclick = () => { const t=b.dataset.t; P.q.t=t; if(QT[t].digit) P.q.v=Math.min(9,Math.max(0,P.q.v%10)); else if(QT[t].num) P.q.v=Math.max(1,Math.min(P.max,P.q.v||1)); P.peek=false; renderPlay(); paint(); });
+  const T = QT[P.q.t], qv = $('#qval');
+  if(T.num) qv.innerHTML = `<div class="row"><div class="step"><button data-d="-10" aria-label="10 less">−10</button><button data-d="-1" aria-label="1 less">−1</button><output>${P.q.v}</output><button data-d="1" aria-label="1 more">+1</button><button data-d="10" aria-label="10 more">+10</button></div><span class="sub">or tap a number on the chart</span></div>`;
+  else if(T.digit) qv.innerHTML = `<div class="digits">${range(0,9).map(d=>`<button data-v="${d}" aria-pressed="${P.q.v===d}">${d}</button>`).join('')}</div>`;
+  else qv.innerHTML = '';
+  $$('#qval .step button').forEach(b => b.onclick = () => { P.q.v = Math.max(1, Math.min(P.max, P.q.v + +b.dataset.d)); P.peek=false; renderPlay(); paint(); });
+  $$('#qval .digits button').forEach(b => b.onclick = () => { P.q.v = +b.dataset.v; P.peek=false; renderPlay(); paint(); });
+  $$('#qval button').forEach(b => b.disabled = !!P.pending);
+  $('#qtext').textContent = qText(P.pending ? P.pending.q : P.q);
+  const area = $('#askArea');
+  if(P.pending && P.pending.ans==null){ // teacher answers
+    area.innerHTML = `<div class="yn"><button class="y" id="ansY">Yes</button><button class="n" id="ansN">No</button></div>`;
+    $('#ansY').onclick = () => answer(true); $('#ansN').onclick = () => answer(false);
+  } else if(P.pending){ // kids crossing out
+    area.innerHTML = `<button class="primary" id="checkCross">Check my cross-outs</button><button class="secondary" id="showCross">Show me</button>`;
+    $('#checkCross').onclick = checkCross; $('#showCross').onclick = () => applyPending(true);
+  } else {
+    area.innerHTML = `<button class="primary" id="askBtn">Ask</button>`;
+    $('#askBtn').onclick = ask;
+  }
+  $('#peekBtn').disabled = !!P.pending;
+  $('#peekBtn').textContent = P.peek ? 'Hide the groups' : 'How many could it cross out?';
+  // log
+  if(P.log.length){
+    const best = Math.max(...P.log.map(l=>l.removed));
+    $('#log').innerHTML = `<tr><th>#</th><th>Question</th><th>Answer</th><th>Crossed out</th></tr>` + P.log.map((l,i)=>`<tr class="${l.removed===best&&best>0?'best':''}"><td>${i+1}</td><td>${esc(qText(l.q))}${l.removed===best&&best>0?' <span class="star" aria-label="best question">★</span>':''}</td><td><span class="pill ${l.ans?'y':'n'}">${l.ans?'Yes':'No'}</span></td><td>${l.removed}</td></tr>`).join('');
+  } else $('#log').innerHTML = '';
+  $('#endRow').innerHTML = P.done ? `<button class="primary" id="againBtn">New game</button><button class="secondary" id="toDet">Detective questions</button>` : '';
+  if(P.done){ $('#againBtn').onclick = () => { S.play = newGame(P.max,P.who,P.cross); renderPlay(); paint(); }; $('#toDet').onclick = () => setTab('det'); }
+}
+function ask(){
+  const P = S.play, q = {...P.q};
+  P.peek = false;
+  if(P.who==='teacher'){ P.pending = {q, ans:null}; P.msg = 'Teacher: is the answer yes or no?'; P.msgKind=''; renderPlay(); paint(); return; }
+  const ans = qTest(q, P.secret);
+  P.pending = {q, ans, removed: crossedBy(q, ans, P.alive)};
+  if(P.cross==='kids'){
+    P.marked = new Set(); P.check = null;
+    P.msg = `<b>${ans?'Yes!':'No.'}</b> Which numbers can’t be it now? Tap them to cross them out. Then tap Check.`; P.msgKind='think';
+    renderPlay(); paint(); if(S.voice) speak(ans?'Yes!':'No.');
+  } else applyPending(false);
+}
+function answer(ans){
+  const P = S.play, q = P.pending.q, removed = crossedBy(q, ans, P.alive);
+  if(removed.length === P.alive.size){ P.msg = `Hmm. That answer would cross out every number left. Check the answer and try again.`; P.msgKind='think'; renderPlay(); return; }
+  P.pending = {q, ans, removed};
+  if(P.cross==='kids'){ P.marked=new Set(); P.check=null; P.msg=`<b>${ans?'Yes!':'No.'}</b> Tap the numbers that can’t be it. Then tap Check.`; P.msgKind='think'; renderPlay(); paint(); }
+  else applyPending(false);
+}
+function applyPending(helped){
+  const P = S.play, {q, ans, removed} = P.pending;
+  removed.forEach(n => P.alive.delete(n));
+  P.log.push({q, ans, removed:removed.length});
+  P.pending = null; P.marked = new Set(); P.check = null;
+  const left = P.alive.size;
+  if(left===1){
+    P.done = true; const n = [...P.alive][0];
+    P.msg = `<b>It’s ${n}!</b> Found in ${plural(P.log.length,'question')}. Which question crossed out the most?`; P.msgKind='good';
+    if(S.voice) speak(`It's ${n}! Found in ${P.log.length} questions.`);
+  } else {
+    const lead = P.cross==='kids' && !helped ? 'All crossed out correctly! ' : '';
+    P.msg = removed.length===0
+      ? `<b>${ans?'Yes.':'No.'}</b> That crossed out <b>0</b> numbers. We already knew that! Try a question that splits what’s left.`
+      : `${lead}<b>${ans?'Yes.':'No.'}</b> That crossed out <b>${removed.length}</b> number${removed.length===1?'':'s'}. <b>${left}</b> left.`;
+    P.msgKind = removed.length===0 ? 'think' : '';
+  }
+  renderPlay(); paint();
+}
+function checkCross(){
+  const P = S.play, {q, ans, removed} = P.pending, rem = new Set(removed);
+  const missed = removed.filter(n => !P.marked.has(n));
+  const wrong = [...P.marked].filter(n => !rem.has(n)).sort((a,b)=>a-b);
+  if(!missed.length && !wrong.length){ applyPending(false); return; }
+  P.check = {missed:new Set(missed), wrong:new Set(wrong)};
+  let msg = '';
+  if(wrong.length){
+    const ex = wrong[0];
+    msg += `<b>${listText(wrong.slice(0,4))}${wrong.length>4?'…':''}</b> could still be it. The answer was ${ans?'yes':'no'}, and ${QT[q.t].desc(ex,q.v)}. Tap ${wrong.length===1?'it':'them'} again to un-cross. `;
+  }
+  if(missed.length) msg += `${plural(missed.length,'more number')} can’t be it. Look for the yellow ones.`;
+  P.msg = msg; P.msgKind = 'think';
+  renderPlay(); paint();
+}
+function tapPlay(n){
+  const P = S.play; if(P.done) return;
+  if(P.pending && P.pending.ans!=null && P.cross==='kids'){
+    if(!P.alive.has(n)) return;
+    P.marked.has(n) ? P.marked.delete(n) : P.marked.add(n);
+    if(P.check){ P.check.missed.delete(n); P.check.wrong.delete(n); }
+    paint(); return;
+  }
+  if(P.pending) return;
+  if(!QT[P.q.t].num) P.q.t = 'eq';
+  P.q.v = n; P.peek=false; renderPlay(); paint();
+}
+
+/* ================= DETECTIVE ================= */
+function halvingPath(secret, lo, hi){
+  const qs = [];
+  while(lo < hi){
+    const m = lo + Math.ceil((hi-lo+1)/2) - 1; // split what's left as evenly as possible
+    const yes = secret > m; qs.push({t:'gt', v:m, ans:yes});
+    if(yes) lo = m+1; else hi = m;
+  }
+  return qs;
+}
+const HALF = range(1,100).map(n => halvingPath(n,1,100).length);
+const HALF_MAX = Math.max(...HALF);
+const SLOW = [23,50,12,87,41,99,7,35,70,58,61,64].map(v=>({t:'eq',v}));
+const FAST = [{t:'gt',v:50},{t:'tens',v:6},{t:'gt',v:65},{t:'gt',v:62},{t:'gt',v:63},{t:'eq',v:64}];
+function runScript(script, secret){ // returns steps with real answers + counts
+  let alive = new Set(range(1,100)); const steps = [];
+  for(const q of script){ const ans = qTest(q,secret); const rem = crossedBy(q,ans,alive); rem.forEach(n=>alive.delete(n)); steps.push({q, ans, removed:rem.length, left:alive.size, alive:new Set(alive)}); }
+  return steps;
+}
+const SLOW_RUN = runScript(SLOW,64), FAST_RUN = runScript(FAST,64);
+if(SLOW_RUN.at(-1).left!==1 || FAST_RUN.at(-1).left!==1) console.error('Sample games do not finish');
+
+const DQ = [
+  {q:'Which question gets rid of more numbers: “Is it 37?” or “Is it more than 50?”', acts:[
+    {label:'Ask “Is it 37?” (answer: no)', run:()=>{ const q={t:'eq',v:37}; const rem=crossedBy(q,false,new Set(range(1,100)));
+      detChart(new Set(rem), [], [37]); detOut(`<div class="say">“Is it 37?” No. That crossed out <b>${rem.length}</b> number. <b>${100-rem.length}</b> are still left.</div>`); }},
+    {label:'Ask “More than 50?” (answer: no)', run:()=>{ const q={t:'gt',v:50}; const rem=crossedBy(q,false,new Set(range(1,100)));
+      detChart(new Set(rem)); detOut(`<div class="say">“Is it more than 50?” No. That crossed out <b>${rem.length}</b> numbers in one question!</div>`); }},
+    {label:'What if the answer is yes?', run:()=>{ const q={t:'gt',v:50}; const rem=crossedBy(q,true,new Set(range(1,100)));
+      detChart(new Set(rem)); detOut(`<div class="say good">If the answer is yes, it still crosses out <b>${rem.length}</b>. Yes or no, “More than 50?” gets rid of half the chart.</div>`); }}
+  ]},
+  {q:'One game took 12 questions. Another took 6. What did the fast player ask first?', acts:[
+    {label:'Watch the slow game', run:()=>playScript(SLOW_RUN,'Slow game')},
+    {label:'Watch the fast game', run:()=>playScript(FAST_RUN,'Fast game')},
+    {label:'Compare side by side', run:()=>{ detChart(new Set(range(1,100).filter(n=>n!==64)), [], [], [64]);
+      detOut(`<div class="two"><div class="say"><b>Slow game: ${SLOW_RUN.length} questions</b><br>${SLOW_RUN.map(s=>qText(s.q).replace('Is it ','')).join(' ')}<br>After 11 questions, ${SLOW_RUN[10].left} numbers were still left.</div><div class="say good"><b>Fast game: ${FAST_RUN.length} questions</b><br>${FAST_RUN.map(s=>esc(qText(s.q))).join('<br>')}</div></div>`); }}
+  ]},
+  {q:'You know it is in the 60s. What do you ask now?', setup:()=>{ detChart(new Set(range(1,100).filter(n=>n<60||n>69))); detOut(''); },
+   acts:[{t:'eq',v:63},{t:'gt',v:64},{t:'even'},{t:'ones',v:5}].map(q=>({label:qText(q), run:()=>{
+      const alive = new Set(range(60,69)), yes=[...alive].filter(n=>qTest(q,n)), no=[...alive].filter(n=>!qTest(q,n));
+      detChart(new Set(range(1,100).filter(n=>n<60||n>69)), yes, [], [], no);
+      const even = yes.length===no.length;
+      detOut(`<div class="say ${even?'good':''}">“${esc(qText(q))}”<br>If <b>yes</b>: ${plural(yes.length,'number')} left (yellow). If <b>no</b>: ${plural(no.length,'number')} left (purple).<br>${even?'Half and half! Either answer crosses out 5.':`If the answer is ${yes.length<no.length?'no':'yes'}, it only crosses out ${Math.min(yes.length,no.length)}.`}</div>`);
+   }}))},
+  {q:'Challenge: can you always find the number in 7 questions? Make a plan.', star:true, acts:[
+    {label:'Show a plan', run:()=>{
+      const a = halvingPath(100,1,100), b = halvingPath(1,1,100);
+      detChart(new Set());
+      detOut(`<div class="say">Cut what’s left in half every time.<br>1. <b>${esc(qText(a[0]))}</b><br>2. If yes: <b>${esc(qText(a[1]))}</b> If no: <b>${esc(qText(b[1]))}</b><br>3. Keep cutting in half: 100 → 50 → 25 → 13 → 7 → 4 → 2 → 1.</div>`); }},
+    {label:'Test every number', run: async ()=>{
+      const g = ++S.det.gen; const badges = {};
+      for(const n of range(1,100)){ if(g!==S.det.gen) return; badges[n]=HALF[n-1]; if(n%10===0){ detChart(new Set(), [], [], [], [], {...badges}); await sleep(120); } }
+      const at = k => HALF.filter(x=>x===k).length;
+      detChart(new Set(), range(1,100).filter(n=>HALF[n-1]===HALF_MAX), [], [], [], badges);
+      detOut(`<div class="say good">The small number on each square is how many halving questions it took.<br><b>Never more than ${HALF_MAX}.</b> ${at(HALF_MAX)} numbers take ${HALF_MAX} questions (yellow) and ${at(HALF_MAX-1)} take ${HALF_MAX-1}.</div>`); }},
+    {label:'Why not 6?', run:()=>{ detChart(new Set());
+      detOut(`<div class="say">Each question can at best cut what’s left in half.<br>6 questions: 100 → 50 → 25 → 13 → 7 → 4 → 2. Still 2 left!<br>So sometimes you need a 7th question.</div>`); }}
+  ]},
+  {q:'Which question got rid of the most numbers? Why did it work?', acts:[
+    {label:'Our best question from Play', run:()=>{
+      const L = S.play.log; detChart(new Set());
+      if(!L.length){ detOut(`<div class="say think">Play a game in part 3 first. Then come back to see your best question.</div>`); return; }
+      const best = L.reduce((a,b)=>b.removed>a.removed?b:a);
+      const q = best.q, yes = range(1,S.play.max).filter(n=>qTest(q,n));
+      detChart(new Set(), yes, [], [], range(1,100).filter(n=>!qTest(q,n)), {}, S.play.max);
+      detOut(`<div class="say good">Our best: <b>“${esc(qText(q))}”</b> It crossed out <b>${best.removed}</b>.<br>Yellow means yes, purple means no. Were the two groups close in size?</div>`); }}
+  ]}
+];
+function detChart(out, hl=[], pick=[], found=[], hl2=[], badges={}, max=100){
+  S.det.model = {out, hl:new Set(hl), pick:new Set(pick), found:new Set(found), hl2:new Set(hl2), badges, max};
+  paint();
+}
+function detOut(html){ $('#dout').innerHTML = html; }
+async function playScript(run, name){
+  const g = ++S.det.gen;
+  detOut(`<div class="say"><b>${name}</b> · secret number 64</div><table class="log" id="dlog"><tr><th>#</th><th>Question</th><th>Answer</th><th>Left</th></tr></table>`);
+  detChart(new Set());
+  for(let i=0;i<run.length;i++){
+    await sleep(i?900:300); if(g!==S.det.gen) return;
+    const s = run[i];
+    const out = new Set(range(1,100).filter(n=>!s.alive.has(n)));
+    detChart(out, [], [], s.left===1?[...s.alive]:[]);
+    const t = document.querySelector('#dlog'); if(!t) return;
+    t.insertAdjacentHTML('beforeend', `<tr><td>${i+1}</td><td>${esc(qText(s.q))}</td><td><span class="pill ${s.ans?'y':'n'}">${s.ans?'Yes':'No'}</span></td><td>${s.left}</td></tr>`);
+  }
+  if(g===S.det.gen) $('#dout').insertAdjacentHTML('beforeend', `<div class="say ${run.length<=6?'good':'think'}">${run.length} questions. ${run===FAST_RUN?'The first question crossed out 50 at once!':'Each guess crossed out only 1 number.'}</div>`);
+}
+function renderDet(){
+  const D = S.det;
+  $('#ddots').innerHTML = DQ.map((q,i)=>`<button data-i="${i+1}" aria-pressed="${D.q===i+1}" ${q.star?'style="width:auto;padding:0 16px;border-radius:28px"':''} aria-label="Question ${i+1}">${q.star?'★ Challenge':i+1}</button>`).join('');
+  $$('#ddots button').forEach(b => b.onclick = () => { D.q=+b.dataset.i; D.gen++; D.model=null; detOut(''); renderDet(); const s=DQ[D.q-1].setup; s?s():paint(); });
+  const q = DQ[D.q-1];
+  $('#dq').textContent = q.q;
+  const box = $('#dacts'); box.innerHTML = '';
+  q.acts.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent = a.label; b.onclick = () => { D.gen++; a.run(); }; box.appendChild(b); });
+}
+
+/* ================= Views ================= */
+const VIEWS = {
+  warm:{ model:()=>{ const W=S.warm, F=warmFacts(W.n), sel=W.sel!=null?new Set(F[W.sel].cells):new Set();
+           return {max:100, cell:n=>({pick:n===W.n, hl:sel.has(n)&&n!==W.n}), legend:W.sel!=null?LEG.hl('the clue’s numbers'):'', note:`${W.n} is outlined on the chart.`}; },
+         tap:n=>{ if(n>=11&&n<=99) setWarm(n); }, say:()=>`Tell me everything you know about ${S.warm.n}.` },
+  riddle:{ model:()=>{
+           const R=S.rid;
+           if(R.mode==='make'){ const fit=new Set(makerFit()); return {max:100, cell:n=>({hl:fit.has(n), out:!fit.has(n)&&fit.size>0&&fit.size<100}), legend:LEG.hl('fits all the clues'), note:`${plural(fit.size,'number')} fit${fit.size===1?'s':''}.`}; }
+           const out=ridOut(R.i), g=R.guess[R.i], ok=g!=null&&RIDDLES[R.i].clues.every(c=>c.f(g));
+           return {max:100, cell:n=>({out:out.has(n)&&!(ok&&n===g), found:ok&&n===g, pick:g===n&&!ok}), legend:LEG.out+(ok?LEG.found:''), note:`${100-out.size} numbers could still be the secret.`}; },
+         tap:n=>{ if(S.rid.mode==='solve') guessRiddle(n); },
+         say:()=> S.rid.mode==='solve' ? `Riddle ${S.rid.i+1}. ` + RIDDLES[S.rid.i].clues.map(c=>c.t).join(' ') : 'Write a riddle with three clues. Make sure only one number fits.' },
+  play:{ model:()=>{ const P=S.play, pend=P.pending, groups=P.peek&&!pend;
+           const yes = groups ? new Set([...P.alive].filter(n=>qTest(P.q,n))) : null;
+           return {max:P.max, cell:n=>{
+             const alive=P.alive.has(n), c={};
+             if(!alive) c.out=true;
+             if(pend && pend.ans!=null && P.cross==='kids' && P.marked.has(n)) c.out=true;
+             if(P.check){ if(P.check.missed.has(n)) c.miss=true; if(P.check.wrong.has(n)) c.oops=true; }
+             if(groups && alive){ yes.has(n) ? c.hl=true : c.hl2=true; }
+             if(P.done && alive) c.found=true;
+             if(P.revealed && n===P.secret && !P.done) c.pick=true;
+             else if(!pend && !P.done && QT[P.q.t].num && n===P.q.v && alive && !groups) c.pick=true;
+             return c; },
+             legend: groups ? LEG.hl(`yes: ${yes.size}`)+LEG.hl2(`no: ${P.alive.size-yes.size}`) : LEG.out + (P.done?LEG.found:''),
+             note: groups ? `A yes crosses out ${P.alive.size-yes.size}. A no crosses out ${yes.size}.` : (P.who==='app' && !P.done ? `I’m thinking of a number from 1 to ${P.max}.` : '') }; },
+         tap:tapPlay, say:()=> S.play.done ? 'We found it!' : qText(S.play.pending?S.play.pending.q:S.play.q) },
+  det:{ model:()=>{ const m=S.det.model || {out:new Set(),hl:new Set(),pick:new Set(),found:new Set(),hl2:new Set(),badges:{},max:100};
+          return {max:m.max||100, cell:n=>({out:m.out.has(n), hl:m.hl.has(n), hl2:m.hl2.has(n), pick:m.pick.has(n), found:m.found.has(n), badge:m.badges[n]}),
+                  legend:(m.out.size?LEG.out:'')+(m.found.size?LEG.found:''), note:''}; },
+        say:()=>DQ[S.det.q-1].q }
+};
+
+/* ================= Wiring ================= */
+function setTab(t){
+  S.tab = t; S.det.gen++;
+  $$('nav button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===t));
+  for(const k of ['warm','riddle','play','det']) $('#v-'+k).hidden = k!==t;
+  if(t==='warm') renderWarm();
+  if(t==='riddle') renderRiddle();
+  if(t==='play') renderPlay();
+  if(t==='det'){ renderDet(); const s=DQ[S.det.q-1].setup; if(s && !S.det.model) s(); }
+  paint();
+}
+$$('nav button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$('#wm10').onclick=()=>setWarm(S.warm.n-10); $('#wm1').onclick=()=>setWarm(S.warm.n-1);
+$('#wp1').onclick=()=>setWarm(S.warm.n+1); $('#wp10').onclick=()=>setWarm(S.warm.n+10);
+$('#warmNew').onclick=()=>{ let n; do{ n=11+Math.floor(Math.random()*89); }while(n===S.warm.n); setWarm(n); };
+$('#warmAll').onclick=()=>{ warmFacts(S.warm.n).forEach((_,i)=>S.warm.shown.add(i)); renderWarm(); };
+$('#rmSolve').onclick=()=>{ S.rid.mode='solve'; renderRiddle(); paint(); };
+$('#rmMake').onclick=()=>{ S.rid.mode='make'; renderRiddle(); paint(); };
+$('#rclear').onclick=()=>{ const R=S.rid; R.used[R.i].clear(); R.tried[R.i].clear(); R.guess[R.i]=null; $('#rsay').innerHTML=''; renderRiddle(); paint(); };
+$('#peekBtn').onclick=()=>{ S.play.peek=!S.play.peek; renderPlay(); paint(); };
+$('#revealBtn').onclick=()=>{ S.play.revealed=!S.play.revealed; renderPlay(); paint(); };
+$$('[data-max]').forEach(b=>b.onclick=()=>{ const P=S.play; S.play=newGame(+b.dataset.max,P.who,P.cross); renderPlay(); paint(); });
+$$('[data-who]').forEach(b=>b.onclick=()=>{ const P=S.play; S.play=newGame(P.max,b.dataset.who,P.cross); S.play.msg = b.dataset.who==='teacher' ? 'Teacher: think of a secret number. Students build questions, and you tap Yes or No.' : ''; renderPlay(); paint(); });
+$$('[data-cross]').forEach(b=>b.onclick=()=>{ S.play.cross=b.dataset.cross; renderPlay(); paint(); });
+$('#speakBtn').onclick=()=>{ S.voice=true; speak(VIEWS[S.tab].say()); };
+$('#resetBtn').onclick=()=>{ try{ speechSynthesis.cancel(); }catch(e){} S = freshState(); $('#settings').open=false; $('#rsay').innerHTML=''; detOut(''); setTab('warm'); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', ()=> $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+S = freshState();
+setTab('warm');
+})();
+</script>
+
+</body></html>

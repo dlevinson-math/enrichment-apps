@@ -1,0 +1,847 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Factor Trees & Prime Factorization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a greenhouse bench. Tabs follow the lesson (warm-up → launch → investigate → kitchen → share), the tree stage is the big card, tools sit beside it. */
+:root{
+  --paper:#ECF1EC; --card:#FFFFFF; --ink:#16231C; --muted:#53625A; --line:#C9D4CC;
+  --accent:#2C6A4C; --on-accent:#FFFFFF; --accent-soft:#DAEADF;
+  --warn:#9C4A0E; --warn-soft:#FBEAD6; --good-soft:#DFF0E3;
+  --branch:#8B6B4C; --on-leaf:#FFFFFF;
+  --p2:#2462C9; --p3:#CF5617; --p5:#7A4BD8; --p7:#C0266A; --p11:#0E7D8C; --p13:#946600; --pX:#56616E;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111814; --card:#1A231E; --ink:#E6EEE8; --muted:#A1B0A7; --line:#33433A;
+    --accent:#6CC197; --on-accent:#0D1A13; --accent-soft:#1D3528;
+    --warn:#F2A76A; --warn-soft:#3A2817; --good-soft:#1C3324;
+    --branch:#BB9570; --on-leaf:#0E1411;
+    --p2:#6E9FF6; --p3:#F38D50; --p5:#B395F6; --p7:#F271A6; --p11:#43C3D3; --p13:#E2B342; --pX:#9AA5B2;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111814; --card:#1A231E; --ink:#E6EEE8; --muted:#A1B0A7; --line:#33433A;
+  --accent:#6CC197; --on-accent:#0D1A13; --accent-soft:#1D3528;
+  --warn:#F2A76A; --warn-soft:#3A2817; --good-soft:#1C3324;
+  --branch:#BB9570; --on-leaf:#0E1411;
+  --p2:#6E9FF6; --p3:#F38D50; --p5:#B395F6; --p7:#F271A6; --p11:#43C3D3; --p13:#E2B342; --pX:#9AA5B2;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.25vw,21px); line-height:1.45; padding-inline:clamp(16px,2.4vw,36px); padding-block:0 40px; -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+.wrap{max-width:1440px; margin:0 auto}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 24px; padding-block:18px 12px}
+.title h1{font-size:clamp(28px,3.2vw,46px); font-weight:800; letter-spacing:-0.015em; line-height:1.05}
+.title .sub{margin:6px 0 0; font-size:clamp(14px,1vw,16px); color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:700}
+.title .tag{margin:4px 0 0; color:var(--muted)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+
+.btn{border:0; background:var(--accent); color:var(--on-accent); font-weight:700; padding:12px 22px; min-height:52px; border-radius:14px; font-size:1em}
+.btn.sec{background:var(--card); color:var(--ink); border:2px solid var(--line)}
+.btn.sec:hover{border-color:var(--ink)}
+.btn:disabled{opacity:.45; cursor:default}
+.btn.small{min-height:44px; padding:8px 16px; font-size:.9em}
+
+.tabs-scroll{overflow-x:auto; margin-bottom:18px}
+.tabs{display:flex; gap:4px; border-bottom:2px solid var(--line); min-width:max-content}
+.tabs button{border:0; background:none; padding:12px 14px; font-weight:700; color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; font-size:clamp(16px,1.15vw,20px); min-height:52px}
+.tabs button span{display:inline-grid; place-items:center; width:1.6em; height:1.6em; border-radius:50%; background:var(--card); border:1.5px solid var(--line); margin-right:8px; font-size:.85em}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tabs button[aria-selected="true"] span{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+
+.lede{font-size:clamp(19px,1.5vw,25px); max-width:42em; margin:0 0 16px}
+.lede b{color:var(--accent)}
+.card{background:var(--card); border:1.5px solid var(--line); border-radius:20px; padding:clamp(14px,1.6vw,24px)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.eyebrow{font-size:.78em; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--muted)}
+.msg{margin:0; padding:12px 16px; border-radius:12px; background:var(--accent-soft); max-width:40em}
+.msg.warn{background:var(--warn-soft)}
+.msg.good{background:var(--good-soft)}
+.msg:empty{display:none}
+.hint{color:var(--muted); font-size:.9em; margin:0}
+
+/* tiles = prime ingredients */
+.tiles{display:inline-flex; flex-wrap:wrap; align-items:center; gap:4px; vertical-align:middle}
+.tile{display:inline-grid; place-items:center; min-width:2em; height:2em; padding:0 .3em; border-radius:999px; background:var(--c); color:var(--on-leaf); font-weight:700; font-variant-numeric:tabular-nums; line-height:1}
+.tiles .x{color:var(--muted); font-weight:700; padding:0 1px}
+.tile.big{font-size:1.4em}
+
+/* trees */
+.stage{background:var(--card); border:1.5px solid var(--line); border-radius:20px; padding:10px; display:flex; justify-content:center; min-height:260px}
+svg.tree{width:100%; height:auto; max-height:60vh; display:block; overflow:visible}
+.branch{stroke:var(--branch); stroke-width:5; stroke-linecap:round; fill:none}
+.times{fill:var(--muted); font-family:var(--body); font-weight:700; font-size:26px; text-anchor:middle}
+.node text{font-family:var(--body); font-weight:700; text-anchor:middle; fill:var(--ink); pointer-events:none; font-variant-numeric:tabular-nums}
+.node rect{fill:var(--paper); stroke:var(--line); stroke-width:2.5}
+.node.open rect{fill:var(--card); stroke:var(--ink); stroke-dasharray:7 6}
+.node.leaf text{fill:var(--on-leaf)}
+.node.leaf circle{stroke:var(--card); stroke-width:3}
+.node[role="button"]{cursor:pointer}
+.node[role="button"]:hover rect{stroke:var(--accent)}
+.node.sel rect,.node.sel circle{stroke:var(--accent); stroke-width:7; stroke-dasharray:none}
+.node:focus{outline:none}
+.node:focus-visible rect,.node:focus-visible circle{stroke:var(--accent); stroke-width:7}
+.node.open.sel rect{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{stroke-width:3}}
+.node.pop{animation:pop .35s ease-out}
+@keyframes pop{from{opacity:0}to{opacity:1}}
+
+.tw{display:flex; flex-direction:column; gap:12px; min-width:0}
+.act{display:flex; flex-direction:column; gap:12px; min-height:3em}
+.ask{margin:0; font-size:1.15em}
+.ask b{font-family:var(--display); font-size:1.25em}
+.splitrow{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.lab{color:var(--muted); font-weight:700; margin-right:4px}
+.k{min-width:56px; min-height:56px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:1.15em}
+.k:hover{border-color:var(--accent)}
+.other{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0}
+.other label{color:var(--muted); display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.other input{width:6em; min-height:52px; border-radius:12px; border:2px solid var(--line); background:var(--card); padding:6px 12px; font-size:1.1em; color:var(--ink)}
+.prime-btn{align-self:flex-start; background:var(--card); color:var(--ink); border:2.5px solid var(--accent)}
+
+/* warm-up */
+.warm{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:24px; align-items:start}
+.warm-card{text-align:center; padding-block:28px}
+.bignum{font-family:var(--display); font-weight:800; font-size:clamp(110px,15vw,220px); line-height:1; letter-spacing:-0.03em; font-variant-numeric:tabular-nums}
+.prompt{font-size:1.2em; margin:8px 0 0}
+.pbtns{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+.pb{min-height:96px; border-radius:20px; border:3px solid var(--c); background:var(--card); color:var(--c); font-family:var(--display); font-weight:800; font-size:clamp(34px,3.4vw,50px)}
+.pb.no{opacity:.5; background:repeating-linear-gradient(45deg,transparent 0 10px,var(--warn-soft) 10px 20px); color:var(--muted); border-color:var(--line)}
+.pb.yes{background:var(--c); color:var(--on-leaf)}
+.trail{display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none}
+.trail li{padding:6px 12px; border-radius:999px; background:var(--card); border:1.5px solid var(--line); font-variant-numeric:tabular-nums}
+
+/* two trees */
+.two{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px}
+.two h3{font-size:1.2em; margin-bottom:6px}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:4px; gap:4px}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:10px; font-weight:700; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.compare{display:grid; gap:10px}
+.cmp-row{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
+.cmp-row .eyebrow{min-width:7em}
+
+/* workshop */
+.ws{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:22px; align-items:start}
+.side{display:flex; flex-direction:column; gap:16px; min-width:0}
+.clock{font-family:var(--display); font-weight:800; font-size:2em; font-variant-numeric:tabular-nums; line-height:1}
+.dna{font-size:1.25em; display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0}
+.dna b{font-family:var(--display); font-size:1.3em}
+.stats{display:flex; gap:24px; flex-wrap:wrap; padding-top:10px; border-top:1.5px solid var(--line)}
+.stat b{display:block; font-family:var(--display); font-size:1.8em; line-height:1; font-variant-numeric:tabular-nums}
+.stat span{font-size:.85em; color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:8px 12px 8px 0; border-bottom:1px solid var(--line); vertical-align:middle}
+td b{white-space:nowrap}
+th{font-size:.8em; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.numchips{display:flex; flex-wrap:wrap; gap:8px}
+.numchips button{min-width:64px; min-height:52px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:1.1em}
+.numchips button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+
+/* kitchen */
+.kit{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:22px; align-items:start}
+.recipe{font-size:clamp(22px,2.2vw,34px); display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0}
+.riddle{font-size:clamp(20px,1.8vw,28px); font-family:var(--display); font-weight:600; margin:6px 0 10px}
+.answer{font-family:var(--display); font-weight:800; font-size:clamp(48px,5vw,72px); min-height:1.2em; border-bottom:3px solid var(--ink); font-variant-numeric:tabular-nums; padding:0 8px; display:inline-block; min-width:3em}
+.keypad{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; max-width:360px}
+.keypad button{min-height:68px; border-radius:16px; border:2px solid var(--line); background:var(--card); font-size:1.5em; font-weight:700}
+.keypad button.go{background:var(--accent); color:var(--on-accent); border-color:var(--accent); font-size:1.1em}
+.pot{min-height:110px; border:3px dashed var(--branch); border-radius:24px; padding:14px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center}
+.pot .tile{font-size:1.5em; border:0; cursor:pointer}
+.pot:empty::before{content:"The pot is empty"; color:var(--muted)}
+.ingredients{display:flex; flex-wrap:wrap; gap:10px}
+.ingredients button{width:76px; height:76px; border-radius:50%; border:0; background:var(--c); color:var(--on-leaf); font-family:var(--display); font-weight:800; font-size:1.7em}
+.makes{font-size:1.2em; margin:0}
+.makes b{font-family:var(--display); font-size:1.5em; font-variant-numeric:tabular-nums}
+.qnav{display:flex; flex-wrap:wrap; gap:8px}
+.qnav button{min-width:56px; height:56px; padding:0 14px; border-radius:28px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:1.05em}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.solved::after{content:" ✓"}
+
+/* detective */
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(22px,2vw,32px); line-height:1.25; max-width:34em; margin:6px 0 14px}
+.result{display:flex; flex-direction:column; gap:14px}
+.forest{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px}
+.forest figure{margin:0; background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:10px; display:flex; flex-direction:column; gap:8px; align-items:center}
+.forest figcaption{font-weight:700; text-align:center}
+.forest svg.tree{max-height:280px}
+.forest.pair{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.chart{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px}
+.cell{background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:6px 4px; text-align:center; min-height:62px; transition:opacity .2s}
+.cell b{display:block; font-variant-numeric:tabular-nums}
+.dots{display:flex; flex-wrap:wrap; gap:3px; justify-content:center; margin-top:4px}
+.dots i{width:11px; height:11px; border-radius:50%; background:var(--c)}
+.chart.focus .cell:not(.on){opacity:.22}
+.cell.on{border-color:var(--ink); border-width:2.5px}
+.legend{display:flex; flex-wrap:wrap; gap:12px; font-size:.85em; color:var(--muted)}
+.legend span{display:inline-flex; gap:6px; align-items:center}
+.legend i{width:13px; height:13px; border-radius:50%; background:var(--c)}
+.chain{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.chain .step{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:8px 14px; text-align:center}
+.chain .step b{display:block; font-family:var(--display); font-size:1.5em}
+.chain .step small{color:var(--muted); font-variant-numeric:tabular-nums}
+.chain .arr{color:var(--muted); font-weight:700}
+.scan{font-family:var(--display); font-size:1.4em; font-variant-numeric:tabular-nums}
+
+@media (max-width:900px){
+  .warm,.ws,.kit,.two{grid-template-columns:minmax(0,1fr)}
+  .chart{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <h1>Factor Trees &amp; Prime Factorization</h1>
+    <p class="sub">Grade 4 · Week 4 · Number Theory Detectives</p>
+    <p class="tag">Every number is built from prime ingredients, and there's only one recipe.</p>
+  </div>
+  <div class="tools">
+    <button class="btn sec" id="resetBtn">Start over</button>
+    <button class="btn sec" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<div class="tabs-scroll">
+  <nav class="tabs" role="tablist" aria-label="Lesson parts">
+    <button role="tab" data-tab="warm" aria-selected="true"><span>1</span>Warm-up</button>
+    <button role="tab" data-tab="two" aria-selected="false"><span>2</span>Two trees for 36</button>
+    <button role="tab" data-tab="ws" aria-selected="false"><span>3</span>Tree workshop</button>
+    <button role="tab" data-tab="kit" aria-selected="false"><span>4</span>Prime kitchen</button>
+    <button role="tab" data-tab="det" aria-selected="false"><span>5</span>Detective questions</button>
+  </nav>
+</div>
+
+<!-- 1 Warm-up -->
+<section id="tab-warm" role="tabpanel">
+  <div class="warm">
+    <div class="card warm-card">
+      <div class="eyebrow">Prime speed round · <span id="wRound">1 of 4</span></div>
+      <div class="bignum" id="wNum" aria-live="polite">21</div>
+      <p class="prompt">Shout it out: what is the <b>smallest prime factor</b>?</p>
+    </div>
+    <div class="side">
+      <div class="pbtns" id="wBtns"></div>
+      <p class="msg" id="wMsg" aria-live="polite"></p>
+      <div class="row">
+        <button class="btn sec" id="wReveal">Show the answer</button>
+        <button class="btn" id="wNext">Next number</button>
+      </div>
+      <ul class="trail" id="wTrail" aria-label="Numbers solved"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 2 Two trees -->
+<section id="tab-two" role="tabpanel" hidden>
+  <p class="lede">Grow two different factor trees for <b>36</b>. Tap each dashed number: split it, or circle it if it's prime.</p>
+  <div class="card row" style="margin-bottom:18px">
+    <span class="eyebrow">Predict first: will both trees end with the same prime leaves?</span>
+    <div class="seg" id="ttPred" role="group" aria-label="Prediction">
+      <button data-p="same" aria-pressed="false">Same leaves</button>
+      <button data-p="diff" aria-pressed="false">Different leaves</button>
+      <button data-p="unsure" aria-pressed="false">Not sure</button>
+    </div>
+    <div class="seg" id="ttPairs" role="group" aria-label="Starting splits" style="margin-left:auto">
+      <button data-i="0" aria-pressed="true">4 × 9 vs 6 × 6</button>
+      <button data-i="1" aria-pressed="false">2 × 18 vs 3 × 12</button>
+    </div>
+  </div>
+  <div class="two">
+    <div><h3 id="ttLh">Tree 1: start with 4 × 9</h3><div id="ttL"></div></div>
+    <div><h3 id="ttRh">Tree 2: start with 6 × 6</h3><div id="ttR"></div></div>
+  </div>
+  <div class="card compare" id="ttCmp" style="margin-top:18px" aria-live="polite"></div>
+</section>
+
+<!-- 3 Workshop -->
+<section id="tab-ws" role="tabpanel" hidden>
+  <div class="ws">
+    <div id="wsTree"></div>
+    <div class="side">
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <span class="eyebrow">Factorization race: pick a number</span>
+        <div class="numchips" id="wsNums"></div>
+        <form class="other" id="wsOwn">
+          <label>Your own number (2 to 999) <input id="wsOwnIn" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3"></label>
+          <button class="btn sec small" type="submit">Plant it</button>
+        </form>
+        <p class="msg warn" id="wsOwnMsg"></p>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="row" style="justify-content:space-between">
+          <div><span class="eyebrow">Race clock</span><div class="clock" id="wsClock">0:00</div></div>
+          <div class="row">
+            <button class="btn sec small" id="wsAuto">Grow it for me</button>
+            <button class="btn sec small" id="wsRestart">Start this tree over</button>
+          </div>
+        </div>
+        <div id="wsDna" aria-live="polite"></div>
+      </div>
+      <div class="card" id="wsLogCard" hidden>
+        <span class="eyebrow">Trees grown today</span>
+        <div class="tbl-wrap"><table id="wsLog"></table></div>
+        <p class="hint" style="margin-top:8px">Compare rows for the same number. What changes? What never does?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 Kitchen -->
+<section id="tab-kit" role="tabpanel" hidden>
+  <div class="row" style="margin-bottom:16px">
+    <div class="seg" id="kMode" role="group" aria-label="Kitchen mode">
+      <button data-m="who" aria-pressed="true">Who am I?</button>
+      <button data-m="cook" aria-pressed="false">Cook a number</button>
+    </div>
+    <p class="hint">Reverse puzzles: start with the prime ingredients and build the number.</p>
+  </div>
+  <div id="kWho">
+    <div class="kit">
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="qnav" id="whoNav"></div>
+        <div id="whoCard"></div>
+        <div><span class="eyebrow">Who am I?</span><br><span class="answer" id="whoAns" aria-live="polite"></span></div>
+        <p class="msg" id="whoMsg" aria-live="polite"></p>
+      </div>
+      <div class="keypad" id="whoPad" aria-label="Number keypad"></div>
+    </div>
+  </div>
+  <div id="kCook" hidden>
+    <div class="kit">
+      <div class="card" style="display:flex;flex-direction:column;gap:14px">
+        <div class="qnav" id="cookNav"></div>
+        <div class="riddle" id="cookGoal"></div>
+        <div class="pot" id="pot" aria-label="Pot of prime ingredients. Tap a tile to remove it."></div>
+        <p class="makes" id="cookMakes"></p>
+        <div class="row">
+          <button class="btn" id="cookCheck">Check my recipe</button>
+          <button class="btn sec" id="cookEmpty">Empty the pot</button>
+        </div>
+        <p class="msg" id="cookMsg" aria-live="polite"></p>
+      </div>
+      <div class="side">
+        <span class="eyebrow">Prime ingredients: tap to add</span>
+        <div class="ingredients" id="ingr"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 Detective -->
+<section id="tab-det" role="tabpanel" hidden>
+  <div class="qnav" id="dNav"></div>
+  <p class="qtext" id="dText"></p>
+  <div class="numchips" id="dNums" style="margin-bottom:12px"></div>
+  <div class="row" id="dActs" style="margin-bottom:16px"></div>
+  <div class="result" id="dRes" aria-live="polite"></div>
+  <p class="hint" style="margin-top:14px">Talk it over first, then tap a button to put evidence on screen.</p>
+</section>
+</div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ---------- number tools ---------- */
+const isPrime=n=>{if(n<2)return false;for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true};
+const spf=n=>{for(let i=2;i*i<=n;i++)if(n%i===0)return i;return n};
+const factorize=n=>{const r=[];let m=n;for(let p=2;p*p<=m;p++)while(m%p===0){r.push(p);m/=p}if(m>1)r.push(m);return r};
+const pairs=n=>{const r=[];for(let a=2;a*a<=n;a++)if(n%a===0)r.push([a,n/a]);return r};
+const distinct=n=>new Set(factorize(n)).size;
+const prod=a=>a.reduce((x,y)=>x*y,1);
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const PCOL={2:'--p2',3:'--p3',5:'--p5',7:'--p7',11:'--p11',13:'--p13'};
+const col=p=>`var(${PCOL[p]||'--pX'})`;
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
+const powerForm=n=>{const m=new Map();factorize(n).forEach(p=>m.set(p,(m.get(p)||0)+1));return [...m].map(([p,e])=>e>1?p+String(e).split('').map(d=>SUP[d]).join(''):String(p)).join(' × ')};
+const tile=(p,cls='')=>`<span class="tile ${cls}" style="--c:${col(p)}">${p}</span>`;
+const tiles=(a,cls)=>`<span class="tiles">${a.map(p=>tile(p,cls)).join('<span class="x">×</span>')}</span>`;
+const times=a=>a.join(' × ');
+const tileList=a=>`<span class="tiles">${a.map(p=>tile(p)).join(' ')}</span>`;
+const sortN=a=>a.slice().sort((x,y)=>x-y);
+const listText=a=>a.length<=1?a.join(''):a.slice(0,-1).join(', ')+(a.length>2?',':'')+' and '+a[a.length-1];
+const WORD=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+const word=n=>WORD[n]||String(n);
+function minus(a,b){const r=a.slice();const out=[];for(const x of b){const i=r.indexOf(x);if(i>=0)r.splice(i,1)}return r}
+const divText=(a,b)=>{const q=Math.floor(a/b),r=a%b;return r?`${a} ÷ ${b} = ${q} R ${r}`:`${a} ÷ ${b} = ${q}`};
+
+/* ---------- tree model ---------- */
+let uid=0;
+const mk=v=>({id:++uid,v,kids:null,prime:false});
+const leaves=n=>n.kids?[...leaves(n.kids[0]),...leaves(n.kids[1])]:[n];
+const depthOf=n=>n.kids?1+Math.max(depthOf(n.kids[0]),depthOf(n.kids[1])):0;
+const splitsOf=n=>n.kids?1+splitsOf(n.kids[0])+splitsOf(n.kids[1]):0;
+const isDone=r=>leaves(r).every(l=>l.prime);
+const findNode=(n,id)=>n.id===id?n:(n.kids?(findNode(n.kids[0],id)||findNode(n.kids[1],id)):null);
+const shapeOf=n=>n.kids?`(${shapeOf(n.kids[0])},${shapeOf(n.kids[1])})`:String(n.v);
+const MD={};
+function minDepth(n){if(isPrime(n))return 0;if(MD[n]!=null)return MD[n];let b=1e9;for(const[a,c]of pairs(n))b=Math.min(b,1+Math.max(minDepth(a),minDepth(c)));return MD[n]=b}
+const chooseRandom=v=>rand(pairs(v));
+const chooseSpf=v=>[spf(v),v/spf(v)];
+const chooseShort=v=>{let best=null,bd=1e9;for(const[a,b]of pairs(v)){const d=1+Math.max(minDepth(a),minDepth(b));if(d<=bd){bd=d;best=[a,b]}}return best};
+function growRest(n,choose){
+  if(n.kids){growRest(n.kids[0],choose);growRest(n.kids[1],choose);return}
+  if(isPrime(n.v)){n.prime=true;return}
+  const [a,b]=choose(n.v); n.kids=[mk(a),mk(b)]; growRest(n,choose);
+}
+function plant(n,first,choose){const r=mk(n);if(first)r.kids=[mk(first[0]),mk(first[1])];growRest(r,choose);return r}
+
+function treeSVG(root,o={}){
+  const U=116,R=o.compact?108:124,TOP=48;
+  const wid=n=>n.kids?wid(n.kids[0])+wid(n.kids[1]):1;
+  const W=wid(root),D=depthOf(root);
+  const totalW=Math.max(W,o.compact?2:3)*U;
+  const off=(totalW-W*U)/2, P={};
+  (function place(n,x0,d){
+    if(n.kids){place(n.kids[0],x0,d+1);place(n.kids[1],x0+wid(n.kids[0])*U,d+1);P[n.id]={x:(P[n.kids[0].id].x+P[n.kids[1].id].x)/2,y:TOP+d*R}}
+    else P[n.id]={x:x0+U/2,y:TOP+d*R};
+  })(root,off,0);
+  const H=TOP*2+D*R;
+  let edges='',nodes='';
+  (function walk(n){
+    const p=P[n.id];
+    if(n.kids){
+      const [a,b]=n.kids.map(k=>P[k.id]);
+      edges+=`<path class="branch" d="M${p.x} ${p.y+30} L${a.x} ${a.y-32}"/><path class="branch" d="M${p.x} ${p.y+30} L${b.x} ${b.y-32}"/>`;
+      edges+=`<text class="times" x="${(a.x+b.x)/2}" y="${a.y+9}">×</text>`;
+      walk(n.kids[0]);walk(n.kids[1]);
+    }
+    const s=String(n.v).length, fs=s<=2?34:s===3?29:25, w=s<=2?80:s===3?96:108;
+    const cls=n.prime?'leaf':n.kids?'split':'open';
+    const state=n.prime?'prime leaf':n.kids?`split into ${n.kids[0].v} times ${n.kids[1].v}`:'not split yet';
+    const attrs=o.interactive?` tabindex="0" role="button" data-id="${n.id}" aria-label="${n.v}, ${state}"`:'';
+    const shape=n.prime?`<circle r="37" style="fill:${col(n.v)}"/>`:`<rect x="${-w/2}" y="-31" width="${w}" height="62" rx="16"/>`;
+    nodes+=`<g class="node ${cls}${o.sel===n.id?' sel':''}" transform="translate(${p.x} ${p.y})"${attrs}>${shape}<text y="${(fs*0.36).toFixed(1)}" style="font-size:${fs}px">${n.v}</text></g>`;
+  })(root);
+  const aria=o.interactive?'':` role="img" aria-label="Factor tree for ${root.v}"`;
+  return `<svg class="tree" viewBox="0 0 ${totalW} ${H}" preserveAspectRatio="xMidYMin meet"${aria}>${edges}${nodes}</svg>`;
+}
+
+/* ---------- interactive tree widget ---------- */
+function TreeWidget(host,opt){
+  const W={root:null,sel:null,msg:'',kind:'',fails:{}};
+  host.classList.add('tw');
+  host.innerHTML='<div class="stage"></div><div class="act" aria-live="polite"></div>';
+  const stage=$('.stage',host),act=$('.act',host);
+  const selectNext=()=>{const o=leaves(W.root).find(l=>!l.prime);W.sel=o?o.id:null};
+  const say=(m,k='')=>{W.msg=m;W.kind=k};
+  W.set=(n,first)=>{W.root=mk(n);if(first)W.root.kids=[mk(first[0]),mk(first[1])];W.fails={};say('');selectNext();render()};
+  W.auto=()=>{growRest(W.root,chooseSpf);W.sel=null;say(`Grown with the smallest prime each time. Every leaf is prime.`,'good');opt.onAction&&opt.onAction(W,'auto');render()};
+  function render(focusId){
+    stage.innerHTML=treeSVG(W.root,{sel:W.sel,interactive:true});
+    renderAct();
+    if(focusId!=null){const g=$(`[data-id="${focusId}"]`,stage);g&&g.focus()}
+    opt.onUpdate&&opt.onUpdate(W);
+  }
+  W.render=render;
+  function renderAct(){
+    const n=W.sel!=null?findNode(W.root,W.sel):null;
+    let h='';
+    if(!n){h=isDone(W.root)?'':'<p class="ask">Tap a number in the tree.</p>'}
+    else if(n.prime){h=`<p class="ask"><b>${n.v}</b> is a prime leaf. Its only factors are 1 and ${n.v}.</p><div class="row"><button class="btn sec small" data-a="unprime">Un-circle ${n.v}</button></div>`}
+    else if(n.kids){h=`<p class="ask"><b>${n.v}</b> = ${n.kids[0].v} × ${n.kids[1].v}</p><div class="row"><button class="btn sec small" data-a="unsplit">Remove this split</button></div>`}
+    else{
+      const max=Math.min(12,n.v-1);let chips='';
+      for(let k=2;k<=max;k++)chips+=`<button class="k" data-k="${k}" aria-label="Split ${n.v} using ${k}">${k}</button>`;
+      h=`<p class="ask">What's inside <b>${n.v}</b>?</p>`+
+        (chips?`<div class="splitrow"><span class="lab">Split with</span>${chips}</div>`:'')+
+        `<form class="other"><label>or another factor <input id="${opt.key}-other" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4"></label><button class="btn sec small" type="submit">Split</button></form>`+
+        `<button class="btn prime-btn" data-a="prime">${n.v} is prime: circle it</button>`;
+    }
+    if(W.msg)h+=`<p class="msg ${W.kind}">${W.msg}</p>`;
+    act.innerHTML=h;
+    const f=$('form',act);
+    if(f)f.addEventListener('submit',e=>{e.preventDefault();const t=$('input',f).value.trim();trySplit(n,/^\d+$/.test(t)?+t:NaN)});
+  }
+  function trySplit(n,k){
+    const v=n.v;
+    if(!Number.isInteger(k)||k<1){say('Type a whole number to try as a factor.','warn');return render()}
+    if(k===1||k===v){say(`${v} = 1 × ${v} doesn't break ${v} into smaller pieces. Both factors in a split must be bigger than 1.`,'warn');return render()}
+    if(k>v){say(`${k} is bigger than ${v}, so it can't be a factor of ${v}.`,'warn');return render()}
+    if(v%k){
+      W.fails[n.id]=(W.fails[n.id]||0)+1;
+      const extra=isPrime(v)&&W.fails[n.id]>=2?` Nothing has worked so far. Could ${v} be prime?`:' Try another factor.';
+      say(`${divText(v,k)}. There's a leftover, so ${k} isn't a factor of ${v}.${extra}`,'warn');return render();
+    }
+    n.kids=[mk(k),mk(v/k)];
+    selectNext();
+    say(isDone(W.root)?'':`${v} = ${k} × ${v/k}. Keep going.`,'good');
+    opt.onAction&&opt.onAction(W,'split');render();
+  }
+  act.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||b.closest('form'))return;
+    const n=findNode(W.root,W.sel);if(!n)return;
+    if(b.dataset.k){trySplit(n,+b.dataset.k);return}
+    const a=b.dataset.a;
+    if(a==='prime'){
+      if(isPrime(n.v)){n.prime=true;selectNext();say(isDone(W.root)?'':`${n.v} is prime. Circled.`,'good');opt.onAction&&opt.onAction(W,'prime')}
+      else{const f=spf(n.v);const why=f===2?`${n.v} is even, so 2 is a factor: ${n.v} = 2 × ${n.v/2}.`:`${divText(n.v,f)} with no leftover, so ${f} is a factor.`;
+        say(`Look again. ${why} A prime can only be written as 1 × itself, so ${n.v} can still be split.`,'warn')}
+      return render();
+    }
+    if(a==='unprime'){n.prime=false;say('');opt.onAction&&opt.onAction(W,'undo');return render()}
+    if(a==='unsplit'){n.kids=null;say('');opt.onAction&&opt.onAction(W,'undo');return render()}
+  });
+  const pick=g=>{W.sel=+g.dataset.id;say('');render(+g.dataset.id)};
+  stage.addEventListener('click',e=>{const g=e.target.closest('[data-id]');if(g)pick(g)});
+  stage.addEventListener('keydown',e=>{const g=e.target.closest('[data-id]');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(g)}});
+  return W;
+}
+
+/* ---------- tabs ---------- */
+function selectTab(t){
+  $$('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  $$('section[role="tabpanel"]').forEach(s=>s.hidden=s.id!=='tab-'+t);
+}
+$$('.tabs button').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+
+/* ---------- 1 warm-up ---------- */
+const WARM=[21,35,51,91];
+const WNOTE={21:'',35:'',51:'51 fools almost everyone. It looks prime, but 5 + 1 = 6, so 3 divides it.',91:'91 looks prime too. It is one of the sneakiest numbers under 100.'};
+const BONUS=[];for(let n=25;n<=221;n+=2)if(!isPrime(n)&&spf(n)<=13)BONUS.push(n);
+const WS_PR=[2,3,5,7,11,13];
+const WU={i:0,n:21,done:false,tried:new Set(),trail:[]};
+$('#wBtns').innerHTML=WS_PR.map(p=>`<button class="pb" data-p="${p}" style="--c:${col(p)}" aria-label="${p}">${p}</button>`).join('');
+function warmRender(){
+  $('#wNum').textContent=WU.n;
+  $('#wRound').textContent=WU.i<4?`${WU.i+1} of 4`:'bonus round';
+  $$('#wBtns .pb').forEach(b=>{const p=+b.dataset.p;b.classList.toggle('no',WU.tried.has(p)&&!(WU.done&&p===spf(WU.n)));b.classList.toggle('yes',WU.done&&p===spf(WU.n))});
+  $('#wTrail').innerHTML=WU.trail.map(([n,p])=>`<li>${n} → ${p}</li>`).join('');
+  $('#wNext').textContent=WU.i<3?'Next number':'Another number';
+}
+function warmSay(m,k){const e=$('#wMsg');e.textContent=m;e.className='msg '+(k||'')}
+function warmSolve(){
+  const n=WU.n,p=spf(n);WU.done=true;
+  if(!WU.trail.some(t=>t[0]===n))WU.trail.push([n,p]);
+  warmSay(`${n} = ${p} × ${n/p}. ${p} is the smallest prime factor. ${WNOTE[n]||''}`.trim(),'good');warmRender();
+}
+$('#wBtns').addEventListener('click',e=>{
+  const b=e.target.closest('.pb');if(!b||WU.done)return;
+  const p=+b.dataset.p,n=WU.n,s=spf(n);
+  if(p===s){warmSolve();return}
+  WU.tried.add(p);
+  if(n%p){
+    let clue='';
+    if(p===2)clue=` (${n} is odd.)`;
+    else if(p===5)clue=` (${n} doesn't end in 0 or 5.)`;
+    else if(p===3){const ds=String(n).split('').reduce((a,d)=>a+ +d,0);clue=` (Its digit sum is ${ds}, which isn't a multiple of 3.)`}
+    warmSay(`${divText(n,p)}. A leftover means ${p} isn't a factor.${clue} Try again.`,'warn');
+  } else warmSay(`${p} does divide ${n}: ${n} = ${p} × ${n/p}. But is there a smaller prime that works too?`,'warn');
+  warmRender();
+});
+$('#wReveal').onclick=()=>{if(!WU.done)warmSolve()};
+$('#wNext').onclick=()=>{
+  WU.i++;WU.tried=new Set();WU.done=false;warmSay('');
+  if(WU.i<4)WU.n=WARM[WU.i];
+  else{let n;do{n=rand(BONUS)}while(n===WU.n);WU.n=n}
+  warmRender();
+};
+function warmReset(){WU.i=0;WU.n=21;WU.done=false;WU.tried=new Set();WU.trail=[];warmSay('');warmRender()}
+
+/* ---------- 2 two trees ---------- */
+const TT_PAIRS=[[[4,9],[6,6]],[[2,18],[3,12]]];
+const TT={i:0,pred:null};
+const tL=TreeWidget($('#ttL'),{key:'ttL',onUpdate:ttUpdate});
+const tR=TreeWidget($('#ttR'),{key:'ttR',onUpdate:ttUpdate});
+function ttSet(i){
+  TT.i=i;const [a,b]=TT_PAIRS[i];
+  $('#ttLh').textContent=`Tree 1: start with ${a[0]} × ${a[1]}`;$('#ttRh').textContent=`Tree 2: start with ${b[0]} × ${b[1]}`;
+  $$('#ttPairs button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.i===i));
+  tL.set(36,a);tR.set(36,b);
+}
+function ttUpdate(){
+  if(!tL.root||!tR.root)return;
+  const box=$('#ttCmp');
+  const dl=isDone(tL.root),dr=isDone(tR.root);
+  if(!dl||!dr){
+    const left=r=>leaves(r).filter(l=>!l.prime).length;
+    box.innerHTML=`<p class="hint" style="margin:0">Finish both trees to compare their leaves. Still open: Tree 1 has ${left(tL.root)}, Tree 2 has ${left(tR.root)}.</p>`;return;
+  }
+  const a=sortN(leaves(tL.root).map(l=>l.v)),b=sortN(leaves(tR.root).map(l=>l.v));
+  const same=a.join()===b.join();
+  let p='';
+  if(TT.pred==='same')p=same?'You predicted the same leaves, and the trees agree. ':'';
+  else if(TT.pred==='diff')p='You predicted different leaves. Look closely at the two rows. ';
+  else if(TT.pred==='unsure')p='Now you have evidence. ';
+  box.innerHTML=`<div class="cmp-row"><span class="eyebrow">Tree 1 leaves</span>${tiles(a,'big')}</div>
+  <div class="cmp-row"><span class="eyebrow">Tree 2 leaves</span>${tiles(b,'big')}</div>
+  <p class="msg good">${p}${same?`Different starts, identical leaves: 36 = ${times(a)}. This is the prime DNA of 36. Will that happen for every number? Test it in the Tree workshop.`:'The leaves differ. Check each leaf: is every one really prime?'}</p>`;
+}
+$$('#ttPred button').forEach(b=>b.onclick=()=>{TT.pred=b.dataset.p;$$('#ttPred button').forEach(x=>x.setAttribute('aria-pressed',x===b));ttUpdate()});
+$$('#ttPairs button').forEach(b=>b.onclick=()=>ttSet(+b.dataset.i));
+
+/* ---------- 3 workshop ---------- */
+const WS_NUMS=[48,60,72,100,36];
+const WSs={n:48,start:null,elapsed:0,timer:null,helped:false,logged:false,log:[]};
+const wsTree=TreeWidget($('#wsTree'),{key:'ws',onAction:wsAction,onUpdate:wsUpdate});
+const fmtTime=ms=>{const s=Math.floor(ms/1000);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`};
+function tick(){if(WSs.start!=null)$('#wsClock').textContent=fmtTime(performance.now()-WSs.start)}
+function stopTimer(){clearInterval(WSs.timer);WSs.timer=null}
+function wsAction(W,kind){
+  if(kind==='auto')WSs.helped=true;
+  if(WSs.start==null&&!WSs.logged){WSs.start=performance.now();stopTimer();WSs.timer=setInterval(tick,250)}
+}
+function wsNew(n){
+  WSs.n=n;WSs.start=null;WSs.elapsed=0;WSs.helped=false;WSs.logged=false;stopTimer();
+  $('#wsClock').textContent='0:00';$('#wsOwnMsg').textContent='';
+  $('#wsNums').innerHTML=WS_NUMS.map(x=>`<button data-n="${x}" aria-pressed="${x===n}">${x}</button>`).join('');
+  wsTree.set(n);
+}
+function wsUpdate(W){
+  const box=$('#wsDna');
+  if(!W.root)return;
+  if(!isDone(W.root)){box.innerHTML='<p class="hint">Split every dashed number until all the leaves are circled primes.</p>';return}
+  if(!WSs.logged){
+    WSs.logged=true;
+    WSs.elapsed=WSs.start!=null?performance.now()-WSs.start:0;stopTimer();
+    $('#wsClock').textContent=fmtTime(WSs.elapsed);
+    WSs.log.push({n:W.root.v,first:W.root.kids?`${W.root.kids[0].v} × ${W.root.kids[1].v}`:'prime',levels:depthOf(W.root),splits:splitsOf(W.root),dna:sortN(leaves(W.root).map(l=>l.v)),time:WSs.helped?'helped':fmtTime(WSs.elapsed)});
+    renderLog();
+  }
+  const r=W.root,lv=sortN(leaves(r).map(l=>l.v));
+  const pf=powerForm(r.v);
+  box.innerHTML=`<span class="eyebrow">Prime DNA</span>
+   <p class="dna"><b>${r.v}</b> = ${tiles(lv,'big')}</p>
+   ${lv.length>1&&pf!==times(lv)?`<p class="hint">Short way to write it: ${r.v} = ${pf}</p>`:''}
+   ${lv.length===1?`<p class="hint">${r.v} is prime, so its tree is a single leaf.</p>`:''}
+   <div class="stats"><div class="stat"><b>${splitsOf(r)}</b><span>splits</span></div><div class="stat"><b>${depthOf(r)}</b><span>branch levels</span></div><div class="stat"><b>${lv.length}</b><span>prime leaves</span></div></div>
+   <button class="btn" id="wsAgain">Plant another tree for ${r.v}</button>`;
+  $('#wsAgain').onclick=()=>wsNew(r.v);
+}
+function renderLog(){
+  $('#wsLogCard').hidden=!WSs.log.length;
+  $('#wsLog').innerHTML='<tr><th>Number</th><th>Start</th><th>Levels</th><th>Splits</th><th>Prime DNA</th><th>Time</th></tr>'+
+    WSs.log.map(e=>`<tr><td><b>${e.n}</b></td><td>${e.first}</td><td>${e.levels}</td><td>${e.splits}</td><td>${times(e.dna)}</td><td>${e.time}</td></tr>`).join('');
+}
+$('#wsNums').addEventListener('click',e=>{const b=e.target.closest('button');if(b)wsNew(+b.dataset.n)});
+$('#wsOwn').addEventListener('submit',e=>{e.preventDefault();const t=$('#wsOwnIn').value.trim();const n=+t;
+  if(!/^\d+$/.test(t)||n<2||n>999){$('#wsOwnMsg').textContent='Pick a whole number from 2 to 999.';return}
+  wsNew(n);$('#wsOwnIn').value='';});
+$('#wsAuto').onclick=()=>{if(!isDone(wsTree.root))wsTree.auto()};
+$('#wsRestart').onclick=()=>wsNew(WSs.n);
+
+/* ---------- 4 kitchen ---------- */
+const WHO=[
+  {r:[2,2,3,5],a:60},
+  {r:[3,3,7],a:63},
+  {need:[2,3,5],a:30,text:'I am the smallest number whose prime DNA uses 2, 3 and 5 at least once.'},
+  {r:[2,2,2,2,2],a:32,after:'Why do computers love me? Computers count in twos (binary). Numbers made only of 2s are their round numbers: 32 is written 100000 in binary, the way 100 is round for us. See Detective question 4.'},
+  {r:[2,3,3,5],a:90,bonus:true},
+  {r:[5,7,11],a:385,bonus:true},
+  {r:[2,2,2,3,3,3],a:216,bonus:true,after:'Look at the recipe again: three 2s and three 3s pair up as (2 × 3) × (2 × 3) × (2 × 3) = 6 × 6 × 6.'}
+];
+const K={mode:'who',w:0,ans:'',solved:new Set(),c:0,pot:[]};
+const COOK=[84,90,126,150,180,96,1001,'free'];
+const ING=[2,3,5,7,11,13];
+function setKMode(m){K.mode=m;$$('#kMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));$('#kWho').hidden=m!=='who';$('#kCook').hidden=m!=='cook'}
+$$('#kMode button').forEach(b=>b.onclick=()=>setKMode(b.dataset.m));
+function whoRender(){
+  $('#whoNav').innerHTML=WHO.map((q,i)=>`<button data-i="${i}" aria-pressed="${i===K.w}" class="${K.solved.has(i)?'solved':''}" aria-label="Puzzle ${i+1}${q.bonus?', bonus':''}">${q.bonus?'Bonus '+(i-3):i+1}</button>`).join('');
+  const q=WHO[K.w];
+  $('#whoCard').innerHTML=q.need?`<p class="riddle">${q.text}</p><div class="recipe">${q.need.map(p=>tile(p,'big')).join(' ')}<span class="hint">at least once each</span></div>`:
+    `<p class="riddle">My prime DNA is:</p><div class="recipe">${tiles(q.r,'big')}</div>`;
+  $('#whoAns').textContent=K.ans||' ';
+}
+function whoSay(h,k){const e=$('#whoMsg');e.innerHTML=h;e.className='msg '+(k||'')}
+$('#whoNav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;K.w=+b.dataset.i;K.ans='';whoSay('');whoRender()});
+$('#whoPad').innerHTML=[1,2,3,4,5,6,7,8,9].map(d=>`<button data-d="${d}">${d}</button>`).join('')+'<button data-d="back" aria-label="Delete">⌫</button><button data-d="0">0</button><button data-d="go" class="go">Check</button>';
+$('#whoPad').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const d=b.dataset.d;
+  if(d==='back')K.ans=K.ans.slice(0,-1);
+  else if(d==='go'){whoCheck();return}
+  else if(K.ans.length<6)K.ans=(K.ans==='0'?'':K.ans)+d;
+  whoRender();
+});
+function dnaText(x){return isPrime(x)?`${x} is prime, so its DNA is just ${tile(x)}.`:`${x} = ${tiles(factorize(x))}.`}
+function whoCheck(){
+  const q=WHO[K.w];
+  if(!K.ans){whoSay('Tap the digits of your answer, then Check.');return}
+  const x=+K.ans;
+  if(x===q.a){
+    K.solved.add(K.w);
+    const how=q.need?`2 × 3 × 5 = 30. Leaving out any ingredient breaks the rule, and adding one makes the number bigger.`:`${times(q.r)} = ${q.a}.`;
+    whoSay(`Yes! ${how}${q.after?' '+q.after:''}`,'good');whoRender();return;
+  }
+  if(x<2){whoSay(`${x} has no prime ingredients at all, so no recipe of primes can make it. Try again.`,'warn');return}
+  const fx=factorize(x);
+  if(q.need){
+    const miss=q.need.filter(p=>x%p);
+    if(miss.length)whoSay(`Check its DNA: ${dnaText(x)} It's missing ${listText(miss)}. Try again.`,'warn');
+    else whoSay(`Check its DNA: ${dnaText(x)} It does use 2, 3 and 5, but it also has extra ingredients: ${tileList(minus(fx,q.need))}. Leave them out. What's smaller?`,'warn');
+    return;
+  }
+  const missing=minus(q.r,fx),extra=minus(fx,q.r);
+  whoSay(`Check by building its DNA: ${dnaText(x)} The recipe is ${tiles(q.r)}. `+(missing.length?`Your number is missing ${tileList(missing)}. `:'')+(extra.length?`It has extra ${tileList(extra)}. `:'')+'Multiply the recipe again, one step at a time.','warn');
+}
+/* cook */
+$('#ingr').innerHTML=ING.map(p=>`<button data-p="${p}" style="--c:${col(p)}" aria-label="Add ${p}">${p}</button>`).join('');
+function cookRender(){
+  $('#cookNav').innerHTML=COOK.map((t,i)=>`<button data-i="${i}" aria-pressed="${i===K.c}">${t==='free'?'Free cook':t.toLocaleString('en-US')}</button>`).join('');
+  const t=COOK[K.c];
+  $('#cookGoal').textContent=t==='free'?'Free cook: add any primes and see what number you make.':`Cook ${t.toLocaleString('en-US')} using only prime ingredients.`;
+  $('#pot').innerHTML=K.pot.map((p,i)=>`<button class="tile" data-i="${i}" style="--c:${col(p)}" aria-label="Remove ${p}">${p}</button>`).join('');
+  $('#cookMakes').innerHTML=K.pot.length?`Pot makes ${times(K.pot)} = <b>${prod(K.pot).toLocaleString('en-US')}</b>`:'Tap the prime ingredients to add them.';
+}
+function cookSay(h,k){const e=$('#cookMsg');e.innerHTML=h;e.className='msg '+(k||'')}
+$('#cookNav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;K.c=+b.dataset.i;K.pot=[];cookSay('');cookRender()});
+$('#ingr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(K.pot.length>=14){cookSay('The pot is full. Check your recipe or take a tile out.','warn');return}K.pot.push(+b.dataset.p);cookSay('');cookRender()});
+$('#pot').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;K.pot.splice(+b.dataset.i,1);cookSay('');cookRender()});
+$('#cookEmpty').onclick=()=>{K.pot=[];cookSay('');cookRender()};
+$('#cookCheck').onclick=()=>{
+  const T=COOK[K.c];
+  if(!K.pot.length){cookSay('The pot is empty. Tap prime tiles to add ingredients.');return}
+  const P=prod(K.pot),srt=sortN(K.pot);
+  if(T==='free'){
+    cookSay(`Your pot makes <b>${P.toLocaleString('en-US')}</b> = ${tiles(srt)}. Any order of the same tiles makes the same number.`+(P<=999&&P>=2?` <button class="btn small" id="toWs">Grow its tree in the workshop</button>`:''),'good');
+    const b=$('#toWs');if(b)b.onclick=()=>{wsNew(P);selectTab('ws')};return;
+  }
+  if(P===T){cookSay(`You cooked ${T.toLocaleString('en-US')} = ${tiles(srt)}. Every recipe for ${T.toLocaleString('en-US')} uses exactly these primes. Only the order can change.`,'good');return}
+  if(T%P===0){cookSay(`Your pot makes ${P}. So far so good: ${divText(T,P)} with no leftover. Keep cooking. What is ${T/P} made of?`);return}
+  const counts=new Map();K.pot.forEach(p=>counts.set(p,(counts.get(p)||0)+1));
+  let reason='';
+  for(const [p,c] of [...counts].sort((a,b)=>a[0]-b[0])){
+    const pc=p**c;
+    if(T%pc){reason=(T%p)?`${divText(T,p)}, so ${p} isn't one of ${T}'s ingredients.`:`${T} ÷ (${times(Array(c).fill(p))}) = ${Math.floor(T/pc)} R ${T%pc}, so ${T} can't hold ${word(c)} ${p}s.`;break}
+  }
+  cookSay(`Your pot makes ${P.toLocaleString('en-US')}, and ${divText(T,P)}. ${reason} Tap a tile in the pot to take it out.`,'warn');
+};
+
+/* ---------- 5 detective ---------- */
+const D={q:1,num:36,gen:0};
+const DNUMS=[36,48,60,72,100];
+const DQ={
+  1:{t:()=>`Do all factor trees for one number end with the same leaves? Predict first. Then grow trees for ${D.num} and look.`,nums:true,
+     acts:[{l:'Grow a tree from every start',f:everyStart},{l:'Grow 20 random trees',f:twenty}]},
+  2:{t:()=>`Which start makes trees faster? Does a different first split change how much work the tree takes?`,nums:true,
+     acts:[{l:'Compare every start',f:compareStarts},{l:'Shortest tree vs tallest tree',f:shortTall}]},
+  3:{t:()=>'Primes are the atoms of arithmetic. Why can a prime leaf never be split? And why does every tree have to stop?',
+     acts:[{l:'Show the prime DNA chart',f:()=>chart(null)},{l:'Light up the primes',f:()=>chart('prime')},{l:'Who has a 2 inside?',f:()=>chart(2)},{l:'Who has a 3 inside?',f:()=>chart(3)},{l:'Light up square numbers',f:()=>chart('sq')}]},
+  4:{t:()=>'I am 2 × 2 × 2 × 2 × 2. Who am I, and why do computers love numbers like me?',
+     acts:[{l:'Double from 1',f:doubling}]},
+  5:{t:()=>'Challenge: find the smallest number whose prime factorization uses four DIFFERENT primes. How do you know nothing smaller works?',
+     acts:[{l:'Search every number below 210',f:search},{l:'Show why it is the smallest',f:proof},{l:'What about five different primes?',f:five}]}
+};
+function detRender(){
+  $('#dNav').innerHTML=[1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${D.q===i}" aria-label="Question ${i}">${i}</button>`).join('')+`<button data-q="5" aria-pressed="${D.q===5}">★ Challenge</button>`;
+  const q=DQ[D.q];
+  $('#dText').textContent=q.t();
+  $('#dNums').hidden=!q.nums;
+  $('#dNums').innerHTML=q.nums?DNUMS.map(n=>`<button data-n="${n}" aria-pressed="${n===D.num}">${n}</button>`).join(''):'';
+  $('#dActs').innerHTML=q.acts.map((a,i)=>`<button class="btn ${i?'sec':''}" data-a="${i}">${a.l}</button>`).join('');
+}
+const res=h=>{$('#dRes').innerHTML=h};
+$('#dNav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;D.q=+b.dataset.q;D.gen++;res('');detRender()});
+$('#dNums').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;D.num=+b.dataset.n;D.gen++;res('');detRender()});
+$('#dActs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;D.gen++;DQ[D.q].acts[+b.dataset.a].f()});
+
+function everyStart(){
+  const n=D.num;
+  const trees=pairs(n).map(([a,b])=>plant(n,[a,b],chooseRandom));
+  const sets=trees.map(r=>sortN(leaves(r).map(l=>l.v)).join(' × '));
+  const same=sets.every(s=>s===sets[0]);
+  res(`<div class="forest">${trees.map(r=>`<figure>${treeSVG(r,{compact:true})}<figcaption>Start ${r.kids[0].v} × ${r.kids[1].v}</figcaption>${tiles(sortN(leaves(r).map(l=>l.v)))}</figure>`).join('')}</div>
+   <p class="msg good">${same?`${trees.length} different starts, one set of leaves: ${n} = ${sets[0]}.`:'These trees ended differently. Check every leaf.'} Could some other start ever give different leaves? Every start for ${n} is shown here.</p>`);
+}
+function twenty(){
+  const n=D.num,trees=[];for(let i=0;i<20;i++)trees.push(plant(n,null,chooseRandom));
+  const shapes=new Set(trees.map(shapeOf)),sets=new Set(trees.map(r=>sortN(leaves(r).map(l=>l.v)).join(' × ')));
+  const show=[];const seen=new Set();for(const r of trees){const s=shapeOf(r);if(!seen.has(s)){seen.add(s);show.push(r)}if(show.length===3)break}
+  res(`<p class="msg">The computer grew 20 trees for ${n}, choosing every split at random. It made <b>${shapes.size}</b> different tree shape${shapes.size===1?'':'s'}, and <b>${sets.size}</b> set${sets.size===1?'':'s'} of leaves: ${[...sets].join(', ')}.</p>
+   <div class="forest">${show.map(r=>`<figure>${treeSVG(r,{compact:true})}${tiles(sortN(leaves(r).map(l=>l.v)))}</figure>`).join('')}</div>
+   <p class="hint">Do you still need to check each tree, or do you trust the leaves will match? Why?</p>`);
+}
+function compareStarts(){
+  const n=D.num,leavesN=factorize(n).length;
+  const rows=pairs(n).map(([a,b])=>({a,b,lv:1+Math.max(minDepth(a),minDepth(b))}));
+  const best=Math.min(...rows.map(r=>r.lv)),worst=Math.max(...rows.map(r=>r.lv));
+  const bestS=rows.filter(r=>r.lv===best).map(r=>`${r.a} × ${r.b}`),worstS=rows.filter(r=>r.lv===worst).map(r=>`${r.a} × ${r.b}`);
+  res(`<div class="tbl-wrap"><table><tr><th>Start</th><th>Fewest branch levels possible</th><th>Splits needed</th></tr>${rows.map(r=>`<tr><td><b>${r.a} × ${r.b}</b></td><td>${r.lv}</td><td>${leavesN-1}</td></tr>`).join('')}</table></div>
+   <p class="msg good">Every tree for ${n} needs exactly <b>${leavesN-1} splits</b>, whatever the start. ${n} has ${leavesN} prime leaves, and each split turns one leaf into two, adding one leaf.
+   ${best<worst?` The start does change how tall the tree grows: ${listText(bestS)} can finish in ${best} level${best===1?'':'s'}, while ${listText(worstS)} needs at least ${worst}. Even-sized splits grow wide and short.`:' Here every start can finish in the same number of levels.'}</p>`);
+}
+function shortTall(){
+  const n=D.num,s=plant(n,null,chooseShort),t=plant(n,null,chooseSpf);
+  res(`<div class="forest pair"><figure>${treeSVG(s)}<figcaption>Shortest: ${depthOf(s)} level${depthOf(s)===1?'':'s'}, ${splitsOf(s)} splits</figcaption></figure><figure>${treeSVG(t)}<figcaption>Tallest: ${depthOf(t)} levels, ${splitsOf(t)} splits (peel off the smallest prime each time)</figcaption></figure></div>
+   <p class="hint">Which tree would you rather draw on a whiteboard? Which one is easier to do in your head?</p>`);
+}
+function chart(mode){
+  const cells=[];for(let n=1;n<=60;n++){
+    const f=n>1?factorize(n):[];
+    let on=false;
+    if(mode==='prime')on=isPrime(n);else if(mode==='sq')on=Number.isInteger(Math.sqrt(n));else if(mode)on=n%mode===0;
+    cells.push(`<div class="cell${on?' on':''}"><b>${n}</b><span class="dots">${f.map(p=>`<i style="--c:${col(p)}" title="${p}"></i>`).join('')}</span></div>`);
+  }
+  const legend=`<div class="legend">${[2,3,5,7,11,13].map(p=>`<span><i style="--c:${col(p)}"></i>${p}</span>`).join('')}<span><i style="--c:var(--pX)"></i>17 and up</span><span>Each dot is one prime ingredient.</span></div>`;
+  let msg='';
+  const pr=[];for(let n=2;n<=60;n++)if(isPrime(n))pr.push(n);
+  if(mode===null)msg=`Every number from 2 to 60 is built from prime dots. 1 has no dots at all: it is neither prime nor composite.`;
+  if(mode==='prime')msg=`${pr.length} numbers wear just one dot: the primes. A prime's only factors are 1 and itself, so its only split is 1 × itself, which doesn't make anything smaller. Every other split makes two smaller numbers, so a tree can't keep shrinking forever. It has to stop at primes.`;
+  if(mode===2){const c=Math.floor(60/2);msg=`${c} numbers have a 2 inside: 2, 4, 6, … 60. They are the same numbers the 2s crossed out in the sieve, plus 2 itself.`}
+  if(mode===3){const c=Math.floor(60/3);msg=`${c} numbers have a 3 inside: every third number. Compare with the 3s in your sieve.`}
+  if(mode==='sq')msg=`Square numbers: 1, 4, 9, 16, 25, 36, 49. Look at their dots. Every color comes in pairs, so the dots split into two matching halves (36 = 2 × 3 × 2 × 3 = 6 × 6).`;
+  res(`<div class="chart${mode?' focus':''}">${cells.join('')}</div>${legend}<p class="msg${mode?' good':''}">${msg}</p>`);
+}
+function doubling(){
+  const steps=[];for(let k=0;k<=5;k++){const v=2**k;steps.push(`<div class="step"><b>${v}</b><small>${k===0?'start':times(Array(k).fill(2))}</small><br><small>binary ${v.toString(2)}</small></div>`)}
+  res(`<div class="chain">${steps.join('<span class="arr">×2 →</span>')}</div>
+   <p class="msg good">I am <b>32</b>: five 2s multiplied together, the fifth doubling of 1. Computers store everything with just two symbols, 0 and 1 (base two). In base two, 32 is written 100000, a "round" number, the way 100 or 1,000 is round for us. Ten doublings make 1,024, the number of bytes in a kilobyte.</p>`);
+}
+async function search(){
+  const g=D.gen;
+  res(`<p class="scan" id="scan">Checking…</p><div id="scanOut"></div>`);
+  let best=0,bestN=0;const three=[];
+  for(let n=2;n<210;n++){
+    const d=distinct(n);if(d>best){best=d;bestN=n}if(d===3)three.push(n);
+    if(!reduced&&n%3===0){if(g!==D.gen)return;$('#scan').textContent=`Checking ${n}… most different primes so far: ${best} (first at ${bestN})`;await sleep(16)}
+  }
+  if(g!==D.gen)return;
+  $('#scan').textContent=`Checked 2 to 209. The most different primes in any of them: ${best}.`;
+  $('#scanOut').innerHTML=`<p class="msg">${three.length} numbers below 210 use three different primes. The first is ${three[0]} = ${tiles(factorize(three[0]))}. Here they all are: ${three.join(', ')}. None uses four.</p>
+   <p class="msg good">The first number with four different primes is <b>210</b> = ${tiles([2,3,5,7])}.</p>`;
+}
+function proof(){
+  res(`<p class="msg">Four <b>different</b> primes means four different numbers from the prime list ${tiles([2,3,5,7,11,13])} …</p>
+   <p class="msg">The four smallest are 2, 3, 5 and 7, and 2 × 3 × 5 × 7 = <b>210</b>.</p>
+   <p class="msg">Any other choice swaps one of them for a bigger prime (the smaller ones are already used), so the product gets bigger. For example, 2 × 3 × 5 × 11 = 330.</p>
+   <p class="msg">Repeating a prime doesn't help: 2 × 2 × 3 × 5 = 60 still has only three different primes, and extra copies only make the number bigger.</p>
+   <p class="msg good">So no number smaller than 210 can use four different primes. That is a proof: it covers every possible number, not just the ones we tried.</p>`);
+}
+function five(){
+  res(`<p class="msg good">Same idea, one more prime: 2 × 3 × 5 × 7 × 11 = <b>2,310</b>. Each new record is the last one times the next prime. What would six different primes give?</p>`);
+}
+
+/* ---------- global ---------- */
+function resetAll(){
+  warmReset();
+  TT.pred=null;$$('#ttPred button').forEach(x=>x.setAttribute('aria-pressed','false'));ttSet(0);
+  WSs.log=[];renderLog();wsNew(48);
+  K.w=0;K.ans='';K.solved=new Set();K.c=0;K.pot=[];whoSay('');cookSay('');setKMode('who');whoRender();cookRender();
+  D.q=1;D.num=36;D.gen++;res('');detRender();
+}
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+document.addEventListener('fullscreenchange',()=>{$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen'});
+resetAll();
+})();
+</script>
+
+</body></html>

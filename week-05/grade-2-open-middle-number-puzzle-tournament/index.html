@@ -1,0 +1,736 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Open Middle: Number Puzzle Tournament</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a tournament table. Left = puzzle board (equation of tile slots + a tray of digit tiles 1–9). Right = the class Record Chart. */
+:root{
+  --bg:#E9EEF5; --card:#FFFFFF; --ink:#16213A; --muted:#55607A; --line:#CBD3E0;
+  --accent:#2550C0; --accent-ink:#FFFFFF; --accent-soft:#DCE5FA;
+  --tile:#FFE7A3; --tile-edge:#D9A93A; --tile-ink:#3A2A05; --tile-used:#E3E7EE;
+  --gold:#B07D00; --gold-soft:#FFF1C9; --good:#16804F; --good-soft:#DDF3E8; --nudge:#A3356D; --nudge-soft:#F8E1ED;
+  --display:"Bungee", "Arial Black", Impact, sans-serif;
+  --body:"Lexend", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10172A; --card:#1A2339; --ink:#EAEFF8; --muted:#A3AEC6; --line:#33405E;
+    --accent:#7FA2FF; --accent-ink:#0E1630; --accent-soft:#25335A;
+    --tile:#F2D27A; --tile-edge:#B88A22; --tile-ink:#2C1F02; --tile-used:#2A3450;
+    --gold:#F4C34A; --gold-soft:#3A3115; --good:#4FD39A; --good-soft:#163A2C; --nudge:#F08CBE; --nudge-soft:#3F2034;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10172A; --card:#1A2339; --ink:#EAEFF8; --muted:#A3AEC6; --line:#33405E;
+  --accent:#7FA2FF; --accent-ink:#0E1630; --accent-soft:#25335A;
+  --tile:#F2D27A; --tile-edge:#B88A22; --tile-ink:#2C1F02; --tile-used:#2A3450;
+  --gold:#F4C34A; --gold-soft:#3A3115; --good:#4FD39A; --good-soft:#163A2C; --nudge:#F08CBE; --nudge-soft:#3F2034;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4; padding:0 24px 28px; -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-block:18px 10px}
+.brand h1{font-family:var(--display); font-weight:400; font-size:clamp(26px,3.4vw,46px); line-height:1.02; margin:0; letter-spacing:.01em; text-wrap:balance}
+.brand h1 span{color:var(--accent)}
+.brand p{margin:6px 0 0; color:var(--muted); font-size:15px; letter-spacing:.06em; text-transform:uppercase; font-weight:500}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:600; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:8px; flex-wrap:wrap; border-bottom:3px solid var(--line); margin-bottom:18px}
+nav.tabs button{border:0; background:none; padding:12px 8px; margin-right:16px; font-weight:600; font-size:clamp(17px,1.5vw,21px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-3px; min-height:52px}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:clamp(17px,1.5vw,21px); padding:14px 24px; border-radius:16px; min-height:56px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(16px,1.3vw,19px); padding:12px 20px; border-radius:16px; min-height:56px}
+.secondary:disabled{opacity:.4; cursor:default}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+
+/* ---------- Warm-up ---------- */
+.duel{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:clamp(18px,3vw,36px); display:flex; flex-direction:column; gap:22px; max-width:980px}
+.duel-q{font-size:clamp(22px,2.4vw,32px); font-weight:600; margin:0; text-wrap:balance}
+.duel-big{font-family:var(--display); font-size:clamp(44px,7vw,96px); line-height:1; display:flex; align-items:center; gap:.3em; flex-wrap:wrap; font-variant-numeric:tabular-nums}
+.duel-big .vs{font-family:var(--body); font-weight:600; font-size:.36em; color:var(--muted); background:var(--accent-soft); padding:.3em .7em; border-radius:999px}
+.duel-big .target{color:var(--accent)}
+.vote{display:flex; gap:14px; flex-wrap:wrap}
+.vote button{flex:1 1 220px; border:3px solid var(--line); background:var(--bg); border-radius:20px; padding:18px; font-size:clamp(20px,2vw,28px); font-weight:700; min-height:76px}
+.vote button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.proof{background:var(--accent-soft); border-radius:18px; padding:18px 22px; font-size:clamp(18px,1.7vw,23px); display:flex; flex-direction:column; gap:10px}
+.proof:empty{display:none}
+.proof p{margin:0}
+.proof .line{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:999px; font-weight:600; background:var(--card); border:2px solid var(--line); font-variant-numeric:tabular-nums}
+.duel-nav{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.duel-nav .dot{width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:19px}
+.duel-nav .dot[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+
+/* ---------- Tournament ---------- */
+.arena{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr); gap:24px; align-items:start}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:clamp(16px,2.2vw,28px); display:flex; flex-direction:column; gap:18px; min-width:0}
+.pick{display:flex; gap:10px; flex-wrap:wrap}
+.pick button{border:2px solid var(--line); background:var(--bg); border-radius:16px; padding:10px 16px; text-align:left; min-height:60px; display:flex; flex-direction:column; gap:2px}
+.pick button b{font-family:var(--display); font-weight:400; font-size:15px; letter-spacing:.04em; color:var(--muted)}
+.pick button span{font-weight:600; font-size:16px}
+.pick button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.pick button[aria-pressed="true"] b{color:var(--accent)}
+.goal{font-size:clamp(19px,1.8vw,25px); font-weight:600; margin:0; text-wrap:balance}
+.goal small{display:block; font-size:.72em; font-weight:400; color:var(--muted); margin-top:4px}
+
+.equation{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 14px; padding:18px 8px 6px; --slot:clamp(58px,8.4vw,104px)}
+.num{display:flex; flex-direction:column; align-items:center; gap:4px}
+.num .pair{display:flex; gap:6px}
+.num .pv{display:flex; gap:6px; font-size:12px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase}
+.num .pv span{width:var(--slot); text-align:center}
+.slot{width:var(--slot); height:calc(var(--slot)*1.12); border-radius:14px; border:3px dashed var(--line); background:var(--bg); font-family:var(--display); font-size:calc(var(--slot)*.58); line-height:1; display:grid; place-items:center; padding:0; color:var(--tile-ink); position:relative}
+.slot.filled{border:0; background:var(--tile); box-shadow:inset 0 -6px 0 var(--tile-edge); }
+.slot.sel{border:3px solid var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+.slot.filled.sel{box-shadow:inset 0 -6px 0 var(--tile-edge), 0 0 0 4px var(--accent)}
+.slot.pop{animation:pop .22s ease-out}
+.opsign{font-family:var(--display); font-size:calc(var(--slot)*.6); color:var(--muted); line-height:1; padding-bottom:22px}
+.result{font-family:var(--display); font-size:calc(var(--slot)*.66); line-height:1; min-width:2.2em; text-align:center; color:var(--accent); padding-bottom:22px; font-variant-numeric:tabular-nums}
+.result.empty{color:var(--line)}
+
+.tray{display:grid; grid-template-columns:repeat(9,1fr); gap:8px}
+.tile{aspect-ratio:1/1.08; max-width:100%; border:0; border-radius:12px; background:var(--tile); box-shadow:inset 0 -5px 0 var(--tile-edge); color:var(--tile-ink); font-family:var(--display); font-size:clamp(24px,3vw,40px); display:grid; place-items:center; padding:0; transition:transform .12s}
+.tile:hover:not(:disabled){transform:translateY(-2px)}
+.tile:disabled{background:var(--tile-used); box-shadow:none; color:var(--muted); opacity:.55; cursor:default}
+.tray-note{font-size:14px; color:var(--muted); margin:-8px 0 0}
+
+.feedback{border-radius:18px; padding:16px 20px; font-size:clamp(17px,1.5vw,21px); display:flex; flex-direction:column; gap:8px}
+.feedback:empty{display:none}
+.feedback p{margin:0}
+.feedback.info{background:var(--accent-soft)}
+.feedback.nudge{background:var(--nudge-soft); border-left:6px solid var(--nudge)}
+.feedback.good{background:var(--good-soft); border-left:6px solid var(--good)}
+.feedback.gold{background:var(--gold-soft); border-left:6px solid var(--gold)}
+.breakdown{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-variant-numeric:tabular-nums}
+
+/* Record chart */
+.chart-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.chart-head h2{font-family:var(--display); font-weight:400; font-size:clamp(20px,1.9vw,26px); margin:0; letter-spacing:.02em}
+.timer{margin-left:auto; display:flex; align-items:center; gap:8px}
+.timer output{font-family:var(--display); font-size:24px; min-width:3.4em; text-align:right; font-variant-numeric:tabular-nums}
+.timer output.done{color:var(--nudge)}
+.timer button{border:2px solid var(--line); background:var(--bg); border-radius:12px; min-width:48px; min-height:48px; font-weight:700; font-size:15px; padding:0 10px}
+.record{border-radius:18px; background:var(--gold-soft); border:2px solid var(--gold); padding:14px 18px; display:flex; flex-direction:column; gap:4px}
+.record .lbl{font-size:13px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--gold)}
+.record .eq{font-family:var(--display); font-size:clamp(24px,2.6vw,34px); font-variant-numeric:tabular-nums; line-height:1.1}
+.record .meta{font-size:15px; color:var(--muted)}
+.record.none{background:var(--bg); border:2px dashed var(--line)}
+.record.none .lbl{color:var(--muted)}
+.record.flash{animation:flash .9s ease-out}
+.who{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.who label{font-size:15px; color:var(--muted)}
+.who input{flex:1 1 140px; min-width:0; border:2px solid var(--line); background:var(--bg); border-radius:12px; padding:10px 12px; min-height:48px; font-size:17px}
+ol.attempts{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto}
+ol.attempts li{display:grid; grid-template-columns:2.2em minmax(0,1fr) auto; gap:10px; align-items:center; padding:8px 12px; border-radius:12px; background:var(--bg); font-variant-numeric:tabular-nums}
+ol.attempts li .rk{font-weight:700; color:var(--muted)}
+ol.attempts li .e{font-weight:600; font-size:18px; overflow-wrap:anywhere}
+ol.attempts li .e small{font-weight:400; color:var(--muted); font-size:14px; margin-left:6px}
+ol.attempts li .s{font-weight:700; white-space:nowrap}
+ol.attempts li.top{background:var(--gold-soft)}
+ol.attempts li.top .rk{color:var(--gold)}
+ol.attempts li.fresh{outline:3px solid var(--accent)}
+.empty-note{color:var(--muted); font-size:16px; margin:0}
+.ways{font-size:15px; color:var(--muted); margin:0}
+.ways b{color:var(--good)}
+
+/* Detective questions */
+.qnav{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+.qnav button{border:2px solid var(--line); background:var(--card); border-radius:999px; min-height:52px; padding:0 20px; font-weight:600; font-size:17px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qcard{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:clamp(18px,3vw,34px); display:flex; flex-direction:column; gap:18px; max-width:1100px}
+.qcard .tag{font-family:var(--display); font-size:14px; letter-spacing:.06em; color:var(--accent)}
+.qtext{font-size:clamp(22px,2.3vw,32px); font-weight:600; margin:0; text-wrap:balance; max-width:32em}
+.evidence{display:flex; flex-direction:column; gap:14px; font-size:clamp(17px,1.6vw,22px)}
+.evidence:empty{display:none}
+.evidence p{margin:0; max-width:40em}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{display:inline-block; white-space:nowrap; font-family:var(--display); font-size:clamp(17px,1.6vw,22px); background:var(--bg); border:2px solid var(--line); border-radius:12px; padding:6px 12px; font-variant-numeric:tabular-nums}
+.chip.ok{background:var(--good-soft); border-color:var(--good)}
+.chip.bad{background:var(--nudge-soft); border-color:var(--nudge)}
+.chip.mine{border-color:var(--gold); background:var(--gold-soft)}
+.cmp{border-collapse:collapse; font-variant-numeric:tabular-nums}
+.cmp .chip{font-size:clamp(15px,1.4vw,20px); padding:4px 10px}
+.cmp td,.cmp th{padding:6px 14px 6px 0; text-align:left; vertical-align:middle}
+.cmp th{font-size:14px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em}
+.scroll{overflow-x:auto; max-width:100%}
+.hint{font-size:15px; color:var(--muted); margin:0}
+.mini{display:inline-flex; gap:4px; vertical-align:middle}
+.mini i{font-style:normal; font-family:var(--display); width:1.7em; height:1.85em; border-radius:6px; background:var(--tile); box-shadow:inset 0 -3px 0 var(--tile-edge); color:var(--tile-ink); display:grid; place-items:center; font-size:.9em}
+
+@keyframes pop{from{transform:scale(.8)}to{transform:scale(1)}}
+@keyframes flash{0%{box-shadow:0 0 0 0 var(--gold)}40%{box-shadow:0 0 0 10px var(--gold-soft)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important; transition:none !important}}
+
+@media (max-width: 920px){
+  .arena{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 560px){
+  body{padding:0 16px 24px; font-size:17px}
+  .equation{--slot:clamp(44px,15vw,64px); gap:8px}
+  .num .pair{gap:4px}
+  .tray{grid-template-columns:repeat(5,1fr)}
+  .tools{margin-left:0}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <h1>Open Middle: <span>Number Puzzle Tournament</span></h1>
+    <p>Grade 2 · Week 5 · Number Detectives</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tabWarm" aria-selected="false">Warm-up: Estimation duel</button>
+  <button role="tab" id="tabPlay" aria-selected="true">Tournament</button>
+  <button role="tab" id="tabQ" aria-selected="false">Detective questions</button>
+</nav>
+
+<section id="viewWarm" hidden>
+  <div class="duel">
+    <div class="duel-nav" id="duelNav"></div>
+    <p class="duel-q" id="duelQ"></p>
+    <div class="duel-big" id="duelBig"></div>
+    <div class="vote">
+      <button id="voteLess" aria-pressed="false">Less than</button>
+      <button id="voteMore" aria-pressed="false">More than</button>
+    </div>
+    <div class="row">
+      <button class="primary" id="proofBtn">Defend it: show the evidence</button>
+      <button class="secondary" id="nextDuel">Next duel</button>
+    </div>
+    <div class="proof" id="proof" aria-live="polite"></div>
+    <p class="hint">Vote first. Then explain without adding it up exactly. Friendly numbers like 40 and 50 help.</p>
+  </div>
+</section>
+
+<section id="viewPlay">
+  <div class="arena">
+    <div class="panel">
+      <div class="pick" id="pick" role="group" aria-label="Choose a puzzle"></div>
+      <p class="goal" id="goal"></p>
+      <div class="equation" id="equation" aria-label="Puzzle board"></div>
+      <div class="tray" id="tray" aria-label="Digit tiles"></div>
+      <p class="tray-note">Tap a box, then a tile. Tap a filled box to take its tile back. Each digit 1–9 can be used once.</p>
+      <div class="row">
+        <button class="primary" id="postBtn">Post to the record chart</button>
+        <button class="secondary" id="clearBtn">Clear board</button>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </div>
+
+    <aside class="panel">
+      <div class="chart-head">
+        <h2>Record Chart</h2>
+        <div class="timer">
+          <output id="clock">8:00</output>
+          <button id="clockGo" aria-label="Start the 8-minute round">Start</button>
+          <button id="clockReset" aria-label="Reset the round timer">↺</button>
+        </div>
+      </div>
+      <div class="record none" id="record"></div>
+      <div class="who">
+        <label for="whoInput">Who?</label>
+        <input id="whoInput" type="text" maxlength="20" placeholder="Name or team (optional)" autocomplete="off">
+      </div>
+      <p class="ways" id="ways"></p>
+      <ol class="attempts" id="attempts"></ol>
+    </aside>
+  </div>
+</section>
+
+<section id="viewQ" hidden>
+  <div class="qnav" id="qnav"></div>
+  <div class="qcard">
+    <span class="tag" id="qtag"></span>
+    <p class="qtext" id="qtext"></p>
+    <div class="row" id="qactions"></div>
+    <div class="evidence" id="evidence" aria-live="polite"></div>
+    <p class="hint">Talk it over with a partner first. Then tap a button to put evidence on the screen.</p>
+  </div>
+</section>
+<script>
+/* ===== Pure math (no DOM) ===== */
+var M = (function(){
+  var DIGITS = [1,2,3,4,5,6,7,8,9];
+  // A puzzle is a list of 2-digit numbers built from slots [t,o,t,o,...]
+  var PUZZLES = {
+    1:{ id:1, nums:2, op:'+', short:'Closest to 100', goal:'□□ + □□ as close to 100 as you can' },
+    2:{ id:2, nums:2, op:'−', short:'Smallest difference', goal:'□□ − □□ with the smallest answer above zero' },
+    3:{ id:3, nums:3, op:'+', short:'Exactly 100?', goal:'□□ + □□ + □□ that makes exactly 100. Is it even possible?' }
+  };
+  function numbers(slots){ var r=[]; for(var i=0;i<slots.length;i+=2) r.push(10*slots[i]+slots[i+1]); return r; }
+  function value(pid, slots){
+    var n = numbers(slots);
+    if(pid===2) return n[0]-n[1];
+    return n.reduce(function(a,b){return a+b;},0);
+  }
+  // lower score is better; null = not a valid entry
+  function score(pid, slots){
+    var v = value(pid, slots);
+    if(pid===2) return v>0 ? v : null;
+    return Math.abs(v-100);
+  }
+  function distinct(slots){ var s={}; for(var i=0;i<slots.length;i++){ if(s[slots[i]]) return false; s[slots[i]]=1; } return true; }
+  // key that treats a+b and b+a as the same answer
+  function key(pid, slots){
+    var n = numbers(slots);
+    if(pid!==2) n = n.slice().sort(function(a,b){return a-b;});
+    return n.join(pid===2?'-':'+');
+  }
+  function perms(arr, k){
+    var out=[];
+    (function go(cur, used){
+      if(cur.length===k){ out.push(cur.slice()); return; }
+      for(var i=0;i<arr.length;i++){ if(used[i]) continue; used[i]=1; cur.push(arr[i]); go(cur,used); cur.pop(); used[i]=0; }
+    })([], {});
+    return out;
+  }
+  // every distinct answer (unordered for +) that reaches the best possible score
+  var cache = {};
+  function allBest(pid){
+    if(cache[pid]) return cache[pid];
+    var k = PUZZLES[pid].nums*2, best=Infinity, map={};
+    perms(DIGITS, k).forEach(function(p){
+      var s = score(pid, p); if(s===null) return;
+      if(s<best){ best=s; map={}; }
+      if(s===best){ var kk=key(pid,p); if(!map[kk]) map[kk]=numbers(p); }
+    });
+    var list = Object.keys(map).map(function(k){ return map[k]; });
+    list.sort(function(a,b){ for(var i=0;i<a.length;i++){ if(a[i]!==b[i]) return a[i]-b[i]; } return 0; });
+    if(pid!==2) list = list.map(function(n){ return n.slice().sort(function(a,b){return a-b;}); }).sort(function(a,b){ for(var i=0;i<a.length;i++){ if(a[i]!==b[i]) return a[i]-b[i]; } return 0; });
+    return (cache[pid] = {best:best, list:list});
+  }
+  // 3-digit sets from 1-9 with a given sum
+  function triples(sum){
+    var r=[]; for(var a=1;a<=9;a++) for(var b=a+1;b<=9;b++) for(var c=b+1;c<=9;c++) if(a+b+c===sum) r.push([a,b,c]); return r;
+  }
+  function shared(x,y){ return x.filter(function(d){ return y.indexOf(d)>=0; }); }
+  // Puzzle 3 proof: ones digits must add to 10 or 20; tens then add to 9 or 8.
+  function p3Case(onesSum){
+    var tensSum = (100 - onesSum)/10; // ones 10 -> 9 tens + 1 carried; ones 20 -> 8 tens + 2 carried
+    var O = triples(onesSum), T = triples(tensSum), pairs=[];
+    O.forEach(function(o){ T.forEach(function(t){ pairs.push({ones:o, tens:t, clash:shared(o,t)}); }); });
+    return {onesSum:onesSum, tensSum:tensSum, ones:O, tens:T, pairs:pairs, works:pairs.filter(function(p){return !p.clash.length;})};
+  }
+  function roundTen(n){ return Math.round(n/10)*10; }
+  return {DIGITS:DIGITS, PUZZLES:PUZZLES, numbers:numbers, value:value, score:score, distinct:distinct, key:key, allBest:allBest, triples:triples, p3Case:p3Case, roundTen:roundTen};
+})();
+(function(){
+var $ = function(s){ return document.querySelector(s); };
+var P = M.PUZZLES;
+var MINUS = '−';
+var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function plural(n, w){ return n + ' ' + w + (n===1 ? '' : 's'); }
+function eqText(pid, nums){ return nums.join(pid===2 ? ' '+MINUS+' ' : ' + '); }
+
+/* ================= State ================= */
+var S;
+function freshState(){
+  return {
+    tab:'play', pid:1,
+    boards:{1:[4,7,3,8], 2:[null,null,null,null], 3:[null,null,null,null,null,null]},
+    sel:{1:-1, 2:0, 3:0},
+    charts:{1:[], 2:[], 3:[]},
+    sample:true,
+    duel:0, votes:{}, proofShown:{},
+    q:1, clock:480, running:false
+  };
+}
+
+/* ================= Warm-up ================= */
+var DUELS = [ {a:38,b:47,t:90}, {a:61,b:28,t:90}, {a:52,b:29,t:80}, {a:44,b:57,t:100} ];
+function renderDuel(){
+  var d = DUELS[S.duel];
+  $('#duelNav').innerHTML = DUELS.map(function(_,i){ return '<button class="dot" data-d="'+i+'" aria-pressed="'+(i===S.duel)+'" aria-label="Duel '+(i+1)+'">'+(i+1)+'</button>'; }).join('');
+  $('#duelNav').querySelectorAll('button').forEach(function(b){ b.onclick = function(){ S.duel = +b.dataset.d; renderDuel(); }; });
+  $('#duelQ').textContent = 'Is '+d.a+' + '+d.b+' more or less than '+d.t+'?';
+  $('#duelBig').innerHTML = '<span>'+d.a+' + '+d.b+'</span><span class="vs">more or less than</span><span class="target">'+d.t+'</span>';
+  var v = S.votes[S.duel];
+  $('#voteLess').setAttribute('aria-pressed', v==='less');
+  $('#voteMore').setAttribute('aria-pressed', v==='more');
+  $('#nextDuel').disabled = S.duel === DUELS.length-1;
+  $('#proof').innerHTML = S.proofShown[S.duel] ? proofHTML(d) : '';
+}
+function offsetText(n, r){
+  if(n===r) return n+' is already a friendly number.';
+  return n < r ? n+' is '+(r-n)+' less than '+r+'.' : n+' is '+(n-r)+' more than '+r+'.';
+}
+function proofHTML(d){
+  var ra = M.roundTen(d.a), rb = M.roundTen(d.b), sum = d.a + d.b;
+  var adj = (d.a - ra) + (d.b - rb);
+  var dir = sum < d.t ? 'less' : 'more';
+  var why;
+  if(adj < 0) why = 'Together the real numbers are '+(-adj)+' less than the friendly numbers. So the real sum is <b>less than '+d.t+'</b>.';
+  else why = 'Together the real numbers are '+adj+' more than the friendly numbers. So the real sum is <b>more than '+d.t+'</b>.';
+  var v = S.votes[S.duel], verdict = '';
+  if(v) verdict = v===dir ? '<p>The vote said <b>'+v+' than</b>. The evidence agrees.</p>' : '<p>The vote said <b>'+v+' than</b>. The evidence points the other way. Which step changes your mind?</p>';
+  return '<p>'+offsetText(d.a, ra)+' '+offsetText(d.b, rb)+'</p>'+
+    '<div class="line"><span class="pill">'+ra+' + '+rb+' = '+(ra+rb)+'</span></div>'+
+    '<p>'+why+'</p>'+ verdict +
+    '<div class="line"><span>Check it exactly:</span><span class="pill">'+d.a+' + '+d.b+' = '+sum+'</span></div>';
+}
+
+/* ================= Tournament board ================= */
+function board(){ return S.boards[S.pid]; }
+function filled(b){ return b.every(function(x){ return x!==null; }); }
+function nextEmpty(b, from){
+  for(var k=0;k<b.length;k++){ var i=(from+k)%b.length; if(b[i]===null) return i; }
+  return -1;
+}
+function renderPick(){
+  $('#pick').innerHTML = [1,2,3].map(function(i){
+    return '<button data-p="'+i+'" aria-pressed="'+(S.pid===i)+'"><b>PUZZLE '+i+'</b><span>'+P[i].short+'</span></button>';
+  }).join('');
+  $('#pick').querySelectorAll('button').forEach(function(b){ b.onclick = function(){ S.pid = +b.dataset.p; S.sample=false; say(''); renderPlay(); }; });
+  var goals = {
+    1:'Make two 2-digit numbers that add up as close to 100 as you can.<small>Use digits 1–9, each one only once.</small>',
+    2:'Make the smallest answer you can. It has to be bigger than 0.<small>Use digits 1–9, each one only once.</small>',
+    3:'Can three 2-digit numbers add up to exactly 100?<small>Use digits 1–9, each one only once. If you can’t hit 100, get as close as you can.</small>'
+  };
+  $('#goal').innerHTML = goals[S.pid];
+}
+function renderEquation(pop){
+  var b = board(), n = P[S.pid].nums, sel = S.sel[S.pid], html='';
+  for(var k=0;k<n;k++){
+    if(k>0) html += '<span class="opsign" aria-hidden="true">'+(P[S.pid].op==='+'?'+':MINUS)+'</span>';
+    html += '<div class="num"><div class="pair">';
+    for(var j=0;j<2;j++){
+      var i = 2*k+j, d = b[i];
+      var label = 'Number '+(k+1)+', '+(j===0?'tens':'ones')+' box, '+(d===null?'empty':d);
+      html += '<button class="slot'+(d!==null?' filled':'')+(i===sel?' sel':'')+(i===pop?' pop':'')+'" data-i="'+i+'" aria-label="'+label+'">'+(d===null?'':d)+'</button>';
+    }
+    html += '</div><div class="pv" aria-hidden="true"><span>tens</span><span>ones</span></div></div>';
+  }
+  var res = '?', cls = 'result empty';
+  if(filled(b)){ var v = M.value(S.pid, b); res = v < 0 ? MINUS+(-v) : String(v); cls = 'result'; }
+  html += '<span class="opsign" aria-hidden="true">=</span><span class="'+cls+'" aria-live="polite">'+res+'</span>';
+  $('#equation').innerHTML = html;
+  $('#equation').querySelectorAll('.slot').forEach(function(el){ el.onclick = function(){ tapSlot(+el.dataset.i); }; });
+}
+function renderTray(){
+  var b = board();
+  $('#tray').innerHTML = M.DIGITS.map(function(d){
+    var used = b.indexOf(d) >= 0;
+    return '<button class="tile" data-d="'+d+'" '+(used?'disabled aria-label="'+d+', already used"':'aria-label="Tile '+d+'"')+'>'+d+'</button>';
+  }).join('');
+  $('#tray').querySelectorAll('.tile').forEach(function(el){ el.onclick = function(){ placeDigit(+el.dataset.d); }; });
+}
+function tapSlot(i){
+  var b = board();
+  if(b[i] !== null){ b[i] = null; }
+  S.sel[S.pid] = i; S.sample=false; say('');
+  renderEquation(); renderTray();
+}
+function placeDigit(d){
+  var b = board();
+  if(b.indexOf(d) >= 0) return;
+  var i = S.sel[S.pid];
+  if(i < 0 || b[i] !== null) i = nextEmpty(b, 0);
+  if(i < 0){ say('nudge', '<p>Every box is full. Tap a box to take its tile back, then try a new digit.</p>'); return; }
+  b[i] = d; S.sample=false; say('');
+  S.sel[S.pid] = nextEmpty(b, i+1);
+  renderEquation(reduced ? -1 : i); renderTray();
+}
+function clearBoard(){
+  S.boards[S.pid] = S.boards[S.pid].map(function(){ return null; });
+  S.sel[S.pid] = 0; S.sample=false; say('');
+  renderEquation(); renderTray();
+}
+function say(kind, html){
+  var f = $('#feedback');
+  f.className = 'feedback' + (kind ? ' '+kind : '');
+  f.innerHTML = html || '';
+}
+
+/* ----- explanations (place value, always exact) ----- */
+function addBreakdown(nums){
+  var tens = nums.map(function(n){ return Math.floor(n/10); }), ones = nums.map(function(n){ return n%10; });
+  var T = tens.reduce(function(a,b){return a+b;},0), O = ones.reduce(function(a,b){return a+b;},0);
+  return '<div class="breakdown"><span class="pill">Tens: '+tens.join(' + ')+' = '+T+' tens = '+(10*T)+'</span>'+
+         '<span class="pill">Ones: '+ones.join(' + ')+' = '+O+'</span>'+
+         '<span class="pill">'+(10*T)+' + '+O+' = '+(10*T+O)+'</span></div>';
+}
+function subBreakdown(a, b){
+  var A=Math.floor(a/10), B=a%10, C=Math.floor(b/10), D=b%10, X=A-C;
+  if(B >= D){
+    return '<div class="breakdown"><span class="pill">Tens: '+A+' − '+C+' = '+plural(X,'ten')+' = '+(10*X)+'</span>'+
+           '<span class="pill">Ones: '+B+' − '+D+' = '+(B-D)+'</span>'+
+           '<span class="pill">'+(10*X)+' + '+(B-D)+' = '+(a-b)+'</span></div>';
+  }
+  return '<div class="breakdown"><span class="pill">Tens: '+A+' − '+C+' = '+plural(X,'ten')+'</span>'+
+         '<span class="pill">Ones: '+B+' − '+D+'? Not enough ones. Trade 1 ten: '+(10+B)+' − '+D+' = '+(10+B-D)+'</span>'+
+         '<span class="pill">'+plural(X-1,'ten')+' + '+(10+B-D)+' = '+(a-b)+'</span></div>';
+}
+function hintFor(pid, nums, v){
+  if(pid===2){
+    var A=Math.floor(nums[0]/10), C=Math.floor(nums[1]/10);
+    if(A-C >= 2) return 'Your tens digits are '+(A-C)+' apart. Try tens digits that are next-door neighbors, like 3 and 2.';
+    return 'Your tens digits are neighbors. Nice! Now try a small ones digit on top and a big ones digit on the bottom.';
+  }
+  var tensVal = 10*nums.reduce(function(a,n){ return a+Math.floor(n/10); },0);
+  var onesSum = nums.reduce(function(a,n){ return a+n%10; },0);
+  if(v===100) return '';
+  var h = '';
+  if(tensVal > 100) h = 'Your tens alone make '+tensVal+'. That is already past 100. Try smaller digits in the tens boxes.';
+  else if(v < 100) h = 'You need '+(100-v)+' more. Moving a tens digit up by 1 adds 10. Moving a ones digit up by 1 adds 1.';
+  else h = 'You are '+(v-100)+' over. Moving a tens digit down by 1 takes away 10. Moving a ones digit down by 1 takes away 1.';
+  if(pid===3 && onesSum%10 !== 0) h += ' Detective clue: your ones digits add to '+onesSum+'. To land on exactly 100, they must add to a number that ends in 0.';
+  return h;
+}
+function scoreText(pid, v, s){
+  if(pid===2) return 'difference '+v;
+  return v===100 ? 'exactly 100' : s+' away';
+}
+function sortedChart(pid){
+  return S.charts[pid].slice().sort(function(x,y){ return x.score-y.score || x.t-y.t; });
+}
+function post(){
+  var pid = S.pid, b = board();
+  var empty = b.filter(function(x){return x===null;}).length;
+  if(empty){ say('nudge','<p>'+plural(empty,'box')+' still '+(empty===1?'needs':'need')+' a tile. Fill every box, then post.</p>'); return; }
+  var nums = M.numbers(b), v = M.value(pid, b), s = M.score(pid, b);
+  if(pid===2 && s===null){
+    say('nudge','<p><b>'+nums[0]+' is smaller than '+nums[1]+'</b>, so the answer would drop below zero. The puzzle needs an answer bigger than 0.</p><p>Swap them: put the bigger number on top.</p>');
+    return;
+  }
+  var key = M.key(pid, b);
+  var dupe = S.charts[pid].filter(function(e){ return e.key===key; })[0];
+  if(dupe){ say('nudge','<p><b>'+eqText(pid, dupe.nums)+'</b> is already on the chart'+(dupe.who?' (posted by '+esc(dupe.who)+')':'')+'. Can you find a different way?</p>'); return; }
+  var prev = sortedChart(pid)[0];
+  var who = $('#whoInput').value.trim().slice(0,20);
+  var entry = {nums:nums, v:v, score:s, key:key, who:who, t:Date.now() + S.charts[pid].length/1000};
+  S.charts[pid].push(entry);
+  var bd = pid===2 ? subBreakdown(nums[0], nums[1]) : addBreakdown(nums);
+  var head, kind, hint = hintFor(pid, nums, v);
+  var best = M.allBest(pid).best;
+  if(!prev || s < prev.score){
+    kind = 'gold';
+    head = '<p><b>New record!</b> '+eqText(pid,nums)+' = '+v+(pid===2?'':' ('+scoreText(pid,v,s)+')')+'. Who can beat it?</p>';
+    if(pid!==2 && s===best) head = '<p><b>New record: exactly 100!</b> '+eqText(pid,nums)+' = 100. Nobody can get closer than that. Can you find a <i>different</i> way?</p>';
+    if(pid===2 && s===best) head = '<p><b>New record!</b> '+eqText(pid,nums)+' = '+v+'. Could anyone ever get 1? Save that for the detective questions.</p>';
+  } else if(s === prev.score){
+    kind = 'good';
+    head = '<p><b>Ties the record</b> with a different way: '+eqText(pid,nums)+' = '+v+'.</p>';
+  } else {
+    kind = 'info';
+    head = '<p>Posted: '+eqText(pid,nums)+' = '+v+'. The record is '+(pid===2 ? 'a difference of '+prev.v : (prev.score===0?'exactly 100':plural(prev.score,'step')+' away from 100'))+'. Why did you put the small digits there? Can you do better?</p>';
+  }
+  say(kind, head + bd + (hint && !(pid!==2 && s===0) ? '<p>'+hint+'</p>' : ''));
+  renderChart(key);
+  if(kind==='gold' && !reduced){ var r=$('#record'); r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); }
+}
+function renderChart(freshKey){
+  var pid = S.pid, list = sortedChart(pid), rec = $('#record');
+  if(!list.length){
+    rec.className = 'record none';
+    rec.innerHTML = '<span class="lbl">Current record</span><span class="eq">None yet</span><span class="meta">Post the first attempt. Anyone may beat it.</span>';
+  } else {
+    var top = list[0];
+    rec.className = 'record';
+    rec.innerHTML = '<span class="lbl">Current record</span><span class="eq">'+eqText(pid, top.nums)+' = '+top.v+'</span><span class="meta">'+scoreText(pid, top.v, top.score)+(top.who?' · '+esc(top.who):'')+'</span>';
+  }
+  var bestScore = list.length ? list[0].score : null;
+  $('#attempts').innerHTML = list.length ? list.map(function(e,i){
+    return '<li class="'+(e.score===bestScore?'top':'')+(e.key===freshKey?' fresh':'')+'"><span class="rk">'+(i+1)+'</span><span class="e">'+eqText(pid,e.nums)+' = '+e.v+(e.who?'<small>'+esc(e.who)+'</small>':'')+'</span><span class="s">'+scoreText(pid,e.v,e.score)+'</span></li>';
+  }).join('') : '<li style="background:none;padding:0"><p class="empty-note">No attempts yet. Posted attempts line up here, best on top.</p></li>';
+  var ab = M.allBest(pid), found = list.filter(function(e){ return e.score===ab.best; }).length;
+  $('#ways').innerHTML = found ? 'Different ways found to make '+(pid===2?'a difference of 2':'exactly 100')+': <b>'+found+'</b> of '+ab.list.length : '';
+}
+function renderPlay(){ renderPick(); renderEquation(); renderTray(); renderChart(); }
+
+/* ----- round timer ----- */
+var tick = null;
+function renderClock(){
+  var m = Math.floor(S.clock/60), s = S.clock%60, o = $('#clock');
+  o.textContent = S.clock ? m+':'+(s<10?'0':'')+s : 'Time!';
+  o.classList.toggle('done', !S.clock);
+  $('#clockGo').textContent = S.running ? 'Pause' : 'Start';
+}
+function toggleClock(){
+  if(S.running){ S.running=false; clearInterval(tick); renderClock(); return; }
+  if(!S.clock) S.clock = 480;
+  S.running = true; renderClock();
+  clearInterval(tick);
+  tick = setInterval(function(){ S.clock = Math.max(0, S.clock-1); if(!S.clock){ S.running=false; clearInterval(tick); } renderClock(); }, 1000);
+}
+function resetClock(){ S.running=false; clearInterval(tick); S.clock=480; renderClock(); }
+
+/* ================= Detective questions ================= */
+function chips(list, pid, cls){
+  var found = {}; S.charts[pid].forEach(function(e){ found[e.key]=1; });
+  return '<div class="chips">'+list.map(function(n){
+    var k = n.join(pid===2?'-':'+'), mine = found[k];
+    return '<span class="chip '+(mine?'mine':(cls||''))+'">'+eqText(pid,n)+' = '+(pid===2?n[0]-n[1]:100)+(mine?' ★':'')+'</span>';
+  }).join('')+'</div>';
+}
+function ev(html){ $('#evidence').innerHTML = html; }
+function setChip(arr){ return '{'+arr.join(', ')+'}'; }
+
+var Q = {
+  1:{ tag:'Puzzle 1 · Debrief', text:'Where should the small digits go? Where should the big ones go? Why does it matter so much?',
+      actions:[
+        {label:'Same 4 digits, two ways', run:function(){
+          ev('<p>Here are the digits 1, 3, 7 and 8 used two different ways.</p>'+
+             '<div class="chips"><span class="chip">18 + 37 = 55</span><span class="chip">81 + 73 = 154</span></div>'+
+             addBreakdown([18,37]) + addBreakdown([81,73]) +
+             '<p>Same digits, but a <b>99</b>-point difference! A digit in a tens box is worth 10 times as much. Small digits in the tens boxes keep a sum small.</p>');
+        }},
+        {label:'Move one tile', run:function(){
+          ev('<p>Start with <b>47 + 38 = 85</b>. Now swap the 4 and the 7.</p>'+
+             '<div class="chips"><span class="chip">47 + 38 = 85</span><span class="chip">74 + 38 = 112</span></div>'+
+             '<p>The 7 moved into the tens box. It went from 7 to 70. The 4 moved to the ones box. It went from 40 to 4. That is 63 more, then 36 less: <b>27 more</b>. 85 + 27 = 112.</p>');
+        }}
+      ]},
+  2:{ tag:'Puzzle 1 · Investigate', text:'How many different ways can you make exactly 100? (13 + 87 and 87 + 13 count as the same way.)',
+      actions:[
+        {label:'What must the ones digits do?', run:function(){
+          ev('<p>100 has <b>0 ones</b>. So the two ones digits must add to a number ending in 0.</p>'+
+             '<p>Two different digits add to at most 9 + 8 = 17. So the ones must add to exactly <b>10</b>: 1 + 9, 2 + 8, 3 + 7 or 4 + 6. (5 + 5 uses 5 twice.)</p>'+
+             '<p>Those 10 ones make 1 new ten. We need 10 tens in all, so the tens digits must add to <b>9</b>: 1 + 8, 2 + 7, 3 + 6 or 4 + 5.</p>'+
+             '<p>Last rule: no digit can be used twice.</p>');
+        }},
+        {label:'Show every way', run:function(){
+          var ab = M.allBest(1);
+          ev('<p><b>'+ab.list.length+' different ways</b> make exactly 100. A ★ means our class posted it.</p>'+chips(ab.list, 1)+
+             '<p>Look at any one: the ones digits add to 10 and the tens digits add to 9.</p>');
+        }}
+      ]},
+  3:{ tag:'Puzzle 2 · Debrief', text:'What is the smallest difference you can make? Could anyone ever get 1?',
+      actions:[
+        {label:'Why the tens should be neighbors', run:function(){
+          ev('<p>The two tens digits can’t match, because each digit is used once. The closest they can be is next-door neighbors, like 3 and 2.</p>'+
+             '<p>Then the top number is 1 ten ahead: <b>10</b>. The ones can take some of that back. The most they can take back is 8: top ones 1, bottom ones 9.</p>'+
+             subBreakdown(31,29)+
+             '<p>10 − 8 = <b>2</b>. The ones can never take back 9 (that would need 1 − 10 or 0 − 9, and we have no 0 or 10). So 1 is impossible. 2 is the smallest.</p>');
+        }},
+        {label:'Show every way to make 2', run:function(){
+          var ab = M.allBest(2);
+          ev('<p><b>'+ab.list.length+' ways</b> make a difference of 2. A ★ means our class posted it.</p>'+chips(ab.list, 2)+
+             '<p>What do they all have in common? Look at the ones digits.</p>');
+        }}
+      ]},
+  4:{ tag:'Puzzle 3 · Extension challenge', text:'Prove it: can three 2-digit numbers, using digits 1–9 once each, add to exactly 100?',
+      actions:[
+        {label:'Step 1: What can the ones add to?', run:function(){
+          ev('<p>100 has 0 ones, so the three ones digits must add to a number ending in 0.</p>'+
+             '<p>Three different digits add to at least 1 + 2 + 3 = 6 and at most 9 + 8 + 7 = 24. The only choices ending in 0 are <b>10</b> and <b>20</b>.</p>'+
+             '<p>If the ones make 10, that is 1 ten. We need 9 more tens. If the ones make 20, that is 2 tens. We need 8 more tens.</p>');
+        }},
+        {label:'Test ones = 10', run:function(){ ev(caseHTML(M.p3Case(10))); }},
+        {label:'Test ones = 20', run:function(){ ev(caseHTML(M.p3Case(20))); }},
+        {label:'Show all the ways', run:function(){
+          var ab = M.allBest(3);
+          ev('<p><b>Yes, it’s possible!</b> There are '+ab.list.length+' different ways. A ★ means our class posted it.</p>'+chips(ab.list, 3)+
+             '<p>Check any one: the ones digits add to 20 and the tens digits add to 8.</p>');
+        }}
+      ]},
+  5:{ tag:'Close', text:'What is one strategy you stole from a classmate today? Borrowing a good idea is what real mathematicians do.',
+      actions:[
+        {label:'Show how our records improved', run:function(){
+          var html = '', any = false;
+          [1,2,3].forEach(function(pid){
+            var seq = S.charts[pid].slice().sort(function(x,y){ return x.t-y.t; }), best = null, steps = [];
+            seq.forEach(function(e){ if(best===null || e.score < best){ best = e.score; steps.push(e); } });
+            if(!steps.length) return; any = true;
+            html += '<tr><th scope="row">Puzzle '+pid+'</th><td><div class="chips">'+steps.map(function(e){ return '<span class="chip">'+eqText(pid,e.nums)+' = '+e.v+(e.who?' · '+esc(e.who):'')+'</span>'; }).join('<span aria-hidden="true">→</span>')+'</div></td></tr>';
+          });
+          ev(any ? '<p>Each arrow is a time someone beat the record.</p><div class="scroll"><table class="cmp">'+html+'</table></div><p>Whose idea helped someone else beat a record?</p>'
+                 : '<p>No attempts are posted yet. Play a round in the Tournament tab first, then come back.</p>');
+        }}
+      ]}
+};
+function caseHTML(c){
+  var rows = c.pairs.map(function(p){
+    var ok = !p.clash.length;
+    return '<tr><td><span class="chip">'+setChip(p.ones)+'</span></td><td><span class="chip">'+setChip(p.tens)+'</span></td><td><span class="chip '+(ok?'ok':'bad')+'">'+(ok?'No repeats. It works!':'Both use '+p.clash.join(' and '))+'</span></td></tr>';
+  }).join('');
+  var ex = '';
+  if(c.works.length){
+    var w = c.works[0], nums = [0,1,2].map(function(i){ return 10*w.tens[i] + w.ones[i]; });
+    ex = '<p>Example: tens '+setChip(w.tens)+' and ones '+setChip(w.ones)+' make <b>'+nums.join(' + ')+' = '+nums.reduce(function(a,b){return a+b;},0)+'</b>.</p>'+addBreakdown(nums);
+  }
+  return '<p>Ones add to <b>'+c.onesSum+'</b>, so the tens must add to <b>'+c.tensSum+'</b>. Three different digits that add to '+c.onesSum+': '+c.ones.map(setChip).join(', ')+'. Three that add to '+c.tensSum+': '+c.tens.map(setChip).join(', ')+'.</p>'+
+    '<div class="scroll"><table class="cmp"><tr><th>Ones digits</th><th>Tens digits</th><th>Repeat?</th></tr>'+rows+'</table></div>'+
+    (c.works.length ? '<p><b>'+plural(c.works.length,'combination')+' work.</b></p>'+ex
+                    : '<p><b>Every pair repeats a digit.</b> So ones adding to 10 can never work. Try ones = 20.</p>');
+}
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4,5].map(function(i){
+    return '<button data-q="'+i+'" aria-pressed="'+(S.q===i)+'">'+(i===4?'★ Challenge':i===5?'Close':'Question '+i)+'</button>';
+  }).join('');
+  $('#qnav').querySelectorAll('button').forEach(function(b){ b.onclick = function(){ S.q=+b.dataset.q; ev(''); renderQ(); }; });
+  var q = Q[S.q];
+  $('#qtag').textContent = q.tag.toUpperCase();
+  $('#qtext').textContent = q.text;
+  var box = $('#qactions'); box.innerHTML='';
+  q.actions.forEach(function(a,i){
+    var b = document.createElement('button');
+    b.className = i===0 ? 'primary' : 'secondary';
+    b.textContent = a.label; b.onclick = a.run; box.appendChild(b);
+  });
+}
+
+/* ================= Tabs, reset, wiring ================= */
+function selectTab(t){
+  S.tab = t;
+  $('#tabWarm').setAttribute('aria-selected', t==='warm');
+  $('#tabPlay').setAttribute('aria-selected', t==='play');
+  $('#tabQ').setAttribute('aria-selected', t==='q');
+  $('#viewWarm').hidden = t!=='warm'; $('#viewPlay').hidden = t!=='play'; $('#viewQ').hidden = t!=='q';
+  if(t==='q'){ ev(''); renderQ(); }
+}
+function startOver(){
+  clearInterval(tick);
+  var tab = S ? S.tab : 'play';
+  S = freshState(); S.tab = tab;
+  $('#whoInput').value = '';
+  renderDuel(); renderPlay(); renderClock(); renderQ(); ev('');
+  say('info','<p>Sample board: <b>47 + 38 = 85</b>. That is 15 away from 100. Can you get closer?</p>');
+  selectTab(tab);
+}
+$('#tabWarm').onclick = function(){ selectTab('warm'); };
+$('#tabPlay').onclick = function(){ selectTab('play'); };
+$('#tabQ').onclick = function(){ selectTab('q'); };
+$('#voteLess').onclick = function(){ S.votes[S.duel]='less'; renderDuel(); };
+$('#voteMore').onclick = function(){ S.votes[S.duel]='more'; renderDuel(); };
+$('#proofBtn').onclick = function(){ S.proofShown[S.duel]=true; renderDuel(); };
+$('#nextDuel').onclick = function(){ if(S.duel<DUELS.length-1){ S.duel++; renderDuel(); } };
+$('#postBtn').onclick = post;
+$('#clearBtn').onclick = clearBoard;
+$('#clockGo').onclick = toggleClock;
+$('#clockReset').onclick = resetClock;
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = function(){
+  try{ if(document.fullscreenElement) document.exitFullscreen(); else { var p = document.documentElement.requestFullscreen(); if(p && p.catch) p.catch(function(){}); } }catch(e){}
+};
+document.addEventListener('fullscreenchange', function(){ $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+document.addEventListener('keydown', function(e){
+  if(S.tab!=='play' || (e.target && e.target.tagName==='INPUT')) return;
+  if(/^[1-9]$/.test(e.key)){ placeDigit(+e.key); e.preventDefault(); }
+  else if(e.key==='Backspace' || e.key==='Delete'){
+    var b = board(), i = S.sel[S.pid];
+    if(i<0 || b[i]===null){ for(var k=b.length-1;k>=0;k--){ if(b[k]!==null){ i=k; break; } } }
+    if(i>=0 && b[i]!==null){ tapSlot(i); e.preventDefault(); }
+  }
+});
+startOver();
+})();
+</script>
+
+</body></html>

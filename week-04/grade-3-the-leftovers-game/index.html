@@ -1,0 +1,691 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Leftovers Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a game table (plates + counters) on the left, the teacher's prompts and controls on the right; stacks on narrow screens. */
+:root{
+  --ground:#EDF0EE; --card:#FFFFFF; --ink:#18232A; --muted:#55636B; --line:#CDD5D2;
+  --table:#2E6B66; --table-ink:#F3F7F5; --table-soft:#3B7A74;
+  --plate:#FBFAF6; --plate-rim:#DCD8CC;
+  --red:#D2433A; --red-dk:#A82E27; --yel:#F3B92E; --yel-dk:#C98F0D;
+  --cookie:#C98B4A; --chip:#5A3618;
+  --accent:#D2433A; --accent-soft:#FBE4E1; --good:#1F8A55; --good-soft:#DDF3E7; --warn-soft:#FFF1CC;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#121A1C; --card:#1B2629; --ink:#EAF0EE; --muted:#A3B1B4; --line:#33444A;
+    --table:#1E4A47; --table-ink:#EAF4F1; --table-soft:#285B57;
+    --plate:#EDEBE4; --plate-rim:#C9C4B5;
+    --accent:#F0675D; --accent-soft:#3A2220; --good:#4FCB8A; --good-soft:#173527; --warn-soft:#3A3014;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121A1C; --card:#1B2629; --ink:#EAF0EE; --muted:#A3B1B4; --line:#33444A;
+  --table:#1E4A47; --table-ink:#EAF4F1; --table-soft:#285B57;
+  --plate:#EDEBE4; --plate-rim:#C9C4B5;
+  --accent:#F0675D; --accent-soft:#3A2220; --good:#4FCB8A; --good-soft:#173527; --warn-soft:#3A3014;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+button:disabled{opacity:.42; cursor:default}
+.wrap{padding-inline:clamp(16px,2.4vw,32px); padding-block:12px 28px; max-width:1500px; margin:0 auto}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; padding-block:6px 10px}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,48px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.title p{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.1vw,17px); letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line); margin-bottom:16px}
+.tabs button{border:0; background:none; padding:12px 14px 10px; font-family:var(--display); font-weight:700; font-size:clamp(18px,1.6vw,23px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tabs small{font-family:var(--body); font-weight:400; font-size:13px; display:block; letter-spacing:.06em; text-transform:uppercase}
+
+.view{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:24px; align-items:start}
+.view[hidden]{display:none}
+@media (max-width:960px){ .view{grid-template-columns:minmax(0,1fr)} }
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+
+/* The table */
+.table{background:var(--table); color:var(--table-ink); border-radius:22px; padding:clamp(14px,2vw,26px); display:flex; flex-direction:column; gap:14px; min-width:0;
+  background-image:radial-gradient(circle at 20% 10%, var(--table-soft), transparent 60%)}
+.eq{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.6vw,40px); line-height:1.1; min-height:1.2em; text-align:center; font-variant-numeric:tabular-nums}
+.eq .r{color:var(--yel)}
+.eq-words{text-align:center; font-size:clamp(16px,1.4vw,21px); min-height:1.4em; opacity:.92}
+
+.dealer{display:flex; flex-direction:column; gap:14px}
+.plates{display:grid; grid-template-columns:repeat(var(--cols,4), minmax(0,1fr)); gap:clamp(8px,1.4vw,18px); justify-items:center}
+.plate{width:100%; max-width:200px; aspect-ratio:1; border-radius:50%; position:relative;
+  background:radial-gradient(circle, var(--plate) 0 60%, var(--plate-rim) 61% 64%, var(--plate) 65% 100%);
+  box-shadow:0 4px 0 rgba(0,0,0,.18); display:flex; align-items:center; justify-content:center}
+.plate .dots{width:66%; height:66%; display:flex; flex-wrap:wrap; align-content:center; justify-content:center; gap:3px}
+.plate .count{position:absolute; bottom:-6px; right:-2px; background:var(--card); color:var(--ink); border:2px solid var(--line); border-radius:999px; min-width:2em; text-align:center; font-weight:700; font-size:clamp(14px,1.3vw,18px); padding:0 .4em; font-variant-numeric:tabular-nums}
+.dot{width:var(--dot,22px); height:var(--dot,22px); border-radius:50%; flex:none;
+  background:radial-gradient(circle at 35% 30%, #fff6 0 18%, transparent 20%), var(--red); box-shadow:inset 0 -2px 0 var(--red-dk)}
+.cookies .dot{background:radial-gradient(circle at 30% 35%, var(--chip) 0 9%, transparent 11%), radial-gradient(circle at 66% 58%, var(--chip) 0 9%, transparent 11%), radial-gradient(circle at 42% 72%, var(--chip) 0 7%, transparent 9%), var(--cookie); box-shadow:inset 0 -2px 0 #0003}
+.dot.left{background:radial-gradient(circle at 35% 30%, #fff8 0 18%, transparent 20%), var(--yel); box-shadow:inset 0 -2px 0 var(--yel-dk)}
+.cookies .dot.left{outline:3px solid var(--yel); outline-offset:1px}
+.dot.pop{animation:pop .28s ease-out}
+@keyframes pop{from{transform:scale(.2); opacity:0}to{transform:scale(1); opacity:1}}
+.pile{border:2.5px dashed #ffffff55; border-radius:16px; padding:10px 14px; display:flex; align-items:center; gap:14px; min-height:64px}
+.pile.left{border-color:var(--yel); border-style:solid; background:#0000001f}
+.pile-label{font-weight:700; font-size:clamp(15px,1.3vw,19px); white-space:nowrap}
+.pile-dots{display:flex; flex-wrap:wrap; gap:4px; flex:1; min-width:0}
+
+/* Controls */
+.card{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:16px 18px; display:flex; flex-direction:column; gap:12px}
+.prompt{font-size:clamp(19px,1.7vw,25px); line-height:1.35; margin:0}
+.prompt b{font-family:var(--display); font-weight:700}
+.label{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:13px 24px; border-radius:14px; min-height:54px}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:54px}
+.stepper{display:flex; align-items:center; gap:8px}
+.stepper button{width:52px; height:52px; border-radius:50%; border:2.5px solid var(--ink); background:var(--card); font-size:26px; font-weight:700; line-height:1}
+.stepper output{font-family:var(--display); font-weight:800; font-size:34px; min-width:2ch; text-align:center; font-variant-numeric:tabular-nums}
+.stepper span{color:var(--muted); font-weight:700}
+.keys{display:flex; gap:8px; flex-wrap:wrap}
+.keys button{width:58px; height:58px; border-radius:14px; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:800; font-size:28px}
+.keys button:hover{border-color:var(--ink)}
+.keys button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; gap:2px}
+.seg button{border:0; background:none; padding:9px 16px; border-radius:11px; font-weight:700; font-size:17px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.msg{margin:0; padding:14px 16px; border-radius:14px; font-size:clamp(17px,1.45vw,21px); line-height:1.4; background:var(--accent-soft)}
+.msg.good{background:var(--good-soft)}
+.msg.think{background:var(--warn-soft)}
+.msg:empty{display:none}
+.hint{font-size:15px; color:var(--muted); margin:0}
+
+/* Game */
+.score{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.team{border:2.5px solid var(--line); border-radius:16px; padding:10px 14px; background:var(--card)}
+.team.on{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.team b{display:block; font-family:var(--display); font-size:40px; line-height:1; font-variant-numeric:tabular-nums}
+.team span{font-weight:700}
+.team small{display:block; color:var(--muted); font-size:14px; min-height:1.2em}
+.die{width:84px; height:84px; border-radius:18px; background:var(--card); border:3px solid var(--ink); display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); padding:10px; flex:none}
+.die i{width:16px; height:16px; border-radius:50%; background:var(--ink); place-self:center; visibility:hidden}
+.die.empty{border-style:dashed; border-color:var(--line)}
+.die.roll{animation:wob .12s linear infinite}
+@keyframes wob{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}100%{transform:rotate(-8deg)}}
+.inplay{font-family:var(--display); font-weight:800; font-size:22px}
+.log{width:100%; border-collapse:collapse; font-size:16px; font-variant-numeric:tabular-nums}
+.log th{text-align:left; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:4px 8px 4px 0; border-bottom:2px solid var(--line)}
+.log td{padding:5px 8px 5px 0; border-bottom:1px solid var(--line)}
+.log td.k{font-weight:700; color:var(--accent)}
+.scroll{overflow-x:auto}
+.rolltable{border-collapse:collapse; font-size:clamp(16px,1.35vw,20px); font-variant-numeric:tabular-nums}
+.rolltable th,.rolltable td{padding:6px 14px 6px 0; text-align:left}
+.rolltable th{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.rolltable tr.best td{font-weight:700; color:var(--good)}
+
+/* Detective grid */
+.numgrid{display:grid; grid-template-columns:repeat(var(--gc,6), minmax(0,1fr)); gap:8px}
+.ncell{border:2.5px solid var(--line); background:var(--card); border-radius:14px; padding:6px 4px 8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:86px}
+.ncell .n{font-weight:700; color:var(--muted); font-size:16px}
+.ncell .a{font-family:var(--display); font-weight:800; font-size:clamp(26px,2.4vw,36px); line-height:1; min-height:1em}
+.ncell.sel{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.ncell.ok{background:var(--good-soft); border-color:var(--good)}
+.ncell.bad{border-color:var(--accent); background:repeating-linear-gradient(45deg, transparent 0 8px, var(--accent-soft) 8px 16px)}
+.colhead{text-align:center; font-weight:700; font-size:14px; color:var(--table-ink); background:var(--table); border-radius:10px; padding:4px 2px}
+.ncell[data-r]{box-shadow:inset 0 -6px 0 var(--rc)}
+.table .numgrid .ncell{border-color:transparent}
+
+/* Big claims */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2.5px solid var(--line); background:var(--card); font-weight:700; font-size:19px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+.chipn{width:clamp(52px,6vw,74px); border-radius:12px; background:#ffffff1a; padding:6px 2px; text-align:center}
+.chipn .n{font-size:14px; opacity:.85}
+.chipn .r{font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,30px); line-height:1.05}
+.chipn.max{background:var(--yel); color:#2a1f00}
+.hund{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:5px}
+.hc{border-radius:9px; background:#ffffff1a; text-align:center; font-weight:700; font-size:clamp(14px,1.5vw,21px); padding:7px 0; font-variant-numeric:tabular-nums; transition:opacity .2s, background-color .2s}
+.hc.out{opacity:.22}
+.hc.hit{background:var(--yel); color:#2a1f00}
+.hc.sneak{background:transparent; box-shadow:inset 0 0 0 2.5px var(--yel)}
+.toggles .secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.claimtbl td,.claimtbl th{color:var(--table-ink)}
+.claimtbl th{color:var(--table-ink); opacity:.8}
+
+@media (max-width:560px){
+  body{font-size:17px}
+  .tabs{flex-wrap:nowrap; overflow-x:auto}
+  .tabs button{flex:none}
+  .keys button{width:50px; height:50px}
+  .die{width:70px; height:70px}
+  .hund{gap:3px}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <h1>The Leftovers Game</h1>
+    <p>Grade 3 · Week 4 · Multiplication Explorers</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><small>Warm-up</small>Cookie share</button>
+  <button role="tab" data-tab="game" aria-selected="false"><small>Launch</small>Play Leftovers</button>
+  <button role="tab" data-tab="det" aria-selected="false"><small>Investigate</small>Remainder detective</button>
+  <button role="tab" data-tab="claims" aria-selected="false"><small>Share &amp; reflect</small>Big claims</button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm">
+  <div class="table">
+    <div class="eq" id="w-eq"></div>
+    <div class="eq-words" id="w-words"></div>
+    <div id="w-dealer" class="cookies"></div>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <p class="prompt"><b>13 cookies, 4 friends.</b> Deal them onto the plates one round at a time. What do we do with the extra one?</p>
+      <div class="row">
+        <div class="stepper"><button id="w-cm" aria-label="Fewer cookies">−</button><output id="w-c">13</output><button id="w-cp" aria-label="More cookies">+</button><span>cookies</span></div>
+        <div class="stepper"><button id="w-fm" aria-label="Fewer friends">−</button><output id="w-f">4</output><button id="w-fp" aria-label="More friends">+</button><span>friends</span></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="w-round">Deal one round</button>
+        <button class="secondary" id="w-all">Deal them all</button>
+        <button class="secondary" id="w-again">Pick them up</button>
+      </div>
+    </div>
+    <p class="msg think" id="w-msg"></p>
+    <p class="hint">Each round puts one cookie on every plate. When there aren’t enough for a whole round, stop. What’s left over has a name: the <b>remainder</b>.</p>
+  </div>
+</section>
+
+<!-- GAME -->
+<section class="view" id="v-game" hidden>
+  <div class="table">
+    <div class="eq" id="g-eq"></div>
+    <div class="eq-words" id="g-words"></div>
+    <div id="g-dealer"></div>
+  </div>
+  <div class="panel">
+    <div class="score">
+      <div class="team" id="t0"><span id="n0">Class</span><b id="s0">0</b><small id="k0"></small></div>
+      <div class="team" id="t1"><span id="n1">Teacher</span><b id="s1">0</b><small id="k1"></small></div>
+    </div>
+    <div class="card" id="g-card">
+      <div class="row" style="justify-content:space-between">
+        <span class="inplay" id="g-inplay"></span>
+        <div class="seg" role="group" aria-label="Starting counters" id="g-start"></div>
+      </div>
+      <div class="row">
+        <div class="die empty" id="die" aria-label="Die"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <p class="prompt" id="g-prompt" style="flex:1; min-width:12ch"></p>
+      </div>
+      <div id="g-actions" class="row"></div>
+    </div>
+    <p class="msg" id="g-msg"></p>
+    <div class="row">
+      <button class="secondary" id="g-what">What would each roll do?</button>
+      <div class="seg" role="group" aria-label="Players">
+        <button id="pClass" aria-pressed="true">Class vs Teacher</button>
+        <button id="pPair" aria-pressed="false">Player 1 vs 2</button>
+      </div>
+    </div>
+    <div id="g-whatbox" class="scroll"></div>
+    <div class="scroll"><table class="log" id="g-log"></table></div>
+    <p class="hint">Rules: roll, share the counters in play into that many EQUAL groups, keep the leftovers as points. Counters in equal groups stay in play. The game ends when no counters remain, or after three turns in a row with no leftovers.</p>
+  </div>
+</section>
+
+<!-- DETECTIVE -->
+<section class="view" id="v-det" hidden>
+  <div class="table">
+    <div class="eq" id="d-eq"></div>
+    <div class="eq-words" id="d-words"></div>
+    <div id="d-dealer"></div>
+    <div class="row" style="justify-content:center"><button class="primary" id="d-deal">Deal it out</button></div>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <div class="row">
+        <span class="label">Divide by</span>
+        <div class="seg" role="group" aria-label="Divide by" id="d-div"></div>
+        <span class="label">Numbers</span>
+        <div class="seg" role="group" aria-label="How many numbers" id="d-len"></div>
+      </div>
+      <p class="prompt" id="d-prompt"></p>
+      <div class="numgrid" id="d-grid"></div>
+      <div>
+        <p class="label" style="margin-bottom:6px">Leftovers for the selected number</p>
+        <div class="keys" id="d-keys"></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="d-check">Check my leftovers</button>
+        <button class="secondary" id="d-wrap" aria-pressed="false">Wrap into rows</button>
+        <button class="secondary" id="d-fill">Fill it in for me</button>
+        <button class="secondary" id="d-clear">Clear</button>
+      </div>
+    </div>
+    <p class="msg" id="d-msg"></p>
+  </div>
+</section>
+
+<!-- CLAIMS -->
+<section class="view" id="v-claims" hidden>
+  <div class="table" id="c-stage"></div>
+  <div class="panel">
+    <div class="qnav" id="c-nav"></div>
+    <div class="card">
+      <p class="prompt" id="c-q"></p>
+      <div class="row" id="c-actions"></div>
+    </div>
+    <p class="msg good" id="c-msg"></p>
+    <p class="hint">Talk it over first. Then tap a button to put evidence on the table.</p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const plural = (n, one, many) => `${n} ${n===1?one:(many||one+'s')}`;
+const PIPS = {1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+
+/* ---------- Dealer: plates + a pile of counters ---------- */
+function makeDealer(root){
+  root.classList.add('dealer');
+  root.innerHTML = '<div class="plates"></div><div class="pile"><div class="pile-label"></div><div class="pile-dots"></div></div>';
+  const platesEl = root.querySelector('.plates'), pileEl = root.querySelector('.pile'), pileLabel = root.querySelector('.pile-label'), pileDots = root.querySelector('.pile-dots');
+  const st = {total:0, groups:1, per:0, gen:0, busy:false, onChange:null, word:'counters'};
+  const left = () => st.total - st.per*st.groups;
+  const canDeal = () => st.groups>0 && left() >= st.groups;
+  function dotSize(){
+    if(!st.groups) return 18;
+    const fin = Math.floor(st.total/st.groups);
+    const g = st.groups;
+    let s = fin<=4 ? 28 : fin<=9 ? 22 : fin<=16 ? 16 : 11;
+    if(g>=6) s = Math.min(s, fin<=4?22:fin<=9?16:11);
+    if(window.innerWidth<560) s = Math.round(s*0.7);
+    return s;
+  }
+  function render(){
+    const s = dotSize();
+    root.style.setProperty('--dot', s+'px');
+    platesEl.hidden = !st.groups;
+    platesEl.style.setProperty('--cols', Math.max(1, Math.min(st.groups, st.groups<=4 ? st.groups : st.groups<=6 ? 3 : 4)));
+    platesEl.innerHTML = '';
+    for(let i=0;i<st.groups;i++){
+      const p = document.createElement('div'); p.className='plate';
+      p.innerHTML = `<div class="dots">${'<span class="dot"></span>'.repeat(st.per)}</div><span class="count">${st.per}</span>`;
+      p.setAttribute('aria-label', `Plate ${i+1}: ${st.per}`);
+      platesEl.appendChild(p);
+    }
+    renderPile();
+  }
+  function renderPile(){
+    const l = left(), done = !canDeal() && st.dealtOnce;
+    pileEl.classList.toggle('left', done);
+    pileLabel.textContent = done ? `Leftovers: ${l}` : `Still to share: ${l}`;
+    pileDots.innerHTML = `<span class="dot${done?' left':''}"></span>`.repeat(l);
+    pileDots.style.setProperty('--dot', '');
+  }
+  async function dealRound(){
+    if(st.busy) return false;
+    if(!canDeal()){ st.dealtOnce = true; renderPile(); st.onChange && st.onChange(); return false; }
+    st.busy = true; const g = st.gen; const plates = platesEl.querySelectorAll('.plate');
+    const d = reduced ? 0 : Math.max(40, 260 - st.groups*25);
+    for(let i=0;i<st.groups;i++){
+      if(g!==st.gen) return false;
+      const dots = plates[i].querySelector('.dots');
+      const dot = document.createElement('span'); dot.className='dot'+(reduced?'':' pop'); dots.appendChild(dot);
+      plates[i].querySelector('.count').textContent = st.per+1;
+      const pd = pileDots.lastElementChild; if(pd) pd.remove();
+      pileLabel.textContent = `Still to share: ${pileDots.children.length}`;
+      if(d) await sleep(d);
+    }
+    if(g!==st.gen) return false;
+    st.per++; st.busy=false; st.dealtOnce = true;
+    plates.forEach((p,i)=>p.setAttribute('aria-label', `Plate ${i+1}: ${st.per}`));
+    renderPile(); st.onChange && st.onChange();
+    return true;
+  }
+  async function dealAll(){
+    const g = st.gen;
+    if(!canDeal()){ st.dealtOnce = true; renderPile(); st.onChange && st.onChange(); return; }
+    while(canDeal() && g===st.gen){ await dealRound(); if(!reduced) await sleep(120); }
+  }
+  return {
+    set(total, groups){ st.gen++; st.busy=false; st.total=total; st.groups=groups; st.per=0; st.dealtOnce=false; render(); st.onChange && st.onChange(); },
+    dealRound, dealAll,
+    get busy(){ return st.busy; }, get per(){ return st.per; }, get total(){ return st.total; }, get groups(){ return st.groups; },
+    get left(){ return left(); }, get finished(){ return st.dealtOnce && !canDeal(); }, canDeal,
+    onChange(fn){ st.onChange = fn; }
+  };
+}
+function eqText(n, d){
+  const q = Math.floor(n/d), r = n % d;
+  return `${n} ÷ ${d} = ${q} <span class="r">R${r}</span>`;
+}
+function wordsText(n, d, thing){
+  const q = Math.floor(n/d), r = n % d;
+  if(q===0) return `Not enough for one round on ${plural(d,'plate')}: all ${n} are left over.`;
+  return `${plural(d,'group')} of ${q}, ${r} left over. Check: ${d} × ${q} = ${d*q}, and ${d*q} + ${r} = ${n}.`;
+}
+
+/* ---------- Tabs ---------- */
+const TABS = ['warm','game','det','claims'];
+function selectTab(t){
+  document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  TABS.forEach(x => $('#v-'+x).hidden = x!==t);
+}
+document.querySelectorAll('[role=tab]').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------- Warm-up ---------- */
+const W = {c:13, f:4};
+const wd = makeDealer($('#w-dealer'));
+function wUpdate(){
+  $('#w-c').textContent = W.c; $('#w-f').textContent = W.f;
+  $('#w-round').disabled = wd.finished || wd.busy; $('#w-all').disabled = wd.finished || wd.busy;
+  if(wd.finished){
+    const r = wd.left;
+    $('#w-eq').innerHTML = eqText(W.c, W.f);
+    $('#w-words').textContent = wordsText(W.c, W.f);
+    $('#w-msg').textContent = r===0
+      ? `Every cookie found a plate. ${W.c} shares into ${W.f} equal groups with nothing left over.`
+      : `Only ${r} left, and we need ${W.f} for another round. ${r===1?'That 1 cookie is':`Those ${r} cookies are`} the remainder. What would you do with ${r===1?'it':'them'}?`;
+  } else {
+    $('#w-eq').innerHTML = wd.per ? `${wd.per} each so far` : `${W.c} cookies, ${W.f} plates`;
+    $('#w-words').textContent = wd.per ? `${W.f} × ${wd.per} = ${W.f*wd.per} dealt, ${wd.left} still to share` : 'Tap “Deal one round” to give every plate one cookie.';
+    $('#w-msg').textContent = '';
+  }
+}
+wd.onChange(wUpdate);
+const wSet = () => wd.set(W.c, W.f);
+$('#w-cm').onclick = () => { W.c = Math.max(1, W.c-1); wSet(); };
+$('#w-cp').onclick = () => { W.c = Math.min(40, W.c+1); wSet(); };
+$('#w-fm').onclick = () => { W.f = Math.max(1, W.f-1); wSet(); };
+$('#w-fp').onclick = () => { W.f = Math.min(8, W.f+1); wSet(); };
+$('#w-round').onclick = async () => { $('#w-round').disabled=true; $('#w-all').disabled=true; await wd.dealRound(); if(!wd.canDeal()) await wd.dealRound(); wUpdate(); };
+$('#w-all').onclick = async () => { $('#w-round').disabled=true; $('#w-all').disabled=true; await wd.dealAll(); wUpdate(); };
+$('#w-again').onclick = wSet;
+
+/* ---------- Game ---------- */
+const G = {start:15, inPlay:15, scores:[0,0], turn:0, phase:'roll', roll:0, pred:null, streak:0, log:[], names:['Class','Teacher'], gen:0};
+const gd = makeDealer($('#g-dealer'));
+function drawDie(n){
+  const el = $('#die'); el.classList.toggle('empty', !n);
+  el.querySelectorAll('i').forEach((p,i) => p.style.visibility = n && PIPS[n].includes(i) ? 'visible' : 'hidden');
+  el.setAttribute('aria-label', n ? `Die shows ${n}` : 'Die not rolled');
+}
+function gRenderStart(){
+  $('#g-start').innerHTML = [12,15,20,25].map(n => `<button data-s="${n}" aria-pressed="${G.start===n}">${n}</button>`).join('');
+  $('#g-start').querySelectorAll('button').forEach(b => b.onclick = () => { G.start = +b.dataset.s; gReset(); });
+}
+function gReset(){
+  G.gen++; G.inPlay=G.start; G.scores=[0,0]; G.turn=0; G.phase='roll'; G.roll=0; G.pred=null; G.streak=0; G.log=[];
+  gd.set(G.inPlay, 0); drawDie(0); $('#g-msg').textContent=''; $('#g-msg').className='msg'; $('#g-whatbox').innerHTML='';
+  gRenderStart(); gRender();
+}
+function gRender(){
+  $('#n0').textContent = G.names[0]; $('#n1').textContent = G.names[1];
+  $('#s0').textContent = G.scores[0]; $('#s1').textContent = G.scores[1];
+  $('#t0').classList.toggle('on', G.turn===0 && G.phase!=='over'); $('#t1').classList.toggle('on', G.turn===1 && G.phase!=='over');
+  $('#k0').textContent = G.turn===0 && G.phase!=='over' ? 'Your turn' : ''; $('#k1').textContent = G.turn===1 && G.phase!=='over' ? 'Your turn' : '';
+  $('#g-inplay').textContent = `${plural(G.inPlay,'counter')} in play`;
+  const who = G.names[G.turn], A = $('#g-actions'); A.innerHTML='';
+  const btn = (txt, cls, fn) => { const b=document.createElement('button'); b.className=cls; b.textContent=txt; b.onclick=fn; A.appendChild(b); return b; };
+  if(G.phase==='roll'){
+    $('#g-eq').innerHTML = `${G.inPlay} in play`; $('#g-words').textContent = `${who}: roll the die.`;
+    $('#g-prompt').innerHTML = `<b>${who}</b>, roll the die. Then share the ${G.inPlay} counters into that many equal groups.`;
+    btn('Roll the die','primary', gRoll);
+    const k = document.createElement('div'); k.className='keys'; k.setAttribute('aria-label','Or enter a real die roll');
+    for(let i=1;i<=6;i++){ const b=document.createElement('button'); b.textContent=i; b.setAttribute('aria-label',`We rolled ${i}`); b.onclick=()=>gSetRoll(i); k.appendChild(b); }
+    const lab = document.createElement('span'); lab.className='hint'; lab.textContent='Rolled a real die? Tap it:';
+    A.appendChild(lab); A.appendChild(k);
+  } else if(G.phase==='predict'){
+    $('#g-eq').innerHTML = `${G.inPlay} ÷ ${G.roll} = ?`; $('#g-words').textContent = `${G.inPlay} counters into ${plural(G.roll,'equal group')}.`;
+    $('#g-prompt').innerHTML = `<b>Predict:</b> how many leftovers will ${who} keep?`;
+    const k = document.createElement('div'); k.className='keys';
+    for(let i=0;i<=6;i++){ const b=document.createElement('button'); b.textContent=i; b.setAttribute('aria-label',`Predict ${i}`); b.onclick=()=>{ G.pred=i; gDeal(); }; k.appendChild(b); }
+    A.appendChild(k);
+    btn('Just deal','secondary', () => { G.pred=null; gDeal(); });
+  } else if(G.phase==='dealing'){
+    $('#g-prompt').innerHTML = `Dealing ${G.inPlay} counters onto ${plural(G.roll,'plate')}…`;
+  } else if(G.phase==='result'){
+    const last = G.log[G.log.length-1];
+    $('#g-prompt').innerHTML = last.left ? `<b>${last.who}</b> keeps ${plural(last.left,'leftover')}. ${plural(G.inPlay,'counter')} stay in play.` : `<b>No leftovers</b> for ${last.who} this time. All ${G.inPlay} stay in play.`;
+    btn(`${G.names[1-G.turn]}’s turn`,'primary', () => { G.turn = 1-G.turn; G.phase='roll'; G.roll=0; drawDie(0); gd.set(G.inPlay,0); $('#g-msg').textContent=''; $('#g-whatbox').innerHTML=''; gRender(); });
+  } else if(G.phase==='over'){
+    const [a,b] = G.scores;
+    const why = G.inPlay===0 ? 'No counters remain.' : 'Three turns in a row with no leftovers.';
+    const res = a===b ? `It’s a tie, ${a} to ${b}.` : `${G.names[a>b?0:1]} wins, ${Math.max(a,b)} to ${Math.min(a,b)}.`;
+    $('#g-prompt').innerHTML = `<b>Game over.</b> ${why} ${res}`;
+    btn('Play again','primary', gReset);
+  }
+  $('#g-what').disabled = G.phase==='over' || G.inPlay===0;
+  gRenderLog();
+}
+function gRenderLog(){
+  if(!G.log.length){ $('#g-log').innerHTML=''; return; }
+  $('#g-log').innerHTML = '<tr><th>Turn</th><th>Who</th><th>In play</th><th>Rolled</th><th>Groups of</th><th>Leftovers kept</th></tr>' +
+    G.log.map((r,i)=>`<tr><td>${i+1}</td><td>${r.who}</td><td>${r.n}</td><td>${r.d}</td><td>${r.q}</td><td class="k">${r.left}</td></tr>`).join('');
+}
+async function gRoll(){
+  if(G.phase!=='roll') return;
+  const g = G.gen; G.phase='rolling'; $('#g-actions').innerHTML=''; const die=$('#die');
+  if(!reduced){ die.classList.add('roll'); for(let i=0;i<8;i++){ drawDie(1+Math.floor(Math.random()*6)); await sleep(70); } die.classList.remove('roll'); }
+  if(g!==G.gen) return;
+  gSetRoll(1+Math.floor(Math.random()*6));
+}
+function gSetRoll(n){
+  G.roll=n; drawDie(n); G.phase='predict'; gd.set(G.inPlay, n); $('#g-msg').textContent=''; gRender();
+}
+async function gDeal(){
+  const g = G.gen; G.phase='dealing'; gRender();
+  await gd.dealAll();
+  if(g!==G.gen) return;
+  const n=G.inPlay, d=G.roll, q=Math.floor(n/d), r=n%d, who=G.names[G.turn];
+  $('#g-eq').innerHTML = eqText(n,d); $('#g-words').textContent = wordsText(n,d);
+  const m = $('#g-msg');
+  if(G.pred===null){ m.className='msg think'; m.textContent = r ? `${r} won’t make another full round of ${d}, so ${r===1?'it is':'they are'} the leftovers.` : `${n} shares evenly into ${d} groups. Nothing left over.`; }
+  else if(G.pred===r){ m.className='msg good'; m.textContent = `Your prediction of ${r} was right. ${wordsText(n,d)}`; }
+  else if(G.pred>=d){ m.className='msg'; m.textContent = d===1 ? `You predicted ${G.pred}. With only 1 group, every counter goes on the one plate, so there can never be leftovers. The leftovers are 0.` : `You predicted ${G.pred}. But ${G.pred} leftovers would be enough to deal another round onto ${d} plates! The leftovers must be smaller than ${d}. The deal shows ${r}.`; }
+  else { m.className='msg'; m.textContent = `You predicted ${G.pred}; the deal shows ${r}. ${q ? `${d} × ${q} = ${d*q}, and ${n} − ${d*q} = ${r}.` : `There aren’t ${d} counters for even one round, so all ${n} are left over.`} Can you see where the count changed?`; }
+  G.scores[G.turn]+=r; G.log.push({who, n, d, q, left:r}); G.inPlay -= r; G.streak = r===0 ? G.streak+1 : 0;
+  G.phase = (G.inPlay===0 || G.streak>=3) ? 'over' : 'result';
+  gRender();
+}
+$('#g-what').onclick = () => {
+  const n = G.inPlay; let best = 0; const rows=[];
+  for(let d=1; d<=6; d++){ const r=n%d; best=Math.max(best,r); rows.push([d, Math.floor(n/d), r]); }
+  $('#g-whatbox').innerHTML = `<table class="rolltable"><tr><th>Roll</th><th>Groups of</th><th>Leftovers</th></tr>${rows.map(([d,q,r])=>`<tr class="${r===best&&best>0?'best':''}"><td>${d}</td><td>${q}</td><td>${r}</td></tr>`).join('')}</table><p class="hint">With ${n} in play, the best ${best>0?'roll keeps':'rolls keep'} ${best}. Does it change when a different number is in play?</p>`;
+};
+$('#pClass').onclick = () => { G.names=['Class','Teacher']; $('#pClass').setAttribute('aria-pressed',true); $('#pPair').setAttribute('aria-pressed',false); gReset(); };
+$('#pPair').onclick = () => { G.names=['Player 1','Player 2']; $('#pClass').setAttribute('aria-pressed',false); $('#pPair').setAttribute('aria-pressed',true); gReset(); };
+
+/* ---------- Remainder detective ---------- */
+const D = {d:3, len:12, ans:{}, sel:1, checked:false, wrap:false};
+const dd = makeDealer($('#d-dealer'));
+const RC = ['var(--yel)','var(--red)','#3C8FD6','#2FA36B','#9B5BD0','#E07A2E'];
+function dRenderSegs(){
+  $('#d-div').innerHTML = [2,3,4,5,6].map(n=>`<button data-d="${n}" aria-pressed="${D.d===n}">÷${n}</button>`).join('');
+  $('#d-div').querySelectorAll('button').forEach(b=>b.onclick=()=>{ D.d=+b.dataset.d; dClear(); });
+  $('#d-len').innerHTML = [12,24].map(n=>`<button data-l="${n}" aria-pressed="${D.len===n}">1–${n}</button>`).join('');
+  $('#d-len').querySelectorAll('button').forEach(b=>b.onclick=()=>{ D.len=+b.dataset.l; if(D.sel>D.len) D.sel=1; dRenderSegs(); dRender(); });
+  const k = $('#d-keys'); k.innerHTML='';
+  for(let i=0;i<=6;i++){ const b=document.createElement('button'); b.textContent=i; b.setAttribute('aria-label',`Leftovers ${i}`); b.onclick=()=>dEnter(i); k.appendChild(b); }
+}
+function dClear(){ D.ans={}; D.sel=1; D.checked=false; $('#d-msg').textContent=''; dRenderSegs(); dRender(); dShow(); }
+function dRender(){
+  const g = $('#d-grid'); g.innerHTML='';
+  $('#d-prompt').innerHTML = D.wrap
+    ? `Wrapped into rows of ${D.d}. Look down each column. What do you notice?`
+    : D.d===3 ? `Divide each number by <b>3</b>. Tap a number, then tap its leftovers.` : `<b>Predict first:</b> what pattern will the ÷${D.d} leftovers make? Say it, then test it.`;
+  $('#d-wrap').textContent = D.wrap ? 'Back to one line' : `Wrap into rows of ${D.d}`;
+  $('#d-wrap').setAttribute('aria-pressed', D.wrap);
+  if(D.wrap){
+    g.style.setProperty('--gc', D.d);
+    for(let c=1;c<=D.d;c++){ const h=document.createElement('div'); h.className='colhead'; h.textContent=`leftover ${c % D.d}`; g.appendChild(h); }
+  } else g.style.setProperty('--gc', window.innerWidth<560 ? 4 : 6);
+  for(let n=1;n<=D.len;n++){
+    const c=document.createElement('button'); c.className='ncell';
+    const a = D.ans[n];
+    if(n===D.sel) c.classList.add('sel');
+    if(D.checked && a!==undefined) c.classList.add(a===n%D.d ? 'ok':'bad');
+    if(D.wrap){ c.dataset.r = n%D.d; c.style.setProperty('--rc', RC[n%D.d]); }
+    c.innerHTML = `<span class="n">${n}</span><span class="a">${a===undefined?'':a}</span>`;
+    c.setAttribute('aria-label', `${n} divided by ${D.d}, leftovers ${a===undefined?'not filled in':a}`);
+    c.onclick = () => { D.sel=n; dRender(); dShow(); if(D.checked) dExplain(n); };
+    g.appendChild(c);
+  }
+}
+function dShow(){
+  dd.set(D.sel, D.d);
+  $('#d-eq').innerHTML = `${D.sel} ÷ ${D.d} = ?`;
+  $('#d-words').textContent = `Deal ${plural(D.sel,'counter')} onto ${plural(D.d,'plate')} to check.`;
+}
+dd.onChange(() => { if(dd.finished){ $('#d-eq').innerHTML = eqText(dd.total, dd.groups); $('#d-words').textContent = wordsText(dd.total, dd.groups); } });
+$('#d-deal').onclick = () => { if(!dd.finished && !dd.busy) dd.dealAll(); };
+function dEnter(v){
+  D.ans[D.sel]=v; D.checked=false; $('#d-msg').textContent='';
+  if(D.sel<D.len) D.sel++;
+  dRender(); dShow();
+}
+function dExplain(n){
+  const a=D.ans[n], d=D.d, r=n%d, q=Math.floor(n/d), m=$('#d-msg');
+  if(a===undefined){ m.className='msg think'; m.textContent=`${n} isn’t filled in yet. Deal it out to see.`; return; }
+  if(a===r){ m.className='msg good'; m.textContent=`${n} ÷ ${d}: ${wordsText(n,d)}`; return; }
+  m.className='msg';
+  if(a>=d) m.textContent = `For ${n} you wrote ${a}. But ${a} leftovers is enough for another round on ${d} plates! Deal it out: ${wordsText(n,d)}`;
+  else m.textContent = `For ${n} you wrote ${a}. Deal it out to check. ${q ? `${d} × ${q} = ${d*q}, and ${n} − ${d*q} = ${r}.` : `${n} is less than ${d}, so there’s no full round and all ${n} ${n===1?'is':'are'} left over.`}`;
+}
+$('#d-check').onclick = () => {
+  D.checked=true; let ok=0, bad=0, blank=0, firstBad=null;
+  for(let n=1;n<=D.len;n++){ const a=D.ans[n]; if(a===undefined) blank++; else if(a===n%D.d) ok++; else { bad++; if(firstBad===null) firstBad=n; } }
+  dRender(); const m=$('#d-msg');
+  if(!bad && !blank){
+    const cyc = Array.from({length:D.d},(_,i)=>(i+1)%D.d).join(', ');
+    m.className='msg good'; m.textContent = `All ${D.len} are right. The leftovers go ${cyc}, ${cyc}… Why must that pattern repeat forever? Try “Wrap into rows of ${D.d}.”`;
+  } else if(!bad){ m.className='msg think'; m.textContent = `${ok} right so far, ${blank} still to fill in.`; }
+  else { m.className='msg'; m.textContent = `${ok} right, ${bad} to look at again (striped). Tap a striped number to see why, then deal it out.`; D.sel=firstBad; dRender(); dShow(); dExplain(firstBad); }
+};
+$('#d-fill').onclick = () => { for(let n=1;n<=D.len;n++) D.ans[n]=n%D.d; $('#d-check').onclick(); };
+$('#d-clear').onclick = dClear;
+$('#d-wrap').onclick = () => {
+  D.wrap=!D.wrap; dRender();
+  const m=$('#d-msg');
+  if(D.wrap){ m.className='msg think'; m.textContent = `Each row adds ${D.d} more: exactly one more full round on ${D.d} plates. One more round never changes the leftovers, so each column keeps the same leftover forever.`; }
+  else m.textContent='';
+};
+
+/* ---------- Big claims ---------- */
+const C = {q:1, mFilter:{2:false,3:false,4:false}};
+const stage = $('#c-stage');
+let cd = null;
+function stageDealer(){ stage.innerHTML = '<div class="eq" id="c-eq"></div><div class="eq-words" id="c-words"></div><div id="c-dealer"></div>'; cd = makeDealer($('#c-dealer')); return cd; }
+const say = (t, cls) => { const m=$('#c-msg'); m.className='msg '+(cls||'good'); m.textContent=t; };
+const Q = {
+  1:{ text:'What is the biggest remainder you can EVER get when dividing by 5?',
+    setup(){ stageDealer(); cd.set(14,5); $('#c-eq').innerHTML='14 ÷ 5 = ?'; $('#c-words').textContent='Deal it out, then try other numbers.'; },
+    actions:[
+      {label:'Deal 14 onto 5 plates', run: async () => { stageDealer(); cd.set(14,5); $('#c-eq').innerHTML='14 ÷ 5 = ?'; await cd.dealAll(); $('#c-eq').innerHTML=eqText(14,5); $('#c-words').textContent=wordsText(14,5); say('4 left over. Can you find a number that leaves MORE than 4 when you divide by 5?','think'); }},
+      {label:'Show ÷5 for 1 to 30', run: () => {
+        let max=0; const items=[]; for(let n=1;n<=30;n++){ const r=n%5; max=Math.max(max,r); items.push([n,r]); }
+        stage.innerHTML = `<div class="eq">÷ 5 leftovers, 1 to 30</div><div class="chips">${items.map(([n,r])=>`<div class="chipn ${r===max?'max':''}"><div class="n">${n}</div><div class="r">${r}</div></div>`).join('')}</div>`;
+        say(`The biggest leftover is ${max}. It shows up at ${items.filter(x=>x[1]===max).map(x=>x[0]).join(', ')}. It never reaches 5.`);
+      }}]},
+  2:{ text:'Why can the remainder never be 5 when you divide by 5? (Think about what you’d do at the game table.)',
+    setup(){ stageDealer(); cd.set(15,5); $('#c-eq').innerHTML='15 on 5 plates'; $('#c-words').textContent='Deal two rounds, then stop.'; },
+    actions:[
+      {label:'Deal two rounds and stop', run: async () => { stageDealer(); cd.set(15,5); await cd.dealRound(); await cd.dealRound(); $('#c-eq').innerHTML='5 still to share…'; $('#c-words').textContent='Should we call these 5 “leftovers”?'; say('Is 5 really left over here? Look at the plates and the pile.','think'); }},
+      {label:'Deal another round', run: async () => {
+        if(!cd || cd.total!==15 || cd.per!==2){ stageDealer(); cd.set(15,5); await cd.dealRound(); await cd.dealRound(); }
+        await cd.dealAll(); $('#c-eq').innerHTML=eqText(15,5); $('#c-words').textContent=wordsText(15,5);
+        say('5 counters fill one more round on 5 plates. If you still have 5 or more, you can always deal another round, so a real leftover must be smaller than 5.');
+      }}]},
+  3:{ text:'Make a claim that works for ANY number you divide by. How big can the leftover be?',
+    setup(){ stage.innerHTML = '<div class="eq">Divide by 2, 3, 4… 9</div><div class="eq-words">Tap the button to test every number from 1 to 100.</div>'; },
+    actions:[
+      {label:'Test 1 to 100', run: () => {
+        const rows=[]; for(let d=2; d<=9; d++){ let mx=0; for(let n=1;n<=100;n++) mx=Math.max(mx,n%d); rows.push([d,mx]); }
+        stage.innerHTML = `<div class="eq">Biggest leftover from 1 to 100</div><div class="scroll" style="display:flex;justify-content:center"><table class="rolltable claimtbl"><tr><th>Divide by</th><th>Biggest leftover</th></tr>${rows.map(([d,m])=>`<tr><td>${d}</td><td><b>${m}</b></td></tr>`).join('')}</table></div>`;
+        say('Every time, the biggest leftover is one less than the number you divide by. Say the rule in your own words. Mathematicians would write: the remainder must be smaller than the divisor.');
+      }}]},
+  4:{ text:'In the game, which rolls are GOOD rolls? Does it depend on how many counters are in play?',
+    setup(){ stage.innerHTML = '<div class="eq">Good rolls?</div><div class="eq-words">Compare 12, 13, 15 and 20 counters in play.</div>'; },
+    actions:[
+      {label:'Compare rolls 1 to 6', run: () => {
+        const ns=[12,13,15,20];
+        const head = `<tr><th>In play</th>${[1,2,3,4,5,6].map(d=>`<th>Roll ${d}</th>`).join('')}</tr>`;
+        const body = ns.map(n=>{ const rs=[1,2,3,4,5,6].map(d=>n%d); const mx=Math.max(...rs); return `<tr><td><b>${n}</b></td>${rs.map(r=>`<td${r===mx&&mx>0?' style="color:var(--yel);font-weight:700"':''}>${r}</td>`).join('')}</tr>`; }).join('');
+        stage.innerHTML = `<div class="eq">Leftovers for each roll</div><div class="scroll"><table class="rolltable claimtbl">${head}${body}</table></div>`;
+        say('A roll of 1 always keeps 0. With 12 in play, rolls 1, 2, 3, 4 and 6 all keep 0 because they share 12 evenly. Good rolls depend on the counters in play.');
+      }}]},
+  5:{ star:true, text:'Challenge: a mystery number leaves remainder 1 when divided by 2, by 3, AND by 4. Find the smallest one. Then the next. Why is the gap what it is?',
+    setup(){ C.mFilter={2:false,3:false,4:false}; renderHund(); },
+    actions:[
+      {label:'Leaves 1 ÷ 2', toggle:2}, {label:'Leaves 1 ÷ 3', toggle:3}, {label:'Leaves 1 ÷ 4', toggle:4},
+      {label:'Show the gap', run: () => {
+        C.mFilter={2:true,3:true,4:true}; renderHund(true);
+        const hits = mystery(); const big = hits.filter(n=>n>1);
+        const gaps = big.slice(1).map((n,i)=>n-big[i]);
+        say(`${big.join(', ')}… each is ${gaps[0]} more than the one before. ${gaps[0]} is the smallest number that 2, 3 and 4 all go into evenly, so adding ${gaps[0]} adds whole rounds for every divisor and keeps each leftover at 1. (1 sneaks in too: 0 groups, 1 left over. The smallest with a full round is ${big[0]}.)`);
+      }}]}
+};
+function mystery(){ const r=[]; for(let n=1;n<=60;n++) if(n%2===1 && n%3===1 && n%4===1) r.push(n); return r; }
+function renderHund(showGap){
+  const act = [2,3,4].filter(k=>C.mFilter[k]);
+  let html = `<div class="eq">${act.length ? 'Leaves 1 when divided by '+act.join(', ') : 'Numbers 1 to 60'}</div><div class="hund">`;
+  for(let n=1;n<=60;n++){
+    const pass = act.every(k=>n%k===1);
+    const cls = !act.length ? '' : pass ? (act.length===3 && n===1 ? 'hit sneak' : 'hit') : 'out';
+    html += `<div class="hc ${cls}">${n}</div>`;
+  }
+  html += '</div>';
+  stage.innerHTML = html;
+  if(!showGap && act.length){
+    const cnt = Array.from({length:60},(_,i)=>i+1).filter(n=>act.every(k=>n%k===1));
+    say(act.length===3 ? `Only ${cnt.join(', ')} survive all three tests. Which is the smallest? Is 1 a fair answer?` : `${cnt.length} numbers from 1 to 60 pass. Add another test.`, 'think');
+  }
+}
+function renderQ(){
+  $('#c-nav').innerHTML = Object.keys(Q).map(k=>`<button data-q="${k}" aria-pressed="${C.q==k}">${Q[k].star?'★ Challenge':k}</button>`).join('');
+  $('#c-nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ C.q=+b.dataset.q; $('#c-msg').textContent=''; renderQ(); });
+  const q=Q[C.q]; $('#c-q').textContent=q.text; q.setup();
+  const box=$('#c-actions'); box.innerHTML=''; box.classList.toggle('toggles', !!q.star);
+  q.actions.forEach((a,i)=>{
+    const b=document.createElement('button'); b.className = (i===0 && !a.toggle) || (a.run && q.star) ? 'primary' : 'secondary'; b.textContent=a.label;
+    if(a.toggle){ b.setAttribute('aria-pressed', C.mFilter[a.toggle]); b.onclick=()=>{ C.mFilter[a.toggle]=!C.mFilter[a.toggle]; b.setAttribute('aria-pressed', C.mFilter[a.toggle]); $('#c-msg').textContent=''; renderHund(); }; }
+    else b.onclick=a.run;
+    box.appendChild(b);
+  });
+}
+
+/* ---------- Global ---------- */
+function resetAll(){ W.c=13; W.f=4; wSet(); gReset(); D.d=3; D.len=12; D.wrap=false; dClear(); C.q=1; $('#c-msg').textContent=''; renderQ(); }
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

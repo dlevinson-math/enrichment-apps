@@ -1,0 +1,740 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Magic Square</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a turtle-shell board on the left, the step's questions and controls on the right; stacks on narrow screens. */
+:root{
+  --bg:#EDF2EF; --card:#FFFFFF; --ink:#15302A; --muted:#536D66; --line:#C6D6CF;
+  --accent:#C2381F; --accent-soft:#F7E0D9;
+  --good:#1D7A58; --good-soft:#DAEEE4; --off:#9A6200; --off-soft:#F6EAD2;
+  --shell:#E3ECE7; --shell-edge:#9DB7AD;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1916; --card:#172420; --ink:#E5EEEA; --muted:#9BB3AB; --line:#2D403A;
+    --accent:#F0785F; --accent-soft:#3B221C;
+    --good:#4FC797; --good-soft:#173A2D; --off:#E8AE45; --off-soft:#3A2D14;
+    --shell:#1C2D28; --shell-edge:#3F5A51; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1916; --card:#172420; --ink:#E5EEEA; --muted:#9BB3AB; --line:#2D403A;
+  --accent:#F0785F; --accent-soft:#3B221C;
+  --good:#4FC797; --good-soft:#173A2D; --off:#E8AE45; --off-soft:#3A2D14;
+  --shell:#1C2D28; --shell-edge:#3F5A51; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; padding-inline:16px; padding-block:0 24px; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1320px; margin:0 auto}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap; padding-block:16px 10px}
+h1{font-family:var(--display); font-weight:400; font-size:clamp(28px,3.2vw,46px); line-height:1.05; margin:0; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:8px; flex-wrap:wrap; padding-block:6px 14px; border-bottom:2px solid var(--line); margin-bottom:18px}
+nav.steps button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 18px 10px 10px; font-weight:700; font-size:17px; display:flex; align-items:center; gap:10px; min-height:52px; color:var(--muted)}
+nav.steps button b{width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:15px; color:var(--ink)}
+nav.steps button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+nav.steps button[aria-selected="true"] b{background:var(--accent); color:#fff}
+nav.steps button.done b{background:var(--good); color:var(--card)}
+
+.stage{display:grid; grid-template-columns:minmax(0,auto) minmax(0,1fr); gap:28px; align-items:start}
+.stage[hidden]{display:none}
+.left,.right{min-width:0; display:flex; flex-direction:column; gap:16px}
+.lead{font-family:var(--display); font-size:clamp(22px,2vw,30px); line-height:1.3; margin:0; text-wrap:balance; max-width:30em}
+.lead em{font-style:normal; color:var(--accent)}
+p.note{margin:0; color:var(--muted); font-size:16px; max-width:38em}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:14px 24px; border-radius:14px; min-height:54px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.fb{margin:0; padding:14px 18px; border-radius:14px; font-size:clamp(17px,1.4vw,21px); line-height:1.45; background:var(--card); border:2px solid var(--line); max-width:36em}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft); border-color:var(--good)}
+.fb.off{background:var(--off-soft); border-color:var(--off)}
+.fb b{font-weight:700}
+
+/* number pad */
+.pad{display:grid; grid-template-columns:repeat(9, minmax(0,1fr)); gap:8px; width:min(100%, 640px)}
+.key{aspect-ratio:1; border:2px solid var(--shell-edge); background:var(--card); border-radius:14px; font-size:clamp(24px,3vw,40px); font-weight:700; font-variant-numeric:tabular-nums; display:grid; place-items:center; padding:0; max-width:100%}
+.key[aria-pressed="true"]{background:var(--accent); color:#fff; border-color:var(--accent); transform:translateY(-3px)}
+.key:disabled{opacity:.25; cursor:default}
+.pick{display:flex; align-items:center; gap:12px; font-size:clamp(30px,3.6vw,52px); font-weight:700; font-variant-numeric:tabular-nums; min-height:1.4em; flex-wrap:wrap}
+.pick .slot{min-width:1.3em; height:1.3em; border-bottom:4px solid var(--line); display:grid; place-items:center}
+.pick .slot.full{border-color:var(--accent)}
+.pick .op{color:var(--muted); font-weight:400}
+
+.triples{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; width:min(100%, 640px)}
+.trip{border:2px dashed var(--line); border-radius:12px; padding:10px; text-align:center; font-size:clamp(17px,1.6vw,22px); white-space:nowrap; font-weight:700; font-variant-numeric:tabular-nums; min-height:56px; display:grid; place-items:center; color:var(--muted)}
+.trip.on{border-style:solid; border-color:var(--good); background:var(--good-soft); color:var(--ink)}
+.trip.shown{border-style:solid; border-color:var(--line); background:var(--card); color:var(--ink)}
+.trip.flash{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(1.15)}100%{transform:scale(1)}}
+.count{font-size:16px; color:var(--muted)}
+.count b{font-size:28px; color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* turtle shell board */
+.shell{background:var(--shell); border:3px solid var(--shell-edge); border-radius:36px 36px 46px 46px; padding:22px; position:relative}
+.sq{--cell:min(19vh, 22vw, 150px); display:grid; grid-template-columns:repeat(3, var(--cell)) calc(var(--cell)*.62); grid-template-rows:calc(var(--cell)*.42) repeat(3, var(--cell)) calc(var(--cell)*.48); gap:8px; justify-content:center}
+.cell{border:3px solid var(--shell-edge); background:var(--card); border-radius:16px; font-size:calc(var(--cell)*.5); font-weight:700; font-variant-numeric:tabular-nums; display:grid; place-items:center; padding:0; position:relative; transition:background-color .2s, border-color .2s}
+.cell.empty{background:transparent; border-style:dashed}
+.cell.target{border-color:var(--accent); border-style:solid; box-shadow:0 0 0 3px var(--accent-soft)}
+.cell.lit{background:var(--accent-soft); border-color:var(--accent)}
+.cell.fixed{cursor:default}
+.cell .lc{position:absolute; top:6px; right:8px; font-size:calc(var(--cell)*.13); font-weight:700; color:var(--accent); line-height:1}
+.cell input{width:100%; height:100%; border:0; background:transparent; text-align:center; font:inherit; color:inherit; padding:0}
+.ls{display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-variant-numeric:tabular-nums; font-size:calc(var(--cell)*.24); color:var(--muted); line-height:1; border-radius:12px; border:0; background:none; padding:0}
+.ls small{font-size:calc(var(--cell)*.11); font-weight:400; margin-top:3px}
+.ls.part{opacity:.7}
+.ls.good{color:var(--good); background:var(--good-soft)}
+.ls.off{color:var(--off); background:var(--off-soft)}
+.ls.blank{visibility:hidden}
+
+.tray{display:flex; gap:8px; flex-wrap:wrap; min-height:72px; align-items:center; justify-content:center}
+.tray .key{width:clamp(52px,6.2vw,72px); font-size:clamp(24px,2.6vw,34px)}
+.tray .done{color:var(--muted); font-size:16px}
+.found{display:flex; gap:10px; flex-wrap:wrap}
+.mini{display:grid; grid-template-columns:repeat(3,1fr); gap:2px; width:78px; padding:5px; background:var(--card); border:2px solid var(--line); border-radius:10px; font-size:15px; font-weight:700; text-align:center; font-variant-numeric:tabular-nums}
+.mini span{padding:1px 0; border-radius:4px}
+.mini span.c{background:var(--accent); color:#fff}
+.mini.big{width:120px; font-size:22px; gap:3px; padding:7px}
+.mini.now{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.gal{display:grid; grid-template-columns:repeat(4, minmax(0,auto)); gap:14px; justify-content:center}
+.gal figure{margin:0; display:flex; flex-direction:column; align-items:center; gap:6px; font-size:14px; color:var(--muted)}
+
+.check{display:flex; align-items:center; gap:10px; font-size:16px; cursor:pointer; min-height:44px}
+.check input{width:22px; height:22px; accent-color:var(--accent)}
+
+/* sum evidence */
+.tiles45{display:flex; gap:8px; flex-wrap:wrap}
+.tiles45 span{width:52px; height:52px; border-radius:12px; border:2px solid var(--shell-edge); background:var(--card); display:grid; place-items:center; font-weight:700; font-size:24px}
+.tiles45 span.g0{background:var(--accent-soft); border-color:var(--accent)}
+.tiles45 span.g1{background:var(--good-soft); border-color:var(--good)}
+.tiles45 span.g2{background:var(--off-soft); border-color:var(--off)}
+.stepper{display:flex; align-items:center; gap:10px}
+.stepper button{width:56px; height:56px; border-radius:50%; border:2px solid var(--ink); background:var(--card); font-size:28px; font-weight:700; line-height:1}
+.stepper output{min-width:2.2em; text-align:center; font-size:44px; font-weight:700; font-variant-numeric:tabular-nums}
+.stepper label{font-weight:700}
+
+/* detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.board{position:relative; display:flex; flex-direction:column; align-items:center; gap:14px}
+.lines svg{position:absolute; inset:0; width:100%; height:100%; pointer-events:none}
+.bigsq{--cell:min(17vh, 22vw, 140px); display:grid; grid-template-columns:repeat(3,var(--cell)); grid-auto-rows:var(--cell); gap:8px; position:relative}
+.bigsq .cell{cursor:default; font-size:calc(var(--cell)*.5)}
+.ctable{border-collapse:collapse; font-size:clamp(16px,1.4vw,20px); font-variant-numeric:tabular-nums}
+.ctable td,.ctable th{padding:5px 10px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle}
+.ctable th{font-size:14px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.04em}
+.ctable td.n{font-size:1.4em; font-weight:700; text-align:center}
+.dots{display:inline-flex; gap:5px}
+.dots i{width:16px; height:16px; border-radius:50%; background:var(--muted)}
+.ctable tr.k4 .dots i{background:var(--accent)}
+.ctable tr.k3 .dots i{background:var(--good)}
+.ctable tr.k2 .dots i{background:var(--off)}
+.ctable .sets{color:var(--muted); font-size:.85em}
+.tblwrap{overflow-x:auto; max-width:100%}
+.loshu .cell{background:var(--card)}
+.ld{display:flex; flex-wrap:wrap; justify-content:center; align-content:center; gap:5px; width:80%}
+.ld i{width:calc(var(--cell)*.13); height:calc(var(--cell)*.13); border-radius:50%; border:3px solid var(--ink)}
+.ld i.y{background:var(--ink)}
+.cap{font-size:15px; color:var(--muted); text-align:center; max-width:34em}
+.journal{border-left:4px solid var(--accent); padding:6px 0 6px 14px; margin:0; font-style:italic; max-width:36em}
+.part{display:flex; flex-direction:column; gap:12px; padding-top:6px}
+.part h2{font-family:var(--display); font-weight:400; font-size:clamp(22px,2vw,28px); margin:0}
+.hr{border:0; border-top:2px solid var(--line); margin:6px 0; width:100%}
+
+@media (max-width: 980px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .left{align-items:center}
+}
+@media (max-width: 600px){
+  body{font-size:17px}
+  .pad{grid-template-columns:repeat(5, minmax(0,1fr))}
+  .triples{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .sq{--cell:min(21vw, 110px); gap:6px}
+  .bigsq{--cell:min(25vw, 110px)}
+  .shell{padding:12px; border-radius:26px}
+  .gal{grid-template-columns:repeat(2, minmax(0,auto))}
+  nav.steps button{padding:8px 14px 8px 8px; font-size:15px; min-height:48px}
+}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none !important; transition:none !important} .key[aria-pressed="true"]{transform:none} }
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>The Magic Square</h1>
+    <p class="sub">Grade 3 · Week 6 · Lesson 3.6</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="steps" role="tablist" aria-label="Lesson steps">
+  <button role="tab" data-step="warm" aria-selected="true"><b>1</b>Fifteen hunt</button>
+  <button role="tab" data-step="sum" aria-selected="false"><b>2</b>The magic number</button>
+  <button role="tab" data-step="build" aria-selected="false"><b>3</b>Build it</button>
+  <button role="tab" data-step="det" aria-selected="false"><b>4</b>Detective questions</button>
+  <button role="tab" data-step="chal" aria-selected="false"><b>★</b>Challenge</button>
+</nav>
+
+<!-- STEP 1: warm-up -->
+<section class="stage" id="st-warm">
+  <div class="left">
+    <p class="lead">Find three <em>different</em> numbers from 1 to 9 that add to 15. How many ways are there?</p>
+    <div class="pick" id="wPick" aria-live="polite"></div>
+    <div class="pad" id="wPad" aria-label="Numbers 1 to 9"></div>
+    <div class="row">
+      <button class="secondary" id="wClear">Clear my pick</button>
+    </div>
+    <p class="fb" id="wFb" aria-live="polite"></p>
+  </div>
+  <div class="right">
+    <div class="count"><b id="wCount">0</b> <span id="wCountW">sets</span> found. The order doesn't matter: 1 + 5 + 9 and 9 + 5 + 1 are the same set.</div>
+    <div class="triples" id="wList"></div>
+    <div class="row">
+      <button class="secondary" id="wOrg">Hunt in order</button>
+      <button class="secondary" id="wShow">Show the whole list</button>
+    </div>
+    <p class="fb" id="wFb2" aria-live="polite"></p>
+    <p class="note">Keep this list. You will need it for the detective questions.</p>
+  </div>
+</section>
+
+<!-- STEP 2: magic sum -->
+<section class="stage" id="st-sum" hidden>
+  <div class="left">
+    <p class="lead">Long ago, people told of a turtle with a 3-by-3 pattern on its shell. Put 1 to 9 in the grid so every row, column, and diagonal adds to the <em>same number</em>.</p>
+    <p class="lead" style="font-size:clamp(20px,1.7vw,26px)">Before you place a single tile: what must that number be?</p>
+    <div class="tiles45" id="sTiles" aria-label="The nine tiles"></div>
+    <div class="row">
+      <div class="stepper">
+        <label for="sOut">Each line adds to</label>
+        <button id="sMinus" aria-label="One less">−</button>
+        <output id="sOut">12</output>
+        <button id="sPlus" aria-label="One more">+</button>
+      </div>
+      <button class="primary" id="sCheck">Check</button>
+    </div>
+    <p class="fb" id="sFb" aria-live="polite"></p>
+  </div>
+  <div class="right">
+    <p class="note">Talk first: the three rows use every tile exactly once. What do all three rows add to together?</p>
+    <div class="row">
+      <button class="secondary" id="sAdd">Add up all nine tiles</button>
+      <button class="secondary" id="sPair">Show a quick way to add them</button>
+      <button class="secondary" id="sSplit">Share 45 among 3 rows</button>
+    </div>
+    <p class="fb" id="sEv" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- STEP 3: build -->
+<section class="stage" id="st-build" hidden>
+  <div class="left">
+    <div class="shell" id="bShell"></div>
+  </div>
+  <div class="right">
+    <p class="lead">Every row, column, and diagonal must make <em>15</em>.</p>
+    <p class="note">Tap a tile, then tap a square. Tap a placed tile to pick it back up. The numbers around the edge show each line's total.</p>
+    <div class="row" id="bBtns"></div>
+    <label class="check"><input type="checkbox" id="bLC"> Show how many lines pass through each square</label>
+    <p class="fb" id="bFb" aria-live="polite"></p>
+    <div>
+      <div class="count"><b id="bCount">0</b> magic squares found so far</div>
+      <div class="found" id="bFound"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 4: detective -->
+<section class="stage" id="st-det" hidden>
+  <div class="left">
+    <div class="board" id="dBoard"></div>
+  </div>
+  <div class="right">
+    <div class="qnav" id="qNav"></div>
+    <p class="lead" id="qText"></p>
+    <div class="row" id="qBtns"></div>
+    <div class="fb" id="qFb" aria-live="polite"></div>
+    <p class="note">Talk it over with your partner first. Then tap a button to put evidence on the board.</p>
+  </div>
+</section>
+
+<!-- CHALLENGE -->
+<section class="stage" id="st-chal" hidden>
+  <div class="left">
+    <div class="shell" id="cShell"></div>
+  </div>
+  <div class="right">
+    <div class="row" role="group" aria-label="Challenge part">
+      <button class="secondary" id="cA" aria-pressed="true">Part A: 2 to 10</button>
+      <button class="secondary" id="cB" aria-pressed="false">Part B: magic sum 30</button>
+    </div>
+    <div class="part" id="cPartA">
+      <p class="lead">Use the numbers <em>2 to 10</em> instead. Predict first.</p>
+      <div class="row">
+        <div class="stepper"><label for="cSumOut">Magic sum</label><button id="cSumM" aria-label="One less">−</button><output id="cSumOut">15</output><button id="cSumP" aria-label="One more">+</button></div>
+        <button class="primary" id="cSumChk">Check</button>
+      </div>
+      <div class="row">
+        <div class="stepper"><label for="cCenOut">Center</label><button id="cCenM" aria-label="One less">−</button><output id="cCenOut">5</output><button id="cCenP" aria-label="One more">+</button></div>
+        <button class="primary" id="cCenChk">Check</button>
+      </div>
+      <p class="fb" id="cFbA" aria-live="polite"></p>
+      <p class="note">Then build it on the shell to prove it.</p>
+    </div>
+    <div class="part" id="cPartB" hidden>
+      <p class="lead">Build a magic square whose magic sum is <em>30</em>, using nine different numbers.</p>
+      <p class="note">Tap a square, then type its number on the keypad.</p>
+      <div class="row"><button class="secondary" id="cHint">Hint</button></div>
+      <p class="fb" id="cFbH" aria-live="polite"></p>
+    </div>
+    <p class="fb" id="cFb" aria-live="polite"></p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/*MATH-START*/
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const LINE_NAMES = ['Top row','Middle row','Bottom row','Left column','Middle column','Right column','Diagonal ↘','Diagonal ↙'];
+const CORNERS = [0,2,6,8], EDGES = [1,3,5,7], CENTER = 4;
+const linesThrough = i => LINES.filter(l => l.includes(i)).length;
+function triples(nums, target){
+  const r=[]; const a=[...nums].sort((x,y)=>x-y);
+  for(let i=0;i<a.length;i++) for(let j=i+1;j<a.length;j++) for(let k=j+1;k<a.length;k++)
+    if(a[i]+a[j]+a[k]===target) r.push([a[i],a[j],a[k]]);
+  return r;
+}
+const rot = g => [g[6],g[3],g[0],g[7],g[4],g[1],g[8],g[5],g[2]];   // quarter turn clockwise
+const flip = g => [g[2],g[1],g[0],g[5],g[4],g[3],g[8],g[7],g[6]];  // mirror left-right
+function orientations(g){
+  const out=[]; let a=g.slice();
+  for(let i=0;i<4;i++){ out.push(a); a=rot(a); }
+  a=flip(g); for(let i=0;i<4;i++){ out.push(a); a=rot(a); }
+  return out;
+}
+const isMagic = (g,t) => g.every(v => v!=null) && LINES.every(l => l.reduce((s,i)=>s+g[i],0)===t);
+const BASE = [2,7,6,9,5,1,4,3,8];
+const ALL8 = orientations(BASE);
+const LOSHU = [4,9,2,3,5,7,8,1,6];
+const TRIPLES = triples([1,2,3,4,5,6,7,8,9],15);
+const usesCount = n => TRIPLES.filter(t => t.includes(n)).length;
+/*MATH-END*/
+
+const sum = a => a.reduce((s,x)=>s+x,0);
+const plural = (n,w,ws) => `${n} ${n===1?w:(ws||w+'s')}`;
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+function fb(el, html, kind){ el.innerHTML = html; el.className = 'fb' + (kind ? ' '+kind : ''); }
+
+/* ================= Steps ================= */
+const stepBtns = [...document.querySelectorAll('nav.steps button')];
+function showStep(s){
+  stepBtns.forEach(b => b.setAttribute('aria-selected', b.dataset.step===s));
+  document.querySelectorAll('.stage').forEach(x => x.hidden = x.id !== 'st-'+s);
+  if(s==='det') renderQ();
+}
+stepBtns.forEach(b => b.onclick = () => showStep(b.dataset.step));
+const markDone = s => stepBtns.find(b => b.dataset.step===s).classList.add('done');
+
+/* ================= 1. Fifteen hunt ================= */
+const W = {pick:[], found:new Set(), shown:false};
+const key3 = t => t.join('-');
+function renderWarm(){
+  const pad = $('#wPad'); pad.innerHTML='';
+  for(let n=1;n<=9;n++){
+    const b=document.createElement('button'); b.className='key'; b.textContent=n;
+    b.setAttribute('aria-pressed', W.pick.includes(n));
+    b.onclick = () => tapWarm(n); pad.appendChild(b);
+  }
+  const p = W.pick, slots = [0,1,2].map(i => `<span class="slot ${p[i]?'full':''}">${p[i]??''}</span>`);
+  const total = p.length ? sum(p) : '';
+  $('#wPick').innerHTML = `${slots[0]}<span class="op">+</span>${slots[1]}<span class="op">+</span>${slots[2]}<span class="op">=</span><span>${p.length===3?total:(p.length?total+'…':'?')}</span>`;
+  const list = $('#wList'); list.innerHTML='';
+  TRIPLES.forEach(t => {
+    const k=key3(t), d=document.createElement('div');
+    const on = W.found.has(k);
+    d.className = 'trip' + (on ? ' on' : W.shown ? ' shown' : '');
+    d.dataset.k = k;
+    d.textContent = (on || W.shown) ? t.join(' + ') : '';
+    list.appendChild(d);
+  });
+  $('#wCount').textContent = W.found.size; $('#wCountW').textContent = W.found.size===1?'set':'sets';
+}
+function tapWarm(n){
+  if(W.pick.includes(n)) W.pick = W.pick.filter(x=>x!==n);
+  else if(W.pick.length<3) W.pick.push(n);
+  else { W.pick[2]=n; }
+  fb($('#wFb'),'');
+  renderWarm();
+  if(W.pick.length===3) judgeWarm();
+}
+function judgeWarm(){
+  const p=W.pick.slice(), s=sum(p), t=p.slice().sort((a,b)=>a-b), k=key3(t);
+  const expr = p.join(' + ') + ' = ' + s;
+  if(s===15){
+    if(W.found.has(k)) fb($('#wFb'), `<b>${expr}</b>. You already have ${t.join(', ')}. Changing the order makes the same set. Look for a set with a different number in it.`, 'off');
+    else {
+      W.found.add(k); W.pick=[];
+      const left = TRIPLES.length - W.found.size;
+      fb($('#wFb'), `<b>${expr}.</b> A new set! ` + (left ? `Clear and look for another.` : `That's every set. Can there be a 9th? Use "Hunt in order" to check you didn't miss one.`), 'good');
+      if(!left) markDone('warm');
+      renderWarm();
+      const el = document.querySelector(`.trip[data-k="${k}"]`); if(el && !reduced){ el.classList.add('flash'); }
+      return;
+    }
+  } else {
+    const d = Math.abs(15-s);
+    const can = p.some(x => { const y = s<15 ? x+d : x-d; return y>=1 && y<=9 && !p.includes(y); });
+    fb($('#wFb'), `<b>${expr}</b>. That's ${d} ${s<15?'short of':'more than'} 15. ` + (can ? `Tap one number to take it out, then try one that is ${d} ${s<15?'bigger':'smaller'}.` : `One swap can't fix that much. Try changing two of the numbers to ${s<15?'bigger':'smaller'} ones.`), 'off');
+  }
+  renderWarm();
+}
+$('#wClear').onclick = () => { W.pick=[]; fb($('#wFb'),''); renderWarm(); };
+$('#wOrg').onclick = () => {
+  const groups = [1,2,3,4,5].map(m => ({m, sets:TRIPLES.filter(t=>t[0]===m)}));
+  const rows = groups.map(g => `<tr><td>Smallest number <b>${g.m}</b></td><td class="n">${g.sets.length}</td><td class="sets">${g.sets.length ? g.sets.map(t=>{const k=key3(t); return (W.found.has(k)||W.shown)? t.join('+') : '?+?+?';}).join(' · ') : (g.m===5 ? '5 + 6 + 7 = 18, too big' : '')}</td></tr>`).join('');
+  fb($('#wFb2'), `A detective trick: hunt in order. Start with 1 as the smallest, then 2, and so on. Sets you haven't found yet show as ?+?+?.<div class="tblwrap"><table class="ctable" style="margin-top:8px"><tr><th>Start with</th><th>Sets</th><th></th></tr>${rows}</table></div>Once 5 is the smallest, the other two must be bigger than 5, and 5 + 6 + 7 is already 18. So there are exactly <b>${TRIPLES.length}</b>.`);
+};
+$('#wShow').onclick = () => { W.shown=true; renderWarm(); markDone('warm'); fb($('#wFb2'), `All <b>${TRIPLES.length}</b> sets that make 15 are on the list. Green ones are the sets you found yourself.`); };
+
+/* ================= 2. Magic sum ================= */
+const SM = {g:12, solved:false};
+function renderTiles(groups){
+  $('#sTiles').innerHTML = [1,2,3,4,5,6,7,8,9].map(n => `<span class="${groups ? 'g'+groups[n] : ''}">${n}</span>`).join('');
+}
+$('#sMinus').onclick = () => { SM.g=Math.max(3,SM.g-1); $('#sOut').textContent=SM.g; };
+$('#sPlus').onclick  = () => { SM.g=Math.min(30,SM.g+1); $('#sOut').textContent=SM.g; };
+$('#sCheck').onclick = () => {
+  const g=SM.g, three=g*3;
+  if(g===15){ SM.solved=true; markDone('sum'); fb($('#sFb'), `<b>Yes, 15.</b> Three rows × 15 = 45, and 1 + 2 + … + 9 = 45. Every row, column, and diagonal must make 15. Now go build it.`, 'good'); }
+  else fb($('#sFb'), `If each row made ${g}, the three rows together would make 3 × ${g} = <b>${three}</b>. But the nine tiles only add up to 45. ${three<45?'Too small':'Too big'}. Try again, or use the evidence buttons.`, 'off');
+};
+$('#sAdd').onclick = async () => {
+  renderTiles(null); let t=0; const steps=[];
+  for(let n=1;n<=9;n++){ t+=n; steps.push(t); fb($('#sEv'), `Running total: ${steps.join(', ')}`); if(!reduced) await sleep(380); }
+  fb($('#sEv'), `Running total: ${steps.join(', ')}. All nine tiles add up to <b>45</b>.`);
+};
+$('#sPair').onclick = () => {
+  renderTiles({1:0,9:0,2:1,8:1,3:2,7:2,4:0,6:0,5:1});
+  fb($('#sEv'), `Pair them: 1 + 9 = 10, 2 + 8 = 10, 3 + 7 = 10, 4 + 6 = 10. That's four tens, 40, plus the 5 left over: <b>45</b>.`);
+};
+$('#sSplit').onclick = () => {
+  // one real partition of 1..9 into three sets of 15 (the rows of a magic square)
+  const g={}; [[2,7,6],[9,5,1],[4,3,8]].forEach((r,i)=>r.forEach(n=>g[n]=i)); renderTiles(g);
+  fb($('#sEv'), `The three rows share the 45 equally: 45 ÷ 3 = <b>15</b>. Here the tiles are split into three groups: 2 + 7 + 6, 9 + 5 + 1, 4 + 3 + 8. Each makes 15.`);
+};
+
+/* ================= Builder (used in Build and Challenge) ================= */
+function makeBuilder(shell, cfg){
+  // cfg: {tiles:[...] | null (own numbers), target:()=>number|null, fbEl, btnsEl, lcEl, onMagic, starter}
+  const B = {grid:Array(9).fill(null), sel:null, cell:null, showLC:false};
+  shell.innerHTML = `<div class="sq"></div><div class="tray" style="margin-top:16px"></div>`;
+  const sq = shell.querySelector('.sq'), tray = shell.querySelector('.tray');
+  const own = !cfg.tiles;
+  // grid layout: row 0 = anti-diagonal sum at col 3; rows 1-3 = cells + row sum; row 4 = column sums + main diagonal sum
+  const sumEls = {};
+  const cellEls = [];
+  for(let r=0;r<5;r++) for(let c=0;c<4;c++){
+    let el;
+    if(r>=1 && r<=3 && c<=2){
+      const i=(r-1)*3+c; el=document.createElement('button'); el.className='cell'; el.onclick=()=>tapCell(i); cellEls[i]=el;
+    } else {
+      el=document.createElement('div'); el.className='ls blank';
+      let li=-1;
+      if(r===0 && c===3) li=7; else if(r>=1&&r<=3&&c===3) li=r-1; else if(r===4&&c<=2) li=3+c; else if(r===4&&c===3) li=6;
+      if(li>=0){ el.className='ls'; sumEls[li]=el; el.dataset.li=li; }
+    }
+    sq.appendChild(el);
+  }
+  function lineState(li){
+    const l=LINES[li], vals=l.map(i=>B.grid[i]), t=cfg.target();
+    const filled = vals.filter(v=>v!=null);
+    const s = sum(filled);
+    if(filled.length<3) return {s, part:true, n:filled.length};
+    return {s, part:false, ok: t!=null && s===t, t};
+  }
+  function render(){
+    const t=cfg.target();
+    cellEls.forEach((el,i) => {
+      const v=B.grid[i];
+      el.className = 'cell' + (v==null?' empty':'') + (own && B.cell===i ? ' target':'') + (!own && B.sel!=null && v==null ? '' : '');
+      el.innerHTML = (v??'') + (B.showLC ? `<span class="lc">${linesThrough(i)} lines</span>` : '');
+      el.setAttribute('aria-label', `Square ${i+1}: ${v??'empty'}`);
+    });
+    for(let li=0; li<8; li++){
+      const st=lineState(li), el=sumEls[li];
+      const arrow = li===6 ? '↘' : li===7 ? '↙' : '';
+      if(st.n===0){ el.className='ls part'; el.innerHTML = `${arrow||'·'}`; continue; }
+      el.className = 'ls' + (st.part ? ' part' : st.ok ? ' good' : (t!=null ? ' off' : ''));
+      el.innerHTML = `${st.s}${st.part?'…':''}${arrow?`<small>${arrow}</small>`:''}`;
+      el.title = LINE_NAMES[li];
+    }
+    if(own){
+      tray.innerHTML='';
+      const keys=[1,2,3,4,5,6,7,8,9,0];
+      keys.forEach(d=>{ const b=document.createElement('button'); b.className='key'; b.textContent=d; b.disabled=B.cell==null; b.onclick=()=>typeDigit(d); tray.appendChild(b); });
+      const bs=document.createElement('button'); bs.className='key'; bs.textContent='⌫'; bs.setAttribute('aria-label','Delete'); bs.disabled=B.cell==null; bs.onclick=()=>{ if(B.cell==null) return; const v=B.grid[B.cell]; B.grid[B.cell] = v==null||v<10 ? null : Math.floor(v/10); changed(); }; tray.appendChild(bs);
+      const nx=document.createElement('button'); nx.className='key'; nx.textContent='→'; nx.setAttribute('aria-label','Next square'); nx.onclick=()=>{ B.cell = B.cell==null?0:(B.cell+1)%9; render(); }; tray.appendChild(nx);
+    } else {
+      tray.innerHTML='';
+      const left = cfg.tiles.filter(n => !B.grid.includes(n));
+      if(!left.length){ tray.innerHTML = `<span class="done">All nine tiles are on the shell.</span>`; }
+      left.forEach(n => { const b=document.createElement('button'); b.className='key'; b.textContent=n; b.setAttribute('aria-pressed', B.sel===n); b.onclick=()=>{ B.sel = B.sel===n?null:n; render(); }; tray.appendChild(b); });
+    }
+  }
+  function typeDigit(d){
+    if(B.cell==null) return;
+    const v=B.grid[B.cell];
+    let nv = (v==null) ? d : (v<10 ? v*10+d : d);
+    if(nv===0) nv=null;
+    B.grid[B.cell]=nv; changed();
+  }
+  function tapCell(i){
+    if(own){ B.cell = i; render(); return; }
+    const v=B.grid[i];
+    if(B.sel!=null){ B.grid[i]=B.sel; B.sel = null; if(v!=null) B.sel=v; changed(); }
+    else if(v!=null){ B.grid[i]=null; B.sel=v; changed(); }
+  }
+  function changed(){ render(); if(B.grid.every(v=>v!=null)) evaluate(true); else fb(cfg.fbEl,''); }
+  function evaluate(auto){
+    const t=cfg.target(), g=B.grid;
+    const filled=g.filter(v=>v!=null).length;
+    if(t==null){ fb(cfg.fbEl, `First work out the magic sum in Part A. Then the line totals will tell you which lines work.`, 'off'); return; }
+    if(own){
+      const dup = g.filter((v,i)=>v!=null && g.indexOf(v)!==i);
+      if(dup.length){ fb(cfg.fbEl, `You used ${listText([...new Set(dup)])} more than once. The nine numbers must all be different.`, 'off'); return; }
+    }
+    if(filled<9){
+      const done = LINES.map((l,li)=>({li, st:lineState(li)})).filter(x=>!x.st.part);
+      if(!done.length){ fb(cfg.fbEl, `No line is full yet. Fill a whole row, column, or diagonal and its total turns green when it makes ${t}.`); return; }
+      const good=done.filter(x=>x.st.ok).length;
+      fb(cfg.fbEl, `${plural(good,'full line')} of ${done.length} make ${t} so far. ${plural(9-filled,'square')} still empty.`, good===done.length?'good':'off');
+      return;
+    }
+    if(isMagic(g,t)){ cfg.onMagic(g.slice()); return; }
+    const bad = LINES.map((l,li)=>({li,s:sum(l.map(i=>g[i]))})).filter(x=>x.s!==t);
+    const parts = bad.slice(0,3).map(x => `${LINE_NAMES[x.li]} makes ${x.s} (${Math.abs(x.s-t)} ${x.s>t?'too many':'short'})`);
+    let hint='';
+    if(cfg.tiles && cfg.tiles[0]===1 && g[CENTER]!==5) hint = ` Clue: 4 lines pass through the middle square. Look at your warm-up list: which number is in 4 sets?`;
+    else if(cfg.tiles && cfg.tiles[0]===1) { const badCorner = CORNERS.find(i => g[i]%2===1); if(badCorner!=null) hint = ` Clue: a corner sits on 3 lines. ${g[badCorner]} is only in ${usesCount(g[badCorner])} sets from the warm-up.`; }
+    fb(cfg.fbEl, `${parts.join('. ')}${bad.length>3?`, and ${bad.length-3} more`:''}. ${plural(8-bad.length,'line')} of 8 already make ${t}. Swap two tiles and watch the totals.${hint}`, 'off');
+  }
+  // buttons
+  const mk = (label, fn, cls='secondary') => { const b=document.createElement('button'); b.className=cls; b.textContent=label; b.onclick=fn; cfg.btnsEl.appendChild(b); return b; };
+  if(!cfg.btnsEl){ cfg.btnsEl=document.createElement('div'); cfg.btnsEl.className='row'; cfg.btnsEl.style.cssText='margin-top:14px;justify-content:center'; shell.appendChild(cfg.btnsEl); }
+  cfg.btnsEl.innerHTML='';
+  mk('Check my square', () => evaluate(false), 'primary');
+  mk('Turn ⟳', () => { B.grid=rot(B.grid); B.sel=null; changed(); });
+  mk('Flip ⇋', () => { B.grid=flip(B.grid); B.sel=null; changed(); });
+  if(cfg.starter) mk('Start me off', () => { B.grid=Array(9).fill(null); cfg.starter(B.grid); B.sel=null; B.cell=null; render(); fb(cfg.fbEl, cfg.starterMsg); });
+  mk('Clear', () => { B.grid=Array(9).fill(null); B.sel=null; B.cell=null; render(); fb(cfg.fbEl,''); });
+  if(cfg.lcEl) cfg.lcEl.onchange = e => { B.showLC = e.target.checked; render(); };
+  B.render=render; B.check=()=>evaluate(false); B.reset=()=>{ B.grid=Array(9).fill(null); B.sel=null; B.cell=null; B.showLC=false; if(cfg.lcEl) cfg.lcEl.checked=false; render(); fb(cfg.fbEl,''); };
+  render();
+  return B;
+}
+
+/* ================= 3. Build ================= */
+const found = new Map();  // key -> grid
+let lastFound = null;
+const builder = makeBuilder($('#bShell'), {
+  tiles:[1,2,3,4,5,6,7,8,9], target:()=>15, fbEl:$('#bFb'), btnsEl:$('#bBtns'), lcEl:$('#bLC'),
+  starter: g => { g[CENTER]=5; g[0]=2; }, starterMsg:`5 is in the middle and 2 is in a corner. Which number must go in the opposite corner so the diagonal makes 15?`,
+  onMagic: g => {
+    const k=g.join(''); const isNew=!found.has(k);
+    if(isNew) found.set(k,g); lastFound=k; renderFound(); markDone('build');
+    fb($('#bFb'), isNew
+      ? `<b>Magic!</b> All 8 lines make 15. Which number is in the center? Which are in the corners? Now tap <b>Turn ⟳</b>. Is it still magic? Is it a new one?`
+      : `<b>Still magic</b>, all 8 lines make 15. You already have this exact square in your collection. Try a turn or a flip to find one you don't have.`, 'good');
+  }
+});
+function renderFound(){
+  $('#bCount').textContent = found.size;
+  $('#bFound').innerHTML = [...found.entries()].map(([k,g]) => miniHTML(g, k===lastFound)).join('');
+}
+function miniHTML(g, now, big){ return `<div class="mini ${big?'big':''} ${now?'now':''}" role="img" aria-label="${g.slice(0,3).join(' ')}, ${g.slice(3,6).join(' ')}, ${g.slice(6).join(' ')}">${g.map((v,i)=>`<span class="${i===CENTER?'c':''}">${v}</span>`).join('')}</div>`; }
+
+/* ================= 4. Detective questions ================= */
+const D = {q:1, gen:0};
+const board = $('#dBoard');
+function bigSquare(vals, opts={}){
+  // vals: array of 9 (or nulls); opts.lit: cell indexes; opts.lines: line indexes to draw; opts.badges: {i:text}
+  const cells = vals.map((v,i)=>`<div class="cell ${opts.lit&&opts.lit.includes(i)?'lit':''} ${v==null?'empty':''}">${v??''}${opts.badges&&opts.badges[i]!=null?`<span class="lc">${opts.badges[i]}</span>`:''}</div>`).join('');
+  let svg='';
+  if(opts.lines){
+    const pt = i => [ (i%3)*100+50, Math.floor(i/3)*100+50 ];
+    svg = `<svg viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">` + opts.lines.map((li,n)=>{
+      const l=LINES[li]; let [x1,y1]=pt(l[0]), [x2,y2]=pt(l[2]);
+      const dx=(x2-x1)/200*40, dy=(y2-y1)/200*40; x1-=dx; y1-=dy; x2+=dx; y2+=dy;
+      const col = opts.lineColors ? opts.lineColors[n] : 'var(--accent)';
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="7" stroke-linecap="round" opacity=".75" vector-effect="non-scaling-stroke"/>`;
+    }).join('') + `</svg>`;
+  }
+  return `<div class="shell"><div class="bigsq lines">${cells}${svg}</div></div>`;
+}
+const BLANK = Array(9).fill(null);
+function setBoard(html, cap){ board.innerHTML = html + (cap?`<p class="cap">${cap}</p>`:''); }
+function qfb(html){ $('#qFb').innerHTML = html; }
+
+const QS = {
+  1:{ text:'Which number is in the center of every magic square?',
+      acts:[
+        {label:'Show every magic square', run:()=>{
+          setBoard(`<div class="gal">${ALL8.map(g=>`<figure>${miniHTML(g,false,true)}</figure>`).join('')}</div>`, 'Every magic square made from 1 to 9. The center is shaded.');
+          qfb(`There are ${ALL8.length} of them, and every one has <b>5</b> in the center. That can't be luck. The next questions find out why.`);
+        }},
+        {label:'Which numbers are in the corners?', run:()=>{
+          setBoard(`<div class="gal">${ALL8.map(g=>`<figure>${miniCorner(g)}</figure>`).join('')}</div>`, 'Corners shaded.');
+          qfb(`Corners are always <b>2, 4, 6, 8</b> (the even numbers). Edges are always <b>1, 3, 7, 9</b>.`);
+        }}]},
+  2:{ text:'How many lines pass through the center? Through a corner? Through an edge?',
+      acts:[
+        {label:'The center', run:()=>showLines(CENTER, 'the center')},
+        {label:'A corner', run:()=>showLines(0, 'a corner')},
+        {label:'An edge', run:()=>showLines(1, 'an edge')},
+        {label:'Label them all', run:()=>{
+          const b={}; for(let i=0;i<9;i++) b[i]=linesThrough(i)+' lines';
+          setBoard(bigSquare(BLANK,{badges:b}), 'Count of rows, columns and diagonals through each square.');
+          qfb(`Center: <b>4</b> lines. Each corner: <b>3</b> lines. Each edge: <b>2</b> lines.`);
+        }}]},
+  3:{ text:'Look at the warm-up list. How many of the sets that make 15 use each number?',
+      acts:[
+        {label:'Count the sets', run:()=>{
+          const rows=[1,2,3,4,5,6,7,8,9].map(n=>{ const c=usesCount(n); return `<tr class="k${c}"><td class="n">${n}</td><td><span class="dots">${'<i></i>'.repeat(c)}</span> ${c}</td><td class="sets">${TRIPLES.filter(t=>t.includes(n)).map(t=>t.join('+')).join(' · ')}</td></tr>`; }).join('');
+          setBoard(`<div class="tblwrap"><table class="ctable"><tr><th>Number</th><th>Sets</th><th>Which sets</th></tr>${rows}</table></div>`);
+          qfb(`Only <b>5</b> is in 4 sets. 2, 4, 6, 8 are each in 3 sets. 1, 3, 7, 9 are each in 2 sets. Does that match anything from question 2?`);
+        }}]},
+  4:{ text:'Why must 5 go in the middle?',
+      acts:[
+        {label:'Match lines to sets', run:()=>{
+          const b={}; for(let i=0;i<9;i++) b[i]= linesThrough(i)+' lines';
+          const vals = BLANK.map((_,i)=> i===CENTER ? 5 : CORNERS.includes(i) ? '2·4·6·8' : '1·3·7·9');
+          setBoard(bigSquare(vals.map(v=>typeof v==='string'?`<span style="font-size:.38em">${v}</span>`:v),{badges:b, lit:[CENTER]}));
+          qfb(`Each line through a square is a set that makes 15, so the number there must be in that many sets.<br>The center is on <b>4</b> lines, and only 5 is in 4 sets. A corner is on <b>3</b> lines: only 2, 4, 6, 8 are in 3 sets. An edge is on <b>2</b> lines: 1, 3, 7, 9 are in 2 sets.`);
+        }},
+        {label:'What if 9 went in the middle?', run:()=>{
+          const v=BLANK.slice(); v[CENTER]=9;
+          const cols=['var(--good)','var(--good)','var(--off)','var(--off)'];
+          setBoard(bigSquare(v,{lines:[1,4,6,7], lineColors:cols, lit:[CENTER]}), 'Green: lines we could fill. Amber: no set left.');
+          qfb(`9 would sit on 4 lines, so it would need 4 different sets with 9 in them. There are only 2: <b>1 + 5 + 9</b> and <b>2 + 4 + 9</b>. Two lines would be stuck, so 9 can't go in the middle.`);
+        }}],
+      journal:'Exit ticket: explain why 5 must be in the middle.'},
+  5:{ text:'How many different magic squares are there?',
+      acts:[
+        {label:'Turn and flip one square', run:()=>turnShow()},
+        {label:'See the turtle’s square', run:()=>{
+          const cells = LOSHU.map((n,i)=>`<div class="cell ${i===CENTER?'lit':''}"><span class="ld" aria-label="${n}">${Array.from({length:n},()=>`<i class="${n%2===0?'y':''}"></i>`).join('')}</span></div>`).join('');
+          setBoard(`<div class="shell loshu"><div class="bigsq">${cells}</div></div>`, 'The Lo Shu, drawn as dots: odd numbers as open dots, even numbers as filled dots.');
+          qfb(`The Lo Shu from the legend is <b>${LOSHU.slice(0,3).join(' ')} / ${LOSHU.slice(3,6).join(' ')} / ${LOSHU.slice(6).join(' ')}</b>. Count the dots in each line: 15 every time. It is one of the 8 you saw, turned and flipped.`);
+        }}]}
+};
+function miniCorner(g){ return `<div class="mini big">${g.map((v,i)=>`<span class="${CORNERS.includes(i)?'c':''}">${v}</span>`).join('')}</div>`; }
+function showLines(i, name){
+  const ls = LINES.map((l,li)=>l.includes(i)?li:-1).filter(x=>x>=0);
+  const b={}; b[i]=ls.length+' lines';
+  setBoard(bigSquare(BLANK,{lit:[i], lines:ls, badges:b}));
+  qfb(`<b>${ls.length} lines</b> pass through ${name}: ${listText(ls.map(li=>LINE_NAMES[li].toLowerCase()))}.`);
+}
+async function turnShow(){
+  const g=++D.gen;
+  const labels=['Start','Turn 1','Turn 2','Turn 3','Flip','Flip + turn 1','Flip + turn 2','Flip + turn 3'];
+  if(reduced){
+    setBoard(`<div class="gal">${ALL8.map((s,i)=>`<figure>${miniHTML(s,false,true)}<figcaption>${labels[i]}</figcaption></figure>`).join('')}</div>`);
+  } else {
+    for(let i=0;i<8;i++){
+      if(g!==D.gen) return;
+      setBoard(bigSquare(ALL8[i],{lit:[CENTER]}), `${labels[i]} · still magic: every line makes 15`);
+      await sleep(1300);
+    }
+    if(g!==D.gen) return;
+    setBoard(`<div class="gal">${ALL8.map((s,i)=>`<figure>${miniHTML(s,false,true)}<figcaption>${labels[i]}</figcaption></figure>`).join('')}</div>`);
+  }
+  qfb(`4 turns × 2 (flipped or not) = <b>8</b> squares, and these are all of them. They are really <b>one</b> magic square, turned or flipped. Did your collection in Build it have any that aren't here?`);
+}
+function renderQ(){
+  const nav=$('#qNav'); nav.innerHTML='';
+  [1,2,3,4,5].forEach(i=>{ const b=document.createElement('button'); b.textContent=i; b.setAttribute('aria-pressed', D.q===i); b.setAttribute('aria-label','Question '+i); b.onclick=()=>{ D.q=i; D.gen++; renderQ(); }; nav.appendChild(b); });
+  const q=QS[D.q];
+  $('#qText').textContent=q.text;
+  const box=$('#qBtns'); box.innerHTML='';
+  q.acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=()=>{ D.gen++; a.run(); }; box.appendChild(b); });
+  qfb(q.journal ? `<p class="journal">${q.journal}</p>` : '');
+  setBoard(bigSquare(BLANK), 'The empty shell. Tap a button for evidence.');
+}
+
+/* ================= Challenge ================= */
+const C = {part:'A', sumG:15, cenG:5, sumOK:false, cenOK:false};
+const T210=[2,3,4,5,6,7,8,9,10];
+let chalB = null;
+function buildChal(){
+  if(C.part==='A'){
+    chalB = makeBuilder($('#cShell'), {tiles:T210, target:()=>C.sumOK?18:null, fbEl:$('#cFb'),
+      onMagic: g => fb($('#cFb'), `<b>Magic!</b> All 8 lines make 18, with <b>${g[CENTER]}</b> in the center. Compare it with your 1 to 9 square: every number is one more.`, 'good')});
+  } else {
+    chalB = makeBuilder($('#cShell'), {tiles:null, target:()=>30, fbEl:$('#cFb'),
+      onMagic: g => { markDone('chal'); fb($('#cFb'), `<b>Magic!</b> All 8 lines make 30 with nine different numbers. Center: <b>${g[CENTER]}</b>. Is there another way? What is 30 ÷ 3?`, 'good'); }});
+  }
+}
+function setPart(p){
+  C.part=p; $('#cA').setAttribute('aria-pressed', p==='A'); $('#cB').setAttribute('aria-pressed', p==='B');
+  $('#cPartA').hidden = p!=='A'; $('#cPartB').hidden = p!=='B'; fb($('#cFb'),'');
+  buildChal();
+}
+$('#cA').onclick=()=>setPart('A'); $('#cB').onclick=()=>setPart('B');
+$('#cSumM').onclick=()=>{ C.sumG=Math.max(3,C.sumG-1); $('#cSumOut').textContent=C.sumG; };
+$('#cSumP').onclick=()=>{ C.sumG=Math.min(40,C.sumG+1); $('#cSumOut').textContent=C.sumG; };
+$('#cCenM').onclick=()=>{ C.cenG=Math.max(2,C.cenG-1); $('#cCenOut').textContent=C.cenG; };
+$('#cCenP').onclick=()=>{ C.cenG=Math.min(10,C.cenG+1); $('#cCenOut').textContent=C.cenG; };
+$('#cSumChk').onclick=()=>{
+  const total=sum(T210), g=C.sumG;
+  if(g*3===total){ C.sumOK=true; chalB.render(); fb($('#cFbA'), `<b>Yes, 18.</b> 2 + 3 + … + 10 = ${total}, and ${total} ÷ 3 = 18. Each of the nine numbers is 1 more than before, so each row of three is 3 more: 15 + 3 = 18.`, 'good'); }
+  else fb($('#cFbA'), `If each row made ${g}, three rows would make ${g*3}. Add up 2 to 10: is it ${g*3}? (Hint: it is 9 more than 45, since each number went up by 1.)`, 'off');
+};
+$('#cCenChk').onclick=()=>{
+  if(C.cenG===6){ C.cenOK=true; fb($('#cFbA'), `<b>Yes, 6.</b> It is the middle number of 2 to 10, the only one in 4 sets that make 18, just as 5 was for 1 to 9. Build it on the shell to prove it.`, 'good'); }
+  else fb($('#cFbA'), `${C.cenG} would need to be in 4 sets that make 18. Every number went up by 1. What was in the center of the 1 to 9 square? Add 1.`, 'off');
+};
+$('#cHint').onclick=()=>fb($('#cFbH'), `What happens to every line if you <b>double</b> every number in a square that makes 15? 2 × 15 = 30. Or: what if you add the same amount to every number? Each line goes up by 3 times that amount.`);
+
+/* ================= Reset / fullscreen ================= */
+function resetAll(){
+  W.pick=[]; W.found.clear(); W.shown=false; renderWarm(); fb($('#wFb'),''); fb($('#wFb2'),'');
+  SM.g=12; SM.solved=false; $('#sOut').textContent=12; renderTiles(null); fb($('#sFb'),''); fb($('#sEv'),'');
+  builder.reset(); found.clear(); lastFound=null; renderFound();
+  D.q=1; D.gen++; renderQ();
+  C.sumG=15; C.cenG=5; C.sumOK=false; C.cenOK=false; $('#cSumOut').textContent=15; $('#cCenOut').textContent=5; fb($('#cFbA'),''); fb($('#cFbH'),''); setPart('A');
+  stepBtns.forEach(b=>b.classList.remove('done'));
+  showStep('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+renderWarm(); renderTiles(null); renderFound(); setPart('A'); renderQ();
+})();
+</script>
+
+</body></html>
