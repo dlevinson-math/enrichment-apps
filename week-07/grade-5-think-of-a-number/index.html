@@ -1,0 +1,750 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Think of a Number</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a magician's stage strip on top, four lesson-flow rooms below; bar models (teal boxes = the secret number, amber tiles = ones) carry the math everywhere. */
+:root{
+  --paper:#EDF1F4; --card:#FFFFFF; --ink:#16202E; --muted:#56606E; --line:#CDD5DE;
+  --box:#0E7C86; --box-soft:#D7EEF0; --one:#D9901A; --one-soft:#FBEBCF;
+  --accent:#B8325E; --accent-soft:#F8E1E9; --good:#1F7A45; --good-soft:#DDF1E4; --warn:#B4441C; --warn-soft:#FBE5DC;
+  --stage:#16202E; --stage-ink:#F4F6F8;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --math:"STIX Two Text", "Cambria Math", Cambria, Georgia, serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11161D; --card:#1A212B; --ink:#E9EDF2; --muted:#A3ADBA; --line:#323C49;
+    --box:#3FC1CB; --box-soft:#163A3E; --one:#F0B54A; --one-soft:#3B2D14;
+    --accent:#F0709A; --accent-soft:#3D1D29; --good:#5BCB8A; --good-soft:#173324; --warn:#FF8E62; --warn-soft:#3C2219;
+    --stage:#0A0E13; --stage-ink:#F4F6F8; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11161D; --card:#1A212B; --ink:#E9EDF2; --muted:#A3ADBA; --line:#323C49;
+  --box:#3FC1CB; --box-soft:#163A3E; --one:#F0B54A; --one-soft:#3B2D14;
+  --accent:#F0709A; --accent-soft:#3D1D29; --good:#5BCB8A; --good-soft:#173324; --warn:#FF8E62; --warn-soft:#3C2219;
+  --stage:#0A0E13; --stage-ink:#F4F6F8; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+table.plain{font-size:clamp(17px,1.4vw,21px)}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1280px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.n{font-family:var(--math); font-style:italic; font-weight:600}
+.expr{font-family:var(--math); font-style:normal; font-size:1.15em; white-space:nowrap}
+.expr i{font-style:italic; font-weight:600; color:var(--box)}
+
+/* header */
+header .wrap{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; padding-block:16px 10px}
+.brand h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,44px); letter-spacing:-.02em; line-height:1}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* tabs */
+nav.rooms{position:sticky; top:env(safe-area-inset-top,0px); z-index:5; background:var(--paper); border-bottom:2px solid var(--line)}
+nav.rooms .wrap{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none}
+nav.rooms button{border:0; background:none; padding:14px 14px 12px; font-weight:700; font-size:clamp(16px,1.4vw,20px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; white-space:nowrap; display:flex; align-items:center; gap:8px; min-height:56px}
+nav.rooms button b{display:inline-grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--line); color:var(--ink); font-size:15px}
+nav.rooms button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+nav.rooms button[aria-selected="true"] b{background:var(--accent); color:#fff}
+main .wrap{padding-block:22px 48px}
+section.room{display:flex; flex-direction:column; gap:20px}
+.lead{font-size:clamp(19px,1.6vw,24px); max-width:44em; margin:0}
+h2{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.4vw,34px); margin:0; letter-spacing:-.01em; text-wrap:balance}
+h3{font-family:var(--display); font-weight:600; font-size:clamp(19px,1.6vw,23px); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:#fff; font-weight:700; font-size:clamp(18px,1.5vw,22px); padding:14px 26px; border-radius:14px; min-height:56px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:11px 20px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 16px; font-weight:700; min-height:48px}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.note{border-radius:14px; padding:14px 18px; font-size:clamp(17px,1.4vw,21px); max-width:46em; margin:0}
+.note:empty{display:none}
+.note.good{background:var(--good-soft)} .note.good strong{color:var(--good)}
+.note.warn{background:var(--warn-soft)} .note.warn strong{color:var(--warn)}
+.note.info{background:var(--accent-soft)}
+.hint{color:var(--muted); font-size:15px; margin:0}
+
+/* bars */
+.bars{display:flex; flex-wrap:wrap; align-items:center; gap:4px; min-height:40px}
+.bx{height:40px; width:64px; border-radius:6px; background:var(--box); color:#fff; display:grid; place-items:center; font-family:var(--math); font-style:italic; font-weight:600; font-size:22px; flex:none}
+.bx.part{overflow:hidden; font-size:15px}
+.u{width:18px; height:18px; border-radius:4px; background:var(--one); flex:none}
+.u.part{border-radius:4px 0 0 4px}
+.ugroup{display:flex; flex-wrap:wrap; gap:3px; max-width:200px}
+.lump{height:40px; padding:0 12px; border-radius:6px; background:var(--one); color:#2b1d00; font-weight:700; display:grid; place-items:center; flex:none}
+.neg{background:transparent !important; color:var(--warn) !important; border:2.5px dashed var(--warn)}
+.bars .lbl{color:var(--muted); font-size:14px; margin-left:4px}
+.bars.small .bx{height:30px; width:46px; font-size:18px}
+.bars.small .u{width:14px; height:14px}
+.bars.small .ugroup{max-width:160px}
+.bars.small .lump{height:30px; font-size:15px}
+.empty-bar{color:var(--muted); font-style:italic}
+@keyframes pop{from{transform:scale(.6); opacity:0}to{transform:none; opacity:1}}
+.bars.anim > *{animation:pop .28s ease-out both}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+/* stage (warm-up) */
+.stage{background:var(--stage); color:var(--stage-ink); border-radius:22px; padding:clamp(22px,4vw,48px); display:flex; flex-direction:column; gap:22px; min-height:340px; justify-content:center; position:relative; overflow:hidden}
+.stage .step-no{font-size:16px; letter-spacing:.14em; text-transform:uppercase; opacity:.7}
+.stage .say{font-family:var(--display); font-weight:800; font-size:clamp(40px,7vw,96px); line-height:1.02; letter-spacing:-.02em; text-wrap:balance; margin:0}
+.stage .pips{display:flex; gap:8px}
+.stage .pips i{width:38px; height:8px; border-radius:4px; background:rgba(255,255,255,.2)}
+.stage .pips i.on{background:#F0709A}
+.stage .primary{align-self:flex-start}
+.stage .ghost{background:transparent; color:var(--stage-ink); border-color:rgba(255,255,255,.35)}
+.launch{display:grid; grid-template-columns:minmax(150px,auto) 1fr auto; gap:10px 18px; align-items:center; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px}
+.launch .s{font-weight:700}
+.launch .x{justify-self:end}
+.launch > *{min-width:0}
+.secret{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.secret input, .num-in{width:7.5em; min-height:52px; border:2px solid var(--line); border-radius:12px; padding:8px 12px; background:var(--card); font-size:20px; font-weight:700}
+.chain{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:clamp(20px,1.8vw,26px); font-weight:700; font-variant-numeric:tabular-nums}
+.chain span.arrow{color:var(--muted); font-weight:400}
+.chain .end{background:var(--accent-soft); padding:2px 10px; border-radius:8px}
+
+/* trick lab table */
+.picker{display:flex; gap:8px; flex-wrap:wrap}
+.scroll{overflow-x:auto; border-radius:16px; border:2px solid var(--line); background:var(--card)}
+table.lab{border-collapse:collapse; width:100%; min-width:860px}
+table.lab th, table.lab td{padding:10px 12px; border-bottom:1.5px solid var(--line); text-align:left; vertical-align:middle}
+table.lab th{font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700; background:var(--paper)}
+table.lab tr:last-child td{border-bottom:0}
+table.lab td.step{font-weight:700; font-size:19px; white-space:nowrap}
+table.lab td.val{width:120px}
+table.lab td.bar{min-width:240px}
+.val input{width:96px; min-height:48px; border:2px solid var(--line); border-radius:10px; padding:6px 10px; background:var(--card); font-size:20px; font-weight:700; font-variant-numeric:tabular-nums}
+.val input.ok{border-color:var(--good); background:var(--good-soft)}
+.val input.no{border-color:var(--warn); background:var(--warn-soft)}
+.given{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums}
+.opts{display:flex; gap:6px; flex-wrap:wrap}
+.opt{border:2px solid var(--line); background:var(--card); border-radius:10px; padding:6px 12px; min-height:46px; font-family:var(--math); font-size:19px}
+.opt.no{border-color:var(--warn); text-decoration:line-through; opacity:.6}
+.opt i{font-style:italic; font-weight:600; color:var(--box)}
+.solved{background:var(--good-soft); border-radius:10px; padding:6px 12px; display:inline-block}
+.drawbtn{border:2px dashed var(--line); background:none; border-radius:10px; padding:8px 14px; color:var(--muted); font-weight:700; min-height:46px}
+.predict{display:flex; flex-direction:column; gap:10px; background:var(--card); border:2px solid var(--line); border-radius:16px; padding:16px 18px}
+
+/* builder */
+.builder{display:grid; grid-template-columns:minmax(260px,340px) 1fr; gap:20px; align-items:start}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.amount{display:flex; align-items:center; gap:8px}
+.amount button{width:48px; height:48px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-size:24px; font-weight:700}
+.amount output{min-width:2.4em; text-align:center; font-size:28px; font-weight:800; font-variant-numeric:tabular-nums}
+.palette{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.palette button{border:2px solid var(--ink); background:var(--card); border-radius:12px; padding:10px; min-height:52px; font-weight:700; font-size:17px; text-align:left}
+.palette button.wide{grid-column:1/-1}
+.palette button.nb{border-color:var(--box); color:var(--box)}
+.target{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.target input{width:5em}
+table.tests{border-collapse:collapse; width:100%; min-width:720px}
+table.tests th, table.tests td{padding:8px 10px; border-bottom:1.5px solid var(--line); text-align:left; vertical-align:middle}
+table.tests th{font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--paper)}
+table.tests td.num{font-variant-numeric:tabular-nums; font-weight:700; font-size:19px; text-align:right; white-space:nowrap}
+table.tests th.num{text-align:right}
+table.tests td.hit{color:var(--good)}
+table.tests tr:last-child td{border-bottom:0}
+.x-btn{border:0; background:none; color:var(--muted); font-size:22px; width:40px; height:40px; border-radius:8px}
+.x-btn:hover{background:var(--paper); color:var(--warn)}
+.th-in{width:4.2em; min-height:36px; border:2px solid var(--line); border-radius:8px; padding:2px 6px; background:var(--card); font-weight:700; text-align:right}
+
+/* detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--card); font-weight:800; font-size:20px; padding:0 18px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.2vw,32px); line-height:1.2; margin:0; max-width:32em; text-wrap:balance}
+.evidence{display:flex; flex-direction:column; gap:12px; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; min-height:120px}
+.evidence:empty::before{content:"Talk it over first. Then tap a button to put evidence here."; color:var(--muted)}
+.ev-steps{display:grid; grid-template-columns:auto auto 1fr; gap:8px 16px; align-items:center}
+.ev-steps > *{min-width:0}
+.ev-steps .hl{background:var(--accent-soft); border-radius:8px; padding:4px 8px}
+.sort{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.bin{border:2px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:8px}
+.bin h3{font-size:19px}
+.card-t{background:var(--paper); border-radius:10px; padding:10px 12px}
+table.plain{border-collapse:collapse; font-variant-numeric:tabular-nums}
+table.plain th, table.plain td{padding:6px 16px 6px 0; text-align:left; border-bottom:1.5px solid var(--line)}
+table.plain th{font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+table.plain td.ok{color:var(--good); font-weight:700}
+table.plain td.bad{color:var(--warn); font-weight:700}
+
+@media (max-width: 860px){
+  .builder{grid-template-columns:1fr}
+  .launch{grid-template-columns:1fr; gap:6px}
+  .launch .x{justify-self:start; margin-bottom:10px}
+  .sort{grid-template-columns:1fr}
+  .ev-steps{grid-template-columns:1fr}
+  .tools{margin-left:0}
+}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1>Think of a Number</h1>
+      <p>Grade 5 · Week 7 · Lesson 5.7 · How does the trick know your number?</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </div>
+</header>
+
+<nav class="rooms" aria-label="Lesson parts">
+  <div class="wrap" role="tablist">
+    <button role="tab" id="tab-warm" aria-selected="true"><b>1</b>The trick</button>
+    <button role="tab" id="tab-lab" aria-selected="false"><b>2</b>Trick lab</button>
+    <button role="tab" id="tab-design" aria-selected="false"><b>3</b>Design a trick</button>
+    <button role="tab" id="tab-q" aria-selected="false"><b>4</b>Detective questions</button>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<!-- 1 WARM-UP + LAUNCH -->
+<section class="room" id="room-warm">
+  <div class="stage" id="stage">
+    <div class="step-no" id="stageNo">Warm-up</div>
+    <p class="say" id="stageSay">Everyone: think of a number.</p>
+    <div class="pips" id="stagePips" aria-hidden="true"></div>
+    <div class="row">
+      <button class="primary" id="stageNext">Next step</button>
+      <button class="ghost" id="stageBack">Back</button>
+    </div>
+  </div>
+
+  <div class="row" style="justify-content:space-between; align-items:flex-end">
+    <div>
+      <h2>How did the trick know?</h2>
+      <p class="lead">Draw it. A box stands for the secret number. Small tiles are ones.</p>
+    </div>
+    <div class="row">
+      <button class="primary" id="launchNext">Draw the next step</button>
+      <button class="secondary" id="launchAll">Show all</button>
+    </div>
+  </div>
+  <div class="launch" id="launch" aria-live="polite"></div>
+
+  <div class="panel">
+    <h3>Check it with a secret number</h3>
+    <div class="secret">
+      <label for="secretIn">Start with</label>
+      <input id="secretIn" class="num-in" type="text" inputmode="decimal" value="37" aria-label="Secret number">
+      <button class="secondary" id="secretGo">Run the trick</button>
+    </div>
+    <div class="chain" id="secretChain" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 2 TRICK LAB -->
+<section class="room" id="room-lab" hidden>
+  <div class="row" style="justify-content:space-between">
+    <div class="picker" id="trickPicker" role="group" aria-label="Choose a trick"></div>
+    <button class="secondary" id="labReveal">Fill in this trick</button>
+  </div>
+  <p class="lead" id="labSteps"></p>
+  <div class="predict">
+    <h3>Predict first: what will this trick do?</h3>
+    <div class="row" id="predictRow" role="group" aria-label="Prediction"></div>
+  </div>
+  <p class="hint">Fill each column: type the result for 5 and for 20, tap to draw the bars, then pick the letter version. Press Enter to check a number.</p>
+  <div class="scroll"><table class="lab" id="labTable"></table></div>
+  <p class="note" id="labMsg" aria-live="polite"></p>
+</section>
+
+<!-- 3 DESIGN -->
+<section class="room" id="room-design" hidden>
+  <div>
+    <h2>Design a trick that always ends at <span id="tgtShow">7</span></h2>
+    <p class="lead">Build your steps. The table tests them on four numbers at once, and the letter column shows whether it works for <em>every</em> number.</p>
+  </div>
+  <div class="builder">
+    <div class="panel">
+      <div class="target">
+        <label for="tgtIn"><strong>Goal: always end at</strong></label>
+        <input id="tgtIn" class="num-in" type="text" inputmode="numeric" value="7">
+      </div>
+      <div>
+        <div style="font-weight:700; margin-bottom:6px">Amount for the next step</div>
+        <div class="amount">
+          <button id="amtDown" aria-label="Smaller amount">−</button>
+          <output id="amtOut">2</output>
+          <button id="amtUp" aria-label="Bigger amount">+</button>
+        </div>
+      </div>
+      <div class="palette" id="palette">
+        <button data-op="add">Add <span class="amt">2</span></button>
+        <button data-op="sub">Subtract <span class="amt">2</span></button>
+        <button data-op="mul">Multiply by <span class="amt">2</span></button>
+        <button data-op="div">Divide by <span class="amt">2</span></button>
+        <button data-op="addn" class="nb wide">Add your number</button>
+        <button data-op="subn" class="nb wide">Subtract your number</button>
+        <button data-op="next" class="nb wide">Add the next number up</button>
+      </div>
+      <div class="row">
+        <button class="secondary" id="undoBtn">Undo</button>
+        <button class="secondary" id="clearSteps">Clear steps</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="scroll" style="border:0; border-radius:0"><table class="tests" id="testTable"></table></div>
+      <p class="note" id="verdict" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 DETECTIVE QUESTIONS -->
+<section class="room" id="room-q" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="qtext" id="qtext"></p>
+  <div class="row" id="qactions"></div>
+  <div class="evidence" id="evidence" aria-live="polite"></div>
+</section>
+
+</div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== MATH CORE (exact fractions) ===== */
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a||1; };
+const R = (p,q=1) => { if(q<0){p=-p;q=-q;} const g=gcd(p,q); return {p:p/g, q:q/g}; };
+const add = (x,y) => R(x.p*y.q + y.p*x.q, x.q*y.q);
+const sub = (x,y) => R(x.p*y.q - y.p*x.q, x.q*y.q);
+const mul = (x,y) => R(x.p*y.p, x.q*y.q);
+const div = (x,y) => R(x.p*y.q, x.q*y.p);
+const eq = (x,y) => x.p===y.p && x.q===y.q;
+const isZero = x => x.p===0;
+const ONE = R(1), ZERO = R(0);
+/* expression a·n + b */
+const E0 = {a:ONE, b:ZERO};
+function applyStep(e, st){
+  const k = R(st.k||0);
+  switch(st.op){
+    case 'add':  return {a:e.a, b:add(e.b,k)};
+    case 'sub':  return {a:e.a, b:sub(e.b,k)};
+    case 'mul':  return {a:mul(e.a,k), b:mul(e.b,k)};
+    case 'div':  return {a:div(e.a,k), b:div(e.b,k)};
+    case 'addn': return {a:add(e.a,ONE), b:e.b};
+    case 'subn': return {a:sub(e.a,ONE), b:e.b};
+    case 'next': return {a:add(e.a,ONE), b:add(e.b,ONE)};
+  }
+  throw new Error('bad op');
+}
+const evalE = (e, n) => add(mul(e.a, n), e.b);
+function chain(steps){ const out=[E0]; let e=E0; for(const st of steps){ e=applyStep(e,st); out.push(e); } return out; }
+function stepText(st){
+  return {add:`Add ${st.k}`, sub:`Subtract ${st.k}`, mul: st.k===2?'Double it':st.k===3?'Multiply by 3':`Multiply by ${st.k}`,
+    div:`Divide by ${st.k}`, addn:'Add your number', subn:'Subtract your number', next:'Add the next number up'}[st.op];
+}
+function fracText(x){
+  if(x.q===1) return (x.p<0?'−':'') + Math.abs(x.p);
+  const neg = x.p<0, a=Math.abs(x.p), w=Math.floor(a/x.q), r=a%x.q;
+  return (neg?'−':'') + (w? w+' ' : '') + r + '/' + x.q;
+}
+function coefHTML(a){
+  if(a.q===1){ if(a.p===1) return '<i>n</i>'; if(a.p===-1) return '−<i>n</i>'; return (a.p<0?'−':'') + Math.abs(a.p) + '<i>n</i>'; }
+  return (a.p<0?'−':'') + Math.abs(a.p) + '⁄' + a.q + '<i>n</i>';
+}
+function exprHTML(e){
+  const parts=[];
+  if(!isZero(e.a)) parts.push(coefHTML(e.a));
+  if(!isZero(e.b) || !parts.length){
+    const s = fracText(R(Math.abs(e.b.p), e.b.q));
+    if(!parts.length) parts.push((e.b.p<0?'−':'') + s);
+    else parts.push((e.b.p<0?' − ':' + ') + s);
+  }
+  return '<span class="expr">' + parts.join('') + '</span>';
+}
+const exprKey = e => `${e.a.p}/${e.a.q}|${e.b.p}/${e.b.q}`;
+function parseNum(s){
+  s = String(s).trim().replace('−','-');
+  if(/^-?\d+$/.test(s)) return R(parseInt(s,10));
+  if(/^-?\d*\.\d+$/.test(s)){ const d=s.split('.')[1].length; return R(Math.round(parseFloat(s)*10**d), 10**d); }
+  let m = s.match(/^(-?)(\d+)\s+(\d+)\/(\d+)$/); if(m && +m[4]) { const v=R(+m[2]*+m[4] + +m[3], +m[4]); return m[1]?R(-v.p,v.q):v; }
+  m = s.match(/^(-?\d+)\/(\d+)$/); if(m && +m[2]) return R(+m[1], +m[2]);
+  return null;
+}
+/* wrong-but-tempting letter versions for a step */
+function distractors(prev, st, right){
+  const k=R(st.k||0); let c=[];
+  switch(st.op){
+    case 'mul': c=[{a:mul(prev.a,k), b:prev.b, why:`Multiply <em>both</em> parts: every box and every one. ${st.k===2?'Double':'Times '+st.k} the ones too.`},
+                   {a:prev.a, b:mul(prev.b,k), why:`The boxes get multiplied too, not just the ones.`}]; break;
+    case 'div': c=[{a:prev.a, b:div(prev.b,k), why:`Split <em>both</em> parts. What is 1/${st.k} of the boxes? 1/${st.k} of the ones?`},
+                   {a:div(prev.a,k), b:prev.b, why:`The ones get divided too. Split the ones into ${st.k} equal groups as well.`}]; break;
+    case 'add': c=[{a:add(prev.a,k), b:prev.b, why:`Adding ${st.k} adds ${st.k} ones, not ${st.k} more boxes.`},
+                   {a:prev.a, b:sub(prev.b,k), why:`That subtracts. Adding ${st.k} puts ${st.k} more ones on the bar.`}]; break;
+    case 'sub': c=[{a:sub(prev.a,k), b:prev.b, why:`Subtracting ${st.k} takes away ones, not boxes.`},
+                   {a:prev.a, b:add(prev.b,k), why:`That adds. Subtracting ${st.k} takes ${st.k} ones away.`}]; break;
+    case 'subn': c=[{a:prev.a, b:sub(prev.b,ONE), why:`“Your number” is a whole box, not a single one. Take away a box.`},
+                    {a:add(prev.a,ONE), b:prev.b, why:`That adds a box. Subtracting your number takes one box away.`}]; break;
+    case 'addn': c=[{a:prev.a, b:add(prev.b,ONE), why:`Your number is a box, not a one. Add a box.`},
+                    {a:sub(prev.a,ONE), b:prev.b, why:`That takes a box away. Adding your number adds a box.`}]; break;
+    case 'next': c=[{a:add(prev.a,ONE), b:prev.b, why:`The next number up is your number plus 1: a box <em>and</em> a one.`},
+                    {a:prev.a, b:add(prev.b,ONE), why:`The next number up is a whole box plus one more.`}]; break;
+  }
+  const seen=new Set([exprKey(right)]), out=[];
+  for(const d of c){ const key=exprKey(d); if(!seen.has(key)){ seen.add(key); out.push(d); } }
+  return out;
+}
+
+/* ===== DATA ===== */
+const S = (op,k) => ({op,k});
+const WARM = [S('add',3), S('mul',2), S('sub',6), S('div',2)];
+const TRICKS = [
+  {name:'Trick 1', steps:[S('add',3), S('mul',2), S('sub',6), S('div',2)]},
+  {name:'Trick 2', steps:[S('mul',2), S('add',10), S('div',2), S('subn')]},
+  {name:'Trick 3', steps:[S('add',5), S('mul',3), S('sub',15), S('div',3)]},
+  {name:'Trick 4', steps:[S('mul',4), S('add',12), S('div',4), S('subn')]},
+];
+const SNEAKY = 'sneaky'; /* n×n + 107 − 25n : 7 for 5 and 20 only */
+function sneakyRun(n){ const a=n*n, b=a+107, c=b-25*n; return [n,a,b,c]; }
+const CHALLENGE = [S('next'), S('add',9), S('div',2), S('subn')];
+
+/* ===== BARS ===== */
+function barsHTML(e, small){
+  const out=[];
+  const a=e.a, b=e.b;
+  const boxes = (val, neg) => {
+    const whole = Math.floor(Math.abs(val.p)/val.q), rem = Math.abs(val.p)%val.q;
+    for(let i=0;i<whole;i++) out.push(`<span class="bx${neg?' neg':''}">${neg?'−':''}n</span>`);
+    if(rem) out.push(`<span class="bx part${neg?' neg':''}" style="width:${(small?46:64)*rem/val.q}px" title="${rem}/${val.q} of a box">${rem}/${val.q}</span>`);
+  };
+  const ones = (val, neg) => {
+    const whole = Math.floor(Math.abs(val.p)/val.q), rem = Math.abs(val.p)%val.q;
+    if(whole > 30){ out.push(`<span class="lump${neg?' neg':''}">${neg?'−':''}${whole}${rem?' '+rem+'/'+val.q:''} ones</span>`); return; }
+    let g='';
+    for(let i=0;i<whole;i++) g+=`<span class="u${neg?' neg':''}"></span>`;
+    if(rem) g+=`<span class="u part${neg?' neg':''}" style="width:${(small?14:18)*rem/val.q}px"></span>`;
+    if(g) out.push(`<span class="ugroup" title="${neg?'minus ':''}${fracText(R(Math.abs(val.p),val.q))} ones">${g}</span>`);
+  };
+  if(a.p>0) boxes(a,false);
+  if(b.p>0) ones(b,false);
+  if(a.p<0) boxes(a,true);
+  if(b.p<0) ones(b,true);
+  if(!out.length) return `<div class="bars${small?' small':''}"><span class="empty-bar">nothing left: 0</span></div>`;
+  return `<div class="bars${small?' small':''}${reduced?'':' anim'}">${out.join('')}</div>`;
+}
+
+/* ===== 1. WARM-UP ===== */
+const W = {i:0, launch:0};
+function warmSay(i){
+  if(i===0) return ['Warm-up','Everyone: think of a number.'];
+  if(i<=WARM.length) return [`Step ${i} of ${WARM.length}`, stepText(WARM[i-1]) + '.'];
+  if(i===WARM.length+1) return ['Reveal','Hands up if you got your starting number.'];
+  return ['Think about it','I never knew your number. How did the trick?'];
+}
+function renderStage(){
+  const [no, say] = warmSay(W.i);
+  $('#stageNo').textContent = no; $('#stageSay').textContent = say;
+  $('#stagePips').innerHTML = WARM.map((_,k)=>`<i class="${k < W.i ? 'on':''}"></i>`).join('');
+  $('#stageNext').disabled = W.i >= WARM.length+2;
+  $('#stageNext').textContent = W.i===0 ? 'Got one. Next step' : W.i===WARM.length ? 'Reveal' : 'Next step';
+  $('#stageBack').disabled = W.i===0;
+}
+function renderLaunch(){
+  const ch = chain(WARM);
+  let h = '';
+  for(let i=0;i<=W.launch && i<ch.length;i++){
+    h += `<div class="s">${i===0?'Think of a number':stepText(WARM[i-1])}</div><div>${barsHTML(ch[i])}</div><div class="x">${exprHTML(ch[i])}</div>`;
+  }
+  if(W.launch >= WARM.length) h += `<div class="s" style="grid-column:1/-1; color:var(--good)">One box again. Every step was undone, so the trick hands back your number, whatever it was.</div>`;
+  $('#launch').innerHTML = h;
+  $('#launchNext').disabled = W.launch >= WARM.length;
+}
+function runSecret(){
+  const v = parseNum($('#secretIn').value);
+  if(!v){ $('#secretChain').innerHTML = '<span class="hint">Type a number, like 37 or 2.5.</span>'; return; }
+  let x=v; const vals=[x];
+  for(const st of WARM){ x = evalE(applyStep({a:ZERO,b:x}, st), ZERO); vals.push(x); }
+  $('#secretChain').innerHTML = vals.map((y,i)=>`${i?`<span class="arrow">${stepText(WARM[i-1]).toLowerCase()} →</span>`:''}<span class="${i===vals.length-1?'end':''}">${fracText(y)}</span>`).join(' ');
+}
+
+/* ===== 2. TRICK LAB ===== */
+const PRED = [{id:'back', t:'You get your number back'},{id:'same', t:'Everyone lands on the same number'},{id:'depends', t:'It depends on the number'}];
+let L;
+function freshLab(){
+  L = {t:0, s: TRICKS.map(tr => {
+    const n = tr.steps.length;
+    const st = {pred:null, v5:Array(n).fill(null), v20:Array(n).fill(null), bars:Array(n).fill(false), ex:Array(n).fill(null), wrongEx:Array(n).fill(null).map(()=>new Set()), optOrder:[]};
+    return st;
+  })};
+  L.s[0].ex[0] = 'ok'; /* handout gives n + 3 for Trick 1 */
+  /* fixed option order per row (deterministic shuffle) */
+  TRICKS.forEach((tr,ti) => {
+    const ch = chain(tr.steps);
+    tr.steps.forEach((st,ri) => {
+      const right = ch[ri+1]; const ds = distractors(ch[ri], st, right);
+      const opts = [{...right, right:true}, ...ds];
+      const rot = (ti + ri*2) % opts.length;
+      L.s[ti].optOrder[ri] = opts.slice(rot).concat(opts.slice(0,rot));
+    });
+  });
+}
+function trickEnd(ti){ const ch=chain(TRICKS[ti].steps); return ch[ch.length-1]; }
+function trickKind(e){ if(eq(e.a,ONE)&&isZero(e.b)) return 'back'; if(isZero(e.a)) return 'same'; return 'depends'; }
+function renderLab(){
+  const tr = TRICKS[L.t], st = L.s[L.t], ch = chain(tr.steps);
+  $('#trickPicker').innerHTML = TRICKS.map((x,i)=>`<button class="chip" data-t="${i}" aria-pressed="${i===L.t}">${x.name}${labDone(i)?' ✓':''}</button>`).join('');
+  $('#trickPicker').querySelectorAll('button').forEach(b => b.onclick = () => { L.t=+b.dataset.t; $('#labMsg').innerHTML=''; $('#labMsg').className='note'; renderLab(); });
+  $('#labSteps').innerHTML = `<strong>${tr.name}:</strong> Think of a number. ` + tr.steps.map(s=>stepText(s)+'.').join(' ');
+  $('#predictRow').innerHTML = PRED.map(p=>`<button class="chip" data-p="${p.id}" aria-pressed="${st.pred===p.id}">${p.t}</button>`).join('');
+  $('#predictRow').querySelectorAll('button').forEach(b => b.onclick = () => { st.pred=b.dataset.p; renderLab(); });
+
+  let h = `<thead><tr><th>${tr.name}</th><th>Try 5</th><th>Try 20</th><th>Draw the bars</th><th>With <span class="n" style="text-transform:none">n</span></th></tr></thead><tbody>`;
+  h += `<tr><td class="step">Think of a number</td><td class="val"><span class="given">5</span></td><td class="val"><span class="given">20</span></td><td class="bar">${barsHTML(E0,true)}</td><td>${exprHTML(E0)}</td></tr>`;
+  tr.steps.forEach((s,ri) => {
+    const cell = (which) => {
+      const v = st[which][ri];
+      const val = v ? v.raw : '';
+      const cls = v ? (v.ok ? 'ok' : 'no') : '';
+      return `<input type="text" inputmode="decimal" id="in-${L.t}-${ri}-${which}" data-r="${ri}" data-w="${which}" class="${cls}" value="${val}" aria-label="${stepText(s)}, ${which==='v5'?'starting with 5':'starting with 20'}" ${v&&v.ok?'readonly':''}>`;
+    };
+    const barCell = st.bars[ri] ? barsHTML(ch[ri+1], true) : `<button class="drawbtn" data-bar="${ri}">Draw</button>`;
+    let exCell;
+    if(st.ex[ri]==='ok') exCell = `<span class="solved">${exprHTML(ch[ri+1])}</span>`;
+    else exCell = `<div class="opts">` + st.optOrder[ri].map((o,oi)=>`<button class="opt${st.wrongEx[ri].has(oi)?' no':''}" data-r="${ri}" data-o="${oi}">${exprHTML(o).replace('class="expr"','')}</button>`).join('') + `</div>`;
+    h += `<tr><td class="step">${stepText(s)}</td><td class="val">${cell('v5')}</td><td class="val">${cell('v20')}</td><td class="bar">${barCell}</td><td>${exCell}</td></tr>`;
+  });
+  h += '</tbody>';
+  const tbl = $('#labTable'); tbl.innerHTML = h;
+  tbl.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); checkVal(inp); } });
+    inp.addEventListener('change', () => checkVal(inp));
+  });
+  tbl.querySelectorAll('[data-bar]').forEach(b => b.onclick = () => { st.bars[+b.dataset.bar]=true; renderLab(); afterLab(); });
+  tbl.querySelectorAll('.opt').forEach(b => b.onclick = () => pickOpt(+b.dataset.r, +b.dataset.o));
+}
+function valueAt(ti, ri, start){ const ch=chain(TRICKS[ti].steps); return evalE(ch[ri+1], R(start)); }
+function prevValue(ti, ri, start){ return ri===0 ? R(start) : valueAt(ti, ri-1, start); }
+function checkVal(inp){
+  const ri=+inp.dataset.r, which=inp.dataset.w, start = which==='v5'?5:20;
+  const st = L.s[L.t], s = TRICKS[L.t].steps[ri];
+  const raw = inp.value.trim(); if(!raw){ st[which][ri]=null; return; }
+  const v = parseNum(raw), right = valueAt(L.t, ri, start), prev = prevValue(L.t, ri, start);
+  const msg = $('#labMsg');
+  if(!v){ msg.className='note warn'; msg.innerHTML = `<strong>That isn’t a number yet.</strong> Type digits, like 16.`; return; }
+  const ok = eq(v, right);
+  st[which][ri] = {raw, ok};
+  if(ok){ msg.className='note good'; msg.innerHTML = `<strong>Yes.</strong> ${stepText(s)}: ${opSentence(s, prev, start)} = ${fracText(right)}.`; }
+  else {
+    msg.className='note warn';
+    msg.innerHTML = `<strong>Check that one.</strong> The row above says ${fracText(prev)}. ${stepText(s)} means ${opSentence(s, prev, start)}. Work it out and try again.`;
+  }
+  renderLab(); afterLab();
+  if(ok){ const next = document.getElementById(`in-${L.t}-${ri+1}-${which}`); if(next) next.focus(); }
+}
+function opSentence(s, prev, start){
+  const p = fracText(prev);
+  switch(s.op){
+    case 'add': return `${p} + ${s.k}`;
+    case 'sub': return `${p} − ${s.k}`;
+    case 'mul': return `${p} × ${s.k}`;
+    case 'div': return `${p} ÷ ${s.k}`;
+    case 'subn': return `${p} − ${start} (your number)`;
+    case 'addn': return `${p} + ${start} (your number)`;
+    case 'next': return `${p} + ${start+1}`;
+  }
+}
+function pickOpt(ri, oi){
+  const st = L.s[L.t], o = st.optOrder[ri][oi], msg = $('#labMsg');
+  const ch = chain(TRICKS[L.t].steps);
+  if(o.right){ st.ex[ri]='ok'; st.bars[ri]=true; msg.className='note good'; msg.innerHTML = `<strong>Yes: ${exprHTML(ch[ri+1])}.</strong> The bars match: ${partsSentence(ch[ri+1])}.`; }
+  else { st.wrongEx[ri].add(oi); msg.className='note warn'; st.bars[ri]=true;
+    msg.innerHTML = `<strong>Not ${exprHTML(o)}.</strong> ${o.why} Look at the bars in this row, then pick again.`; }
+  renderLab(); afterLab();
+}
+function partsSentence(e){
+  const bits=[];
+  if(!isZero(e.a)) bits.push(`${fracText(e.a)} box${eq(e.a,ONE)?'':'es'}`);
+  if(!isZero(e.b)) bits.push(`${fracText(e.b)} one${eq(e.b,ONE)?'':'s'}`);
+  return bits.length ? bits.join(' and ') : 'nothing at all';
+}
+function labDone(ti){ const st=L.s[ti]; return st.v5.every(v=>v&&v.ok) && st.v20.every(v=>v&&v.ok) && st.ex.every(x=>x==='ok'); }
+function afterLab(){
+  if(!labDone(L.t)) return;
+  const e = trickEnd(L.t), k = trickKind(e), st = L.s[L.t];
+  const what = k==='back' ? 'gives back your number: one box, nothing else.' : `always lands on ${fracText(e.b)}: the box is gone, so your number doesn’t matter.`;
+  const pred = st.pred ? (st.pred===k ? ' Your prediction was right.' : ` You predicted “${PRED.find(p=>p.id===st.pred).t.toLowerCase()}.” What surprised you?`) : '';
+  const msg = $('#labMsg'); msg.className='note good';
+  msg.innerHTML = `<strong>${TRICKS[L.t].name} is complete.</strong> It ${what} 5 and 20 were only two tests. The letter column proves it for every number.${pred}`;
+}
+function revealTrick(){
+  const st = L.s[L.t]; const n = TRICKS[L.t].steps.length;
+  for(let ri=0; ri<n; ri++){
+    st.v5[ri] = {raw: fracText(valueAt(L.t,ri,5)), ok:true};
+    st.v20[ri] = {raw: fracText(valueAt(L.t,ri,20)), ok:true};
+    st.bars[ri] = true; st.ex[ri] = 'ok';
+  }
+  renderLab(); afterLab();
+}
+
+/* ===== 3. DESIGN ===== */
+let D;
+function freshDesign(){ D = {steps:[S('mul',2), S('add',14)], amt:2, target:7, custom:[0,5,20,100]}; }
+function renderDesign(){
+  $('#amtOut').textContent = D.amt;
+  document.querySelectorAll('#palette .amt').forEach(s => s.textContent = D.amt);
+  $('#tgtShow').textContent = D.target;
+  const ch = chain(D.steps);
+  let h = `<thead><tr><th>Step</th><th>Bars</th><th>With <span class="n" style="text-transform:none">n</span></th>` +
+    D.custom.map((c,i)=>`<th class="num"><label class="hint" for="tn${i}" style="display:none">Test number ${i+1}</label><input class="th-in" id="tn${i}" data-i="${i}" value="${c}" inputmode="numeric" aria-label="Test number ${i+1}"></th>`).join('') + `<th></th></tr></thead><tbody>`;
+  ch.forEach((e,i) => {
+    const label = i===0 ? 'Think of a number' : stepText(D.steps[i-1]);
+    const last = i===ch.length-1;
+    h += `<tr><td style="font-weight:700; white-space:nowrap">${label}</td><td>${barsHTML(e,true)}</td><td>${exprHTML(e)}</td>` +
+      D.custom.map(c => { const v = evalE(e, R(c)); return `<td class="num${last && v.q===1 && v.p===D.target ? ' hit':''}">${fracText(v)}</td>`; }).join('') +
+      `<td>${i>0?`<button class="x-btn" data-del="${i-1}" aria-label="Remove ${label}">×</button>`:''}</td></tr>`;
+  });
+  h += '</tbody>';
+  $('#testTable').innerHTML = h;
+  $('#testTable').querySelectorAll('[data-del]').forEach(b => b.onclick = () => { D.steps.splice(+b.dataset.del,1); renderDesign(); });
+  $('#testTable').querySelectorAll('.th-in').forEach(inp => inp.onchange = () => {
+    const v = parseInt(inp.value,10); if(Number.isFinite(v) && Math.abs(v)<=100000){ D.custom[+inp.dataset.i] = v; } renderDesign();
+  });
+  $('#verdict').className = 'note ' + verdictOf(ch[ch.length-1]).cls;
+  $('#verdict').innerHTML = verdictOf(ch[ch.length-1]).html;
+  $('#undoBtn').disabled = !D.steps.length;
+}
+function verdictOf(e){
+  const T = R(D.target);
+  const fracSteps = chain(D.steps).some(x => x.b.q!==1 || x.a.q!==1);
+  const fracNote = fracSteps ? ' Some steps make fractions. The trick still works, but it is harder to do in your head.' : '';
+  if(!D.steps.length) return {cls:'info', html:'Add a step to start.'};
+  if(isZero(e.a) && eq(e.b,T)) return {cls:'good', html:`<strong>Proved: it always ends at ${D.target}.</strong> The last row is just ${D.target}, with no <span class="n">n</span> left, so every starting number lands there. Kind: the <span class="n">n</span> cancels out.${fracNote}`};
+  if(isZero(e.a)) { const d = sub(T, e.b); return {cls:'info', html:`<strong>Your number is gone, so it always ends at ${fracText(e.b)}.</strong> Close! You need ${fracText(R(Math.abs(d.p),d.q))} ${d.p>0?'more':'less'}. Which earlier step could you change so the ones come out to ${D.target}?${fracNote}`}; }
+  if(eq(e.a,ONE) && isZero(e.b)) return {cls:'info', html:`<strong>This trick gives back your number.</strong> Every step is undone. That’s a good trick, but the goal is to land on ${D.target}. Which step could get rid of the box?${fracNote}`};
+  const boxes = fracText(e.a);
+  const tip = (e.a.q===1 && e.a.p>0) ? `There ${e.a.p===1?'is':'are'} still ${boxes} box${e.a.p===1?'':'es'}. Try dividing until one box is left, then subtract your number.` : `The box hasn’t cancelled. Use steps that leave exactly one box, then subtract your number.`;
+  return {cls:'warn', html:`<strong>Not yet: the answer still depends on the number.</strong> Look at the test columns: the last row changes when the start changes. ${tip}${fracNote}`};
+}
+
+/* ===== 4. DETECTIVE QUESTIONS ===== */
+let QI = 1;
+function stepsEvidence(steps, title, hlFn){
+  const ch = chain(steps);
+  let h = `<h3>${title}</h3><div class="ev-steps">`;
+  ch.forEach((e,i) => {
+    const lbl = i===0 ? 'Think of a number' : stepText(steps[i-1]);
+    const hl = hlFn && hlFn(i, ch);
+    h += `<div class="${hl?'hl':''}" style="font-weight:700">${lbl}</div><div>${exprHTML(e)}</div><div>${barsHTML(e,true)}</div>`;
+  });
+  return h + '</div>';
+}
+function setEv(h){ $('#evidence').innerHTML = h; }
+const QS = {
+  1:{ q:'Which step gets rid of the number?', acts:[
+      {l:'Trick 2', f:()=>setEv(stepsEvidence(TRICKS[1].steps,'Trick 2', (i,ch)=> i>0 && isZero(ch[i].a) && !isZero(ch[i-1].a)) + `<p class="note info"><strong>“Subtract your number”</strong> takes away the last box. With no box left, the answer can’t depend on your number. Everyone gets 5.</p>`)},
+      {l:'Trick 4', f:()=>setEv(stepsEvidence(TRICKS[3].steps,'Trick 4', (i,ch)=> i>0 && isZero(ch[i].a) && !isZero(ch[i-1].a)) + `<p class="note info">Same move. Divide by 4 leaves one box and 3 ones. Subtract your number, and only the 3 is left.</p>`)},
+      {l:'Trick 3', f:()=>setEv(stepsEvidence(TRICKS[2].steps,'Trick 3') + `<p class="note info">No step gets rid of the box here. Subtract 15 undoes add 5 (tripled), and divide by 3 undoes multiply by 3. You end with one box: your own number.</p>`)} ]},
+  2:{ q:'When you double, what happens to the + 10? And when you halve 2n + 10?', acts:[
+      {l:'Double n + 10', f:()=>setEv(stepsEvidence([S('add',10), S('mul',2)],'Double it') + `<p class="note info">Both parts double: 1 box becomes 2 boxes, and 10 ones become 20 ones. So 2 × (<span class="n">n</span> + 10) = 2<span class="n">n</span> + 20.</p>`)},
+      {l:'Halve 2n + 10', f:()=>{
+        const rows=[5,20,0].map(n=>`<tr><td>${n}</td><td>${(2*n+10)/2}</td><td class="ok">${n+5}</td><td class="bad">${2*n+5}</td></tr>`).join('');
+        setEv(`<h3>Halve 2<span class="n">n</span> + 10</h3><div class="ev-steps"><div style="font-weight:700">Before</div><div>${exprHTML({a:R(2),b:R(10)})}</div><div>${barsHTML({a:R(2),b:R(10)},true)}</div><div style="font-weight:700">Halve both parts</div><div>${exprHTML({a:ONE,b:R(5)})}</div><div>${barsHTML({a:ONE,b:R(5)},true)}</div></div>
+        <p class="note warn"><strong>2<span class="n">n</span> + 5 is a trap.</strong> It halves the ones but not the boxes. Test it:</p>
+        <div class="scroll" style="border:0"><table class="plain"><tr><th>Number</th><th>(2n + 10) ÷ 2</th><th>n + 5</th><th>2n + 5</th></tr>${rows}</table></div>`);
+      }} ]},
+  3:{ q:'Your trick ended at 7 for 5 and for 20. Does that prove it works for every number?', acts:[
+      {l:'Meet the sneaky trick', f:()=>sneaky([5,20])},
+      {l:'Now try 0, 1, 30, 100', f:()=>sneaky([5,20,0,1,30,100])},
+      {l:'What counts as proof?', f:()=>setEv(stepsEvidence(TRICKS[1].steps,'Trick 2 with a letter') + `<p class="note good"><strong>The letter tests every number at once.</strong> <span class="n">n</span> stands for any number. When the last line has no <span class="n">n</span> in it, nothing about your number is left, so the answer is the same for all of them. Examples can only test the numbers you tried.</p>`)} ]},
+  4:{ q:'A trick can work in two ways: every step is undone, or the n cancels out. Which kind is each trick? Which kind is yours?', acts:[
+      {l:'Sort the four tricks', f:()=>sortTricks(false)},
+      {l:'Which kind is my design?', f:()=>sortTricks(true)} ]},
+  5:{ q:'Challenge: Think of a number. Add the next number up. Add 9. Divide by 2. Subtract your number. Why is it always 5?', star:true, acts:[
+      {l:'Show the bars', f:()=>setEv(stepsEvidence(CHALLENGE,'The challenge trick') + `<p class="note good"><span class="n">n</span> + (<span class="n">n</span> + 1) + 9 = 2<span class="n">n</span> + 10. Halved, that is <span class="n">n</span> + 5. Take away your number and 5 is left, every time.</p>` + challengeTest())},
+      {l:'Make one that ends at your age', f:()=>{ setEv(`<p class="note info">Type your age as the goal in “Design a trick,” then build it. The challenge steps are loaded so you can change the 9.</p><div class="row"><label for="ageIn"><strong>Your age</strong></label><input id="ageIn" class="num-in" inputmode="numeric" value="10"><button class="primary" id="ageGo">Open Design a trick</button></div>`);
+        $('#ageGo').onclick = () => { const v=parseInt($('#ageIn').value,10); D.target = Number.isFinite(v)&&v>0&&v<200 ? v : 10; $('#tgtIn').value=D.target; D.steps = CHALLENGE.map(s=>({...s})); go('design'); renderDesign(); }; }} ]},
+};
+function challengeTest(){
+  const rows=[3,8,25,100].map(n=>{ const a=n+(n+1), b=a+9, c=b/2, d=c-n; return `<tr><td>${n}</td><td>${a}</td><td>${b}</td><td>${c}</td><td class="ok">${d}</td></tr>`; }).join('');
+  return `<div class="scroll" style="border:0"><table class="plain"><tr><th>Start</th><th>+ next number</th><th>+ 9</th><th>÷ 2</th><th>− your number</th></tr>${rows}</table></div>`;
+}
+function sneaky(list){
+  const rows = list.map(n=>{ const [s,a,b,c] = sneakyRun(n); return `<tr><td>${s}</td><td>${a}</td><td>${b}</td><td class="${c===7?'ok':'bad'}">${c}</td></tr>`; }).join('');
+  const all = list.length>2;
+  setEv(`<h3>The sneaky trick</h3><p style="margin:0">Think of a number. Multiply it by itself. Add 107. Subtract 25 times your number.</p>
+    <div class="scroll" style="border:0"><table class="plain"><tr><th>Start</th><th>× itself</th><th>+ 107</th><th>− 25 × your number</th></tr>${rows}</table></div>
+    <p class="note ${all?'warn':'info'}">${all ? '<strong>It only works for 5 and 20.</strong> Two good tests did not prove anything. Multiplying by itself makes <span class="n">n</span> × <span class="n">n</span>, which no “subtract your number” step can cancel.' : 'Both land on 7. Does it always work? Predict, then try more numbers.'}</p>`);
+}
+function sortTricks(mine){
+  const card = (name, e) => `<div class="card-t"><strong>${name}</strong> ends at ${exprHTML(e)}</div>`;
+  const back=[], cancel=[];
+  TRICKS.forEach((t,i)=>{ const e=trickEnd(i); (trickKind(e)==='back'?back:cancel).push(card(t.name,e)); });
+  let extra='';
+  if(mine){
+    const e = chain(D.steps).slice(-1)[0], k = trickKind(e);
+    const c = `<div class="card-t" style="outline:3px solid var(--accent)"><strong>Your design</strong> ends at ${exprHTML(e)}</div>`;
+    if(k==='back') back.push(c); else if(k==='same') cancel.push(c);
+    else extra = `<p class="note warn"><strong>Your design isn’t finished.</strong> It ends at ${exprHTML(e)}, which still depends on the number. Go back to “Design a trick” and try again.</p>`;
+  }
+  setEv(`<div class="sort"><div class="bin"><h3>Every step is undone</h3><p class="hint">You get your number back.</p>${back.join('')}</div><div class="bin"><h3>The <span class="n">n</span> cancels out</h3><p class="hint">Subtract your number. Everyone gets the same answer.</p>${cancel.join('')}</div></div>${extra}`);
+}
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${QI===i}" aria-label="Question ${i}">${i}</button>`).join('') + `<button data-q="5" aria-pressed="${QI===5}">★ Challenge</button>`;
+  $('#qnav').querySelectorAll('button').forEach(b => b.onclick = () => { QI=+b.dataset.q; setEv(''); renderQ(); });
+  const q = QS[QI];
+  $('#qtext').innerHTML = q.q.replace(/\b(\d?)n\b/g, (m,d)=>`${d}<span class="n">n</span>`);
+  const box = $('#qactions'); box.innerHTML='';
+  q.acts.forEach((a,i) => { const b=document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=a.f; box.appendChild(b); });
+}
+
+/* ===== NAV / RESET ===== */
+const ROOMS = ['warm','lab','design','q'];
+function go(r){
+  ROOMS.forEach(x => { $('#room-'+x).hidden = x!==r; $('#tab-'+x).setAttribute('aria-selected', x===r); });
+  if(r==='lab') renderLab(); if(r==='design') renderDesign(); if(r==='q') renderQ();
+}
+ROOMS.forEach(r => $('#tab-'+r).onclick = () => go(r));
+function resetAll(){
+  W.i=0; W.launch=0; renderStage(); renderLaunch(); $('#secretIn').value='37'; runSecret();
+  freshLab(); freshDesign(); $('#tgtIn').value=7; QI=1; setEv('');
+  $('#labMsg').innerHTML=''; $('#labMsg').className='note';
+  renderLab(); renderDesign(); renderQ();
+}
+$('#stageNext').onclick = () => { W.i=Math.min(W.i+1, WARM.length+2); renderStage(); };
+$('#stageBack').onclick = () => { W.i=Math.max(W.i-1, 0); renderStage(); };
+$('#launchNext').onclick = () => { W.launch=Math.min(W.launch+1, WARM.length); renderLaunch(); };
+$('#launchAll').onclick = () => { W.launch=WARM.length; renderLaunch(); };
+$('#secretGo').onclick = runSecret;
+$('#secretIn').addEventListener('keydown', e => { if(e.key==='Enter') runSecret(); });
+$('#labReveal').onclick = revealTrick;
+$('#amtUp').onclick = () => { D.amt=Math.min(D.amt+1, 50); renderDesign(); };
+$('#amtDown').onclick = () => { D.amt=Math.max(D.amt-1, 1); renderDesign(); };
+document.querySelectorAll('#palette button').forEach(b => b.onclick = () => {
+  if(D.steps.length >= 10){ $('#verdict').className='note warn'; $('#verdict').innerHTML='<strong>That’s 10 steps.</strong> A good trick is short enough to do in your head. Remove a step first.'; return; }
+  const op=b.dataset.op; D.steps.push(['add','sub','mul','div'].includes(op) ? S(op,D.amt) : S(op)); renderDesign();
+});
+$('#undoBtn').onclick = () => { D.steps.pop(); renderDesign(); };
+$('#clearSteps').onclick = () => { D.steps=[]; renderDesign(); };
+$('#tgtIn').onchange = () => { const v=parseInt($('#tgtIn').value,10); if(Number.isFinite(v) && Math.abs(v)<10000) D.target=v; $('#tgtIn').value=D.target; renderDesign(); };
+$('#resetBtn').onclick = () => { resetAll(); go('warm'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+/* expose for checks */
+window.__TOAN = {R, chain, evalE, applyStep, TRICKS, WARM, CHALLENGE, distractors, exprKey, fracText, sneakyRun, parseNum, eq, isZero};
+resetAll();
+W.launch = 1; renderLaunch();
+})();
+</script>
+
+</body></html>

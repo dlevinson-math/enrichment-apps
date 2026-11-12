@@ -1,0 +1,479 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+<title>Shape City Architects</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: one-screen toy. Header + three big tabs (Name It, Build, Mayor). Build = canvas left, challenge cards right (stacks on phones). */
+:root{
+  --bg:#eaf1f9; --surface:#ffffff; --ink:#16243b; --muted:#53647f; --line:#c9d6e6;
+  --accent:#2b62e8; --accent-ink:#ffffff; --good:#17895a; --good-bg:#dff5ea; --bad:#b4372f; --bad-bg:#fde6e3;
+  --sky:#cfe5ff; --ground:#b6dba5;
+  --red:#e8453c; --yellow:#f5b700; --blue:#2f6df6; --green:#2fa84f; --orange:#f28c28; --purple:#8d5be0;
+  --display:'Fredoka','Trebuchet MS',system-ui,sans-serif; --body:'Nunito','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1626; --surface:#18233a; --ink:#edf2fb; --muted:#9fb0cb; --line:#2c3b58;
+  --accent:#6f9bff; --accent-ink:#0e1626; --good:#5fd3a0; --good-bg:#14382b; --bad:#ff948b; --bad-bg:#43211e;
+  --sky:#1e3354; --ground:#2c4a3a; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e1626; --surface:#18233a; --ink:#edf2fb; --muted:#9fb0cb; --line:#2c3b58;
+  --accent:#6f9bff; --accent-ink:#0e1626; --good:#5fd3a0; --good-bg:#14382b; --bad:#ff948b; --bad-bg:#43211e;
+  --sky:#1e3354; --ground:#2c4a3a; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:700;font-size:16px;line-height:1.4;margin:0;
+  padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance;line-height:1.1}
+h1{font-size:clamp(1.7rem,5vw,2.4rem)} h2{font-size:1.35rem} h3{font-size:1.05rem}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+header p{margin:4px 0 0;color:var(--muted)}
+.logo{display:flex;align-items:center;gap:12px;min-width:0}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.pill{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;min-height:44px;font-weight:800}
+.pill[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.choice .stamp{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:1.1rem}
+.choice .stamp svg{width:min(80px,22vw);height:min(80px,22vw)}
+.choice.yn{font-size:1.6rem;min-height:72px}
+.sub{color:var(--muted);text-align:center;margin-top:-6px}
+.tab{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 8px;min-height:56px;font-family:var(--display);font-weight:600;font-size:1.1rem}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:8px 14px;min-height:44px;font-weight:800}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0}
+.big{width:min(240px,60vw);height:min(240px,60vw)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;width:100%;max-width:640px}
+.choice{border:3px solid var(--line);background:var(--surface);border-radius:16px;padding:12px;min-height:64px;font-family:var(--display);font-weight:600;font-size:1.4rem;text-transform:capitalize;display:flex;align-items:center;justify-content:center}
+.choice svg{width:min(110px,28vw);height:min(110px,28vw)}
+.choice.right{border-color:var(--good);background:var(--good-bg)}
+.choice.wrong{border-color:var(--bad);background:var(--bad-bg);opacity:.75}
+.msg{min-height:3.2em;text-align:center;font-size:1.1rem;max-width:560px}
+.msg.good{color:var(--good)} .msg.bad{color:var(--bad)}
+.prompt{font-family:var(--display);font-size:1.7rem;text-align:center;font-weight:600}
+.primary{border:0;background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:12px 22px;min-height:52px;font-family:var(--display);font-weight:600;font-size:1.15rem}
+.ghost{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 14px;min-height:44px;font-weight:800}
+.stars{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.stars span{width:22px;height:22px;display:inline-block;background:var(--line);clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 36%)}
+.stars span.on{background:var(--yellow)}
+.build{display:grid;gap:16px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+@media (max-width:860px){.build{grid-template-columns:minmax(0,1fr)}}
+.canvas-wrap{display:flex;flex-direction:column;gap:10px;min-width:0}
+#city{width:100%;height:auto;border-radius:16px;border:2px solid var(--line);touch-action:none;display:block;background:var(--sky)}
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.add{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:76px;font-size:.85rem;text-transform:capitalize}
+.add svg{width:44px;height:36px}
+.sel{display:flex;flex-direction:column;gap:8px;border:2px dashed var(--line);border-radius:14px;padding:10px;min-height:64px}
+.sel .row button{min-height:44px}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);outline:2px solid var(--line);padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:3px 12px;font-size:.92rem}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.cards{display:grid;gap:8px}
+.card{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;width:100%}
+.card b{font-family:var(--display);font-weight:600;font-size:1.05rem}
+.card span.d{grid-column:1;color:var(--muted);font-size:.92rem;font-weight:700}
+.card .st{grid-row:1 / span 2;grid-column:2;font-size:.78rem;border-radius:999px;padding:4px 10px;border:2px solid var(--line);color:var(--muted);white-space:nowrap}
+.card.done{border-color:var(--good);background:var(--good-bg)}
+.card.done .st{border-color:var(--good);color:var(--good)}
+.banner{background:var(--good-bg);border:2px solid var(--good);color:var(--good);border-radius:14px;padding:10px 14px;font-family:var(--display);font-weight:600;font-size:1.1rem}
+.check{display:flex;gap:10px;align-items:center;padding:6px 0}
+.check input{width:24px;height:24px;accent-color:var(--good)}
+.check.auto{color:var(--muted)}
+input[type=text]{font:inherit;border:2px solid var(--line);border-radius:10px;padding:8px 12px;min-height:44px;background:var(--bg);color:var(--ink);width:100%;max-width:280px}
+.mayor{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.mayor .say{font-family:var(--display);font-size:1.8rem;font-weight:600;max-width:20ch;text-wrap:balance;min-height:3.4em;display:flex;align-items:center}
+.mlist{display:grid;gap:6px;width:100%;max-width:560px;text-align:left}
+.mlist .check{border:2px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface)}
+.note{color:var(--muted);font-size:.92rem}
+@media (prefers-reduced-motion:no-preference){.choice.wrong{animation:shk .3s}.choice.right{animation:pop .35s}}
+@keyframes shk{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{50%{transform:scale(1.06)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="52" height="52" viewBox="-60 -60 120 120" aria-hidden="true"><rect x="-50" y="-10" width="60" height="55" rx="3" style="fill:var(--yellow)" stroke="var(--ink)" stroke-width="5"/><polygon points="-20,-52 20,-10 -60,-10" style="fill:var(--red)" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="22" r="26" style="fill:var(--blue)" stroke="var(--ink)" stroke-width="5"/></svg>
+      <div><h1>Shape City Architects</h1><p>Name the shapes. Build the city.</p></div>
+    </div>
+    <div class="tools"><button class="pill" id="voiceBtn" aria-pressed="true">Voice on</button></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-name" aria-selected="true" data-tab="name">Name It</button>
+    <button class="tab" role="tab" id="t-solid" aria-selected="false" data-tab="solid">3-D</button>
+    <button class="tab" role="tab" id="t-build" aria-selected="false" data-tab="build">Build</button>
+    <button class="tab" role="tab" id="t-mayor" aria-selected="false" data-tab="mayor">Mayor</button>
+  </div>
+
+  <section id="p-name" class="panel" role="tabpanel">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <div class="seg" role="group" aria-label="Game"><button id="m-see" aria-pressed="true">See it, name it</button><button id="m-hear" aria-pressed="false">Hear it, find it</button></div>
+      <div class="row">
+        <div class="seg" role="group" aria-label="How many shapes"><button id="l-easy" aria-pressed="true">4 shapes</button><button id="l-all" aria-pressed="false">8 shapes</button></div>
+        <button class="pill" id="tiltBtn" aria-pressed="false">Tilted</button>
+      </div>
+    </div>
+    <div class="stage" id="quiz"></div>
+  </section>
+
+  <section id="p-solid" hidden class="panel" role="tabpanel">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <div class="seg" role="group" aria-label="3-D game" style="flex-wrap:wrap"><button id="s-name" aria-pressed="true">Name it</button><button id="s-find" aria-pressed="false">Find it</button><button id="s-stamp" aria-pressed="false">Shape stamp</button><button id="s-roll" aria-pressed="false">Roll or stack?</button></div>
+      <div class="seg" role="group" aria-label="How many solids"><button id="s-easy" aria-pressed="true">4 solids</button><button id="s-all" aria-pressed="false">6 solids</button></div>
+    </div>
+    <div class="stage" id="solidQuiz"></div>
+  </section>
+
+  <section id="p-build" hidden role="tabpanel">
+    <div class="build">
+      <div class="canvas-wrap panel">
+        <div class="row" style="justify-content:space-between">
+          <h2>My Shape City</h2>
+          <div class="row"><button class="pill" id="namesBtn" aria-pressed="true">Show names</button><button class="ghost" id="clearBtn">Clear city</button></div>
+        </div>
+        <svg id="city" viewBox="0 0 400 300" role="img" aria-label="City building area"></svg>
+        <div class="palette" id="palette"></div>
+        <div class="sel" id="selBox"></div>
+        <div class="chips" id="counts" aria-live="polite"></div>
+      </div>
+      <div class="side">
+        <div class="panel">
+          <h2>Challenge cards</h2>
+          <p class="note" style="margin:4px 0 10px">Choose any three. Tap a card when you finish it.</p>
+          <div class="cards" id="cards"></div>
+        </div>
+        <div class="panel">
+          <h2>Architect's checklist</h2>
+          <div class="row" style="margin:8px 0"><label for="arch" class="note">Architect:</label><input type="text" id="arch" placeholder="Type your name"></div>
+          <div id="checklist"></div>
+          <div id="win" class="banner" hidden>You are a Shape Architect! Show the mayor your city.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="p-mayor" hidden class="panel" role="tabpanel">
+    <div class="mayor">
+      <h2>The Mayor's Surprise Challenges</h2>
+      <p class="note" style="margin:0">Tap the button for a new challenge. Then go change your city.</p>
+      <div class="say" id="mSay">Add a building with no squares.</div>
+      <div class="row" style="justify-content:center">
+        <button class="primary" id="mNew">Surprise me</button>
+        <button class="ghost" id="mSpeak">Say it</button>
+        <button class="ghost" id="mGo">Go build</button>
+      </div>
+      <div class="mlist" id="mList"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const SH=[
+ {id:'circle',pl:'circles',hint:'It has no sides and no corners. It is round all the way.'},
+ {id:'square',pl:'squares',hint:'It has 4 sides that are all the same, and 4 corners.'},
+ {id:'triangle',pl:'triangles',hint:'It has 3 sides and 3 corners.'},
+ {id:'rectangle',pl:'rectangles',hint:'It has 4 sides and 4 corners. Two sides are long and two are short.'},
+ {id:'hexagon',pl:'hexagons',hint:'It has 6 sides and 6 corners.'},
+ {id:'trapezoid',pl:'trapezoids',hint:'It has 4 sides. The top is shorter than the bottom.'},
+ {id:'rhombus',pl:'rhombuses',hint:'It has 4 sides that are all the same. It looks like a diamond.'},
+ {id:'oval',pl:'ovals',hint:'It has no sides and no corners. It is round and long, like an egg.'}
+];
+const BYID=Object.fromEntries(SH.map(s=>[s.id,s]));
+const COLORS=['red','yellow','blue','green','orange','purple'];
+function inner(type,color,sw){
+  const st='style="fill:var(--'+color+')" stroke="var(--ink)" stroke-width="'+(sw||3)+'" stroke-linejoin="round" vector-effect="non-scaling-stroke"';
+  switch(type){
+    case 'circle':return '<circle r="42" '+st+'/>';
+    case 'oval':return '<ellipse rx="50" ry="31" '+st+'/>';
+    case 'square':return '<rect x="-40" y="-40" width="80" height="80" '+st+'/>';
+    case 'rectangle':return '<rect x="-52" y="-26" width="104" height="52" '+st+'/>';
+    case 'triangle':return '<polygon points="0,-45 50,40 -50,40" '+st+'/>';
+    case 'trapezoid':return '<polygon points="-30,-30 30,-30 55,30 -55,30" '+st+'/>';
+    case 'rhombus':return '<polygon points="0,-45 56,0 0,45 -56,0" '+st+'/>';
+    case 'hexagon':return '<polygon points="50,0 25,43.3 -25,43.3 -50,0 -25,-43.3 25,-43.3" '+st+'/>';
+  }
+}
+function miniSvg(type,color,rot){return '<svg viewBox="-62 -62 124 124" aria-hidden="true"><g transform="rotate('+(rot||0)+')">'+inner(type,color,4)+'</g></svg>';}
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+const $=id=>document.getElementById(id);
+let voice=true;
+function say(t){if(!voice)return;try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.1;speechSynthesis.speak(u);}catch(e){}}
+
+/* ---------- tabs ---------- */
+function showTab(t){
+  ['name','solid','build','mayor'].forEach(k=>{$('p-'+k).hidden=k!==t;$('t-'+k).setAttribute('aria-selected',k===t);});
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('voiceBtn').onclick=e=>{voice=!voice;e.target.setAttribute('aria-pressed',voice);e.target.textContent=voice?'Voice on':'Voice off';if(!voice){try{speechSynthesis.cancel();}catch(x){}}};
+
+/* ---------- Name It quiz ---------- */
+const Q={mode:'see',all:false,tilt:false,queue:[],i:0,stars:0,res:[],answered:false,tries:0};
+function pool(){return Q.all?SH:SH.slice(0,4);}
+function newRound(){Q.queue=shuffle(pool()).slice(0,8);while(Q.queue.length<8)Q.queue.push(pool()[rnd(pool().length)]);Q.i=0;Q.stars=0;Q.res=[];nextQ();}
+function rot(){return Q.tilt?[30,45,90,150,200,320][rnd(6)]:0;}
+function starsHtml(){let h='<div class="stars" aria-label="Stars">';for(let k=0;k<8;k++)h+='<span class="'+(k<Q.res.length&&Q.res[k]?'on':'')+'"></span>';return h+'</div>';}
+function nextQ(){
+  const box=$('quiz');
+  if(Q.i>=8){
+    box.innerHTML=starsHtml()+'<div class="prompt">You got '+Q.stars+' of 8 on the first try!</div><div class="msg">'+(Q.stars>=7?'Shape expert!':'Great practice. Try again to get more stars.')+'</div><button class="primary" id="again">Play again</button>';
+    $('again').onclick=newRound;say('Great job, architect!');return;
+  }
+  Q.answered=false;Q.tries=0;
+  const cur=Q.queue[Q.i],color=COLORS[rnd(6)];
+  if(Q.mode==='see'){
+    const names=shuffle([cur].concat(shuffle(pool().filter(s=>s.id!==cur.id)).slice(0,2)));
+    box.innerHTML=starsHtml()+'<div class="prompt">What shape is this?</div><svg class="big" viewBox="-62 -62 124 124" role="img" aria-label="A shape to name"><g transform="rotate('+rot()+')">'+inner(cur.id,color,3)+'</g></svg><div class="choices">'+names.map(s=>'<button class="choice" data-id="'+s.id+'">'+s.id+'</button>').join('')+'</div><div class="msg" id="qmsg" aria-live="polite"></div><div class="row"><button class="ghost" id="hintB">Hint</button></div>';
+    $('hintB').onclick=()=>{$('qmsg').className='msg';$('qmsg').textContent=cur.hint;};
+  }else{
+    const opts=shuffle([cur].concat(shuffle(pool().filter(s=>s.id!==cur.id)).slice(0,3)));
+    box.innerHTML=starsHtml()+'<div class="prompt">Find the <u>'+cur.id+'</u></div><div class="row"><button class="ghost" id="spk">Say it again</button></div><div class="choices">'+opts.map(s=>'<button class="choice" data-id="'+s.id+'" aria-label="'+s.id+' option">'+miniSvg(s.id,COLORS[rnd(6)],rot())+'</button>').join('')+'</div><div class="msg" id="qmsg" aria-live="polite"></div>';
+    $('spk').onclick=()=>say('Find the '+cur.id);
+    say('Find the '+cur.id);
+  }
+  box.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(b,cur));
+}
+function answer(btn,cur){
+  if(Q.answered)return;
+  const m=$('qmsg');
+  if(btn.dataset.id===cur.id){
+    Q.answered=true;btn.classList.add('right');
+    const first=Q.tries===0;if(first)Q.stars++;Q.res.push(first);
+    m.className='msg good';m.textContent='Yes! That is a '+cur.id+'. '+cur.hint;say('Yes! That is a '+cur.id);
+    const n=document.createElement('button');n.className='primary';n.textContent=Q.i>=7?'Finish':'Next shape';
+    n.onclick=()=>{Q.i++;nextQ();};m.after(n);n.focus();
+  }else{
+    Q.tries++;btn.classList.add('wrong');btn.disabled=true;
+    m.className='msg bad';m.textContent='Not this one. Try again! '+cur.hint;say('Try again');
+  }
+}
+function seg(a,b,key,va,vb){
+  $(a).onclick=()=>{Q[key]=va;$(a).setAttribute('aria-pressed',true);$(b).setAttribute('aria-pressed',false);newRound();};
+  $(b).onclick=()=>{Q[key]=vb;$(b).setAttribute('aria-pressed',true);$(a).setAttribute('aria-pressed',false);newRound();};
+}
+seg('m-see','m-hear','mode','see','hear');seg('l-easy','l-all','all',false,true);
+$('tiltBtn').onclick=e=>{Q.tilt=!Q.tilt;e.target.setAttribute('aria-pressed',Q.tilt);newRound();};
+
+/* ---------- Build ---------- */
+const B={items:[],sel:null,id:1,names:true,manual:{},explain:false};
+const svg=$('city');
+function seed(){
+  B.items=[];B.id=1;B.sel=null;
+  B.items.push({id:B.id++,type:'square',x:140,y:205,rot:0,fy:1,s:.8,color:'yellow'});
+  B.items.push({id:B.id++,type:'triangle',x:140,y:141,rot:0,fy:1,s:.8,color:'red'});
+}
+function addShape(type){
+  const n=B.items.length;
+  const it={id:B.id++,type:type,x:Math.min(360,Math.max(40,200+((n*47)%160)-80)),y:Math.min(240,150+((n*31)%80)-30),rot:0,fy:1,s:.8,color:COLORS[n%6]};
+  B.items.push(it);B.sel=it.id;say(type);renderBuild();
+}
+function selItem(){return B.items.find(i=>i.id===B.sel);}
+function renderCanvas(){
+  let h='<rect width="400" height="300" style="fill:var(--sky)"/><rect y="250" width="400" height="50" style="fill:var(--ground)"/><line x1="0" y1="250" x2="400" y2="250" stroke="var(--ink)" stroke-width="2" opacity=".35"/>';
+  if(!B.items.length)h+='<text x="200" y="140" text-anchor="middle" font-family="Fredoka,sans-serif" font-size="20" style="fill:var(--ink)">Tap a shape below to start your city</text>';
+  B.items.forEach(it=>{
+    const sel=it.id===B.sel;
+    h+='<g data-id="'+it.id+'" style="cursor:grab" transform="translate('+it.x+' '+it.y+') rotate('+it.rot+') scale('+it.s+' '+(it.s*it.fy)+')">'+inner(it.type,it.color,sel?5:3).replace('stroke="var(--ink)"',sel?'stroke="var(--accent)" stroke-dasharray="1 0"':'stroke="var(--ink)"')+'</g>';
+  });
+  if(B.names)B.items.forEach(it=>{h+='<text x="'+it.x+'" y="'+(it.y+4)+'" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="12" paint-order="stroke" stroke="#ffffff" stroke-width="3" style="fill:#16243b;pointer-events:none">'+it.type+'</text>';});
+  if(B.items.length===2&&B.items[0].type==='square'&&B.items[1].type==='triangle'&&B.items[0].x===140&&B.items[1].x===140&&B.items[0].y===205)h+='<text x="250" y="75" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="13" style="fill:var(--ink)">Example house. Add a door to finish it!</text>';
+  svg.innerHTML=h;
+}
+function renderSel(){
+  const it=selItem(),box=$('selBox');
+  if(!it){box.innerHTML='<span class="note">Tap a shape in your city to turn it, flip it, resize it, or change its color. Drag to move it.</span>';return;}
+  box.innerHTML='<div><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">'+it.type+'</b> <span class="note">('+it.color+')</span></div>'+
+  '<div class="row"><button class="ghost" data-a="turn">Turn</button><button class="ghost" data-a="flip">Flip over</button><button class="ghost" data-a="big">Bigger</button><button class="ghost" data-a="small">Smaller</button><button class="ghost" data-a="copy">Copy</button><button class="ghost" data-a="del">Remove</button></div>'+
+  '<div class="row" role="group" aria-label="Color">'+COLORS.map(c=>'<button class="sw" data-c="'+c+'" aria-label="'+c+'" style="background:var(--'+c+')"></button>').join('')+'</div>';
+  box.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>act(b.dataset.a));
+  box.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{it.color=b.dataset.c;renderBuild();});
+}
+function act(a){
+  const it=selItem();if(!it)return;
+  if(a==='turn')it.rot=(it.rot+45)%360;
+  if(a==='flip')it.fy*=-1;
+  if(a==='big')it.s=Math.min(1.8,+(it.s+.15).toFixed(2));
+  if(a==='small')it.s=Math.max(.35,+(it.s-.15).toFixed(2));
+  if(a==='copy'){const c=Object.assign({},it,{id:B.id++,x:Math.min(380,it.x+25),y:Math.min(280,it.y+20)});B.items.push(c);B.sel=c.id;}
+  if(a==='del'){B.items=B.items.filter(i=>i.id!==it.id);B.sel=null;}
+  renderBuild();
+}
+function counts(){const c={};B.items.forEach(i=>c[i.type]=(c[i.type]||0)+1);return c;}
+const CH=[
+ {k:'house',t:'The Shape House',d:'Build a house using at least 3 different shapes.',auto:c=>Object.keys(c).length>=3},
+ {k:'tower',t:'The Tall Tower',d:'Build a tower taller than your hand.'},
+ {k:'bridge',t:'The Bridge',d:'Build a bridge that connects two buildings.'},
+ {k:'tri',t:'Triangle Trouble',d:'Build something using 4 triangles.',auto:c=>(c.triangle||0)>=4},
+ {k:'mirror',t:'Mirror Magic',d:'Build something that looks the same on both sides.'},
+ {k:'invent',t:'Invent Something!',d:'Create something nobody else has built. Explain your shapes.'}
+];
+function done(ch,c){return ch.auto?ch.auto(c):!!B.manual[ch.k];}
+function renderSide(){
+  const c=counts();
+  $('counts').innerHTML=Object.keys(c).length?SH.filter(s=>c[s.id]).map(s=>'<span class="chip">'+c[s.id]+' '+(c[s.id]===1?s.id:s.pl)+'</span>').join(''):'<span class="note">No shapes yet.</span>';
+  $('cards').innerHTML='';
+  let n=0;
+  CH.forEach(ch=>{
+    const d=done(ch,c);if(d)n++;
+    const b=document.createElement(ch.auto?'div':'button');
+    b.className='card'+(d?' done':'');
+    b.innerHTML='<b>'+ch.t+'</b><span class="st">'+(ch.auto?(d?'Done':'Checks itself'):(d?'Done':'Tap when done'))+'</span><span class="d">'+ch.d+'</span>';
+    if(!ch.auto){b.setAttribute('aria-pressed',d);b.onclick=()=>{B.manual[ch.k]=!B.manual[ch.k];renderSide();};}
+    $('cards').appendChild(b);
+  });
+  const types=Object.keys(c).length;
+  $('checklist').innerHTML=
+    '<div class="check auto"><input type="checkbox" disabled '+(types>=3?'checked':'')+' aria-label="Used 3 shapes"><span>I used at least 3 different shapes. ('+types+' so far)</span></div>'+
+    '<div class="check auto"><input type="checkbox" disabled '+(n>=3?'checked':'')+' aria-label="Finished 3 challenges"><span>I completed 3 building challenges. ('+n+' so far)</span></div>'+
+    '<label class="check"><input type="checkbox" id="expl" '+(B.explain?'checked':'')+'><span>I can explain how I made one of my buildings.</span></label>';
+  $('expl').onchange=e=>{B.explain=e.target.checked;renderSide();};
+  $('win').hidden=!(types>=3&&n>=3&&B.explain);
+}
+function renderBuild(){renderCanvas();renderSel();renderSide();}
+$('palette').innerHTML=SH.map(s=>'<button class="add" data-t="'+s.id+'" aria-label="Add a '+s.id+'">'+miniSvg(s.id,'blue',0)+'<span>'+s.id+'</span></button>').join('');
+$('palette').querySelectorAll('.add').forEach(b=>b.onclick=()=>addShape(b.dataset.t));
+$('namesBtn').onclick=e=>{B.names=!B.names;e.target.setAttribute('aria-pressed',B.names);renderCanvas();};
+$('clearBtn').onclick=()=>{B.items=[];B.sel=null;B.manual={};renderBuild();};
+$('arch').addEventListener('input',()=>{});
+
+let drag=null;
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+svg.addEventListener('pointerdown',e=>{
+  const g=e.target.closest('g[data-id]');
+  if(!g){B.sel=null;renderSel();renderCanvas();return;}
+  const id=+g.dataset.id,it=B.items.find(i=>i.id===id),p=pt(e);
+  B.items=B.items.filter(i=>i.id!==id);B.items.push(it);
+  const was=B.sel===id;B.sel=id;drag={it:it,dx:p.x-it.x,dy:p.y-it.y,moved:false,was:was};
+  try{svg.setPointerCapture(e.pointerId);}catch(x){}
+  renderSel();renderCanvas();
+});
+svg.addEventListener('pointermove',e=>{
+  if(!drag)return;const p=pt(e);
+  const nx=Math.max(10,Math.min(390,p.x-drag.dx)),ny=Math.max(10,Math.min(290,p.y-drag.dy));
+  if(Math.abs(nx-drag.it.x)+Math.abs(ny-drag.it.y)>2)drag.moved=true;
+  drag.it.x=nx;drag.it.y=ny;renderCanvas();
+});
+function endDrag(){if(!drag)return;if(!drag.moved)say(drag.it.type);drag=null;renderSide();}
+svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+
+/* ---------- Mayor ---------- */
+const MC=['Add a building with no squares.','Build something that looks the same on both sides.','Change one building so it uses fewer pieces.','Turn one triangle upside down. What changed?','Make a rectangle using only triangles.','Make a tower with a hexagon on top.','Add a building made of exactly 5 shapes.','Build a bridge using a trapezoid.','Make two different buildings with the same shapes.','Put a cone on top of a tower.','Add a building that uses a solid that rolls.'];
+const MD={};let mi=0;
+function renderM(){
+  $('mSay').textContent=MC[mi];
+  $('mList').innerHTML=MC.map((t,k)=>'<label class="check"><input type="checkbox" data-k="'+k+'" '+(MD[k]?'checked':'')+'><span>'+t+'</span></label>').join('');
+  $('mList').querySelectorAll('input').forEach(i=>i.onchange=()=>{MD[i.dataset.k]=i.checked;});
+}
+$('mNew').onclick=()=>{let k;do{k=rnd(MC.length);}while(k===mi&&MC.length>1);mi=k;renderM();say(MC[mi]);};
+$('mSpeak').onclick=()=>say(MC[mi]);
+$('mGo').onclick=()=>showTab('build');
+
+/* ---------- 3-D solids ---------- */
+const SO=[
+ {id:'cube',name:'cube',faces:['square'],avoid:['rectangle'],roll:false,stack:true,twin:'a block',hint:'It has 6 flat sides. Every flat side is a square.'},
+ {id:'sphere',name:'sphere',faces:[],avoid:[],roll:true,stack:false,twin:'a ball',hint:'It is round all over, like a ball. It has no flat sides.'},
+ {id:'cylinder',name:'cylinder',faces:['circle'],avoid:[],roll:true,stack:true,twin:'a can',hint:'It has 2 flat circles on the ends and a curved middle, like a can.'},
+ {id:'cone',name:'cone',faces:['circle'],avoid:[],roll:true,stack:false,twin:'a party hat',hint:'It has 1 flat circle on the bottom and a point on top.'},
+ {id:'box',name:'rectangular prism',faces:['rectangle'],avoid:['square'],roll:false,stack:true,twin:'a cereal box',hint:'It is a box shape. Its flat sides are rectangles.'},
+ {id:'pyramid',name:'pyramid',faces:['triangle','square'],avoid:[],roll:false,stack:false,twin:'a tent',hint:'It has a square on the bottom and triangle sides that meet at a point.'}
+];
+const FLAT=['circle','square','triangle','rectangle'];
+function solidSvg(id,c,cls){
+  const F='style="fill:var(--'+c+')"',S='stroke="var(--ink)" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"';
+  const D='fill="#000" fill-opacity=".2"',L='fill="#fff" fill-opacity=".35"',N='fill="none"';
+  const H='fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 5" opacity=".55" vector-effect="non-scaling-stroke"';
+  const poly=(p,sh)=>'<polygon points="'+p+'" '+F+'/><polygon points="'+p+'" '+sh+' '+S+'/>';
+  const path=(d,sh)=>'<path d="'+d+'" '+F+'/><path d="'+d+'" '+sh+' '+S+'/>';
+  let g='';
+  switch(id){
+    case 'cube':g=poly('-42,-18 -20,-40 40,-40 18,-18',L)+poly('-42,-18 18,-18 18,42 -42,42',N)+poly('18,-18 40,-40 40,20 18,42',D);break;
+    case 'box':g='<g transform="translate(0 -10)">'+poly('-50,0 -30,-20 50,-20 30,0',L)+poly('-50,0 30,0 30,40 -50,40',N)+poly('30,0 50,-20 50,20 30,40',D)+'</g>';break;
+    case 'sphere':g='<circle r="44" '+F+' '+S+'/><path d="M-44,0 A44,13 0 0 1 44,0" '+H+'/><path d="M-44,0 A44,13 0 0 0 44,0" fill="none" stroke="var(--ink)" stroke-width="2" opacity=".5" vector-effect="non-scaling-stroke"/><ellipse cx="-16" cy="-20" rx="12" ry="8" fill="#fff" fill-opacity=".5"/>';break;
+    case 'cylinder':g=path('M-32,-34 L-32,38 A32,11 0 0 0 32,38 L32,-34 Z',N)+'<path d="M-32,38 A32,11 0 0 1 32,38" '+H+'/><ellipse cy="-34" rx="32" ry="11" '+F+'/><ellipse cy="-34" rx="32" ry="11" '+L+' '+S+'/>';break;
+    case 'cone':g=path('M0,-46 L38,34 A38,12 0 0 1 -38,34 Z',N)+'<path d="M0,-46 L38,34 A38,12 0 0 1 14,45 Z" '+D+'/><path d="M38,34 A38,12 0 0 0 -38,34" '+H+'/>';break;
+    case 'pyramid':g=poly('-44,30 20,30 0,-46',N)+poly('20,30 44,10 0,-46',D)+'<polyline points="-44,30 -20,10 44,10" '+H+'/><line x1="-20" y1="10" x2="0" y2="-46" '+H+'/>';break;
+  }
+  return '<svg '+(cls?'class="'+cls+'" role="img" aria-label="A 3-D shape"':'aria-hidden="true"')+' viewBox="-62 -62 124 124">'+g+'</svg>';
+}
+const P={mode:'name',all:false,queue:[],i:0,stars:0,res:[],answered:false,tries:0};
+function ppool(){return P.all?SO:SO.slice(0,4);}
+function pRound(){let q=[];while(q.length<8)q=q.concat(shuffle(ppool()));P.queue=q.slice(0,8);P.i=0;P.stars=0;P.res=[];pNext();}
+function pStars(){let h='<div class="stars" aria-label="Stars">';for(let k=0;k<8;k++)h+='<span class="'+(k<P.res.length&&P.res[k]?'on':'')+'"></span>';return h+'</div>';}
+function pNext(){
+  const box=$('solidQuiz');
+  if(P.i>=8){
+    box.innerHTML=pStars()+'<div class="prompt">You got '+P.stars+' of 8 on the first try!</div><div class="msg">'+(P.stars>=7?'3-D shape expert!':'Great practice. Try again to get more stars.')+'</div><button class="primary" id="again3">Play again</button>';
+    $('again3').onclick=pRound;say('Great job, architect!');return;
+  }
+  P.answered=false;P.tries=0;
+  const cur=P.queue[P.i],color=COLORS[rnd(6)],an=n=>(/^[aeiou]/.test(n)?'an ':'a ')+n;
+  let head='',ch=[],talk='',good='',goodSay='',yn=false;
+  const pic=solidSvg(cur.id,color,'big');
+  if(P.mode==='name'){
+    talk='What 3-D shape is this?';head='<div class="prompt">'+talk+'</div>'+pic;
+    ch=shuffle([cur].concat(shuffle(ppool().filter(s=>s!==cur)).slice(0,2))).map(s=>({ok:s===cur,html:s.name,label:s.name}));
+    good='Yes! That is '+an(cur.name)+'. '+cur.hint;goodSay='Yes! That is '+an(cur.name);
+  }else if(P.mode==='find'){
+    talk='Find the '+cur.name+'.';head='<div class="prompt">Find the <u>'+cur.name+'</u></div><div class="sub">It looks like '+cur.twin+'.</div>';
+    ch=shuffle([cur].concat(shuffle(ppool().filter(s=>s!==cur)).slice(0,3))).map(s=>({ok:s===cur,html:solidSvg(s.id,COLORS[rnd(6)]),label:s.name}));
+    good='Yes! That is '+an(cur.name)+'. It looks like '+cur.twin+'.';goodSay='Yes! That is '+an(cur.name);
+  }else if(P.mode==='stamp'){
+    talk='Stamp it! What flat shape can the '+cur.name+' print?';head='<div class="prompt">'+talk+'</div>'+pic;
+    const opt=f=>({ok:false,f:f,html:'<span class="stamp">'+miniSvg(f,'blue',0)+'<span>'+f+'</span></span>',label:f});
+    if(!cur.faces.length){
+      ch=[{ok:true,html:'<span>No flat side</span>',label:'No flat side'},opt('circle'),opt(['square','triangle','rectangle'][rnd(3)])];
+      ch[1].bad='A sphere looks like a circle, but it is round all over. Try again!';
+      good='Yes! A sphere has no flat side, so it cannot print a flat shape.';goodSay='Yes! A sphere has no flat side.';
+    }else{
+      const f=cur.faces[rnd(cur.faces.length)],c=opt(f);c.ok=true;
+      ch=[c].concat(shuffle(FLAT.filter(x=>!cur.faces.includes(x)&&!cur.avoid.includes(x))).slice(0,2).map(opt));
+      good='Yes! '+an(cur.name).replace(/^./,m=>m.toUpperCase())+' has a flat '+f+'. '+cur.hint;goodSay='Yes! It prints '+an(f);
+    }
+    ch=shuffle(ch);
+  }else{
+    yn=true;const q=rnd(2)?'roll':'stack',yes=cur[q];
+    talk=q==='roll'?'Can '+an(cur.name)+' roll?':'Can you stack a block on top of '+an(cur.name)+'?';
+    head='<div class="prompt">'+talk+'</div>'+pic;
+    ch=[{ok:yes,html:'Yes',label:'Yes'},{ok:!yes,html:'No',label:'No'}];
+    if(q==='roll')good=yes?'Yes! It rolls because it has a curved part.':'Right! It has only flat sides, so it slides but does not roll.';
+    else good=yes?'Yes! It has a flat top, so a block stays on.':(cur.id==='sphere'?'Right! It is round all over, so a block falls off.':'Right! It comes to a point, so a block will not stay on top.');
+    goodSay=good;
+  }
+  box.innerHTML=pStars()+head+'<div class="choices">'+ch.map((c,k)=>'<button class="choice'+(yn?' yn':'')+'" data-k="'+k+'" aria-label="'+c.label+'">'+c.html+'</button>').join('')+'</div><div class="msg" id="pmsg" aria-live="polite"></div><div class="row"><button class="ghost" id="spk3">Say it again</button><button class="ghost" id="hint3">Hint</button></div>';
+  $('spk3').onclick=()=>say(talk);
+  $('hint3').onclick=()=>{$('pmsg').className='msg';$('pmsg').textContent=cur.hint;say(cur.hint);};
+  box.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{
+    if(P.answered)return;const c=ch[+b.dataset.k],m=$('pmsg');
+    if(c.ok){
+      P.answered=true;b.classList.add('right');const first=P.tries===0;if(first)P.stars++;P.res.push(first);
+      m.className='msg good';m.textContent=good;say(goodSay);
+      const n=document.createElement('button');n.className='primary';n.textContent=P.i>=7?'Finish':'Next shape';
+      n.onclick=()=>{P.i++;pNext();};m.after(n);n.focus();
+    }else{
+      P.tries++;b.classList.add('wrong');b.disabled=true;
+      m.className='msg bad';m.textContent=c.bad||('Not this one. Try again! '+cur.hint);say('Try again');
+    }
+  });
+  if(!$('p-solid').hidden)say(talk);
+}
+const SM=['s-name','s-find','s-stamp','s-roll'];
+SM.forEach(id=>$(id).onclick=()=>{P.mode=id.slice(2);SM.forEach(x=>$(x).setAttribute('aria-pressed',x===id));pRound();});
+$('s-easy').onclick=()=>{P.all=false;$('s-easy').setAttribute('aria-pressed',true);$('s-all').setAttribute('aria-pressed',false);pRound();};
+$('s-all').onclick=()=>{P.all=true;$('s-all').setAttribute('aria-pressed',true);$('s-easy').setAttribute('aria-pressed',false);pRound();};
+$('t-solid').addEventListener('click',()=>{if(P.i<8&&!P.answered){const p=$('solidQuiz').querySelector('.prompt');if(p)say(p.textContent);}});
+
+seed();renderBuild();renderM();newRound();pRound();
+})();
+</script>
+
+</body></html>

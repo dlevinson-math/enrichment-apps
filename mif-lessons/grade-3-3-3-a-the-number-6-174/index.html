@@ -1,0 +1,784 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Number 6,174</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a "number machine" bench on the left (digit cards, slots, keypad) and the chain frame ledger on the right; stacks on narrow screens. */
+:root{
+  --paper:#EDF0F5; --card:#FFFFFF; --ink:#17203A; --muted:#566079; --line:#CDD3DF;
+  --big:#2552C2; --big-soft:#E3EAFB; --small:#C2661B; --small-soft:#FBEBDD;
+  --diff:#17805A; --diff-soft:#DDF2E8; --goal:#9C2E87; --goal-soft:#F6E2F1;
+  --warn:#B4361F; --warn-soft:#FBE6E1; --tile:#FFFDF8; --tile-edge:#B9C1D1;
+  --display:"Bricolage Grotesque","Arial Rounded MT Bold","Segoe UI",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11151F; --card:#1A2030; --ink:#E9ECF3; --muted:#A3ACC1; --line:#323B50;
+    --big:#7EA2FF; --big-soft:#1D2A4C; --small:#F2A15E; --small-soft:#3A2817;
+    --diff:#4FD19C; --diff-soft:#14352A; --goal:#EB86D6; --goal-soft:#3A1B35;
+    --warn:#FF8A72; --warn-soft:#3D1E18; --tile:#232A3D; --tile-edge:#46506A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11151F; --card:#1A2030; --ink:#E9ECF3; --muted:#A3ACC1; --line:#323B50;
+  --big:#7EA2FF; --big-soft:#1D2A4C; --small:#F2A15E; --small-soft:#3A2817;
+  --diff:#4FD19C; --diff-soft:#14352A; --goal:#EB86D6; --goal-soft:#3A1B35;
+  --warn:#FF8A72; --warn-soft:#3D1E18; --tile:#232A3D; --tile-edge:#46506A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 28px;
+  -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--big); outline-offset:2px}
+.num{font-family:var(--display); font-variant-numeric:tabular-nums; font-weight:700}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap; padding-block:18px 10px; max-width:1320px; margin:0 auto}
+.brand h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(30px,4vw,52px); line-height:1; letter-spacing:-0.02em; text-wrap:balance}
+.brand h1 .k{color:var(--goal)}
+.brand p{margin:6px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:6px; flex-wrap:wrap; max-width:1320px; margin:6px auto 18px; border-bottom:2px solid var(--line)}
+.tabs button{border:0; background:none; padding:12px 10px 10px; font-size:clamp(16px,1.4vw,19px); font-weight:600; color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px; display:flex; gap:8px; align-items:center}
+.tabs button .n{width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:14px; background:var(--line); color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--goal)}
+.tabs button[aria-selected="true"] .n{background:var(--goal); color:var(--card)}
+
+main{max-width:1320px; margin:0 auto}
+section.view{display:grid; gap:24px}
+.two{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); align-items:start}
+@media (max-width:960px){.two{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:22px; display:flex; flex-direction:column; gap:16px; min-width:0}
+.eyebrow{font-size:13px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin:0}
+h2{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(24px,2.4vw,34px); line-height:1.15; text-wrap:balance}
+.lead{margin:0; font-size:clamp(18px,1.6vw,22px); max-width:36em}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:600; font-size:clamp(17px,1.5vw,20px); padding:14px 24px; border-radius:14px; min-height:56px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(16px,1.3vw,18px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.link{border:0; background:none; text-decoration:underline; text-underline-offset:3px; color:var(--muted); font-size:16px; padding:8px 4px; min-height:44px}
+
+/* Digit cards and slots */
+.cards{display:flex; gap:12px; flex-wrap:wrap; min-height:84px}
+.tile{width:clamp(58px,6.4vw,78px); height:clamp(72px,8vw,96px); border-radius:14px; border:2px solid var(--tile-edge); background:var(--tile);
+  font-family:var(--display); font-weight:800; font-size:clamp(36px,4.2vw,54px); display:grid; place-items:center; box-shadow:0 3px 0 var(--tile-edge); transition:transform .15s, opacity .15s}
+.tile:hover:not(:disabled){transform:translateY(-2px)}
+.tile:disabled{opacity:.18; box-shadow:none; cursor:default}
+.slots{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.slotlabel{width:112px; font-weight:600; font-size:17px}
+.slotlabel small{display:block; font-weight:400; color:var(--muted); font-size:13px}
+.slot{width:clamp(58px,6.4vw,78px); height:clamp(72px,8vw,96px); border-radius:14px; border:2.5px dashed var(--line); background:transparent;
+  font-family:var(--display); font-weight:800; font-size:clamp(36px,4.2vw,54px); display:grid; place-items:center; padding:0}
+.slot.f{border-style:solid}
+.big .slot.f{border-color:var(--big); background:var(--big-soft); color:var(--big)}
+.small .slot.f{border-color:var(--small); background:var(--small-soft); color:var(--small)}
+.slot.active{border-color:var(--ink)}
+.comma{font-family:var(--display); font-size:40px; font-weight:800; margin:0 -4px; align-self:flex-end; padding-bottom:6px; color:var(--muted)}
+.ok-badge{font-weight:600; color:var(--diff)}
+
+.msg{margin:0; padding:14px 18px; border-radius:14px; font-size:clamp(17px,1.45vw,20px); line-height:1.45; max-width:40em}
+.msg:empty{display:none}
+.msg.good{background:var(--diff-soft)}
+.msg.try{background:var(--warn-soft)}
+.msg.info{background:var(--big-soft)}
+.msg.goal{background:var(--goal-soft)}
+.msg b{font-weight:600}
+
+/* Subtraction card */
+.sub{display:grid; grid-template-columns:auto auto; justify-content:start; column-gap:14px; font-family:var(--display); font-weight:700; font-size:clamp(34px,4vw,52px); line-height:1.1; font-variant-numeric:tabular-nums}
+.sub .op{color:var(--muted)}
+.sub .L{color:var(--big)} .sub .S{color:var(--small)}
+.sub .bar{grid-column:1 / -1; height:4px; background:var(--ink); border-radius:2px; margin:6px 0}
+.answer{min-width:4.6ch; border-bottom:4px dashed var(--diff); color:var(--diff); min-height:1.15em}
+.answer.caret::after{content:"|"; color:var(--muted); font-weight:400; animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.keypad{display:grid; grid-template-columns:repeat(5, minmax(0,64px)); gap:8px}
+.keypad button{height:58px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:26px}
+.keypad button.wide{grid-column:span 2; font-family:var(--body); font-size:17px; font-weight:600}
+.keypad button.go{background:var(--diff); color:var(--card); border-color:var(--diff)}
+.steplist{margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; font-size:17px}
+
+/* Picker */
+.picker{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end}
+.wheel{display:flex; flex-direction:column; align-items:center; gap:6px}
+.wheel button.arr{width:clamp(58px,6.4vw,78px); height:40px; border-radius:10px; border:2px solid var(--line); background:var(--card); font-size:18px}
+.seg{display:inline-flex; background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:3px}
+.seg button{border:0; background:none; padding:9px 16px; border-radius:10px; font-weight:600; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+/* Chain frame */
+.frame{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.frame th{font-size:13px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:600; text-align:left; padding:6px 8px; border-bottom:2px solid var(--line)}
+.frame td{padding:7px 8px; border-bottom:1px solid var(--line); font-family:var(--display); font-weight:700; font-size:clamp(20px,2vw,27px); height:46px}
+.frame td:first-child{font-family:var(--body); font-weight:500; font-size:15px; color:var(--muted); width:2.6em}
+.frame .cL{color:var(--big)} .frame .cS{color:var(--small)} .frame .cD{color:var(--diff)}
+.frame tr.now td{background:var(--paper)}
+.frame tr.hit .cD{color:var(--goal)}
+.frame tr.hit .cD span{background:var(--goal-soft); border-radius:8px; padding:0 6px}
+.frame tr.stay td{color:var(--muted)}
+.frame tr.stay td.cD{color:var(--goal)}
+.stepsline{display:flex; align-items:baseline; gap:12px; font-size:18px; padding-top:4px}
+.stepsline b{font-family:var(--display); font-size:44px; line-height:1; color:var(--goal); min-width:1ch}
+.tablewrap{overflow-x:auto}
+
+/* Launch */
+.dq{font-family:var(--display); font-weight:800; font-size:clamp(34px,5vw,64px); line-height:1.05; letter-spacing:-0.02em; margin:0; text-wrap:balance}
+.votes{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+.vote{display:flex; justify-content:space-between; align-items:center; gap:10px; text-align:left; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:14px 16px; font-size:18px; font-weight:500; min-height:64px}
+.vote .c{font-family:var(--display); font-weight:800; font-size:30px; min-width:1.4ch; text-align:right}
+.example{display:flex; flex-direction:column; gap:10px}
+.exline{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:baseline; font-family:var(--display); font-weight:700; font-size:clamp(26px,3.2vw,40px); font-variant-numeric:tabular-nums}
+.exline .L{color:var(--big)} .exline .S{color:var(--small)} .exline .D{color:var(--diff)}
+.exline .D.g{color:var(--goal)}
+.exnote{font-size:16px; color:var(--muted); font-family:var(--body); font-weight:400}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--card); font-weight:600; font-size:19px; padding:0 18px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-size:clamp(21px,2vw,28px); font-weight:500; margin:0; max-width:32em; line-height:1.35}
+.hist{display:flex; flex-direction:column; gap:6px; max-width:620px}
+.hbar{display:grid; grid-template-columns:5.5em minmax(0,1fr) 4em; align-items:center; gap:10px; font-size:16px}
+.hbar .t{height:26px; background:var(--line); border-radius:6px; overflow:hidden}
+.hbar .t i{display:block; height:100%; background:var(--big); border-radius:6px}
+.hbar.top .t i{background:var(--goal)}
+.hbar .v{font-variant-numeric:tabular-nums; text-align:right; font-weight:600}
+.record{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.record th,.record td{padding:8px 10px; border-bottom:1px solid var(--line); text-align:left}
+.record th{font-size:13px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.record td{font-size:19px}
+.record tr.best td{background:var(--goal-soft)}
+.record td .num{font-size:22px}
+.addform{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.addform input{width:8.5em; font-size:22px; padding:10px 12px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; min-height:52px}
+.empty{color:var(--muted); margin:0}
+.found{display:flex; gap:8px; flex-wrap:wrap}
+.found span{background:var(--goal-soft); color:var(--ink); border-radius:999px; padding:6px 14px; font-family:var(--display); font-weight:700; font-size:20px}
+.chainlist{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; font-family:var(--display); font-weight:700; font-size:clamp(20px,2vw,26px); font-variant-numeric:tabular-nums}
+.chainlist .arrow{color:var(--muted); font-weight:500}
+.chainlist .g{color:var(--goal)}
+.note{color:var(--muted); font-size:15px; margin:0}
+
+@media (max-width:520px){
+  .slotlabel{width:100%}
+  .keypad{grid-template-columns:repeat(5, minmax(0,1fr))}
+  .panel{padding:16px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+</style>
+
+<header>
+  <div class="brand">
+    <h1>The Number <span class="k">6,174</span></h1>
+    <p>Grade 3 · Math in Focus Ch 3 · Lesson 3.3-A</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-tab="launch" aria-selected="false"><span class="n">2</span>Launch</button>
+  <button role="tab" data-tab="run" aria-selected="false"><span class="n">3</span>Run a chain</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span class="n">4</span>Detective questions</button>
+  <button role="tab" data-tab="chal" aria-selected="false"><span class="n">★</span>Challenge</button>
+</nav>
+
+<main>
+  <!-- WARM-UP -->
+  <section class="view" id="v-warm">
+    <div class="panel">
+      <p class="eyebrow">Warm-up · 5 min</p>
+      <h2>Make the largest number and the smallest number</h2>
+      <p class="lead">Tap the cards in order. Use every card once.</p>
+      <div class="cards" id="wCards" aria-label="Digit cards"></div>
+      <div class="slots big" id="wBigRow"></div>
+      <div class="slots small" id="wSmallRow"></div>
+      <div class="row">
+        <button class="primary" id="wCheck">Check</button>
+        <button class="secondary" id="wUndo">Take back a card</button>
+        <button class="link" id="wNew">New digits</button>
+      </div>
+      <p class="msg" id="wMsg" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- LAUNCH -->
+  <section class="view two" id="v-launch" hidden>
+    <div class="panel">
+      <p class="eyebrow">Launch · driving question</p>
+      <p class="dq">Where does every number end up?</p>
+      <p class="lead">Take the largest number, subtract the smallest. Then do it again with the digits of the answer. <b>Predict:</b> what will happen if we keep going?</p>
+      <div class="votes" id="votes"></div>
+      <div class="row"><button class="link" id="voteClear">Clear the votes</button></div>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Try it together · digits 3, 5, 2, 4</p>
+      <div class="example" id="example"></div>
+      <p class="msg" id="exMsg" aria-live="polite"></p>
+      <div class="row">
+        <button class="primary" id="exNext">Show the first step</button>
+        <button class="secondary" id="exGo" hidden>Pick our own digits</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RUN -->
+  <section class="view two" id="v-run" hidden>
+    <div class="panel" id="bench">
+      <div class="row" style="justify-content:space-between">
+        <p class="eyebrow" id="runEyebrow">Investigate · 25 min</p>
+        <div class="seg" role="group" aria-label="Number of digits">
+          <button data-digits="4" aria-pressed="true">4 digits</button>
+          <button data-digits="3" aria-pressed="false">3 digits (easier)</button>
+        </div>
+      </div>
+
+      <div id="pickBox">
+        <h2 id="pickTitle">Choose your four digits</h2>
+        <p class="lead" style="margin:8px 0 14px">Use the arrows. The digits can repeat, but not all of them can be the same.</p>
+        <div class="picker" id="picker"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="primary" id="startBtn">Start the chain</button>
+          <button class="secondary" id="randBtn">Random digits</button>
+        </div>
+        <p class="msg" id="pickMsg" aria-live="polite" style="margin-top:14px"></p>
+      </div>
+
+      <div id="buildBox" hidden>
+        <h2 id="buildTitle"></h2>
+        <p class="lead" id="buildLead" style="margin-top:6px"></p>
+        <div class="cards" id="rCards" aria-label="Digit cards"></div>
+        <div class="slots" id="rSlots"></div>
+        <div class="row">
+          <button class="primary" id="rCheck">Check</button>
+          <button class="secondary" id="rUndo">Take back a card</button>
+        </div>
+      </div>
+
+      <div id="diffBox" hidden>
+        <h2>Subtract</h2>
+        <p class="lead" style="margin:6px 0 10px">Work it out on paper, then type the difference.</p>
+        <div class="sub" id="subCard"></div>
+        <div class="keypad" id="keypad"></div>
+        <div class="row"><button class="link" id="regroupBtn">Show the regrouping</button></div>
+        <ol class="steplist" id="regroupList" hidden></ol>
+      </div>
+
+      <p class="msg" id="rMsg" aria-live="polite"></p>
+
+      <div class="row" id="doneRow" hidden>
+        <button class="primary" id="recordBtn">Add to class record</button>
+        <button class="secondary" id="stayBtn">What happens next?</button>
+        <button class="secondary" id="againBtn">New chain</button>
+      </div>
+      <div class="row" id="helpRow">
+        <button class="link" id="autoBtn">Show this step for me</button>
+        <button class="link" id="newChainBtn" hidden>Choose new digits</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="eyebrow">Chain frame</p>
+      <div class="tablewrap">
+        <table class="frame" id="frame">
+          <thead><tr><th>Step</th><th>Largest</th><th>Smallest</th><th>Difference</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="stepsline"><span id="stepsLabel">Steps to reach 6,174:</span> <b id="stepsVal"></b></div>
+      <p class="note" id="startNote">Start: —</p>
+    </div>
+  </section>
+
+  <!-- DETECTIVE -->
+  <section class="view" id="v-det" hidden>
+    <div class="panel">
+      <p class="eyebrow">Share and reflect · 10 min</p>
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div id="qresult" aria-live="polite" style="display:flex; flex-direction:column; gap:14px"></div>
+      <p class="note">Talk it over first, then tap a button to put evidence on the screen.</p>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Class record · longest chains first</p>
+      <div class="addform">
+        <label for="addStart" style="font-weight:600">A pair’s start:</label>
+        <input id="addStart" inputmode="numeric" maxlength="4" placeholder="e.g. 3524" autocomplete="off">
+        <button class="secondary" id="addBtn">Add</button>
+      </div>
+      <p class="msg" id="addMsg" aria-live="polite"></p>
+      <div class="tablewrap" id="recordBox"></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE -->
+  <section class="view two" id="v-chal" hidden>
+    <div class="panel">
+      <p class="eyebrow">Raise the ceiling</p>
+      <h2>Find a start that takes 7 steps</h2>
+      <p class="lead">Nobody has found one that takes 8. Choose four digits and count the steps.</p>
+      <div class="picker" id="cPicker"></div>
+      <div class="row">
+        <button class="primary" id="cTest">Count the steps</button>
+        <button class="link" id="cHint">Give me a hint</button>
+      </div>
+      <p class="msg" id="cMsg" aria-live="polite"></p>
+      <div class="chainlist" id="cChain"></div>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">7-step starts we found</p>
+      <div class="found" id="cFound"><p class="empty">None yet.</p></div>
+      <p class="eyebrow" style="margin-top:8px">Is there an 8?</p>
+      <p class="lead" style="font-size:18px">Make a claim first. Then let the computer try every possible start.</p>
+      <div class="row"><button class="secondary" id="cAll">Try every start</button></div>
+      <div id="cAllOut" style="display:flex; flex-direction:column; gap:12px"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const PLACE = {4:['thousands','hundreds','tens','ones'], 3:['hundreds','tens','ones']};
+const GOAL = {4:6174, 3:495};
+
+/* ---------- math ---------- */
+const digitsOf = (v,n) => String(v).padStart(n,'0').split('').map(Number);
+const toNum = a => a.reduce((s,d)=>s*10+d,0);
+const desc = a => [...a].sort((x,y)=>y-x);
+const asc = a => [...a].sort((x,y)=>x-y);
+const allSame = a => a.every(d => d===a[0]);
+function fmtD(a){ const s=a.join(''); return a.length===4 ? s[0]+','+s.slice(1) : s; }
+const fmtN = (v,n) => fmtD(digitsOf(v,n));
+function kStep(v,n){ const d=digitsOf(v,n); return toNum(desc(d)) - toNum(asc(d)); }
+/* chain: list of {L,S,D}; steps = subtractions until first D === goal */
+function chainOf(v,n){
+  const rows=[]; let cur=v;
+  for(let i=0;i<12;i++){ const d=digitsOf(cur,n); const L=toNum(desc(d)), S=toNum(asc(d)), D=L-S; rows.push({L,S,D}); if(D===GOAL[n]) break; cur=D; }
+  return rows;
+}
+function survey(n){
+  const counts={}; let max=0, total=0, ok=true, maxStarts=[];
+  for(let v=0; v<10**n; v++){
+    const d=digitsOf(v,n); if(allSame(d)) continue;
+    total++;
+    let cur=v, s=0;
+    while(cur!==GOAL[n]){ cur=kStep(cur,n); s++; if(s>20){ ok=false; break; } }
+    counts[s]=(counts[s]||0)+1;
+    if(s>max){ max=s; maxStarts=[v]; } else if(s===max) maxStarts.push(v);
+  }
+  return {counts,max,total,ok,maxStarts};
+}
+
+/* ---------- shared UI helpers ---------- */
+function say(el, html, kind){ el.className='msg'+(kind?' '+kind:''); el.innerHTML=html||''; }
+function listText(a){ return a.length<=1 ? a.join('') : a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* A builder: cards + one or more slot rows */
+function makeBuilder({cardsEl, rows}){
+  const B = {digits:[], used:[], rows:rows.map(r=>({...r, picks:[]})), cur:0};
+  B.load = (digits) => { B.digits=digits; B.used=digits.map(()=>false); B.rows.forEach(r=>r.picks=[]); B.cur=0; B.render(); };
+  B.render = () => {
+    cardsEl.innerHTML='';
+    B.digits.forEach((d,i)=>{
+      const b=document.createElement('button'); b.className='tile'; b.textContent=d; b.disabled=B.used[i];
+      b.setAttribute('aria-label','Card '+d);
+      b.onclick=()=>{ const r=B.rows[B.cur]; if(!r || r.picks.length>=B.digits.length) return; r.picks.push(i); B.used[i]=true; B.render(); B.onchange&&B.onchange(); };
+      cardsEl.appendChild(b);
+    });
+    B.rows.forEach((r,ri)=>{
+      r.el.innerHTML = `<div class="slotlabel">${r.label}<small>${r.sub||''}</small></div>`;
+      for(let k=0;k<B.digits.length;k++){
+        if(B.digits.length===4 && k===1){ const c=document.createElement('span'); c.className='comma'; c.textContent=','; r.el.appendChild(c); }
+        const s=document.createElement('button'); const idx=r.picks[k];
+        s.className='slot'+(idx!==undefined?' f':'')+(ri===B.cur && k===r.picks.length?' active':'');
+        s.textContent = idx!==undefined ? B.digits[idx] : '';
+        s.setAttribute('aria-label', `${r.label} ${PLACE[B.digits.length][k]} place${idx!==undefined?': '+B.digits[idx]:', empty'}`);
+        s.onclick=()=>{ if(idx===undefined || r.done) return; // remove this and later picks in this row
+          r.picks.splice(k).forEach(j=>B.used[j]=false); B.cur=ri; B.render(); B.onchange&&B.onchange(); };
+        r.el.appendChild(s);
+      }
+      if(r.done){ const t=document.createElement('span'); t.className='ok-badge'; t.textContent='✓'; r.el.appendChild(t); }
+    });
+  };
+  B.undo = () => { const r=B.rows[B.cur]; if(!r) return; let j=r.picks.pop(); if(j===undefined && B.cur>0 && !B.rows[B.cur-1].done){ B.cur--; j=B.rows[B.cur].picks.pop(); } if(j!==undefined) B.used[j]=false; B.render(); };
+  B.value = ri => B.rows[ri].picks.map(i=>B.digits[i]);
+  return B;
+}
+
+/* Feedback for a built number. kind = 'big' | 'small' */
+function judge(built, digits, kind){
+  const n=digits.length, word = n===4?'four':'three';
+  const target = kind==='big' ? desc(digits) : asc(digits);
+  const sorted = desc(digits).join(', ');
+  if(built.length<n){
+    const remaining=[...digits]; built.forEach(d=>remaining.splice(remaining.indexOf(d),1));
+    if(remaining.includes(0)){
+      return {ok:false, html:`<b>Keep ${word} digits.</b> The zero is a card too. What is the ${kind==='big'?'largest':'smallest'} arrangement of ${listText(asc(digits))}?`};
+    }
+    return {ok:false, html:`Use all ${word} cards. ${remaining.length===1?'One card is':remaining.length+' cards are'} still waiting.`};
+  }
+  if(built.join('')===target.join('')) return {ok:true};
+  // first place that is wrong
+  let k=0; while(built[k]===target[k]) k++;
+  const place = PLACE[n][k];
+  if(kind==='small' && digits.includes(0) && built[0]!==0 && target[0]===0){
+    return {ok:false, html:`Zero is the smallest digit, so it goes first. <b>Keep ${word} digits</b>, even when the number starts with zero. Which card goes in the ${PLACE[n][0]} place?`};
+  }
+  if(kind==='big'){
+    return {ok:false, html:`Close! Look at the <b>${place}</b> place. Is there a bigger card you could put there? The largest number puts the biggest digit first, then the next biggest.`};
+  }
+  return {ok:false, html:`Close! Look at the <b>${place}</b> place. Is there a smaller card you could put there? The smallest number puts the smallest digit first.`};
+}
+
+/* ---------- WARM-UP ---------- */
+const W = { digits:[3,5,2,4] };
+const wB = makeBuilder({cardsEl:$('#wCards'), rows:[{el:$('#wBigRow'), label:'Largest', sub:'biggest first'},{el:$('#wSmallRow'), label:'Smallest', sub:'smallest first'}]});
+function wLoad(d){ W.digits=d; wB.rows.forEach(r=>r.done=false); wB.load(d); say($('#wMsg'),''); wB.rows[1].el.style.opacity=.45; }
+$('#wCheck').onclick = () => {
+  const ri=wB.cur, r=wB.rows[ri]; if(!r) return;
+  const res = judge(wB.value(ri), W.digits, ri===0?'big':'small');
+  if(!res.ok){ say($('#wMsg'), res.html, 'try'); return; }
+  r.done=true;
+  if(ri===0){
+    wB.cur=1; wB.rows[1].el.style.opacity=1; wB.render();
+    say($('#wMsg'), `Yes! <span class="num">${fmtD(desc(W.digits))}</span> is the largest. Now make the smallest with the same cards.`, 'good');
+    // free the cards for row 2
+    wB.used=wB.digits.map(()=>false); wB.render();
+  } else {
+    wB.cur=2; wB.render();
+    const L=toNum(desc(W.digits)), S=toNum(asc(W.digits));
+    say($('#wMsg'), `Both right! Largest <span class="num">${fmtN(L,4)}</span>, smallest <span class="num">${fmtN(S,4)}</span>. They use the same digits in opposite order.`, 'good');
+  }
+};
+$('#wUndo').onclick = () => { if(wB.cur===2) return; wB.undo(); say($('#wMsg'),''); };
+$('#wNew').onclick = () => { let d; do{ d=[0,0,0,0].map(()=>Math.floor(Math.random()*10)); }while(new Set(d).size<3); wLoad(d); };
+
+/* ---------- LAUNCH ---------- */
+const VOTE_OPTS = ['It shrinks down to 0','It keeps changing forever','It gets stuck on one number','Something else'];
+let votes=[0,0,0,0];
+function renderVotes(){
+  $('#votes').innerHTML = VOTE_OPTS.map((t,i)=>`<button class="vote" data-v="${i}" aria-label="${t}: ${votes[i]} votes. Tap to add a vote."><span>${t}</span><span class="c">${votes[i]}</span></button>`).join('');
+  $$('#votes .vote').forEach(b=>b.onclick=()=>{ votes[+b.dataset.v]++; renderVotes(); });
+}
+$('#voteClear').onclick = () => { votes=[0,0,0,0]; renderVotes(); };
+const EX = [ [3,5,2,4] ];
+const exRows = chainOf(3524,4); // 5432-2345=3087, 8730-0378=8352, 8532-2358=6174
+let exShown = 0;
+const EX_NOTES = [
+  'Largest minus smallest. Now use the digits of the answer: 3, 0, 8, 7.',
+  'Keep the zero! The smallest is 0,378, not 378.',
+  'Where is this going? Pick your own digits and find out.'
+];
+function renderExample(){
+  $('#example').innerHTML = exRows.slice(0,exShown).map((r,i)=>`<div class="exline"><span class="L">${fmtN(r.L,4)}</span><span>−</span><span class="S">${fmtN(r.S,4)}</span><span>=</span><span class="D${r.D===6174?' g':''}">${fmtN(r.D,4)}</span></div>`).join('');
+  say($('#exMsg'), exShown ? EX_NOTES[exShown-1] : 'Digits 3, 5, 2, 4. Largest number? Smallest number?', exShown===3?'goal':'info');
+  $('#exNext').textContent = exShown===0 ? 'Show the first step' : 'Do it again';
+  $('#exNext').hidden = exShown>=3;
+  $('#exGo').hidden = exShown<3;
+}
+$('#exNext').onclick = () => { exShown=Math.min(3,exShown+1); renderExample(); };
+$('#exGo').onclick = () => selectTab('run');
+
+/* ---------- RUN A CHAIN ---------- */
+const R = { n:4, pick:[3,5,2,4], start:null, rows:[], phase:'pick', cur:null, built:null, entry:'', reached:false, stayed:false, recorded:false };
+const rB = makeBuilder({cardsEl:$('#rCards'), rows:[{el:$('#rSlots'), label:'Largest', sub:''}]});
+
+function buildPicker(el, arr, onChange){
+  el.innerHTML='';
+  arr.forEach((d,i)=>{
+    if(arr.length===4 && i===1){ const c=document.createElement('span'); c.className='comma'; c.textContent=','; el.appendChild(c); }
+    const w=document.createElement('div'); w.className='wheel';
+    w.innerHTML=`<button class="arr" aria-label="Increase ${PLACE[arr.length][i]} digit">▲</button><div class="tile" style="cursor:default" aria-live="polite">${d}</div><button class="arr" aria-label="Decrease ${PLACE[arr.length][i]} digit">▼</button>`;
+    const [up,,down]=w.children;
+    up.onclick=()=>{ arr[i]=(arr[i]+1)%10; buildPicker(el,arr,onChange); onChange&&onChange(); };
+    down.onclick=()=>{ arr[i]=(arr[i]+9)%10; buildPicker(el,arr,onChange); onChange&&onChange(); };
+    el.appendChild(w);
+  });
+}
+function setDigits(n){
+  R.n=n; $$('[data-digits]').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.digits===n));
+  R.pick = n===4 ? [3,5,2,4] : [4,5,2];
+  $('#runEyebrow').textContent = n===4 ? 'Investigate · 25 min' : 'Lower the floor · three digits';
+  $('#pickTitle').textContent = n===4 ? 'Choose your four digits' : 'Choose your three digits';
+  runReset();
+}
+function runReset(){
+  R.phase='pick'; R.rows=[]; R.start=null; R.reached=false; R.stayed=false; R.recorded=false; R.entry='';
+  buildPicker($('#picker'), R.pick, ()=>say($('#pickMsg'),''));
+  say($('#pickMsg'),''); say($('#rMsg'),'');
+  renderRun();
+}
+function renderRun(){
+  const n=R.n;
+  $('#pickBox').hidden = R.phase!=='pick';
+  $('#buildBox').hidden = !(R.phase==='big' || R.phase==='small');
+  $('#diffBox').hidden = R.phase!=='diff';
+  $('#doneRow').hidden = R.phase!=='done';
+  $('#autoBtn').hidden = R.phase==='pick' || R.phase==='done';
+  $('#newChainBtn').hidden = R.phase==='pick' || R.phase==='done';
+  $('#stayBtn').hidden = R.stayed;
+  $('#recordBtn').disabled = R.recorded;
+  $('#recordBtn').textContent = R.recorded ? 'Added to class record ✓' : 'Add to class record';
+  // frame
+  const tb=$('#frame tbody'); const rows=[];
+  for(let i=0;i<8;i++){
+    const r=R.rows[i]; const isNow = i===R.rows.length && R.phase!=='pick' && R.phase!=='done';
+    let L='',S='',D='',cls='';
+    if(r){ L=fmtN(r.L,n); S=fmtN(r.S,n); D=`<span>${fmtN(r.D,n)}</span>`; if(r.D===GOAL[n] && !r.stay) cls='hit'; if(r.stay) cls='stay'; }
+    else if(isNow && R.built){ L=R.built.L!=null?fmtN(R.built.L,n):''; S=R.built.S!=null?fmtN(R.built.S,n):''; }
+    rows.push(`<tr class="${cls}${isNow?' now':''}"><td>${i+1}</td><td class="cL">${L}</td><td class="cS">${S}</td><td class="cD">${D}</td></tr>`);
+  }
+  tb.innerHTML=rows.join('');
+  $('#stepsLabel').textContent = `Steps to reach ${fmtN(GOAL[n],n)}:`;
+  const steps = R.reached ? R.rows.filter(r=>!r.stay).length - (R.start===GOAL[n]?1:0) : null;
+  $('#stepsVal').textContent = steps===null ? '' : steps;
+  $('#startNote').textContent = R.start===null ? 'Start: —' : `Start: ${fmtN(R.start,n)}`;
+}
+$$('[data-digits]').forEach(b=>b.onclick=()=>setDigits(+b.dataset.digits));
+$('#randBtn').onclick = () => { do{ for(let i=0;i<R.n;i++) R.pick[i]=Math.floor(Math.random()*10); }while(allSame(R.pick)); buildPicker($('#picker'),R.pick,()=>say($('#pickMsg'),'')); say($('#pickMsg'),''); };
+$('#startBtn').onclick = () => {
+  if(allSame(R.pick)){
+    say($('#pickMsg'), `All the digits are ${R.pick[0]}. Then largest and smallest are the same number, so the difference is 0 and the chain stops. Change at least one digit.`, 'try');
+    return;
+  }
+  R.start = toNum(R.pick); R.cur = R.start; beginStep();
+};
+function beginStep(){
+  R.built={L:null,S:null}; R.phase='big'; R.entry='';
+  loadBuild();
+}
+function loadBuild(){
+  const d = digitsOf(R.cur, R.n);
+  rB.rows[0].label = R.phase==='big' ? 'Largest' : 'Smallest';
+  rB.rows[0].sub = R.phase==='big' ? 'biggest digit first' : 'smallest digit first';
+  rB.rows[0].el.className = 'slots '+(R.phase==='big'?'big':'small');
+  rB.rows[0].done=false;
+  rB.load(d);
+  const step = R.rows.length+1;
+  $('#buildTitle').textContent = `Step ${step}: make the ${R.phase==='big'?'largest':'smallest'} number`;
+  $('#buildLead').innerHTML = `Use the digits of <span class="num">${fmtN(R.cur,R.n)}</span>: ${listText(d)}. Tap the cards in order.`;
+  say($('#rMsg'),'');
+  renderRun();
+}
+$('#rUndo').onclick = () => { rB.undo(); say($('#rMsg'),''); };
+$('#rCheck').onclick = () => {
+  const digits = digitsOf(R.cur,R.n);
+  const res = judge(rB.value(0), digits, R.phase);
+  if(!res.ok){ say($('#rMsg'), res.html, 'try'); return; }
+  if(R.phase==='big'){ R.built.L = toNum(desc(digits)); R.phase='small'; loadBuild(); say($('#rMsg'), `Largest: <span class="num">${fmtN(R.built.L,R.n)}</span>. Now the smallest, with the same cards.`, 'good'); }
+  else { R.built.S = toNum(asc(digits)); startDiff(); }
+};
+function startDiff(){
+  R.phase='diff'; R.entry=''; $('#regroupList').hidden=true; $('#regroupBtn').textContent='Show the regrouping';
+  renderSub(); renderRun();
+  say($('#rMsg'), R.built.S < 10**(R.n-1) ? `The smallest starts with 0. Line up the places: <span class="num">${fmtN(R.built.S,R.n)}</span>.` : '', 'info');
+}
+function renderSub(){
+  const n=R.n;
+  $('#subCard').innerHTML = `<span></span><span class="L">${fmtN(R.built.L,n)}</span><span class="op">−</span><span class="S">${fmtN(R.built.S,n)}</span><span class="bar"></span><span></span><span class="answer caret" id="ans">${R.entry}</span>`;
+}
+function buildKeypad(){
+  const kp=$('#keypad'); kp.innerHTML='';
+  const keys=['1','2','3','4','5','6','7','8','9','0','⌫','Check'];
+  keys.forEach(k=>{
+    const b=document.createElement('button'); b.textContent=k;
+    if(k==='Check'){ b.className='wide go'; b.onclick=checkDiff; }
+    else if(k==='⌫'){ b.setAttribute('aria-label','Delete'); b.onclick=()=>{ R.entry=R.entry.slice(0,-1); renderSub(); }; }
+    else b.onclick=()=>typeDigit(k);
+    kp.appendChild(b);
+  });
+}
+function typeDigit(k){ if(R.phase!=='diff') return; if(R.entry.length>=R.n) return; R.entry+=k; renderSub(); say($('#rMsg'),''); }
+function checkDiff(){
+  if(R.phase!=='diff') return;
+  const n=R.n, L=R.built.L, S=R.built.S, D=L-S;
+  if(R.entry===''){ say($('#rMsg'),'Type the difference first.','info'); return; }
+  const a = parseInt(R.entry,10);
+  if(a===D){ commitRow(); return; }
+  const back = a + S;
+  say($('#rMsg'), `<b>Check by adding.</b> Add your answer to the smaller number: <span class="num">${fmtN(a,n)} + ${fmtN(S,n)} = ${back.toLocaleString('en-US')}</span>. Do you get the larger number, <span class="num">${fmtN(L,n)}</span>? ${back>L?'Your answer is too big.':'Your answer is too small.'} Look again at the places where you regrouped.`, 'try');
+}
+function regroupSteps(L,S,n){
+  const a=digitsOf(L,n), b=digitsOf(S,n), P=PLACE[n], out=[]; let borrow=0; const res=[];
+  for(let i=n-1;i>=0;i--){
+    let top=a[i]-borrow; const name=P[i], next=P[i-1];
+    let line=`<b>${name[0].toUpperCase()+name.slice(1)}:</b> `;
+    if(borrow) line += a[i]===0 ? `0 gave 1 away, so this place must regroup too. ` : `${a[i]} gave 1 away, so now there ${top===1?'is':'are'} ${top}. `;
+    if(top<b[i]){
+      line += `${top<0?'Not enough':`${top} − ${b[i]}? Not enough`}. Regroup 1 from the ${next}: ${top+10} − ${b[i]} = ${top+10-b[i]}.`;
+      res[i]=top+10-b[i]; borrow=1;
+    } else { line += `${top} − ${b[i]} = ${top-b[i]}.`; res[i]=top-b[i]; borrow=0; }
+    out.push(line);
+  }
+  out.push(`<b>Difference:</b> <span class="num">${fmtD(res)}</span>`);
+  return out;
+}
+$('#regroupBtn').onclick = () => {
+  const l=$('#regroupList');
+  if(!l.hidden){ l.hidden=true; $('#regroupBtn').textContent='Show the regrouping'; return; }
+  l.innerHTML = regroupSteps(R.built.L,R.built.S,R.n).map(s=>`<li>${s}</li>`).join(''); l.hidden=false; $('#regroupBtn').textContent='Hide the regrouping';
+};
+function commitRow(){
+  const n=R.n, L=R.built.L, S=R.built.S, D=L-S, G=GOAL[n];
+  R.rows.push({L,S,D}); R.built=null;
+  if(D===G){
+    R.reached=true; R.phase='done'; if(R.start===G) R.stayed=true;
+    const steps = R.start===G ? 0 : R.rows.length;
+    renderRun();
+    if(R.start===G) say($('#rMsg'), `You started at <span class="num">${fmtN(G,n)}</span> and landed right back on <span class="num">${fmtN(G,n)}</span>. It stays! <b>0 steps</b> to reach it.`, 'goal');
+    else say($('#rMsg'), `<span class="num">${fmtN(D,n)}</span>! Your chain reached ${fmtN(G,n)} in <b>${steps} step${steps===1?'':'s'}</b>. What happens if you keep going?`, 'goal');
+    return;
+  }
+  if(R.rows.length>=8){ R.phase='done'; renderRun(); say($('#rMsg'),'The frame is full.','info'); return; }
+  R.cur=D;
+  const zeroNote = D < 10**(n-1) ? ` Keep the zero: the next digits are ${listText(digitsOf(D,n))}.` : '';
+  beginStep();
+  say($('#rMsg'), `Correct: <span class="num">${fmtN(L,n)} − ${fmtN(S,n)} = ${fmtN(D,n)}</span>.${zeroNote} Now do it again with ${fmtN(D,n)}.`, 'good');
+}
+$('#autoBtn').onclick = () => {
+  const n=R.n, d=digitsOf(R.cur,n);
+  if(R.phase==='big'||R.phase==='small'){ R.built={L:toNum(desc(d)), S:toNum(asc(d))}; startDiff(); R.entry=String(R.built.L-R.built.S).padStart(n,'0'); renderSub(); say($('#rMsg'),'Here is the subtraction. Check it by adding, then tap Check.','info'); }
+  else if(R.phase==='diff'){ R.entry=String(R.built.L-R.built.S).padStart(n,'0'); renderSub(); say($('#rMsg'),`Check: <span class="num">${fmtN(R.built.L-R.built.S,n)} + ${fmtN(R.built.S,n)} = ${fmtN(R.built.L,n)}</span>. Tap Check to write it in the frame.`,'info'); }
+};
+$('#newChainBtn').onclick = runReset;
+$('#againBtn').onclick = runReset;
+$('#stayBtn').onclick = () => {
+  const n=R.n, G=GOAL[n], d=digitsOf(G,n), L=toNum(desc(d)), S=toNum(asc(d));
+  R.rows.push({L,S,D:L-S,stay:true}); R.stayed=true; renderRun();
+  say($('#rMsg'), `<span class="num">${fmtN(L,n)} − ${fmtN(S,n)} = ${fmtN(L-S,n)}</span> again. Once you reach ${fmtN(G,n)}, you are stuck there forever.`, 'goal');
+};
+$('#recordBtn').onclick = () => { if(R.recorded) return; addRecord(R.start, R.n); R.recorded=true; renderRun(); };
+document.addEventListener('keydown', e => {
+  if($('#v-run').hidden || R.phase!=='diff' || e.target.tagName==='INPUT') return;
+  if(/^[0-9]$/.test(e.key)) typeDigit(e.key);
+  else if(e.key==='Backspace'){ R.entry=R.entry.slice(0,-1); renderSub(); }
+  else if(e.key==='Enter'){ e.preventDefault(); checkDiff(); }
+});
+
+/* ---------- CLASS RECORD ---------- */
+let record=[];
+function stepsFor(v,n){ return v===GOAL[n] ? 0 : chainOf(v,n).length; }
+function addRecord(v,n){ record.push({v,n,steps:stepsFor(v,n)}); renderRecord(); }
+function renderRecord(highlight){
+  const box=$('#recordBox');
+  if(!record.length){ box.innerHTML='<p class="empty">No chains yet. Finish a chain in “Run a chain”, or type a pair’s start above.</p>'; return; }
+  const sorted=[...record].sort((a,b)=> b.n-a.n || b.steps-a.steps);
+  const best4 = Math.max(-1,...record.filter(r=>r.n===4).map(r=>r.steps));
+  box.innerHTML = `<table class="record"><thead><tr><th>Start</th><th>Digits</th><th>Steps</th></tr></thead><tbody>${
+    sorted.map(r=>`<tr class="${highlight && r.n===4 && r.steps===best4?'best':''}"><td><span class="num">${fmtN(r.v,r.n)}</span></td><td>${r.n}</td><td><span class="num">${r.steps}</span></td></tr>`).join('')}</tbody></table>`;
+}
+$('#addBtn').onclick = () => {
+  const raw=$('#addStart').value.trim();
+  if(!/^\d{3,4}$/.test(raw)){ say($('#addMsg'),'Type a start with 4 digits (or 3 digits for the easier chain), like 3524.','try'); return; }
+  const n=raw.length, d=raw.split('').map(Number);
+  if(allSame(d)){ say($('#addMsg'),`All the digits are ${d[0]}, so the difference is 0 and the chain stops. Pick digits that are not all the same.`,'try'); return; }
+  const v=toNum(d); addRecord(v,n);
+  say($('#addMsg'), `Added <span class="num">${fmtN(v,n)}</span>: ${stepsFor(v,n)} step${stepsFor(v,n)===1?'':'s'} to reach ${fmtN(GOAL[n],n)}. Does that match the pair’s frame?`, 'good');
+  $('#addStart').value='';
+};
+$('#addStart').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#addBtn').click(); });
+
+/* ---------- DETECTIVE ---------- */
+let SURVEY4=null, SURVEY3=null;
+const getS4 = () => SURVEY4 || (SURVEY4=survey(4));
+const getS3 = () => SURVEY3 || (SURVEY3=survey(3));
+function histHTML(s, n){
+  const keys=Object.keys(s.counts).map(Number).sort((a,b)=>a-b);
+  const mx=Math.max(...keys.map(k=>s.counts[k]));
+  return `<div class="hist" role="img" aria-label="How many starts take each number of steps">${keys.map(k=>`<div class="hbar ${k===s.max?'top':''}"><span>${k} step${k===1?'':'s'}</span><span class="t"><i style="width:${(s.counts[k]/mx*100).toFixed(1)}%"></i></span><span class="v">${s.counts[k].toLocaleString('en-US')}</span></div>`).join('')}</div>`;
+}
+const qres = html => { $('#qresult').innerHTML = html; };
+const Q = [
+  { t:'What happens when you start with 6,174?',
+    a:[{l:'Run 6,174', f:()=>{ const r=chainOf(6174,4)[0];
+        qres(`<p class="msg goal"><span class="num">${fmtN(r.L,4)} − ${fmtN(r.S,4)} = ${fmtN(r.D,4)}</span>. It comes right back to itself. That’s why every chain stops changing once it gets there.</p>`); }}]},
+  { t:'Whose start took the longest?',
+    a:[{l:'Show the class record', f:()=>{ renderRecord(true); const r4=record.filter(r=>r.n===4);
+        if(!r4.length){ qres(`<p class="msg info">No 4-digit chains in the class record yet. Add each pair’s start in the box below.</p>`); return; }
+        const best=Math.max(...r4.map(r=>r.steps)); const who=r4.filter(r=>r.steps===best).map(r=>fmtN(r.v,4));
+        qres(`<p class="msg goal">Longest so far: <b>${best} step${best===1?'':'s'}</b>, starting from <span class="num">${listText(who)}</span>. It’s highlighted in the class record.</p>`); }},
+       {l:'How many steps do all starts take?', f:()=>{ const s=getS4();
+        qres(`<p class="msg info">Every 4-digit start (not all the same digit), sorted by how many steps it takes to reach 6,174:</p>${histHTML(s,4)}<p class="note">Which bar is the tallest? Is a long chain rare?</p>`); }}]},
+  { t:'Will every start end at 6,174? How could we be sure?',
+    a:[{l:'Test all the starts', f:()=>{ const s=getS4();
+        qres(`<p class="msg goal">The computer tried all <b>${s.total.toLocaleString('en-US')}</b> starts, from 0,001 to 9,998 (skipping 1,111, 2,222 and the other same-digit numbers). <b>${s.ok?'Every one':'Not every one'}</b> reached 6,174, and none took more than <b>${s.max} steps</b>.</p>`); }}]},
+  { t:'Partners check each subtraction by adding. Why does that work?',
+    a:[{l:'Show it with 5,432 − 2,345', f:()=>{
+        qres(`<p class="msg info"><span class="num">5,432 − 2,345 = 3,087</span><br><span class="num">3,087 + 2,345 = 5,432</span><br>Subtracting takes 2,345 away. Adding puts it back, so you land on the larger number again. If you don’t, something went wrong.</p>`); }}]},
+  { t:'What happens with three digits?',
+    a:[{l:'Run 452', f:()=>{ const rows=chainOf(452,3);
+        qres(`<div class="chainlist">${['452'].concat(rows.map(r=>fmtN(r.D,3))).map((x,i,a)=>`<span class="${i===a.length-1?'g':''}">${x}</span>${i<a.length-1?'<span class="arrow">→</span>':''}`).join('')}</div><p class="msg info">${rows.map(r=>`${r.L} − ${fmtN(r.S,3)} = ${fmtN(r.D,3)}`).join('<br>')}</p>`); }},
+       {l:'Test all 3-digit starts', f:()=>{ const s=getS3();
+        qres(`<p class="msg goal">All <b>${s.total}</b> three-digit starts reach <b>495</b>, in at most <b>${s.max} steps</b>. Check: 954 − 459 = ${954-459}.</p>`); }}]}
+];
+let qi=0;
+function renderQ(){
+  $('#qnav').innerHTML = Q.map((q,i)=>`<button aria-pressed="${i===qi}" data-q="${i}" aria-label="Question ${i+1}">${i+1}</button>`).join('');
+  $$('#qnav button').forEach(b=>b.onclick=()=>{ qi=+b.dataset.q; qres(''); renderRecord(); renderQ(); });
+  $('#qtext').textContent = Q[qi].t;
+  const box=$('#qactions'); box.innerHTML='';
+  Q[qi].a.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=a.f; box.appendChild(b); });
+}
+
+/* ---------- CHALLENGE ---------- */
+let cPick=[1,2,3,4], found=[];
+function renderFound(){ $('#cFound').innerHTML = found.length ? found.map(v=>`<span>${fmtN(v,4)}</span>`).join('') : '<p class="empty">None yet.</p>'; }
+$('#cTest').onclick = () => {
+  if(allSame(cPick)){ say($('#cMsg'),`All the digits are ${cPick[0]}, so the chain stops at 0. Change at least one digit.`,'try'); $('#cChain').innerHTML=''; return; }
+  const v=toNum(cPick), rows=v===6174?[]:chainOf(v,4), steps=rows.length;
+  const nums=[fmtN(v,4)].concat(rows.map(r=>fmtN(r.D,4)));
+  $('#cChain').innerHTML = nums.map((x,i)=>`<span class="${i===nums.length-1?'g':''}">${x}</span>${i<nums.length-1?'<span class="arrow">→</span>':''}`).join('');
+  if(steps===7){ if(!found.includes(v)){ found.push(v); renderFound(); } say($('#cMsg'),`<b>7 steps!</b> You found one. Can you find another with different digits?`,'goal'); }
+  else say($('#cMsg'), `${steps} step${steps===1?'':'s'}. ${steps>=5?'So close. Try changing just one digit.':'Keep hunting. Long chains often start from digits that are almost all the same.'}`, 'info');
+};
+let hintN=0;
+$('#cHint').onclick = () => {
+  const hints=['Try digits that are almost all the same, with one or two that are different.','Try using two zeros. For example: 2, 0, 0, and one more digit.','Try 2, 0, 0, 5.'];
+  say($('#cMsg'), hints[Math.min(hintN,2)], 'info'); hintN++;
+};
+$('#cAll').onclick = () => {
+  const s=getS4(); const n7=s.counts[7]||0;
+  $('#cAllOut').innerHTML = `<p class="msg goal">The computer tried all ${s.total.toLocaleString('en-US')} starts. The most steps any start takes is <b>${s.max}</b>. <b>${n7.toLocaleString('en-US')}</b> starts take exactly 7, and none take 8.</p>${histHTML(s,4)}`;
+};
+
+/* ---------- tabs, reset, fullscreen ---------- */
+function selectTab(t){
+  $$('.tabs [role=tab]').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','launch','run','det','chal'].forEach(k=>$('#v-'+k).hidden = k!==t);
+  if(t==='det'){ renderRecord(); }
+  window.scrollTo({top:0, behavior: reduced?'auto':'smooth'});
+}
+$$('.tabs [role=tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+function resetAll(){
+  wLoad([3,5,2,4]); votes=[0,0,0,0]; renderVotes(); exShown=0; renderExample();
+  record=[]; renderRecord(); qi=0; qres(''); renderQ(); say($('#addMsg'),'');
+  cPick=[1,2,3,4]; buildPicker($('#cPicker'), cPick, ()=>{ say($('#cMsg'),''); $('#cChain').innerHTML=''; }); found=[]; renderFound(); hintN=0; say($('#cMsg'),''); $('#cChain').innerHTML=''; $('#cAllOut').innerHTML='';
+  setDigits(4);
+}
+$('#resetBtn').onclick = () => { resetAll(); selectTab('warm'); };
+$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p=document.documentElement.requestFullscreen(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+buildKeypad();
+resetAll();
+})();
+</script>
+
+</body></html>

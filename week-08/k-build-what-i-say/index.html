@@ -1,0 +1,1060 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Build What I Say</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Grandstander:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom table seen from above. Two building mats side by side, a manila-folder barrier
+   that lifts off the secret mat, and a tray of pattern blocks underneath. Words live in a column beside the mats. */
+:root{
+  --bg:#E6ECF2; --card:#FFFFFF; --ink:#1B2634; --muted:#57657A; --line:#C8D2DD;
+  --mat:#F5F8FB; --matline:#D3DCE6;
+  --folder:#E9C97C; --folder-edge:#C69C45; --folder-ink:#5B4415;
+  --accent:#0E7E86; --accent-soft:#DCF0F1;
+  --good:#16865A; --good-soft:#DDF3E8; --bad:#C93A31; --bad-soft:#FBE3E0;
+  --sq:#F08A24; --tri:#2FA055; --cir:#2F7FDD; --hex:#F2C12E; --rect:#8C59D6; --edge:#1B2634;
+  --display:"Grandstander", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Andika", "Century Gothic", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111821; --card:#1A2430; --ink:#EAF0F6; --muted:#9DABBD; --line:#2E3B4C;
+    --mat:#1F2A37; --matline:#344457;
+    --folder:#B89144; --folder-edge:#8C6B2C; --folder-ink:#2A1E07;
+    --accent:#39C0C7; --accent-soft:#163A3E;
+    --good:#45C98A; --good-soft:#163828; --bad:#FF7A6E; --bad-soft:#40201D;
+    --sq:#F59A3E; --tri:#43B96A; --cir:#4F95EA; --hex:#F4C845; --rect:#A57BEA; --edge:#0B1017;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111821; --card:#1A2430; --ink:#EAF0F6; --muted:#9DABBD; --line:#2E3B4C;
+  --mat:#1F2A37; --matline:#344457;
+  --folder:#B89144; --folder-edge:#8C6B2C; --folder-ink:#2A1E07;
+  --accent:#39C0C7; --accent-soft:#163A3E;
+  --good:#45C98A; --good-soft:#163828; --bad:#FF7A6E; --bad-soft:#40201D;
+  --sq:#F59A3E; --tri:#43B96A; --cir:#4F95EA; --hex:#F4C845; --rect:#A57BEA; --edge:#0B1017;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
+  display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0}
+
+/* Header */
+.top{display:flex; align-items:center; gap:12px 20px; flex-wrap:wrap; padding-block:14px 8px}
+.top h1{font-size:clamp(28px,3.2vw,44px); font-weight:800; letter-spacing:-.01em; line-height:1}
+.top .sub{margin:4px 0 0; font-size:15px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* Tabs */
+.tabs{display:flex; gap:8px; flex-wrap:wrap; padding-block:6px 12px}
+.tab{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px;
+  padding:8px 18px 8px 8px; font-weight:700; font-size:clamp(16px,1.4vw,20px); min-height:54px}
+.tab .n{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-family:var(--display); font-weight:800}
+.tab[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.tab[aria-selected="true"] .n{background:var(--accent); color:#fff}
+
+main{flex:1; min-height:0; padding-block:0 20px}
+.panel{display:grid; gap:20px}
+
+/* Shapes */
+.shp{width:100%; height:100%; display:block; overflow:visible}
+.shp .body{stroke:var(--edge); stroke-width:3; stroke-linejoin:round}
+.f-square{fill:var(--sq)} .f-triangle{fill:var(--tri)} .f-circle{fill:var(--cir)} .f-hexagon{fill:var(--hex)} .f-rectangle{fill:var(--rect)}
+.ico{display:inline-block; width:1.25em; height:1.25em; vertical-align:-.28em; margin:0 .08em}
+
+/* Mats */
+.matwrap{margin:0; display:flex; flex-direction:column; gap:6px; min-width:0}
+.matwrap figcaption{font-family:var(--display); font-weight:800; font-size:clamp(18px,1.6vw,24px); display:flex; align-items:center; gap:8px}
+.matwrap figcaption .pill{font-family:var(--body); font-size:14px; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--accent-soft); color:var(--ink)}
+.edge-label{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-align:center}
+.barrier-box{position:relative; overflow:hidden; border-radius:16px}
+.mat{--size:min(100%, var(--matmax, 420px)); width:var(--size); aspect-ratio:1; max-width:100%; margin-inline:auto;
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:6px; padding:6px;
+  background:var(--mat); border:3px solid var(--matline); border-radius:16px}
+.cell{border:2px dashed var(--matline); border-radius:10px; background:transparent; padding:9%; display:grid; place-items:center; position:relative; min-width:0; min-height:0}
+.mat.live .cell:hover{border-color:var(--accent); background:var(--accent-soft)}
+.mat.live.armed .cell:not(.full){border-color:var(--accent)}
+.cell.full{border-style:solid; border-color:transparent}
+.cell.good{background:var(--good-soft); border:3px solid var(--good)}
+.cell.bad{background:var(--bad-soft); border:3px solid var(--bad)}
+.cell.want{border:3px dashed var(--bad)}
+.cell .mark{position:absolute; top:-8px; right:-8px; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:800; color:#fff; font-size:18px; z-index:2}
+.cell.good .mark{background:var(--good)} .cell.bad .mark{background:var(--bad)}
+.mat.active{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+.mat.locked{pointer-events:none}
+.pop{animation:pop .28s ease-out}
+@keyframes pop{from{transform:scale(.55)}to{transform:scale(1)}}
+
+/* Folder barrier */
+.folder{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center;
+  background:linear-gradient(180deg, var(--folder) 0 100%); border:3px solid var(--folder-edge); border-radius:16px; color:var(--folder-ink);
+  transition:transform .55s cubic-bezier(.3,.7,.2,1); z-index:3}
+.folder::before{content:""; position:absolute; top:-3px; left:12%; width:34%; height:14%; background:var(--folder); border:3px solid var(--folder-edge); border-bottom:0; border-radius:12px 12px 0 0; transform:translateY(-70%)}
+.folder::after{content:""; position:absolute; left:6%; right:6%; top:50%; border-top:2px dashed var(--folder-edge); opacity:.6}
+.folder b{font-family:var(--display); font-size:clamp(24px,2.6vw,36px); position:relative; z-index:1; background:var(--folder); padding:0 10px}
+.folder span{font-size:16px; font-weight:700; position:relative; z-index:1; background:var(--folder); padding:0 8px}
+.folder.up{transform:translateY(-104%)}
+.folder.gone{display:none}
+
+/* Tray */
+.tray{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; padding:10px; background:var(--card); border:2px solid var(--line); border-radius:18px}
+.tray-label{width:100%; text-align:center; font-size:15px; color:var(--muted); margin-top:-2px}
+.blk{width:clamp(64px,7.5vw,92px); height:clamp(64px,7.5vw,92px); padding:10px; border-radius:14px; border:3px solid transparent; background:var(--bg); position:relative}
+.blk.sel{border-color:var(--accent); background:var(--accent-soft); transform:translateY(-4px)}
+.blk.used{opacity:.35}
+.blk .nm{position:absolute; left:0; right:0; bottom:-2px; font-size:12px; color:var(--muted)}
+.turn{border:2px solid var(--line); background:var(--bg); border-radius:14px; font-weight:700; padding:8px 14px; min-height:64px; display:flex; align-items:center; gap:8px}
+.turn svg{width:30px; height:30px}
+
+/* Buttons */
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:clamp(18px,1.6vw,22px); padding:14px 26px; border-radius:16px; min-height:58px}
+.primary.go{background:var(--accent); color:#fff}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.4vw,19px); padding:11px 20px; border-radius:16px; min-height:54px}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 14px; border-radius:10px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.check{display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; cursor:pointer}
+.check input{width:24px; height:24px; accent-color:var(--accent)}
+.speak{border:2px solid var(--line); background:var(--card); border-radius:50%; width:52px; height:52px; display:inline-grid; place-items:center; flex:none}
+.speak svg{width:26px; height:26px}
+.speak.big{width:64px; height:64px} .speak.big svg{width:32px; height:32px}
+.nospeech .speak{display:none}
+
+/* Feedback */
+.fb{border-radius:16px; padding:14px 18px; font-size:clamp(18px,1.6vw,22px); line-height:1.4; background:var(--card); border:2px solid var(--line)}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft); border-color:var(--good)}
+.fb.bad{background:var(--bad-soft); border-color:var(--bad)}
+.fb h3{font-size:clamp(24px,2.4vw,32px); margin-bottom:4px}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.chip{border:2px solid var(--ink); background:var(--card); border-radius:999px; padding:8px 16px; font-weight:700; font-size:17px; min-height:46px}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+/* ---------- Warm-up ---------- */
+.warm{max-width:1100px; margin-inline:auto; width:100%}
+.cmd{display:flex; align-items:center; gap:16px; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:22px; padding:18px 22px}
+.cmd .kicker{font-family:var(--display); font-weight:800; color:var(--accent); font-size:clamp(20px,2vw,28px); width:100%; margin:0}
+.cmd .say{font-family:var(--display); font-weight:800; font-size:clamp(30px,4.2vw,58px); line-height:1.15; flex:1; min-width:0}
+.cmd .say .ico{width:1.05em; height:1.05em; vertical-align:-.16em}
+.cmd .say em{font-style:normal; color:var(--accent); text-decoration:underline; text-decoration-thickness:.08em; text-underline-offset:.12em}
+.choices{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+.pic{border:3px solid var(--line); background:var(--card); border-radius:22px; padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px; min-width:0}
+.pic .mat{--matmax:260px; pointer-events:none}
+.pic .cap{font-size:16px; color:var(--muted); min-height:1.4em; text-align:center}
+.pic.right{border-color:var(--good); background:var(--good-soft)}
+.pic.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.pic:hover{border-color:var(--ink)}
+.dots{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:16px}
+.dots i{width:16px; height:16px; border-radius:50%; background:var(--line)}
+.dots i.on{background:var(--good)}
+
+/* ---------- Listen & build ---------- */
+.listen{grid-template-columns:minmax(300px, 0.95fr) minmax(0, 1.7fr); align-items:start}
+.wordcard{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.wordcard .head{display:flex; align-items:center; gap:12px}
+.wordcard h2{font-size:clamp(24px,2.3vw,32px); flex:1}
+.steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; counter-reset:st}
+.steps li{counter-increment:st; display:grid; grid-template-columns:40px 1fr auto; gap:10px; align-items:center; padding:10px 10px 10px 8px; border-radius:14px; background:var(--bg); font-size:clamp(19px,1.75vw,25px); line-height:1.3}
+.steps li::before{content:counter(st); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:var(--card); font-family:var(--display); font-weight:800; font-size:18px}
+.steps li .speak{width:44px; height:44px}
+.steps li .speak svg{width:22px; height:22px}
+.steps li .why{grid-column:2 / 4; font-size:clamp(16px,1.4vw,19px); line-height:1.35}
+.steps li.ok{background:var(--good-soft)} .steps li.ok::before{content:"✓"; background:var(--good); color:#fff}
+.steps li.no{background:var(--bad-soft)} .steps li.no::before{content:"!"; background:var(--bad); color:#fff}
+.steps .pos{font-weight:700; color:var(--accent)}
+.rule{font-size:15px; color:var(--muted); margin:0}
+.stage{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; align-items:start; --matmax:min(100%, calc(100dvh - 440px))}
+.stage .tray-wrap{grid-column:1 / -1}
+.opts{display:flex; gap:12px 16px; flex-wrap:wrap; align-items:center}
+
+/* ---------- Partner ---------- */
+.phases{display:flex; gap:8px; flex-wrap:wrap; list-style:none; padding:0; margin:0}
+.phases li{display:flex; align-items:center; gap:8px; padding:8px 14px 8px 8px; border-radius:999px; background:var(--card); border:2px solid var(--line); color:var(--muted); font-weight:700; font-size:16px}
+.phases li b{width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-family:var(--display)}
+.phases li.now{border-color:var(--accent); color:var(--ink)} .phases li.now b{background:var(--accent); color:#fff}
+.phases li.done b{background:var(--good); color:#fff}
+.tip{font-size:clamp(19px,1.7vw,24px); margin:0}
+.tip strong{font-family:var(--display)}
+.log{border-collapse:collapse; font-size:17px; min-width:100%}
+.log th,.log td{padding:8px 14px; border-bottom:1.5px solid var(--line); text-align:left; font-variant-numeric:tabular-nums}
+.log th{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.logbox{overflow-x:auto}
+.diff{display:flex; flex-direction:column; gap:6px; margin-top:6px}
+.diff div{display:flex; gap:10px; align-items:center}
+.diff .ico{width:34px; height:34px; flex:none}
+
+/* ---------- Detectives ---------- */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px; font-weight:700; font-size:17px; min-height:52px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qcard{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:18px 20px; display:flex; flex-direction:column; gap:14px}
+.qcard h2{font-size:clamp(26px,2.8vw,38px)}
+.qcard .lead{font-size:clamp(19px,1.7vw,24px); margin:0; max-width:40em}
+.minis{display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start}
+.minis figure{margin:0; display:flex; flex-direction:column; gap:6px; width:min(260px, 100%)}
+.minis .mat{--matmax:260px; pointer-events:none}
+.minis figcaption{font-size:16px; text-align:center}
+.wall{display:flex; flex-direction:column; gap:8px; max-width:620px}
+.wall .bar{display:grid; grid-template-columns:150px 1fr 40px; gap:12px; align-items:center; font-weight:700; font-size:18px}
+.wall .track{height:26px; background:var(--bg); border-radius:8px; overflow:hidden}
+.wall .fill{height:100%; background:var(--accent); border-radius:8px; transition:width .4s}
+.wall .num{font-variant-numeric:tabular-nums; text-align:right}
+.sentence{font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); line-height:1.25}
+.blank{display:inline-block; min-width:3.5em; border-bottom:4px solid var(--accent); color:var(--accent); text-align:center}
+.bigopts{display:flex; gap:12px; flex-wrap:wrap}
+.bigopts button{border:3px solid var(--line); background:var(--card); border-radius:18px; padding:12px 20px; font-weight:700; font-size:clamp(19px,1.7vw,24px); min-height:64px; display:flex; align-items:center; gap:10px}
+.bigopts button .ico{width:40px; height:40px}
+.bigopts button.right{border-color:var(--good); background:var(--good-soft)}
+.bigopts button.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.compare{display:flex; flex-direction:column; gap:8px}
+.compare p{margin:0; font-size:19px}
+.compare .count{font-family:var(--display); font-weight:800; font-size:28px; color:var(--accent)}
+.corners{display:flex; gap:18px; align-items:center; flex-wrap:wrap}
+.corners .big{width:170px; height:170px; flex:none}
+.cdot{fill:var(--card); stroke:var(--ink); stroke-width:2.5}
+.ctext{font-family:var(--display); font-weight:800; font-size:13px; fill:var(--ink); text-anchor:middle; dominant-baseline:central}
+.riddle-tray .blk{width:clamp(76px,9vw,110px); height:clamp(76px,9vw,110px)}
+.riddle-tray .blk.right{border-color:var(--good); background:var(--good-soft)}
+.riddle-tray .blk.wrong{border-color:var(--bad); background:var(--bad-soft)}
+
+@media (max-width: 980px), (orientation: portrait){
+  .listen{grid-template-columns:minmax(0,1fr)}
+  .stage{--matmax:100%}
+}
+@media (max-width: 560px){
+  body{font-size:17px}
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .choices{grid-template-columns:minmax(0,1fr)}
+  .pic{flex-direction:row}
+  .pic .mat{--matmax:150px}
+  .wall .bar{grid-template-columns:110px 1fr 32px; font-size:16px}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<header class="top">
+  <div>
+    <h1>Build What I Say</h1>
+    <p class="sub">Kindergarten · Week 8 · Lesson K.8</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn" type="button">Start over</button>
+    <button class="ghost" id="fsBtn" type="button">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Parts of the lesson">
+  <button class="tab" role="tab" id="tab-warm" aria-selected="true" type="button"><span class="n">1</span>Simon says</button>
+  <button class="tab" role="tab" id="tab-listen" aria-selected="false" type="button"><span class="n">2</span>Listen &amp; build</button>
+  <button class="tab" role="tab" id="tab-partner" aria-selected="false" type="button"><span class="n">3</span>Partner barrier</button>
+  <button class="tab" role="tab" id="tab-detect" aria-selected="false" type="button"><span class="n">4</span>Word detectives</button>
+</nav>
+
+<main>
+  <!-- 1. Warm-up -->
+  <section class="panel warm" id="p-warm">
+    <div class="cmd">
+      <p class="kicker">Simon says… tap the picture!</p>
+      <div class="say" id="wSay" aria-live="polite"></div>
+      <button class="speak big" type="button" id="wSpeak" aria-label="Read it aloud"></button>
+    </div>
+    <div class="choices" id="wChoices"></div>
+    <div class="fb" id="wFb" aria-live="polite"></div>
+    <div class="row">
+      <button class="primary go" id="wNext" type="button">Next one</button>
+      <div class="dots" id="wDots" aria-label="Pictures found"></div>
+    </div>
+  </section>
+
+  <!-- 2. Listen & build -->
+  <section class="panel listen" id="p-listen" hidden>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0">
+      <div class="opts">
+        <div class="seg" role="group" aria-label="How many blocks">
+          <button type="button" data-lv="0" aria-pressed="false">2 blocks</button>
+          <button type="button" data-lv="1" aria-pressed="true">3 blocks</button>
+          <button type="button" data-lv="2" aria-pressed="false">5 blocks + turns</button>
+        </div>
+        <label class="check"><input type="checkbox" id="noNames"> ★ No shape names</label>
+      </div>
+      <div class="wordcard">
+        <div class="head"><h2>Listen. Build.</h2><button class="speak" type="button" id="lSpeakAll" aria-label="Read all the steps"></button></div>
+        <ol class="steps" id="lSteps"></ol>
+        <p class="rule">Our blocks always touch, side to side.</p>
+      </div>
+      <div class="row">
+        <button class="primary go" id="lLift" type="button">Lift the barrier</button>
+        <button class="secondary" id="lNew" type="button">New design</button>
+      </div>
+      <div class="fb" id="lFb" aria-live="polite"></div>
+    </div>
+    <div class="stage" id="lStage">
+      <figure class="matwrap">
+        <figcaption>Secret mat</figcaption>
+        <div class="edge-label">top of the mat</div>
+        <div class="barrier-box">
+          <div class="mat" id="lSecret"></div>
+          <div class="folder" id="lFolder"><b>Shh!</b><span>Secret design</span></div>
+        </div>
+        <div class="edge-label">bottom of the mat</div>
+      </figure>
+      <figure class="matwrap">
+        <figcaption>My mat</figcaption>
+        <div class="edge-label">top of the mat</div>
+        <div class="mat live" id="lMine"></div>
+        <div class="edge-label">bottom of the mat</div>
+      </figure>
+      <div class="tray-wrap"><div class="tray" id="lTray"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. Partner barrier -->
+  <section class="panel" id="p-partner" hidden>
+    <ol class="phases" id="pPhases">
+      <li><b>1</b>Builder builds</li>
+      <li><b>2</b>Barrier up. Copier listens and builds</li>
+      <li><b>3</b>Lift and compare</li>
+    </ol>
+    <p class="tip" id="pTip"></p>
+    <div class="stage" id="pStage">
+      <figure class="matwrap">
+        <figcaption>Builder <span class="pill" id="pBuilderPill">building</span></figcaption>
+        <div class="edge-label">top of the mat</div>
+        <div class="barrier-box">
+          <div class="mat live" id="pA"></div>
+          <div class="folder up" id="pFolder"><b>Barrier up!</b><span>No peeking</span></div>
+        </div>
+        <div class="edge-label">bottom of the mat</div>
+      </figure>
+      <figure class="matwrap">
+        <figcaption>Copier <span class="pill" id="pCopierPill">wait</span></figcaption>
+        <div class="edge-label">top of the mat</div>
+        <div class="mat live" id="pB"></div>
+        <div class="edge-label">bottom of the mat</div>
+      </figure>
+      <div class="tray-wrap"><div class="tray" id="pTray"></div></div>
+    </div>
+    <div class="row">
+      <button class="primary go" id="pGo" type="button">Put up the barrier</button>
+      <button class="secondary" id="pNext" type="button">Next round</button>
+    </div>
+    <div class="fb" id="pFb" aria-live="polite"></div>
+    <div class="logbox" id="pLogBox" hidden>
+      <table class="log"><thead><tr><th>Round</th><th>Did they match?</th><th>A word that helped</th></tr></thead><tbody id="pLog"></tbody></table>
+    </div>
+  </section>
+
+  <!-- 4. Detectives -->
+  <section class="panel" id="p-detect" hidden>
+    <div class="qnav" id="qNav" role="group" aria-label="Detective questions">
+      <button type="button" data-q="wall" aria-pressed="true">Which word helped?</button>
+      <button type="button" data-q="beside" aria-pressed="false">Beside… which side?</button>
+      <button type="button" data-q="fix" aria-pressed="false">Fix my words</button>
+      <button type="button" data-q="hard" aria-pressed="false">Which was hardest?</button>
+      <button type="button" data-q="names" aria-pressed="false">★ No shape names</button>
+    </div>
+    <div class="qcard" id="qBody"></div>
+  </section>
+</main>
+
+<script>
+/* ===== Pure logic (tested in node) ===== */
+const TYPES = ['square','triangle','circle','hexagon','rectangle'];
+const FACTS = {
+  triangle:{sides:3, corners:3}, square:{sides:4, corners:4, equal:true},
+  rectangle:{sides:4, corners:4, equal:false}, hexagon:{sides:6, corners:6}, circle:{sides:0, corners:0, round:true}
+};
+const DESC_THE = {square:'the shape with 4 equal sides', rectangle:'the shape with 2 long sides and 2 short sides', triangle:'the shape with 3 corners', hexagon:'the shape with 6 corners', circle:'the round shape'};
+const DESC_A = {square:'a shape with 4 equal sides', rectangle:'a shape with 2 long sides and 2 short sides', triangle:'a shape with 3 corners', hexagon:'a shape with 6 corners', circle:'a round shape'};
+const POS = [
+  ['in the top left corner','at the top, in the middle','in the top right corner'],
+  ['on the left side, in the middle','in the middle','on the right side, in the middle'],
+  ['in the bottom left corner','at the bottom, in the middle','in the bottom right corner']
+];
+const DIRS = {above:[-1,0], below:[1,0], left:[0,-1], right:[0,1]};
+const WORDS = ['above','on top of','below','beside','on the left','on the right','between','in the middle','pointing up','pointing down'];
+
+const pick = (a, rng=Math.random) => a[Math.floor(rng()*a.length)];
+function shuffle(a, rng=Math.random){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function nm(t, noNames, art){ if(noNames) return (art==='a'?DESC_A:DESC_THE)[t]; return (art==='a'?'a ':'the ')+t; }
+function dirPhrase(dir, refName, onTop){
+  if(dir==='above') return (onTop?'on top of ':'above ')+refName;
+  if(dir==='below') return 'below '+refName;
+  if(dir==='left') return 'beside '+refName+', on the left';
+  return 'beside '+refName+', on the right';
+}
+/* where-part of a step (everything after "Put a ___") */
+function whereText(s, noNames){
+  let w;
+  if(s.kind==='abs') w = POS[s.r][s.c];
+  else if(s.kind==='rel') w = dirPhrase(s.dir, nm(s.ref,noNames,'the'), s.onTop);
+  else w = 'between '+nm(s.ref,noNames,'the')+' and '+nm(s.ref2,noNames,'the');
+  if(s.turn) w += ', pointing '+s.o;
+  return w;
+}
+function stepText(s, noNames){ return 'Put '+nm(s.t,noNames,'a')+' '+whereText(s,noNames)+'.'; }
+
+function occupied(blocks, r, c){ return Object.values(blocks).some(b => b.r===r && b.c===c); }
+
+/* Build a secret design whose words pin down exactly one build. */
+function makeDesign({n, types, turns=false, between=false, starts=[[1,1]], rng=Math.random}){
+  for(let tries=0; tries<500; tries++){
+    const pool = types ? types.slice() : shuffle(TYPES.slice(), rng).slice(0, n);
+    const blocks = {}, steps = [];
+    const oFor = t => (turns && t==='triangle') ? pick(['up','down'], rng) : 'up';
+    let first = 1;
+    if(between && pool.length>=3 && rng()<0.5){
+      /* two ends placed by their spot on the mat, then one block between them */
+      const r = pick([0,1,2], rng);
+      [[r,0],[r,2]].forEach(([rr,cc],k) => { const t=pool[k], o=oFor(t); blocks[t]={r:rr,c:cc,o}; steps.push({kind:'abs', t, r:rr, c:cc, o, turn: turns && t==='triangle'}); });
+      const t=pool[2], o=oFor(t); blocks[t]={r, c:1, o};
+      steps.push({kind:'between', t, ref:pool[0], ref2:pool[1], r, c:1, o, turn: turns && t==='triangle'});
+      first = 3;
+    } else {
+      const [r0,c0] = pick(starts, rng), t0 = pool[0], o0 = oFor(t0);
+      blocks[t0] = {r:r0, c:c0, o:o0};
+      steps.push({kind:'abs', t:t0, r:r0, c:c0, o:o0, turn: turns && t0==='triangle'});
+    }
+    let ok = true;
+    for(let i=first;i<pool.length;i++){
+      const t = pool[i], cands = [];
+      for(const [rt,b] of Object.entries(blocks)) for(const [d,[dr,dc]] of Object.entries(DIRS)){
+        const r=b.r+dr, c=b.c+dc;
+        if(r<0||r>2||c<0||c>2||occupied(blocks,r,c)) continue;
+        cands.push({kind:'rel', ref:rt, dir:d, r, c});
+      }
+      const ks = Object.keys(blocks);
+      for(let a=0;a<ks.length;a++) for(let b=a+1;b<ks.length;b++){
+        let A=blocks[ks[a]], B=blocks[ks[b]], ra=ks[a], rb=ks[b];
+        if(A.r===B.r && Math.abs(A.c-B.c)===2){
+          if(A.c>B.c){ [A,B]=[B,A]; [ra,rb]=[rb,ra]; }
+          const r=A.r, c=A.c+1;
+          if(!occupied(blocks,r,c)) cands.push({kind:'between', ref:ra, ref2:rb, r, c});
+        }
+      }
+      if(!cands.length){ ok=false; break; }
+      const betw = cands.filter(x => x.kind==='between');
+      const ch = (betw.length && rng()<0.6) ? pick(betw, rng) : pick(cands, rng);
+      const o = oFor(t);
+      blocks[t] = {r:ch.r, c:ch.c, o};
+      steps.push(Object.assign({}, ch, {t, o, turn: turns && t==='triangle', onTop: ch.dir==='above' && rng()<0.35}));
+    }
+    if(ok) return {blocks, steps, turns};
+  }
+  throw new Error('no design');
+}
+
+/* Where is `me` compared with `ref`? Plain words for feedback. */
+function relWords(me, ref, refName){
+  const dr=me.r-ref.r, dc=me.c-ref.c;
+  if(dc===0 && dr===-1) return 'above '+refName;
+  if(dc===0 && dr===1) return 'below '+refName;
+  if(dr===0 && dc===1) return 'beside '+refName+', on the right';
+  if(dr===0 && dc===-1) return 'beside '+refName+', on the left';
+  if(dc===0 && dr<0) return 'above '+refName+', but not touching';
+  if(dc===0 && dr>0) return 'below '+refName+', but not touching';
+  if(dr===0) return 'beside '+refName+', but not touching';
+  if(Math.abs(dr)===1 && Math.abs(dc)===1) return 'corner to corner with '+refName;
+  return 'far from '+refName;
+}
+
+function checkStep(s, build, noNames){
+  const me = build[s.t];
+  const said = whereText(s, noNames);
+  if(!me) return {ok:false, code:'missing', said};
+  let posOk, actual;
+  if(s.kind==='abs'){ posOk = me.r===s.r && me.c===s.c; actual = POS[me.r][me.c]; }
+  else if(s.kind==='rel'){
+    const ref = build[s.ref];
+    if(!ref) return {ok:false, code:'noref', said, need:s.ref};
+    const [dr,dc] = DIRS[s.dir];
+    posOk = me.r===ref.r+dr && me.c===ref.c+dc;
+    actual = relWords(me, ref, nm(s.ref,noNames,'the'));
+  } else {
+    const A=build[s.ref], B=build[s.ref2];
+    if(!A || !B) return {ok:false, code:'noref', said, need: !A ? s.ref : s.ref2};
+    const rowPair = A.r===B.r && Math.abs(A.c-B.c)===2 && me.r===A.r && me.c===(A.c+B.c)/2;
+    const colPair = A.c===B.c && Math.abs(A.r-B.r)===2 && me.c===A.c && me.r===(A.r+B.r)/2;
+    posOk = rowPair || colPair;
+    actual = 'not in between them';
+  }
+  if(!posOk) return {ok:false, code:'place', said, actual};
+  if(s.turn && me.o!==s.o) return {ok:false, code:'turn', said, actual:'pointing '+me.o};
+  return {ok:true, said};
+}
+function checkBuild(design, build, noNames){
+  const results = design.steps.map(s => checkStep(s, build, noNames));
+  const extras = Object.keys(build).filter(t => !design.blocks[t]);
+  return {results, extras, match: results.every(r => r.ok) && extras.length===0};
+}
+function sameLayout(a, b, checkTurn){
+  const ka=Object.keys(a).sort(), kb=Object.keys(b).sort();
+  if(ka.join()!==kb.join()) return false;
+  return ka.every(t => a[t].r===b[t].r && a[t].c===b[t].c && (!checkTurn || t!=='triangle' || a[t].o===b[t].o));
+}
+
+/* Partner compare: builder mat A vs copier mat B */
+function compareMats(A, B){
+  const types = TYPES.filter(t => A[t] || B[t]);
+  const diffs = [];
+  for(const t of types){
+    const a=A[t], b=B[t];
+    if(a && b && a.r===b.r && a.c===b.c && (t!=='triangle' || a.o===b.o)) continue;
+    diffs.push({t, a, b});
+  }
+  let shifted = false;
+  if(diffs.length){
+    const ka=Object.keys(A).sort(), kb=Object.keys(B).sort();
+    if(ka.length && ka.join()===kb.join()){
+      const dr=B[ka[0]].r-A[ka[0]].r, dc=B[ka[0]].c-A[ka[0]].c;
+      shifted = (dr||dc) && ka.every(t => B[t].r-A[t].r===dr && B[t].c-A[t].c===dc && (t!=='triangle' || A[t].o===B[t].o));
+    }
+  }
+  return {match: diffs.length===0 && types.length>0, diffs, shifted: !!shifted};
+}
+
+/* Warm-up: Shape Simon Says picture match */
+const WARM_REL = {above:[-1,0], below:[1,0], left:[0,-1], right:[0,1]};
+function warmText(r){
+  if(r.rel==='above') return r.a+' above the '+r.b;
+  if(r.rel==='below') return r.a+' below the '+r.b;
+  if(r.rel==='beside') return r.a+' beside the '+r.b;
+  return r.a+' beside the '+r.b+', on the '+r.rel;
+}
+function warmCorrect(rel){ return rel==='beside' ? ['left','right'] : [rel]; }
+function makeWarm(rng=Math.random, prevRel){
+  const fam = ['triangle','square','circle'];
+  const ab = shuffle(Math.random()<0.25 ? TYPES.slice() : fam.slice(), rng).slice(0,2);
+  let rel; do { rel = pick(['above','below','beside','left','right'], rng); } while(rel===prevRel);
+  let choices;
+  if(rel==='above'||rel==='below') choices = ['above','below', pick(['left','right'],rng)];
+  else choices = ['left','right', pick(['above','below'],rng)];
+  return {a:ab[0], b:ab[1], rel, choices: shuffle(choices, rng)};
+}
+function warmPhrase(a, b, pos){
+  return a+' '+(pos==='above'?'above the '+b : pos==='below'?'below the '+b : 'beside the '+b+', on the '+pos);
+}
+
+/* Fix my words */
+function makeFix(kind, rng=Math.random){
+  const [ref, t] = shuffle(TYPES.slice(), rng).slice(0,2);
+  const dir = kind==='side' ? pick(['left','right'], rng) : pick(Object.keys(DIRS), rng);
+  const [dr,dc] = DIRS[dir];
+  const blocks = {}; blocks[ref]={r:1,c:1,o:'up'}; blocks[t]={r:1+dr,c:1+dc,o:'up'};
+  let vague, options, answer, fixed;
+  if(kind==='side'){
+    vague = 'Put a '+t+' beside the '+ref+'.';
+    options = ['on the left','on the right']; answer = 'on the '+dir;
+    fixed = 'Put a '+t+' beside the '+ref+', on the '+dir+'.';
+  } else if(kind==='name'){
+    vague = 'Put this one '+dirPhrase(dir,'the '+ref)+'.';
+    options = shuffle([t].concat(shuffle(TYPES.filter(x => x!==t && x!==ref), rng).slice(0,2)), rng); answer = t;
+    fixed = 'Put a '+t+' '+dirPhrase(dir,'the '+ref)+'.';
+  } else {
+    vague = 'Put a '+t+' next to the '+ref+'.';
+    options = Object.keys(DIRS).map(d => dirPhrase(d,'the '+ref)); answer = dirPhrase(dir,'the '+ref);
+    fixed = 'Put a '+t+' '+answer+'.';
+  }
+  return {kind, ref, t, dir, blocks, vague, options, answer, fixed};
+}
+/* which option texts are true for the picture? (cross-check) */
+function fixTrue(f, opt){
+  const me=f.blocks[f.t], R=f.blocks[f.ref];
+  if(f.kind==='side') return opt==='on the left' ? me.c<R.c && me.r===R.r : me.c>R.c && me.r===R.r;
+  if(f.kind==='name') return opt===f.t;
+  return relWords(me, R, 'the '+f.ref)===opt;
+}
+
+const RIDDLES = [
+  {text:'I have 3 sides and 3 corners.', answer:'triangle', check: t => FACTS[t].sides===3 && FACTS[t].corners===3},
+  {text:'I have 4 sides. All 4 are the same length.', answer:'square', check: t => FACTS[t].sides===4 && FACTS[t].equal===true},
+  {text:'I have 4 sides: 2 long and 2 short.', answer:'rectangle', check: t => FACTS[t].sides===4 && FACTS[t].equal===false},
+  {text:'I have 6 sides and 6 corners.', answer:'hexagon', check: t => FACTS[t].sides===6 && FACTS[t].corners===6},
+  {text:'I am round. I have no corners.', answer:'circle', check: t => FACTS[t].round===true && FACTS[t].corners===0}
+];
+function riddleWhy(r, t){
+  const f = FACTS[t];
+  if(t==='circle') return 'A circle is round. It has no corners.';
+  if(r.answer==='square' && t==='rectangle') return 'A rectangle has 2 long sides and 2 short sides. They are not all the same.';
+  if(r.answer==='rectangle' && t==='square') return 'A square’s 4 sides are all the same length.';
+  if(r.answer==='circle') return 'A '+t+' has '+f.corners+' corners. Count them!';
+  return 'A '+t+' has '+f.sides+' sides and '+f.corners+' corners. Count them!';
+}
+const wordCount = s => s.trim().split(/\s+/).length;
+function wordsIn(text){ return WORDS.filter(w => new RegExp('\\b'+w+'\\b').test(text) && !(w==='beside' && false)); }
+
+
+</script>
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Drawing ---------- */
+const VERTS = {
+  square:[[18,18],[82,18],[82,82],[18,82]],
+  rectangle:[[4,29],[96,29],[96,71],[4,71]],
+  triangle:[[50,12],[90,81],[10,81]],
+  triangleDown:[[10,19],[90,19],[50,88]],
+  hexagon:[[92,50],[71,86.4],[29,86.4],[8,50],[29,13.6],[71,13.6]]
+};
+function shapeSVG(t, o){
+  let inner;
+  if(t==='circle') inner = `<circle class="body f-circle" cx="50" cy="50" r="38"/>`;
+  else { const v = t==='triangle' && o==='down' ? VERTS.triangleDown : VERTS[t];
+    inner = `<polygon class="body f-${t}" points="${v.map(p=>p.join(',')).join(' ')}"/>`; }
+  return `<svg class="shp" viewBox="0 0 100 100" aria-hidden="true">${inner}</svg>`;
+}
+function cornerSVG(t){
+  if(t==='circle') return `<svg class="shp" viewBox="-8 -8 116 116" aria-hidden="true"><circle class="body f-circle" cx="50" cy="50" r="38"/></svg>`;
+  const v = VERTS[t];
+  return `<svg class="shp" viewBox="-8 -8 116 116" aria-hidden="true"><polygon class="body f-${t}" points="${v.map(p=>p.join(',')).join(' ')}"/>` +
+    v.map((p,i)=>`<circle class="cdot" cx="${p[0]}" cy="${p[1]}" r="9"/><text class="ctext" x="${p[0]}" y="${p[1]}">${i+1}</text>`).join('') + `</svg>`;
+}
+const ico = (t,o) => `<span class="ico">${shapeSVG(t,o)}</span>`;
+const SPEAK_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const TURN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M20 3v5h-5" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* put shape icons in front of shape words for pre-readers */
+function iconize(text, noNames){
+  let h = esc(text);
+  if(!noNames) h = h.replace(/\b(square|triangle|circle|hexagon|rectangle)\b/g, (m) => ico(m)+m);
+  return h;
+}
+
+/* ---------- Speech (optional) ---------- */
+const canSpeak = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance!=='undefined';
+if(!canSpeak) document.body.classList.add('nospeech');
+function speak(text){
+  if(!canSpeak) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.85; u.pitch = 1.05; speechSynthesis.speak(u); }catch(e){}
+}
+document.querySelectorAll('.speak').forEach(b => b.innerHTML = SPEAK_ICON);
+
+/* ---------- Mats ---------- */
+function renderMat(el, blocks, opts={}){
+  const marks = opts.marks || {};
+  el.innerHTML = '';
+  for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'cell';
+    const t = Object.keys(blocks).find(k => blocks[k].r===r && blocks[k].c===c);
+    if(t){ b.classList.add('full'); b.innerHTML = shapeSVG(t, blocks[t].o); if(opts.pop===t && !reduced) b.firstChild.classList.add('pop'); }
+    const m = marks[r*3+c];
+    if(m){ b.classList.add(m); if(m!=='want') b.insertAdjacentHTML('beforeend', `<span class="mark">${m==='good'?'✓':'!'}</span>`); }
+    b.setAttribute('aria-label', (t ? (t + (t==='triangle' ? ', pointing '+blocks[t].o : '')) : 'empty') + ', ' + POS[r][c]);
+    if(opts.onTap) b.onclick = () => opts.onTap(r,c,t); else b.tabIndex = -1;
+    el.appendChild(b);
+  }
+}
+function renderTray(el, st, opts){
+  el.innerHTML = '';
+  for(const t of TYPES){
+    const b = document.createElement('button');
+    b.type='button'; b.className = 'blk' + (st.sel===t?' sel':'') + (st.blocks[t]?' used':'');
+    b.innerHTML = shapeSVG(t, t==='triangle' ? st.triO : 'up');
+    b.setAttribute('aria-label', t + (st.blocks[t] ? ' (on the mat)' : '') + (st.sel===t?' (picked up)':''));
+    b.onclick = () => { st.sel = st.sel===t ? null : t; opts.redraw(); };
+    el.appendChild(b);
+  }
+  if(opts.turns){
+    const tb = document.createElement('button');
+    tb.type='button'; tb.className='turn'; tb.innerHTML = TURN_ICON + `Turn ${ico('triangle', st.triO)}`;
+    tb.setAttribute('aria-label','Turn the triangle');
+    tb.onclick = () => { st.triO = st.triO==='up'?'down':'up'; if(st.blocks.triangle) st.blocks.triangle.o = st.triO; opts.redraw('triangle'); };
+    el.appendChild(tb);
+  }
+  const lab = document.createElement('div'); lab.className='tray-label';
+  lab.textContent = st.sel ? `Now tap a spot on the mat for the ${st.sel}.` : 'Tap a block. Then tap a spot on the mat. Tap a block on the mat to pick it up.';
+  el.appendChild(lab);
+}
+/* tap-to-place, one of each block */
+function tapCell(st, r, c, t){
+  if(st.sel){
+    const s = st.sel;
+    if(t && t!==s) delete st.blocks[t];
+    st.blocks[s] = {r, c, o: s==='triangle' ? st.triO : 'up'};
+    st.sel = null; return s;
+  }
+  if(t){ delete st.blocks[t]; st.sel = t; }
+  return null;
+}
+const newBuild = () => ({blocks:{}, sel:null, triO:'up'});
+
+/* ---------- Tabs ---------- */
+const TABS = ['warm','listen','partner','detect'];
+let tab = 'warm';
+function showTab(t){
+  tab = t;
+  TABS.forEach(k => { $('#tab-'+k).setAttribute('aria-selected', k===t); $('#p-'+k).hidden = k!==t; });
+  if(canSpeak) try{ speechSynthesis.cancel(); }catch(e){}
+  if(t==='detect') renderQ();
+}
+TABS.forEach(k => $('#tab-'+k).onclick = () => showTab(k));
+
+/* ---------- Word wall tally (this session) ---------- */
+const tally = Object.fromEntries(WORDS.map(w => [w,0]));
+function wordChips(el, words, onPick){
+  const box = document.createElement('div'); box.className='chips';
+  words.forEach(w => { const b=document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=w; b.setAttribute('aria-pressed','false');
+    b.onclick = () => { if(box.dataset.done) return; box.dataset.done='1'; b.setAttribute('aria-pressed','true'); tally[w]++; onPick && onPick(w); };
+    box.appendChild(b); });
+  el.appendChild(box);
+}
+
+/* =================== 1. WARM-UP =================== */
+const W = {round:null, found:0, done:false, prev:null};
+function warmText2(r){ /* HTML version with icons + emphasis on the position word */
+  const pos = r.rel==='beside' ? 'beside' : r.rel==='left'||r.rel==='right' ? 'beside' : r.rel;
+  let h = `${ico(r.a)}${r.a} <em>${pos}</em> the ${ico(r.b)}${r.b}`;
+  if(r.rel==='left'||r.rel==='right') h += `, <em>on the ${r.rel}</em>`;
+  return h;
+}
+function newWarm(){
+  W.round = makeWarm(Math.random, W.prev); W.prev = W.round.rel; W.done = false;
+  $('#wSay').innerHTML = warmText2(W.round);
+  $('#wFb').className='fb'; $('#wFb').innerHTML='';
+  const box = $('#wChoices'); box.innerHTML='';
+  W.round.choices.forEach(pos => {
+    const b = document.createElement('button'); b.type='button'; b.className='pic';
+    const blocks = {}; blocks[W.round.b] = {r:1,c:1,o:'up'};
+    const [dr,dc] = WARM_REL[pos]; blocks[W.round.a] = {r:1+dr, c:1+dc, o:'up'};
+    b.innerHTML = `<div class="mat"></div><div class="cap"></div>`;
+    renderMat(b.querySelector('.mat'), blocks);
+    b.setAttribute('aria-label', warmPhrase(W.round.a, W.round.b, pos));
+    b.onclick = () => pickWarm(b, pos);
+    b.dataset.pos = pos;
+    box.appendChild(b);
+  });
+  drawDots();
+}
+function pickWarm(btn, pos){
+  if(W.done) return;
+  const r = W.round, ok = warmCorrect(r.rel).includes(pos), fb = $('#wFb');
+  if(ok){
+    W.done = true; W.found++;
+    btn.classList.add('right'); btn.querySelector('.cap').textContent = warmPhrase(r.a, r.b, pos);
+    let msg = `<h3>Yes!</h3>The ${esc(warmPhrase(r.a, r.b, pos)).replace(r.a, r.a+' is')}.`;
+    if(r.rel==='beside'){
+      const other = [...$('#wChoices').children].find(x => x!==btn && warmCorrect('beside').includes(x.dataset.pos));
+      other.classList.add('right'); other.querySelector('.cap').textContent = warmPhrase(r.a, r.b, other.dataset.pos);
+      msg += ` Look! This one is beside too. <b>Beside</b> can be either side. Which words tell the side?`;
+    }
+    fb.className='fb good'; fb.innerHTML = msg; speak('Yes!');
+    drawDots();
+  } else {
+    btn.classList.add('wrong');
+    btn.querySelector('.cap').textContent = warmPhrase(r.a, r.b, pos);
+    fb.className='fb bad';
+    fb.innerHTML = `This one shows the ${ico(r.a)}${esc(warmPhrase(r.a, r.b, pos)).replace(r.a, r.a+' <b>')}</b>. Simon said <b>${esc(warmText(r).replace(r.a+' ','').replace(' the '+r.b,''))}</b>. Try another picture!`;
+  }
+}
+function drawDots(){ const n = Math.max(5, W.found+1); $('#wDots').innerHTML = Array.from({length:n},(_,i)=>`<i class="${i<W.found?'on':''}"></i>`).join('') + `<span>${W.found} found</span>`; }
+$('#wNext').onclick = newWarm;
+$('#wSpeak').onclick = () => speak('Simon says: ' + warmText(W.round));
+
+/* =================== 2. LISTEN & BUILD =================== */
+const LEVELS = [
+  {n:2, types:['square','triangle'], starts:[[1,1]], turns:false, between:false},
+  {n:3, starts:[[1,1],[1,1],[0,1],[2,1],[1,0],[1,2]], turns:false, between:true},
+  {n:5, starts:[[1,1],[0,1],[2,1],[1,0],[1,2],[0,0],[0,2],[2,0],[2,2]], turns:true, between:true}
+];
+const Lst = {lv:1, design:null, build:newBuild(), lifted:false, noNames:false};
+function newDesign(){
+  const L = LEVELS[Lst.lv];
+  let d, guard=0;
+  do { d = makeDesign({n:L.n, types:L.types, starts:L.starts, turns:L.turns, between:L.between}); }
+  while(Lst.design && guard++<20 && sameLayout(d.blocks, Lst.design.blocks, true));
+  Lst.design = d; Lst.build = newBuild(); Lst.lifted = false;
+  $('#lFolder').classList.remove('up');
+  $('#lFb').className='fb'; $('#lFb').innerHTML='';
+  drawListen();
+}
+function drawSteps(results){
+  const ol = $('#lSteps'); ol.innerHTML='';
+  Lst.design.steps.forEach((s,i) => {
+    const li = document.createElement('li');
+    const txt = stepText(s, Lst.noNames);
+    const where = whereText(s, Lst.noNames);
+    const head = txt.slice(0, txt.length - where.length - 1);
+    li.innerHTML = `<span>${iconize(head, Lst.noNames)} <span class="pos">${iconize(where, Lst.noNames)}</span>.</span>`;
+    const sp = document.createElement('button'); sp.type='button'; sp.className='speak'; sp.innerHTML=SPEAK_ICON; sp.setAttribute('aria-label','Read step '+(i+1));
+    sp.onclick = () => speak(txt); li.appendChild(sp);
+    if(results){
+      const r = results[i]; li.classList.add(r.ok ? 'ok' : 'no');
+      if(!r.ok){
+        const w = document.createElement('div'); w.className='why';
+        const shape = Lst.noNames ? 'the '+s.t : 'the '+s.t;
+        if(r.code==='missing') w.innerHTML = `There is no ${esc(s.t)} on your mat yet.`;
+        else if(r.code==='noref') w.innerHTML = `First the ${esc(r.need)} needs to be on your mat.`;
+        else if(r.code==='turn') w.innerHTML = `The words said <b>pointing ${s.o}</b>. Yours is <b>${esc(r.actual)}</b>. Tap Turn.`;
+        else w.innerHTML = `The words said <b>${esc(r.said)}</b>. Your ${esc(s.t)} is <b>${esc(r.actual)}</b>.`;
+        li.appendChild(w);
+      }
+    }
+    ol.appendChild(li);
+  });
+}
+function drawListen(popT){
+  const L = LEVELS[Lst.lv];
+  drawSteps(null);
+  renderMat($('#lSecret'), Lst.design.blocks);
+  const armed = !!Lst.build.sel;
+  $('#lMine').classList.toggle('armed', armed);
+  renderMat($('#lMine'), Lst.build.blocks, {pop:popT, onTap:(r,c,t) => { const p = tapCell(Lst.build, r, c, t); drawListen(p); }});
+  renderTray($('#lTray'), Lst.build, {turns:L.turns, redraw:(p)=>drawListen(p)});
+  $('#lLift').textContent = 'Lift the barrier';
+}
+function liftListen(){
+  if(Lst.lifted){ /* put it back: try again */
+    Lst.lifted = false; $('#lFolder').classList.remove('up'); $('#lFb').className='fb'; $('#lFb').innerHTML=''; drawListen(); return;
+  }
+  const res = checkBuild(Lst.design, Lst.build.blocks, Lst.noNames);
+  Lst.lifted = true; $('#lFolder').classList.add('up');
+  drawSteps(res.results);
+  /* marks on both mats */
+  const mineMarks = {}, secretMarks = {};
+  for(const t of Object.keys(Lst.build.blocks)){
+    const b = Lst.build.blocks[t], s = Lst.design.blocks[t];
+    mineMarks[b.r*3+b.c] = (s && s.r===b.r && s.c===b.c && (t!=='triangle' || !Lst.design.turns || s.o===b.o)) ? 'good' : 'bad';
+  }
+  if(!res.match) for(const t of Object.keys(Lst.design.blocks)){ const s=Lst.design.blocks[t], b=Lst.build.blocks[t]; if(!b || b.r!==s.r || b.c!==s.c) secretMarks[s.r*3+s.c]='want'; }
+  renderMat($('#lSecret'), Lst.design.blocks, {marks:secretMarks});
+  renderMat($('#lMine'), Lst.build.blocks, {marks:mineMarks});
+  $('#lMine').classList.remove('armed');
+  const fb = $('#lFb');
+  if(res.match){
+    fb.className='fb good';
+    fb.innerHTML = `<h3>They match!</h3>Your words and blocks went together. Which word helped most?`;
+    const words = wordsIn(Lst.design.steps.map(s => stepText(s,false)).join(' '));
+    wordChips(fb, words, w => fb.insertAdjacentHTML('beforeend', `<p style="margin:8px 0 0">“${esc(w)}” goes on the word wall.</p>`));
+    $('#lLift').textContent = 'Lower the barrier';
+    speak('They match!');
+  } else {
+    const nBad = res.results.filter(r=>!r.ok).length;
+    let msg = `<h3>Not yet. Let’s check the words.</h3>`;
+    const shiftedOnly = !res.results[0].ok && res.results.slice(1).every(r=>r.ok) && res.extras.length===0 && Lst.design.steps[0].kind==='abs' && Lst.design.steps[1] && Lst.design.steps[1].kind!=='abs';
+    if(shiftedOnly) msg += `Your blocks are in the right order next to each other. Only the start is off: step 1 says <b>${esc(whereText(Lst.design.steps[0], Lst.noNames))}</b>.`;
+    else msg += `${nBad} step${nBad===1?' needs':'s need'} another look. Red boxes show where to look on both mats.`;
+    if(res.extras.length) msg += ` The words never said ${res.extras.map(t=>ico(t)+esc(t)).join(' or ')}. Take ${res.extras.length===1?'it':'them'} off.`;
+    msg += ` Tap <b>Try again</b> to fix it.`;
+    fb.className='fb bad'; fb.innerHTML = msg;
+    $('#lLift').textContent = 'Try again';
+  }
+}
+$('#lLift').onclick = liftListen;
+$('#lNew').onclick = newDesign;
+$('#lSpeakAll').onclick = () => speak(Lst.design.steps.map(s => stepText(s, Lst.noNames)).join(' '));
+document.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => {
+  Lst.lv = +b.dataset.lv; document.querySelectorAll('[data-lv]').forEach(x => x.setAttribute('aria-pressed', x===b)); newDesign();
+});
+$('#noNames').onchange = e => { Lst.noNames = e.target.checked; if(Lst.lifted) liftListen(); drawListen(); };
+
+/* =================== 3. PARTNER BARRIER =================== */
+const P = {phase:0, A:newBuild(), B:newBuild(), round:1, log:[]};
+const where = (b) => b ? POS[b.r][b.c] + (b.o==='down' ? ', pointing down' : '') : 'not on the mat';
+function drawPartner(popT){
+  const ph = P.phase;
+  [...$('#pPhases').children].forEach((li,i) => { li.className = i<ph ? 'done' : i===ph ? 'now' : ''; });
+  $('#pTip').innerHTML = ph===0 ? `<strong>Builder:</strong> make a design with 3 blocks. <strong>Copier:</strong> no peeking!`
+    : ph===1 ? `<strong>Builder:</strong> say each block’s name and where it goes. <strong>Copier:</strong> build it. Not sure? Ask a question: “On the left or on the right?”`
+    : `Look at both mats. Which words helped? Which word was missing?`;
+  const act = ph===0 ? P.A : ph===1 ? P.B : null;
+  $('#pA').classList.toggle('active', ph===0); $('#pB').classList.toggle('active', ph===1);
+  $('#pA').classList.toggle('locked', ph!==0); $('#pB').classList.toggle('locked', ph!==1);
+  $('#pBuilderPill').textContent = ph===0 ? 'building' : ph===1 ? 'describing' : 'compare';
+  $('#pCopierPill').textContent = ph===0 ? 'wait' : ph===1 ? 'building' : 'compare';
+  const marksA = {}, marksB = {};
+  if(ph===2){
+    const cmp = compareMats(P.A.blocks, P.B.blocks);
+    const bad = new Set(cmp.diffs.map(d=>d.t));
+    for(const [t,b] of Object.entries(P.A.blocks)) marksA[b.r*3+b.c] = bad.has(t)?'bad':'good';
+    for(const [t,b] of Object.entries(P.B.blocks)) marksB[b.r*3+b.c] = bad.has(t)?'bad':'good';
+  }
+  renderMat($('#pA'), P.A.blocks, {marks:marksA, pop: act===P.A?popT:null, onTap: ph===0 ? (r,c,t) => { const p=tapCell(P.A,r,c,t); drawPartner(p); } : null});
+  renderMat($('#pB'), P.B.blocks, {marks:marksB, pop: act===P.B?popT:null, onTap: ph===1 ? (r,c,t) => { const p=tapCell(P.B,r,c,t); drawPartner(p); } : null});
+  $('#pA').classList.toggle('armed', ph===0 && !!P.A.sel); $('#pB').classList.toggle('armed', ph===1 && !!P.B.sel);
+  const tray = $('#pTray');
+  if(act) { tray.parentElement.hidden = false; renderTray(tray, act, {turns:true, redraw:(p)=>drawPartner(p)}); }
+  else tray.parentElement.hidden = true;
+  $('#pFolder').classList.toggle('up', ph!==1);
+  const go = $('#pGo');
+  go.textContent = ph===0 ? 'Put up the barrier' : ph===1 ? 'Lift the barrier' : 'Next round';
+  go.disabled = (ph===0 && !Object.keys(P.A.blocks).length) || (ph===1 && !Object.keys(P.B.blocks).length);
+  $('#pNext').hidden = ph===2;
+  $('#pNext').textContent = 'Clear both mats';
+  $('#pLogBox').hidden = P.log.length===0;
+  $('#pLog').innerHTML = P.log.map(r => `<tr><td>${r.round}</td><td>${r.match?'✓ yes':'✗ no'}</td><td>${esc(r.word||'')}</td></tr>`).join('');
+}
+function partnerGo(){
+  if(P.phase===0){ P.A.sel=null; P.phase=1; $('#pFb').className='fb'; $('#pFb').innerHTML=''; drawPartner(); return; }
+  if(P.phase===1){
+    P.B.sel=null; P.phase=2; drawPartner();
+    const cmp = compareMats(P.A.blocks, P.B.blocks), fb = $('#pFb');
+    const entry = {round:P.round, match:cmp.match, word:''}; P.log.push(entry);
+    if(cmp.match){ fb.className='fb good'; fb.innerHTML = `<h3>They match!</h3>Which word helped most?`; speak('They match!'); }
+    else {
+      fb.className='fb bad';
+      let h = `<h3>Not the same. Find what went wrong.</h3>`;
+      if(cmp.shifted) h += `Same picture, but in a different spot on the mat. Which words tell <b>where on the mat</b> to start? (in the middle, at the top…)`;
+      else h += `<div class="diff">` + cmp.diffs.map(d => `<div>${ico(d.t, d.a ? d.a.o : (d.b ? d.b.o : 'up'))}<span><b>${d.t}</b>: builder’s is ${esc(where(d.a))}. Copier’s is ${esc(where(d.b))}.</span></div>`).join('') + `</div>`;
+      h += `<p style="margin:8px 0 0">Which word would have helped?</p>`;
+      fb.innerHTML = h;
+    }
+    wordChips(fb, WORDS, w => { entry.word = w; drawPartner(); });
+    drawPartner();
+    return;
+  }
+  /* next round */
+  P.round++; P.A = newBuild(); P.B = newBuild(); P.phase = 0; $('#pFb').className='fb'; $('#pFb').innerHTML=''; drawPartner();
+}
+$('#pGo').onclick = partnerGo;
+$('#pNext').onclick = () => { P.A=newBuild(); P.B=newBuild(); P.phase=0; $('#pFb').className='fb'; $('#pFb').innerHTML=''; drawPartner(); };
+
+/* =================== 4. DETECTIVES =================== */
+let Q = 'wall';
+const F = {kind:0, round:null, done:false};
+const R = {i:0, order:[], done:false, score:0};
+const HARD_A = {blocks:{square:{r:1,c:1,o:'up'}, triangle:{r:0,c:1,o:'up'}}, steps:[
+  {kind:'abs', t:'square', r:1, c:1}, {kind:'rel', t:'triangle', ref:'square', dir:'above'}]};
+const HARD_B = {blocks:{square:{r:1,c:1,o:'up'}, triangle:{r:0,c:1,o:'down'}, circle:{r:1,c:2,o:'up'}, hexagon:{r:1,c:0,o:'up'}, rectangle:{r:2,c:1,o:'up'}}, steps:[
+  {kind:'abs', t:'square', r:1, c:1}, {kind:'rel', t:'triangle', ref:'square', dir:'above', turn:true, o:'down'},
+  {kind:'rel', t:'circle', ref:'square', dir:'right'}, {kind:'rel', t:'hexagon', ref:'square', dir:'left'}, {kind:'rel', t:'rectangle', ref:'square', dir:'below'}]};
+function mini(blocks, cap){ const f=document.createElement('figure'); f.innerHTML=`<div class="mat"></div>${cap?`<figcaption>${cap}</figcaption>`:''}`; renderMat(f.querySelector('.mat'), blocks); return f; }
+function btn(label, cls, fn){ const b=document.createElement('button'); b.type='button'; b.className=cls; b.innerHTML=label; b.onclick=fn; return b; }
+
+function renderQ(){
+  document.querySelectorAll('#qNav button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q===Q));
+  const box = $('#qBody'); box.innerHTML='';
+  if(Q==='wall'){
+    box.innerHTML = `<h2>Which word told your partner where it goes?</h2><p class="lead">Every match adds the helpful word to our word wall. Which word helped most?</p><div class="row" id="qa"></div><div id="qr"></div>`;
+    $('#qa').appendChild(btn('Show our word wall','primary go', () => {
+      const max = Math.max(1, ...WORDS.map(w=>tally[w])), total = WORDS.reduce((a,w)=>a+tally[w],0);
+      const sorted = WORDS.slice().sort((a,b)=>tally[b]-tally[a]);
+      $('#qr').innerHTML = `<div class="wall">${sorted.map(w => `<div class="bar"><span>${w}</span><div class="track"><div class="fill" style="width:${tally[w]/max*100}%"></div></div><span class="num">${tally[w]}</span></div>`).join('')}</div>` +
+        `<p class="lead" style="margin-top:12px">${total ? `Most helpful so far: <b>${sorted[0]}</b> (${tally[sorted[0]]} ${tally[sorted[0]]===1?'time':'times'}).` : 'No rounds yet. Play Listen &amp; build or Partner barrier, then tap the word that helped.'}</p>`;
+    }));
+  }
+  else if(Q==='beside'){
+    box.innerHTML = `<h2>Beside… which side?</h2><p class="sentence">Put a ${ico('circle')}circle <span class="blank">beside</span> the ${ico('square')}square.</p><p class="lead">Can you build it two ways? Do both follow the words?</p><div class="row" id="qa"></div><div class="minis" id="qm"></div><div class="fb" id="qr"></div>`;
+    $('#qa').appendChild(btn('Build it two ways','primary go', () => {
+      const L1 = {square:{r:1,c:1,o:'up'}, circle:{r:1,c:0,o:'up'}}, R1 = {square:{r:1,c:1,o:'up'}, circle:{r:1,c:2,o:'up'}};
+      const st = {kind:'rel', t:'circle', ref:'square', dir:'left'};
+      /* both are beside: check with the relation words */
+      const okL = relWords(L1.circle, L1.square, 'the square').startsWith('beside the square'), okR = relWords(R1.circle, R1.square, 'the square').startsWith('beside the square');
+      $('#qm').innerHTML=''; $('#qm').appendChild(mini(L1, `${okL?'✓':''} beside, on the left`)); $('#qm').appendChild(mini(R1, `${okR?'✓':''} beside, on the right`));
+      const q = $('#qr'); q.className='fb'; q.innerHTML = `Both are <b>beside</b> the square! The words were missing something. Which words fix it?`;
+      const ch = document.createElement('div'); ch.className='chips';
+      ['on the left','on the right','above','between'].forEach(w => ch.appendChild(btn(w,'chip', () => {
+        if(w==='on the left'||w==='on the right'){ q.className='fb good'; q.innerHTML = `Yes! “Put a circle beside the square, <b>${w}</b>.” Now only one build fits.`; }
+        else { q.className='fb bad'; q.innerHTML = `“${w}” does not tell which side of the square. Look at the two builds. What is different? Try again.`; q.appendChild(ch); }
+      })));
+      q.appendChild(ch);
+    }));
+  }
+  else if(Q==='fix'){ renderFix(box); }
+  else if(Q==='hard'){
+    box.innerHTML = `<h2>Which design is harder to describe? Why?</h2><div class="minis" id="qm"></div><div class="row" id="qa"></div><div class="compare" id="qr"></div>`;
+    $('#qm').appendChild(mini(HARD_A.blocks, 'Design A')); $('#qm').appendChild(mini(HARD_B.blocks, 'Design B'));
+    $('#qa').appendChild(btn('Count the words we need','primary go', () => {
+      const tA = HARD_A.steps.map(s=>stepText(s)).join(' '), tB = HARD_B.steps.map(s=>stepText(s)).join(' ');
+      const nA = wordCount(tA), nB = wordCount(tB);
+      $('#qr').innerHTML = `<p><b>Design A</b>: ${iconize(tA)} <span class="count">${nA} words</span></p><p><b>Design B</b>: ${iconize(tB)} <span class="count">${nB} words</span></p>` +
+        `<p>Design B needs ${nB-nA} more words. More blocks need more words. The turned triangle needs extra words too: <b>pointing down</b>.</p>`;
+    }));
+  }
+  else { renderRiddle(box); }
+}
+document.querySelectorAll('#qNav button').forEach(b => b.onclick = () => { Q = b.dataset.q; renderQ(); });
+
+const FIX_KINDS = ['side','name','place'];
+function renderFix(box){
+  if(!F.round){ F.round = makeFix(FIX_KINDS[F.kind % 3]); F.done=false; }
+  const f = F.round;
+  const lead = f.kind==='side' ? 'Beside. But which side?' : f.kind==='name' ? '“This one?” Which one? Say its name!' : '“Next to” where? Pick the place word.';
+  let shown = iconize(f.vague);
+  shown = f.kind==='name' ? shown.replace('this one', '<span class="blank">this one</span>') : f.kind==='side' ? shown.replace(/\.$/, ' <span class="blank">?</span>.') : shown.replace('next to', '<span class="blank">next to</span>');
+  box.innerHTML = `<h2>Fix my words</h2><p class="lead">The builder made this. The words are not clear enough. ${lead}</p><div class="minis" id="qm"></div><p class="sentence" id="qs">${shown}</p><div class="bigopts" id="qo"></div><div class="fb" id="qr"></div><div class="row"><button class="secondary" type="button" id="qnext">Another one</button></div>`;
+  $('#qm').appendChild(mini(f.blocks, 'Builder’s mat'));
+  f.options.forEach(o => {
+    const label = f.kind==='name' ? ico(o)+o : esc(o);
+    const b = btn(label, '', () => {
+      if(F.done) return;
+      const q = $('#qr');
+      if(fixTrue(f, o)){
+        F.done = true; b.classList.add('right'); q.className='fb good';
+        q.innerHTML = `<h3>Clear now!</h3>${iconize(f.fixed)}`; speak(f.fixed);
+      } else {
+        b.classList.add('wrong'); q.className='fb bad';
+        if(f.kind==='name') q.innerHTML = `That would put a ${ico(o)}${o} there. Look at the mat: which shape is ${esc(dirPhraseOf(f))}?`;
+        else if(f.kind==='side') q.innerHTML = `Look at the mat. Is the ${f.t} ${esc(o)} of the ${f.ref}? Find the ${f.t}, then try again.`;
+        else q.innerHTML = `“${esc(o)}” puts it in a different place. Find the ${f.t} on the mat. Where is it next to the ${f.ref}?`;
+      }
+    });
+    $('#qo').appendChild(b);
+  });
+  $('#qnext').onclick = () => { F.kind++; F.round=null; renderQ(); };
+}
+function dirPhraseOf(f){ return relWords(f.blocks[f.t], f.blocks[f.ref], 'the '+f.ref); }
+
+function renderRiddle(box){
+  if(!R.order.length){ R.order = TYPES.map((_,i)=>i).sort(()=>Math.random()-.5); R.i=0; R.done=false; }
+  const rd = RIDDLES[R.order[R.i % RIDDLES.length]];
+  box.innerHTML = `<h2>★ No shape names!</h2><p class="lead">Describe a shape by its sides and corners. Which shape am I?</p>
+    <div class="row"><p class="sentence" style="margin:0">${esc(rd.text)}</p><button class="speak" type="button" id="rs" aria-label="Read the riddle">${SPEAK_ICON}</button></div>
+    <div class="tray riddle-tray" id="rt"></div><div class="fb" id="rr"></div>
+    <div class="row"><button class="secondary" type="button" id="rn">Next riddle</button></div>
+    <p class="rule">Next step: in Listen &amp; build, turn on ★ No shape names and build from sides and corners only.</p>`;
+  $('#rs').onclick = () => speak(rd.text);
+  TYPES.forEach(t => {
+    const b = document.createElement('button'); b.type='button'; b.className='blk'; b.innerHTML = shapeSVG(t,'up'); b.setAttribute('aria-label', t);
+    b.onclick = () => {
+      if(R.done) return;
+      const q = $('#rr');
+      if(rd.check(t)){
+        R.done = true; b.classList.add('right'); q.className='fb good';
+        q.innerHTML = `<div class="corners"><div class="big">${cornerSVG(t)}</div><div><h3>Yes! A ${t}.</h3>${t==='circle' ? 'Round all the way. No corners at all.' : `Count the corners: ${Array.from({length:FACTS[t].corners},(_,i)=>i+1).join(', ')}.`}</div></div>`;
+        speak('Yes! A ' + t);
+      } else {
+        b.classList.add('wrong'); q.className='fb bad';
+        q.innerHTML = `<div class="corners"><div class="big">${cornerSVG(t)}</div><div>${esc(riddleWhy(rd, t))} Read the riddle again and try another shape.</div></div>`;
+      }
+    };
+    $('#rt').appendChild(b);
+  });
+  $('#rn').onclick = () => { R.i++; R.done=false; renderQ(); };
+}
+
+/* ---------- Global ---------- */
+function startOver(){
+  W.found = 0; W.prev = null; newWarm();
+  Lst.build = newBuild(); Lst.design = null; newDesign();
+  P.phase=0; P.A=newBuild(); P.B=newBuild(); P.round=1; P.log=[]; $('#pFb').className='fb'; $('#pFb').innerHTML=''; drawPartner();
+  WORDS.forEach(w => tally[w]=0);
+  F.kind=0; F.round=null; R.order=[]; R.i=0; Q='wall'; renderQ();
+}
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+newWarm(); newDesign(); drawPartner(); renderQ();
+})();
+</script>
+
+</body></html>

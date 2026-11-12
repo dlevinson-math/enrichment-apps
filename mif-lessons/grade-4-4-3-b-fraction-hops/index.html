@@ -1,0 +1,684 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fraction Hops</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a pond-side lab bench. One wide number line is the hero; controls sit below it in two columns, stacking on phones. */
+:root{
+  --water:#E8F2EE; --card:#FFFFFF; --ink:#142E2A; --muted:#4D6560; --line:#C5D8D1;
+  --frog:#23864F; --frog-soft:#DCEFE3; --gold:#B87A00; --gold-soft:#FFF1CC; --coral:#C9472D; --coral-soft:#FCE6E0;
+  --sky:#2A6FB0;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --water:#0E1A18; --card:#162522; --ink:#E4EFEB; --muted:#9BB3AC; --line:#2B423C;
+    --frog:#4EC783; --frog-soft:#1B3A2A; --gold:#F0B93A; --gold-soft:#3A2F12; --coral:#FF7E64; --coral-soft:#3D211B; --sky:#6FB0EE;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --water:#0E1A18; --card:#162522; --ink:#E4EFEB; --muted:#9BB3AC; --line:#2B423C;
+  --frog:#4EC783; --frog-soft:#1B3A2A; --gold:#F0B93A; --gold-soft:#3A2F12; --coral:#FF7E64; --coral-soft:#3D211B; --sky:#6FB0EE;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+body{background:var(--water); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.25vw,20px); line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:12px 32px;
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sky); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); line-height:1.05; margin:0; text-wrap:balance}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+header h1{font-size:clamp(30px,3.4vw,50px); font-weight:800; letter-spacing:-.01em}
+.sub{font-size:15px; color:var(--muted); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:9px 16px; font-weight:700; font-size:16px; min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:6px; flex-wrap:wrap}
+nav button{border:2px solid transparent; background:transparent; border-radius:999px; padding:8px 16px; font-family:var(--display); font-weight:700; font-size:clamp(16px,1.3vw,20px); color:var(--muted); min-height:46px; display:flex; align-items:center; gap:8px}
+nav button .n{width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:14px; background:var(--card); border:2px solid var(--line)}
+nav button[aria-selected="true"]{background:var(--ink); color:var(--card)}
+nav button[aria-selected="true"] .n{background:var(--frog); border-color:var(--frog); color:#fff}
+
+section.view{display:flex; flex-direction:column; gap:14px}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.grid2{display:grid; grid-template-columns:1.1fr 1fr; gap:14px}
+@media (max-width:900px){ .grid2{grid-template-columns:1fr} }
+.lead{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.4vw,36px); line-height:1.15; margin:0}
+.eyebrow{font-size:13px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.ws{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; padding:2px 9px; border-radius:8px; background:var(--gold-soft); color:var(--ink); border:1.5px solid var(--gold)}
+p{margin:0}
+.muted{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+.primary{border:0; background:var(--frog); color:#fff; font-weight:700; font-size:clamp(18px,1.5vw,22px); padding:12px 24px; border-radius:14px; min-height:54px; font-family:var(--display)}
+:root[data-theme="dark"] .primary{color:#0E1A18}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .primary{color:#0E1A18} }
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:52px; font-family:var(--display)}
+
+/* hop chips */
+.chips{display:flex; flex-direction:column; gap:10px}
+.chipset{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.chipset > span{font-size:14px; font-weight:700; color:var(--muted); min-width:110px}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:4px 14px; min-height:58px; min-width:64px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:22px; font-weight:700; position:relative}
+.chip[aria-pressed="true"]{border-color:var(--frog); background:var(--frog-soft); box-shadow:0 0 0 2px var(--frog) inset}
+.chip.done::after{content:"✓"; position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%; background:var(--gold); color:#fff; font-size:13px; display:grid; place-items:center}
+
+/* fractions */
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; line-height:1; font-variant-numeric:tabular-nums; margin:0 .08em}
+.fr > span:first-child{border-bottom:.09em solid currentColor; padding:0 .12em .06em}
+.fr > span:last-child{padding:.06em .12em 0}
+.chip .fr{font-size:20px}
+.mixed{display:inline-flex; align-items:center; gap:.1em; white-space:nowrap}
+
+/* number line */
+.linebox{overflow-x:auto; border-radius:14px; background:var(--card); border:2px solid var(--line)}
+.linebox svg{display:block; width:100%; min-width:680px; height:auto}
+.stack{display:flex; flex-direction:column; gap:10px}
+.stack .cap{font-weight:700; font-size:16px; display:flex; align-items:center; gap:8px; padding:6px 12px 0}
+
+/* inputs */
+.fin{display:inline-flex; flex-direction:column; align-items:center; gap:4px}
+.fin input{width:72px; height:48px; text-align:center; font-size:24px; font-weight:700; border:2px solid var(--line); border-radius:10px; background:var(--water); color:var(--ink); font-family:var(--body)}
+.fin .bar{width:80px; height:3px; background:var(--ink); border-radius:2px}
+.num input{width:84px; height:52px; text-align:center; font-size:24px; font-weight:700; border:2px solid var(--line); border-radius:10px; background:var(--water); color:var(--ink); font-family:var(--body)}
+label.lbl{display:flex; flex-direction:column; gap:4px; font-size:15px; font-weight:700; color:var(--muted)}
+.seg{display:inline-flex; background:var(--water); border:2px solid var(--line); border-radius:12px; padding:3px}
+.seg button{border:0; background:none; padding:8px 14px; border-radius:9px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+.fb{padding:12px 16px; border-radius:12px; background:var(--water); border-left:6px solid var(--line); font-size:clamp(17px,1.35vw,21px)}
+.fb:empty{display:none}
+.fb.good{background:var(--frog-soft); border-left-color:var(--frog)}
+.fb.try{background:var(--coral-soft); border-left-color:var(--coral)}
+.fb.star{background:var(--gold-soft); border-left-color:var(--gold)}
+
+.log{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
+.log li{background:var(--water); border:1.5px solid var(--line); border-radius:12px; padding:6px 12px; font-size:19px; display:flex; align-items:center; gap:8px}
+.log li b{font-size:13px; color:var(--muted); font-weight:700}
+.log li.whole{background:var(--gold-soft); border-color:var(--gold)}
+
+table.chart{border-collapse:collapse; width:100%; font-size:clamp(18px,1.5vw,24px)}
+table.chart th{font-family:var(--display); text-align:left; font-size:.75em; color:var(--muted); padding:8px 12px; border-bottom:2px solid var(--line)}
+table.chart td{padding:10px 12px; border-bottom:1.5px solid var(--line); vertical-align:middle; font-variant-numeric:tabular-nums}
+table.chart td.empty{color:var(--muted)}
+table.chart .hlD{background:var(--frog-soft); border-radius:6px; padding:2px 6px; outline:2px solid var(--frog)}
+table.chart .hlN{background:var(--gold-soft); border-radius:6px; padding:2px 6px; outline:2px solid var(--gold)}
+.tablebox{overflow-x:auto}
+
+.votes{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px}
+.vote{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:8px; font-weight:700; font-size:19px; min-height:64px}
+.vote b{font-family:var(--display); font-size:30px; color:var(--frog)}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.found{display:flex; flex-wrap:wrap; gap:8px}
+.found span{background:var(--gold-soft); border:1.5px solid var(--gold); border-radius:10px; padding:4px 10px; font-size:20px}
+
+.frog-hop{transition:none}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Fraction Hops</h1>
+    <div class="sub">Grade 4 · Math in Focus Ch 3 · Lesson 4.3-B</div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav role="tablist" id="nav">
+  <button role="tab" data-v="warm" aria-selected="true"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-v="launch" aria-selected="false"><span class="n">2</span>Launch</button>
+  <button role="tab" data-v="lab" aria-selected="false"><span class="n">3</span>Hop Lab</button>
+  <button role="tab" data-v="chart" aria-selected="false"><span class="n">4</span>Rule Chart</button>
+  <button role="tab" data-v="detect" aria-selected="false"><span class="n">5</span>Detective</button>
+  <button role="tab" data-v="chal" aria-selected="false"><span class="n">★</span>Challenge</button>
+  <button role="tab" data-v="journal" aria-selected="false"><span class="n">J</span>Journal</button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm">
+  <p class="lead">Count by fourths. Tap to hop one fourth at a time.</p>
+  <div class="linebox"><svg id="warmSvg" viewBox="0 0 1000 270" role="img" aria-label="Number line from 0 to 3 marked in fourths"></svg></div>
+  <div class="row">
+    <button class="primary" id="warmNext">Count on: next fourth</button>
+    <button class="secondary" id="warmAll">Count to 3</button>
+    <span class="muted" id="warmSay" aria-live="polite"></span>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <p class="lead" style="font-size:clamp(20px,1.9vw,28px)">Another name for <span class="fr"><span>4</span><span>4</span></span> ?</p>
+      <div class="row">
+        <label class="lbl num">Whole number<input id="w1" inputmode="numeric" autocomplete="off"></label>
+        <button class="secondary" id="w1Check">Check</button>
+      </div>
+      <div class="fb" id="w1Fb" aria-live="polite"></div>
+    </div>
+    <div class="panel">
+      <p class="lead" style="font-size:clamp(20px,1.9vw,28px)">Another name for <span class="fr"><span>6</span><span>4</span></span> ?</p>
+      <div class="row" style="align-items:flex-end">
+        <label class="lbl num">Whole<input id="w2w" inputmode="numeric" autocomplete="off"></label>
+        <div class="fin"><input id="w2n" inputmode="numeric" aria-label="numerator" autocomplete="off"><div class="bar"></div><input id="w2d" inputmode="numeric" aria-label="denominator" autocomplete="off"></div>
+        <button class="secondary" id="w2Check">Check</button>
+      </div>
+      <div class="fb" id="w2Fb" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LAUNCH -->
+<section class="view" id="v-launch" hidden>
+  <div class="panel">
+    <span class="eyebrow">Driving question</span>
+    <p class="lead">A frog hops <span class="fr"><span>3</span><span>4</span></span> of a meter each time. Will it ever land exactly on a whole meter? Where?</p>
+    <p class="muted">Vote first. Tap a choice once for each hand that goes up.</p>
+  </div>
+  <div class="votes" id="votes"></div>
+  <div class="row">
+    <button class="primary" id="goTest">Test it in the Hop Lab</button>
+    <button class="secondary" id="clearVotes">Clear votes</button>
+  </div>
+</section>
+
+<!-- LAB -->
+<section class="view" id="v-lab" hidden>
+  <div class="row" style="justify-content:space-between">
+    <p class="lead" id="labTitle"></p>
+    <span class="ws">Worksheet #1</span>
+  </div>
+  <div class="linebox"><svg id="labSvg" viewBox="0 0 1000 270" role="img" aria-label="Frog number line"></svg></div>
+  <ol class="log" id="labLog" aria-label="Landings"></ol>
+  <div class="fb" id="labFb" aria-live="polite"></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <span class="eyebrow">Hop</span>
+        <div class="seg" role="group" aria-label="Who labels the landing">
+          <button id="mFrog" aria-pressed="true">Frog labels</button>
+          <button id="mMe" aria-pressed="false">I label first</button>
+        </div>
+      </div>
+      <div class="row" id="labelBox" hidden style="align-items:flex-end">
+        <span>Next landing:</span>
+        <div class="fin"><input id="ln" inputmode="numeric" aria-label="landing numerator" autocomplete="off"><div class="bar"></div><input id="ld" inputmode="numeric" aria-label="landing denominator" autocomplete="off"></div>
+        <span class="muted" style="font-size:15px">as an improper fraction</span>
+      </div>
+      <div class="row">
+        <button class="primary" id="hopBtn">Hop</button>
+        <button class="secondary" id="hopAll">Hop to a whole number</button>
+        <button class="secondary" id="undoBtn">Undo</button>
+        <button class="secondary" id="clearLine">Clear line</button>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="eyebrow">Predict before you hop</span>
+      <div class="row" style="align-items:flex-end">
+        <label class="lbl num">How many hops?<input id="pH" inputmode="numeric" autocomplete="off"></label>
+        <label class="lbl num">First whole number?<input id="pL" inputmode="numeric" autocomplete="off"></label>
+        <button class="secondary" id="lockBtn">Lock it in</button>
+      </div>
+      <div class="muted" id="predSay" style="font-size:16px"></div>
+    </div>
+  </div>
+  <div class="panel chips" id="chips">
+    <span class="eyebrow">Choose a hop size</span>
+  </div>
+</section>
+
+<!-- CHART -->
+<section class="view" id="v-chart" hidden>
+  <div class="row" style="justify-content:space-between">
+    <p class="lead">Class chart: hop size, hops, landing</p>
+    <span class="ws">Worksheet #2</span>
+  </div>
+  <p class="muted">Rows fill in as you finish each hop size in the Hop Lab. Write each landing as number of hops × hop size.</p>
+  <div class="panel tablebox"><table class="chart" id="chartT"></table></div>
+  <div class="row">
+    <button class="secondary" id="simpBtn" aria-pressed="false">Show simplest form</button>
+    <button class="secondary" id="fillBtn">Fill in the rest</button>
+  </div>
+</section>
+
+<!-- DETECTIVE -->
+<section class="view" id="v-detect" hidden>
+  <div class="qnav" id="qnav"></div>
+  <div class="panel">
+    <div class="row" style="justify-content:space-between"><p class="lead" id="qText"></p><span class="ws" id="qWs"></span></div>
+    <p class="muted">Talk it over first. Then tap a button to put evidence on screen.</p>
+    <div class="row" id="qActs"></div>
+  </div>
+  <div class="stack" id="qStage"></div>
+  <div class="fb" id="qFb" aria-live="polite"></div>
+</section>
+
+<!-- CHALLENGE -->
+<section class="view" id="v-chal" hidden>
+  <div class="row" style="justify-content:space-between"><p class="lead">Bigger hops</p><span class="ws">Worksheet #5</span></div>
+  <div class="panel" id="chalA"></div>
+  <div class="panel">
+    <span class="eyebrow">Hop hunt</span>
+    <p class="lead" style="font-size:clamp(20px,1.9vw,28px)">Find a hop size whose <em>first</em> whole-number landing is 7.</p>
+    <div class="row" style="align-items:flex-end">
+      <span>Hop by</span>
+      <div class="fin"><input id="hn" inputmode="numeric" aria-label="hop numerator" autocomplete="off"><div class="bar"></div><input id="hd" inputmode="numeric" aria-label="hop denominator" autocomplete="off"></div>
+      <button class="primary" id="huntBtn">Test my hop</button>
+    </div>
+    <div class="linebox" id="huntBox" hidden><svg id="huntSvg" viewBox="0 0 1000 270" role="img" aria-label="Number line for your hop"></svg></div>
+    <div class="fb" id="huntFb" aria-live="polite"></div>
+    <div class="row"><span class="muted">Hops that work:</span><div class="found" id="found"><span class="muted" style="background:none;border:0">none yet</span></div></div>
+  </div>
+</section>
+
+<!-- JOURNAL -->
+<section class="view" id="v-journal" hidden>
+  <div class="row" style="justify-content:space-between"><p class="lead">Math Journal</p><span class="ws">Worksheet #6</span></div>
+  <div class="panel" id="jBox"></div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a; };
+const simp = (n,d) => { const g=gcd(n,d); return [n/g, d/g]; };
+/* First whole-number landing for a hop of n/d (n,d >= 1): hops = d/g, landing = n/g */
+const first = (n,d) => { const [a,b]=simp(n,d); return {hops:b, land:a}; };
+const fr = (n,d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const mixedH = (num,d) => { const w=Math.floor(num/d), r=num%d; if(r===0) return `${w}`; if(w===0) return fr(r,d); return `<span class="mixed">${w}${fr(r,d)}</span>`; };
+const PARTS={1:'wholes',2:'halves',3:'thirds',4:'fourths',5:'fifths',6:'sixths',7:'sevenths',8:'eighths',9:'ninths',10:'tenths',11:'elevenths',12:'twelfths'};
+const parts = d => PARTS[d]||(d+'ths');
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const intIn = el => { const v=el.value.trim(); return /^\d+$/.test(v) ? parseInt(v,10) : null; };
+const lineMax = (n,d) => { const L=first(n,d).land; return L<=2 ? 3 : Math.max(6, L); };
+
+/* ---------- SVG number line ---------- */
+const W=1000, PL=44, PR=44, AY=170, H=270;
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function svgFrac(g, x, y, n, d, size, color, weight){
+  const w = Math.max(String(n).length, String(d).length)*size*0.6 + 6;
+  el('text',{x, y:y-5, 'text-anchor':'middle', 'font-size':size, 'font-weight':weight||700, fill:color, 'font-family':'Atkinson Hyperlegible, sans-serif'},g).textContent=n;
+  el('line',{x1:x-w/2, x2:x+w/2, y1:y, y2:y, stroke:color, 'stroke-width':2.2, 'stroke-linecap':'round'},g);
+  el('text',{x, y:y+size*0.95, 'text-anchor':'middle', 'font-size':size, 'font-weight':weight||700, fill:color, 'font-family':'Atkinson Hyperlegible, sans-serif'},g).textContent=d;
+  return w;
+}
+function svgMixed(g, x, y, num, d, size, color){
+  const w=Math.floor(num/d), r=num%d;
+  if(r===0){ el('text',{x, y:y+size*0.4, 'text-anchor':'middle','font-size':size*1.15,'font-weight':800, fill:color,'font-family':'Atkinson Hyperlegible, sans-serif'},g).textContent=w; return; }
+  if(w===0){ svgFrac(g,x,y,r,d,size,color,400); return; }
+  const fw = Math.max(String(r).length,String(d).length)*size*0.6+6;
+  el('text',{x:x-fw/2-2, y:y+size*0.4, 'text-anchor':'end','font-size':size*1.15,'font-weight':700, fill:color,'font-family':'Atkinson Hyperlegible, sans-serif'},g).textContent=w;
+  svgFrac(g,x+4,y,r,d,size*0.85,color,400);
+}
+function frogShape(parent){
+  const g = el('g',{class:'frog'},parent);
+  el('ellipse',{cx:0, cy:-14, rx:19, ry:13, fill:'var(--frog)'},g);
+  el('ellipse',{cx:0, cy:-10, rx:11, ry:6, fill:'var(--frog-soft)'},g);
+  for(const s of [-1,1]){
+    el('circle',{cx:s*9, cy:-27, r:7, fill:'var(--frog)'},g);
+    el('circle',{cx:s*9, cy:-28, r:4.2, fill:'#fff'},g);
+    el('circle',{cx:s*9.6, cy:-28, r:2.1, fill:'#142E2A'},g);
+  }
+  return g;
+}
+/* opts: n,d hop; k hops drawn; max; mark {num,den} learner's guess; labels; showMixed; ticksD (tick denominator) */
+function drawLine(svg, o){
+  svg.innerHTML='';
+  const max=o.max, td=o.ticksD||o.d;
+  const X = v => PL + v/max*(W-PL-PR);
+  const ink='var(--ink)', muted='var(--muted)';
+  el('rect',{x:0,y:0,width:W,height:H,fill:'var(--card)'},svg);
+  // axis
+  el('line',{x1:PL-14, x2:W-PR+14, y1:AY, y2:AY, stroke:ink, 'stroke-width':3, 'stroke-linecap':'round'},svg);
+  el('path',{d:`M ${W-PR+20} ${AY} l -12 -7 v 14 z`, fill:ink},svg);
+  const per = (W-PL-PR)/(max*td);
+  for(let i=0;i<=max*td;i++){
+    const whole = i%td===0;
+    if(!whole && per<5) continue;
+    el('line',{x1:X(i/td), x2:X(i/td), y1:AY-(whole?14:8), y2:AY+(whole?14:8), stroke:whole?ink:muted, 'stroke-width':whole?3:1.6},svg);
+    if(whole) el('text',{x:X(i/td), y:AY+40, 'text-anchor':'middle','font-size':26,'font-weight':800, fill:ink,'font-family':'Baloo 2, sans-serif'},svg).textContent=i/td;
+  }
+  const k=o.k||0, n=o.n, d=o.d;
+  const spacing = X(n/d)-X(0);
+  const crowd = spacing < 62;
+  // arcs
+  for(let j=1;j<=k;j++){
+    const x0=X((j-1)*n/d), x1=X(j*n/d); const h=Math.min(52, (x1-x0)*0.45+10);
+    el('path',{d:`M ${x0} ${AY} Q ${(x0+x1)/2} ${AY-2*h} ${x1} ${AY}`, fill:'none', stroke:'var(--frog)', 'stroke-width':3, 'stroke-dasharray':'2 7', 'stroke-linecap':'round'},svg);
+  }
+  // landings
+  for(let j=1;j<=k;j++){
+    const num=j*n, x=X(num/d), isW = num%d===0;
+    el('circle',{cx:x, cy:AY, r:isW?10:7, fill:isW?'var(--gold)':'var(--frog)', stroke:'var(--card)', 'stroke-width':2.5},svg);
+    if(o.labels!==false && (spacing>=30 || isW)){
+      const up = crowd && j%2===0 ? 46 : 0;
+      svgFrac(svg, x, AY-82-up, num, d, crowd?17:21, isW?'var(--gold)':ink);
+      if(o.showMixed!==false && num>=d){
+        const down = crowd && j%2===0 ? 40 : 0;
+        svgMixed(svg, x, AY+80+down, num, d, crowd?15:19, isW?'var(--gold)':'var(--frog)');
+      }
+    }
+  }
+  // learner's guess
+  if(o.mark){
+    const v=o.mark.num/o.mark.den; const off = v>max; const x = X(Math.min(v,max));
+    el('path',{d:`M ${x} ${AY-6} l -10 -18 h 20 z`, fill:'var(--coral)'},svg);
+    el('line',{x1:x,x2:x,y1:AY-6,y2:AY+12,stroke:'var(--coral)','stroke-width':3},svg);
+    el('text',{x, y:AY-32, 'text-anchor':'middle','font-size':16,'font-weight':700, fill:'var(--coral)','font-family':'Atkinson Hyperlegible, sans-serif'},svg).textContent = off ? 'your guess is off the line →' : 'your guess';
+  }
+  if(o.frog!==false){
+    const f=frogShape(svg); const x=X(k*n/d); f.setAttribute('transform',`translate(${x} ${AY-4})`);
+    svg._frog=f; svg._X=X;
+  }
+  if(o.caption){ el('text',{x:PL-14, y:30, 'font-size':20,'font-weight':700, fill:muted,'font-family':'Baloo 2, sans-serif'},svg).textContent=o.caption; }
+}
+async function animateFrog(svg, fromV, toV){
+  const f=svg._frog, X=svg._X; if(!f) return;
+  const x0=X(fromV), x1=X(toV); const h=Math.min(52,(x1-x0)*0.45+10);
+  if(reduced){ f.setAttribute('transform',`translate(${x1} ${AY-4})`); return; }
+  const T=420, t0=performance.now();
+  await new Promise(res=>{ function step(t){ const u=Math.min(1,(t-t0)/T); const x=x0+(x1-x0)*u; const y=AY-4-4*h*u*(1-u); f.setAttribute('transform',`translate(${x} ${y})`); u<1?requestAnimationFrame(step):res(); } requestAnimationFrame(step); });
+}
+
+/* ---------- Tabs ---------- */
+const views=['warm','launch','lab','chart','detect','chal','journal'];
+function show(v){
+  document.querySelectorAll('#nav button').forEach(b=>b.setAttribute('aria-selected', b.dataset.v===v));
+  views.forEach(x=> $('#v-'+x).hidden = x!==v);
+  if(v==='chart') renderChart();
+  if(v==='detect') renderQ();
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+
+/* ---------- Warm-up ---------- */
+const warm={k:0};
+function drawWarm(){ drawLine($('#warmSvg'),{n:1,d:4,k:warm.k,max:3}); $('#warmSay').innerHTML = warm.k ? `The frog is on ${fr(warm.k,4)}${warm.k>=4?` = ${mixedH(warm.k,4)}`:''}` : 'Start at 0.'; $('#warmNext').disabled = warm.k>=12; }
+$('#warmNext').onclick=async()=>{ if(warm.k>=12) return; const s=$('#warmSvg'); await animateFrog(s, warm.k/4, (warm.k+1)/4); warm.k++; drawWarm(); };
+$('#warmAll').onclick=async()=>{ const g=++warm.gen; while(warm.k<12 && g===warm.gen){ await animateFrog($('#warmSvg'), warm.k/4,(warm.k+1)/4); if(g!==warm.gen) return; warm.k++; drawWarm(); await sleep(reduced?0:120);} };
+function fb(elm, cls, html){ elm.className='fb '+(cls||''); elm.innerHTML=html; }
+$('#w1Check').onclick=()=>{
+  const v=intIn($('#w1')), f=$('#w1Fb');
+  if(v===null) return fb(f,'try','Type a whole number.');
+  if(v===1) return fb(f,'good',`Yes. ${fr(4,4)} = 1. Four fourths make one whole.`);
+  if(v===4) return fb(f,'try',`4 is how many fourths there are. Find ${fr(4,4)} on the line: which whole number is it sitting on?`);
+  fb(f,'try',`Look at the line. Count 4 fourths from 0. Which whole number do you reach?`);
+};
+$('#w2Check').onclick=()=>{
+  const w=intIn($('#w2w'))||0, n=intIn($('#w2n')), d=intIn($('#w2d')), f=$('#w2Fb');
+  if(n===null && d===null && w>0) { return fb(f,'try',`${w} is a whole number. ${fr(6,4)} is between 1 and 2 on the line. Add the fraction part.`); }
+  if(n===null || !d) return fb(f,'try','Fill in the fraction part (top and bottom).');
+  const num = w*d + n; // value = num/d
+  if(num*4 === 6*d){
+    if(w===0 && n===6 && d===4) return fb(f,'try',`That's the same name. Can you write it as a mixed number?`);
+    let extra = (w===1 && n===2 && d===4) ? ` You could also say 1${fr(1,2)}, because ${fr(2,4)} = ${fr(1,2)}.` : '';
+    return fb(f,'good',`Yes. ${fr(6,4)} = ${w?w:''}${fr(n,d)}. Four fourths make 1, and 2 fourths are left over.${extra}`);
+  }
+  fb(f,'try',`Hop 6 fourths on the line above. Where do you land? How many wholes have you passed, and how many fourths are left over?`);
+};
+
+/* ---------- Launch votes ---------- */
+const VOTES=['Yes, at 1','Yes, at 2','Yes, at 3','Yes, somewhere else','Never'];
+let votes=VOTES.map(()=>0);
+function renderVotes(){ $('#votes').innerHTML = VOTES.map((t,i)=>`<button class="vote" data-i="${i}"><span>${t}</span><b>${votes[i]}</b></button>`).join(''); $('#votes').querySelectorAll('button').forEach(b=>b.onclick=()=>{votes[+b.dataset.i]++; renderVotes();}); }
+$('#clearVotes').onclick=()=>{votes=VOTES.map(()=>0); renderVotes();};
+$('#goTest').onclick=()=>{ selectHop(3,4); show('lab'); };
+
+/* ---------- Hop Lab ---------- */
+const SETS=[
+  {name:'Easier start', list:[[1,4],[1,3],[1,2],[3,4]]},
+  {name:'Worksheet #1–2', list:[[3,4],[2,3],[5,6],[6,8],[4,6]]},
+  {name:'Challenge', list:[[5,4],[3,2]]},
+];
+const WSROWS=[[3,4],[2,3],[5,6],[6,8],[4,6]];
+const done=new Map(); // "n/d" -> true
+const lab={n:3,d:4,k:0,mode:'frog',pred:null,busy:false,announced:false,mark:null};
+function renderChips(){
+  const box=$('#chips'); box.innerHTML='<span class="eyebrow">Choose a hop size</span>';
+  SETS.forEach(s=>{ const r=document.createElement('div'); r.className='chipset'; r.innerHTML=`<span>${s.name}</span>`+s.list.map(([n,d])=>`<button class="chip ${done.has(n+'/'+d)?'done':''}" data-n="${n}" data-d="${d}" aria-pressed="${lab.n===n&&lab.d===d}" aria-label="hop ${n} over ${d}">${fr(n,d)}</button>`).join(''); box.appendChild(r); });
+  box.querySelectorAll('.chip').forEach(b=>b.onclick=()=>selectHop(+b.dataset.n,+b.dataset.d));
+}
+function selectHop(n,d){ lab.n=n; lab.d=d; lab.k=0; lab.pred=null; lab.announced=false; lab.mark=null; lab.gen=(lab.gen||0)+1; lab.busy=false; $('#pH').value=''; $('#pL').value=''; $('#predSay').textContent=''; $('#ln').value=''; $('#ld').value=''; fb($('#labFb'),'',''); renderLab(); renderChips(); }
+function maxHops(){ return Math.floor(lineMax(lab.n,lab.d)*lab.d/lab.n); }
+function renderLab(){
+  const {n,d,k}=lab;
+  $('#labTitle').innerHTML=`Hop by ${fr(n,d)}`;
+  drawLine($('#labSvg'),{n,d,k,max:lineMax(n,d),mark:lab.mark});
+  const items=[]; for(let j=1;j<=k;j++){ const num=j*n; const isW=num%d===0; items.push(`<li class="${isW?'whole':''}"><b>Hop ${j}</b>${fr(num,d)}${num>=d?` = ${mixedH(num,d)}`:''}</li>`); }
+  $('#labLog').innerHTML = items.join('') || `<li><b>Start</b>The frog is on 0.</li>`;
+  $('#hopBtn').textContent = lab.mode==='me' ? 'Check and hop' : 'Hop';
+  const atEnd = k>=maxHops();
+  $('#hopBtn').disabled = atEnd || lab.busy; $('#hopAll').disabled = lab.busy || lab.announced; $('#undoBtn').disabled = k===0 || lab.busy;
+  $('#labelBox').hidden = lab.mode!=='me';
+}
+async function doHop(){
+  if(lab.busy || lab.k>=maxHops()) return;
+  const g=lab.gen; lab.busy=true; lab.mark=null; renderLab();
+  await animateFrog($('#labSvg'), lab.k*lab.n/lab.d, (lab.k+1)*lab.n/lab.d);
+  if(g!==lab.gen) return;
+  lab.k++; lab.busy=false; renderLab(); afterHop();
+}
+function afterHop(){
+  const {n,d,k}=lab, num=k*n;
+  if(num%d===0 && !lab.announced){
+    lab.announced=true; const F=first(n,d); done.set(n+'/'+d,true); renderChips(); renderLab();
+    let msg = `<b>Whole number!</b> After ${k} hops the frog is on ${fr(num,d)} = ${num/d}. &nbsp; ${k} × ${fr(n,d)} = ${fr(num,d)} = ${num/d}.`;
+    if(lab.pred){
+      const okH=lab.pred.hops===F.hops, okL=lab.pred.land===F.land;
+      msg += okH&&okL ? ` Your prediction was right on both.` :
+        ` You predicted ${lab.pred.hops} hops to land on ${lab.pred.land}. ${okH?'The hops were right.':`It took ${F.hops} hops.`} ${okL?'The landing was right.':`It landed on ${F.land}.`}`;
+      if(gcd(n,d)>1 && lab.pred.hops===d) msg += ` Only ${F.hops} hops, not ${d}: ${fr(n,d)} is the same size as ${fr(F.land,F.hops)}.`;
+    }
+    msg += ` Keep hopping: does it land on a whole number again?`;
+    fb($('#labFb'),'star',msg);
+  } else if(num%d===0){
+    fb($('#labFb'),'star',`Another whole number: ${k} × ${fr(n,d)} = ${fr(num,d)} = ${num/d}.`);
+  } else if(lab.mode!=='me'){
+    fb($('#labFb'),'',`Hop ${k}: ${k} × ${fr(n,d)} = ${fr(num,d)}${num>=d?` = ${mixedH(num,d)}`:''}. Not a whole number yet.`);
+  }
+  if(k>=maxHops()) $('#labFb').innerHTML += ` <span class="muted">(End of the line.)</span>`;
+}
+$('#hopBtn').onclick=()=>{
+  if(lab.mode!=='me') return doHop();
+  const a=intIn($('#ln')), b=intIn($('#ld')); const {n,d,k}=lab; const k1=k+1;
+  if(a===null || !b){ return fb($('#labFb'),'try','Type the landing as a fraction first (top and bottom), then check.'); }
+  const target=k1*n; // over d
+  if(a*d===target*b){
+    const same = b===d;
+    lab.mark=null; doHop().then(()=>{ if((lab.k*n)%d===0){ $('#labFb').innerHTML = `Correct label: ${fr(a,b)}. ` + $('#labFb').innerHTML; $('#ln').value=''; $('#ld').value=''; return; } fb($('#labFb'),'good', same ? `Yes, ${fr(a,b)}${target>=d?` = ${mixedH(target,d)}`:''}. Type the next landing.` : `Yes, ${fr(a,b)} names the same spot. On this line we count in ${parts(d)}: ${fr(target,d)}${target>=d?` = ${mixedH(target,d)}`:''}.`); $('#ln').value=''; $('#ld').value=''; });
+    return;
+  }
+  lab.mark={num:a,den:b}; renderLab();
+  const addedAll = (b===d*k1 && a===n*k1);
+  const addedPrev = (k1>=2 && b===2*d && a===k*n+n);
+  if(addedAll || addedPrev){
+    const v=a/b, here=k*n/d;
+    const where = Math.abs(v-n/d)<1e-9 ? `It is the same spot as one hop, ${fr(n,d)}.` : v<=here+1e-9 ? `That spot is not ahead of the frog at all.` : '';
+    return fb($('#labFb'),'try',`Show that hop on the line. Did the size of the parts change? The line is still cut into ${parts(d)}. Your ${fr(a,b)} is the orange marker. ${where}`);
+  }
+  if(b===d) return fb($('#labFb'),'try',`The frog is on ${fr(k*n,d)}. One hop adds ${n} more ${parts(d)}. Count them on the line. Your ${fr(a,b)} is the orange marker.`);
+  fb($('#labFb'),'try',`Your ${fr(a,b)} is the orange marker. Is that one hop of ${fr(n,d)} past the frog? Try naming the landing in ${parts(d)}.`);
+};
+$('#hopAll').onclick=async()=>{ const g=lab.gen; while(lab.k<maxHops() && g===lab.gen){ await doHop(); if(lab.announced) break; await sleep(reduced?0:120);} };
+$('#undoBtn').onclick=()=>{ if(lab.k>0){ lab.k--; if(lab.announced && (lab.k*lab.n)/lab.d < first(lab.n,lab.d).land){ lab.announced=false; } lab.mark=null; fb($('#labFb'),'',''); renderLab(); } };
+$('#clearLine').onclick=()=>selectHop(lab.n,lab.d);
+$('#mFrog').onclick=()=>{ lab.mode='frog'; $('#mFrog').setAttribute('aria-pressed',true); $('#mMe').setAttribute('aria-pressed',false); renderLab(); };
+$('#mMe').onclick=()=>{ lab.mode='me'; $('#mMe').setAttribute('aria-pressed',true); $('#mFrog').setAttribute('aria-pressed',false); renderLab(); fb($('#labFb'),'',`Type where the frog will land next, then tap Check and hop.`); };
+$('#lockBtn').onclick=()=>{
+  const h=intIn($('#pH')), L=intIn($('#pL'));
+  if(!h || !L) { $('#predSay').textContent='Type both numbers (hops and the whole number), then lock it in.'; return; }
+  lab.pred={hops:h, land:L};
+  const {n,d}=lab; const F=first(n,d);
+  let s=`Locked: ${h} hops, landing on ${L}. Now hop to test it.`;
+  if(gcd(n,d)>1 && h===d) s = `Locked: ${h} hops, landing on ${L}. Try it. Where are you after ${F.hops}?`;
+  $('#predSay').textContent=s;
+};
+
+/* ---------- Chart ---------- */
+let showSimp=false, hl=null, filled=false;
+function chartRows(){
+  const rows=WSROWS.map(x=>x.slice());
+  for(const key of done.keys()){ const [n,d]=key.split('/').map(Number); if(!rows.some(r=>r[0]===n&&r[1]===d)) rows.push([n,d]); }
+  return rows;
+}
+function renderChart(){
+  const rows=chartRows();
+  let h=`<tr><th>Hop size</th>${showSimp?'<th>Simplest form</th>':''}<th>Hops</th><th>First whole landing</th><th>Multiplication sentence</th></tr>`;
+  for(const [n,d] of rows){
+    const F=first(n,d), ok = filled || done.has(n+'/'+d);
+    const [sn,sd]=simp(n,d);
+    const simpCell = `<span class="fr"><span class="${hl==='N'?'hlN':''}">${sn}</span><span class="${hl==='D'?'hlD':''}">${sd}</span></span>`;
+    h+=`<tr><td>${fr(n,d)}</td>${showSimp?`<td>${simpCell}</td>`:''}`+
+      (ok ? `<td><span class="${hl==='D'?'hlD':''}">${F.hops}</span></td><td><span class="${hl==='N'?'hlN':''}">${F.land}</span></td><td>${F.hops} × ${fr(n,d)} = ${fr(F.hops*n,d)} = ${F.land}</td>`
+          : `<td class="empty">?</td><td class="empty">?</td><td class="empty">finish it in the Hop Lab</td>`)+`</tr>`;
+  }
+  $('#chartT').innerHTML=h;
+  $('#simpBtn').textContent = showSimp ? 'Hide simplest form' : 'Show simplest form';
+  $('#simpBtn').setAttribute('aria-pressed', showSimp);
+}
+$('#simpBtn').onclick=()=>{ showSimp=!showSimp; renderChart(); };
+$('#fillBtn').onclick=()=>{ filled=true; renderChart(); };
+
+/* ---------- Detective ---------- */
+let qi=0;
+function stageLines(list, maxOverride){
+  const st=$('#qStage'); st.innerHTML='';
+  const max = maxOverride || Math.max(...list.map(o=>lineMax(o.n,o.d)));
+  list.forEach(o=>{
+    const box=document.createElement('div'); box.className='panel'; box.style.padding='6px 6px 2px';
+    box.innerHTML=`<div class="cap">Hop by ${fr(o.n,o.d)}</div><div class="linebox" style="border:0"><svg viewBox="0 0 1000 ${H}" role="img" aria-label="Number line hopping by ${o.n} over ${o.d}"></svg></div>`;
+    st.appendChild(box);
+    drawLine(box.querySelector('svg'),{n:o.n,d:o.d,k:o.k??first(o.n,o.d).hops,max,showMixed:o.showMixed});
+  });
+}
+const Q=[
+  {t:()=>`Why do ${fr(3,4)} and ${fr(6,8)} behave the same?`, ws:'Worksheet #3', acts:[
+    {l:'Stack the two lines', run:()=>{ stageLines([{n:3,d:4},{n:6,d:8}]); fb($('#qFb'),'',`Both frogs land in the same places: ${fr(3,4)} and ${fr(6,8)}, ${fr(6,4)} and ${fr(12,8)}, ${fr(9,4)} and ${fr(18,8)}, then 3. What does that tell you about the two hops?`); }},
+    {l:'Split each fourth in half', run:()=>{ stageLines([{n:3,d:4,k:1,showMixed:false},{n:6,d:8,k:1,showMixed:false}],3); fb($('#qFb'),'good',`Cut every fourth into 2 equal parts and you get eighths. So 3 fourths = 6 eighths: ${fr(3,4)} = ${fr(6,8)}. Same hop, so same landings: 4 hops to 3.`); }},
+  ]},
+  {t:()=>`Look at the chart. What predicts the number of hops?`, ws:'Worksheet #4', acts:[
+    {l:'Highlight the hops', run:()=>{ $('#qStage').innerHTML=''; fb($('#qFb'),'',chartMini('D')+`Compare each green number with the hop size. Where do you see it?`); }},
+    {l:'Show the rule', run:()=>{ $('#qStage').innerHTML=''; fb($('#qFb'),'good',chartMini('D')+`Write the hop in simplest form. Its <b>denominator</b> is the number of hops. ${fr(6,8)} = ${fr(3,4)}, so 4 hops, not 8.`); }},
+  ]},
+  {t:()=>`What predicts the landing spot?`, ws:'Worksheet #4', acts:[
+    {l:'Highlight the landings', run:()=>{ $('#qStage').innerHTML=''; fb($('#qFb'),'',chartMini('N')+`Compare each gold number with the hop size. Where do you see it?`); }},
+    {l:'Show the rule', run:()=>{ $('#qStage').innerHTML=''; fb($('#qFb'),'good',chartMini('N')+`In simplest form, the <b>numerator</b> is the first whole landing. ${fr(5,6)} lands first on 5. ${fr(4,6)} = ${fr(2,3)} lands first on 2.`); }},
+  ]},
+  {t:()=>`${fr(4,6)} has a 4 on top. So why does it land on 2, not 4?`, ws:'Worksheet #2', acts:[
+    {l:'Stack 4/6 and 2/3', run:()=>{ stageLines([{n:4,d:6},{n:2,d:3}]); fb($('#qFb'),'',`Both frogs reach 2 after 3 hops. Why is the 4/6 frog on 2 already?`); }},
+    {l:'Why 3 hops?', run:()=>{ stageLines([{n:4,d:6}]); fb($('#qFb'),'good',`3 × ${fr(4,6)} = ${fr(12,6)} = 2. Twelve sixths make 2 wholes. ${fr(4,6)} = ${fr(2,3)}, and 3 × ${fr(2,3)} = ${fr(6,3)} = 2.`); }},
+  ]},
+  {t:()=>`After the first whole number, does the frog land on a whole number again? When?`, ws:'Worksheet #1', acts:[
+    {l:`Keep hopping by 3/4`, run:()=>{ stageLines([{n:3,d:4,k:8}],6); fb($('#qFb'),'',`Gold dots are whole numbers. Count the hops between them.`); }},
+    {l:'Show the pattern', run:()=>{ stageLines([{n:3,d:4,k:8}],6); fb($('#qFb'),'good',`Every 4 hops lands on a whole number: 4 × ${fr(3,4)} = 3 and 8 × ${fr(3,4)} = ${fr(24,4)} = 6. The whole-number landings are multiples of 3.`); }},
+  ]},
+  {t:()=>`Write the 3/4 frog's first whole landing as a multiplication sentence.`, ws:'Worksheet #2', acts:[
+    {l:'Show it', run:()=>{ stageLines([{n:3,d:4}]); fb($('#qFb'),'good',`<span style="font-size:1.4em">4 × ${fr(3,4)} = ${fr(12,4)} = 3</span><br>4 hops of 3 fourths is 12 fourths. 12 fourths make 3 wholes.`); }},
+  ]},
+];
+function chartMini(which){
+  let h=`<div class="tablebox"><table class="chart" style="margin-bottom:8px"><tr><th>Hop size</th><th>Simplest form</th><th>Hops</th><th>First whole landing</th></tr>`;
+  for(const [n,d] of WSROWS){ const [sn,sd]=simp(n,d); const F=first(n,d);
+    h+=`<tr><td>${fr(n,d)}</td><td><span class="fr"><span class="${which==='N'?'hlN':''}">${sn}</span><span class="${which==='D'?'hlD':''}">${sd}</span></span></td><td><span class="${which==='D'?'hlD':''}">${F.hops}</span></td><td><span class="${which==='N'?'hlN':''}">${F.land}</span></td></tr>`; }
+  return h+`</table></div>`;
+}
+function renderQ(){
+  $('#qnav').innerHTML = Q.map((_,i)=>`<button data-i="${i}" aria-pressed="${i===qi}" aria-label="Question ${i+1}">${i+1}</button>`).join('');
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ qi=+b.dataset.i; $('#qStage').innerHTML=''; fb($('#qFb'),'',''); renderQ(); });
+  const q=Q[qi]; $('#qText').innerHTML=q.t(); $('#qWs').textContent=q.ws;
+  const a=$('#qActs'); a.innerHTML='';
+  q.acts.forEach((x,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=x.l; b.onclick=x.run; a.appendChild(b); });
+}
+
+/* ---------- Predict-and-test runner (Challenge part A, Journal) ---------- */
+function runner(box, hops, intro){
+  const id='r'+Math.random().toString(36).slice(2,7);
+  box.innerHTML = `${intro}
+    <div class="chipset" id="${id}c"></div>
+    <div class="row" style="align-items:flex-end">
+      <label class="lbl num">First whole number?<input id="${id}L" inputmode="numeric" autocomplete="off"></label>
+      <label class="lbl num">After how many hops?<input id="${id}H" inputmode="numeric" autocomplete="off"></label>
+      <button class="primary" id="${id}go">Check by hopping</button>
+    </div>
+    <div class="linebox" id="${id}b" hidden><svg id="${id}s" viewBox="0 0 1000 ${H}" role="img" aria-label="Number line"></svg></div>
+    <div class="fb" id="${id}f" aria-live="polite"></div>`;
+  let cur=hops[0], gen=0;
+  const chips=box.querySelector('#'+id+'c');
+  function rc(){ chips.innerHTML = hops.length>1 ? hops.map(([n,d])=>`<button class="chip" data-n="${n}" data-d="${d}" aria-pressed="${cur[0]===n&&cur[1]===d}">${fr(n,d)}</button>`).join('') : ''; chips.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{cur=[+b.dataset.n,+b.dataset.d]; gen++; rc(); box.querySelector('#'+id+'b').hidden=true; fb(box.querySelector('#'+id+'f'),'',''); box.querySelector('#'+id+'L').value=''; box.querySelector('#'+id+'H').value='';}); }
+  rc();
+  box.querySelector('#'+id+'go').onclick=async()=>{
+    const [n,d]=cur, F=first(n,d), L=intIn(box.querySelector('#'+id+'L')), Hh=intIn(box.querySelector('#'+id+'H'));
+    const f=box.querySelector('#'+id+'f');
+    if(!L || !Hh) return fb(f,'try','Make your prediction first: type both numbers.');
+    const g=++gen; const lb=box.querySelector('#'+id+'b'); lb.hidden=false; const s=box.querySelector('#'+id+'s');
+    const max=lineMax(n,d);
+    for(let k=0;k<=F.hops;k++){ if(g!==gen) return; drawLine(s,{n,d,k,max}); if(k<F.hops){ await sleep(reduced?0:80); await animateFrog(s,k*n/d,(k+1)*n/d); } }
+    const okL=L===F.land, okH=Hh===F.hops, sent=`${F.hops} × ${fr(n,d)} = ${fr(F.hops*n,d)} = ${F.land}`;
+    if(okL&&okH) return fb(f,'good',`Right on both. ${sent}.`);
+    let why='';
+    if(!okH && Hh===d && gcd(n,d)>1) why=` Try it: where are you after ${F.hops}?`;
+    else if(!okH || !okL) why = gcd(n,d)>1 ? ` Hint: ${fr(n,d)} = ${fr(F.land,F.hops)}.` : ` Look at the hop size ${fr(n,d)}: which number tells the hops, and which tells the landing?`;
+    fb(f,'try',`You said ${L} after ${Hh} hops. ${okL?'The landing is right. ':''}${okH?'The hops are right. ':''}Watch the frog: it lands on ${F.land} after ${F.hops} hops. ${sent}.${why}`);
+  };
+}
+function buildChallenge(){
+  runner($('#chalA'), [[5,4],[3,2]], `<span class="eyebrow">Part A</span><p class="lead" style="font-size:clamp(20px,1.9vw,28px)">Hops bigger than 1. Predict, then check.</p>`);
+}
+function buildJournal(){
+  runner($('#jBox'), [[2,5]], `<p class="lead" style="font-size:clamp(20px,1.9vw,28px)">A frog hops ${fr(2,5)} each time. Where does it first land on a whole number? After how many hops?</p><p class="muted">Write your answer in your journal first. Then test it here.</p>`);
+}
+
+/* ---------- Hop hunt for 7 ---------- */
+let found=[];
+$('#huntBtn').onclick=async()=>{
+  const n=intIn($('#hn')), d=intIn($('#hd')), f=$('#huntFb');
+  if(!n || !d) return fb(f,'try','Type a hop size: a top number and a bottom number (not 0).');
+  if(n>24 || d>12) return fb(f,'try','Keep the top number 24 or less and the bottom number 12 or less, so the frog fits on the line.');
+  const F=first(n,d); const box=$('#huntBox'); box.hidden=false; const s=$('#huntSvg');
+  const max=Math.max(lineMax(n,d), 7);
+  drawLine(s,{n,d,k:F.hops,max});
+  if(F.land===7){
+    const key=`${n}/${d}`;
+    if(d===1 || F.hops===1){ fb(f,'star',`${fr(n,d)} = 7, so one hop lands on 7. That works, but it's a whole-number hop. Can you find a fraction hop that takes more than one hop to reach 7?`); }
+    else fb(f,'good',`Yes! ${F.hops} × ${fr(n,d)} = ${fr(F.hops*n,d)} = 7, and no earlier hop lands on a whole number.${gcd(n,d)>1?` (${fr(n,d)} = ${fr(7,F.hops)}.)`:''} How many more can you find?`);
+    if(!found.includes(key)){ found.push(key); renderFound(); }
+  } else {
+    const passes = (7*d)%n===0 && 7*d/n>F.hops;
+    fb(f,'try',`This frog first lands on ${F.land} after ${F.hops} hop${F.hops===1?'':'s'}: ${F.hops} × ${fr(n,d)} = ${F.land}.${passes?' It does reach 7 later, but 7 is not its first whole number.':''} In simplest form, ${fr(n,d)} = ${fr(simp(n,d)[0],simp(n,d)[1])}. Which part of the hop decides the first landing?`);
+  }
+};
+function renderFound(){ $('#found').innerHTML = found.length ? found.map(k=>{const [n,d]=k.split('/'); return `<span>${fr(n,d)}</span>`;}).join('') : '<span class="muted" style="background:none;border:0">none yet</span>'; }
+
+/* ---------- Start over / fullscreen ---------- */
+function resetAll(){
+  warm.k=0; warm.gen=(warm.gen||0)+1; drawWarm(); ['w1','w2w','w2n','w2d','hn','hd'].forEach(i=>$('#'+i).value=''); fb($('#w1Fb'),'',''); fb($('#w2Fb'),'','');
+  votes=VOTES.map(()=>0); renderVotes();
+  done.clear(); filled=false; showSimp=false; lab.mode='frog'; $('#mFrog').setAttribute('aria-pressed',true); $('#mMe').setAttribute('aria-pressed',false); selectHop(3,4);
+  qi=0; $('#qStage').innerHTML=''; fb($('#qFb'),'',''); renderQ(); renderChart();
+  buildChallenge(); buildJournal(); found=[]; renderFound(); $('#huntBox').hidden=true; fb($('#huntFb'),'','');
+  show('warm');
+}
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+
+resetAll();
+})();
+</script>
+
+</body></html>

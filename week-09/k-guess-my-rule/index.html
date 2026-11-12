@@ -1,0 +1,643 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Guess My Rule</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a felt play-mat with a yarn loop (IN) beside an open OUT area; controls and the block tray sit in a side column. */
+:root{
+  --bg:#E9EFEC; --mat:#D5E5DD; --card:#FFFFFF; --ink:#1A2627; --muted:#536466; --line:#BFD1CA;
+  --loop:#7447CC; --on-loop:#FFFFFF; --loop-soft:#ECE4FB; --loop2:#0B8571; --loop2-soft:#DDF3EE;
+  --good:#17804A; --good-soft:#DDF3E5; --oops:#B65300; --oops-soft:#FCEBDB;
+  --red:#E1392E; --red-d:#9C1F16; --blue:#2C6AD6; --blue-d:#163F86; --yellow:#F4B600; --yellow-d:#9E7400;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --b:clamp(52px, 7.2vh, 80px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111918; --mat:#1A2725; --card:#22302E; --ink:#E8F0ED; --muted:#A2B4B1; --line:#33443F;
+    --loop:#B293F6; --on-loop:#1C1233; --loop-soft:#2C2443; --loop2:#3FCFB4; --loop2-soft:#16332E;
+    --good:#56D18E; --good-soft:#163323; --oops:#FFA556; --oops-soft:#3A2614;
+    --red-d:#FF8F86; --blue-d:#9DBDF7; --yellow-d:#FFE08A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111918; --mat:#1A2725; --card:#22302E; --ink:#E8F0ED; --muted:#A2B4B1; --line:#33443F;
+  --loop:#B293F6; --on-loop:#1C1233; --loop-soft:#2C2443; --loop2:#3FCFB4; --loop2-soft:#16332E;
+  --good:#56D18E; --good-soft:#163323; --oops:#FFA556; --oops-soft:#3A2614;
+  --red-d:#FF8F86; --blue-d:#9DBDF7; --yellow-d:#FFE08A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--loop); outline-offset:3px}
+
+header{display:flex; align-items:center; gap:12px 24px; flex-wrap:wrap; padding-block:14px 8px}
+.ttl h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3.2vw,46px); line-height:1; text-wrap:balance}
+.ttl p{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.2vw,17px)}
+.ttl p b{color:var(--loop); font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:8px; flex-wrap:wrap; padding-block:6px 12px}
+nav.tabs button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 20px 8px 8px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.6vw,22px); min-height:54px}
+nav.tabs button i{font-style:normal; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:var(--mat); font-size:18px}
+nav.tabs button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav.tabs button[aria-selected="true"] i{background:var(--loop); color:var(--on-loop)}
+
+main{flex:1; min-height:0; overflow:auto; padding-block:0 20px}
+.view{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:22px; align-items:start}
+.view[hidden]{display:none}
+.side{display:flex; flex-direction:column; gap:16px; min-width:0}
+
+/* Say bubble */
+.say{display:flex; gap:12px; align-items:flex-start; background:var(--card); border:2px solid var(--line); border-radius:20px; padding:14px 16px; min-height:84px}
+.say p{margin:0; font-size:clamp(20px,1.9vw,27px); line-height:1.35; font-family:var(--display); font-weight:500; min-width:0}
+.say p b{font-weight:700}
+.say.good{background:var(--good-soft); border-color:var(--good)}
+.say.oops{background:var(--oops-soft); border-color:var(--oops)}
+.spk{flex:none; width:48px; height:48px; border-radius:50%; border:2px solid var(--line); background:var(--bg); display:grid; place-items:center}
+.spk svg{width:24px; height:24px; fill:none; stroke:var(--ink); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+.inline-act{margin-top:10px; display:block}
+
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.big{border:0; background:var(--loop); color:var(--on-loop); font-family:var(--display); font-weight:600; font-size:clamp(19px,1.7vw,24px); padding:12px 24px; border-radius:16px; min-height:58px}
+.big.alt{background:var(--card); color:var(--ink); border:2.5px solid var(--ink)}
+.big:disabled{opacity:.4; cursor:default}
+.inout{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.inout button{min-height:72px; font-size:clamp(24px,2.4vw,32px); font-family:var(--display); font-weight:700; border-radius:18px; border:3px solid var(--loop); background:var(--loop-soft); color:var(--ink)}
+.inout button.o{border:3px dashed var(--muted); background:var(--card)}
+.inout[hidden]{display:none}
+.lbl-small{font-size:15px; color:var(--muted); margin:0; font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+
+/* Blocks */
+.blk{width:var(--b); height:var(--b); border:0; border-radius:14px; background:var(--card); padding:5px; position:relative; box-shadow:0 3px 0 var(--line); transition:transform .15s}
+.blk svg{width:100%; height:100%; display:block; overflow:visible}
+.blk:hover{transform:translateY(-2px)}
+.blk.sel{transform:translateY(-6px) scale(1.08); box-shadow:0 0 0 4px var(--loop), 0 8px 0 var(--line)}
+.blk.flash{animation:pop .6s ease-out}
+.blk.moved{box-shadow:0 0 0 4px var(--oops)}
+.blk.pulse{animation:pulse 1s ease-in-out 3; box-shadow:0 0 0 5px var(--oops)}
+.blk.ok{box-shadow:0 0 0 4px var(--good)}
+.blk.wrong{box-shadow:0 0 0 4px var(--oops); background:repeating-linear-gradient(45deg, var(--card) 0 8px, var(--oops-soft) 8px 16px)}
+.blk .tag{position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); background:var(--ink); color:var(--card); font-size:13px; font-weight:700; padding:2px 8px; border-radius:8px; white-space:nowrap}
+.blk .num{position:absolute; top:-10px; right:-10px; width:30px; height:30px; border-radius:50%; background:var(--loop); color:var(--on-loop); font-family:var(--display); font-weight:700; display:grid; place-items:center; font-size:17px}
+.c-red{fill:var(--red); stroke:var(--red-d)} .c-blue{fill:var(--blue); stroke:var(--blue-d)} .c-yellow{fill:var(--yellow); stroke:var(--yellow-d)}
+.shape *{stroke-width:4; stroke-linejoin:round}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@keyframes wig{20%{transform:rotate(-6deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+.wig{animation:wig .5s}
+
+/* Mat */
+.mat{background:var(--mat); border-radius:28px; padding:28px 20px 20px; display:grid; grid-template-columns:auto minmax(0,1fr); gap:20px; align-items:stretch}
+.loop{width:min(46vh, 34vw); aspect-ratio:1; border-radius:50%; border:10px solid var(--loop); box-shadow:inset 0 0 0 3px var(--loop-soft), 0 0 0 3px var(--loop-soft); background:color-mix(in srgb, var(--loop-soft) 55%, transparent);
+  display:flex; flex-wrap:wrap; align-content:center; justify-content:center; gap:8px; padding:14%; position:relative; cursor:pointer; max-width:100%}
+.loop.static,.out.static{cursor:default}
+.region-lbl{position:absolute; top:-22px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; background:var(--loop); color:var(--on-loop); font-family:var(--display); font-weight:700; font-size:20px; padding:4px 16px; border-radius:999px; white-space:nowrap}
+.region-lbl .n{background:color-mix(in srgb, var(--on-loop) 25%, transparent); border-radius:999px; padding:0 10px; min-width:32px; text-align:center}
+.region-lbl svg{width:28px; height:28px}
+.out{position:relative; border:3px dashed var(--muted); border-radius:22px; padding:34px 14px 14px; display:flex; flex-wrap:wrap; align-content:flex-start; gap:8px; min-height:200px; cursor:pointer}
+.out .region-lbl{background:var(--card); color:var(--ink); border:2.5px dashed var(--muted); top:-20px}
+.out .region-lbl .n{background:var(--mat)}
+.target .loop, .target .out{animation:breathe 1.6s ease-in-out infinite}
+@keyframes breathe{50%{filter:brightness(1.06); transform:scale(1.01)}}
+.tray{display:flex; flex-wrap:wrap; gap:8px; padding:12px; border-radius:18px; background:var(--card); border:2px solid var(--line); min-height:calc(var(--b) + 26px)}
+.tray.empty::after{content:"No blocks left."; color:var(--muted); align-self:center; padding:8px}
+
+/* Rule cards */
+.cards{display:grid; grid-template-columns:repeat(auto-fill, minmax(104px,1fr)); gap:10px}
+.card{border:2.5px solid var(--line); background:var(--card); border-radius:18px; padding:10px 6px 8px; display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--display); font-weight:600; font-size:19px; min-height:104px}
+.card svg{width:56px; height:56px}
+.card:hover{border-color:var(--loop)}
+.card.on{border-color:var(--loop); background:var(--loop-soft)}
+.card.dim{opacity:.35}
+.ricon .ink{fill:none; stroke:var(--ink); stroke-width:7; stroke-linejoin:round}
+.ricon .inkfill{fill:var(--ink); stroke:var(--ink); stroke-width:5; stroke-linejoin:round}
+.ricon .faint{fill:none; stroke:var(--muted); stroke-width:5; stroke-dasharray:6 6}
+.ricon .dot{fill:var(--loop); stroke:var(--card); stroke-width:3}
+.region-lbl .ricon .ink{stroke:var(--on-loop)} .region-lbl .ricon .inkfill{fill:var(--on-loop); stroke:var(--on-loop)}
+.panel{background:var(--card); border:2px solid var(--loop); border-radius:20px; padding:14px; display:flex; flex-direction:column; gap:12px}
+.panel h3{margin:0; font-family:var(--display); font-size:22px}
+.panel[hidden]{display:none}
+.chip{display:inline-flex; align-items:center; gap:8px; background:var(--loop-soft); border:2px solid var(--loop); border-radius:999px; padding:4px 14px 4px 6px; font-family:var(--display); font-weight:600; font-size:20px}
+.chip svg{width:34px; height:34px}
+.dots{display:flex; gap:6px}
+.dots span{width:22px; height:22px; border-radius:50%; border:3px solid var(--good)}
+.dots span.f{background:var(--good)}
+
+/* Warm-up */
+.wodb{justify-self:center; background:var(--mat); border-radius:28px; padding:22px; display:grid; grid-template-columns:1fr 1fr; gap:18px; max-width:620px; width:100%}
+.wodb .blk{--b:auto; width:100%; height:auto; aspect-ratio:1; border-radius:24px; padding:12%}
+.wodb .blk .tag{font-size:clamp(15px,1.5vw,20px); bottom:10px; padding:4px 12px}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:58px; height:58px; border-radius:29px; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.q{font-family:var(--display); font-weight:600; font-size:clamp(23px,2.2vw,32px); line-height:1.25; margin:0; text-wrap:balance}
+.vennwrap{background:var(--mat); border-radius:28px; padding:14px; display:flex; flex-direction:column; gap:8px}
+.vlabels{display:flex; justify-content:space-between; gap:8px; padding:0 4%}
+.vlabels .chip.b{background:var(--loop2-soft); border-color:var(--loop2)}
+.venn{width:100%; height:auto; display:block; cursor:pointer; touch-action:manipulation}
+.venn .ca{fill:var(--loop-soft); fill-opacity:.65; stroke:var(--loop); stroke-width:9}
+.venn .cb{fill:var(--loop2-soft); fill-opacity:.65; stroke:var(--loop2); stroke-width:9}
+.venn .vb rect.bg{fill:var(--card); stroke:var(--line); stroke-width:2}
+.venn .vb.hit rect.bg{stroke:var(--good); stroke-width:6}
+.venn .vt{font-family:var(--display); font-weight:600; font-size:26px; fill:var(--muted)}
+.tests{display:flex; gap:12px; flex-wrap:wrap}
+.pred{display:grid; grid-template-columns:auto 1fr; gap:8px 14px; align-items:center; font-family:var(--display); font-size:22px; font-weight:600}
+.pred .res{padding:4px 14px; border-radius:12px; background:var(--mat); justify-self:start}
+.pred .res.r-in{background:var(--loop-soft); color:var(--ink); border:2px solid var(--loop)}
+
+@media (max-width: 900px), (orientation: portrait){
+  .view{grid-template-columns:minmax(0,1fr)}
+  .loop{width:min(78vw, 380px)}
+}
+@media (max-width: 560px){
+  :root{--b:50px}
+  html,body{height:auto} main{overflow:visible}
+  .mat{grid-template-columns:minmax(0,1fr); justify-items:center; padding:28px 12px 14px}
+  .out{width:100%; min-height:120px}
+  nav.tabs button{padding-right:14px; font-size:16px}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<header>
+  <div class="ttl">
+    <h1>Guess My Rule</h1>
+    <p>Kindergarten · Week 9 · Lesson K.9 &nbsp;·&nbsp; <b>What rule put these together?</b></p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><i>1</i>Odd one out</button>
+  <button role="tab" data-tab="guess" aria-selected="false"><i>2</i>Guess my rule</button>
+  <button role="tab" data-tab="sort" aria-selected="false"><i>3</i>My sort</button>
+  <button role="tab" data-tab="det" aria-selected="false"><i>4</i>Detectives</button>
+</nav>
+
+<main>
+  <!-- 1 Warm-up -->
+  <section class="view" id="v-warm">
+    <div class="wodb" id="wodb"></div>
+    <div class="side">
+      <div class="say" id="wSay"></div>
+      <p class="lbl-small">Reasons found</p>
+      <div class="dots" id="wDots"></div>
+      <div class="row"><button class="big alt" id="wClear">Hide reasons</button></div>
+    </div>
+  </section>
+
+  <!-- 2 Guess my rule -->
+  <section class="view" id="v-guess" hidden>
+    <div class="mat" id="gMat">
+      <div class="loop" id="gIn" data-side="in"></div>
+      <div class="out" id="gOut" data-side="out"></div>
+    </div>
+    <div class="side">
+      <div class="say" id="gSay"></div>
+      <div class="inout" id="gInOut" hidden><button data-side="in">IN</button><button class="o" data-side="out">OUT</button></div>
+      <div class="row">
+        <button class="big" id="gKnow">I know the rule!</button>
+        <button class="big alt" id="gClue">Next clue</button>
+      </div>
+      <div class="row"><span class="lbl-small">Right in a row</span><div class="dots" id="gDots"></div></div>
+      <div class="panel" id="gPanel" hidden><h3 id="gPanelH"></h3><div class="cards" id="gCards"></div></div>
+      <p class="lbl-small">Blocks · tap one, then tap IN or OUT</p>
+      <div class="tray" id="gTray"></div>
+      <div class="row">
+        <button class="ghost" id="gNewBtn">New secret rule</button>
+        <button class="ghost" id="gTeach">Teacher picks the rule</button>
+        <button class="ghost" id="gShow">Show the rule</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 My sort -->
+  <section class="view" id="v-sort" hidden>
+    <div class="mat" id="mMat">
+      <div class="loop" id="mIn" data-side="in"></div>
+      <div class="out" id="mOut" data-side="out"></div>
+    </div>
+    <div class="side">
+      <div class="say" id="mSay"></div>
+      <div class="panel" id="mPick"><h3>Pick your rule</h3><div class="cards" id="mCards"></div></div>
+      <div class="row" id="mRuleRow" hidden><span class="lbl-small">My rule</span><span id="mRuleChip"></span></div>
+      <div class="inout" id="mInOut" hidden><button data-side="in">IN</button><button class="o" data-side="out">OUT</button></div>
+      <div class="tray" id="mTray" data-side="tray"></div>
+      <div class="row" id="mActs" hidden>
+        <button class="big" id="mCheck">Check my sort</button>
+        <button class="big alt" id="mPartner" hidden>Partner: guess it!</button>
+      </div>
+      <div class="panel" id="mGuess" hidden><h3>What was the rule?</h3><div class="cards" id="mGCards"></div></div>
+      <div class="row" id="mMore" hidden>
+        <button class="ghost" id="mNewBlocks">New blocks</button>
+        <button class="ghost" id="mNewRule">New rule</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Detective -->
+  <section class="view" id="v-det" hidden>
+    <div id="dStage"></div>
+    <div class="side">
+      <div class="qnav" id="qnav"></div>
+      <p class="q" id="qText"></p>
+      <div class="say" id="dSay"></div>
+      <div class="row" id="dActs"></div>
+      <div id="dExtra"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+/*LOGIC*/
+const COLORS=['red','blue','yellow'], SHAPES=['circle','square','triangle'], SIZES=['big','small'];
+const ALL=[]; for(const z of SIZES) for(const c of COLORS) for(const s of SHAPES) ALL.push({id:`${z}-${c}-${s}`, color:c, shape:s, size:z});
+const B=(z,c,s)=>ALL.find(b=>b.id===`${z}-${c}-${s}`);
+const name=b=>`${b.size} ${b.color} ${b.shape}`;
+const RULES=[
+  {id:'red',    word:'red',    is:'is red',      isnt:'is not red',      test:b=>b.color==='red'},
+  {id:'blue',   word:'blue',   is:'is blue',     isnt:'is not blue',     test:b=>b.color==='blue'},
+  {id:'yellow', word:'yellow', is:'is yellow',   isnt:'is not yellow',   test:b=>b.color==='yellow'},
+  {id:'circle', word:'circle', is:'is a circle', isnt:'is not a circle', test:b=>b.shape==='circle'},
+  {id:'square', word:'square', is:'is a square', isnt:'is not a square', test:b=>b.shape==='square'},
+  {id:'triangle',word:'triangle',is:'is a triangle',isnt:'is not a triangle',test:b=>b.shape==='triangle'},
+  {id:'big',    word:'big',    is:'is big',      isnt:'is not big',      test:b=>b.size==='big'},
+  {id:'small',  word:'small',  is:'is small',    isnt:'is not small',    test:b=>b.size==='small'},
+  {id:'corners',word:'has corners',is:'has corners',isnt:'has no corners',test:b=>b.shape!=='circle'}
+];
+const R=id=>RULES.find(r=>r.id===id);
+const sideOf=(r,b)=>r.test(b)?'in':'out';
+const consistent=placed=>RULES.filter(r=>placed.every(p=>sideOf(r,p.b)===p.side));
+const counterexample=(r,placed)=>placed.find(p=>sideOf(r,p.b)!==p.side);
+function oddReasons(b,set){
+  const others=set.filter(x=>x!==b), out=[];
+  if(others.every(o=>o.size!==b.size)) out.push({tag:`only ${b.size}`, say:`It is the only ${b.size} one.`});
+  if(others.every(o=>o.color!==b.color)) out.push({tag:`only ${b.color}`, say:`It is the only ${b.color} one.`});
+  if(others.every(o=>o.shape!==b.shape)) out.push({tag:`only ${b.shape}`, say:`It is the only ${b.shape}.`});
+  return out;
+}
+const WODB=[B('big','red','triangle'),B('small','red','triangle'),B('big','red','square'),B('big','blue','triangle')];
+// Venn
+const VA={x:380,y:300}, VB={x:620,y:300}, VR=220;
+const SLOTS={A:[[240,225],[215,300],[240,375],[300,300]], B:[[760,225],[785,300],[760,375],[700,300]], AB:[[500,215],[500,300],[500,385]],
+  none:[[60,60],[160,60],[840,60],[940,60],[60,560],[160,560],[840,560],[940,560]]};
+const regionAt=(x,y)=>{const a=Math.hypot(x-VA.x,y-VA.y)<VR, b=Math.hypot(x-VB.x,y-VB.y)<VR; return (a?'A':'')+(b?'B':'')||'none';};
+const regionOf=(A,Bb,b)=>(A.test(b)?'A':'')+(Bb.test(b)?'B':'')||'none';
+function regionWhy(A,Bb,b){
+  const r=regionOf(A,Bb,b), n=name(b);
+  if(r==='AB') return `The ${n} ${A.is} AND ${Bb.is}. It goes in the middle, in both loops.`;
+  if(r==='A') return `The ${n} ${A.is}. It ${Bb.isnt}. It goes in the ${A.word} loop only.`;
+  if(r==='B') return `The ${n} ${Bb.is}. It ${A.isnt}. It goes in the ${Bb.word} loop only.`;
+  return `The ${n} ${A.isnt}. It ${Bb.isnt}. It goes outside both loops.`;
+}
+const Q1={rule:'small', in:[B('small','red','circle'),B('small','blue','square'),B('small','yellow','triangle'),B('small','blue','circle')], out:[B('big','red','circle'),B('big','yellow','square'),B('big','blue','triangle')]};
+const Q2={in:[B('big','red','triangle'),B('small','red','triangle')], out:[B('big','blue','square'),B('small','yellow','circle')], tests:[B('big','red','circle'),B('small','blue','triangle'),B('big','yellow','square'),B('small','red','square')]};
+const CHAL=[B('big','red','triangle'),B('small','red','triangle'),B('big','red','circle'),B('small','red','square'),B('big','blue','triangle'),B('small','yellow','triangle'),B('small','blue','circle'),B('big','yellow','square')];
+/*END*/
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;};
+const byId=id=>ALL.find(b=>b.id===id);
+
+/* ---------- Drawing ---------- */
+function shapeInner(b){
+  const k=b.size==='big'?1:0.56;
+  if(b.shape==='circle') return `<circle cx="50" cy="50" r="${(44*k).toFixed(1)}"/>`;
+  if(b.shape==='square'){const s=80*k; return `<rect x="${50-s/2}" y="${50-s/2}" width="${s}" height="${s}" rx="${4*k}"/>`;}
+  const h=84*k, w=92*k;
+  return `<polygon points="50,${50-h*0.55} ${50+w/2},${50+h*0.45} ${50-w/2},${50+h*0.45}"/>`;
+}
+const shapeSVG=b=>`<svg viewBox="0 0 100 100" aria-hidden="true" class="shape c-${b.color}">${shapeInner(b)}</svg>`;
+function blkBtn(b,cls='',extra=''){ return `<button class="blk ${cls}" data-id="${b.id}" aria-label="${name(b)}">${shapeSVG(b)}${extra}</button>`; }
+const DROP='M50 6 C50 6 84 46 84 64 A34 34 0 0 1 16 64 C16 46 50 6 50 6Z';
+function ruleIcon(r){
+  let g='';
+  if(['red','blue','yellow'].includes(r.id)) g=`<path d="${DROP}" class="c-${r.id}" stroke-width="5"/>`;
+  else if(r.id==='circle') g=`<circle cx="50" cy="50" r="38" class="ink"/>`;
+  else if(r.id==='square') g=`<rect x="14" y="14" width="72" height="72" rx="4" class="ink"/>`;
+  else if(r.id==='triangle') g=`<polygon points="50,10 90,84 10,84" class="ink"/>`;
+  else if(r.id==='big') g=`<rect x="4" y="16" width="62" height="62" rx="4" class="inkfill"/><rect x="74" y="58" width="22" height="22" rx="2" class="faint"/>`;
+  else if(r.id==='small') g=`<rect x="4" y="16" width="62" height="62" rx="4" class="faint"/><rect x="74" y="56" width="22" height="22" rx="2" class="inkfill"/>`;
+  else g=`<polygon points="26,22 46,78 6,78" class="ink" style="stroke-width:5"/><rect x="56" y="38" width="38" height="40" class="ink" style="stroke-width:5"/><circle cx="26" cy="22" r="7" class="dot"/><circle cx="46" cy="78" r="7" class="dot"/><circle cx="6" cy="78" r="7" class="dot"/><circle cx="56" cy="38" r="7" class="dot"/><circle cx="94" cy="38" r="7" class="dot"/><circle cx="56" cy="78" r="7" class="dot"/><circle cx="94" cy="78" r="7" class="dot"/>`;
+  return `<svg viewBox="0 0 100 100" class="ricon" aria-hidden="true">${g}</svg>`;
+}
+const cardsHTML=(sel)=>RULES.map(r=>`<button class="card ${sel===r.id?'on':''}" data-rule="${r.id}">${ruleIcon(r)}<span>${r.word}</span></button>`).join('');
+const chipHTML=(r,cls='')=>`<span class="chip ${cls}">${ruleIcon(r)}${r.word}</span>`;
+const dotsHTML=(n,max)=>Array.from({length:max},(_,i)=>`<span class="${i<n?'f':''}"></span>`).join('');
+
+/* ---------- Speech + bubbles ---------- */
+const SPK='<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+function say(id,html,tone=''){
+  const el=$(id); el.className='say '+tone;
+  el.innerHTML=`<button class="spk" aria-label="Read aloud">${SPK}</button><div style="min-width:0"><p>${html}</p></div>`;
+  el.querySelector('.spk').onclick=()=>speak(el.querySelector('p').textContent);
+  return el;
+}
+function speak(t){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.rate=.88; speechSynthesis.speak(u);}catch(e){} }
+function wiggle(el){ if(!el||reduced) return; el.classList.remove('wig'); void el.offsetWidth; el.classList.add('wig'); }
+
+/* ================= 1. Warm-up ================= */
+const W={found:new Set(), shown:new Set()};
+function wRender(){
+  $('#wodb').innerHTML=WODB.map(b=>{
+    const r=oddReasons(b,WODB); const tag=W.shown.has(b.id)?`<span class="tag">${r.length?r[0].tag:'nothing different'}</span>`:'';
+    return blkBtn(b, W.shown.has(b.id)?'ok':'', tag);
+  }).join('');
+  $('#wDots').innerHTML=dotsHTML(W.found.size,4);
+}
+function wTap(b){
+  const r=oddReasons(b,WODB); W.found.add(b.id); W.shown.add(b.id); wRender();
+  let msg = r.length ? `${r.map(x=>x.say).join(' ')} So it does not belong!`
+    : `The other three each have one thing that is different. This one has <b>nothing</b> different. That makes it odd too!`;
+  if(W.found.size===4) msg+=` <br><b>Every block can be the odd one out!</b>`;
+  say('#wSay',msg,'good');
+}
+function wReset(){ W.found.clear(); W.shown.clear(); wRender(); say('#wSay','Which one does not belong? Tap it. Why?'); }
+$('#wodb').onclick=e=>{const t=e.target.closest('[data-id]'); if(t) wTap(byId(t.dataset.id));};
+$('#wClear').onclick=()=>{ W.shown.clear(); wRender(); say('#wSay','Which one does not belong? Tap it. Why?'); };
+
+/* ================= 2. Guess my rule ================= */
+const G={secret:null, placed:[], sel:null, streak:0, solved:false, panel:null, flash:null, mark:null};
+const gTray=()=>ALL.filter(b=>!G.placed.some(p=>p.b===b));
+function gNew(rule, msg){
+  G.secret = rule || rand(RULES.filter(r=>r!==G.secret));
+  G.placed=[]; G.sel=null; G.streak=0; G.solved=false; G.panel=null; G.flash=null; G.mark=null;
+  gClue(true); gClue(true);
+  gRender();
+  say('#gSay', msg || 'I have a <b>secret rule</b>. Some blocks go IN. Some go OUT. Pick a block. In or out?');
+}
+function gClue(silent, split){
+  const tray=gTray(); if(!tray.length) return null;
+  let cands;
+  if(split){ cands=tray.filter(b=>split.test(b)!==G.secret.test(b)); if(!cands.length) return null; }
+  else{
+    const nIn=G.placed.filter(p=>p.side==='in').length, nOut=G.placed.length-nIn;
+    const want=nIn<=nOut?'in':'out';
+    cands=tray.filter(b=>sideOf(G.secret,b)===want); if(!cands.length) cands=tray;
+    const cons=consistent(G.placed);
+    const score=b=>cons.filter(r=>r!==G.secret && sideOf(r,b)!==sideOf(G.secret,b)).length;
+    const best=Math.max(...cands.map(score)); cands=cands.filter(c=>score(c)===best);
+  }
+  const b=rand(cands), side=sideOf(G.secret,b);
+  G.placed.push({b,side,by:'clue'}); G.flash=b.id; G.mark=null; G.sel=null;
+  if(!silent){ gRender(); say('#gSay',`Clue: the ${name(b)} goes <b>${side.toUpperCase()}</b>.`); }
+  return b;
+}
+function gRender(){
+  const ins=G.placed.filter(p=>p.side==='in'), outs=G.placed.filter(p=>p.side==='out');
+  const cls=p=>[G.flash===p.b.id?'flash':'', G.mark===p.b.id?'pulse':'', p.moved?'moved':''].join(' ');
+  const lblIn = G.solved ? `${ruleIcon(G.secret)}${G.secret.word}` : 'IN';
+  $('#gIn').innerHTML=`<span class="region-lbl">${lblIn} <span class="n">${ins.length}</span></span>`+ins.map(p=>blkBtn(p.b,cls(p))).join('');
+  $('#gOut').innerHTML=`<span class="region-lbl">OUT <span class="n">${outs.length}</span></span>`+outs.map(p=>blkBtn(p.b,cls(p))).join('');
+  const tray=gTray();
+  $('#gTray').innerHTML=tray.map(b=>blkBtn(b,G.sel===b?'sel':'')).join('');
+  $('#gTray').classList.toggle('empty',!tray.length);
+  $('#gInOut').hidden=!G.sel; $('#gMat').classList.toggle('target',!!G.sel);
+  $('#gDots').innerHTML=dotsHTML(Math.min(G.streak,5),5);
+  $('#gClue').disabled=!tray.length;
+  $('#gPanel').hidden=!G.panel;
+  if(G.panel){
+    $('#gPanelH').textContent = G.panel==='guess' ? 'What is my rule?' : 'Teacher: pick a secret rule. Keep it hidden!';
+    $('#gCards').innerHTML=cardsHTML();
+  }
+  G.flash=null;
+}
+function gPlace(side){
+  const b=G.sel; if(!b) return;
+  const truth=sideOf(G.secret,b), ok=side===truth;
+  G.placed.push({b,side:truth,by:'kid',moved:!ok}); G.sel=null; G.flash=b.id; G.mark=null;
+  if(ok){ G.streak++; gRender();
+    say('#gSay',`Yes! The ${name(b)} goes <b>${truth.toUpperCase()}</b>.`+(G.streak>=3&&!G.solved?` ${G.streak} right in a row! Do you know the rule?`:''),'good'); }
+  else { G.streak=0; gRender();
+    say('#gSay',`Not this time. The ${name(b)} goes <b>${truth.toUpperCase()}</b>. Look at the IN blocks. What do they all have?`,'oops'); }
+}
+function gGuess(r){
+  G.panel=null;
+  if(r===G.secret){
+    G.solved=true; gRender();
+    say('#gSay',`Yes! My rule is <b>${r.word}</b>. Every IN block ${r.is}. No OUT block ${r.is}.`,'good');
+  } else if(!counterexample(r,G.placed)){
+    gRender();
+    const el=say('#gSay',`<b>${r.word}</b> fits every block so far! But it is not my rule. Test it with another block.`,'oops');
+    if(gTray().some(b=>r.test(b)!==G.secret.test(b))){
+      const btn=document.createElement('button'); btn.className='big alt inline-act'; btn.textContent='Show a block that tells them apart';
+      btn.onclick=()=>{ const b=gClue(true,r); gRender(); say('#gSay',`Look: the ${name(b)} goes <b>${sideOf(G.secret,b).toUpperCase()}</b>. Your rule <b>${r.word}</b> says ${sideOf(r,b).toUpperCase()}.`); };
+      el.querySelector('div').appendChild(btn);
+    }
+  } else {
+    const p=counterexample(r,G.placed); G.mark=p.b.id; gRender();
+    const s = p.side==='in' ? `Look! The ${name(p.b)} is IN. But it ${r.isnt}.` : `Look! The ${name(p.b)} ${r.is}. But it is OUT.`;
+    say('#gSay',`${s} So <b>${r.word}</b> is not the rule. Try again!`,'oops');
+  }
+}
+$('#gTray').onclick=e=>{const t=e.target.closest('[data-id]'); if(!t) return; const b=byId(t.dataset.id); G.sel=G.sel===b?null:b; G.mark=null; gRender(); if(G.sel) say('#gSay',`The ${name(b)}. IN or OUT?`); };
+function gRegionClick(e){
+  const t=e.target.closest('[data-id]');
+  if(G.sel){ gPlace(e.currentTarget.dataset.side); return; }
+  if(t){ const p=G.placed.find(p=>p.b.id===t.dataset.id); say('#gSay',`The ${name(p.b)} is <b>${p.side.toUpperCase()}</b>.${G.solved?` It ${p.side==='in'?G.secret.is:G.secret.isnt}.`:' Why?'}`); }
+}
+$('#gIn').onclick=gRegionClick; $('#gOut').onclick=gRegionClick;
+$('#gInOut').onclick=e=>{const t=e.target.closest('[data-side]'); if(t) gPlace(t.dataset.side);};
+$('#gClue').onclick=()=>gClue(false);
+$('#gKnow').onclick=()=>{ G.panel=G.panel==='guess'?null:'guess'; gRender(); if(G.panel) say('#gSay','Tap the rule you think it is.'); };
+$('#gTeach').onclick=()=>{ G.panel=G.panel==='teach'?null:'teach'; gRender(); };
+$('#gCards').onclick=e=>{const t=e.target.closest('[data-rule]'); if(!t) return; const r=R(t.dataset.rule);
+  if(G.panel==='teach'){ G.secret=null; gNew(r,'The secret rule is set. Two clues are on the mat. Pick a block. In or out?'); }
+  else gGuess(r); };
+$('#gNewBtn').onclick=()=>gNew();
+$('#gShow').onclick=()=>{ G.solved=true; G.panel=null; gRender(); say('#gSay',`The rule was <b>${G.secret.word}</b>. Every IN block ${G.secret.is}.`); };
+
+/* ================= 3. My sort ================= */
+const M={rule:null, blocks:[], where:{}, sel:null, partner:false, wrong:[]};
+function mDeal(){
+  const r=M.rule, fit=shuffle(ALL.filter(r.test)), no=shuffle(ALL.filter(b=>!r.test(b)));
+  const k=2+Math.floor(Math.random()*3);
+  M.blocks=shuffle([...fit.slice(0,k),...no.slice(0,6-k)]); M.where={}; M.blocks.forEach(b=>M.where[b.id]='tray');
+  M.sel=null; M.partner=false; M.wrong=[];
+}
+function mRender(){
+  const has=!!M.rule;
+  $('#mPick').hidden=has; $('#mRuleRow').hidden=!has||M.partner; $('#mActs').hidden=!has; $('#mMore').hidden=!has;
+  $('#mGuess').hidden=!M.partner; $('#mInOut').hidden=!M.sel;
+  $('#mMat').classList.toggle('target',!!M.sel);
+  if(!has){ $('#mCards').innerHTML=cardsHTML(); }
+  else $('#mRuleChip').innerHTML=chipHTML(M.rule);
+  const list=s=>M.blocks.filter(b=>M.where[b.id]===s);
+  const cls=b=>[M.sel===b?'sel':'', M.wrong.includes(b.id)?'wrong':''].join(' ');
+  const lbl = has && !M.partner ? `${ruleIcon(M.rule)}${M.rule.word}` : 'IN';
+  $('#mIn').innerHTML=`<span class="region-lbl">${lbl} <span class="n">${list('in').length}</span></span>`+list('in').map(b=>blkBtn(b,cls(b))).join('');
+  $('#mOut').innerHTML=`<span class="region-lbl">OUT <span class="n">${list('out').length}</span></span>`+list('out').map(b=>blkBtn(b,cls(b))).join('');
+  $('#mTray').innerHTML=list('tray').map(b=>blkBtn(b,cls(b))).join('');
+  $('#mTray').classList.toggle('empty',has&&!list('tray').length); $('#mTray').hidden=!has;
+  $('#mPartner').hidden=true;
+  if(M.partner) $('#mGCards').innerHTML=cardsHTML();
+}
+function mMove(side){
+  if(!M.sel) return; M.where[M.sel.id]=side; M.wrong=M.wrong.filter(id=>id!==M.sel.id); M.sel=null; mRender();
+  const left=M.blocks.filter(b=>M.where[b.id]==='tray').length;
+  say('#mSay', left ? `${left} more to sort.` : 'All sorted! Tap <b>Check my sort</b>.');
+}
+function mWhy(b){
+  const s=M.where[b.id], r=M.rule;
+  if(s==='in' && !r.test(b)) return `The ${name(b)} is IN. But it ${r.isnt}. Move it OUT.`;
+  if(s==='out' && r.test(b)) return `The ${name(b)} ${r.is}. It belongs IN.`;
+  return `The ${name(b)} is ${s.toUpperCase()}. ${r.test(b)?'It '+r.is+'.':'It '+r.isnt+'.'}`;
+}
+function mCheck(){
+  const left=M.blocks.filter(b=>M.where[b.id]==='tray').length;
+  if(left){ say('#mSay',`Sort all 6 first. ${left} left in the tray.`,'oops'); return; }
+  M.wrong=M.blocks.filter(b=>(M.where[b.id]==='in')!==M.rule.test(b)).map(b=>b.id);
+  mRender();
+  if(M.wrong.length){
+    say('#mSay',`${mWhy(byId(M.wrong[0]))}${M.wrong.length>1?` ${M.wrong.length} blocks need a look (striped).`:''}`,'oops');
+  } else {
+    say('#mSay',`Every IN block ${M.rule.is}. No OUT block ${M.rule.is}. Your sort works!`,'good');
+    $('#mPartner').hidden=false;
+  }
+}
+function mGuess(r){
+  const placed=M.blocks.map(b=>({b,side:M.where[b.id]}));
+  if(r===M.rule){ M.partner=false; mRender(); say('#mSay',`Yes! The rule was <b>${r.word}</b>.`,'good'); return; }
+  const ce=counterexample(r,placed);
+  if(!ce){ say('#mSay',`<b>${r.word}</b> fits these blocks too! But it was not the secret. Can you find a block to tell them apart?`,'oops'); return; }
+  M.wrong=[ce.b.id]; mRender(); M.wrong=[];
+  say('#mSay',(ce.side==='in'?`The ${name(ce.b)} is IN. But it ${r.isnt}.`:`The ${name(ce.b)} ${r.is}. But it is OUT.`)+' Try again!','oops');
+}
+function mReset(){ M.rule=null; M.blocks=[]; M.where={}; M.sel=null; M.partner=false; M.wrong=[]; mRender(); say('#mSay','Pick a rule. Then sort 6 blocks: IN or OUT.'); }
+$('#mCards').onclick=e=>{const t=e.target.closest('[data-rule]'); if(!t) return; M.rule=R(t.dataset.rule); mDeal(); mRender(); say('#mSay',`Your rule: <b>${M.rule.word}</b>. Tap a block. Then tap IN or OUT.`);};
+function mBlockTap(e){
+  const t=e.target.closest('[data-id]'), side=e.currentTarget.dataset.side;
+  if(M.sel && (!t || (t.dataset.id!==M.sel.id && M.where[M.sel.id]!==side))){ mMove(side); return; }
+  if(!t) return;
+  const b=byId(t.dataset.id);
+  if(M.wrong.includes(b.id) && M.sel!==b){ say('#mSay',mWhy(b),'oops'); }
+  M.sel = M.sel===b?null:b; mRender();
+}
+['#mIn','#mOut','#mTray'].forEach(s=>$(s).onclick=mBlockTap);
+$('#mInOut').onclick=e=>{const t=e.target.closest('[data-side]'); if(t) mMove(t.dataset.side);};
+$('#mCheck').onclick=mCheck;
+$('#mPartner').onclick=()=>{ M.partner=true; M.sel=null; mRender(); say('#mSay','Partner: look at the IN blocks. Tap the rule.'); };
+$('#mGCards').onclick=e=>{const t=e.target.closest('[data-rule]'); if(t) mGuess(R(t.dataset.rule));};
+$('#mNewBlocks').onclick=()=>{ mDeal(); mRender(); say('#mSay',`New blocks! Rule: <b>${M.rule.word}</b>. Sort them.`); };
+$('#mNewRule').onclick=mReset;
+
+/* ================= 4. Detectives ================= */
+const D={q:1, share:false, count:false, test:null, V:null};
+const QS={1:'What do all the IN blocks have?', 2:'Red? Triangle? Both rules fit! Which block can tell them apart?',
+  3:'Red loop. Triangle loop. Where does the red triangle go?', 4:'Where does a blue circle go?', 5:'Two loops! Sort all 8 blocks.'};
+function staticMat(ins,outs,opts={}){
+  const tag=b=>opts.share?`<span class="tag">${b.size}</span>`:'';
+  const num=(b,i)=>opts.count?`<span class="num">${i+1}</span>`:'';
+  const hl=b=>opts.hl&&opts.hl.includes(b.id)?'flash ok':'';
+  return `<div class="mat"><div class="loop static"><span class="region-lbl">IN <span class="n">${ins.length}</span></span>${ins.map((b,i)=>blkBtn(b,hl(b),tag(b)+num(b,i))).join('')}</div>
+    <div class="out static"><span class="region-lbl">OUT <span class="n">${outs.length}</span></span>${outs.map((b,i)=>blkBtn(b,hl(b),tag(b)+num(b,i))).join('')}</div></div>`;
+}
+function newVenn(pool){ return {A:R('red'), B:R('triangle'), pool:pool.slice(), placed:[], sel:null}; }
+function vennHTML(V){
+  const g=[];
+  const used={A:0,B:0,AB:0,none:0};
+  for(const p of V.placed){ const [x,y]=SLOTS[p.region][used[p.region]++];
+    g.push(`<g class="vb ${p.hit?'hit':''}" data-id="${p.b.id}" transform="translate(${x-36},${y-36})"><rect class="bg" width="72" height="72" rx="12"/><svg x="6" y="6" width="60" height="60" viewBox="0 0 100 100">${shapeInner(p.b).replace('/>',` class="c-${p.b.color}" stroke-width="5"/>`)}</svg></g>`); }
+  return `<div class="vennwrap"><div class="vlabels">${chipHTML(V.A)}${chipHTML(V.B,'b')}</div>
+    <svg class="venn" id="venn" viewBox="0 0 1000 620" role="img" aria-label="Two overlapping loops: ${V.A.word} and ${V.B.word}">
+      <circle class="ca" cx="${VA.x}" cy="${VA.y}" r="${VR}"/><circle class="cb" cx="${VB.x}" cy="${VB.y}" r="${VR}"/>
+      <text class="vt" x="500" y="610" text-anchor="middle">outside both</text>${g.join('')}</svg></div>
+    ${V.pool.length?`<p class="lbl-small" style="margin-top:12px">Tap a block, then tap where it goes</p><div class="tray" id="vTray">${V.pool.map(b=>blkBtn(b,V.sel===b?'sel':'')).join('')}</div>`:''}`;
+}
+function vennWire(){
+  const V=D.V, svg=$('#venn');
+  svg.onclick=e=>{
+    const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    const t=e.target.closest('[data-id]');
+    if(!V.sel){ if(t){ say('#dSay',regionWhy(V.A,V.B,byId(t.dataset.id))); } else say('#dSay','Tap a block first.'); return; }
+    vPlace(regionAt(p.x,p.y));
+  };
+  const tr=$('#vTray'); if(tr) tr.onclick=e=>{const t=e.target.closest('[data-id]'); if(!t) return; const b=byId(t.dataset.id); V.sel=V.sel===b?null:b; dRender(true); if(V.sel) say('#dSay',`The ${name(b)}. Where does it go?`);};
+}
+function vPlace(region, auto){
+  const V=D.V, b=V.sel; const truth=regionOf(V.A,V.B,b);
+  if(region===truth){
+    if(V.placed.filter(p=>p.region===region).length>=SLOTS[region].length) return;
+    V.placed.push({b,region,hit:true}); V.pool=V.pool.filter(x=>x!==b); V.sel=null; dRender(true);
+    let msg=(auto?'':'Yes! ')+regionWhy(V.A,V.B,b);
+    if(D.q===5 && !V.pool.length){
+      const c=k=>V.placed.filter(p=>p.region===k).length;
+      msg+=` <br><b>All sorted!</b> Red only: ${c('A')}. Both: ${c('AB')}. Triangle only: ${c('B')}. Outside: ${c('none')}.`;
+    }
+    say('#dSay',msg,'good');
+  } else {
+    const where={A:`the ${V.A.word} loop only`,B:`the ${V.B.word} loop only`,AB:'the middle',none:'outside both'}[region];
+    say('#dSay',`Hmm, not ${where}. ${regionWhy(V.A,V.B,b)} Try again!`,'oops');
+    wiggle($('#vTray .sel'));
+  }
+}
+function dAct(label,fn,primary){ const b=document.createElement('button'); b.className=primary?'big':'big alt'; b.textContent=label; b.onclick=fn; $('#dActs').appendChild(b); }
+function dRender(keepSay){
+  $('#qnav').innerHTML=[1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${D.q===i}" aria-label="Question ${i}">${i}</button>`).join('')+`<button data-q="5" aria-pressed="${D.q===5}">★ Challenge</button>`;
+  $('#qText').textContent=QS[D.q]; $('#dActs').innerHTML=''; $('#dExtra').innerHTML='';
+  const st=$('#dStage');
+  if(D.q===1){
+    st.innerHTML=staticMat(Q1.in,Q1.out,{share:D.share,count:D.count});
+    dAct('Show what they share',()=>{D.share=true; dRender(true); say('#dSay','They are all <b>small</b>. Every OUT block is big. The rule is <b>small</b>.','good');},true);
+    dAct('Count them',()=>{D.count=true; dRender(true); say('#dSay',`<b>${Q1.in.length}</b> blocks IN. <b>${Q1.out.length}</b> blocks OUT.`,'good');});
+    if(!keepSay) say('#dSay','Look at the IN blocks. Say it with “because”.');
+  }
+  if(D.q===2){
+    st.innerHTML=staticMat(Q2.in,Q2.out);
+    dAct('Which rules fit?',()=>{ const c=consistent([...Q2.in.map(b=>({b,side:'in'})),...Q2.out.map(b=>({b,side:'out'}))]);
+      say('#dSay',`${c.length} rules fit all 4 blocks: ${c.map(r=>`<b>${r.word}</b>`).join(' and ')}. Test a block to tell them apart.`,'good');},true);
+    const ex=document.createElement('div'); ex.style.cssText='display:flex;flex-direction:column;gap:12px';
+    ex.innerHTML=`<p class="lbl-small">Test a block</p><div class="tests" id="tests">${Q2.tests.map(b=>blkBtn(b,D.test===b?'sel':'')).join('')}</div><div id="predBox"></div>`;
+    $('#dExtra').appendChild(ex);
+    $('#tests').onclick=e=>{const t=e.target.closest('[data-id]'); if(!t) return; D.test=byId(t.dataset.id); dRender(true); dPredict();};
+    if(D.test) dPredict(true); else if(!keepSay) say('#dSay','Both <b>red</b> and <b>triangle</b> could be the rule. Tap a test block.');
+  }
+  if(D.q===3||D.q===4||D.q===5){
+    st.innerHTML=vennHTML(D.V); vennWire();
+    if(D.q!==5) dAct('Show me',()=>{ if(!D.V.pool.length) return; D.V.sel=D.V.pool[0]; vPlace(regionOf(D.V.A,D.V.B,D.V.sel),true); },true);
+    else dAct('Start again',()=>{ D.V=newVenn(shuffle(CHAL)); dRender(); });
+    if(!keepSay) say('#dSay', D.q===5?'Tap a block. Then tap where it goes on the loops.':'Tap the block. Then tap the place where it goes.');
+  }
+}
+function dPredict(silent){
+  const b=D.test, a=sideOf(R('red'),b), t=sideOf(R('triangle'),b);
+  $('#predBox').innerHTML=`<div class="pred"><span>${chipHTML(R('red'))}</span><span class="res r-${a}">${a.toUpperCase()}</span><span>${chipHTML(R('triangle'))}</span><span class="res r-${t}">${t.toUpperCase()}</span></div>`;
+  if(!silent) say('#dSay', a!==t ? `The ${name(b)}: the two rules disagree! This block can tell them apart.` : `The ${name(b)}: both rules say ${a.toUpperCase()}. It can't tell them apart. Try another.`, a!==t?'good':'oops');
+}
+function dSet(q){
+  D.q=q; D.share=false; D.count=false; D.test=null;
+  if(q===3) D.V=newVenn([B('big','red','triangle')]);
+  if(q===4) D.V=newVenn([B('small','blue','circle')]);
+  if(q===5) D.V=newVenn(shuffle(CHAL));
+  dRender();
+}
+$('#qnav').onclick=e=>{const t=e.target.closest('[data-q]'); if(t) dSet(+t.dataset.q);};
+
+/* ---------- Tabs / global ---------- */
+function tab(t){ $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t)); ['warm','guess','sort','det'].forEach(k=>$('#v-'+k).hidden=k!==t); try{speechSynthesis.cancel();}catch(e){} }
+$$('nav.tabs button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+function resetAll(){ wReset(); G.secret=null; gNew(); mReset(); dSet(1); }
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

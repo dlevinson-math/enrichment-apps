@@ -1,0 +1,948 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Number Detective Agency</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* Layout: a detective's desk. The 120 chart sits on the left like evidence; the manila case folder on the right holds the class-by-class work. */
+:root{
+  --desk:#E3E9F1; --paper:#FFFFFF; --folder:#F3DB97; --folder-edge:#CFAF5C; --folder-ink:#3B2E0C;
+  --ink:#16223B; --muted:#54607A; --line:#C8D1DD; --soft:#EEF2F7;
+  --stamp:#C3303B; --stamp-soft:#FBE4E5; --clue:#17785A; --clue-soft:#DDF3EA;
+  --ten:#2B5BD0; --one:#D2710A; --sticky:#FFE158; --sticky-ink:#2A2300; --tenscol:#E9EEF6;
+  --display:"Special Elite","Courier New",Courier,monospace;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#0F141D; --paper:#1A2130; --folder:#3B3220; --folder-edge:#6B5A2E; --folder-ink:#F3E2B0;
+    --ink:#EDF1F7; --muted:#A3AEC2; --line:#323D52; --soft:#222B3C;
+    --stamp:#FF6B74; --stamp-soft:#3D1F25; --clue:#4FCB9E; --clue-soft:#173A30;
+    --ten:#86A8FF; --one:#FFB052; --sticky:#E6C93C; --sticky-ink:#2A2300; --tenscol:#212A3B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#0F141D; --paper:#1A2130; --folder:#3B3220; --folder-edge:#6B5A2E; --folder-ink:#F3E2B0;
+  --ink:#EDF1F7; --muted:#A3AEC2; --line:#323D52; --soft:#222B3C;
+  --stamp:#FF6B74; --stamp-soft:#3D1F25; --clue:#4FCB9E; --clue-soft:#173A30;
+  --ten:#86A8FF; --one:#FFB052; --sticky:#E6C93C; --sticky-ink:#2A2300; --tenscol:#212A3B;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--desk); color:var(--ink); font-family:var(--body); font-size:18px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 20px;
+  -webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ten); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding-block:14px 8px}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.badge-ico{width:52px; height:52px; flex:none}
+h1{font-family:var(--display); font-weight:400; font-size:clamp(26px,3vw,40px); margin:0; line-height:1.05; text-wrap:balance}
+.sub{margin:3px 0 0; font-size:14px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--paper); border-radius:12px; padding:10px 16px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* Folder tabs */
+.classes{display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end}
+.foldercol{min-width:0}
+.classes button{border:2px solid var(--folder-edge); border-bottom:0; background:var(--soft); color:var(--muted); border-radius:14px 14px 0 0;
+  padding:10px 18px 9px; font-weight:600; font-size:17px; min-height:52px; text-align:left; line-height:1.15}
+.classes button small{display:block; font-weight:400; font-size:13px}
+.classes button[aria-selected="true"]{background:var(--folder); color:var(--folder-ink); position:relative; top:2px; padding-bottom:11px}
+
+main{display:grid; grid-template-columns:auto minmax(0,1fr); gap:22px; align-items:start}
+.chartcol{display:flex; flex-direction:column; gap:8px; position:sticky; top:8px}
+.chart{--h:min(calc(100dvh - 190px), 54vw * 1.2); height:var(--h); width:calc(var(--h) * 10 / 12);
+  display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(12,1fr); container-type:size;
+  background:var(--paper); border:2px solid var(--ink); border-radius:6px; overflow:hidden}
+.cell{position:relative; border:0; padding:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper);
+  font-size:3.3cqh; font-weight:500; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center; transition:background-color .2s, opacity .2s}
+.cell:nth-child(10n){border-right:0; background:var(--tenscol)}
+.cell:nth-child(n+111){border-bottom:0}
+.cell .n{position:relative; z-index:1}
+.cell.gone .n{opacity:.28}
+.cell.gone::after{content:""; position:absolute; left:18%; right:18%; top:calc(50% - .07em); height:.14em; background:var(--stamp); border-radius:.1em; transform:rotate(-35deg); opacity:.8}
+.cell.hl{background:var(--hlbg, var(--clue-soft)); box-shadow:inset 0 0 0 .13em var(--hlc, var(--clue))}
+.cell.hl .n{font-weight:700}
+.cell.sticky{background:var(--sticky); color:var(--sticky-ink); box-shadow:inset 0 -.18em 0 rgba(0,0,0,.12)}
+.cell.sticky .n{visibility:hidden}
+.cell.sticky::before{content:"?"; position:absolute; font-family:var(--display); font-size:1.3em}
+.cell.sticky.active{outline:.16em solid var(--ink); outline-offset:-.16em}
+.cell.token::before{content:""; position:absolute; inset:12%; border-radius:50%; background:var(--ten); opacity:.22}
+.cell.token .n{font-weight:700; color:var(--ten)}
+.cell .bdg{position:absolute; top:3%; right:5%; font-size:.42em; font-weight:700; color:var(--hlc, var(--clue)); z-index:2}
+.cell.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(1.35)}100%{transform:scale(1)}}
+.chartnote{font-size:14px; color:var(--muted); margin:0}
+.chartnote b{color:var(--ink)}
+
+/* Folder panel */
+.folder{background:var(--folder); border:2px solid var(--folder-edge); border-radius:0 16px 16px 16px; padding:14px; min-width:0}
+.steps{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px}
+.steps button{border:2px solid var(--folder-edge); background:transparent; color:var(--folder-ink); border-radius:999px; padding:8px 16px; font-weight:600; font-size:16px; min-height:46px}
+.steps button[aria-pressed="true"]{background:var(--folder-ink); color:var(--folder); border-color:var(--folder-ink)}
+.sheet{background:var(--paper); border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:14px; min-width:0; box-shadow:0 2px 0 var(--folder-edge)}
+.eyebrow{font-family:var(--display); font-size:16px; letter-spacing:.06em; color:var(--stamp); text-transform:uppercase; margin:0}
+.big{font-size:clamp(22px,2.1vw,30px); font-weight:600; line-height:1.3; margin:0; text-wrap:balance}
+.say{font-size:clamp(18px,1.6vw,22px); line-height:1.45; margin:0; max-width:36em}
+.muted{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--paper); font-weight:600; font-size:clamp(17px,1.5vw,21px); padding:13px 22px; border-radius:14px; min-height:54px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--paper); font-weight:600; font-size:clamp(16px,1.3vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.choice{min-width:96px; min-height:76px; font-size:34px; font-weight:700; border:3px solid var(--line); background:var(--paper); border-radius:16px; font-variant-numeric:tabular-nums}
+.choice:hover{border-color:var(--ink)}
+.choice.no{border-color:var(--stamp); background:var(--stamp-soft)}
+.fb{font-size:clamp(18px,1.6vw,22px); line-height:1.45; padding:12px 16px; border-radius:12px; margin:0; max-width:36em}
+.fb:empty{display:none}
+.fb.good{background:var(--clue-soft); border-left:6px solid var(--clue)}
+.fb.try{background:var(--stamp-soft); border-left:6px solid var(--stamp)}
+.fb.info{background:var(--soft); border-left:6px solid var(--ten)}
+.tally{font-size:16px; color:var(--muted)}
+.dots{display:flex; gap:8px}
+.dots i{width:22px; height:22px; border-radius:50%; border:2px solid var(--folder-edge); background:var(--paper)}
+.dots i.on{background:var(--sticky); border-color:var(--sticky-ink)}
+
+/* Torn piece */
+.piecewrap{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start}
+.piece{display:grid; gap:0; background:var(--paper); filter:drop-shadow(0 3px 0 var(--folder-edge)); border:2px solid var(--ink)}
+.piece.torn{clip-path:polygon(0 3%,8% 0,20% 4%,33% 0,47% 3%,60% 0,74% 4%,88% 0,100% 3%,97% 18%,100% 34%,97% 50%,100% 66%,97% 82%,100% 97%,86% 100%,72% 96%,58% 100%,44% 96%,30% 100%,16% 96%,0 100%,3% 82%,0 66%,3% 50%,0 34%,3% 18%)}
+.pc{width:clamp(64px,7vw,92px); height:clamp(64px,7vw,92px); border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper);
+  font-size:clamp(24px,2.6vw,34px); font-weight:600; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center; padding:0}
+.pc.given{background:var(--soft); font-weight:800}
+.pc.sel{box-shadow:inset 0 0 0 4px var(--ten)}
+.pc.ok{color:var(--clue)}
+.pc.bad{background:var(--stamp-soft)}
+.pc .t{color:var(--ten)} .pc .o{color:var(--one)}
+.pc .t,.pc .o{transition:color .2s}
+.piece.plain .pc .t,.piece.plain .pc .o{color:inherit}
+.pad{display:grid; grid-template-columns:repeat(3,64px); gap:8px}
+.pad button{height:58px; border-radius:12px; border:2px solid var(--line); background:var(--paper); font-size:26px; font-weight:600}
+.pad button.go{background:var(--clue); color:var(--paper); border-color:var(--clue)}
+.entry{font-size:34px; font-weight:700; min-width:3.4em; min-height:58px; padding:4px 14px; border:3px dashed var(--line); border-radius:12px; display:inline-flex; align-items:center; font-variant-numeric:tabular-nums}
+
+/* Cubes */
+.cubes{display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end}
+.cubebox{display:flex; flex-direction:column; gap:6px; align-items:flex-start}
+.cubebox svg{max-width:100%; height:auto}
+.cubecap{font-size:17px}
+.cubecap b{font-size:22px}
+.tenc{color:var(--ten); font-weight:700} .onec{color:var(--one); font-weight:700}
+
+/* Case cards */
+.case{border:2px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; position:relative; overflow:hidden}
+.clue{display:flex; gap:12px; align-items:center; font-size:clamp(19px,1.7vw,24px); padding:10px 12px; border-radius:10px; background:var(--soft)}
+.clue .num{flex:none; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--ink); color:var(--paper); font-weight:700; font-size:18px}
+.clue.hidden{color:var(--muted); background:transparent; border:2px dashed var(--line)}
+.clue.hidden .num{background:var(--line); color:var(--muted)}
+.suspects{font-size:18px}
+.suspects b{font-size:26px}
+.stamp{position:absolute; right:14px; top:10px; font-family:var(--display); font-size:34px; color:var(--stamp); border:4px solid var(--stamp); border-radius:8px; padding:2px 12px; transform:rotate(-12deg); opacity:.9; pointer-events:none}
+.stamp.in{animation:stampin .35s ease-out}
+@keyframes stampin{0%{transform:rotate(-12deg) scale(2.2); opacity:0}100%{transform:rotate(-12deg) scale(1); opacity:.9}}
+
+/* Fact families */
+.fam{display:flex; flex-direction:column; gap:10px}
+.eq{display:flex; align-items:center; gap:8px; font-size:30px; font-weight:600; flex-wrap:wrap}
+.slot{min-width:72px; height:62px; border:3px dashed var(--line); border-radius:12px; background:var(--paper); font-size:30px; font-weight:700; font-variant-numeric:tabular-nums}
+.slot.filled{border-style:solid; border-color:var(--ink)}
+.slot.act{border-color:var(--ten); box-shadow:0 0 0 3px var(--ten)}
+.eq.ok .slot{border-color:var(--clue); color:var(--clue)}
+.eq.bad .slot{border-color:var(--stamp)}
+.chips{display:flex; gap:10px}
+.chip{min-width:80px; height:64px; border-radius:32px; border:0; background:var(--ten); color:var(--paper); font-size:30px; font-weight:700}
+.frames{display:flex; gap:12px; flex-wrap:wrap}
+.frame{display:grid; grid-template-columns:repeat(5,34px); grid-template-rows:repeat(2,34px); border:2px solid var(--ink); border-radius:4px}
+.frame span{border:1px solid var(--line); display:grid; place-items:center}
+.frame span i{width:24px; height:24px; border-radius:5px; display:block}
+.frame span i.a{background:var(--stamp)} .frame span i.b{background:var(--ten)} .frame span i.q{border:2px dashed var(--muted)}
+
+/* Builder */
+.build{display:flex; flex-direction:column; gap:10px}
+.bclue{display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:8px 10px; border-radius:10px; background:var(--soft)}
+.bclue select{font-size:17px; padding:10px; border-radius:10px; border:2px solid var(--line); background:var(--paper); min-height:48px; max-width:100%}
+.step{display:inline-flex; align-items:center; border:2px solid var(--line); border-radius:12px; background:var(--paper)}
+.step button{width:44px; height:44px; border:0; background:none; font-size:24px; font-weight:700}
+.step output{min-width:2.6em; text-align:center; font-size:22px; font-weight:700; font-variant-numeric:tabular-nums}
+.btext{flex-basis:100%; font-size:19px; font-weight:500}
+input[type=text]{font-size:18px; padding:10px 12px; border-radius:10px; border:2px solid var(--line); background:var(--paper); min-height:48px; max-width:100%}
+.boxlist{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px}
+.mini{border:2px solid var(--line); border-radius:10px; padding:10px 12px; background:var(--paper); text-align:left; font-size:15px; display:flex; flex-direction:column; gap:4px; min-height:84px}
+.mini b{font-size:16px}
+.mini .tagx{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+.mini.solved{border-color:var(--clue)}
+.mini.solved .tagx{color:var(--clue)}
+
+table.ev{border-collapse:collapse; font-size:18px; width:100%}
+table.ev td{padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.ev td:last-child{width:45%}
+.bar{height:18px; background:var(--ten); border-radius:4px; min-width:4px}
+.evbtn{border:0; background:none; text-align:left; padding:0; font-size:18px; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:4px}
+.arrows{display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(2,64px); gap:8px}
+.arrows button{border-radius:12px; border:2px solid var(--ink); background:var(--paper); font-size:28px; font-weight:700}
+.arrows button:disabled{opacity:.3}
+.sent{font-size:clamp(22px,2.2vw,30px); font-weight:600; font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+@media (max-width: 980px), (orientation: portrait){
+  main{grid-template-columns:minmax(0,1fr)}
+  .chartcol{position:static; align-items:center}
+  .foldercol{order:-1}
+  .chart{--h:min(calc((100vw - 40px) * 1.2), 78dvh)}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  .sheet{padding:14px}
+  .folder{padding:10px}
+  .choice{min-width:80px; font-size:28px}
+  .pad{grid-template-columns:repeat(3,56px)}
+  .eq{font-size:24px} .slot{min-width:58px; height:54px; font-size:24px}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <svg class="badge-ico" viewBox="0 0 52 52" aria-hidden="true"><path d="M26 3l6 5 8-1 2 8 6 5-4 7 2 8-8 3-3 8-9-2-9 2-3-8-8-3 2-8-4-7 6-5 2-8 8 1z" fill="var(--folder)" stroke="var(--folder-ink)" stroke-width="2"/><circle cx="23" cy="23" r="8" fill="none" stroke="var(--ink)" stroke-width="3"/><path d="M29 29l7 7" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/></svg>
+    <div>
+      <h1>Number Detective Agency</h1>
+      <p class="sub">Grade 1 · Set 3 project · 3 class periods</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <div class="chartcol">
+    <div class="chart" id="chart" aria-label="120 chart"></div>
+    <p class="chartnote"><b>Right</b> is 1 more. <b>Down</b> is 10 more. The shaded column is the tens.</p>
+  </div>
+  <div class="foldercol">
+<nav class="classes" role="tablist" aria-label="Class periods">
+  <button role="tab" id="tab1" aria-selected="true">Class 1<small>Badge Training</small></button>
+  <button role="tab" id="tab2" aria-selected="false">Class 2<small>Cracking Cases</small></button>
+  <button role="tab" id="tab3" aria-selected="false">Class 3<small>Open Your Own Case</small></button>
+</nav>
+  <div class="folder">
+    <div class="steps" id="steps" role="group" aria-label="Steps"></div>
+    <div class="sheet" id="sheet" aria-live="polite"></div>
+  </div>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const R = n => Math.floor((n-1)/10), C = n => (n-1)%10;
+const at = (r,c) => r*10 + c + 1;
+const tensOf = n => Math.floor(n/10), onesOf = n => n%10;
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + ' and ' + a[a.length-1];
+const plural = (k,w) => `${k} ${w}${k===1?'':'s'}`;
+// digits with tens part coloured
+const td = n => { const s=String(n); return s.length===1 ? `<span class="o">${s}</span>` : `<span class="t">${s.slice(0,-1)}</span><span class="o">${s.slice(-1)}</span>`; };
+
+/* ================= 120 chart ================= */
+const chart = $('#chart'), cellEl = {};
+for(let n=1;n<=120;n++){
+  const b = document.createElement('button');
+  b.className='cell'; b.innerHTML = `<span class="n">${n}</span><span class="bdg"></span>`;
+  b.setAttribute('aria-label', String(n));
+  b.addEventListener('click', () => V.onTap && V.onTap(n));
+  chart.appendChild(b); cellEl[n]=b;
+}
+let V;
+function clearView(){ V = {sticky:new Set(), active:null, gone:new Set(), hl:new Map(), badge:new Map(), token:null, onTap:null}; }
+function paint(){
+  for(let n=1;n<=120;n++){
+    const el = cellEl[n], h = V.hl.get(n);
+    el.classList.toggle('sticky', V.sticky.has(n));
+    el.classList.toggle('active', V.active===n);
+    el.classList.toggle('gone', V.gone.has(n));
+    el.classList.toggle('hl', !!h);
+    el.classList.toggle('token', V.token===n);
+    if(h){ el.style.setProperty('--hlc', h.c); el.style.setProperty('--hlbg', h.bg); } else { el.style.removeProperty('--hlc'); el.style.removeProperty('--hlbg'); }
+    el.querySelector('.bdg').textContent = V.badge.get(n) || '';
+    el.setAttribute('aria-label', V.sticky.has(n) ? 'hidden number' : String(n) + (V.gone.has(n) ? ', crossed off' : ''));
+  }
+}
+const HL = { clue:{c:'var(--clue)', bg:'var(--clue-soft)'}, ten:{c:'var(--ten)', bg:'var(--soft)'}, stamp:{c:'var(--stamp)', bg:'var(--stamp-soft)'}, one:{c:'var(--one)', bg:'var(--soft)'} };
+function pop(n){ const el=cellEl[n]; if(!el||reduced) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+
+/* ================= base-ten cubes ================= */
+function cubesSVG(n, extraTen){
+  const t = tensOf(n), o = onesOf(n), u = 13;
+  const w = (t)*(u+7) + (o? 12 + Math.ceil(o/5)*(u+3) : 0) + 4, h = 10*u + 4;
+  let s = `<svg viewBox="0 0 ${Math.max(w,30)} ${h}" width="${Math.max(w,30)*1.1}" role="img" aria-label="${t} tens and ${o} ones">`;
+  for(let i=0;i<t;i++){
+    const x = 2 + i*(u+7), isNew = extraTen && i===t-1;
+    for(let k=0;k<10;k++) s += `<rect x="${x}" y="${2+k*u}" width="${u}" height="${u}" rx="2" fill="${isNew?'var(--clue)':'var(--ten)'}" stroke="var(--paper)" stroke-width="1.5"/>`;
+  }
+  const ox = 2 + t*(u+7) + 8;
+  for(let k=0;k<o;k++){
+    const col = Math.floor(k/5), row = k%5;
+    s += `<rect x="${ox + col*(u+3)}" y="${h-2-(row+1)*u}" width="${u}" height="${u}" rx="2" fill="var(--one)" stroke="var(--paper)" stroke-width="1.5"/>`;
+  }
+  return s + '</svg>';
+}
+function cubesPair(a){
+  const b = a + 10;
+  return `<div class="cubes">
+    <div class="cubebox">${cubesSVG(a)}<div class="cubecap"><b>${a}</b> = <span class="tenc">${tensOf(a)} tens</span> and <span class="onec">${onesOf(a)} ones</span></div></div>
+    <div class="cubebox">${cubesSVG(b,true)}<div class="cubecap"><b>${b}</b> = <span class="tenc">${tensOf(b)} tens</span> and <span class="onec">${onesOf(b)} ones</span></div></div>
+  </div><p class="say">One row down adds <b>one more stick of ten</b>. The loose ones stay the same.</p>`;
+}
+
+/* ================= clue library ================= */
+const CLUE = {
+  tens:   {label:'I have __ tens', min:0, max:12, def:6, text:c=>`I have ${c.k} tens.`, test:(c,n)=>tensOf(n)===c.k, why:(c,n)=>`${n} has ${tensOf(n)} tens.`},
+  onesIs: {label:'My ones digit is __', min:0, max:9, def:7, text:c=>`My ones digit is ${c.k}.`, test:(c,n)=>onesOf(n)===c.k, why:(c,n)=>`The ones digit of ${n} is ${onesOf(n)}.`},
+  onesMore:{label:'My ones digit is more than __', min:0, max:8, def:7, text:c=>`My ones digit is more than ${c.k}.`, test:(c,n)=>onesOf(n)>c.k, why:(c,n)=>`The ones digit of ${n} is ${onesOf(n)}. That is not more than ${c.k}.`},
+  onesLess:{label:'My ones digit is less than __', min:1, max:9, def:3, text:c=>`My ones digit is less than ${c.k}.`, test:(c,n)=>onesOf(n)<c.k, why:(c,n)=>`The ones digit of ${n} is ${onesOf(n)}. That is not less than ${c.k}.`},
+  even:   {label:'I am an even number', text:()=>`I am an even number.`, test:(c,n)=>n%2===0, why:(c,n)=>`${n} is odd. Its ones digit, ${onesOf(n)}, is odd.`},
+  odd:    {label:'I am an odd number', text:()=>`I am an odd number.`, test:(c,n)=>n%2===1, why:(c,n)=>`${n} is even. Its ones digit, ${onesOf(n)}, is even.`},
+  more:   {label:'I am more than __', min:1, max:119, def:50, text:c=>`I am more than ${c.k}.`, test:(c,n)=>n>c.k, why:(c,n)=>`${n} is not more than ${c.k}.`},
+  less:   {label:'I am less than __', min:2, max:120, def:50, text:c=>`I am less than ${c.k}.`, test:(c,n)=>n<c.k, why:(c,n)=>`${n} is not less than ${c.k}.`},
+  between:{label:'I am between __ and __', min:1, max:120, def:40, def2:50, two:true, text:c=>`I am between ${c.k} and ${c.k2}.`, test:(c,n)=>n>Math.min(c.k,c.k2) && n<Math.max(c.k,c.k2), why:(c,n)=>`${n} is not between ${c.k} and ${c.k2}.`},
+  tenMore:{label:'I am 10 more than __', min:1, max:110, def:46, text:c=>`I am 10 more than ${c.k}.`, test:(c,n)=>n===c.k+10, why:(c,n)=>`${n} is not right under ${c.k}. Down one row is 10 more.`},
+  onesTens:{label:'My ones digit is __ more than my tens digit', min:1, max:8, def:3, text:c=>`My ones digit is ${c.k} more than my tens digit.`, test:(c,n)=>n>=10 && n<100 && onesOf(n)===tensOf(n)+c.k,
+           why:(c,n)=> n<10||n>=100 ? `${n} does not have one tens digit and one ones digit to compare.` : `${n}: tens digit ${tensOf(n)}, ones digit ${onesOf(n)}. ${tensOf(n)} + ${c.k} = ${tensOf(n)+c.k}, not ${onesOf(n)}.`}
+};
+const ALL = Array.from({length:120},(_,i)=>i+1);
+const fits = (clues,n) => clues.every(c => CLUE[c.t].test(c,n));
+const suspectsOf = clues => ALL.filter(n => fits(clues,n));
+const clueText = c => CLUE[c.t].text(c);
+
+/* ================= number pad ================= */
+function padHTML(id){ return `<div class="pad" id="${id}">${[1,2,3,4,5,6,7,8,9].map(d=>`<button data-d="${d}">${d}</button>`).join('')}<button data-d="back" aria-label="Erase">⌫</button><button data-d="0">0</button><button data-d="ok" class="go" aria-label="Check">✓</button></div>`; }
+function wirePad(id, onKey){ document.getElementById(id).querySelectorAll('button').forEach(b => b.onclick = () => onKey(b.dataset.d)); }
+
+/* ================= Torn piece component ================= */
+function makePiece(rows, cols, top, left, gr, gc){
+  // top,left: chart row/col of the piece's top-left. gr,gc: position of given number inside the piece.
+  const cells=[];
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) cells.push({r,c,n:at(top+r,left+c), given:r===gr&&c===gc, val:'', ok:false});
+  return {rows, cols, top, left, gr, gc, given:at(top+gr,left+gc), cells, sel:null};
+}
+function randomPiece(past100){
+  const shape = Math.random()<.5 ? [3,3] : [2,4];
+  const [rows, cols] = shape;
+  const top = past100 ? rnd(11-rows, 12-rows) : rnd(0, 10-rows);
+  const left = rnd(0, 10-cols);
+  return makePiece(rows, cols, top, left, rnd(0,rows-1), rnd(0,cols-1));
+}
+function stepWords(dr, dc){
+  const p=[];
+  if(dr) p.push(`${Math.abs(dr)} step${Math.abs(dr)>1?'s':''} ${dr>0?'down':'up'}`);
+  if(dc) p.push(`${Math.abs(dc)} step${Math.abs(dc)>1?'s':''} ${dc>0?'right':'left'}`);
+  return p.join(' and ');
+}
+function stepRule(dr, dc){
+  const p=[];
+  if(dr>0) p.push('Down is 10 more.'); if(dr<0) p.push('Up is 10 less.');
+  if(dc>0) p.push('Right is 1 more.'); if(dc<0) p.push('Left is 1 less.');
+  return p.join(' ');
+}
+function renderPiece(host, P, opts={}){
+  const colour = opts.colour ? '' : ' plain';
+  host.innerHTML = `<div class="piece torn${colour}" style="grid-template-columns:repeat(${P.cols},auto)" role="grid">${P.cells.map((c,i)=>{
+    const show = c.given || c.ok || (opts.reveal);
+    const cls = ['pc', c.given?'given':'', P.sel===i?'sel':'', c.ok&&!c.given?'ok':'', c.bad?'bad':''].join(' ');
+    const label = show ? td(c.n) : (c.val || '');
+    return `<button class="${cls}" data-i="${i}" aria-label="${show? c.n : 'empty square'}" style="${c.c===P.cols-1?'border-right:0;':''}${c.r===P.rows-1?'border-bottom:0;':''}">${label}</button>`;
+  }).join('')}</div>`;
+  if(opts.onPick) host.querySelectorAll('.pc').forEach(b => b.onclick = () => opts.onPick(+b.dataset.i));
+}
+function pieceKey(P, d, fb){
+  if(P.sel==null){ fb('info', 'Tap an empty square first.'); return; }
+  const c = P.cells[P.sel];
+  if(d==='back'){ c.val = c.val.slice(0,-1); c.bad=false; return; }
+  if(d==='ok'){
+    if(!c.val){ fb('info','Type a number, then tap ✓.'); return; }
+    const v = +c.val, dr = c.r-P.gr, dc = c.c-P.gc;
+    if(v===c.n){
+      c.ok=true; c.bad=false;
+      fb('good', `Yes! ${c.n}. From ${P.given}: ${stepWords(dr,dc)}. ${stepRule(dr,dc)}`);
+      const next = P.cells.findIndex(x=>!x.given && !x.ok); P.sel = next<0 ? null : next;
+    } else {
+      c.bad=true;
+      fb('try', `Not yet. This square is <b>${stepWords(dr,dc)}</b> from ${P.given}. ${stepRule(dr,dc)} Try again.`);
+      c.val='';
+    }
+    return;
+  }
+  if(c.val.length<3){ c.val += d; c.bad=false; }
+}
+const pieceDone = P => P.cells.every(c=>c.given||c.ok);
+
+/* ================= state ================= */
+let S;
+function freshState(){
+  return {
+    cls:1, step:{1:'warm',2:'warm',3:'write'},
+    w1:null,
+    ex:{P:makePiece(3,3,4,2,1,1), past100:false, shown:null},
+    share:{P:null, mode:'tens'},
+    rid:{list:null, i:0, solved:false},
+    torn:{which:'A', A:makePiece(3,3,4,2,1,1), B:makePiece(3,3,9,7,1,1)},
+    cc:{which:'A', shown:{A:0,B:0}, solved:{A:false,B:false}},
+    ff:{which:0, files:null},
+    build:{clues:[{t:'tens',k:3},{t:'odd'},{t:'onesMore',k:7}], author:''},
+    box:[
+      {id:1, author:'Example case', clues:[{t:'tens',k:3},{t:'odd'},{t:'onesMore',k:7}], solved:false},
+      {id:2, author:'Example case', clues:[{t:'more',k:100},{t:'even'},{t:'onesIs',k:6}], solved:false},
+      {id:3, author:'Example case', clues:[{t:'between',k:20,k2:30},{t:'onesTens',k:5},{t:'odd'}], solved:false}
+    ],
+    nextId:4, cur:null, curShown:0,
+    rf:{q:1, start:7, adds:0},
+    xt:{start:35, down:2, right:3, pos:35, moves:[], solvedMove:false, showSent:false}
+  };
+}
+
+/* ================= shell ================= */
+const STEPS = {
+  1:[['warm','Warm-up'],['explore','Torn pieces'],['share','Share']],
+  2:[['warm','Warm-up'],['torn','Case 1 · Torn Chart'],['clues','Case 2 · Clues'],['facts','Case 3 · Fact Families']],
+  3:[['write','Write a case'],['box','Case box'],['reflect','Reflect'],['challenge','★ Challenge']]
+};
+const sheet = $('#sheet');
+function render(){
+  [1,2,3].forEach(k => $('#tab'+k).setAttribute('aria-selected', S.cls===k));
+  const st = S.step[S.cls];
+  $('#steps').innerHTML = STEPS[S.cls].map(([k,l]) => `<button data-s="${k}" aria-pressed="${k===st}">${l}</button>`).join('');
+  $('#steps').querySelectorAll('button').forEach(b => b.onclick = () => { S.step[S.cls]=b.dataset.s; render(); });
+  clearView();
+  VIEWS[S.cls+':'+st]();
+  paint();
+}
+function fbSet(el, kind, html){ el.className = 'fb ' + kind; el.innerHTML = html; }
+
+const VIEWS = {};
+
+/* ---------- Class 1 · Warm-up: hidden numbers ---------- */
+function newHidden(){
+  for(let tries=0; tries<500; tries++){
+    const set = new Set();
+    while(set.size<6){
+      const n = rnd(11,120);
+      let near=false; for(const m of set) if(Math.abs(m-n)===1 || Math.abs(m-n)===10 || m===n) near=true;
+      if(!near) set.add(n);
+    }
+    return {hidden:[...set], found:new Set(), active:null, tries:{}};
+  }
+}
+function reason(n, hiddenSet){
+  if(C(n)>0 && !hiddenSet.has(n-1)) return {kind:'left', m:n-1};
+  return {kind:'up', m:n-10};
+}
+VIEWS['1:warm'] = function(){
+  if(!S.w1) S.w1 = newHidden();
+  const W = S.w1;
+  const still = new Set(W.hidden.filter(n=>!W.found.has(n)));
+  V.sticky = still; V.active = W.active;
+  for(const n of W.found) V.hl.set(n, HL.clue);
+  sheet.innerHTML = `
+    <p class="eyebrow">Warm-up · Hidden numbers</p>
+    <p class="big">Six numbers are hiding under sticky notes. Tap one.</p>
+    <div class="row"><div class="dots">${W.hidden.map(n=>`<i class="${W.found.has(n)?'on':''}"></i>`).join('')}</div><span class="tally">${W.found.size} of 6 found</span></div>
+    <div id="w1q"></div>
+    <p class="fb" id="w1fb"></p>
+    <div class="row"><button class="secondary" id="w1new">Hide 6 new numbers</button></div>`;
+  const fb = $('#w1fb');
+  if(W.msg) fbSet(fb, W.msg[0], W.msg[1]);
+  if(W.active){
+    const a = W.active, why = reason(a, still);
+    if(why.kind==='up' && still.has(a-10)) {/* never happens: we never hide vertical neighbours */}
+    const opts = new Set([a]);
+    const alt = [a+1, a-1, a+10, a-10].filter(x=>x>=1 && x<=120);
+    shuffle(alt); for(const x of alt){ if(opts.size<3) opts.add(x); }
+    W.opts = W.opts && W.opts.includes(a) ? W.opts : shuffle([...opts]);
+    $('#w1q').innerHTML = `<p class="say">What number is under the sticky note?</p><div class="row">${W.opts.map(x=>`<button class="choice ${ (W.tries[a]||[]).includes(x)?'no':''}" data-x="${x}">${x}</button>`).join('')}</div>`;
+    $('#w1q').querySelectorAll('.choice').forEach(b => b.onclick = () => {
+      const x = +b.dataset.x, rs = reason(a, still);
+      if(x===a){
+        W.found.add(a); W.active=null; W.opts=null;
+        W.msg = ['good', rs.kind==='left' ? `Yes! <b>${a}</b> comes right after ${rs.m}.` : `Yes! <b>${a}</b> is under ${rs.m}, so it is 10 more.`];
+        if(W.found.size===6) W.msg[1] += ' All six found. Great detective work!';
+        render(); pop(a);
+      } else {
+        (W.tries[a] = W.tries[a]||[]).push(x);
+        W.msg = ['try', rs.kind==='left' ? `Not ${x}. Look at the number before it: <b>${rs.m}</b>. One step right is 1 more. Try again.` : `Not ${x}. Look up: <b>${rs.m}</b>. One step down is 10 more. Try again.`];
+        W.flash = rs.m; render();
+      }
+    });
+  }
+  if(W.flash){ V.hl.set(W.flash, HL.ten); W.flash=null; }
+  V.onTap = n => { if(still.has(n)){ W.active=n; W.opts=null; W.msg=null; render(); } };
+  $('#w1new').onclick = () => { S.w1 = newHidden(); render(); };
+};
+
+/* ---------- Class 1 · Explore: torn pieces ---------- */
+VIEWS['1:explore'] = function(){
+  const E = S.ex, P = E.P;
+  if(P.sel==null){ const i=P.cells.findIndex(c=>!c.given&&!c.ok); P.sel = i<0?null:i; }
+  const done = pieceDone(P);
+  sheet.innerHTML = `
+    <p class="eyebrow">Explore · Torn piece</p>
+    <p class="big">This piece was torn off a chart. Only <b>${P.given}</b> is left. Fill in the rest.</p>
+    <p class="say muted">Use only: right is 1 more, down is 10 more.</p>
+    <div class="piecewrap"><div id="pc"></div>${done?'':`<div class="row" style="align-items:flex-start">${padHTML('pad1')}</div>`}</div>
+    <p class="fb" id="fb1"></p>
+    <div class="row">
+      <button class="primary" id="where" ${done?'':'disabled'}>Where does it fit on the chart?</button>
+      <button class="secondary" id="cubes">Prove it with cubes</button>
+    </div>
+    <div id="proof"></div>
+    <div class="row">
+      <button class="secondary" id="newp">New piece</button>
+      <button class="secondary" id="newp100">New piece past 100</button>
+    </div>`;
+  const fb = $('#fb1');
+  if(E.msg) fbSet(fb, E.msg[0], E.msg[1]);
+  renderPiece($('#pc'), P, {onPick: i => { if(!P.cells[i].given && !P.cells[i].ok){ P.sel=i; E.msg=null; render(); } }});
+  if(!done) wirePad('pad1', d => { pieceKey(P, d, (k,m)=>{E.msg=[k,m];}); if(pieceDone(P)) E.msg=['good', `Piece complete! Every row is 10 more than the row above.`]; render(); });
+  if(E.shown===P){ P.cells.forEach(c => V.hl.set(c.n, c.given?HL.ten:HL.clue)); }
+  $('#where').onclick = () => { E.shown = P; E.msg=['info', `It came from rows ${P.top+1} to ${P.top+P.rows} of the chart. The numbers match.`]; render(); };
+  $('#cubes').onclick = () => {
+    const a = P.given, b = a+10 <= 120 ? a : a-10;
+    $('#proof').innerHTML = cubesPair(b);
+  };
+  $('#newp').onclick = () => { E.P = randomPiece(false); E.shown=null; E.msg=null; render(); };
+  $('#newp100').onclick = () => { E.P = randomPiece(true); E.shown=null; E.msg=['info','The chart does not stop at 100. Keep going: 101, 102, 103 …']; render(); };
+};
+
+/* ---------- Class 1 · Share ---------- */
+VIEWS['1:share'] = function(){
+  const Sh = S.share;
+  const P = Sh.P || (pieceDone(S.ex.P) ? S.ex.P : makePiece(3,3,4,2,1,1));
+  Sh.P = P;
+  sheet.innerHTML = `
+    <p class="eyebrow">Share</p>
+    <p class="big">Look from one row to the next. What changes? What stays the same?</p>
+    <div class="piecewrap"><div id="pcs"></div><div id="cmp" class="say"></div></div>
+    <div class="row">
+      <button class="primary" id="showT">Show the tens digits</button>
+      <button class="secondary" id="showO">Show the ones digits</button>
+      <button class="secondary" id="showC">Prove it with cubes</button>
+    </div>
+    <div id="proof2"></div>
+    <div class="row"><button class="secondary" id="sw">Use a piece past 100</button></div>`;
+  const draw = () => {
+    renderPiece($('#pcs'), P, {reveal:true, colour:true});
+    const piece = $('#pcs .piece');
+    if(Sh.mode==='tens') piece.querySelectorAll('.o').forEach(e=>e.style.color='var(--muted)');
+    if(Sh.mode==='ones') piece.querySelectorAll('.t').forEach(e=>e.style.color='var(--muted)');
+    const col = P.cells.filter(c=>c.c===P.gc).map(c=>c.n);
+    $('#cmp').innerHTML = Sh.mode==='tens'
+      ? `Down the middle: ${col.map(td).join(' → ')}<br><b class="tenc">The tens digit goes up by 1</b> each row.`
+      : `Down the middle: ${col.map(td).join(' → ')}<br><b class="onec">The ones digit never changes</b> going down.`;
+    $('#cmp').querySelectorAll('.t').forEach(e=>e.style.color = Sh.mode==='tens'?'var(--ten)':'var(--muted)');
+    $('#cmp').querySelectorAll('.o').forEach(e=>e.style.color = Sh.mode==='ones'?'var(--one)':'var(--muted)');
+    P.cells.forEach(c => V.hl.set(c.n, c.c===P.gc ? HL.ten : HL.clue)); paint();
+  };
+  draw();
+  $('#showT').onclick = () => { Sh.mode='tens'; draw(); };
+  $('#showO').onclick = () => { Sh.mode='ones'; draw(); };
+  $('#showC').onclick = () => { const col = P.cells.filter(c=>c.c===P.gc).map(c=>c.n); $('#proof2').innerHTML = cubesPair(col[0]); };
+  $('#sw').onclick = () => { Sh.P = makePiece(3,3,9,7,1,1); render(); };
+};
+
+/* ---------- Class 2 · Warm-up riddles ---------- */
+const RID = {
+  tensOnes:(t,o)=>({text:`I have ${t} tens and ${o} ones.`, ans:t*10+o, why:n=>`${n} has ${tensOf(n)} tens and ${onesOf(n)} ones. I have ${t} tens and ${o} ones.`, help:[]}),
+  tenMore:(k)=>({text:`I am 10 more than ${k}.`, ans:k+10, why:n=>`${n} is not right under ${k}. Find ${k}, then go one step down.`, help:[k]}),
+  between:(a,o)=>({text:`I am between ${a} and ${a+10} and have ${o} ones.`, ans:a+o, why:n=>{
+      const p=[]; if(!(n>a && n<a+10)) p.push(`${n} is not between ${a} and ${a+10}`); if(onesOf(n)!==o) p.push(`${n} has ${onesOf(n)} ones, not ${o}`);
+      return p.join(', and ') + '.'; }, help:[a, a+10]})
+};
+function newRiddles(){ return [RID.tensOnes(7,3), RID.tenMore(46), RID.between(80,2)]; }
+function randomRiddle(){
+  const k = rnd(0,2);
+  if(k===0){ const t=rnd(1,11), o = t===11? rnd(0,9) : rnd(0,9); return RID.tensOnes(t,o); }
+  if(k===1) return RID.tenMore(rnd(1,110));
+  return RID.between(rnd(1,10)*10, rnd(1,9));
+}
+VIEWS['2:warm'] = function(){
+  const Rd = S.rid; if(!Rd.list) Rd.list = newRiddles();
+  const q = Rd.list[Rd.i];
+  sheet.innerHTML = `
+    <p class="eyebrow">Warm-up · Riddle ${Rd.i+1}</p>
+    <div class="case"><div class="clue" style="font-size:clamp(24px,2.4vw,34px)">${q.text}</div></div>
+    <p class="say">Find me on the chart. Tap my square.</p>
+    <p class="fb" id="rfb"></p>
+    <div class="row">
+      <button class="secondary" id="rprev" ${Rd.i===0?'disabled':''}>◀ Back</button>
+      <button class="primary" id="rnext">${Rd.i<Rd.list.length-1?'Next riddle ▶':'New riddle ▶'}</button>
+    </div>`;
+  const fb = $('#rfb');
+  if(Rd.msg) fbSet(fb, Rd.msg[0], Rd.msg[1]);
+  if(Rd.solved) V.hl.set(q.ans, HL.clue);
+  if(Rd.wrong){ V.hl.set(Rd.wrong, HL.stamp); q.help.forEach(h=>V.hl.set(h, HL.ten)); }
+  V.onTap = n => {
+    if(n===q.ans){ Rd.solved=true; Rd.wrong=null; Rd.msg=['good', `Yes! <b>${n}</b> has ${tensOf(n)} tens and ${onesOf(n)} ones. Case closed.`]; render(); pop(n); }
+    else { Rd.wrong=n; Rd.solved=false; Rd.msg=['try', `${q.why(n)} Try again.`]; render(); }
+  };
+  const go = i => { Rd.i=i; Rd.solved=false; Rd.wrong=null; Rd.msg=null; render(); };
+  $('#rprev').onclick = () => go(Rd.i-1);
+  $('#rnext').onclick = () => { if(Rd.i===Rd.list.length-1) Rd.list.push(randomRiddle()); go(Rd.i+1); };
+};
+
+/* ---------- Class 2 · Case 1 Torn Chart ---------- */
+VIEWS['2:torn'] = function(){
+  const T = S.torn, P = T[T.which];
+  if(P.sel==null){ const i=P.cells.findIndex(c=>!c.given&&!c.ok); P.sel = i<0?null:i; }
+  const done = pieceDone(P);
+  sheet.innerHTML = `
+    <p class="eyebrow">Case 1 · The Torn Chart</p>
+    <div class="row"><div class="steps" style="margin:0">${['A','B'].map(k=>`<button data-p="${k}" aria-pressed="${T.which===k}">Piece ${k}${pieceDone(T[k])?' ✓':''}</button>`).join('')}</div></div>
+    <p class="big">Someone tore this piece off a chart. Fill in every missing number.</p>
+    <div class="piecewrap"><div id="pc2"></div>${done?'':padHTML('pad2')}</div>
+    <p class="fb" id="fb2"></p>
+    ${done?`<div class="row"><button class="secondary" id="why54">How did you know what goes under ${P.given}?</button></div><div id="whyout"></div>`:''}`;
+  const fb = $('#fb2');
+  if(T.msg) fbSet(fb, T.msg[0], T.msg[1]);
+  document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { T.which=b.dataset.p; T.msg=null; render(); });
+  renderPiece($('#pc2'), P, {onPick:i => { if(!P.cells[i].given&&!P.cells[i].ok){ P.sel=i; T.msg=null; render(); } }, colour:done});
+  if(!done) wirePad('pad2', d => { pieceKey(P,d,(k,m)=>{T.msg=[k,m];}); if(pieceDone(P)) T.msg=['good',`Piece ${T.which} solved!`]; render(); });
+  if(done){
+    P.cells.forEach(c => V.hl.set(c.n, c.given?HL.ten:HL.clue));
+    $('#why54').onclick = () => { $('#whyout').innerHTML = cubesPair(P.given); };
+  }
+};
+
+/* ---------- Class 2 · Case 2 Clues ---------- */
+const CASES = {
+  A:[{t:'tens',k:6},{t:'onesMore',k:7},{t:'even'}],
+  B:[{t:'between',k:40,k2:50},{t:'odd'},{t:'onesTens',k:3}]
+};
+const THIRD_POOL = n => [ {t:'even'},{t:'odd'},{t:'onesIs',k:onesOf(n)},{t:'onesMore',k:Math.max(0,onesOf(n)-1)},{t:'onesLess',k:Math.min(9,onesOf(n)+1)},{t:'tenMore',k:n-10},{t:'tens',k:tensOf(n)} ];
+VIEWS['2:clues'] = function(){
+  const K = S.cc, w = K.which, clues = CASES[w], shown = K.shown[w];
+  const revealed = clues.slice(0, shown);
+  const sus = suspectsOf(revealed);
+  if(shown>0) for(const n of ALL) if(!sus.includes(n)) V.gone.add(n);
+  const solved = K.solved[w];
+  if(solved) V.hl.set(suspectsOf(clues)[0], HL.clue);
+  if(K.wrong) V.hl.set(K.wrong, HL.stamp);
+  sheet.innerHTML = `
+    <p class="eyebrow">Case 2 · Tens-and-Ones Clues</p>
+    <div class="row"><div class="steps" style="margin:0">${['A','B'].map(k=>`<button data-c="${k}" aria-pressed="${w===k}">Mystery number ${k}${K.solved[k]?' ✓':''}</button>`).join('')}</div></div>
+    <div class="case">
+      ${solved?'<div class="stamp in">SOLVED</div>':''}
+      ${clues.map((c,i)=>`<div class="clue ${i<shown?'':'hidden'}"><span class="num">${i+1}</span>${i<shown?clueText(c):'Clue hidden'}</div>`).join('')}
+    </div>
+    <div class="row">
+      <button class="primary" id="nextClue" ${shown>=3?'disabled':''}>${shown===0?'Read clue 1':'Read the next clue'}</button>
+      <span class="suspects">Suspects left: <b>${shown===0?120:sus.length}</b></span>
+    </div>
+    <p class="say muted">${shown===0 ? 'Every number on the chart is a suspect.' : sus.length<=12 && !solved ? 'Still standing: '+listText(sus)+'.' : solved ? '' : 'Crossed-off numbers broke a clue.'} ${solved?'':'When you know it, tap the mystery number on the chart.'}</p>
+    <p class="fb" id="cfb"></p>
+    ${shown>=2 ? `<div class="row"><button class="secondary" id="third">Which third clues would settle it?</button></div><div id="thirdout"></div>` : ''}`;
+  if(K.msg) fbSet($('#cfb'), K.msg[0], K.msg[1]);
+  document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { K.which=b.dataset.c; K.msg=null; K.wrong=null; render(); });
+  $('#nextClue').onclick = () => { K.shown[w]++; K.msg=null; K.wrong=null; const s2 = suspectsOf(clues.slice(0,K.shown[w])); K.msg=['info', `Clue ${K.shown[w]} leaves <b>${plural(s2.length,'suspect')}</b>.`]; render(); };
+  V.onTap = n => {
+    if(solved) return;
+    const broken = revealed.find(c => !CLUE[c.t].test(c,n));
+    if(shown===0){ K.msg=['info','Read clue 1 first. Then start crossing off.']; render(); return; }
+    if(broken){ K.wrong=n; K.msg=['try', `${CLUE[broken.t].why(broken,n)} So ${n} breaks the clue “${clueText(broken)}” Try again.`]; render(); return; }
+    if(sus.length>1){ K.wrong=null; const others = sus.filter(x=>x!==n); K.msg=['info', `${n} fits so far. But ${listText(others.slice(0,6))}${others.length>6?' …':''} ${others.length===1?'fits':'fit'} too. ${shown<3?'Read the next clue.':''}`]; render(); return; }
+    K.solved[w]=true; K.wrong=null; K.msg=['good', `Case closed: the mystery number is <b>${n}</b>. It fits all three clues.`]; render(); pop(n);
+  };
+  if(shown>=2){
+    $('#third').onclick = () => {
+      const two = suspectsOf(clues.slice(0,2));
+      const ideas = []; const seen = new Set();
+      for(const n of two) for(const c of THIRD_POOL(n)){
+        const s = suspectsOf([...clues.slice(0,2), c]);
+        const key = clueText(c);
+        if(s.length===1 && !seen.has(key)){ seen.add(key); ideas.push({c, n:s[0]}); }
+      }
+      $('#thirdout').innerHTML = `<p class="say">After two clues, the suspects were <b>${listText(two)}</b>. Each of these third clues leaves exactly one:</p>
+        <table class="ev">${ideas.slice(0,6).map(x=>`<tr><td>“${clueText(x.c)}”</td><td>only <b>${x.n}</b></td></tr>`).join('')}</table>`;
+    };
+  }
+};
+
+/* ---------- Class 2 · Case 3 Fact families ---------- */
+function makeFile(kind, a, b){ return {kind, a, b, whole:a+b, ans: kind==='add' ? b : a+b, entry:'', solved:false, rows:[[null,null,null],[null,null,null],[null,null,null],[null,null,null]], act:[0,0], checked:null, msg:null}; }
+function randomFile(){ let a,b; do{ a=rnd(2,10); b=rnd(2,10); } while(a===b || a+b>20); return Math.random()<.5 ? makeFile('add',a,b) : makeFile('sub',a,b); }
+function framesHTML(F){
+  // red = known part, blue = found part, dashed = still to find
+  const total = F.whole, cells=[];
+  const red = F.kind==='add' ? F.a : F.a; // add: 8 known; sub: 6 taken away
+  for(let i=0;i<Math.ceil(total/10)*10;i++){
+    let cls='';
+    if(i<total){ if(i<red) cls='a'; else cls = F.solved ? 'b' : (F.kind==='add' ? 'q' : 'b'); }
+    cells.push(cls);
+  }
+  const frames=[]; for(let f=0; f<cells.length; f+=10) frames.push(`<div class="frame">${cells.slice(f,f+10).map(c=>`<span>${c?`<i class="${c}"></i>`:''}</span>`).join('')}</div>`);
+  return `<div class="frames" aria-hidden="true">${F.kind==='sub' && !F.solved ? '<div class="say muted">The whole is hidden. Build it from the parts.</div>' : frames.join('')}</div>`;
+}
+VIEWS['2:facts'] = function(){
+  const FF = S.ff;
+  if(!FF.files) FF.files = [makeFile('add',8,5), makeFile('sub',6,9)];
+  const F = FF.files[FF.which];
+  const title = F.kind==='add' ? `${F.a} + ___ = ${F.whole}` : `___ − ${F.a} = ${F.b}`;
+  const nums = [F.a, F.b, F.whole];
+  sheet.innerHTML = `
+    <p class="eyebrow">Case 3 · Fact-Family Files</p>
+    <div class="row"><div class="steps" style="margin:0">${FF.files.map((f,i)=>`<button data-f="${i}" aria-pressed="${FF.which===i}">File ${i+1}${f.solved&&f.checked===true?' ✓':''}</button>`).join('')}<button id="newf">+ New file</button></div></div>
+    <div class="case">${F.solved&&F.checked===true?'<div class="stamp in">SOLVED</div>':''}<div class="clue" style="font-size:clamp(28px,3vw,42px); font-weight:700; justify-content:center">${title}</div>${framesHTML(F)}</div>
+    ${F.solved ? '' : `<p class="say">What number is missing? Use subtraction to find it.</p>
+      <div class="row" style="align-items:flex-start"><span class="entry" id="fent">${F.entry||'&nbsp;'}</span>${padHTML('pad3')}</div>
+      <div class="row"><button class="secondary" id="fhint">Detective hint</button></div>`}
+    <p class="fb" id="ffb"></p>
+    ${F.solved ? `<p class="say">Now write all four facts in the family. Tap a box, then tap a number.</p>
+      <div class="chips">${nums.map(x=>`<button class="chip" data-v="${x}">${x}</button>`).join('')}</div>
+      <div class="fam">${F.rows.map((r,i)=>`<div class="eq ${F.checked&&F.checked[i]===true?'ok':F.checked&&F.checked[i]===false?'bad':''}">${[0,1,2].map(j=>`<button class="slot ${r[j]!=null?'filled':''} ${F.act[0]===i&&F.act[1]===j?'act':''}" data-r="${i}" data-c="${j}">${r[j]??''}</button>${j===0?`<span>${i<2?'+':'−'}</span>`:j===1?'<span>=</span>':''}`).join('')}</div>`).join('')}</div>
+      <div class="row"><button class="primary" id="fcheck">Check my facts</button><button class="secondary" id="fclear">Clear facts</button></div>
+      <p class="fb" id="ffb2"></p>` : ''}`;
+  if(F.msg) fbSet($('#ffb'), F.msg[0], F.msg[1]);
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { FF.which=+b.dataset.f; render(); });
+  $('#newf').onclick = () => { FF.files.push(randomFile()); FF.which = FF.files.length-1; render(); };
+  if(!F.solved){
+    $('#fhint').onclick = () => { F.msg=['info', F.kind==='add' ? `Think: <b>${F.whole} − ${F.a} = ?</b> Start at ${F.a} and count up to ${F.whole}.` : `Think: <b>${F.a} + ${F.b} = ?</b> Put back the ${F.a} that were taken away.`]; render(); };
+    wirePad('pad3', d => {
+      if(d==='back'){ F.entry = F.entry.slice(0,-1); }
+      else if(d==='ok'){
+        if(!F.entry){ F.msg=['info','Type a number, then tap ✓.']; render(); return; }
+        const g = +F.entry;
+        if(g===F.ans){ F.solved=true; F.msg=['good', F.kind==='add' ? `Yes! ${F.whole} − ${F.a} = ${F.b}, so ${F.a} + <b>${F.b}</b> = ${F.whole}.` : `Yes! ${F.a} + ${F.b} = ${F.whole}, so <b>${F.whole}</b> − ${F.a} = ${F.b}.`]; }
+        else if(F.kind==='add'){ const s = F.a+g; F.msg=['try', `${F.a} + ${g} = ${s}. ${s>F.whole?`That is more than ${F.whole}.`:`That is less than ${F.whole}.`} Try ${F.whole} − ${F.a}.`]; F.entry=''; }
+        else { F.msg=['try', g<F.a ? `You can't take ${F.a} away from ${g} here. The whole must be bigger than ${F.a}.` : `${g} − ${F.a} = ${g-F.a}, not ${F.b}. Try ${F.a} + ${F.b}.`]; F.entry=''; }
+        render(); return;
+      } else if(F.entry.length<2) F.entry += d;
+      $('#fent').innerHTML = F.entry || '&nbsp;';
+    });
+  } else {
+    document.querySelectorAll('.slot').forEach(b => b.onclick = () => {
+      const i=+b.dataset.r, j=+b.dataset.c;
+      if(F.act[0]===i && F.act[1]===j && F.rows[i][j]!=null) F.rows[i][j]=null;
+      F.act=[i,j]; F.checked=null; render();
+    });
+    document.querySelectorAll('.chip').forEach(b => b.onclick = () => {
+      const [i,j] = F.act; F.rows[i][j] = +b.dataset.v; F.checked=null;
+      // advance to next empty slot
+      let k = i*3+j; for(let s=1;s<=12;s++){ const q=(k+s)%12; if(F.rows[Math.floor(q/3)][q%3]==null){ F.act=[Math.floor(q/3), q%3]; break; } }
+      render();
+    });
+    $('#fclear').onclick = () => { F.rows = F.rows.map(()=>[null,null,null]); F.act=[0,0]; F.checked=null; render(); };
+    $('#fcheck').onclick = () => {
+      const res=[], notes=[];
+      const fam = new Set([F.a,F.b,F.whole]);
+      F.rows.forEach((r,i) => {
+        if(r.some(x=>x==null)){ res.push(false); notes.push(`Fact ${i+1} has an empty box.`); return; }
+        const [x,y,z] = r; const add = i<2;
+        const ok = add ? x+y===z : x-y===z;
+        const inFam = r.every(v=>fam.has(v)) && new Set(r).size===3;
+        if(!ok){ res.push(false); notes.push(add ? `${x} + ${y} = ${x+y}, not ${z}. In an addition fact the whole goes last.` : `${x} − ${y} = ${x-y}, not ${z}. In a subtraction fact, start with the whole.`); return; }
+        if(!inFam){ res.push(false); notes.push(`Fact ${i+1} must use ${F.a}, ${F.b} and ${F.whole}, each once.`); return; }
+        res.push(true);
+      });
+      if(res[0]&&res[1] && F.rows[0].join()===F.rows[1].join()){ res[1]=false; notes.push(`Facts 1 and 2 are the same. Turn the parts around for the second one.`); }
+      if(res[2]&&res[3] && F.rows[2].join()===F.rows[3].join()){ res[3]=false; notes.push(`Facts 3 and 4 are the same. Take away the other part for the second one.`); }
+      F.checked = res;
+      F.factMsg = res.every(Boolean) ? ['good', `All four facts are true. ${F.a}, ${F.b} and ${F.whole} are one family.`] : ['try', notes.join(' ')];
+      render();
+    };
+    if(F.factMsg && F.checked) fbSet($('#ffb2'), F.factMsg[0], F.factMsg[1]);
+  }
+};
+
+/* ---------- Class 3 · Write a case ---------- */
+function defaultClue(t){ const d = CLUE[t]; const c = {t}; if(d.min!=null) c.k = d.def; if(d.two) c.k2 = d.def2; return c; }
+VIEWS['3:write'] = function(){
+  const B = S.build, sus = suspectsOf(B.clues);
+  for(const n of ALL) if(!sus.includes(n)) V.gone.add(n);
+  sus.forEach(n => V.hl.set(n, sus.length===1 ? HL.clue : HL.one));
+  const verdict = sus.length===1 ? ['good', `Exactly one number fits: <b>${sus[0]}</b>. This case is ready for the case box.`]
+    : sus.length===0 ? ['try', `No number fits all three clues. Change a clue so at least one number is left.`]
+    : ['try', `${plural(sus.length,'number')} still fit${sus.length===1?'s':''}${sus.length<=8?': '+listText(sus):''}. Make a clue sharper so only one is left.`];
+  sheet.innerHTML = `
+    <p class="eyebrow">Open your own case · Write it</p>
+    <p class="say">Pick three clues that point to <b>exactly one</b> number. Watch the chart cross off suspects.</p>
+    <div class="build">${B.clues.map((c,i)=>{
+      const d = CLUE[c.t];
+      return `<div class="bclue"><span class="clue" style="padding:0;background:none"><span class="num">${i+1}</span></span>
+        <select id="bsel${i}" aria-label="Clue ${i+1} type">${Object.entries(CLUE).map(([k,v])=>`<option value="${k}" ${k===c.t?'selected':''}>${v.label}</option>`).join('')}</select>
+        ${d.min!=null?`<span class="step"><button data-i="${i}" data-w="k" data-d="-1" aria-label="less">−</button><output>${c.k}</output><button data-i="${i}" data-w="k" data-d="1" aria-label="more">+</button></span>`:''}
+        ${d.two?`<span>and</span><span class="step"><button data-i="${i}" data-w="k2" data-d="-1" aria-label="less">−</button><output>${c.k2}</output><button data-i="${i}" data-w="k2" data-d="1" aria-label="more">+</button></span>`:''}
+        <span class="btext">“${clueText(c)}”</span></div>`; }).join('')}</div>
+    <p class="suspects">Suspects left: <b>${sus.length}</b></p>
+    <p class="fb ${verdict[0]}">${verdict[1]}</p>
+    <div class="row"><input type="text" id="author" placeholder="Detective's name" value="${B.author.replace(/"/g,'&quot;')}" aria-label="Detective's name"><button class="primary" id="addBox">Put it in the case box</button></div>
+    <p class="fb" id="wfb"></p>`;
+  B.clues.forEach((c,i) => { $('#bsel'+i).onchange = e => { B.clues[i] = defaultClue(e.target.value); render(); }; });
+  document.querySelectorAll('.step button').forEach(b => b.onclick = () => {
+    const c = B.clues[+b.dataset.i], d = CLUE[c.t], w = b.dataset.w;
+    c[w] = Math.min(d.max, Math.max(d.min, c[w] + (+b.dataset.d))); render();
+  });
+  $('#author').oninput = e => { B.author = e.target.value; };
+  $('#addBox').onclick = () => {
+    S.box.push({id:S.nextId++, author:B.author.trim()||'A detective', clues:B.clues.map(c=>({...c})), solved:false});
+    B.msg = sus.length===1 ? ['good','Filed! Your case is in the case box.'] : ['info','Filed. Classmates will find out if it needs a sharper clue.'];
+    fbSet($('#wfb'), B.msg[0], B.msg[1]);
+  };
+};
+
+/* ---------- Class 3 · Case box (showcase) ---------- */
+VIEWS['3:box'] = function(){
+  const cur = S.box.find(c=>c.id===S.cur);
+  if(!cur){
+    sheet.innerHTML = `
+      <p class="eyebrow">The agency is open · Case box</p>
+      <p class="big">Draw a case. Read the clues. Solve it on the chart.</p>
+      <div class="row"><button class="primary" id="draw">Draw a case</button><span class="tally">${S.box.filter(c=>!c.solved).length} unsolved · ${S.box.filter(c=>c.solved).length} solved</span></div>
+      <div class="boxlist">${S.box.map(c=>`<button class="mini ${c.solved?'solved':''}" data-id="${c.id}"><span class="tagx">${c.solved?'Solved':'Case #'+c.id}</span><b>${c.author}</b><span>${c.clues.length} clues</span></button>`).join('')}</div>`;
+    $('#draw').onclick = () => { const open = S.box.filter(c=>!c.solved); const pool = open.length?open:S.box; const p = pool[rnd(0,pool.length-1)]; S.cur=p.id; S.curShown=1; S.curMsg=null; S.curWrong=null; S.curRight=null; S.curStamp=null; render(); };
+    document.querySelectorAll('.mini').forEach(b => b.onclick = () => { S.cur=+b.dataset.id; S.curShown=1; S.curMsg=null; S.curWrong=null; S.curRight=null; S.curStamp=null; render(); });
+    return;
+  }
+  const shown = S.curShown, revealed = cur.clues.slice(0,shown), all = suspectsOf(cur.clues);
+  if(S.crossOn){ const sus = suspectsOf(revealed); for(const n of ALL) if(!sus.includes(n)) V.gone.add(n); }
+  if(S.curWrong) V.hl.set(S.curWrong, HL.stamp);
+  if(S.curRight) V.hl.set(S.curRight, HL.clue);
+  sheet.innerHTML = `
+    <p class="eyebrow">Case #${cur.id} · written by ${cur.author}</p>
+    <div class="case">${S.curStamp?`<div class="stamp in">${S.curStamp}</div>`:''}
+      ${cur.clues.map((c,i)=>`<div class="clue ${i<shown?'':'hidden'}" style="font-size:clamp(22px,2.2vw,30px)"><span class="num">${i+1}</span>${i<shown?clueText(c):'Clue hidden'}</div>`).join('')}</div>
+    <div class="row">
+      <button class="primary" id="cnext" ${shown>=cur.clues.length?'disabled':''}>Next clue</button>
+      <button class="secondary" id="cross" aria-pressed="${!!S.crossOn}">${S.crossOn?'Stop crossing off':'Cross off for us'}</button>
+      <button class="secondary" id="back">Back to the case box</button>
+    </div>
+    <p class="say muted">Tap the mystery number on the chart.</p>
+    <p class="fb" id="bfb"></p>`;
+  if(S.curMsg) fbSet($('#bfb'), S.curMsg[0], S.curMsg[1]);
+  $('#cnext').onclick = () => { S.curShown++; render(); };
+  $('#cross').onclick = () => { S.crossOn = !S.crossOn; render(); };
+  $('#back').onclick = () => { S.cur=null; S.curStamp=null; S.curRight=null; S.curWrong=null; render(); };
+  V.onTap = n => {
+    const broken = revealed.find(c => !CLUE[c.t].test(c,n));
+    if(broken){ S.curWrong=n; S.curRight=null; S.curMsg=['try', `${CLUE[broken.t].why(broken,n)} It breaks clue ${cur.clues.indexOf(broken)+1}. Try again.`]; render(); return; }
+    if(shown < cur.clues.length){ S.curWrong=null; S.curMsg=['info', `${n} fits so far. Read the next clue to be sure.`]; render(); return; }
+    S.curWrong=null; S.curRight=n;
+    if(all.length===1){ cur.solved=true; S.curStamp='SOLVED'; S.curMsg=['good', `<b>${n}</b> fits every clue, and no other number does. Check the back of the card: case closed!`]; }
+    else { const others = all.filter(x=>x!==n); S.curStamp='2ND LOOK'; S.curMsg=['info', `${n} fits every clue. But so ${others.length===1?'does':'do'} ${listText(others.slice(0,8))}${others.length>8?' …':''}! This case goes back to ${cur.author==='Example case'?'its author':cur.author} for a sharper clue.`]; }
+    render(); pop(n);
+  };
+};
+
+/* ---------- Class 3 · Reflect ---------- */
+const REF_CLUES = [{t:'tenMore',k:46},{t:'between',k:40,k2:50},{t:'tens',k:6},{t:'onesIs',k:7},{t:'onesMore',k:7},{t:'even'}];
+VIEWS['3:reflect'] = function(){
+  const F = S.rf;
+  sheet.innerHTML = `
+    <p class="eyebrow">Reflect</p>
+    <div class="row"><div class="steps" style="margin:0"><button data-q="1" aria-pressed="${F.q===1}">Fastest clues</button><button data-q="2" aria-pressed="${F.q===2}">Why “10 more”?</button></div></div>
+    <div id="rq"></div>`;
+  document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { F.q=+b.dataset.q; F.pick=null; render(); });
+  const box = $('#rq');
+  if(F.q===1){
+    const rows = REF_CLUES.map(c => ({c, n:suspectsOf([c]).length})).sort((a,b)=>a.n-b.n);
+    box.innerHTML = `<p class="big">Which clue types narrowed the search fastest?</p>
+      <p class="say muted">Each clue starts from all 120 numbers. Tap a clue to see who is left.</p>
+      <table class="ev">${rows.map((r,i)=>`<tr><td><button class="evbtn" data-r="${REF_CLUES.indexOf(r.c)}">“${clueText(r.c)}”</button></td><td><div class="row" style="gap:8px; flex-wrap:nowrap"><div class="bar" style="width:${Math.max(2,r.n/120*100)}%"></div><b>${r.n}</b></div></td></tr>`).join('')}</table>
+      <p class="fb" id="rfb"></p>`;
+    box.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { F.pick=+b.dataset.r; render(); });
+    if(F.pick!=null){
+      const c = REF_CLUES[F.pick], sus = suspectsOf([c]);
+      for(const n of ALL) if(!sus.includes(n)) V.gone.add(n);
+      sus.forEach(n=>V.hl.set(n,HL.clue));
+      fbSet($('#rfb'),'info', `“${clueText(c)}” leaves <b>${plural(sus.length,'number')}</b>${sus.length<=12?': '+listText(sus):''}.`);
+    }
+  } else {
+    const n = F.start + 10*F.adds;
+    const path = []; for(let i=0;i<=F.adds;i++) path.push(F.start+10*i);
+    path.forEach(x => V.hl.set(x, HL.one)); V.token = n;
+    box.innerHTML = `<p class="big">Why does “10 more” never change the ones digit?</p>
+      <p class="say muted">Tap any number on the chart to start there. Then add 10 again and again.</p>
+      <div class="sent">${path.map(td).join(' → ')}</div>
+      <div class="row"><button class="primary" id="add10" ${n+10>120?'disabled':''}>+ 10</button><button class="secondary" id="rs">Start again</button></div>
+      <div class="cubebox">${cubesSVG(n, F.adds>0)}<div class="cubecap"><b>${n}</b> = <span class="tenc">${tensOf(n)} tens</span> and <span class="onec">${onesOf(n)} ones</span></div></div>
+      <p class="fb info">Adding 10 adds <b>one stick of ten</b>. Nobody touches the loose ones, so the ones digit stays <b class="onec">${onesOf(F.start)}</b>.</p>`;
+    box.querySelectorAll('.sent .t').forEach(e=>e.style.color='var(--ten)');
+    box.querySelectorAll('.sent .o').forEach(e=>e.style.color='var(--one)');
+    $('#add10').onclick = () => { F.adds++; render(); pop(F.start+10*F.adds); };
+    $('#rs').onclick = () => { F.adds=0; render(); };
+    V.onTap = m => { F.start=m; F.adds=0; render(); };
+  }
+};
+
+/* ---------- Class 3 · Extension challenge ---------- */
+function newTrip(past100){
+  for(let k=0;k<500;k++){
+    const down = rnd(1,3), right = rnd(1,4), r = rnd(0, 11-down), c = rnd(0, 9-right);
+    const s = at(r,c), end = s + 10*down + right;
+    if(past100 ? end>100 && s<=100 : end<=100) return {start:s, down, right};
+  }
+  return {start:35, down:2, right:3};
+}
+VIEWS['3:challenge'] = function(){
+  const X = S.xt, end = X.start + 10*X.down + X.right;
+  V.hl.set(X.start, HL.ten);
+  X.moves.reduce((p,m)=>{ const q = p + (m==='D'?10:m==='U'?-10:m==='R'?1:-1); V.hl.set(q, HL.one); return q; }, X.start);
+  V.token = X.pos;
+  const arrows = `${X.down? '↓ '.repeat(X.down):''}${'→ '.repeat(X.right)}`.trim();
+  const r = R(X.pos), c = C(X.pos);
+  sheet.innerHTML = `
+    <p class="eyebrow">★ Extension · Two-step cases</p>
+    <div class="case">${X.solvedMove?'<div class="stamp in">SOLVED</div>':''}
+      <div class="clue" style="font-size:clamp(22px,2.2vw,30px)">Start at <b>&nbsp;${X.start}&nbsp;</b>. Go down ${X.down} row${X.down>1?'s':''} and right ${X.right}. Where are you?</div>
+      <div class="sent" aria-hidden="true" style="letter-spacing:.2em">${arrows}</div></div>
+    <div class="row" style="align-items:flex-start">
+      <div class="arrows" role="group" aria-label="Move the detective">
+        <span></span><button id="mU" ${r===0?'disabled':''} aria-label="up">↑</button><span></span>
+        <button id="mL" ${c===0?'disabled':''} aria-label="left">←</button><button id="mD" ${r===11?'disabled':''} aria-label="down">↓</button><button id="mR" ${c===9?'disabled':''} aria-label="right">→</button>
+      </div>
+      <div class="say">You are on <b class="sent">${X.pos}</b><br><span class="muted">${X.moves.length? 'Moves: '+X.moves.map(m=>({D:'↓',U:'↑',L:'←',R:'→'})[m]).join(' ') : 'Use the arrows to move.'}</span></div>
+    </div>
+    <div class="row"><button class="primary" id="here">I'm there!</button><button class="secondary" id="sent" ${X.solvedMove?'':'disabled'}>What one addition sentence takes you there?</button></div>
+    <p class="fb" id="xfb"></p>
+    ${X.showSent ? `<div class="case"><div class="sent">${X.start} + <span class="tenc">${10*X.down}</span> + <span class="onec">${X.right}</span> = ${end}</div><div class="sent">${X.start} + ${10*X.down + X.right} = ${end}</div><p class="say">Down ${X.down} row${X.down>1?'s':''} is <span class="tenc">${X.down} ten${X.down>1?'s':''}</span>. Right ${X.right} is <span class="onec">${X.right} one${X.right>1?'s':''}</span>. Together: <b>${10*X.down + X.right}</b>.</p></div>` : ''}
+    <div class="row"><button class="secondary" id="xnew">New case</button><button class="secondary" id="xnew100">New case past 100</button><button class="secondary" id="xreset">Back to start</button></div>`;
+  if(X.msg) fbSet($('#xfb'), X.msg[0], X.msg[1]);
+  const mv = (m,d) => { X.pos += d; X.moves.push(m); X.msg=null; render(); pop(X.pos); };
+  $('#mU').onclick = () => mv('U',-10); $('#mD').onclick = () => mv('D',10);
+  $('#mL').onclick = () => mv('L',-1);  $('#mR').onclick = () => mv('R',1);
+  $('#here').onclick = () => {
+    if(X.pos===end){ X.solvedMove=true; X.msg=['good', `Yes! You are on <b>${end}</b>. ${X.down} down is ${10*X.down} more. ${X.right} right is ${X.right} more.`]; }
+    else {
+      const dr = R(X.pos)-R(X.start), dc = C(X.pos)-C(X.start);
+      X.msg=['try', `You are ${dr===0&&dc===0?'still at the start':stepWords(dr,dc)+' from '+X.start}. The case says ${X.down} down and ${X.right} right. Try again.`];
+    }
+    render();
+  };
+  $('#sent').onclick = () => { X.showSent = true; render(); };
+  const reset = t => { Object.assign(X, t, {pos:t.start, moves:[], solvedMove:false, showSent:false, msg:null}); render(); };
+  $('#xnew').onclick = () => reset(newTrip(false));
+  $('#xnew100').onclick = () => reset(newTrip(true));
+  $('#xreset').onclick = () => reset({start:X.start, down:X.down, right:X.right});
+  V.onTap = n => { X.msg=['info','Use the arrow buttons to walk there one step at a time.']; render(); };
+};
+
+/* ================= wire up ================= */
+[1,2,3].forEach(k => $('#tab'+k).onclick = () => { S.cls=k; render(); });
+$('#resetBtn').onclick = () => { S = freshState(); render(); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+S = freshState(); render();
+window.__NDA = {CLUE, CASES, suspectsOf, makePiece, newHidden, newTrip, randomPiece, randomFile, RID};
+})();
+</script>
+
+</body></html>

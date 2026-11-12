@@ -1,0 +1,1127 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Secrets of the Multiplication Table</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: graph-paper ground; header + three class tabs; each class = a visual stage (table or tile array) beside a step panel */
+:root{
+  --bg:#EDF1F5; --grid:#DDE4ED; --card:#FFFFFF; --ink:#16202F; --muted:#55617A; --line:#C8D1DD;
+  --accent:#1C5BC9; --accent-ink:#FFFFFF; --soft:#E2EBFA;
+  --red:#D6453A; --blue:#2A76DE; --yellow:#E9AE00; --green:#20905A;
+  --ok:#17804A; --ok-bg:#DFF3E7; --bad:#C2352A; --bad-bg:#FBE6E3; --hi:#FFE38F; --diag:#FFF2C6; --dim:.22;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151D; --grid:#19212D; --card:#18202B; --ink:#E8EDF4; --muted:#A0ABBD; --line:#2E3949;
+    --accent:#6FA3FF; --accent-ink:#0B1220; --soft:#1D2B42;
+    --red:#F0675B; --blue:#5C9BFF; --yellow:#F2C640; --green:#3DBD7B;
+    --ok:#52D58E; --ok-bg:#15332A; --bad:#FF7D70; --bad-bg:#3B1E1C; --hi:#5B4A10; --diag:#332C16; --dim:.28;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151D; --grid:#19212D; --card:#18202B; --ink:#E8EDF4; --muted:#A0ABBD; --line:#2E3949;
+  --accent:#6FA3FF; --accent-ink:#0B1220; --soft:#1D2B42;
+  --red:#F0675B; --blue:#5C9BFF; --yellow:#F2C640; --green:#3DBD7B;
+  --ok:#52D58E; --ok-bg:#15332A; --bad:#FF7D70; --bad-bg:#3B1E1C; --hi:#5B4A10; --diag:#332C16; --dim:.28;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0; min-height:100%; color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 28px; -webkit-tap-highlight-color:transparent;
+}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* Header */
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; padding-block:16px 10px; max-width:1500px; margin:0 auto}
+.brand h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,42px); letter-spacing:-.015em; line-height:1.05; text-wrap:balance}
+.brand h1 b{color:var(--accent); font-weight:800}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* Class tabs */
+nav.classes{display:flex; gap:8px; max-width:1500px; margin:0 auto 14px; flex-wrap:wrap}
+nav.classes button{flex:1 1 200px; text-align:left; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; min-height:60px; display:flex; gap:12px; align-items:center}
+nav.classes button .n{font-family:var(--display); font-weight:800; font-size:28px; width:42px; height:42px; border-radius:10px; display:grid; place-items:center; background:var(--soft); color:var(--accent); flex:none}
+nav.classes button .t{display:flex; flex-direction:column; line-height:1.15}
+nav.classes button .t small{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.06em}
+nav.classes button .t span{font-weight:700; font-size:19px}
+nav.classes button[aria-selected="true"]{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset}
+nav.classes button[aria-selected="true"] .n{background:var(--accent); color:var(--accent-ink)}
+
+/* Stage */
+.stage{max-width:1500px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:24px; align-items:start}
+.stage[hidden]{display:none}
+.visual{min-width:0; display:flex; flex-direction:column; gap:10px; position:sticky; top:env(safe-area-inset-top,0px)}
+.panel{min-width:0; background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px 20px; display:flex; flex-direction:column; gap:14px}
+.steps{display:flex; gap:6px; flex-wrap:wrap; border-bottom:2px solid var(--line); padding-bottom:10px}
+.steps button{border:0; background:none; border-radius:10px; padding:9px 12px; font-weight:700; font-size:16px; color:var(--muted); min-height:46px}
+.steps button small{display:block; font-weight:400; font-size:12px; text-transform:uppercase; letter-spacing:.06em}
+.steps button[aria-selected="true"]{background:var(--soft); color:var(--ink)}
+.sub[hidden]{display:none}
+.sub{display:flex; flex-direction:column; gap:14px}
+h2{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px); letter-spacing:-.01em; text-wrap:balance}
+h3{margin:0; font-family:var(--display); font-weight:600; font-size:20px}
+.lead{margin:0; font-size:clamp(18px,1.5vw,22px); max-width:36em}
+.muted{color:var(--muted)}
+.note{margin:0; font-size:15px; color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; min-height:52px; border-radius:14px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,18px); padding:10px 18px; min-height:52px; border-radius:14px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.msg{margin:0; padding:14px 16px; border-radius:12px; background:var(--soft); font-size:clamp(17px,1.4vw,21px); line-height:1.45}
+.msg:empty{display:none}
+.msg.ok{background:var(--ok-bg)} .msg.bad{background:var(--bad-bg)}
+.msg b{font-weight:700}
+hr{border:0; border-top:2px dashed var(--line); margin:4px 0; width:100%}
+
+/* Multiplication table */
+.mt-host{width:min(100%, calc(100dvh - 210px)); min-width:min(100%,300px)}
+.mt{display:grid; grid-template-columns:repeat(var(--n1),1fr); aspect-ratio:1; width:100%; container-type:inline-size; background:var(--card); border:2px solid var(--ink); border-radius:8px; overflow:hidden}
+.mt > *{display:flex; align-items:center; justify-content:center; border-right:1px solid var(--line); border-bottom:1px solid var(--line); font-size:calc(100cqw / var(--n1) * .37); font-weight:700; position:relative; min-width:0; padding:0; line-height:1}
+.mt .hd{background:var(--soft); color:var(--accent); font-family:var(--display); font-weight:800}
+.mt .hd.on{background:var(--accent); color:var(--accent-ink)}
+.mt .corner{background:var(--ink); color:var(--card)}
+.mt-cell{background:var(--card); border-top:0; border-left:0; transition:background-color .2s, opacity .2s}
+.mt-cell .bd{position:absolute; left:4%; right:4%; bottom:3%; font-size:.42em; font-weight:700; text-align:center; color:var(--muted); white-space:nowrap; overflow:hidden}
+.mt-cell .bd:empty{display:none}
+.mt-cell.diag{background:var(--diag)}
+.mt.focus .mt-cell:not(.hl):not(.ok):not(.bad):not(.paint):not(.ex){opacity:var(--dim)}
+.mt-cell.hl{background:var(--hi)}
+.mt-cell.sel{box-shadow:inset 0 0 0 .14em var(--accent)}
+.mt-cell.ok{background:var(--ok-bg); color:var(--ok)}
+.mt-cell.bad{background:repeating-linear-gradient(45deg,var(--bad-bg) 0 6px,var(--card) 6px 12px); color:var(--bad); box-shadow:inset 0 0 0 .12em var(--bad)}
+.mt-cell.ex{box-shadow:inset 0 0 0 .14em var(--ok); background:var(--ok-bg)}
+.mt-cell.paint{background:color-mix(in srgb,var(--paint) 38%,var(--card))}
+.mt-cell.shade{background:color-mix(in srgb,var(--accent) 22%,var(--card))}
+.mt-cell.hard .bd{color:var(--bad)}
+.mt-cell.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:15px; color:var(--muted); align-items:center}
+.legend i{display:inline-block; width:18px; height:18px; border-radius:4px; vertical-align:-3px; margin-right:6px; border:1px solid var(--line)}
+.info{font-size:clamp(17px,1.4vw,21px); min-height:1.5em}
+
+/* Claim pills / question pills */
+.pills{display:flex; gap:8px; flex-wrap:wrap}
+.pills button{min-width:48px; height:48px; border-radius:24px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:18px; padding:0 14px}
+.pills button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.claim{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(22px,2.1vw,32px); line-height:1.2; padding:14px 18px; border-radius:12px; background:var(--diag); border:2px dashed var(--yellow); text-wrap:balance}
+.evidence{display:grid; grid-template-columns:auto 1fr; gap:8px 12px; align-items:center; font-size:16px}
+.slots{display:flex; gap:8px; flex-wrap:wrap}
+.slot{min-width:96px; height:44px; border-radius:10px; border:2px dashed var(--line); display:grid; place-items:center; font-weight:700; padding:0 10px}
+.slot.full{border-style:solid; border-color:var(--ok); background:var(--ok-bg); color:var(--ok)}
+.slot.ce{border-style:solid; border-color:var(--bad); background:var(--bad-bg); color:var(--bad)}
+.swatch{width:46px; height:46px; border-radius:50%; border:3px solid transparent; background:var(--c)}
+.swatch[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--card) inset}
+.swatch.erase{background:var(--card); border-color:var(--line); font-weight:700; width:auto; border-radius:23px; padding:0 14px}
+.swatch.erase[aria-pressed="true"]{border-color:var(--ink)}
+.toggle{display:flex; gap:10px; align-items:center; font-weight:700; cursor:pointer}
+.toggle input{width:24px; height:24px; accent-color:var(--accent)}
+
+/* Votes */
+.votes{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.vote{border:2px solid var(--line); border-radius:14px; background:var(--card); padding:12px 8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:96px}
+.vote b{font-family:var(--display); font-size:34px; line-height:1}
+.vote span{font-weight:700}
+.vote.win{border-color:var(--ok); background:var(--ok-bg); box-shadow:0 0 0 2px var(--ok) inset}
+
+/* Sticky notes */
+.stickies{display:flex; gap:10px; flex-wrap:wrap}
+.sticky{background:var(--hi); padding:10px 12px; border-radius:4px 4px 14px 4px; font-size:16px; max-width:220px; box-shadow:0 2px 0 var(--line)}
+.inp{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 12px; font-size:18px; min-height:50px; min-width:0}
+
+/* Arrays */
+.arr-stage{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; min-height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; overflow:hidden}
+.arr-wrap{display:flex; flex-direction:column; gap:var(--pg,14px); transition:transform .6s ease-in-out}
+.arr-wrap.spin{transform:rotate(90deg)}
+.arr-part{display:flex; align-items:center; gap:12px}
+.arr{display:grid; gap:3px}
+.tile{width:var(--t); height:var(--t); border-radius:calc(var(--t) * .18); background:var(--c); box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
+.arr-label{font-weight:700; font-size:clamp(16px,1.4vw,20px); white-space:nowrap}
+.arr-cut{border-top:3px dashed var(--ink); width:100%; margin:-6px 0}
+.arr-cap{font-size:clamp(18px,1.6vw,24px); font-weight:700; text-align:center}
+.arr-cap small{display:block; font-weight:400; color:var(--muted); font-size:.75em}
+.stations{display:flex; gap:6px; flex-wrap:wrap}
+
+/* Fill-ins */
+.fill{font-size:clamp(19px,1.6vw,24px); line-height:2.1; margin:0}
+.fill input{width:3.4em; text-align:center; font-weight:700; border:2px solid var(--line); border-bottom:3px solid var(--ink); border-radius:8px; background:var(--card); padding:2px 4px; font-size:1em; line-height:1.3}
+.fill input.ok{border-color:var(--ok); background:var(--ok-bg)}
+.fill input.bad{border-color:var(--bad); background:var(--bad-bg)}
+.box{border:2px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:10px}
+.box h3{font-size:18px}
+select.inp{padding-right:8px}
+.facts{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px 14px; font-size:17px; font-variant-numeric:tabular-nums}
+
+/* Strategy cards */
+.card{border:3px solid var(--sc,var(--accent)); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; background:var(--card)}
+.card .tag{align-self:flex-start; background:var(--sc,var(--accent)); color:#fff; font-weight:700; font-size:14px; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.05em}
+.card ol{margin:0; padding-left:1.4em; font-size:clamp(17px,1.4vw,21px)}
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.passport{display:flex; gap:10px; flex-wrap:wrap}
+.stamp{width:86px; height:86px; border-radius:50%; border:3px dashed var(--line); display:grid; place-items:center; text-align:center; font-size:13px; font-weight:700; color:var(--muted); padding:6px; line-height:1.1}
+.stamp.on{border:4px double var(--sc); color:var(--sc); transform:rotate(-8deg); background:color-mix(in srgb,var(--sc) 10%,var(--card))}
+
+/* Lightning */
+.lightning{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr)); gap:10px 18px}
+.lq{display:grid; grid-template-columns:4.4em 4.2em minmax(0,1fr); gap:8px; align-items:center; font-size:clamp(20px,1.7vw,26px); font-weight:700}
+.lq input{width:100%; text-align:center; font-weight:700; border:2px solid var(--line); border-radius:10px; padding:6px 4px; background:var(--card)}
+.lq input.ok{border-color:var(--ok); background:var(--ok-bg)}
+.lq input.bad{border-color:var(--bad); background:var(--bad-bg)}
+.lq select{font-size:15px; min-height:44px; border:2px solid var(--line); border-radius:10px; background:var(--card); min-width:0}
+.lq .hint{grid-column:1/-1; font-size:15px; font-weight:400; color:var(--bad); margin-top:-4px}
+.lq .hint:empty{display:none}
+.timer{font-family:var(--display); font-weight:800; font-size:44px; font-variant-numeric:tabular-nums; line-height:1}
+.big{font-family:var(--display); font-weight:800; font-size:clamp(48px,6vw,84px); line-height:1; color:var(--accent)}
+table.cmp{border-collapse:collapse; font-size:16px; width:100%}
+table.cmp th,table.cmp td{text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top}
+table.cmp th{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.05em}
+table.cmp tr.click{cursor:pointer}
+table.cmp tr.click:hover td{background:var(--soft)}
+.v-always{color:var(--ok); font-weight:700} .v-sometimes{color:var(--yellow); font-weight:700} .v-never{color:var(--bad); font-weight:700}
+.wrapx{overflow-x:auto}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+@media (max-width: 960px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .visual{position:static}
+  .mt-host{width:100%}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  .panel{padding:14px}
+  .votes{gap:6px}
+  .vote b{font-size:28px}
+  .mt-cell .bd{display:none}
+}
+</style>
+
+<header>
+  <div class="brand">
+    <h1>Secrets of the <b>Multiplication Table</b></h1>
+    <p>Grade 3 · Set 3 project · 3 class periods · Pattern Lab</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="classes" role="tablist" aria-label="Class periods">
+  <button role="tab" id="tab1" aria-selected="true" data-cls="1"><span class="n">1</span><span class="t"><small>Class 1</small><span>Pattern Hunt</span></span></button>
+  <button role="tab" id="tab2" aria-selected="false" data-cls="2"><span class="n">2</span><span class="t"><small>Class 2</small><span>Why It Works</span></span></button>
+  <button role="tab" id="tab3" aria-selected="false" data-cls="3"><span class="n">3</span><span class="t"><small>Class 3</small><span>Strategy Fair</span></span></button>
+</nav>
+
+<!-- CLASS 1 -->
+<section class="stage" id="cls1">
+  <div class="visual">
+    <div class="mt-host" id="t1"></div>
+    <div class="info" id="info1" aria-live="polite"></div>
+  </div>
+  <div class="panel">
+    <div class="steps" role="tablist">
+      <button role="tab" data-s1="warm" aria-selected="true"><small>Warm-up</small>Notice &amp; wonder</button>
+      <button role="tab" data-s1="explore" aria-selected="false"><small>Explore</small>Test a claim</button>
+      <button role="tab" data-s1="share" aria-selected="false"><small>Share</small>Always, sometimes, never?</button>
+    </div>
+
+    <div class="sub" id="s1-warm">
+      <h2>What do you notice? What do you wonder?</h2>
+      <p class="lead">The diagonal of square numbers is shaded. Look for a while before you tap anything.</p>
+      <div class="row" id="noticeBtns"></div>
+      <p class="msg" id="noticeMsg" aria-live="polite"></p>
+      <hr>
+      <h3>Our noticings</h3>
+      <div class="row"><label for="noteIn" class="note">Type a noticing or a wonder:</label></div>
+      <div class="row"><input class="inp" id="noteIn" style="flex:1 1 220px" placeholder="The 2s row counts by 2s…"><button class="secondary" id="noteAdd">Add sticky note</button></div>
+      <div class="stickies" id="stickies"></div>
+    </div>
+
+    <div class="sub" id="s1-explore" hidden>
+      <div class="pills" id="claimPills1" aria-label="Claims"></div>
+      <p class="claim" id="claimText1"></p>
+      <p class="note"><b>1.</b> Tap three examples on the table. <b>2.</b> Hunt for a counterexample. <b>3.</b> Test every entry.</p>
+      <div class="evidence">
+        <span class="muted">Examples</span><div class="slots" id="exSlots"></div>
+        <span class="muted">Counterexample</span><div class="slots" id="ceSlot"></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="testAll1">Test every entry</button>
+        <button class="secondary" id="clearEv">Clear evidence</button>
+      </div>
+      <p class="msg" id="exploreMsg" aria-live="polite"></p>
+      <hr>
+      <label class="toggle"><input type="checkbox" id="paintMode"> Color our own pattern</label>
+      <div class="row" id="paintTools" hidden></div>
+      <p class="note" id="paintNote" hidden>Tap cells to color your team's pattern. Then write it as a claim on your sheet and test it the same way.</p>
+    </div>
+
+    <div class="sub" id="s1-share" hidden>
+      <div class="pills" id="claimPills2" aria-label="Claims"></div>
+      <p class="claim" id="claimText2"></p>
+      <p class="lead">Vote first. Tap to add a vote.</p>
+      <div class="votes" id="votes"></div>
+      <div class="row">
+        <button class="primary" id="breakIt">Try to break it</button>
+        <button class="secondary" id="clearVotes">Clear votes</button>
+      </div>
+      <p class="msg" id="shareMsg" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- CLASS 2 -->
+<section class="stage" id="cls2" hidden>
+  <div class="visual">
+    <div class="arr-stage" id="arrStage"><div class="arr-wrap" id="arrWrap"></div><div class="arr-cap" id="arrCap"></div></div>
+  </div>
+  <div class="panel">
+    <div class="steps" role="tablist" id="steps2">
+      <button role="tab" data-s2="turn" aria-selected="true"><small>Warm-up</small>Turn it</button>
+      <button role="tab" data-s2="double" aria-selected="false"><small>Station</small>Doubling</button>
+      <button role="tab" data-s2="break" aria-selected="false"><small>Station</small>Break apart</button>
+      <button role="tab" data-s2="family" aria-selected="false"><small>Station</small>Fact families</button>
+      <button role="tab" data-s2="card" aria-selected="false"><small>Draft</small>Strategy card</button>
+      <button role="tab" data-s2="share" aria-selected="false"><small>Share</small>Try it on 8 × 7</button>
+    </div>
+    <div class="sub" id="s2-body"></div>
+  </div>
+</section>
+
+<!-- CLASS 3 -->
+<section class="stage" id="cls3" hidden>
+  <div class="visual" id="vis3">
+    <div id="vis3-arr" class="arr-stage"><div class="arr-wrap" id="arrWrap3"></div><div class="arr-cap" id="arrCap3"></div></div>
+    <div class="mt-host" id="t3" hidden></div>
+    <div class="info" id="info3" aria-live="polite"></div>
+  </div>
+  <div class="panel">
+    <div class="steps" role="tablist" id="steps3">
+      <button role="tab" data-s3="booth" aria-selected="true"><small>Fair</small>Strategy booths</button>
+      <button role="tab" data-s3="lightning" aria-selected="false"><small>Fair</small>Lightning round</button>
+      <button role="tab" data-s3="reflect" aria-selected="false"><small>Reflect</small>How many facts?</button>
+      <button role="tab" data-s3="ext" aria-selected="false"><small>Extension</small>★ 12 × 12 and beyond</button>
+    </div>
+    <div class="sub" id="s3-body"></div>
+  </div>
+</section>
+<script>
+/* ---------- Pure math: claims, verdicts, strategy explanations (tested in node) ---------- */
+const M = (function(){
+  const digitSum = n => String(n).split('').reduce((a,d)=>a + Number(d), 0);
+  const fx = (r,c) => `${r} × ${c} = ${r*c}`;
+  const odd = n => n % 2 === 1;
+
+  const CLAIMS = [
+    { text:'An even number times any number is even.',
+      scope:(r,c)=> !odd(r) || !odd(c), scopeText:'at least one factor is even',
+      holds:(r,c,v)=> v % 2 === 0,
+      why:(r,c,v,ok)=> `${fx(r,c)}. ${v} is ${ok?'even':'odd'}.` },
+    { text:'An odd number times an odd number is odd.',
+      scope:(r,c)=> odd(r) && odd(c), scopeText:'both factors are odd',
+      holds:(r,c,v)=> odd(v),
+      why:(r,c,v,ok)=> `${fx(r,c)}. ${v} is ${ok?'odd':'even'}.` },
+    { text:'An odd number times any number is odd.',
+      scope:(r,c)=> odd(r) || odd(c), scopeText:'at least one factor is odd',
+      holds:(r,c,v)=> odd(v),
+      why:(r,c,v,ok)=> `${fx(r,c)}. ${v} is ${ok?'odd':'even'}.`,
+      fix:'Can you fix it? “An odd number times an odd number is odd” has no counterexample. Test it: it is claim 2.' },
+    { text:'Every number in the 5s row ends in 0 or 5.',
+      scope:(r)=> r === 5, scopeText:'the cell is in the 5s row (the row that starts with 5)',
+      holds:(r,c,v)=> v % 10 === 0 || v % 10 === 5,
+      why:(r,c,v)=> `${fx(r,c)}. It ends in ${v % 10}.` },
+    { text:'The digits of every number in the 9s row add up to 9.',
+      scope:(r)=> r === 9, scopeText:'the cell is in the 9s row',
+      holds:(r,c,v)=> digitSum(v) === 9,
+      why:(r,c,v)=> `${fx(r,c)}, and ${String(v).split('').join(' + ')} = ${digitSum(v)}.`,
+      fix:'Keep adding the digits until one digit is left, and you still land on 9 every time.' },
+    { text:'Every number has a twin across the diagonal: a × b = b × a.',
+      scope:()=> true, scopeText:'any cell',
+      holds:(r,c)=> r*c === c*r,
+      why:(r,c,v)=> r === c ? `${fx(r,c)} sits on the diagonal, so it is its own twin.` : `${fx(r,c)}, and its twin ${c} × ${r} = ${c*r}.` },
+    { text:'Every number in the 6s row is double the number in the 3s row.',
+      scope:(r)=> r === 6, scopeText:'the cell is in the 6s row',
+      holds:(r,c,v)=> v === 2 * (3*c),
+      why:(r,c,v)=> `6 × ${c} = ${v}, and 3 × ${c} = ${3*c}. ${3*c} + ${3*c} = ${6*c}.` },
+    { text:'Every number in the 10s row ends in 0.',
+      scope:(r)=> r === 10, scopeText:'the cell is in the 10s row',
+      holds:(r,c,v)=> v % 10 === 0,
+      why:(r,c,v)=> `${fx(r,c)}. It ends in ${v % 10}.` },
+    { text:'Square numbers (the shaded diagonal) are odd.',
+      scope:(r,c)=> r === c, scopeText:'the cell is on the shaded diagonal',
+      holds:(r,c,v)=> odd(v),
+      why:(r,c,v,ok)=> `${fx(r,c)}. ${v} is ${ok?'odd':'even'}.`,
+      fix:'Look at which squares are odd: 1, 9, 25, 49, 81. What do 1, 3, 5, 7 and 9 have in common?' },
+    { text:'An odd number times an odd number is even.',
+      scope:(r,c)=> odd(r) && odd(c), scopeText:'both factors are odd',
+      holds:(r,c,v)=> v % 2 === 0,
+      why:(r,c,v,ok)=> `${fx(r,c)}. ${v} is ${ok?'even':'odd'}.`,
+      fix:'Flip it around: “odd × odd is odd” is always true.' },
+    { text:'No number in the 7s row ends in 7.',
+      scope:(r)=> r === 7, scopeText:'the cell is in the 7s row',
+      holds:(r,c,v)=> v % 10 !== 7,
+      why:(r,c,v,ok)=> `${fx(r,c)}. It ends in ${v % 10}.`,
+      fix:'Only a few facts break it. Which ones? Can you change the claim so it is always true?' }
+  ];
+
+  function verdict(cl, N){
+    let inS = 0, hold = 0, firstBad = null, firstGood = null;
+    for(let r=1;r<=N;r++) for(let c=1;c<=N;c++){
+      if(!cl.scope(r,c)) continue;
+      inS++;
+      if(cl.holds(r,c,r*c)){ hold++; if(!firstGood) firstGood=[r,c]; }
+      else if(!firstBad) firstBad=[r,c];
+    }
+    const v = hold === inS ? 'always' : hold === 0 ? 'never' : 'sometimes';
+    return { v, inS, hold, firstBad, firstGood };
+  }
+
+  const STRATS = {
+    turn:  { name:'Turn-around', prop:'commutative property', color:'var(--blue)',  pattern:'The table mirrors across the diagonal.', example:[3,8] },
+    double:{ name:'Doubling', prop:'double a smaller row', color:'var(--red)', pattern:'The 4s, 6s and 8s rows are double the 2s, 3s and 4s rows.', example:[8,6] },
+    break: { name:'Break apart', prop:'distributive property', color:'var(--green)', pattern:'Any row is two smaller rows added together.', example:[7,6] },
+    family:{ name:'Fact family', prop:'multiplication and division', color:'var(--yellow)', pattern:'Every number in a row is also two division facts.', example:[6,9] }
+  };
+
+  // Returns {ok, steps[], last, cols, parts[], note}
+  function explain(s, a, b){
+    const p = a*b;
+    if(s === 'turn'){
+      if(a === b) return { ok:false, note:`${a} × ${a} turns into itself, so turning doesn't help. Try another strategy for squares.`, steps:[], cols:b, parts:[{rows:a, color:'var(--blue)', label:`${a} × ${b}`}] };
+      return { ok:true, steps:[`${a} × ${b} is ${a} rows of ${b}.`, `Turn it a quarter turn: ${b} rows of ${a}. Same tiles.`],
+        last:`So ${a} × ${b} = ${b} × ${a} = ${p}.`, cols:b, parts:[{rows:a, color:'var(--blue)', label:`${a} rows of ${b}`}] };
+    }
+    if(s === 'double'){
+      let e, o, turned = false;
+      if(a % 2 === 0){ e=a; o=b; } else if(b % 2 === 0){ e=b; o=a; turned=true; }
+      else return { ok:false, note:`Doubling needs an even factor. ${a} and ${b} are both odd. Try breaking it apart.`, steps:[], cols:b, parts:[{rows:a, color:'var(--red)', label:`${a} × ${b}`}] };
+      const h = e/2, hp = h*o;
+      const steps = [];
+      if(turned) steps.push(`Turn it around first: ${a} × ${b} = ${b} × ${a}.`);
+      steps.push(`${e} is double ${h}, so build ${h} × ${o} twice.`);
+      steps.push(`${h} × ${o} = ${hp}.`);
+      return { ok:true, steps, last:`${hp} + ${hp} = ${2*hp}, so ${a} × ${b} = ${p}.`, cols:o,
+        parts:[{rows:h, color:'var(--red)', label:`${h} × ${o}`},{rows:h, color:'var(--blue)', label:`${h} × ${o}`}] };
+    }
+    if(s === 'break'){
+      const f = Math.max(a,b), o = Math.min(a,b), turned = (f === b && a !== b);
+      let p1, p2;
+      if(f >= 6){ p1=5; p2=f-5; } else if(f >= 3){ p1=2; p2=f-2; }
+      else return { ok:false, note:`${a} × ${b} is small already. Skip count instead.`, steps:[], cols:o, parts:[{rows:f, color:'var(--green)', label:`${f} × ${o}`}] };
+      const steps = [];
+      if(turned) steps.push(`Turn it around first: ${a} × ${b} = ${b} × ${a}.`);
+      steps.push(`Break ${f} into ${p1} + ${p2}.`);
+      steps.push(`${p1} × ${o} = ${p1*o}.`);
+      steps.push(`${p2} × ${o} = ${p2*o}.`);
+      return { ok:true, steps, last:`${p1*o} + ${p2*o} = ${p1*o + p2*o}, so ${a} × ${b} = ${p}.`, cols:o,
+        parts:[{rows:p1, color:'var(--green)', label:`${p1} × ${o}`},{rows:p2, color:'var(--yellow)', label:`${p2} × ${o}`}] };
+    }
+    // family
+    const steps = [`${a} × ${b} = ${p}.`];
+    if(a !== b) steps.push(`${b} × ${a} = ${p}.`);
+    steps.push(`${p} ÷ ${a} = ${b}.`);
+    return { ok:true, steps, last: a !== b ? `${p} ÷ ${b} = ${a}.` : `A square has a family of just two facts.`, cols:b,
+      parts:[{rows:a, color:'var(--yellow)', label:`${a} rows of ${b}`}] };
+  }
+
+  const SHEET = [[6,7],[8,4],[9,6],[7,7],[8,8],[6,9],[7,8],[9,9],[4,9],[8,6]];
+  const SHEET_KEY = [42,32,54,49,64,54,56,81,36,48];
+
+  // facts you must learn after the mirror (r<=c) and after freeing 1s and 10s
+  function factCounts(N){
+    let all=0, mirror=0, core=0;
+    for(let r=1;r<=N;r++) for(let c=1;c<=N;c++){
+      all++;
+      if(r<=c){ mirror++; if(r!==1 && c!==1 && r!==N && c!==N) core++; }
+    }
+    return {all, mirror, core};
+  }
+
+  return { CLAIMS, verdict, STRATS, explain, SHEET, SHEET_KEY, factCounts, digitSum };
+})();
+if(typeof module !== 'undefined') module.exports = M;
+/* ---------- App ---------- */
+(function(){
+if(typeof document === 'undefined') return;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rnd = (lo,hi) => lo + Math.floor(Math.random()*(hi-lo+1));
+const opts = (lo,hi,sel) => { let s=''; for(let i=lo;i<=hi;i++) s += `<option value="${i}"${i===sel?' selected':''}>${i}</option>`; return s; };
+const { CLAIMS, verdict, STRATS, explain, SHEET, SHEET_KEY, factCounts } = M;
+const SKEYS = ['turn','double','break','family'];
+const VNAME = { always:'Always', sometimes:'Sometimes', never:'Never' };
+const PAINTS = ['var(--red)','var(--blue)','var(--yellow)','var(--green)'];
+
+let S, gen = 0;
+function fresh(){
+  return { cls:1, s1:'warm', s2:'turn', s3:'booth', claim:0, ex:[], ce:null, votes:[0,0,0], paint:false, paintColor:PAINTS[0], painted:{}, notes:[],
+    turn:{a:4,b:7,turned:false}, dbl:{h:3,b:7,stacked:true}, brk:{a:7,b:8,k:5}, fam:{a:4,b:6,row:4},
+    card:{strat:'break', name:'', a:8, b:7}, cards:{}, share:{a:8,b:7,shown:{}},
+    booth:'turn', visitor:null, stamps:{},
+    light:{facts:SHEET.map(f=>f.slice()), sheet:true, t0:null, elapsed:0, done:false},
+    hard:new Set(), reflect:0 };
+}
+
+/* ---------- Multiplication table component ---------- */
+function makeTable(host, onTap){
+  const T = { size:10, cells:{}, rh:{}, ch:{} };
+  T.build = n => {
+    if(n) T.size = n; const N = T.size;
+    host.innerHTML = ''; host.style.setProperty('--n1', N+1);
+    const g = document.createElement('div'); g.className = 'mt'; g.setAttribute('role','grid'); g.setAttribute('aria-label',`${N} by ${N} multiplication table`);
+    const corner = document.createElement('div'); corner.className='corner'; corner.textContent='×'; g.appendChild(corner);
+    T.cells = {}; T.rh = {}; T.ch = {};
+    for(let c=1;c<=N;c++){ const d=document.createElement('div'); d.className='hd'; d.textContent=c; g.appendChild(d); T.ch[c]=d; }
+    for(let r=1;r<=N;r++){
+      const d=document.createElement('div'); d.className='hd'; d.textContent=r; g.appendChild(d); T.rh[r]=d;
+      for(let c=1;c<=N;c++){
+        const b=document.createElement('button'); b.className='mt-cell';
+        b.innerHTML=`<span class="v">${r*c}</span><span class="bd"></span>`;
+        b.setAttribute('aria-label',`${r} times ${c} is ${r*c}`);
+        b.addEventListener('click', () => onTap(r,c,b));
+        g.appendChild(b); T.cells[r+','+c]=b;
+      }
+    }
+    T.grid = g; host.appendChild(g);
+  };
+  T.cell = (r,c) => T.cells[r+','+c];
+  T.each = fn => { for(let r=1;r<=T.size;r++) for(let c=1;c<=T.size;c++) fn(r,c,T.cell(r,c)); };
+  T.clear = () => {
+    T.grid.classList.remove('focus');
+    T.each((r,c,el) => { el.className='mt-cell'; el.style.removeProperty('--paint'); el.querySelector('.bd').textContent=''; });
+    Object.values(T.rh).concat(Object.values(T.ch)).forEach(h => h.classList.remove('on'));
+  };
+  T.focus = () => T.grid.classList.add('focus');
+  T.badge = (r,c,t) => { T.cell(r,c).querySelector('.bd').textContent = t; };
+  T.add = (r,c,...cls) => T.cell(r,c).classList.add(...cls);
+  T.heads = (r,c) => { if(T.rh[r]) T.rh[r].classList.add('on'); if(T.ch[c]) T.ch[c].classList.add('on'); };
+  T.pop = (r,c) => { if(reduced) return; const el=T.cell(r,c); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); };
+  T.build(10);
+  return T;
+}
+
+/* ---------- Tile arrays ---------- */
+const lastSpec = new Map();
+function drawArray(wrap, cap, spec){
+  lastSpec.set(wrap, {cap, spec});
+  const stage = wrap.parentElement;
+  const W = Math.max(200, stage.clientWidth - 40);
+  const narrow = W < 460;
+  const labelW = spec.parts.some(p=>p.label) && !narrow ? 130 : 0;
+  const rows = spec.parts.reduce((t,p)=>t+p.rows,0);
+  const maxH = Math.max(200, Math.min(window.innerHeight*0.56, 540));
+  const gap = spec.cols > 12 || rows > 12 ? 2 : 3;
+  let t = Math.floor(Math.min((W - labelW - (spec.cols-1)*gap)/spec.cols, (maxH - (rows-1)*gap - (spec.parts.length-1)*16)/rows, 46));
+  t = Math.max(t, 5);
+  wrap.innerHTML = '';
+  spec.parts.forEach((p,i) => {
+    if(i>0 && spec.cut !== false){ const cut=document.createElement('div'); cut.className='arr-cut'; wrap.appendChild(cut); }
+    const part = document.createElement('div'); part.className='arr-part';
+    if(narrow) part.style.flexDirection='column';
+    const g = document.createElement('div'); g.className='arr';
+    g.style.gridTemplateColumns = `repeat(${spec.cols}, ${t}px)`; g.style.gap = gap+'px'; g.style.setProperty('--t', t+'px');
+    let html=''; for(let k=0;k<p.rows*spec.cols;k++) html += `<i class="tile" style="--c:${p.color}"></i>`;
+    g.innerHTML = html;
+    g.setAttribute('role','img'); g.setAttribute('aria-label', `${p.rows} rows of ${spec.cols} tiles`);
+    part.appendChild(g);
+    if(p.label){ const l=document.createElement('span'); l.className='arr-label'; l.textContent=p.label; l.style.color=p.color; part.appendChild(l); }
+    wrap.appendChild(part);
+  });
+  cap.innerHTML = spec.cap || '';
+}
+async function spinArray(wrap, cap, nextSpec){
+  if(reduced){ drawArray(wrap, cap, nextSpec); return; }
+  wrap.classList.add('spin');
+  await sleep(650);
+  wrap.style.transition='none'; wrap.classList.remove('spin');
+  drawArray(wrap, cap, nextSpec);
+  void wrap.offsetWidth; wrap.style.transition='';
+}
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => lastSpec.forEach((v,w) => { if(w.offsetParent) drawArray(w, v.cap, v.spec); }), 150); });
+
+/* ---------- Fill-in blanks ---------- */
+// lines: strings with [] for blanks; answers: number or fn(v, vals) -> bool; hint(i, v, vals) -> string
+function fillin(host, pid, {lines, answers, hint, ok}){
+  let i = 0;
+  host.innerHTML = lines.map(l => '<p class="fill">' + l.replace(/\[\]/g, () => { const k=i++; return `<input id="${pid}-${k}" inputmode="numeric" autocomplete="off" aria-label="blank ${k+1}">`; }) + '</p>').join('')
+    + `<div class="row"><button class="primary" id="${pid}-chk">Check</button></div><p class="msg" id="${pid}-msg" aria-live="polite"></p>`;
+  const ins = [...host.querySelectorAll('input')];
+  const msg = host.querySelector('.msg');
+  const check = () => {
+    const vals = ins.map(x => x.value.trim());
+    let firstBad = -1, empty = false;
+    ins.forEach((x,k) => {
+      x.classList.remove('ok','bad');
+      if(vals[k] === ''){ empty = true; return; }
+      const v = Number(vals[k]);
+      const good = Number.isInteger(v) && (typeof answers[k] === 'function' ? answers[k](v, vals.map(Number)) : v === answers[k]);
+      x.classList.add(good ? 'ok' : 'bad');
+      if(!good && firstBad < 0) firstBad = k;
+    });
+    msg.className = 'msg';
+    if(firstBad >= 0){ msg.classList.add('bad'); msg.innerHTML = `<b>Not yet.</b> ${hint(firstBad, Number(vals[firstBad]), vals.map(Number))} Change it and check again.`; ins[firstBad].focus(); }
+    else if(empty){ msg.innerHTML = 'So far so good. Fill in every blank, then check.'; }
+    else { msg.classList.add('ok'); msg.innerHTML = typeof ok === 'function' ? ok(vals.map(Number)) : ok; }
+  };
+  host.querySelector('.primary').onclick = check;
+  ins.forEach(x => x.addEventListener('keydown', e => { if(e.key === 'Enter') check(); }));
+}
+
+/* ======================= CLASS 1 ======================= */
+const T1 = makeTable($('#t1'), tap1);
+const info1 = $('#info1');
+function base1(){
+  gen++; T1.clear();
+  T1.each((r,c,el) => { if(r===c) el.classList.add('diag'); const p=S.painted[r+','+c]; if(p && S.s1==='explore'){ el.classList.add('paint'); el.style.setProperty('--paint', p); } });
+}
+function mirrorShow(r,c){
+  base1(); T1.focus(); T1.add(r,c,'hl','sel'); T1.add(c,r,'hl','sel'); T1.heads(r,c); T1.heads(c,r);
+  const v = r*c;
+  $('#noticeMsg').innerHTML = r===c
+    ? `<b>${r} × ${r} = ${v}</b> sits on the diagonal. It is its own twin.`
+    : `<b>${r} × ${c} = ${v}</b> and <b>${c} × ${r} = ${v}</b>. They sit in mirror spots across the diagonal. Tap any number to find its twin.`;
+}
+const NOTICES = [
+  { label:'The shaded diagonal', run(){ base1(); T1.focus(); T1.each((r,c)=>{ if(r===c){ T1.add(r,c,'hl'); T1.badge(r,c,`${r}×${r}`); } });
+      $('#noticeMsg').innerHTML = 'These are the <b>square numbers</b>: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100. Each is a number times itself, so its array is a square.'; } },
+  { label:'It mirrors across the diagonal', run(){ mirrorShow(4,7); } },
+  { label:'The 5s end in 0 or 5', run(){ base1(); T1.focus(); T1.each((r,c)=>{ if(r===5||c===5) T1.add(r,c,'hl'); });
+      $('#noticeMsg').innerHTML = 'Every number in the 5s row and the 5s column ends in 0 or 5: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50.'; } },
+  { label:'The 9s digits add to 9', run(){ base1(); T1.focus(); T1.each((r,c)=>{ if(r===9){ const v=r*c; T1.add(r,c,'hl'); T1.badge(r,c,`${Math.floor(v/10)}+${v%10}`); } });
+      $('#noticeMsg').innerHTML = '9, 18, 27, 36, 45, 54, 63, 72, 81, 90. Add the digits: 0 + 9, 1 + 8, 2 + 7 … 9 + 0. Every one makes 9. The tens digit goes up by 1 while the ones digit goes down by 1.'; } },
+  { label:'Lots of even numbers', run(){ base1(); T1.focus(); let n=0; T1.each((r,c)=>{ if((r*c)%2===0){ n++; T1.add(r,c,'hl'); } });
+      $('#noticeMsg').innerHTML = `<b>${n} of the 100 numbers are even.</b> Look at the ones that stayed white. What do their row and column numbers have in common?`; } }
+];
+function renderWarm(){
+  $('#noticeBtns').innerHTML = '';
+  NOTICES.forEach((n,i) => { const b=document.createElement('button'); b.className='secondary'; b.textContent=n.label; b.onclick=()=>n.run(); $('#noticeBtns').appendChild(b); });
+  $('#noticeMsg').innerHTML=''; renderStickies();
+}
+function renderStickies(){ $('#stickies').innerHTML = S.notes.map(t => `<div class="sticky"></div>`).join(''); $$('#stickies .sticky').forEach((d,i)=> d.textContent = S.notes[i]); }
+$('#noteAdd').onclick = () => { const v=$('#noteIn').value.trim(); if(!v) return; S.notes.push(v); $('#noteIn').value=''; renderStickies(); };
+$('#noteIn').addEventListener('keydown', e => { if(e.key==='Enter') $('#noteAdd').click(); });
+
+function renderClaimPills(){
+  ['#claimPills1','#claimPills2'].forEach(sel => {
+    const host = $(sel); host.innerHTML = CLAIMS.map((c,i)=>`<button aria-pressed="${i===S.claim}" aria-label="Claim ${i+1}">${i+1}</button>`).join('');
+    [...host.children].forEach((b,i) => b.onclick = () => selectClaim(i));
+  });
+  $('#claimText1').textContent = `“${CLAIMS[S.claim].text}”`;
+  $('#claimText2').textContent = `“${CLAIMS[S.claim].text}”`;
+}
+function selectClaim(i){
+  S.claim = i; S.ex = []; S.ce = null; S.votes = [0,0,0];
+  renderClaimPills(); renderEvidence(); renderVotes(); $('#exploreMsg').innerHTML=''; $('#shareMsg').innerHTML=''; info1.textContent='';
+  base1();
+}
+function renderEvidence(){
+  $('#exSlots').innerHTML = [0,1,2].map(k => S.ex[k] ? `<span class="slot full">${S.ex[k][0]} × ${S.ex[k][1]} = ${S.ex[k][0]*S.ex[k][1]}</span>` : `<span class="slot">${k+1}</span>`).join('');
+  $('#ceSlot').innerHTML = S.ce ? `<span class="slot ce">${S.ce[0]} × ${S.ce[1]} = ${S.ce[0]*S.ce[1]}</span>` : '<span class="slot">?</span>';
+  if(S.s1 !== 'explore') return;
+  base1();
+  S.ex.forEach(([r,c],k) => { T1.add(r,c,'ex'); T1.badge(r,c,`#${k+1}`); });
+  if(S.ce){ T1.add(S.ce[0],S.ce[1],'bad'); T1.badge(S.ce[0],S.ce[1],'✗'); }
+}
+function exMsg(html, kind){ const m=$('#exploreMsg'); m.className='msg'+(kind?' '+kind:''); m.innerHTML=html; }
+function claimTap(r,c){
+  const cl = CLAIMS[S.claim], v = r*c;
+  if(!cl.scope(r,c)){
+    exMsg(`<b>${r} × ${c} = ${v}</b> isn’t part of this claim. Look for a cell where ${cl.scopeText}.`); T1.pop(r,c); return;
+  }
+  if(cl.holds(r,c,v)){
+    if(S.ex.some(e=>e[0]===r&&e[1]===c)){ exMsg(`${r} × ${c} is already one of your examples. Try a different cell.`); return; }
+    if(S.ex.length < 3){
+      S.ex.push([r,c]); renderEvidence(); T1.pop(r,c);
+      exMsg(`${cl.why(r,c,v,true)} It fits the claim.` + (S.ex.length===3 ? ' <b>Three examples!</b> Now hunt for a counterexample: a cell that breaks the claim.' : ''), 'ok');
+    } else { exMsg(`${cl.why(r,c,v,true)} Another one that fits. Keep hunting for a counterexample, or test every entry.`, 'ok'); T1.pop(r,c); }
+  } else {
+    S.ce = [r,c]; renderEvidence(); T1.pop(r,c);
+    exMsg(`<b>Counterexample!</b> ${cl.why(r,c,v,false)} So the claim is <b>not always</b> true.`, 'bad');
+  }
+}
+async function testAll(T, cl, msgEl){
+  const g = ++gen; const N = T.size;
+  T.clear(); T.focus();
+  for(let r=1;r<=N;r++){
+    for(let c=1;c<=N;c++){ if(!cl.scope(r,c)) continue; T.add(r,c, cl.holds(r,c,r*c) ? 'ok' : 'bad'); }
+    if(!reduced) await sleep(70);
+    if(g !== gen) return null;
+  }
+  const V = verdict(cl, N);
+  let html;
+  const range = `1-to-${N} table`;
+  if(V.v === 'always') html = `<b>Always</b> (on our ${range}). All ${V.inS} cells where ${cl.scopeText} fit the claim. No counterexample anywhere.`;
+  else if(V.v === 'sometimes') html = `<b>Sometimes.</b> ${V.hold} of ${V.inS} cells fit, but ${V.inS-V.hold} ${V.inS-V.hold===1?'breaks':'break'} it (striped). One counterexample: ${cl.why(...V.firstBad, V.firstBad[0]*V.firstBad[1], false)}`;
+  else html = `<b>Never.</b> All ${V.inS} cells where ${cl.scopeText} break it. For example: ${cl.why(...V.firstBad, V.firstBad[0]*V.firstBad[1], false)}`;
+  if(V.v !== 'always' && cl.fix) html += ` ${cl.fix}`;
+  msgEl.className = 'msg ' + (V.v === 'always' ? 'ok' : V.v === 'never' ? 'bad' : '');
+  msgEl.innerHTML = html;
+  return V;
+}
+$('#testAll1').onclick = () => testAll(T1, CLAIMS[S.claim], $('#exploreMsg'));
+$('#clearEv').onclick = () => { S.ex=[]; S.ce=null; renderEvidence(); exMsg(''); };
+
+function renderPaintTools(){
+  const host = $('#paintTools');
+  host.innerHTML = PAINTS.map((c,i)=>`<button class="swatch" style="--c:${c}" aria-label="Color ${i+1}" aria-pressed="${S.paintColor===c}"></button>`).join('') + `<button class="swatch erase" aria-pressed="${S.paintColor===null}">Eraser</button><button class="secondary" id="clearPaint">Clear colors</button>`;
+  const sw = [...host.querySelectorAll('.swatch')];
+  sw.forEach((b,i) => b.onclick = () => { S.paintColor = i < PAINTS.length ? PAINTS[i] : null; renderPaintTools(); });
+  $('#clearPaint').onclick = () => { S.painted = {}; renderEvidence(); };
+}
+$('#paintMode').onchange = e => { S.paint = e.target.checked; $('#paintTools').hidden = !S.paint; $('#paintNote').hidden = !S.paint; renderPaintTools(); };
+
+function renderVotes(){
+  const host = $('#votes');
+  host.innerHTML = ['always','sometimes','never'].map((k,i)=>`<button class="vote" data-k="${k}"><b>${S.votes[i]}</b><span>${VNAME[k]}</span></button>`).join('');
+  [...host.children].forEach((b,i) => b.onclick = () => { S.votes[i]++; b.querySelector('b').textContent = S.votes[i]; });
+}
+$('#clearVotes').onclick = () => { S.votes=[0,0,0]; renderVotes(); $('#shareMsg').innerHTML=''; base1(); };
+$('#breakIt').onclick = async () => {
+  const V = await testAll(T1, CLAIMS[S.claim], $('#shareMsg'));
+  if(!V) return;
+  $$('#votes .vote').forEach(b => b.classList.toggle('win', b.dataset.k === V.v));
+  const total = S.votes.reduce((a,b)=>a+b,0);
+  if(total){ const right = S.votes[['always','sometimes','never'].indexOf(V.v)]; $('#shareMsg').innerHTML += ` <br>${right} of ${total} vote${total===1?'':'s'} said “${VNAME[V.v]}.”`; }
+};
+
+function tap1(r,c){
+  if(S.s1 === 'warm'){ mirrorShow(r,c); return; }
+  if(S.s1 === 'explore'){
+    if(S.paint){
+      const k=r+','+c;
+      if(S.paintColor) S.painted[k] = S.paintColor; else delete S.painted[k];
+      renderEvidence(); return;
+    }
+    claimTap(r,c); return;
+  }
+  const cl = CLAIMS[S.claim], v=r*c;
+  info1.textContent = cl.scope(r,c) ? `${cl.why(r,c,v,cl.holds(r,c,v))} ${cl.holds(r,c,v) ? 'It fits the claim.' : 'It breaks the claim.'}` : `${r} × ${c} = ${v}. This cell isn’t part of the claim.`;
+}
+function setStep1(s){
+  S.s1 = s;
+  $$('[data-s1]').forEach(b => b.setAttribute('aria-selected', b.dataset.s1 === s));
+  ['warm','explore','share'].forEach(k => $('#s1-'+k).hidden = k !== s);
+  info1.textContent = '';
+  if(s === 'warm'){ base1(); $('#noticeMsg').innerHTML=''; }
+  else if(s === 'explore'){ renderEvidence(); }
+  else { base1(); $$('#votes .vote').forEach(b=>b.classList.remove('win')); }
+}
+$$('[data-s1]').forEach(b => b.onclick = () => setStep1(b.dataset.s1));
+
+/* ======================= CLASS 2 ======================= */
+const W2 = $('#arrWrap'), C2 = $('#arrCap'), body2 = $('#s2-body');
+function setStep2(s){
+  S.s2 = s; gen++;
+  $$('[data-s2]').forEach(b => b.setAttribute('aria-selected', b.dataset.s2 === s));
+  ({turn:renderTurn, double:renderDouble, break:renderBreak, family:renderFamily, card:renderCard, share:renderShare2})[s]();
+}
+$$('[data-s2]').forEach(b => b.onclick = () => setStep2(b.dataset.s2));
+
+function turnSpec(){ const {a,b,turned} = S.turn; const r = turned?b:a, c = turned?a:b;
+  return { cols:c, parts:[{rows:r, color:'var(--blue)'}], cap:`${r} rows of ${c}<small>${turned ? 'after a quarter turn' : 'Count the tiles. Then turn it.'}</small>` }; }
+function renderTurn(){
+  const {a,b} = S.turn;
+  body2.innerHTML = `
+    <h2>Turn it a quarter turn</h2>
+    <p class="lead">Build a ${a} × ${b} array: ${a} rows of ${b} tiles. Turn it a quarter turn. What is ${b} × ${a}? Why must it be the same?</p>
+    <div class="row"><label for="tA">Rows</label><select class="inp" id="tA">${opts(1,10,a)}</select><label for="tB">Columns</label><select class="inp" id="tB">${opts(1,10,b)}</select>
+      <button class="primary" id="turnBtn">Turn a quarter turn</button></div>
+    <div class="box"><h3>Turn-around (commutative)</h3><div id="turnFill"></div></div>
+    <div class="row"><button class="secondary" id="whyTurn">Why must it be the same?</button></div>
+    <p class="msg" id="whyMsg"></p>`;
+  S.turn.turned = false; drawArray(W2, C2, turnSpec());
+  $('#tA').onchange = e => { S.turn.a = +e.target.value; renderTurn(); };
+  $('#tB').onchange = e => { S.turn.b = +e.target.value; renderTurn(); };
+  $('#turnBtn').onclick = () => { S.turn.turned = !S.turn.turned; spinArray(W2, C2, turnSpec()); };
+  const p = a*b, seq = Array.from({length:a},(_,i)=>(i+1)*b).join(', ');
+  fillin($('#turnFill'), 'turn', {
+    lines:[`${a} × ${b} = ${b} × ${a} = []`, `Turned on its side, a ${a} × ${b} array is [] × [].`],
+    answers:[p, b, a],
+    hint:(i)=> i===0 ? `Count by ${b}s, ${a} time${a===1?'':'s'}: ${seq}. Or count the tiles on the array.` : `Press “Turn a quarter turn.” The ${a} rows of ${b} stand up as ${b} rows of ${a}. Write the rows first.`,
+    ok:`Yes! ${a} × ${b} = ${b} × ${a} = ${p}, and the turned array is ${b} × ${a}. Same tiles, new direction.`
+  });
+  $('#whyTurn').onclick = () => { $('#whyMsg').innerHTML = `Turning moves the tiles but never adds or takes away a tile, so the total stays ${p}. That’s the <b>turn-around (commutative) property</b>. It’s the reason the table mirrors across the diagonal: ${a} × ${b} and ${b} × ${a} are twins.`; };
+}
+
+function dblSpec(){ const {h,b,stacked} = S.dbl;
+  const parts = [{rows:h, color:'var(--red)', label:`${h} × ${b}`}]; if(stacked) parts.push({rows:h, color:'var(--blue)', label:`${h} × ${b}`});
+  return { cols:b, parts, cap: stacked ? `${2*h} rows of ${b}<small>two copies of ${h} × ${b}</small>` : `${h} rows of ${b}` }; }
+function renderDouble(){
+  const {h,b} = S.dbl;
+  body2.innerHTML = `
+    <h2>Doubling</h2>
+    <p class="lead">Build ${h} × ${b}. Stack a second ${h} × ${b} on it. Now you have ${2*h} × ${b}.</p>
+    <div class="row"><label for="dH">Double the</label><select class="inp" id="dH">${[1,2,3,4,5].map(x=>`<option value="${x}"${x===h?' selected':''}>${x}s row</option>`).join('')}</select>
+      <label for="dB">times</label><select class="inp" id="dB">${opts(1,10,b)}</select></div>
+    <div class="row"><button class="secondary" id="dOne">Build ${h} × ${b}</button><button class="primary" id="dTwo">Stack a second one</button></div>
+    <div class="box"><h3>Doubling</h3><div id="dblFill"></div></div>`;
+  drawArray(W2, C2, dblSpec());
+  $('#dH').onchange = e => { S.dbl.h = +e.target.value; renderDouble(); };
+  $('#dB').onchange = e => { S.dbl.b = +e.target.value; renderDouble(); };
+  $('#dOne').onclick = () => { S.dbl.stacked = false; drawArray(W2, C2, dblSpec()); };
+  $('#dTwo').onclick = () => { S.dbl.stacked = true; drawArray(W2, C2, dblSpec()); };
+  const hp = h*b;
+  fillin($('#dblFill'), 'dbl', {
+    lines:[`${2*h} × ${b} = ${h} × ${b} + ${h} × ${b} = [] + [] = []`, `The ${2*h}s row is double the []s row.`],
+    answers:[hp, hp, 2*hp, h],
+    hint:(i,v,vals)=> i<2 ? `One color is ${h} row${h===1?'':'s'} of ${b}. Count by ${b}s ${h} time${h===1?'':'s'}.` : i===2 ? `Add the two colors: ${vals[0]} + ${vals[1]}.` : `Which row did you build twice? Look at the two colors.`,
+    ok:`${2*h} × ${b} = ${hp} + ${hp} = ${2*hp}. The ${2*h}s row is double the ${h}s row, all the way across the table.`
+  });
+}
+
+function brkSpec(){ const {a,b,k} = S.brk;
+  return { cols:b, parts:[{rows:k, color:'var(--green)', label:`${k} × ${b}`},{rows:a-k, color:'var(--yellow)', label:`${a-k} × ${b}`}], cap:`${a} rows of ${b}, cut into ${k} + ${a-k}` }; }
+function renderBreak(){
+  const {a,b,k} = S.brk;
+  body2.innerHTML = `
+    <h2>Break apart</h2>
+    <p class="lead">Cut a ${a} × ${b} array into two smaller arrays. Find each part, then add.</p>
+    <div class="row"><label for="bA">Rows</label><select class="inp" id="bA">${opts(2,10,a)}</select><label for="bB">Columns</label><select class="inp" id="bB">${opts(1,10,b)}</select></div>
+    <div class="row"><label for="bK" style="font-weight:700">Move the cut:</label><input type="range" id="bK" min="1" max="${a-1}" value="${k}" style="flex:1 1 200px; min-height:44px; accent-color:var(--accent)"><span style="font-weight:700" id="bKv">${k} + ${a-k}</span></div>
+    <div class="box"><h3>Break apart (distributive)</h3><div id="brkFill"></div></div>
+    <div class="box"><h3>Try it: 8 × 9</h3><p class="note">Pick your own cut. Any two parts that add to 8 work.</p><div id="tryFill"></div></div>`;
+  drawArray(W2, C2, brkSpec());
+  $('#bA').onchange = e => { S.brk.a = +e.target.value; S.brk.k = Math.min(S.brk.k, S.brk.a-1); renderBreak(); };
+  $('#bB').onchange = e => { S.brk.b = +e.target.value; renderBreak(); };
+  $('#bK').oninput = e => { S.brk.k = +e.target.value; $('#bKv').textContent = `${S.brk.k} + ${S.brk.a-S.brk.k}`; drawArray(W2, C2, brkSpec()); brkFill(); };
+  brkFill();
+  const okPart = (v, vals) => v >= 1 && v <= 7 && vals[0] + vals[1] === 8;
+  fillin($('#tryFill'), 'try', {
+    lines:['8 × 9 = [] × 9 + [] × 9 = []'],
+    answers:[okPart, okPart, 72],
+    hint:(i,v,vals)=> i<2 ? (vals[0] && vals[1] ? `Your parts make ${vals[0]+vals[1]} rows. 8 × 9 is 8 rows of 9, so the two parts must add to 8 (like 5 + 3).` : 'Each part needs at least 1 row, and the two parts add to 8.') : `Find ${vals[0]} × 9 and ${vals[1]} × 9, then add them.`,
+    ok:(vals)=> { drawArray(W2, C2, { cols:9, parts:[{rows:vals[0], color:'var(--green)', label:`${vals[0]} × 9 = ${vals[0]*9}`},{rows:vals[1], color:'var(--yellow)', label:`${vals[1]} × 9 = ${vals[1]*9}`}], cap:'8 rows of 9' });
+      return `8 × 9 = ${vals[0]*9} + ${vals[1]*9} = 72. The array shows your cut.`; }
+  });
+}
+
+function brkFill(){
+  const {a,b,k} = S.brk, p1 = k*b, p2 = (a-k)*b;
+  fillin($('#brkFill'), 'brk', {
+    lines:[`${a} × ${b} = ${k} × ${b} + ${a-k} × ${b} = [] + [] = []`],
+    answers:[p1, p2, a*b],
+    hint:(i,v,vals)=> i===0 ? `Count the green part: ${k} row${k===1?'':'s'} of ${b}.` : i===1 ? `Count the yellow part: ${a-k} row${a-k===1?'':'s'} of ${b}.` : `Add the two parts: ${vals[0]} + ${vals[1]}.`,
+    ok:`${a} × ${b} = ${p1} + ${p2} = ${a*b}. Two easy facts made one hard one.`
+  });
+}
+function famSpec(){ const {a,b} = S.fam; return { cols:b, parts:[{rows:a, color:'var(--yellow)'}], cap:`${a} rows of ${b}` }; }
+function renderFamily(){
+  const {a,b,row} = S.fam, p = a*b;
+  body2.innerHTML = `
+    <h2>Fact families</h2>
+    <p class="lead">One array shows a whole family: two multiplication facts and two division facts.</p>
+    <div class="row"><label for="fA">Rows</label><select class="inp" id="fA">${opts(1,10,a)}</select><label for="fB">Columns</label><select class="inp" id="fB">${opts(1,10,b)}</select></div>
+    <div class="box"><h3>Fact family (multiplication and division)</h3><div id="famFill"></div></div>
+    <div class="box"><h3>Division facts for a whole row</h3>
+      <div class="row"><label for="fRow">Row</label><select class="inp" id="fRow">${opts(1,10,row)}</select><button class="secondary" id="fShow">Check our list</button></div>
+      <p class="note">Write the row’s division facts on your sheet first. Then check.</p>
+      <div class="facts" id="fList"></div></div>`;
+  drawArray(W2, C2, famSpec());
+  $('#fA').onchange = e => { S.fam.a = +e.target.value; renderFamily(); };
+  $('#fB').onchange = e => { S.fam.b = +e.target.value; renderFamily(); };
+  $('#fRow').onchange = e => { S.fam.row = +e.target.value; $('#fList').innerHTML=''; };
+  $('#fShow').onclick = () => { const n = S.fam.row; let h='';
+    for(let k=1;k<=10;k++){ const q=n*k; h += `<div><b>${n} × ${k} = ${q}</b><br>${q} ÷ ${n} = ${k}${k!==n ? `<br>${q} ÷ ${k} = ${n}` : ''}</div>`; }
+    $('#fList').innerHTML = h; };
+  fillin($('#famFill'), 'fam', {
+    lines:[`${a} × ${b} = []&nbsp;&nbsp;&nbsp; ${b} × ${a} = []`, `${p} ÷ ${a} = []&nbsp;&nbsp;&nbsp; ${p} ÷ ${b} = []`],
+    answers:[p, p, b, a],
+    hint:(i)=> i<2 ? `Count the tiles: ${a} row${a===1?'':'s'} of ${b}. Turning it doesn’t change the total.` : i===2 ? `Share ${p} tiles into ${a} equal row${a===1?'':'s'}. How many tiles in each row?` : `Share ${p} tiles into ${b} equal column${b===1?'':'s'}. How many tiles in each column?`,
+    ok:`${a} × ${b} = ${p}, ${b} × ${a} = ${p}, ${p} ÷ ${a} = ${b}, ${p} ÷ ${b} = ${a}. One array, four facts.`
+  });
+}
+
+function stratSpec(s, a, b){ const e = explain(s,a,b); return { cols:e.cols, parts:e.parts, cap:`${a} × ${b}<small>${STRATS[s].name}</small>` }; }
+function cardHTML(s, a, b, title, revealLast=true){
+  const e = explain(s,a,b), st = STRATS[s];
+  const steps = e.ok ? e.steps.concat(revealLast ? [e.last] : []) : [];
+  return `<div class="card" style="--sc:${st.color}"><span class="tag">${st.name}</span>
+    <h3>${title || st.name}</h3><p class="note">Pattern: ${st.pattern} (${st.prop})</p>
+    <p style="margin:0;font-weight:700;font-size:20px">Hard fact: ${a} × ${b}</p>
+    ${e.ok ? `<ol>${steps.map(x=>`<li>${x}</li>`).join('')}</ol>` : `<p class="msg bad">${e.note}</p>`}</div>`;
+}
+function stratPills(id, cur){ return `<div class="pills" id="${id}">${SKEYS.map(k=>`<button data-k="${k}" aria-pressed="${k===cur}">${STRATS[k].name}</button>`).join('')}</div>`; }
+function renderCard(){
+  const c = S.card;
+  body2.innerHTML = `
+    <h2>Draft your strategy card</h2>
+    <p class="lead">Pick the strategy your pattern explains, give it a name, and choose a hard fact it unlocks.</p>
+    ${stratPills('cardStrat', c.strat)}
+    <div class="row"><label for="cName">Our name for it</label><input class="inp" id="cName" style="flex:1 1 200px" placeholder="${STRATS[c.strat].name}" value=""></div>
+    <div class="row"><label for="cA">Hard fact</label><select class="inp" id="cA">${opts(1,10,c.a)}</select><span>×</span><select class="inp" id="cB">${opts(1,10,c.b)}</select></div>
+    <div id="cardOut"></div>
+    <div class="row"><button class="primary" id="cSave">Save card for the fair</button></div>
+    <p class="msg" id="cMsg"></p>`;
+  $('#cName').value = c.name;
+  const out = () => { $('#cardOut').innerHTML = cardHTML(c.strat, c.a, c.b, c.name); drawArray(W2, C2, stratSpec(c.strat, c.a, c.b)); };
+  $$('#cardStrat button').forEach(b => b.onclick = () => { c.strat = b.dataset.k; c.name = S.cards[c.strat] || ''; renderCard(); });
+  $('#cName').oninput = e => { c.name = e.target.value; out(); };
+  $('#cA').onchange = e => { c.a = +e.target.value; out(); };
+  $('#cB').onchange = e => { c.b = +e.target.value; out(); };
+  $('#cSave').onclick = () => { S.cards[c.strat] = c.name.trim() || STRATS[c.strat].name; $('#cMsg').innerHTML = `Saved. Your <b>${S.cards[c.strat]}</b> card will run the ${STRATS[c.strat].name} booth in Class 3.`; };
+  out();
+}
+function renderShare2(){
+  const {a,b} = S.share;
+  body2.innerHTML = `
+    <h2>Use it on a fact nobody has practiced</h2>
+    <p class="lead">Try ${a} × ${b} with each strategy. Predict first, then reveal. Which one feels fastest?</p>
+    <div class="row"><label for="shA">Fact</label><select class="inp" id="shA">${opts(1,10,a)}</select><span>×</span><select class="inp" id="shB">${opts(1,10,b)}</select></div>
+    <div class="cards" id="shCards"></div>`;
+  $('#shA').onchange = e => { S.share.a = +e.target.value; S.share.shown={}; renderShare2(); };
+  $('#shB').onchange = e => { S.share.b = +e.target.value; S.share.shown={}; renderShare2(); };
+  const host = $('#shCards');
+  host.innerHTML = SKEYS.map(k => S.share.shown[k] ? cardHTML(k,a,b,S.cards[k]) :
+    `<div class="card" style="--sc:${STRATS[k].color}"><span class="tag">${STRATS[k].name}</span><h3>${S.cards[k] || STRATS[k].name}</h3><button class="secondary" data-k="${k}">Reveal</button></div>`).join('');
+  host.querySelectorAll('button[data-k]').forEach(btn => btn.onclick = () => { S.share.shown[btn.dataset.k] = true; renderShare2(); drawArray(W2, C2, stratSpec(btn.dataset.k, a, b)); });
+  const last = SKEYS.filter(k=>S.share.shown[k]).pop();
+  drawArray(W2, C2, last ? stratSpec(last,a,b) : { cols:b, parts:[{rows:a, color:'var(--accent)'}], cap:`${a} rows of ${b}<small>How would you find it without counting by ones?</small>` });
+}
+
+/* ======================= CLASS 3 ======================= */
+const W3 = $('#arrWrap3'), C3 = $('#arrCap3'), body3 = $('#s3-body'), info3 = $('#info3');
+const T3 = makeTable($('#t3'), tap3);
+function vis3(mode){ $('#vis3-arr').hidden = mode !== 'arr'; $('#t3').hidden = mode !== 'table'; info3.textContent=''; }
+function setStep3(s){
+  S.s3 = s; gen++;
+  $$('[data-s3]').forEach(b => b.setAttribute('aria-selected', b.dataset.s3 === s));
+  ({booth:renderBooth, lightning:renderLightning, reflect:renderReflect, ext:renderExt})[s]();
+}
+$$('[data-s3]').forEach(b => b.onclick = () => setStep3(b.dataset.s3));
+
+function visitorFacts(s){
+  const out = [], seen = new Set();
+  while(out.length < 3){
+    let a, b;
+    if(s==='double'){ a = [4,6,8][rnd(0,2)]; b = rnd(3,9); }
+    else if(s==='break'){ a = rnd(6,9); b = rnd(3,9); }
+    else { a = rnd(3,9); b = rnd(3,9); if(s==='turn' && a===b) continue; }
+    const key = a+'x'+b; if(seen.has(key)) continue; seen.add(key); out.push([a,b]);
+  }
+  return out;
+}
+function renderBooth(){
+  vis3('arr');
+  const s = S.booth, st = STRATS[s], [ea, eb] = st.example;
+  if(!S.visitor || S.visitor.s !== s) S.visitor = { s, facts:visitorFacts(s) };
+  const isFam = s === 'family';
+  body3.innerHTML = `
+    <h2>Strategy booths</h2>
+    ${stratPills('boothPills', s)}
+    ${cardHTML(s, ea, eb, S.cards[s])}
+    <hr>
+    <h3>Visitor: use ${S.cards[s] || st.name} on three facts</h3>
+    <div class="fill" id="visit">${S.visitor.facts.map(([a,b],i)=> `<div>${isFam ? `${a*b} ÷ ${a}` : `${a} × ${b}`} = <input id="vis-${i}" inputmode="numeric" autocomplete="off" aria-label="visitor fact ${i+1}"></div>`).join('')}</div>
+    <div class="row"><button class="primary" id="visChk">Check</button><button class="secondary" id="visNew">New facts</button></div>
+    <p class="msg" id="visMsg" aria-live="polite"></p>
+    <h3>Passport</h3>
+    <div class="passport">${SKEYS.map(k=>`<div class="stamp${S.stamps[k]?' on':''}" style="--sc:${STRATS[k].color}">${S.stamps[k] ? '★<br>' : ''}${S.cards[k] || STRATS[k].name}</div>`).join('')}</div>
+    <div class="row"><button class="secondary" id="visNext">Next visitor (clear passport)</button></div>`;
+  drawArray(W3, C3, stratSpec(s, ea, eb));
+  $$('#boothPills button').forEach(b => b.onclick = () => { S.booth = b.dataset.k; renderBooth(); });
+  $('#visNew').onclick = () => { S.visitor = { s, facts:visitorFacts(s) }; renderBooth(); };
+  $('#visNext').onclick = () => { S.stamps = {}; S.visitor = { s, facts:visitorFacts(s) }; renderBooth(); };
+  const ins = $$('#visit input');
+  const check = () => {
+    let wrong = -1, empty = false;
+    S.visitor.facts.forEach(([a,b],i) => {
+      const x = ins[i]; x.classList.remove('ok','bad');
+      const want = isFam ? b : a*b;
+      if(x.value.trim()===''){ empty = true; return; }
+      const good = Number(x.value) === want; x.classList.add(good?'ok':'bad'); if(!good && wrong<0) wrong = i;
+    });
+    const m = $('#visMsg'); m.className='msg';
+    if(wrong >= 0){
+      const [a,b] = S.visitor.facts[wrong], e = explain(s,a,b);
+      m.classList.add('bad');
+      if(isFam) m.innerHTML = `<b>Not yet.</b> Think of the family: ${a} × ? = ${a*b}. How many ${a}s make ${a*b}? Try again.`;
+      else if(e.ok) m.innerHTML = `<b>Not yet.</b> Use the strategy on ${a} × ${b}: ${e.steps.join(' ')} What’s the total? Try again.`;
+      else m.innerHTML = `<b>Not yet.</b> ${e.note}`;
+      drawArray(W3, C3, stratSpec(s, a, b));
+    } else if(empty) m.innerHTML = 'So far so good. Answer all three.';
+    else { S.stamps[s] = true; m.classList.add('ok'); m.innerHTML = `<b>Stamp!</b> All three correct with ${S.cards[s] || st.name}.`;
+      $$('.stamp')[SKEYS.indexOf(s)].classList.add('on'); $$('.stamp')[SKEYS.indexOf(s)].innerHTML = `★<br>${S.cards[s] || st.name}`; }
+  };
+  $('#visChk').onclick = check;
+  ins.forEach(x => x.addEventListener('keydown', e => { if(e.key==='Enter') check(); }));
+}
+
+const fmtTime = ms => { const s = Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
+let tick = null;
+function startTimer(){ const L = S.light; if(L.t0 || L.done) return; L.t0 = Date.now(); clearInterval(tick); tick = setInterval(() => { const el=$('#lTime'); if(el && S.light.t0) el.textContent = fmtTime(Date.now()-S.light.t0); }, 250); }
+function stopTimer(){ if(!S) return; const L = S.light; if(L.t0){ L.elapsed = Date.now()-L.t0; L.t0 = null; } clearInterval(tick); }
+function bestHint(a,b){
+  const s = (a%2===0 && a>=4) || (b%2===0 && b>=4) ? 'double' : 'break';
+  const e = explain(s,a,b);
+  return e.ok ? `${STRATS[s].name}: ${e.steps.join(' ')} Then finish it.` : `Count by ${b}s ${a} times.`;
+}
+function lightTable(results){
+  T3.build(10); T3.clear(); T3.focus();
+  S.light.facts.forEach(([a,b],i) => { T3.add(a,b, results ? (results[i]===true ? 'ok' : results[i]===false ? 'bad' : 'hl') : 'hl'); });
+}
+function renderLightning(){
+  vis3('table');
+  const L = S.light;
+  body3.innerHTML = `
+    <h2>Lightning round</h2>
+    <p class="lead">Ten facts. Use any strategy. Then write which strategy you used.</p>
+    <div class="row"><span class="timer" id="lTime">${fmtTime(L.elapsed)}</span><button class="primary" id="lStart">Start the clock</button><button class="secondary" id="lChk">Check answers</button></div>
+    <div class="lightning" id="lGrid">${L.facts.map(([a,b],i)=>`<div class="lq"><label for="lq-${i}">${a} × ${b}</label><input id="lq-${i}" inputmode="numeric" autocomplete="off"><select id="ls-${i}" aria-label="Strategy I used for ${a} × ${b}"><option value="">Strategy I used…</option><option>I just knew it</option>${SKEYS.map(k=>`<option>${STRATS[k].name}</option>`).join('')}</select><div class="hint" id="lh-${i}"></div></div>`).join('')}</div>
+    <p class="msg" id="lMsg" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="lNew">New 10 facts</button><button class="secondary" id="lSheet">Sheet facts</button><button class="secondary" id="lShow" hidden>Show answers</button></div>`;
+  lightTable(null);
+  $('#lStart').onclick = startTimer;
+  $$('#lGrid input').forEach(x => { x.addEventListener('input', startTimer); x.addEventListener('keydown', e => { if(e.key==='Enter') $('#lChk').click(); }); });
+  const reset = facts => { stopTimer(); S.light = { facts, sheet:false, t0:null, elapsed:0, done:false }; renderLightning(); };
+  $('#lNew').onclick = () => { const f=[]; const seen=new Set(); while(f.length<10){ const a=rnd(3,9), b=rnd(3,9); if(seen.has(a+','+b)) continue; seen.add(a+','+b); f.push([a,b]); } reset(f); };
+  $('#lSheet').onclick = () => { reset(SHEET.map(x=>x.slice())); S.light.sheet = true; };
+  $('#lChk').onclick = () => {
+    const res = []; let right = 0, wrong = 0, empty = 0;
+    L.facts.forEach(([a,b],i) => {
+      const x = $('#lq-'+i), h = $('#lh-'+i); x.classList.remove('ok','bad'); h.textContent='';
+      if(x.value.trim()===''){ empty++; res.push(null); return; }
+      const good = Number(x.value) === a*b; res.push(good);
+      if(good){ right++; x.classList.add('ok'); } else { wrong++; x.classList.add('bad'); h.textContent = `Try ${bestHint(a,b)}`; S.hard.add(Math.min(a,b)+','+Math.max(a,b)); }
+    });
+    lightTable(res);
+    const m = $('#lMsg'); m.className='msg';
+    if(right === 10){ stopTimer(); L.done = true; $('#lTime').textContent = fmtTime(L.elapsed); m.classList.add('ok');
+      const used = {}; L.facts.forEach((_,i)=>{ const v=$('#ls-'+i).value; if(v) used[v]=(used[v]||0)+1; });
+      const u = Object.entries(used).map(([k,n])=>`${k} ${n}`).join(', ');
+      m.innerHTML = `<b>All 10 correct in ${fmtTime(L.elapsed)}!</b>${u ? ` Strategies used: ${u}.` : ''}`; }
+    else { m.innerHTML = `${right} correct so far.${wrong ? ` ${wrong} need${wrong===1?'s':''} another look: each one has a strategy hint under it.` : ''}${empty ? ` ${empty} still blank.` : ''}`; if(wrong) m.classList.add('bad'); }
+    $('#lShow').hidden = wrong === 0;
+  };
+  $('#lShow').onclick = () => { L.facts.forEach(([a,b],i) => { const h=$('#lh-'+i); if($('#lq-'+i).classList.contains('bad')) h.textContent = `${a} × ${b} = ${a*b}. ${bestHint(a,b).replace(' Then finish it.','')}`; }); };
+}
+
+function reflectRender(){
+  T3.clear();
+  const st = S.reflect;
+  if(st > 0){
+    T3.focus();
+    T3.each((r,c) => {
+      const on = st === 1 || (st === 2 && r <= c) || (st === 3 && r <= c && r !== 1 && c !== 1 && r !== 10 && c !== 10);
+      if(on) T3.add(r,c,'shade','hl');
+    });
+  }
+  S.hard.forEach(k => { const [a,b] = k.split(',').map(Number); T3.add(a,b,'hard','hl'); T3.badge(a,b,'hard'); });
+}
+function renderReflect(){
+  vis3('table'); T3.build(10);
+  const counts = factCounts(10);
+  body3.innerHTML = `
+    <h2>How many facts do you really have to learn?</h2>
+    <p class="lead">If you know the mirror property, how many of the 100 facts are left? Predict, then shade.</p>
+    <div class="row">
+      <button class="secondary" data-rs="1">All 100 facts</button>
+      <button class="secondary" data-rs="2">Use the turn-around</button>
+      <button class="secondary" data-rs="3">1s and 10s are free</button>
+    </div>
+    <div class="row" style="align-items:baseline"><span class="big" id="rCount">?</span><span class="muted" id="rUnit">facts to learn</span></div>
+    <p class="msg" id="rMsg"></p>
+    <hr>
+    <h3>Which facts were hardest?</h3>
+    <p class="note">Facts missed in the lightning round are marked “hard.” Tap the table to mark or unmark more.</p>
+    <div class="row"><button class="primary" id="rHardBtn">Which strategy handles them?</button></div>
+    <div id="rHard"></div>`;
+  const MSG = {
+    1:`Every cell is a fact: 10 rows of 10 = <b>${counts.all}</b>.`,
+    2:`Every fact below the diagonal is the turn-around of one above it. 100 − 10 on the diagonal = 90. Half of 90 is 45. Add the 10 diagonal facts back: 45 + 10 = <b>${counts.mirror}</b>.`,
+    3:`The 1s row is just the other number. The 10s row puts a 0 on the end. Take those away and only <b>${counts.core}</b> facts are left to learn.`
+  };
+  const show = st => { S.reflect = st; reflectRender(); $$('[data-rs]').forEach(b => b.className = +b.dataset.rs === st ? 'primary' : 'secondary');
+    let n = 0; T3.each((r,c,el) => { if(el.classList.contains('shade')) n++; }); $('#rCount').textContent = n; $('#rMsg').innerHTML = MSG[st]; };
+  $$('[data-rs]').forEach(b => b.onclick = () => show(+b.dataset.rs));
+  $('#rHardBtn').onclick = () => {
+    if(!S.hard.size){ $('#rHard').innerHTML = '<p class="msg">No hard facts marked yet. Tap the facts your class found hardest.</p>'; return; }
+    const list = [...S.hard].map(k => k.split(',').map(Number)).sort((x,y)=>x[0]-y[0]||x[1]-y[1]);
+    $('#rHard').innerHTML = `<div class="cards">${list.map(([a,b]) => { const s = (a%2===0&&a>=4)||(b%2===0&&b>=4) ? 'double' : 'break'; return cardHTML(s, b, a, `${b} × ${a}`); }).join('')}</div>`;
+  };
+  if(S.reflect) show(S.reflect); else reflectRender();
+}
+
+function renderExt(){
+  vis3('table'); T3.build(12); T3.clear();
+  body3.innerHTML = `
+    <h2>Extend the table to 12 × 12</h2>
+    <p class="lead">Which patterns survive? Tap a claim to test it on the bigger table.</p>
+    <div class="wrapx"><table class="cmp"><thead><tr><th>#</th><th>Claim</th><th>1 to 10</th><th>1 to 12</th></tr></thead><tbody id="xRows"></tbody></table></div>
+    <p class="msg" id="xMsg" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="x911">Look closely at 9 × 11 and 9 × 12</button></div>
+    <hr>
+    <h3>Predict 15 × 15 by breaking it apart</h3>
+    <div id="x15"></div>
+    <div class="row"><button class="secondary" id="x15arr">Show the 15 × 15 array</button><button class="secondary" id="x12tab" hidden>Back to the 12 × 12 table</button></div>`;
+  const rows = CLAIMS.map((cl,i) => { const a=verdict(cl,10).v, b=verdict(cl,12).v; return `<tr class="click" data-i="${i}" tabindex="0"><td>${i+1}</td><td>${cl.text}</td><td class="v-${a}">${VNAME[a]}</td><td class="v-${b}">${VNAME[b]}</td></tr>`; }).join('');
+  $('#xRows').innerHTML = rows;
+  $$('#xRows tr').forEach(tr => { const go = () => { vis3('table'); $('#x12tab').hidden = true; testAll(T3, CLAIMS[+tr.dataset.i], $('#xMsg')); }; tr.onclick = go; tr.onkeydown = e => { if(e.key==='Enter') go(); }; });
+  $('#x911').onclick = () => { vis3('table'); $('#x12tab').hidden = true; gen++; T3.clear(); T3.focus();
+    for(let c=1;c<=12;c++){ const v=9*c; T3.add(9,c,'hl'); T3.badge(9,c, String(v).split('').join('+')); }
+    const m=$('#xMsg'); m.className='msg';
+    m.innerHTML = '9 × 11 = 99: 9 + 9 = 18, and 1 + 8 = 9. 9 × 12 = 108: 1 + 0 + 8 = 9. The digits no longer add to 9 the first time, but keep adding and you still land on 9.'; };
+  fillin($('#x15'), 'x15', {
+    lines:['15 × 15 = 10 × 15 + 5 × 15 = [] + [] = []'],
+    answers:[150, 75, 225],
+    hint:(i,v,vals)=> i===0 ? '10 groups of 15: put a 0 on the end of 15.' : i===1 ? '5 × 15 is half of 10 × 15.' : `Add the two parts: ${vals[0]} + ${vals[1]}.`,
+    ok:'15 × 15 = 150 + 75 = 225. Break apart works on facts that aren’t even on the table.'
+  });
+  $('#x15arr').onclick = () => { vis3('arr'); $('#x12tab').hidden = false;
+    drawArray(W3, C3, { cols:15, parts:[{rows:10, color:'var(--green)', label:'10 × 15'},{rows:5, color:'var(--yellow)', label:'5 × 15'}], cap:'15 rows of 15' }); };
+  $('#x12tab').onclick = () => { vis3('table'); $('#x12tab').hidden = true; };
+}
+
+function tap3(r,c){
+  const v = r*c;
+  if(S.s3 === 'reflect'){
+    const k = Math.min(r,c)+','+Math.max(r,c);
+    if(S.hard.has(k)) S.hard.delete(k); else S.hard.add(k);
+    reflectRender(); info3.textContent = `${r} × ${c} = ${v}${S.hard.has(k) ? ' marked hard.' : ''}`; return;
+  }
+  const extra = r !== c ? ` Its twin: ${c} × ${r} = ${v}.` : ' It sits on the diagonal.';
+  info3.textContent = `${r} × ${c} = ${v}.${extra}`;
+}
+
+/* ---------- Class switch, reset, full screen ---------- */
+function setClass(n){
+  S.cls = n; gen++;
+  $$('nav.classes button').forEach(b => b.setAttribute('aria-selected', +b.dataset.cls === n));
+  [1,2,3].forEach(k => $('#cls'+k).hidden = k !== n);
+  if(n === 1) setStep1(S.s1);
+  if(n === 2) setStep2(S.s2);
+  if(n === 3) setStep3(S.s3);
+}
+$$('nav.classes button').forEach(b => b.onclick = () => setClass(+b.dataset.cls));
+function startOver(){
+  stopTimer();
+  const cls = S ? S.cls : 1;
+  S = fresh(); S.cls = cls;
+  $('#paintMode').checked = false; $('#paintTools').hidden = true; $('#paintNote').hidden = true;
+  renderWarm(); renderClaimPills(); renderEvidence(); renderVotes(); $('#exploreMsg').innerHTML=''; $('#shareMsg').innerHTML='';
+  setClass(cls);
+}
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+startOver();
+})();
+</script>
+
+</body></html>

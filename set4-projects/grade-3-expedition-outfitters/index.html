@@ -1,0 +1,1002 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Expedition Outfitters</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@500;600;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
+<style>
+/* Layout: an outfitter's gear room. Luggage-tag class tabs, one working bench per part, instruments (scale, cylinder, ruler, thermometer) drawn as the real thing. */
+:root{
+  --ground:#E7ECE8; --card:#FBFCFA; --ink:#17252A; --muted:#55676A; --line:#C6D1CC;
+  --blaze:#D2521C; --blaze-soft:#F7E0D4; --pine:#1E6B51; --pine-soft:#DAEDE3;
+  --sky:#2A6CA0; --sky-soft:#DCE9F5; --warm:#9A6200; --warm-soft:#FAEDD3;
+  --cold:#3C7FC0; --mild:#2E8B62; --hot:#D0661F;
+  --display:"Saira Stencil One", "Arial Black", Impact, sans-serif;
+  --label:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#111A1C; --card:#1A2629; --ink:#E5ECE8; --muted:#9DB0AD; --line:#2E3F42;
+    --blaze:#F27C46; --blaze-soft:#3B2318; --pine:#52C496; --pine-soft:#173328;
+    --sky:#6CB2E8; --sky-soft:#15293A; --warm:#E5AE4E; --warm-soft:#33270F;
+    --cold:#6FAEEA; --mild:#4FC290; --hot:#F08A48; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111A1C; --card:#1A2629; --ink:#E5ECE8; --muted:#9DB0AD; --line:#2E3F42;
+  --blaze:#F27C46; --blaze-soft:#3B2318; --pine:#52C496; --pine-soft:#173328;
+  --sky:#6CB2E8; --sky-soft:#15293A; --warm:#E5AE4E; --warm-soft:#33270F;
+  --cold:#6FAEEA; --mild:#4FC290; --hot:#F08A48; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ground); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.25vw,20px); line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blaze); outline-offset:2px}
+.app{max-width:1320px; margin:0 auto; padding-block:14px 40px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); display:flex; flex-direction:column; gap:16px}
+
+/* Header */
+.top{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px}
+.brand{min-width:0}
+.eyebrow{margin:0; font-family:var(--label); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:15px; color:var(--blaze)}
+h1{margin:0; font-family:var(--display); font-weight:400; font-size:clamp(34px,4.4vw,60px); line-height:1; letter-spacing:.01em; text-wrap:balance}
+.motto{margin:4px 0 0; color:var(--muted); font-size:clamp(16px,1.3vw,19px)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 18px; font-family:var(--label); font-weight:600; font-size:19px; letter-spacing:.02em; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+.ghost.armed{border-color:var(--blaze); color:var(--blaze)}
+
+/* Class tabs as luggage tags */
+.classes{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+.tag{position:relative; text-align:left; border:2px solid var(--line); background:var(--card); border-radius:10px 22px 22px 10px; padding:12px 16px 12px 44px; min-height:64px; display:flex; flex-direction:column; justify-content:center}
+.tag::before{content:""; position:absolute; left:16px; top:50%; width:14px; height:14px; margin-top:-7px; border-radius:50%; border:2px solid var(--line); background:var(--ground)}
+.tag b{font-family:var(--label); font-size:15px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.tag span{font-family:var(--label); font-weight:700; font-size:clamp(19px,1.6vw,24px); line-height:1.1}
+.tag[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.tag[aria-selected="true"] b{color:var(--card); opacity:.75}
+.tag[aria-selected="true"]::before{border-color:var(--card)}
+.parts{display:flex; flex-wrap:wrap; gap:8px}
+.parts button{border:2px solid var(--line); background:transparent; border-radius:999px; padding:8px 18px; min-height:46px; font-family:var(--label); font-weight:600; font-size:19px}
+.parts button[aria-pressed="true"]{background:var(--blaze); border-color:var(--blaze); color:#fff}
+
+/* Benches */
+main{display:flex; flex-direction:column; gap:16px}
+.bench{background:var(--card); border:2px solid var(--line); border-radius:16px; padding:clamp(16px,2vw,26px); display:flex; flex-direction:column; gap:16px; min-width:0}
+.bench h2{margin:0; font-family:var(--label); font-weight:700; font-size:clamp(26px,2.4vw,34px); line-height:1.05; text-wrap:balance}
+.bench h3{margin:0; font-family:var(--label); font-weight:700; font-size:clamp(21px,1.8vw,25px)}
+.lead{margin:0; color:var(--muted); max-width:62ch}
+.grid2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:20px; align-items:start}
+.grid4{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px}
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--ground); border-radius:14px; padding:4px}
+.seg button{border:0; background:none; border-radius:10px; padding:9px 16px; min-height:46px; font-family:var(--label); font-weight:600; font-size:19px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card); color:var(--ink); box-shadow:0 0 0 2px var(--ink) inset}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--blaze); color:#fff; border-radius:12px; padding:12px 22px; min-height:52px; font-family:var(--label); font-weight:700; font-size:21px; letter-spacing:.02em}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); border-radius:12px; padding:10px 18px; min-height:52px; font-family:var(--label); font-weight:700; font-size:20px}
+.secondary:disabled{opacity:.4; cursor:default}
+.mini{font-size:15px; color:var(--muted); margin:0}
+
+/* Tasks */
+.task{border:2px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; background:var(--card)}
+.task.ok{border-color:var(--pine)}
+.task .q{margin:0; font-size:clamp(18px,1.4vw,22px)}
+.task .q .num{font-family:var(--label); font-weight:700; color:var(--blaze); margin-right:6px}
+.fields{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center}
+.fld{display:inline-flex; align-items:center; gap:6px; font-family:var(--label); font-weight:600; font-size:20px}
+.fld input{width:5.2em; min-height:50px; border:2px solid var(--line); border-radius:10px; background:var(--ground); color:var(--ink); font-family:var(--label); font-weight:700; font-size:24px; padding:4px 10px; text-align:center; font-variant-numeric:tabular-nums}
+.fld input.wide{width:9em; text-align:left; font-family:var(--body); font-weight:400; font-size:19px}
+.fb{margin:0; padding:10px 14px; border-radius:10px; font-size:clamp(17px,1.3vw,20px)}
+.fb.good{background:var(--pine-soft); color:var(--ink); border-left:6px solid var(--pine)}
+.fb.try{background:var(--warm-soft); color:var(--ink); border-left:6px solid var(--warm)}
+.fb.note{background:var(--sky-soft); color:var(--ink); border-left:6px solid var(--sky)}
+.fb b{font-family:var(--label); font-size:1.08em}
+.done-chip{font-family:var(--label); font-weight:700; color:var(--pine); font-size:17px; letter-spacing:.05em; text-transform:uppercase}
+
+/* Benchmarks */
+.bm{border:2px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; align-items:flex-start}
+.bm.ok{border-color:var(--pine)}
+.bm svg{width:100%; max-width:180px; height:96px}
+.bm h3{font-size:22px}
+
+/* Stations */
+.items{display:flex; flex-wrap:wrap; gap:8px}
+.items button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; min-height:48px; font-family:var(--label); font-weight:600; font-size:19px; display:inline-flex; gap:8px; align-items:center}
+.items button[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 2px var(--ink) inset}
+.items button .tick{color:var(--pine); font-weight:700}
+.instrument{background:var(--ground); border-radius:14px; padding:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:300px}
+.instrument svg{max-width:100%; height:auto}
+.instrument .cap{font-family:var(--label); font-weight:600; color:var(--muted); font-size:17px; text-align:center}
+.scale{width:min(300px,100%); background:var(--ink); color:var(--card); border-radius:18px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:8px}
+.scale .pan{width:80%; height:12px; border-radius:6px; background:var(--muted)}
+.scale .lcd{width:100%; background:#C9D8B6; color:#1B2A12; border-radius:8px; font-family:var(--label); font-weight:700; font-size:54px; text-align:right; padding:2px 14px; font-variant-numeric:tabular-nums; letter-spacing:.04em}
+.scale .lcd small{font-size:26px; margin-left:6px}
+.steps{display:flex; flex-direction:column; gap:12px}
+.step{display:grid; grid-template-columns:36px minmax(0,1fr); gap:10px; align-items:start}
+.step .n{width:36px; height:36px; border-radius:50%; background:var(--ground); display:grid; place-items:center; font-family:var(--label); font-weight:700; font-size:19px}
+.step.ok .n{background:var(--pine); color:var(--card)}
+.step.now .n{background:var(--blaze); color:#fff}
+.step.wait{opacity:.45}
+.step > div{display:flex; flex-direction:column; gap:8px; min-width:0}
+.step p{margin:0}
+.tablewrap{overflow-x:auto}
+table.log{border-collapse:collapse; width:100%; min-width:520px; font-variant-numeric:tabular-nums}
+table.log th,table.log td{text-align:left; padding:8px 12px; border-bottom:1.5px solid var(--line)}
+table.log th{font-family:var(--label); font-weight:600; color:var(--muted); font-size:16px; letter-spacing:.05em; text-transform:uppercase}
+table.log td.n{font-family:var(--label); font-weight:700; font-size:21px}
+table.log tr.best td{background:var(--pine-soft)}
+table.log tr.sec td{font-family:var(--label); font-weight:700; font-size:18px; color:var(--blaze); background:transparent}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chips button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 16px; min-height:46px; font-family:var(--label); font-weight:600; font-size:19px}
+.chips button[aria-pressed="true"]{border-color:var(--pine); background:var(--pine-soft)}
+
+/* Pack bar */
+.pack{display:flex; flex-direction:column; gap:6px; min-width:0}
+.bar{position:relative; height:64px; border-radius:10px; background:var(--ground); border:2px solid var(--line); overflow:hidden}
+.bar .segs{position:absolute; inset:0; display:flex}
+.bar .seg-i{height:100%; border-right:2px solid var(--card); display:flex; align-items:center; justify-content:center; font-family:var(--label); font-weight:600; font-size:15px; color:#fff; overflow:hidden; white-space:nowrap; padding:0 4px}
+.bar .limit{position:absolute; top:-2px; bottom:-2px; width:0; border-left:4px dashed var(--ink)}
+.axis{position:relative; height:22px; font-family:var(--label); font-weight:600; font-size:15px; color:var(--muted)}
+.axis span{position:absolute; transform:translateX(-50%); white-space:nowrap}
+.axis span.lim{color:var(--ink); font-weight:700}
+
+/* Expedition cards */
+.cards{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}
+.xcard{text-align:left; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:6px; min-height:140px}
+.xcard[aria-pressed="true"]{border-color:var(--blaze); box-shadow:0 0 0 2px var(--blaze) inset}
+.xcard .dest{font-family:var(--display); font-size:24px; line-height:1}
+.xcard dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:2px 10px; font-size:16px}
+.xcard dt{color:var(--muted)}
+.xcard dd{margin:0; font-family:var(--label); font-weight:700; font-size:18px}
+.catalog{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px}
+.catalog button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 12px; min-height:60px; text-align:left; display:flex; flex-direction:column}
+.catalog button b{font-family:var(--label); font-size:20px}
+.catalog button span{font-family:var(--label); font-weight:600; color:var(--muted); font-size:17px}
+.catalog button[aria-pressed="true"]{border-color:var(--pine); background:var(--pine-soft)}
+.catalog button:disabled{opacity:.4; cursor:default}
+
+/* Inspection */
+.sealed{display:flex; flex-wrap:wrap; gap:10px}
+.sealed button{border:2px solid var(--line); background:var(--card); border-radius:16px 16px 22px 22px; padding:12px 16px; min-width:120px; min-height:80px; font-family:var(--label); font-weight:700; font-size:21px; display:flex; flex-direction:column; align-items:center; gap:2px}
+.sealed button small{font-weight:600; color:var(--muted); font-size:16px}
+.sealed button[aria-pressed="true"]{border-color:var(--blaze); box-shadow:0 0 0 2px var(--blaze) inset}
+.unpack{display:flex; flex-wrap:wrap; gap:8px}
+.unpack button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; min-height:52px; font-family:var(--label); font-weight:600; font-size:19px}
+.unpack button.out{text-decoration:line-through; opacity:.5; border-style:dashed}
+
+/* Showcase */
+.show{position:fixed; inset:0; z-index:50; background:var(--ink); color:var(--card); display:flex; flex-direction:column; padding-block:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); padding-left:max(24px, env(safe-area-inset-left, 0px)); padding-right:max(24px, env(safe-area-inset-right, 0px))}
+.show[hidden]{display:none}
+.show .sbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.show .sbar .count{font-family:var(--label); font-weight:600; font-size:20px; opacity:.75; margin-right:auto}
+.show .sbar button{border:2px solid var(--card); background:transparent; color:var(--card); border-radius:12px; padding:8px 18px; min-height:52px; font-family:var(--label); font-weight:700; font-size:20px}
+.show .slide{flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; justify-content:center; gap:18px; max-width:1100px; width:100%; margin:0 auto}
+.show .kicker{font-family:var(--label); font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--blaze); font-size:clamp(18px,2vw,26px); margin:0}
+.show .big{font-family:var(--display); font-size:clamp(40px,7vw,96px); line-height:1; margin:0; text-wrap:balance}
+.show .eq{font-family:var(--label); font-weight:700; font-size:clamp(28px,4.2vw,58px); line-height:1.15; margin:0; font-variant-numeric:tabular-nums}
+.show .eq em{font-style:normal; color:var(--blaze)}
+.show ul{margin:0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:6px 24px; font-family:var(--label); font-weight:600; font-size:clamp(22px,2.6vw,34px)}
+.show ul li{display:flex; justify-content:space-between; border-bottom:2px solid color-mix(in srgb, var(--card) 25%, transparent); padding:4px 0}
+.show .soft{opacity:.75; font-size:clamp(18px,1.8vw,24px); margin:0}
+
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.96); opacity:.4}to{transform:none; opacity:1}}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+@media (max-width: 980px){
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .grid4,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 560px){
+  .classes{grid-template-columns:minmax(0,1fr)}
+  .tag{min-height:54px}
+  .grid4,.cards{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+  .scale .lcd{font-size:44px}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <p class="eyebrow">Grade 3 · Set 4 project · 3 class periods</p>
+      <h1>Expedition Outfitters</h1>
+      <p class="motto">Estimate first. Measure second. Pack the expedition within its limits.</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="fsBtn" type="button">Full screen</button>
+      <button class="ghost" id="resetBtn" type="button">Start over</button>
+    </div>
+  </header>
+  <nav class="classes" role="tablist" aria-label="Class periods">
+    <button class="tag" role="tab" data-cls="0" type="button"><b>Class 1</b><span>Benchmarks &amp; Gear Check</span></button>
+    <button class="tag" role="tab" data-cls="1" type="button"><b>Class 2</b><span>Pack the Expedition</span></button>
+    <button class="tag" role="tab" data-cls="2" type="button"><b>Class 3</b><span>Base Camp Inspection</span></button>
+  </nav>
+  <div class="parts" id="parts" role="group" aria-label="Parts"></div>
+  <main id="main"></main>
+</div>
+<div class="show" id="show" hidden role="dialog" aria-label="Showcase"></div>
+
+<script>
+(function(){
+/*MATH-START*/
+const LIMIT = 1000;                       // one explorer's pack, grams
+const PRACTICE = [['Compass',50],['Flashlight',150],['Rope',300],['Water filter',200],['First-aid kit',250]];
+const COATS = {
+  heavy:{name:'Heavy coat', g:300, band:'below 32°F'},
+  fleece:{name:'Fleece', g:180, band:'32°F to 50°F'},
+  wind:{name:'Windbreaker', g:90, band:'above 50°F'}
+};
+const coatFor = t => t < 32 ? 'heavy' : (t <= 50 ? 'fleece' : 'wind');
+const sum = a => a.reduce((s,x) => s + x, 0);
+const PRACTICE_TOTAL = sum(PRACTICE.map(x => x[1]));
+const PRACTICE_LOW = 28, PRACTICE_HIGH = 54;
+const WATER_PER_DAY = 2;                  // liters per explorer per day
+const BOTTLE_ML = 500;
+const bottlesFor = L => L * 1000 / BOTTLE_ML;
+const ropesNeeded = (cliff, len) => Math.ceil(cliff / len);
+const PRACTICE_ROPES = 3, PRACTICE_ROPE_M = 20, PRACTICE_CLIFF = 55;
+const CARDS = [
+  {id:'frost',  dest:'Frost Peak',  days:3, explorers:4, low:25, high:41, cliff:75, rope:20},
+  {id:'canyon', dest:'Canyon Rim',  days:2, explorers:5, low:52, high:88, cliff:35, rope:10},
+  {id:'river',  dest:'Misty River', days:4, explorers:3, low:40, high:63, cliff:48, rope:15},
+  {id:'pine',   dest:'Pine Ridge',  days:5, explorers:2, low:32, high:50, cliff:54, rope:25}
+];
+const CATALOG = [
+  {id:'compass', name:'Compass', g:50}, {id:'flash', name:'Flashlight', g:150}, {id:'rope', name:'Rope', g:300},
+  {id:'filter', name:'Water filter', g:200}, {id:'aid', name:'First-aid kit', g:250}, {id:'map', name:'Map', g:30},
+  {id:'whistle', name:'Whistle', g:10}, {id:'lamp', name:'Headlamp', g:90}, {id:'snack', name:'Snack pack', g:120},
+  {id:'hat', name:'Sun hat', g:80}, {id:'mitt', name:'Mittens', g:60}, {id:'mat', name:'Sleeping mat', g:400}
+];
+const MAX_GEAR = 6;
+const MASS_ITEMS = [
+  {name:'Granola bar', g:40, unit:'g'}, {name:'Hiking boot', g:700, unit:'g'},
+  {name:'Sleeping bag', g:2000, unit:'kg'}, {name:'Tent', g:4000, unit:'kg'}
+];
+const massIn = (it, unit) => unit === 'kg' ? it.g / 1000 : it.g;
+const LIQUID_ITEMS = [{name:'Mug', ml:350}, {name:'Cup', ml:250}, {name:'Bottle', ml:500}];
+const LENGTH_ITEMS = [{name:'Rope', v:15, unit:'m'}, {name:'Tent peg', v:18, unit:'cm'}];
+const TEMP_ITEMS = [{name:'Ice water', f:34}, {name:'Warm water', f:104}, {name:'Our room', f:70}];
+const INSPECT_PACKS = [
+  {id:'A', items:[['Flashlight',150],['Rope',300],['Water filter',200],['First-aid kit',250],['Heavy coat',300]]},
+  {id:'B', items:[['Compass',50],['Headlamp',90],['Fleece',180],['Snack pack',120],['First-aid kit',250],['Water filter',200],['Map',30]]},
+  {id:'C', items:[['Rope',300],['Flashlight',150],['Fleece',180],['Snack pack',120],['Sun hat',80],['First-aid kit',250],['Compass',50]]}
+];
+const packTotal = items => sum(items.map(x => x[1]));
+const lightestFix = (items, over) => { const c = items.filter(x => x[1] >= over).sort((a,b) => a[1]-b[1]); return c[0] || null; };
+const TEAM_PACKS = [850, 920, 780, 990];
+const CUP_ML = 250, BIG_BOTTLE_L = 2, CHALLENGE_L = 24;
+/*MATH-END*/
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => Number(n).toLocaleString('en-US');
+const ITEM_COLORS = ['#2E8B62','#2A6CA0','#B4561E','#7A55B0','#A0731A','#2C8C99','#B03A5B','#5E7A2A'];
+
+function fresh(){
+  return {cls:0, part:[0,0,0], v:{}, t:{},
+    bench:{}, st:{station:'mass', item:0, mode:'sim', rec:{}, best:false, bm:null},
+    man:{card:null, coat:null, gear:[]},
+    insp:{pack:null, est:'', locked:false, weighed:false, out:[], fixShown:false},
+    ch:{pick:null, all:false, evidence:false},
+    showI:0};
+}
+let S = fresh();
+
+/* ---------- Number entry ---------- */
+function num(x){
+  if(x === undefined || x === null) return NaN;
+  const s = String(x).replace(/[,\s]/g,'');
+  if(!/^-?\d+$/.test(s)) return NaN;
+  return parseInt(s, 10);
+}
+const val = k => S.v[k] ?? '';
+
+/* ---------- Generic task ---------- */
+const TASKS = {};
+function fieldHTML(key, f){
+  const id = `${key}.${f.n}`;
+  if(f.kind === 'choice'){
+    return `<span class="fld">${f.pre ? esc(f.pre) : ''}<span class="seg" role="group">${f.opts.map(([v,l]) => `<button type="button" data-choice="${id}" data-val="${v}" aria-pressed="${S.v[id]===v}">${esc(l)}</button>`).join('')}</span></span>`;
+  }
+  return `<label class="fld">${f.pre ? esc(f.pre) : ''}<input id="f-${id.replace(/[^a-z0-9]/gi,'-')}" data-f="${id}" inputmode="numeric" autocomplete="off" value="${esc(val(id))}" aria-label="${esc(f.aria || f.pre || f.n)}">${f.suf ? esc(f.suf) : ''}</label>`;
+}
+function taskHTML(key, cfg){
+  TASKS[key] = cfg;
+  const r = S.t[key];
+  return `<div class="task ${r && r.ok ? 'ok' : ''}">
+    <p class="q">${cfg.no ? `<span class="num">${cfg.no}</span>` : ''}${cfg.q}</p>
+    <div class="fields">${cfg.fields.map(f => fieldHTML(key, f)).join('')}
+      <button class="primary" type="button" data-check="${key}">Check</button>
+      ${r && r.ok ? '<span class="done-chip">✓ Checked</span>' : ''}</div>
+    ${r ? `<p class="fb ${r.ok ? 'good' : 'try'}" aria-live="polite">${r.msg}</p>` : ''}
+    ${cfg.after ? cfg.after(r) : ''}
+  </div>`;
+}
+function runCheck(key){
+  const cfg = TASKS[key]; if(!cfg) return;
+  const v = {};
+  for(const f of cfg.fields){
+    const raw = S.v[`${key}.${f.n}`];
+    if(raw === undefined || raw === ''){ S.t[key] = {ok:false, msg:'Fill in every blank first, then check.'}; return render(); }
+    if(f.kind === 'choice') v[f.n] = raw;
+    else { const n = num(raw); if(Number.isNaN(n)){ S.t[key] = {ok:false, msg:`“${esc(raw)}” isn’t a whole number. Type digits only, like 250.`}; return render(); } v[f.n] = n; }
+  }
+  const res = cfg.check(v);
+  S.t[key] = res;
+  if(res.ok && cfg.onOk) cfg.onOk(v);
+  render();
+}
+const ok = msg => ({ok:true, msg});
+const no = msg => ({ok:false, msg});
+const isOk = k => !!(S.t[k] && S.t[k].ok);
+
+/* ---------- Drawings ---------- */
+function cylinderSVG(ml, show){
+  const top = 30, bot = 330, H = bot - top, y = v => bot - v / 1000 * H;
+  let t = '';
+  for(let v = 0; v <= 1000; v += 50){
+    const major = v % 100 === 0;
+    t += `<line x1="60" x2="${major ? 92 : 80}" y1="${y(v)}" y2="${y(v)}" stroke="var(--ink)" stroke-width="${major ? 2.5 : 1.5}"/>`;
+    if(major) t += `<text x="52" y="${y(v)+6}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--ink)">${v}</text>`;
+  }
+  const level = show ? `<rect x="61" y="${y(ml)}" width="118" height="${bot - y(ml)}" fill="var(--sky)" opacity=".55"/><line x1="61" x2="179" y1="${y(ml)}" y2="${y(ml)}" stroke="var(--sky)" stroke-width="3"/>` : '';
+  return `<svg viewBox="0 0 220 350" width="220" height="350" role="img" aria-label="Measuring cylinder marked 0 to 1,000 mL">
+    ${level}
+    <path d="M60 22 V330 Q60 340 70 340 H170 Q180 340 180 330 V22" fill="none" stroke="var(--ink)" stroke-width="3"/>
+    ${t}<text x="200" y="40" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="20" fill="var(--muted)" text-anchor="middle">mL</text></svg>`;
+}
+function rulerSVG(cm, show){
+  const x0 = 20, px = 24, len = 30;
+  let t = '';
+  for(let c = 0; c <= len; c++){
+    const major = c % 5 === 0;
+    t += `<line x1="${x0+c*px}" x2="${x0+c*px}" y1="120" y2="${major ? 92 : 104}" stroke="var(--ink)" stroke-width="${major ? 2.5 : 1.5}"/>`;
+    if(major) t += `<text x="${x0+c*px}" y="86" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--ink)">${c}</text>`;
+  }
+  const peg = show ? `<g><rect x="${x0}" y="34" width="${cm*px - 18}" height="16" rx="3" fill="var(--hot)"/><path d="M${x0+cm*px-18} 34 L${x0+cm*px} 42 L${x0+cm*px-18} 50 Z" fill="var(--hot)"/><rect x="${x0-4}" y="26" width="18" height="32" rx="4" fill="var(--hot)"/><line x1="${x0+cm*px}" x2="${x0+cm*px}" y1="42" y2="120" stroke="var(--hot)" stroke-dasharray="4 4" stroke-width="2"/></g>` : '';
+  return `<svg viewBox="0 0 770 130" width="770" height="130" role="img" aria-label="Centimeter ruler 0 to 30">
+    <rect x="8" y="64" width="744" height="58" rx="6" fill="var(--warm-soft)" stroke="var(--ink)" stroke-width="2"/>${t}${peg}
+    <text x="752" y="40" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="20" fill="var(--muted)">cm</text></svg>`;
+}
+function sticksHTML(m, show){
+  if(!show) return `<p class="cap">The rope is coiled. Lay meter sticks along it to measure.</p>`;
+  let h = '<div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:520px">';
+  for(let r = 0; r < Math.ceil(m/5); r++){
+    h += '<div style="display:flex;gap:4px">';
+    for(let c = 0; c < 5 && r*5+c < m; c++) h += `<div style="flex:1;height:26px;border-radius:4px;background:${(r*5+c)%2 ? 'var(--warm)' : 'var(--hot)'}"></div>`;
+    for(let c = m - r*5; c < 5; c++) h += '<div style="flex:1"></div>';
+    h += '</div>';
+  }
+  return h + `</div><svg viewBox="0 0 520 30" width="100%" height="30" aria-hidden="true"><path d="M5 15 C 120 0, 200 30, 300 15 S 470 0, 515 15" stroke="var(--muted)" stroke-width="6" fill="none" stroke-linecap="round"/></svg><p class="cap">Each colored bar is one meter stick. The rope is exactly as long as the sticks.</p>`;
+}
+function thermSVG(f, opts = {}){
+  const lo = opts.lo ?? Math.max(0, Math.floor((f - 20) / 10) * 10), hi = opts.hi ?? lo + 50;
+  const top = 26, bot = 360, y = v => bot - (v - lo) / (hi - lo) * (bot - top);
+  let t = '';
+  if(opts.bands){
+    const band = (a,b,c) => { const ya = y(Math.min(Math.max(a,lo),hi)), yb = y(Math.min(Math.max(b,lo),hi)); return yb < ya ? `<rect x="92" y="${yb}" width="70" height="${ya-yb}" fill="${c}" opacity=".18"/>` : ''; };
+    t += band(lo, 32, 'var(--cold)') + band(32, 50, 'var(--mild)') + band(50, hi, 'var(--hot)');
+    t += `<text x="168" y="${(y(lo)+y(32))/2+5}" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="15" fill="var(--cold)">Heavy coat</text>`;
+    t += `<text x="168" y="${(y(32)+y(50))/2+5}" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="15" fill="var(--mild)">Fleece</text>`;
+    t += `<text x="168" y="${(y(50)+y(hi))/2+5}" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="15" fill="var(--hot)">Windbreaker</text>`;
+  }
+  for(let v = lo; v <= hi; v++){
+    const major = v % 10 === 0, mid = v % 5 === 0;
+    t += `<line x1="92" x2="${major ? 122 : mid ? 112 : 104}" y1="${y(v)}" y2="${y(v)}" stroke="var(--ink)" stroke-width="${major ? 2.2 : 1.2}"/>`;
+    if(major) t += `<text x="84" y="${y(v)+6}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--ink)">${v}</text>`;
+  }
+  const show = opts.show !== false;
+  const marks = (opts.marks || []).map(m => `<line x1="40" x2="162" y1="${y(m.v)}" y2="${y(m.v)}" stroke="${m.c}" stroke-width="3" stroke-dasharray="6 4"/><text x="38" y="${y(m.v)+5}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="16" fill="${m.c}">${esc(m.label)}</text>`).join('');
+  return `<svg viewBox="0 0 ${opts.bands ? 250 : 200} 410" width="${opts.bands ? 250 : 200}" height="410" role="img" aria-label="Thermometer in degrees Fahrenheit">
+    <rect x="60" y="14" width="30" height="360" rx="15" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>
+    <circle cx="75" cy="384" r="20" fill="var(--blaze)" stroke="var(--ink)" stroke-width="2.5"/>
+    ${show ? `<rect x="69" y="${y(f)}" width="12" height="${380 - y(f)}" fill="var(--blaze)"/>` : ''}
+    ${t}${marks}
+    <text x="75" y="10" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--muted)">°F</text></svg>`;
+}
+function scaleHTML(v, unit){
+  return `<div class="scale"><div class="pan"></div><div class="lcd">${v === null ? '- - -' : fmt(v)}<small>${unit}</small></div></div>`;
+}
+function balanceSVG(g){
+  const ang = g > LIMIT ? -8 : g < LIMIT ? 8 : 0;
+  return `<svg viewBox="0 0 360 200" width="360" height="200" role="img" aria-label="Balance: pack compared with a 1-liter bottle">
+    <path d="M180 70 L160 190 H200 Z" fill="var(--muted)"/>
+    <g transform="rotate(${ang} 180 70)">
+      <rect x="40" y="64" width="280" height="10" rx="5" fill="var(--ink)"/>
+      <line x1="70" y1="74" x2="70" y2="110" stroke="var(--ink)" stroke-width="2"/><line x1="290" y1="74" x2="290" y2="110" stroke="var(--ink)" stroke-width="2"/>
+      <rect x="35" y="110" width="70" height="8" rx="3" fill="var(--ink)"/><rect x="255" y="110" width="70" height="8" rx="3" fill="var(--ink)"/>
+      <path d="M45 110 Q45 70 70 66 Q95 70 95 110 Z" fill="var(--blaze)"/>
+      <rect x="276" y="68" width="28" height="42" rx="6" fill="var(--sky)" opacity=".8"/><rect x="284" y="60" width="12" height="9" fill="var(--sky)"/>
+    </g>
+    <text x="70" y="160" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--ink)">Pack</text>
+    <text x="290" y="160" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--ink)">1 L bottle</text>
+    <text x="290" y="180" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="600" font-size="15" fill="var(--muted)">about 1,000 g</text></svg>`;
+}
+function packBar(items, opts = {}){
+  const scaleMax = Math.max(1400, Math.ceil(packTotal(items) / 200) * 200);
+  const pct = g => g / scaleMax * 100;
+  const segs = items.map(([n,g],i) => `<div class="seg-i" style="width:${pct(g)}%;background:${ITEM_COLORS[i % ITEM_COLORS.length]}" title="${esc(n)}">${opts.labels === false ? '' : esc(n)}</div>`).join('');
+  let ax = '';
+  for(let v = 0; v <= scaleMax; v += 200) ax += `<span class="${v === LIMIT ? 'lim' : ''}" style="left:${pct(v)}%">${v === LIMIT ? '1,000 g limit' : fmt(v)}</span>`;
+  return `<div class="pack"><div class="bar"><div class="segs">${segs}</div><div class="limit" style="left:${pct(LIMIT)}%"></div></div><div class="axis">${ax}</div></div>`;
+}
+const clipSVG = `<svg viewBox="0 0 180 96" aria-hidden="true"><path d="M60 70 V28 a14 14 0 0 1 28 0 V66 a9 9 0 0 1 -18 0 V34" fill="none" stroke="var(--muted)" stroke-width="5" stroke-linecap="round"/></svg>`;
+const bottleSVG = c => `<svg viewBox="0 0 180 96" aria-hidden="true"><rect x="70" y="8" width="40" height="10" rx="3" fill="var(--ink)"/><path d="M74 18 h32 v10 q14 6 14 20 v40 q0 6 -6 6 h-48 q-6 0 -6 -6 v-40 q0 -14 14 -20 z" fill="${c}" opacity=".7" stroke="var(--ink)" stroke-width="2"/></svg>`;
+const stickSVG = `<svg viewBox="0 0 180 96" aria-hidden="true"><rect x="6" y="38" width="168" height="20" rx="3" fill="var(--warm-soft)" stroke="var(--ink)" stroke-width="2"/>${Array.from({length:11},(_,i)=>`<line x1="${6+i*16.8}" x2="${6+i*16.8}" y1="38" y2="${i%5===0?54:48}" stroke="var(--ink)" stroke-width="1.5"/>`).join('')}</svg>`;
+
+/* ---------- Class 1 · Part 1 Benchmarks ---------- */
+const BENCH = [
+  {id:'clip', name:'Paper clip', pic:clipSVG, fields:[{n:'g', pre:'about', suf:'g'}], ans:{g:1},
+    why:'A small paper clip has a mass of about <b>1 gram</b>. It’s your gram friend: very light things are measured in grams.'},
+  {id:'bm', name:'1-liter bottle of water (mass)', pic:bottleSVG('var(--sky)'), fields:[{n:'kg', pre:'about', suf:'kg ='},{n:'g', suf:'g'}], ans:{kg:1, g:1000},
+    why:'1 liter of water has a mass of about <b>1 kilogram</b>, and 1 kg = <b>1,000 g</b>. That’s 1,000 paper clips in one bottle!'},
+  {id:'bv', name:'1-liter bottle of water (holds)', pic:bottleSVG('var(--sky-soft)'), fields:[{n:'ml', suf:'mL'}], ans:{ml:1000},
+    why:'The bottle holds 1 liter, and 1 L = <b>1,000 mL</b>. A milliliter is tiny: about 20 drops.'},
+  {id:'ms', name:'Meter stick', pic:stickSVG, fields:[{n:'cm', pre:'1 m =', suf:'cm'}], ans:{cm:100},
+    why:'Count the centimeter marks on a meter stick: 1 m = <b>100 cm</b>.'}
+];
+function part1(){
+  return `<section class="bench"><div><h2>Part 1 · Benchmarks</h2><p class="lead">Hold each one. These are your measuring friends. Fill in about how much, then check.</p></div>
+  <div class="grid4">${BENCH.map(b => {
+    const key = 'b-' + b.id;
+    TASKS[key] = {fields:b.fields, check:v => {
+      const wrong = b.fields.filter(f => v[f.n] !== b.ans[f.n]);
+      if(!wrong.length) return ok(b.why);
+      if(b.id === 'bm' && v.kg === 1 && v.g !== 1000) return no(`1 kg is right. Now change kilograms to grams: 1 kg is the same as how many grams? Think “kilo” = 1,000.`);
+      if(b.id === 'bm' && v.kg !== 1) return no(`Lift the bottle. It feels like about 1 kilogram, the benchmark for kilograms. Try again.`);
+      if(b.id === 'clip') return no(`A paper clip is very light. ${v.g > 1 ? `${fmt(v.g)} g would be like ${fmt(v.g)} clips together.` : ''} Think of the lightest unit friend we have. Try again.`);
+      if(b.id === 'bv') return no(`“Milli” means 1,000 of them make one whole liter. How many mL fill 1 L?`);
+      return no(`Look closely at a meter stick and count the centimeter marks by tens: 10, 20, 30… How many to the end?`);
+    }};
+    const r = S.t[key];
+    return `<div class="bm ${r && r.ok ? 'ok' : ''}">${b.pic}<h3>${esc(b.name)}</h3><div class="fields">${b.fields.map(f => fieldHTML(key, f)).join('')}</div>
+      <div class="row"><button class="secondary" type="button" data-check="${key}">Check</button>${r && r.ok ? '<span class="done-chip">✓</span>' : ''}</div>
+      ${r ? `<p class="fb ${r.ok ? 'good' : 'try'}">${r.msg}</p>` : ''}</div>`;
+  }).join('')}</div></section>`;
+}
+
+/* ---------- Class 1 · Part 2 Gear Check Stations ---------- */
+const STATIONS = {
+  mass:{label:'Mass', items:MASS_ITEMS},
+  liquid:{label:'Liquid volume', items:LIQUID_ITEMS},
+  length:{label:'Length', items:LENGTH_ITEMS},
+  temp:{label:'Temperature', items:TEMP_ITEMS}
+};
+function recKey(st = S.st.station, i = S.st.item, mode = S.st.mode){ return `${mode}-${st}-${i}`; }
+function rec(st, i, mode){ const k = recKey(st, i, mode); return S.st.rec[k] || (S.st.rec[k] = {unit:null, unitMsg:null, est:'', locked:false, shown:false, read:'', readOk:false, readMsg:null, diff:'', diffOk:false, diffMsg:null, name:'', own:''}); }
+function itemUnit(st, it, r){
+  if(st === 'mass') return S.st.mode === 'sim' ? it.unit : (r.unit || 'g');
+  if(st === 'liquid') return 'mL';
+  if(st === 'length') return it.unit;
+  return '°F';
+}
+function truth(st, it, r){
+  if(S.st.mode === 'own') return num(r.own);
+  if(st === 'mass') return massIn(it, it.unit);
+  if(st === 'liquid') return it.ml;
+  if(st === 'length') return it.v;
+  return it.f;
+}
+function itemName(st, i){ const it = STATIONS[st].items[i]; const r = rec(st, i); return (S.st.mode === 'own' && st === 'mass') ? (r.name.trim() || `Item ${i+1}`) : it.name; }
+function measuredOK(st, r){ return S.st.mode === 'own' ? !Number.isNaN(num(r.own)) && r.readOk : (st === 'mass' ? r.shown : r.readOk); }
+
+function part2(){
+  const st = S.st.station, items = STATIONS[st].items;
+  if(S.st.item >= items.length) S.st.item = 0;
+  const i = S.st.item, it = items[i], r = rec(st, i), sim = S.st.mode === 'sim', unit = itemUnit(st, it, r);
+  const noEst = st === 'temp';
+  // step states
+  const unitDone = st !== 'mass' || !sim || r.unit === it.unit;
+  const estDone = noEst || r.locked;
+  const measDone = measuredOK(st, r);
+  const m = truth(st, it, r);
+
+  let steps = '';
+  let n = 1;
+  if(st === 'mass'){
+    const nameField = !sim ? `<label class="fld">Item <input class="wide" id="own-name-${i}" data-rec="name" value="${esc(r.name)}" placeholder="what are you weighing?"></label>` : '';
+    steps += `<div class="step ${unitDone && (sim ? r.unit : true) ? 'ok' : 'now'}"><span class="n">${n++}</span><div>${nameField}<p>Pick the unit that fits: g or kg.</p>
+      <div class="seg" role="group">${['g','kg'].map(u => `<button type="button" data-unit="${u}" aria-pressed="${(sim ? r.unit : unit) === u}">${u === 'g' ? 'grams (g)' : 'kilograms (kg)'}</button>`).join('')}</div>
+      ${r.unitMsg ? `<p class="fb ${r.unitMsg.ok ? 'good' : 'try'}">${r.unitMsg.msg}</p>` : ''}</div></div>`;
+  }
+  if(!noEst){
+    const can = unitDone;
+    steps += `<div class="step ${r.locked ? 'ok' : can ? 'now' : 'wait'}"><span class="n">${n++}</span><div><p>Estimate first. Use a benchmark to help.</p>
+      <div class="fields"><label class="fld">My estimate <input id="est-${st}-${i}" data-rec="est" inputmode="numeric" value="${esc(r.est)}" ${r.locked || !can ? 'disabled' : ''}> ${unit}</label>
+      ${r.locked ? '<span class="done-chip">✓ Locked in</span>' : `<button class="primary" type="button" data-act="lock" ${can ? '' : 'disabled'}>Lock it in</button>`}</div>
+      ${r.estMsg ? `<p class="fb try">${r.estMsg}</p>` : ''}</div></div>`;
+  }
+  // measure step
+  const canMeasure = unitDone && estDone;
+  if(sim && st === 'mass'){
+    steps += `<div class="step ${r.shown ? 'ok' : canMeasure ? 'now' : 'wait'}"><span class="n">${n++}</span><div><p>Measure second. Put it on the scale.</p>
+      <div class="row"><button class="primary" type="button" data-act="show" ${canMeasure && !r.shown ? '' : 'disabled'}>Weigh it</button>${r.shown ? `<span class="done-chip">✓ Scale reads ${fmt(m)} ${unit}</span>` : ''}</div></div></div>`;
+  } else {
+    const prompt = sim
+      ? (st === 'liquid' ? 'Pour it into the measuring cylinder. Read the water line.' : st === 'temp' ? 'Read the thermometer to the nearest degree.' : it.unit === 'm' ? 'Lay out meter sticks. How many meters long?' : 'Line the peg up with 0. Read where its tip lands.')
+      : 'Measure it for real. Type what you measured.';
+    const showBtn = sim && !r.shown ? `<button class="secondary" type="button" data-act="show" ${canMeasure ? '' : 'disabled'}>${st === 'liquid' ? 'Pour it in' : st === 'temp' ? 'Dip the thermometer' : 'Measure it'}</button>` : '';
+    steps += `<div class="step ${r.readOk ? 'ok' : canMeasure ? 'now' : 'wait'}"><span class="n">${n++}</span><div><p>${prompt}</p>
+      ${showBtn}
+      ${(!sim || r.shown) ? `<div class="fields"><label class="fld">Measured <input id="read-${st}-${i}" data-rec="${sim ? 'read' : 'own'}" inputmode="numeric" value="${esc(sim ? r.read : r.own)}" ${r.readOk || !canMeasure ? 'disabled' : ''}> ${unit}</label>
+        ${r.readOk ? '<span class="done-chip">✓</span>' : `<button class="primary" type="button" data-act="read" ${canMeasure ? '' : 'disabled'}>${sim ? 'Check my reading' : 'Record it'}</button>`}</div>` : ''}
+      ${r.readMsg ? `<p class="fb ${r.readMsg.ok ? 'good' : 'try'}">${r.readMsg.msg}</p>` : ''}</div></div>`;
+  }
+  if(!noEst){
+    const can = measDone;
+    steps += `<div class="step ${r.diffOk ? 'ok' : can ? 'now' : 'wait'}"><span class="n">${n++}</span><div><p>Difference = how far off your estimate was.</p>
+      <div class="fields"><label class="fld">Difference <input id="diff-${st}-${i}" data-rec="diff" inputmode="numeric" value="${esc(r.diff)}" ${r.diffOk || !can ? 'disabled' : ''}> ${unit}</label>
+      ${r.diffOk ? '<span class="done-chip">✓</span>' : `<button class="primary" type="button" data-act="diff" ${can ? '' : 'disabled'}>Check</button>`}</div>
+      ${r.diffMsg ? `<p class="fb ${r.diffMsg.ok ? 'good' : 'try'}">${r.diffMsg.msg}</p>` : ''}</div></div>`;
+  }
+
+  // instrument
+  let inst = '';
+  const reveal = sim && r.shown;
+  if(!sim) inst = `<p class="cap">Our own measurements: use the real scale, measuring cup, meter stick and thermometer at each station. The app checks the difference math.</p>`;
+  else if(st === 'mass') inst = scaleHTML(r.shown ? m : null, unit) + `<p class="cap">${esc(it.name)} ${r.shown ? 'on the scale' : 'waiting to be weighed'}</p>`;
+  else if(st === 'liquid') inst = cylinderSVG(it.ml, reveal) + `<p class="cap">${reveal ? `Water from the ${esc(it.name.toLowerCase())}. Small lines: every 50 mL.` : 'Empty measuring cylinder'}</p>`;
+  else if(st === 'length') inst = it.unit === 'cm' ? `<div class="tablewrap" style="width:100%">${rulerSVG(it.v, reveal)}</div><p class="cap">Small lines: every 1 cm.</p>` : sticksHTML(it.v, reveal);
+  else inst = thermSVG(it.f, {show:reveal}) + `<p class="cap">${esc(it.name)}. Small lines: every 1°F.</p>`;
+
+  return `<section class="bench"><div><h2>Part 2 · Gear Check Stations</h2><p class="lead">Estimate before you measure. Difference = how far off your estimate was.</p></div>
+    <div class="row"><div class="seg" role="group" aria-label="Station">${Object.entries(STATIONS).map(([k,s]) => `<button type="button" data-station="${k}" aria-pressed="${st===k}">${s.label}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="Data">${[['sim','Practice stations'],['own','Our own measurements']].map(([k,l]) => `<button type="button" data-mode="${k}" aria-pressed="${S.st.mode===k}">${l}</button>`).join('')}</div></div>
+    <div class="items">${items.map((x,j) => { const rr = rec(st, j); const done = noEst ? rr.readOk : rr.diffOk; return `<button type="button" data-item="${j}" aria-pressed="${j===i}">${done ? '<span class="tick">✓</span>' : ''}${esc(itemName(st, j))}</button>`; }).join('')}</div>
+    <div class="grid2"><div class="instrument">${inst}</div><div class="steps">${steps}</div></div>
+  </section>
+  ${logBench()}`;
+}
+function logBench(){
+  let rows = '', any = false;
+  const best = {};
+  for(const [k, s] of Object.entries(STATIONS)){
+    if(k === 'temp') continue;
+    let minD = Infinity;
+    s.items.forEach((it, j) => { const r = rec(k, j); if(r.diffOk) minD = Math.min(minD, diffBase(k, it, r)); });
+    best[k] = minD;
+  }
+  for(const [k, s] of Object.entries(STATIONS)){
+    rows += `<tr class="sec"><td colspan="5">${s.label}</td></tr>`;
+    s.items.forEach((it, j) => {
+      const r = rec(k, j), unit = itemUnit(k, it, r), meas = measuredOK(k, r) ? truth(k, it, r) : null;
+      if(r.locked || meas !== null) any = true;
+      const isBest = S.st.best && k !== 'temp' && r.diffOk && diffBase(k, it, r) === best[k];
+      rows += `<tr class="${isBest ? 'best' : ''}"><td>${esc(itemName(k, j))}${isBest ? ' ★' : ''}</td><td>${unit}</td><td class="n">${k === 'temp' ? '—' : r.locked ? fmt(num(r.est)) : ''}</td><td class="n">${meas !== null ? fmt(meas) : ''}</td><td class="n">${r.diffOk ? fmt(num(r.diff)) : ''}</td></tr>`;
+    });
+  }
+  const BM = {clip:['Paper clip','The paper clip is about 1 g. Light gear like a granola bar is measured in grams: picture how many clips it would take.'],
+    bottle:['1-liter bottle','The bottle is about 1 kg and holds 1,000 mL. Is the gear heavier or lighter than the bottle? Does the mug hold more or less than the bottle?'],
+    stick:['Meter stick','The meter stick is 1 m = 100 cm. How many sticks long is the rope? Is the peg more or less than a quarter of a stick?']};
+  return `<section class="bench"><div><h3>Our gear check log</h3><p class="mini">Fills in as you finish each station.</p></div>
+    <div class="tablewrap"><table class="log"><thead><tr><th>Item</th><th>Unit</th><th>Estimate</th><th>Measured</th><th>Difference</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="row"><button class="secondary" type="button" data-act="best" ${any ? '' : 'disabled'}>Which estimate was closest?</button></div>
+    ${S.st.best ? `<p class="fb note">${closestMsg(best)}</p>` : ''}
+    <p class="q" style="margin:0">Which benchmark helped?</p>
+    <div class="chips">${Object.entries(BM).map(([k,[l]]) => `<button type="button" data-bm="${k}" aria-pressed="${S.st.bm===k}">${l}</button>`).join('')}</div>
+    ${S.st.bm ? `<p class="fb note">${BM[S.st.bm][1]}</p>` : ''}</section>`;
+}
+// Compare differences in one base unit: grams for mass, centimeters for length.
+function diffBase(k, it, r){ const d = num(r.diff), u = itemUnit(k, it, r); return u === 'kg' ? d * 1000 : u === 'm' ? d * 100 : d; }
+function closestMsg(best){
+  const parts = [];
+  for(const k of ['mass','liquid','length']){
+    if(best[k] === Infinity) continue;
+    const hits = STATIONS[k].items.map((it,j) => [it,j]).filter(([it,j]) => { const r = rec(k,j); return r.diffOk && diffBase(k, it, r) === best[k]; });
+    const [it0, j0] = hits[0], r0 = rec(k, j0);
+    parts.push(`<b>${STATIONS[k].label}:</b> ${esc(hits.map(([it,j]) => itemName(k,j)).join(' and '))} (off by ${fmt(num(r0.diff))} ${itemUnit(k, it0, r0)})`);
+  }
+  if(!parts.length) return 'Finish the difference step at a station first.';
+  return 'Closest in each station (★ in the log): ' + parts.join('; ') + '. Inside a station we compare in the same unit: being off by 1 kg is the same as being off by 1,000 g!';
+}
+
+function stationAct(act){
+  const st = S.st.station, i = S.st.item, it = STATIONS[st].items[i], r = rec(st, i), sim = S.st.mode === 'sim';
+  const unit = itemUnit(st, it, r);
+  if(act === 'lock'){
+    const e = num(r.est);
+    if(Number.isNaN(e) || e <= 0){ r.estMsg = 'Type a whole number for your estimate first. Any honest guess is fine.'; }
+    else { r.locked = true; r.estMsg = null; }
+  }
+  if(act === 'show') r.shown = true;
+  if(act === 'read'){
+    const g = num(sim ? r.read : r.own);
+    if(Number.isNaN(g)) r.readMsg = no('Type a whole number, like 250.');
+    else if(!sim){ r.readOk = true; r.readMsg = ok(`Recorded: ${fmt(g)} ${unit}.`); }
+    else if(g === truth(st, it, r)){ r.readOk = true; r.readMsg = ok(`Yes, ${fmt(g)} ${unit}.`); }
+    else r.readMsg = no(readHint(st, it, g));
+  }
+  if(act === 'diff'){
+    const d = num(r.diff), e = num(r.est), m = truth(st, it, r);
+    const big = Math.max(e, m), small = Math.min(e, m);
+    if(Number.isNaN(d)) r.diffMsg = no('Type a whole number.');
+    else if(d === big - small){ r.diffOk = true; r.diffMsg = ok(big === small ? `Exact! Your estimate matched: difference 0.` : `${fmt(big)} − ${fmt(small)} = ${fmt(d)} ${unit}. Your estimate was ${e > m ? 'too high' : 'too low'} by ${fmt(d)}.`); }
+    else r.diffMsg = no(`Difference means how far apart the two numbers are. Your estimate was ${fmt(e)} and you measured ${fmt(m)}. Subtract the smaller from the bigger: ${fmt(big)} − ${fmt(small)} = ?`);
+  }
+  render();
+}
+function readHint(st, it, g){
+  const m = st === 'liquid' ? it.ml : st === 'temp' ? it.f : it.v;
+  const dir = m > g ? 'higher' : 'lower';
+  if(st === 'liquid'){ const a = Math.floor(m/100)*100; return `You read ${fmt(g)} mL. Look again: the water line is ${dir} than ${fmt(g)}. ${m % 100 ? `It sits between ${a} and ${a+100}. Each small line is 50 mL.` : 'It sits right on a numbered line.'}`; }
+  if(st === 'temp'){ const a = Math.floor(m/10)*10; return `You read ${g}°F. The top of the red line is ${dir} than that. ${m % 10 ? `It’s between ${a} and ${a+10}. Count the small lines up from ${a}: each one is 1 degree.` : 'It sits right on a numbered line.'}`; }
+  if(it.unit === 'cm'){ const a = Math.floor(m/5)*5; return `You read ${g} cm. The tip is ${dir} than that. It’s between ${a} and ${a+5}. Count the small lines from ${a}: each is 1 cm.`; }
+  return `You counted ${g}. Count the meter sticks again by fives: each row holds 5 sticks.`;
+}
+
+/* ---------- Class 2 · Part 3 Practice Pack ---------- */
+function practiceItems(){
+  const a = PRACTICE.slice();
+  if(isOk('p2')) a.push(['Heavy coat', COATS.heavy.g]);
+  return a;
+}
+function part3(){
+  const water = isOk('p5') || S.t.p5;
+  const t1 = taskHTML('p1', {no:'1', q:'Is the pack under 1,000 g? By how much?',
+    fields:[{n:'total', pre:'Total', suf:'g'},{n:'side', kind:'choice', opts:[['under','Under'],['over','Over']]},{n:'by', pre:'by', suf:'g'}],
+    check:v => {
+      if(v.total !== PRACTICE_TOTAL) return no(`Add in steps. 50 + 150 = 200. Then 200 + 300 = 500. Then 500 + 200 = 700. Now add the first-aid kit’s 250 g. What’s the total?`);
+      if(v.side !== 'under') return no(`The total is ${fmt(PRACTICE_TOTAL)} g. Is ${fmt(PRACTICE_TOTAL)} more or less than 1,000? Look where the pack stops on the bar.`);
+      if(v.by !== LIMIT - PRACTICE_TOTAL) return no(`Count up from ${fmt(PRACTICE_TOTAL)} to 1,000. How many grams is that jump?`);
+      return ok(`${fmt(PRACTICE_TOTAL)} g. Under the limit by 1,000 − ${fmt(PRACTICE_TOTAL)} = <b>${LIMIT - PRACTICE_TOTAL} g</b>. Not much room left!`);
+    }});
+  const t2 = `<div class="task ${isOk('p2') ? 'ok' : ''}"><p class="q"><span class="num">2</span>The morning low is <b>${PRACTICE_LOW}°F</b>. Use the coat rule. Which coat goes in?</p>
+    <div class="grid2"><div class="instrument" style="min-height:0">${thermSVG(PRACTICE_LOW, {lo:20, hi:60, bands:true, marks: isOk('p4') || S.t.p4 ? [{v:PRACTICE_HIGH, c:'var(--hot)', label:'54'}] : []})}</div>
+      <div class="steps"><div class="tablewrap"><table class="log" style="min-width:0"><thead><tr><th>Morning low</th><th>Coat</th><th>Mass</th></tr></thead><tbody>
+        ${Object.values(COATS).map(c => `<tr><td>${c.band}</td><td>${c.name}</td><td class="n">${c.g} g</td></tr>`).join('')}</tbody></table></div>
+        <div class="fields">${fieldHTML('p2', {n:'coat', kind:'choice', opts:Object.entries(COATS).map(([k,c]) => [k, c.name])})}<button class="primary" type="button" data-check="p2">Check</button></div>
+        ${S.t.p2 ? `<p class="fb ${S.t.p2.ok ? 'good' : 'try'}">${S.t.p2.msg}</p>` : ''}</div></div></div>`;
+  TASKS.p2 = {fields:[{n:'coat', kind:'choice'}], check:v => {
+    const right = coatFor(PRACTICE_LOW);
+    if(v.coat === right) return ok(`${PRACTICE_LOW} is below 32, so the <b>heavy coat</b> (${COATS.heavy.g} g) goes in. It’s been added to the pack bar.`);
+    return no(`The ${COATS[v.coat].name.toLowerCase()} is for ${COATS[v.coat].band}. Find ${PRACTICE_LOW} on the thermometer. Is ${PRACTICE_LOW} below 32, between 32 and 50, or above 50?`);
+  }};
+  const newTotal = PRACTICE_TOTAL + COATS.heavy.g;
+  const t3 = isOk('p2') ? taskHTML('p3', {no:'3', q:'Add the coat. New total? Over or under the limit? By how much?',
+    fields:[{n:'total', pre:'New total', suf:'g'},{n:'side', kind:'choice', opts:[['under','Under'],['over','Over']]},{n:'by', pre:'by', suf:'g'}],
+    check:v => {
+      if(v.total !== newTotal) return no(`Start with the pack total, ${fmt(PRACTICE_TOTAL)} g, and add the heavy coat’s ${COATS.heavy.g} g.`);
+      if(v.side !== 'over') return no(`${fmt(newTotal)} g. Is that more or less than 1,000 g? Look at the dashed limit line on the bar.`);
+      if(v.by !== newTotal - LIMIT) return no(`How far past 1,000 is ${fmt(newTotal)}? Subtract: ${fmt(newTotal)} − 1,000.`);
+      return ok(`${fmt(newTotal)} g is <b>${newTotal - LIMIT} g over</b>. Something has to come out. Which item weighs at least ${newTotal - LIMIT} g?`);
+    }}) : `<div class="task"><p class="q"><span class="num">3</span>Add the coat. <span class="mini">Pick the coat in question 2 first.</span></p></div>`;
+  const diff = PRACTICE_HIGH - PRACTICE_LOW;
+  const t4 = taskHTML('p4', {no:'4', q:`The afternoon high is <b>${PRACTICE_HIGH}°F</b>. How many degrees warmer than the morning?`,
+    fields:[{n:'d', suf:'degrees'}],
+    check:v => v.d === diff ? ok(`${PRACTICE_HIGH} − ${PRACTICE_LOW} = <b>${diff} degrees</b> warmer. Counting up works too: 28 → 30 is 2, 30 → 50 is 20, 50 → 54 is 4. 2 + 20 + 4 = 26.`)
+      : no(`Count up on the thermometer from ${PRACTICE_LOW} to ${PRACTICE_HIGH}. Jump to a friendly number first: 28 → 30 → 50 → 54. How big is each jump? Add them.`),
+    after:r => r ? jumpLine() : ''});
+  const L = WATER_PER_DAY * 4 * 3;
+  const t5 = taskHTML('p5', {no:'5', q:'<b>Water.</b> 4 explorers each drink 2 L a day for 3 days. Total?',
+    fields:[{n:'L', suf:'L'}],
+    check:v => v.L === L ? ok(`2 L × 4 explorers = 8 L a day. 8 L × 3 days = <b>${L} L</b>.`)
+      : no(`One day first: 4 explorers × 2 L = 8 L. ${v.L === 8 ? 'That’s just one day. ' : ''}Now how much for 3 days? Count the jugs in the picture.`),
+    after:r => r ? waterGrid(4, 3) : ''});
+  const t5b = taskHTML('p5b', {no:'', q:'One explorer’s 2 L for one day fills how many 500 mL bottles?',
+    fields:[{n:'b', suf:'bottles'}],
+    check:v => v.b === bottlesFor(2) ? ok(`2 L = 2,000 mL. 500 + 500 + 500 + 500 = 2,000, so <b>4 bottles</b>.`)
+      : no(`Change liters to milliliters first: 2 L = 2,000 mL. How many 500s make 2,000? (Two 500s make 1,000.)`),
+    after:r => r ? bottleSplit() : ''});
+  const total = PRACTICE_ROPES * PRACTICE_ROPE_M, extra = total - PRACTICE_CLIFF;
+  const t6 = taskHTML('p6', {no:'6', q:`<b>Rope.</b> 3 ropes, each 20 m. The cliff is 55 m.`,
+    fields:[{n:'t', pre:'Total', suf:'m'},{n:'e', kind:'choice', pre:'Enough?', opts:[['yes','Yes'],['no','No']]},{n:'x', pre:'Extra', suf:'m'}],
+    check:v => {
+      if(v.t !== total) return no(`3 ropes × 20 m: count by 20s three times. 20, 40, …?`);
+      if(v.e !== 'yes') return no(`You have ${total} m of rope and the cliff is 55 m. Which is longer? Compare the bars.`);
+      if(v.x !== extra) return no(`Extra = rope − cliff = ${total} − 55. Count up from 55 to ${total}.`);
+      return ok(`${total} m of rope reaches the 55 m cliff with <b>${extra} m extra</b>.`);
+    },
+    after:r => r ? ropeBars(PRACTICE_ROPES, PRACTICE_ROPE_M, PRACTICE_CLIFF) : ''});
+  return `<section class="bench"><div><h2>Part 3 · Practice Pack</h2><p class="lead">Class 2 warm-up. One explorer’s pack can hold <b>1,000 g</b> of gear.</p></div>
+    <div class="grid2"><div class="tablewrap"><table class="log" style="min-width:0"><thead><tr><th>Gear</th><th>Mass</th></tr></thead><tbody>
+      ${PRACTICE.map(([n,g]) => `<tr><td>${n}</td><td class="n">${g} g</td></tr>`).join('')}
+      ${isOk('p2') ? `<tr><td>Heavy coat</td><td class="n">${COATS.heavy.g} g</td></tr>` : ''}
+      <tr><td><b>Total</b></td><td class="n">${isOk(isOk('p2') ? 'p3' : 'p1') ? fmt(packTotal(practiceItems())) + ' g' : '______ g'}</td></tr></tbody></table></div>
+      <div class="pack">${packBar(practiceItems())}<p class="mini">The bar is drawn to scale. The dashed line is the 1,000 g limit.</p></div></div>
+    ${t1}${t2}${t3}${t4}${t5}${t5b}${t6}</section>`;
+}
+function jumpLine(){
+  const lo = 26, hi = 56, x = v => 20 + (v - lo) / (hi - lo) * 640;
+  const jumps = [[28,30],[30,50],[50,54]];
+  let t = '';
+  for(let v = lo; v <= hi; v += 2) t += `<line x1="${x(v)}" x2="${x(v)}" y1="92" y2="${v % 10 === 0 ? 104 : 98}" stroke="var(--ink)" stroke-width="1.5"/>${v % 10 === 0 || v === 28 || v === 54 ? `<text x="${x(v)}" y="124" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="17" fill="var(--ink)">${v}</text>` : ''}`;
+  jumps.forEach(([a,b]) => { const m = (x(a)+x(b))/2, h = 20 + (b-a)*2.4; t += `<path d="M${x(a)} 90 Q${m} ${90-h*1.6} ${x(b)} 90" fill="none" stroke="var(--blaze)" stroke-width="3"/><text x="${m}" y="${86 - h*.8}" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="18" fill="var(--blaze)">${isOk('p4') ? '+' + (b-a) : '?'}</text>`; });
+  return `<div class="tablewrap"><svg viewBox="0 0 680 132" width="680" height="132" role="img" aria-label="Number line jumps from 28 to 54"><line x1="20" x2="660" y1="92" y2="92" stroke="var(--ink)" stroke-width="2"/>${t}</svg></div>`;
+}
+function waterGrid(ex, days){
+  let h = '<div style="display:flex;flex-direction:column;gap:6px">';
+  for(let d = 1; d <= days; d++){
+    h += `<div class="row" style="gap:6px"><span class="fld" style="min-width:64px">Day ${d}</span>`;
+    for(let e = 0; e < ex; e++) h += `<span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:40px;border-radius:8px;background:var(--sky-soft);border:2px solid var(--sky);font-family:var(--label);font-weight:700">2 L</span>`;
+    h += '</div>';
+  }
+  return h + `</div><p class="mini">Each row is one day. Each jug is one explorer’s 2 L.</p>`;
+}
+function bottleSplit(){
+  let h = '<div class="row" style="gap:4px">';
+  for(let i = 0; i < 4; i++) h += `<span style="display:inline-flex;align-items:center;justify-content:center;width:90px;height:44px;border-radius:8px;background:var(--sky-soft);border:2px solid var(--sky);font-family:var(--label);font-weight:700">500 mL</span>`;
+  return h + `<span class="fld">= 2,000 mL = 2 L</span></div>`;
+}
+function ropeBars(n, len, cliff){
+  const tot = n * len, max = Math.max(tot, cliff) * 1.05, pct = v => v / max * 100;
+  let ropes = '';
+  for(let i = 0; i < n; i++) ropes += `<div style="width:${pct(len)}%;height:30px;background:${i % 2 ? 'var(--warm)' : 'var(--hot)'};color:#fff;font-family:var(--label);font-weight:700;display:flex;align-items:center;justify-content:center;border-right:2px solid var(--card)">${len} m</div>`;
+  return `<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex">${ropes}</div>
+    <div style="width:${pct(cliff)}%;height:30px;background:var(--muted);color:var(--card);font-family:var(--label);font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:4px">Cliff ${cliff} m</div></div>`;
+}
+
+/* ---------- Class 2 · Part 4 Manifest ---------- */
+function card(){ return CARDS.find(c => c.id === S.man.card) || null; }
+function manItems(){
+  const c = card(); const a = S.man.gear.map(id => { const g = CATALOG.find(x => x.id === id); return [g.name, g.g]; });
+  if(c && isOk('m-coat')) a.push([COATS[coatFor(c.low)].name, COATS[coatFor(c.low)].g]);
+  return a;
+}
+function part4(){
+  const c = card();
+  const cards = `<div class="cards">${CARDS.map(x => `<button class="xcard" type="button" data-card="${x.id}" aria-pressed="${S.man.card===x.id}">
+    <span class="dest">${x.dest}</span><dl><dt>Days</dt><dd>${x.days}</dd><dt>Explorers</dt><dd>${x.explorers}</dd><dt>Morning low</dt><dd>${x.low}°F</dd><dt>Afternoon high</dt><dd>${x.high}°F</dd><dt>Cliff</dt><dd>${x.cliff} m · ropes ${x.rope} m each</dd></dl></button>`).join('')}</div>`;
+  if(!c) return `<section class="bench"><div><h2>Part 4 · Our Expedition Manifest</h2><p class="lead">Class 2. Pick your team’s expedition card, then fill in every line.</p></div>${cards}</section>`;
+  const coatTask = `<div class="task ${isOk('m-coat') ? 'ok' : ''}"><p class="q"><span class="num">A</span>Morning low at ${c.dest}: <b>${c.low}°F</b>. Which coat goes in each pack?</p>
+    <div class="fields">${fieldHTML('m-coat', {n:'coat', kind:'choice', opts:Object.entries(COATS).map(([k,x]) => [k, `${x.name} (${x.band})`])})}<button class="primary" type="button" data-check="m-coat">Check</button></div>
+    ${S.t['m-coat'] ? `<p class="fb ${S.t['m-coat'].ok ? 'good' : 'try'}">${S.t['m-coat'].msg}</p>` : ''}</div>`;
+  TASKS['m-coat'] = {fields:[{n:'coat', kind:'choice'}], check:v => {
+    const right = coatFor(c.low), x = COATS[v.coat];
+    if(v.coat === right) return ok(`${c.low}°F is ${right === 'heavy' ? 'below 32' : right === 'fleece' ? (c.low === 32 ? 'exactly 32, and the fleece covers 32°F to 50°F' : 'between 32 and 50') : 'above 50'}, so the <b>${COATS[right].name.toLowerCase()}</b> (${COATS[right].g} g) goes in.`);
+    return no(`The ${x.name.toLowerCase()} is for ${x.band}. Where does ${c.low} fit? ${c.low === 32 ? 'Careful: is 32 “below 32”?' : ''}`);
+  }, onOk:() => { delete S.t['m-total']; }};
+  const items = manItems(), tot = packTotal(items);
+  const gear = `<div class="task ${isOk('m-total') ? 'ok' : ''}"><p class="q"><span class="num">B</span><b>Gear for one explorer</b> (limit 1,000 g). Tap up to ${MAX_GEAR} items. The coat is added for you.</p>
+    <div class="catalog">${CATALOG.map(g => { const on = S.man.gear.includes(g.id); return `<button type="button" data-gear="${g.id}" aria-pressed="${on}" ${!on && S.man.gear.length >= MAX_GEAR ? 'disabled' : ''}><b>${g.name}</b><span>${g.g} g</span></button>`; }).join('')}</div>
+    ${packBar(items)}
+    <div class="fields">${fieldHTML('m-total', {n:'total', pre:'Total', suf:'g'})}${fieldHTML('m-total', {n:'room', pre:'Room left (1,000 g − total)', suf:'g'})}<button class="primary" type="button" data-check="m-total">Check</button>${isOk('m-total') ? '<span class="done-chip">✓ Checked</span>' : ''}</div>
+    ${S.t['m-total'] ? `<p class="fb ${S.t['m-total'].ok ? 'good' : 'try'}">${S.t['m-total'].msg}</p>` : ''}</div>`;
+  TASKS['m-total'] = {fields:[{n:'total'},{n:'room'}], check:v => {
+    if(!isOk('m-coat')) return no('Choose the coat first (A). It has to be in the pack.');
+    if(!S.man.gear.length) return no('Tap some gear to pack first.');
+    if(v.total !== tot){ const list = items.map(x => x[1]).join(' + '); return no(`Add every mass in the pack: ${list}. Add two at a time and write down each step. ${v.total > tot ? 'Your total is too big.' : 'Your total is too small.'}`); }
+    if(tot > LIMIT) return no(`${fmt(tot)} g is over the limit by ${fmt(tot - LIMIT)} g. Tap an item to take it out, then find the new total.`);
+    if(v.room !== LIMIT - tot) return no(`Room left = 1,000 − ${fmt(tot)}. Count up from ${fmt(tot)} to 1,000.`);
+    return ok(`Total <b>${fmt(tot)} g</b>, room left <b>${fmt(LIMIT - tot)} g</b>. This pack is ready for inspection.`);
+  }};
+  const L = WATER_PER_DAY * c.explorers * c.days;
+  const water = taskHTML('m-w-' + c.id, {no:'C', q:'<b>Water</b>',
+    fields:[{n:'pd', suf:'L a day ×'},{n:'ex', suf:'explorers ×'},{n:'d', suf:'days ='},{n:'L', suf:'L ='},{n:'b', suf:'bottles of 500 mL'}],
+    check:v => {
+      if(v.pd !== WATER_PER_DAY) return no('Each explorer drinks 2 L a day (from the practice pack). Start with 2.');
+      if(v.ex !== c.explorers || v.d !== c.days) return no(`Look at your card: ${c.dest} has ${c.explorers} explorers for ${c.days} days.`);
+      if(v.L !== L) return no(`Multiply in two steps. 2 L × ${c.explorers} explorers = ${2*c.explorers} L each day. Then × ${c.days} days.`);
+      if(v.b !== bottlesFor(L)) return no(`Each liter fills 2 bottles of 500 mL (500 + 500 = 1,000 mL). So ${L} L fills ${L} × 2 bottles.`);
+      return ok(`2 × ${c.explorers} × ${c.days} = <b>${L} L</b> = <b>${bottlesFor(L)} bottles</b>.`);
+    }});
+  const need = ropesNeeded(c.cliff, c.rope);
+  const rope = taskHTML('m-r-' + c.id, {no:'D', q:`<b>Rope</b>. Ropes are ${c.rope} m each. Pack enough to reach the ${c.cliff} m cliff.`,
+    fields:[{n:'n', suf:'ropes ×'},{n:'len', suf:'m ='},{n:'t', suf:'m.'},{n:'cliff', pre:'Cliff:', suf:'m.'},{n:'e', kind:'choice', pre:'Enough?', opts:[['yes','Yes'],['no','No']]}],
+    check:v => {
+      if(v.len !== c.rope || v.cliff !== c.cliff) return no(`Check your card: each rope is ${c.rope} m and the cliff is ${c.cliff} m.`);
+      if(v.t !== v.n * v.len) return no(`${v.n} ropes × ${c.rope} m: count by ${c.rope}s ${v.n} times.`);
+      const enough = v.t >= c.cliff;
+      if((v.e === 'yes') !== enough) return no(`Compare ${fmt(v.t)} m of rope with the ${c.cliff} m cliff. Which is longer?`);
+      if(!enough) return no(`Your math is right: ${v.t} m is not enough for ${c.cliff} m. An outfitter packs rope that reaches. Add another rope.`);
+      if(v.n > need) return ok(`${v.n} × ${c.rope} = ${v.t} m reaches the ${c.cliff} m cliff. Could you carry one rope less? ${need} ropes make ${need * c.rope} m, which also reaches.`);
+      return ok(`${v.n} × ${c.rope} = <b>${v.t} m</b>. That reaches the ${c.cliff} m cliff with ${v.t - c.cliff} m extra. ${need - 1} ropes would only make ${(need - 1) * c.rope} m.`);
+    },
+    after:r => r && r.ok ? ropeBars(num(val('m-r-' + c.id + '.n')), c.rope, c.cliff) : ''});
+  const temp = taskHTML('m-t-' + c.id, {no:'E', q:'<b>Temperature</b>: afternoon high − morning low',
+    fields:[{n:'h', suf:'−'},{n:'l', suf:'='},{n:'d', suf:'degrees warmer'}],
+    check:v => {
+      if(v.h !== c.high || v.l !== c.low) return no(`From your card: the high is ${c.high}°F and the low is ${c.low}°F. The bigger number goes first.`);
+      if(v.d !== c.high - c.low) return no(`Count up from ${c.low} to ${c.high}. Jump to the next ten first (${c.low} → ${Math.ceil((c.low+1)/10)*10}), then by tens, then the rest.`);
+      return ok(`${c.high} − ${c.low} = <b>${c.high - c.low} degrees</b> warmer by afternoon.`);
+    }});
+  return `<section class="bench"><div><h2>Part 4 · Our Expedition Manifest</h2><p class="lead">Class 2. Pick your team’s expedition card, then fill in every line.</p></div>${cards}
+    ${coatTask}${gear}${water}${rope}${temp}</section>`;
+}
+
+/* ---------- Class 3 · Part 5 Base Camp Inspection ---------- */
+function teamPackReady(){ return card() && isOk('m-total'); }
+function inspItems(){
+  if(S.insp.pack === 'ours') return manItems();
+  const p = INSPECT_PACKS.find(x => x.id === S.insp.pack); return p ? p.items : [];
+}
+function part5(){
+  const I = S.insp;
+  const choices = INSPECT_PACKS.map(p => [p.id, `Pack ${p.id}`, 'practice team']).concat(teamPackReady() ? [['ours','Our pack', card().dest]] : []);
+  let body = '';
+  if(I.pack){
+    const items = inspItems(), g = packTotal(items);
+    const kept = items.filter((x,i) => !I.out.includes(i)), now = packTotal(kept);
+    const over = g > LIMIT;
+    body += `<div class="grid2"><div class="instrument">${balanceSVG(g)}<p class="cap">Heft test: which side is heavier, the pack or the 1-liter bottle?</p>${I.weighed ? scaleHTML(I.out.length ? now : g, 'g') : scaleHTML(null, 'g')}</div><div class="steps">
+      <div class="step ${I.locked ? 'ok' : 'now'}"><span class="n">1</span><div><p>Inspector’s estimate. Heft the pack against the liter bottle (about 1,000 g).</p>
+        <div class="fields"><label class="fld">Estimate <input id="insp-est" data-insp="est" inputmode="numeric" value="${esc(I.est)}" ${I.locked ? 'disabled' : ''}> g</label>${I.locked ? '<span class="done-chip">✓ Locked in</span>' : '<button class="primary" type="button" data-act="ilock">Lock it in</button>'}</div>
+        ${I.estMsg ? `<p class="fb try">${I.estMsg}</p>` : ''}</div></div>
+      <div class="step ${I.weighed ? 'ok' : I.locked ? 'now' : 'wait'}"><span class="n">2</span><div><p>Scale reading.</p><div class="row"><button class="primary" type="button" data-act="weigh" ${I.locked && !I.weighed ? '' : 'disabled'}>Put it on the scale</button>${I.weighed ? `<span class="done-chip">✓ ${fmt(g)} g</span>` : ''}</div></div></div>
+      <div class="step ${isOk('i-diff-' + I.pack) ? 'ok' : I.weighed ? 'now' : 'wait'}"><span class="n">3</span><div>${I.weighed ? taskHTML('i-diff-' + I.pack, {q:'Difference between the estimate and the scale?', fields:[{n:'d', suf:'g'}],
+          check:v => { const e = num(I.est), big = Math.max(e,g), small = Math.min(e,g); return v.d === big - small ? ok(`${fmt(big)} − ${fmt(small)} = <b>${fmt(big - small)} g</b>. ${big === small ? 'A perfect heft!' : `The inspector was ${e > g ? 'too high' : 'too low'}.`}`) : no(`Estimate ${fmt(e)} g, scale ${fmt(g)} g. Subtract the smaller from the bigger: ${fmt(big)} − ${fmt(small)}.`); }}) : '<p>Difference.</p>'}</div></div>
+      <div class="step ${isOk('i-over-' + I.pack) ? 'ok' : isOk('i-diff-' + I.pack) ? 'now' : 'wait'}"><span class="n">4</span><div>${isOk('i-diff-' + I.pack) ? taskHTML('i-over-' + I.pack, {q:'Over the limit?', fields:[{n:'o', kind:'choice', opts:[['yes','Yes, over'],['no','No, within 1,000 g']]}],
+          check:v => (v.o === 'yes') === over ? ok(over ? `${fmt(g)} g is <b>${fmt(g - LIMIT)} g over</b>. Open the pack and take something out.` : `${fmt(g)} g is within the limit with ${fmt(LIMIT - g)} g to spare. Pack passes inspection!`) : no(`Compare ${fmt(g)} with 1,000. ${g > LIMIT ? 'Which number is bigger?' : 'Is it more than 1,000?'}`)}) : '<p>Over the limit? What came out?</p>'}</div></div>
+    </div></div>`;
+    if(isOk('i-over-' + I.pack) && over){
+      const fixed = now <= LIMIT;
+      const fix = lightestFix(items, g - LIMIT);
+      body += `<div class="task ${fixed ? 'ok' : ''}"><p class="q">What comes out? Tap items to take them out of the pack.</p>
+        <div class="unpack">${items.map((x,i) => `<button type="button" data-out="${i}" class="${I.out.includes(i) ? 'out' : ''}" aria-pressed="${I.out.includes(i)}">${esc(x[0])} · ${x[1]} g</button>`).join('')}</div>
+        ${packBar(kept)}
+        <p class="fb ${fixed ? 'good' : 'note'}">${fixed ? `Took out ${esc(items.filter((x,i) => I.out.includes(i)).map(x => x[0]).join(' and '))}. ${fmt(g)} − ${fmt(g - now)} = <b>${fmt(now)} g</b>, which is ${now === LIMIT ? 'exactly the limit' : `${fmt(LIMIT - now)} g under`}. Passed!` : I.out.length ? `Still ${fmt(now - LIMIT)} g over. Keep going.` : `The pack is ${fmt(g - LIMIT)} g over. Which item weighs at least ${fmt(g - LIMIT)} g?`}</p>
+        <div class="row"><button class="secondary" type="button" data-act="fix">What is the lightest single item that fixes it?</button></div>
+        ${I.fixShown ? `<p class="fb note">${fix ? `The pack is ${fmt(g - LIMIT)} g over, so one item must weigh at least ${fmt(g - LIMIT)} g. The lightest one that does is the <b>${esc(fix[0])}</b> (${fix[1]} g). Taking it out leaves ${fmt(g - fix[1])} g. Would the explorer miss it?` : 'No single item is heavy enough. Two items must come out.'}</p>` : ''}</div>`;
+    }
+  }
+  return `<section class="bench"><div><h2>Part 5 · Base Camp Inspection</h2><p class="lead">Class 3. Another team inspects your pack. Choose a pack to inspect.${teamPackReady() ? '' : ' (Finish the Part 4 gear check to inspect your own pack.)'}</p></div>
+    <div class="sealed">${choices.map(([id,l,s]) => `<button type="button" data-pack="${id}" aria-pressed="${I.pack===id}">${esc(l)}<small>${esc(s)}</small></button>`).join('')}</div>${body}</section>`;
+}
+
+/* ---------- Class 3 · Outfitter Challenge ---------- */
+function partChallenge(){
+  const cups = BIG_BOTTLE_L * 1000 / CUP_ML, big = CHALLENGE_L / BIG_BOTTLE_L;
+  const c1 = taskHTML('c1', {no:'1', q:'How many 250 mL cups fill a 2 L bottle?', fields:[{n:'n', suf:'cups'}],
+    check:v => v.n === cups ? ok(`2 L = 2,000 mL. 4 cups make 1,000 mL, so 8 cups make 2,000 mL: <b>${cups} cups</b>.`) : no(`Change liters to mL: 2 L = 2,000 mL. Count by 250s: 250, 500, 750, 1,000… How many jumps to 2,000?`),
+    after:r => r ? `<div class="row" style="gap:4px">${Array.from({length:cups}, (_,i) => `<span style="display:inline-flex;align-items:center;justify-content:center;width:62px;height:40px;border-radius:6px;background:var(--sky-soft);border:2px solid var(--sky);font-family:var(--label);font-weight:700;font-size:15px">${r.ok ? (i+1)*250 : '250'}</span>`).join('')}</div>` : ''});
+  const c2 = taskHTML('c2', {no:'2', q:'How many 2 L bottles make 24 L?', fields:[{n:'n', suf:'bottles'}],
+    check:v => v.n === big ? ok(`2 × 12 = 24, so <b>${big} bottles</b>. That’s the water for 4 explorers for 3 days!`) : no(`Count by 2s to 24, or think: 2 × ? = 24. ${v.n === 48 ? '48 would be the 500 mL bottles. These are 2 L bottles.' : ''}`)});
+  const C = S.ch;
+  const real = sum(TEAM_PACKS);
+  let c3 = `<div class="task ${isOk('c3b') ? 'ok' : ''}"><p class="q"><span class="num">3</span>Weigh one pack. Multiply by the number of packs to estimate them all. Then compare with the real total.</p>
+    <div class="sealed">${TEAM_PACKS.map((g,i) => `<button type="button" data-tp="${i}" aria-pressed="${C.pick===i}">Pack ${i+1}<small>${C.pick===i || C.all ? fmt(g) + ' g' : 'tap to weigh'}</small></button>`).join('')}</div>`;
+  if(C.pick !== null){
+    const one = TEAM_PACKS[C.pick];
+    c3 += taskHTML('c3a-' + C.pick, {q:`Shortcut: pack ${C.pick+1} weighs ${fmt(one)} g. There are ${TEAM_PACKS.length} packs.`,
+      fields:[{n:'g', suf:'g ×'},{n:'k', suf:'='},{n:'p', suf:'g'}],
+      check:v => {
+        if(v.g !== one || v.k !== TEAM_PACKS.length) return no(`Use the scale reading, ${fmt(one)} g, and the number of packs, ${TEAM_PACKS.length}.`);
+        if(v.p !== one * TEAM_PACKS.length) return no(`${fmt(one)} × 4 is the same as doubling twice: ${fmt(one)} + ${fmt(one)} = ${fmt(one*2)}, then double that.`);
+        return ok(`${fmt(one)} × 4 = <b>${fmt(one*4)} g</b>. That’s the shortcut estimate.`);
+      }});
+    if(isOk('c3a-' + C.pick)){
+      c3 += `<div class="row"><button class="secondary" type="button" data-act="weighall" ${C.all ? 'disabled' : ''}>Weigh every pack</button></div>`;
+      if(C.all){
+        c3 += taskHTML('c3b', {q:`Real total: ${TEAM_PACKS.map(fmt).join(' g + ')} g =`, fields:[{n:'t', suf:'g'}],
+          check:v => v.t === real ? ok(`Real total <b>${fmt(real)} g</b>. Your shortcut said ${fmt(one*4)} g, off by ${fmt(Math.abs(real - one*4))} g.`) : no(`Add two packs at a time: ${fmt(TEAM_PACKS[0])} + ${fmt(TEAM_PACKS[1])} = ${fmt(TEAM_PACKS[0]+TEAM_PACKS[1])}. Then add the other two.`)});
+      }
+      if(isOk('c3b')){
+        c3 += `<p class="q" style="margin:0">Why might the shortcut miss?</p><div class="row"><button class="secondary" type="button" data-act="evidence">Show the evidence</button></div>`;
+        if(C.evidence) c3 += evidenceHTML(one);
+      }
+    }
+  }
+  c3 += '</div>';
+  return `<section class="bench"><div><h2>Outfitter Challenge</h2><p class="lead">For teams that finish early.</p></div>${c1}${c2}${c3}</section>`;
+}
+function evidenceHTML(one){
+  const max = 1100, pct = v => v / max * 100;
+  const bars = TEAM_PACKS.map((g,i) => `<div class="row" style="gap:8px;flex-wrap:nowrap"><span class="fld" style="width:70px">Pack ${i+1}</span><div style="position:relative;flex:1;height:32px;background:var(--ground);border-radius:6px">
+    <div style="width:${pct(g)}%;height:100%;background:var(--blaze);border-radius:6px"></div>
+    <div style="position:absolute;top:-3px;bottom:-3px;left:${pct(one)}%;border-left:3px dashed var(--ink)"></div></div><span class="fld" style="width:80px">${fmt(g)} g</span></div>`).join('');
+  const rows = TEAM_PACKS.map(g => g - one);
+  return `<div style="display:flex;flex-direction:column;gap:6px">${bars}</div>
+    <p class="fb note">The dashed line is the pack you weighed (${fmt(one)} g). The shortcut pretends every pack is exactly that heavy. But the packs are different: ${TEAM_PACKS.map((g,i) => `pack ${i+1} is ${g === one ? 'the one you weighed' : g > one ? `${fmt(g - one)} g heavier` : `${fmt(one - g)} g lighter`}`).join(', ')}. Those differences add up to ${sum(rows) >= 0 ? '+' : '−'}${fmt(Math.abs(sum(rows)))} g, which is exactly how far the shortcut missed. Which pack would give the closest shortcut?</p>`;
+}
+
+/* ---------- Class 3 · Showcase ---------- */
+function partShow(){
+  const c = card();
+  return `<section class="bench"><div><h2>Showcase</h2><p class="lead">Present your expedition to the class: destination, pack, water, rope and temperature, one big slide at a time. Use the arrow keys or the Next button.</p></div>
+    ${c ? `<p class="fb note">Ready to present: <b>${esc(c.dest)}</b>. Lines you haven’t checked yet show as blanks.</p>` : `<p class="fb try">Pick an expedition card in Class 2, Part 4 first.</p>`}
+    <div class="row"><button class="primary" type="button" data-act="showcase" ${c ? '' : 'disabled'}>Start the showcase</button></div></section>`;
+}
+function slides(){
+  const c = card(); if(!c) return [];
+  const items = manItems(), tot = packTotal(items), L = WATER_PER_DAY * c.explorers * c.days;
+  const ropeN = num(val('m-r-' + c.id + '.n'));
+  const blank = '____';
+  const s = [];
+  s.push(`<p class="kicker">Our expedition</p><p class="big">${esc(c.dest)}</p><p class="eq">${c.explorers} explorers · ${c.days} days</p><p class="soft">Morning low ${c.low}°F · afternoon high ${c.high}°F · cliff ${c.cliff} m</p>`);
+  s.push(`<p class="kicker">One explorer’s pack · limit 1,000 g</p><ul>${items.map(([n,g]) => `<li><span>${esc(n)}</span><span>${g} g</span></li>`).join('') || '<li>No gear packed yet</li>'}</ul>
+    <p class="eq">Total <em>${isOk('m-total') ? fmt(tot) + ' g' : blank}</em> · room left <em>${isOk('m-total') ? fmt(LIMIT - tot) + ' g' : blank}</em></p>`);
+  s.push(`<p class="kicker">Water</p><p class="eq">2 L × ${c.explorers} explorers × ${c.days} days = <em>${isOk('m-w-' + c.id) ? L + ' L' : blank}</em></p><p class="eq">= <em>${isOk('m-w-' + c.id) ? bottlesFor(L) : blank}</em> bottles of 500 mL</p>`);
+  s.push(`<p class="kicker">Rope</p><p class="eq">${isOk('m-r-' + c.id) ? `${ropeN} ropes × ${c.rope} m = <em>${ropeN * c.rope} m</em>` : `${blank} ropes × ${c.rope} m = ${blank}`}</p><p class="eq">Cliff ${c.cliff} m · ${isOk('m-r-' + c.id) ? `<em>enough, ${ropeN * c.rope - c.cliff} m extra</em>` : 'enough? ' + blank}</p>`);
+  s.push(`<p class="kicker">Temperature</p><p class="eq">${c.high} − ${c.low} = <em>${isOk('m-t-' + c.id) ? (c.high - c.low) + ' degrees' : blank}</em> warmer</p><p class="eq">Coat: <em>${isOk('m-coat') ? COATS[coatFor(c.low)].name : blank}</em></p>`);
+  s.push(`<p class="kicker">Questions for our team</p><p class="eq" style="font-size:clamp(24px,3.2vw,44px)">Which estimate was closest? Which benchmark helped? What would you leave behind if the pack were over?</p>`);
+  return s;
+}
+function renderShow(){
+  const el = $('#show'), s = slides();
+  if(!s.length){ closeShow(); return; }
+  S.showI = Math.max(0, Math.min(S.showI, s.length - 1));
+  el.innerHTML = `<div class="sbar"><span class="count">Expedition Outfitters · slide ${S.showI+1} of ${s.length}</span>
+    <button type="button" data-sact="prev" ${S.showI ? '' : 'disabled'}>Back</button><button type="button" data-sact="next" ${S.showI < s.length - 1 ? '' : 'disabled'}>Next</button><button type="button" data-sact="close">Exit showcase</button></div>
+    <div class="slide pop">${s[S.showI]}</div>`;
+}
+function openShow(){ S.showI = 0; $('#show').hidden = false; renderShow(); }
+function closeShow(){ $('#show').hidden = true; }
+
+/* ---------- Render ---------- */
+const PARTS = [
+  [['Part 1 · Benchmarks', part1], ['Part 2 · Gear Check Stations', part2]],
+  [['Part 3 · Practice Pack', part3], ['Part 4 · Expedition Manifest', part4]],
+  [['Part 5 · Base Camp Inspection', part5], ['Outfitter Challenge', partChallenge], ['Showcase', partShow]]
+];
+function render(){
+  document.querySelectorAll('.tag').forEach(b => b.setAttribute('aria-selected', +b.dataset.cls === S.cls));
+  const ps = PARTS[S.cls], pi = S.part[S.cls];
+  $('#parts').innerHTML = ps.map(([l],i) => `<button type="button" data-part="${i}" aria-pressed="${i===pi}">${l}</button>`).join('');
+  const y = window.scrollY;
+  $('#main').innerHTML = ps[pi][1]();
+  window.scrollTo(0, y);
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(t.dataset.f) S.v[t.dataset.f] = t.value;
+  if(t.dataset.rec){ const r = rec(); r[t.dataset.rec] = t.value; if(t.dataset.rec === 'name'){ const b = document.querySelector(`[data-item="${S.st.item}"]`); if(b) b.textContent = itemName(S.st.station, S.st.item); } }
+  if(t.dataset.insp) S.insp[t.dataset.insp] = t.value;
+});
+document.addEventListener('keydown', e => {
+  if(!$('#show').hidden){
+    if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); S.showI++; renderShow(); }
+    else if(e.key === 'ArrowLeft'){ S.showI--; renderShow(); }
+    else if(e.key === 'Escape') closeShow();
+    return;
+  }
+  if(e.key === 'Enter' && e.target.matches('input')){
+    const box = e.target.closest('.task, .bm, .step');
+    const btn = box && box.querySelector('[data-check], [data-act]:not([disabled])');
+    if(btn){ e.preventDefault(); btn.click(); }
+  }
+});
+let resetTimer = null;
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b || b.disabled) return;
+  const d = b.dataset;
+  if(b.id === 'fsBtn'){ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }catch(err){} return; }
+  if(b.id === 'resetBtn'){
+    if(b.classList.contains('armed')){ clearTimeout(resetTimer); b.classList.remove('armed'); b.textContent = 'Start over'; const cls = S.cls; S = fresh(); S.cls = cls; closeShow(); render(); window.scrollTo(0,0); }
+    else { b.classList.add('armed'); b.textContent = 'Tap again to clear everything'; resetTimer = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Start over'; }, 3500); }
+    return;
+  }
+  if(d.cls !== undefined){ S.cls = +d.cls; render(); return; }
+  if(d.part !== undefined){ S.part[S.cls] = +d.part; render(); return; }
+  if(d.check){ runCheck(d.check); return; }
+  if(d.choice){ S.v[d.choice] = d.val; render(); return; }
+  if(d.sact){ if(d.sact === 'close') closeShow(); else { S.showI += d.sact === 'next' ? 1 : -1; renderShow(); } return; }
+  // stations
+  if(d.station){ S.st.station = d.station; S.st.item = 0; render(); return; }
+  if(d.mode){ S.st.mode = d.mode; S.st.best = false; render(); return; }
+  if(d.item !== undefined){ S.st.item = +d.item; render(); return; }
+  if(d.unit){
+    const r = rec(), it = STATIONS.mass.items[S.st.item];
+    if(S.st.mode === 'own'){ r.unit = d.unit; render(); return; }
+    if(r.locked) return;
+    if(d.unit === it.unit){ r.unit = d.unit; r.unitMsg = ok(it.unit === 'g' ? `Grams fit. A ${it.name.toLowerCase()} is lighter than the 1-liter bottle (about 1 kg).` : `Kilograms fit. A ${it.name.toLowerCase()} is heavier than the 1-liter bottle, so grams would make a very big number.`); }
+    else { r.unit = null; r.unitMsg = no(it.unit === 'g' ? `Hold it next to the 1-liter bottle (about 1 kg). A ${it.name.toLowerCase()} is lighter, so 1 kg is too big a unit for it. Which unit fits a lighter thing?` : `Hold it next to the 1-liter bottle (about 1 kg). A ${it.name.toLowerCase()} is a lot heavier: more than one bottle. Grams would be a huge number. Which unit fits?`); }
+    render(); return;
+  }
+  if(d.bm){ S.st.bm = S.st.bm === d.bm ? null : d.bm; render(); return; }
+  if(d.act === 'best'){ S.st.best = true; render(); return; }
+  if(['lock','show','read','diff'].includes(d.act)){ stationAct(d.act); return; }
+  // manifest
+  if(d.card){ if(S.man.card !== d.card){ S.man.card = d.card; delete S.t['m-coat']; delete S.v['m-coat.coat']; delete S.t['m-total']; if(S.insp.pack === 'ours') S.insp = fresh().insp; } render(); return; }
+  if(d.gear){ const g = S.man.gear, i = g.indexOf(d.gear); if(i >= 0) g.splice(i,1); else if(g.length < MAX_GEAR) g.push(d.gear); delete S.t['m-total']; if(S.insp.pack === 'ours') S.insp = fresh().insp; render(); return; }
+  // inspection
+  if(d.pack){ if(S.insp.pack !== d.pack){ S.insp = fresh().insp; S.insp.pack = d.pack; for(const k of Object.keys(S.t)) if(k.startsWith('i-')) delete S.t[k]; for(const k of Object.keys(S.v)) if(k.startsWith('i-')) delete S.v[k]; } render(); return; }
+  if(d.act === 'ilock'){ const e2 = num(S.insp.est); if(Number.isNaN(e2) || e2 <= 0) S.insp.estMsg = 'Type your estimate in grams first. Use the balance: heavier or lighter than 1,000 g?'; else { S.insp.locked = true; S.insp.estMsg = null; } render(); return; }
+  if(d.act === 'weigh'){ S.insp.weighed = true; render(); return; }
+  if(d.out !== undefined){ const o = S.insp.out, i = +d.out, k = o.indexOf(i); if(k >= 0) o.splice(k,1); else o.push(i); render(); return; }
+  if(d.act === 'fix'){ S.insp.fixShown = true; render(); return; }
+  // challenge
+  if(d.tp !== undefined){ S.ch.pick = +d.tp; S.ch.evidence = false; render(); return; }
+  if(d.act === 'weighall'){ S.ch.all = true; render(); return; }
+  if(d.act === 'evidence'){ S.ch.evidence = true; render(); return; }
+  if(d.act === 'showcase'){ openShow(); return; }
+});
+document.addEventListener('fullscreenchange', () => { $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+render();
+})();
+</script>
+
+</body></html>

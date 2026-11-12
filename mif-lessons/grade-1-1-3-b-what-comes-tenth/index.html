@@ -1,0 +1,550 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>What Comes Tenth?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a "pattern train" of numbered slots, 10 to a row, so the 10th always sits at the end of row one. One step on screen at a time. */
+:root{
+  --paper:#EEF2F9; --card:#FFFFFF; --ink:#1B2340; --muted:#56607D; --line:#CFD7E7; --slot:#F6F8FC;
+  --gold:#F2B705; --gold-ink:#8A5F00; --gold-soft:#FFF4CC;
+  --good:#1E8F4E; --good-soft:#DFF5E8; --oops:#C2560F; --oops-soft:#FDEBDD;
+  --c-circle:#E5484D; --c-square:#2F6BE0; --c-tri:#23A26D; --c-cube:#F08C1A; --c-cone:#8B4FD8; --c-cyl:#0F9BB0;
+  --c-red:#E03A3E; --c-blue:#2F6BE0;
+  --band-a:#DCE6FB; --band-b:#FBE3CF;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11162A; --card:#1A2138; --ink:#EEF1F9; --muted:#A5AFCA; --line:#34405F; --slot:#151B30;
+    --gold:#FFCB3D; --gold-ink:#FFD866; --gold-soft:#3A3115;
+    --good:#4CD38A; --good-soft:#163A28; --oops:#FF9B54; --oops-soft:#3D2616;
+    --c-circle:#FF6B6F; --c-square:#5E8EFF; --c-tri:#3FCB8E; --c-cube:#FFA43D; --c-cone:#AE7BFF; --c-cyl:#2CC6DB;
+    --c-red:#FF5D61; --c-blue:#5E8EFF;
+    --band-a:#22325A; --band-b:#4A3020;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11162A; --card:#1A2138; --ink:#EEF1F9; --muted:#A5AFCA; --line:#34405F; --slot:#151B30;
+  --gold:#FFCB3D; --gold-ink:#FFD866; --gold-soft:#3A3115;
+  --good:#4CD38A; --good-soft:#163A28; --oops:#FF9B54; --oops-soft:#3D2616;
+  --c-circle:#FF6B6F; --c-square:#5E8EFF; --c-tri:#3FCB8E; --c-cube:#FFA43D; --c-cone:#AE7BFF; --c-cyl:#2CC6DB;
+  --c-red:#FF5D61; --c-blue:#5E8EFF;
+  --band-a:#22325A; --band-b:#4A3020;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 28px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+.wrap{max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:10px 20px}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(28px,3.4vw,46px); margin:0; line-height:1.05; letter-spacing:-.01em}
+.sub{margin:2px 0 0; color:var(--muted); font-size:15px; font-weight:700; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap}
+nav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 18px 10px 10px; font-weight:800; font-size:17px; display:flex; align-items:center; gap:8px; min-height:52px}
+nav button i{font-style:normal; width:30px; height:30px; border-radius:50%; background:var(--slot); display:grid; place-items:center; font-family:var(--display); font-size:16px}
+nav button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav button[aria-selected="true"] i{background:var(--gold); color:#1B2340}
+
+.panel{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:clamp(16px,2.4vw,30px); display:flex; flex-direction:column; gap:18px; min-width:0}
+.panel[hidden]{display:none}
+.say{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.8vw,38px); line-height:1.2; margin:0; text-wrap:balance}
+.say small{display:block; font-family:var(--body); font-weight:700; font-size:clamp(15px,1.4vw,19px); color:var(--muted); margin-top:6px}
+.teacher{font-size:15px; color:var(--muted); margin:0; border-left:4px solid var(--line); padding-left:12px}
+.teacher b{color:var(--ink)}
+
+/* Pattern train */
+.strip{display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:clamp(4px,.8vw,10px)}
+.slot{position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; border:0; background:none; padding:0}
+.box{width:100%; aspect-ratio:1; border-radius:12px; background:var(--slot); border:2.5px dashed var(--line); display:grid; place-items:center; position:relative; transition:background-color .2s}
+.slot.filled .box{border-style:solid; border-color:transparent; background:var(--slot)}
+.box svg{width:86%; height:86%; overflow:visible}
+.n{font-family:var(--display); font-weight:600; font-size:clamp(13px,1.4vw,19px); color:var(--muted); font-variant-numeric:tabular-nums}
+.slot.target .box{border:3.5px solid var(--gold); background:var(--gold-soft)}
+.slot.target .n{color:var(--gold-ink); font-weight:700}
+.slot.target .n::after{content:"th"; font-size:.7em}
+.q{font-family:var(--display); font-weight:700; font-size:clamp(20px,3vw,40px); color:var(--gold-ink)}
+.slot.inbox .box{background:var(--gold-soft)}
+.boxline{position:absolute; inset:-5px; border:4px solid var(--ink); pointer-events:none; border-radius:0}
+.slot.b-first .boxline{border-right:0; border-radius:14px 0 0 14px}
+.slot.b-mid .boxline{border-left:0; border-right:0}
+.slot.b-last .boxline{border-left:0; border-radius:0 14px 14px 0}
+.slot.b-only .boxline{border-radius:14px}
+.slot.b-first .boxline,.slot.b-mid .boxline{right:calc(-1 * clamp(4px,.8vw,10px) - 1px)}
+.slot.miss .box{outline:4px solid var(--oops); outline-offset:2px; background:var(--oops-soft)}
+.ghostshape{position:absolute; inset:auto -6px -6px auto; width:46%; height:46%; background:var(--card); border:2.5px dashed var(--oops); border-radius:10px; display:grid; place-items:center}
+.ghostshape svg{width:80%; height:80%}
+.band{width:100%; height:12px; border-radius:6px; background:transparent; font-family:var(--display); font-weight:700; font-size:12px; display:grid; place-items:center; line-height:1}
+.strip.bands .band{background:var(--band-a)}
+.strip.bands .band.odd{background:var(--band-b)}
+.band b{display:none; width:20px; height:20px; border-radius:50%; background:var(--ink); color:var(--card); place-items:center; font-size:13px; margin-left:auto}
+.strip.bands .band{height:22px; display:flex; align-items:center; padding:0 1px}
+.strip.bands .band.end b{display:grid}
+.tapme .slot.can .box{cursor:pointer}
+.tapme .slot.can:hover .box{border-color:var(--ink)}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.4); opacity:0}to{transform:scale(1); opacity:1}}
+
+.rows{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:16px}
+.ask{display:flex; flex-direction:column; gap:10px; background:var(--slot); border-radius:16px; padding:14px 16px}
+.ask h3{margin:0; font-family:var(--display); font-weight:600; font-size:22px; display:flex; align-items:center; gap:10px}
+.tag{font-family:var(--display); background:var(--gold); color:#1B2340; border-radius:10px; padding:2px 10px; font-size:20px}
+.choices{display:flex; gap:10px; flex-wrap:wrap}
+.pick{width:78px; height:78px; border-radius:16px; border:3px solid var(--line); background:var(--card); display:grid; place-items:center; padding:8px; position:relative}
+.pick svg{width:100%; height:100%; overflow:visible}
+.pick[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--gold)}
+.pick .ct{position:absolute; top:-10px; right:-10px; min-width:30px; height:30px; padding:0 6px; border-radius:15px; background:var(--ink); color:var(--card); font-family:var(--display); font-weight:700; font-size:17px; display:grid; place-items:center}
+.mark{font-family:var(--display); font-weight:700; font-size:22px}
+.mark.ok{color:var(--good)} .mark.no{color:var(--oops)}
+
+.actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:800; font-size:clamp(17px,1.6vw,21px); padding:14px 24px; border-radius:16px; min-height:56px}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-weight:800; font-size:clamp(16px,1.5vw,19px); padding:11px 20px; border-radius:16px; min-height:56px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.msg{font-size:clamp(18px,1.8vw,24px); font-weight:700; margin:0; padding:14px 18px; border-radius:16px; background:var(--slot); display:flex; gap:12px; align-items:center; flex-wrap:wrap; line-height:1.35}
+.msg:empty{display:none}
+.msg.ok{background:var(--good-soft)} .msg.no{background:var(--oops-soft)}
+.msg .ico{display:inline-grid; width:40px; height:40px; vertical-align:middle}
+.msg .ico svg{width:100%; height:100%}
+.inl{display:inline-block; width:1.5em; height:1.5em; vertical-align:-.4em}
+.inl svg{width:100%; height:100%}
+
+.subtabs{display:flex; gap:8px; flex-wrap:wrap}
+.subtabs button{border:2.5px solid var(--line); background:var(--card); border-radius:16px; padding:8px 14px; display:flex; align-items:center; gap:8px; font-family:var(--display); font-weight:700; font-size:20px; min-height:56px}
+.subtabs button[aria-pressed="true"]{border-color:var(--ink); background:var(--gold-soft)}
+.subtabs .mini{display:flex; gap:2px}
+.subtabs .mini span{width:28px; height:28px; display:inline-grid}
+.subtabs .mini svg{width:100%; height:100%}
+
+/* Warm-up beats */
+.beats{display:flex; gap:clamp(6px,1.2vw,14px); flex-wrap:wrap; align-items:center; position:relative}
+.beat{font-family:var(--display); font-weight:700; font-size:clamp(22px,3vw,40px); padding:14px 22px; border-radius:20px; border:3px solid var(--line); background:var(--slot); min-width:3.6em; text-align:center; transition:transform .15s}
+.beat.clap{color:var(--c-cube)} .beat.snap{color:var(--c-cone)}
+.beat.on{transform:scale(1.12); border-color:var(--ink)}
+.beat.q{color:var(--gold-ink); border-color:var(--gold); background:var(--gold-soft)}
+.beat.boxed{outline:4px solid var(--ink); outline-offset:5px}
+
+/* Chart table */
+.chart{border-collapse:separate; border-spacing:0 8px; width:100%; font-size:20px}
+.chart th{font-family:var(--display); font-weight:600; text-align:left; color:var(--muted); font-size:17px; padding:0 12px}
+.chart td{background:var(--slot); padding:8px 12px}
+.chart td:first-child{border-radius:14px 0 0 14px} .chart td:last-child{border-radius:0 14px 14px 0}
+.chart .cores{display:flex; gap:4px}
+.chart .cores span{width:44px; height:44px; display:inline-grid}
+.chart .cores svg,.chart .ans svg{width:100%; height:100%}
+.chart .ans{width:56px; height:56px; display:inline-grid}
+.chart .reveal{border:2px dashed var(--gold); background:var(--gold-soft); border-radius:12px; font-weight:800; padding:8px 14px; color:var(--gold-ink)}
+.tblwrap{overflow-x:auto}
+.journal{border:3px dashed var(--line); border-radius:18px; padding:16px 20px; font-family:var(--display); font-weight:600; font-size:clamp(20px,2.2vw,28px)}
+.journal span{display:block; font-family:var(--body); font-size:15px; color:var(--muted); font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+
+/* Builder */
+.core-edit{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.core-edit .pick{width:88px; height:88px; border-style:solid; border-color:var(--ink)}
+.lenpick{display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-weight:800}
+.lenpick button{width:52px; height:52px; border-radius:14px; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px}
+.lenpick button[aria-pressed="true"]{border-color:var(--ink); background:var(--gold-soft)}
+.hundred{display:grid; grid-template-columns:repeat(10, minmax(0,30px)); gap:4px}
+.hundred i{aspect-ratio:1; border-radius:5px; background:var(--c-red); position:relative}
+.hundred i.b{background:var(--c-blue)}
+.hundred i.last{outline:4px solid var(--gold); outline-offset:2px}
+.hundred i.last::after{content:"100"; position:absolute; top:calc(100% + 6px); left:50%; transform:translateX(-50%); font-family:var(--display); font-weight:700; font-size:14px; color:var(--gold-ink)}
+.split{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+.card2{background:var(--slot); border-radius:18px; padding:16px 18px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.card2 h2{font-family:var(--display); font-weight:700; font-size:24px; margin:0}
+
+@media (max-width:800px){
+  .split{grid-template-columns:1fr}
+  body{font-size:16px}
+  .pick{width:64px; height:64px}
+  .box{border-radius:8px}
+  .boxline{border-width:3px}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>What Comes Tenth?</h1>
+      <p class="sub">Grade 1 · Math in Focus Ch 3 · Lesson 1.3-B</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav role="tablist" aria-label="Lesson steps">
+    <button role="tab" data-v="warm" aria-selected="true"><i>1</i>Warm-up</button>
+    <button role="tab" data-v="launch" aria-selected="false"><i>2</i>Red, blue</button>
+    <button role="tab" data-v="lab" aria-selected="false"><i>3</i>Patterns</button>
+    <button role="tab" data-v="talk" aria-selected="false"><i>4</i>Let's talk</button>
+    <button role="tab" data-v="easy" aria-selected="false"><i>5</i>Warm start</button>
+    <button role="tab" data-v="star" aria-selected="false"><i>★</i>Challenge</button>
+  </nav>
+
+  <!-- 1 Warm-up -->
+  <section class="panel" id="v-warm">
+    <p class="say">What comes next?<small>Clap and snap along.</small></p>
+    <div class="beats" id="beats"></div>
+    <div class="actions">
+      <button class="secondary" id="playBeats">▶ Play the pattern</button>
+      <span style="font-weight:800">Next is…</span>
+      <button class="secondary" data-beat="clap">CLAP</button>
+      <button class="secondary" data-beat="snap">SNAP</button>
+    </div>
+    <p class="msg" id="warmMsg" aria-live="polite"></p>
+    <p class="teacher"><b>Ask:</b> “What is the part that repeats?”</p>
+  </section>
+
+  <!-- 2 Launch -->
+  <section class="panel" id="v-launch" hidden>
+    <p class="say">What color is the 10th cube?<small>Don't build it yet. Vote! Then convince a friend.</small></p>
+    <div id="launchLab"></div>
+    <p class="teacher"><b>Ask:</b> “Without building, what color is the 10th cube? Convince me.” Tap a cube once for each vote.</p>
+  </section>
+
+  <!-- 3 Investigate -->
+  <section class="panel" id="v-lab" hidden>
+    <div class="subtabs" id="patTabs" aria-label="Worksheet pattern"></div>
+    <div id="mainLab"></div>
+    <p class="teacher"><b>Ask:</b> “How many times does the core fit before 10?”</p>
+  </section>
+
+  <!-- 4 Talk -->
+  <section class="panel" id="v-talk" hidden>
+    <p class="say">Why does the 10th start over?</p>
+    <div class="strip" id="talkStrip"></div>
+    <div class="actions">
+      <button class="primary" id="talkCount">Count the cores to 9</button>
+      <button class="secondary" id="talkTen">Show the 10th</button>
+    </div>
+    <p class="msg" id="talkMsg" aria-live="polite"></p>
+    <h2 class="say" style="font-size:clamp(22px,2.4vw,30px)">Class chart: the 10th and 20th</h2>
+    <div class="tblwrap"><table class="chart" id="chart"></table></div>
+    <div class="journal"><span>Math journal</span>How did you know the 10th shape?</div>
+  </section>
+
+  <!-- 5 Easier -->
+  <section class="panel" id="v-easy" hidden>
+    <p class="say">Two-shape patterns<small>Guess the 6th and the 8th.</small></p>
+    <div class="subtabs" id="easyTabs"></div>
+    <div id="easyLab"></div>
+  </section>
+
+  <!-- 6 Challenge -->
+  <section class="panel" id="v-star" hidden>
+    <div class="split">
+      <div class="card2">
+        <h2>Make your own</h2>
+        <p style="margin:0; font-weight:700">The <b>10th</b> must be a <span class="inl" data-shape="triangle"></span> triangle.<br>The <b>11th</b> must be a <span class="inl" data-shape="square"></span> square.</p>
+        <div class="lenpick" id="lenPick">Core size:</div>
+        <div class="core-edit" id="coreEdit"></div>
+        <p class="teacher" style="margin:0">Tap a shape in the core to change it.</p>
+        <div class="strip" id="makeStrip"></div>
+        <p class="msg" id="makeMsg" aria-live="polite"></p>
+        <div class="actions"><button class="secondary" id="oneWay">Show one way</button></div>
+      </div>
+      <div class="card2">
+        <h2>The 100th cube</h2>
+        <p style="margin:0; font-weight:700">Red, blue, red, blue… What color is the <b>100th</b> cube?</p>
+        <div class="choices" id="hundredPick"></div>
+        <p class="msg" id="hundredMsg" aria-live="polite"></p>
+        <div class="hundred" id="hundredGrid" hidden></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+const ORD = ['','first','second','third','fourth','fifth'];
+
+/* ---------- Shapes ---------- */
+const S = {
+  circle:  {name:'circle',   c:'--c-circle', d:c=>`<circle cx="50" cy="50" r="36" fill="var(${c})" stroke="var(--ink)" stroke-width="3"/>`},
+  square:  {name:'square',   c:'--c-square', d:c=>`<rect x="16" y="16" width="68" height="68" rx="4" fill="var(${c})" stroke="var(--ink)" stroke-width="3"/>`},
+  triangle:{name:'triangle', c:'--c-tri',    d:c=>`<polygon points="50,12 89,84 11,84" fill="var(${c})" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>`},
+  cube:    {name:'cube',     c:'--c-cube',   d:cubeSVG},
+  cone:    {name:'cone',     c:'--c-cone',   d:c=>`<polygon points="50,10 82,78 18,78" fill="var(${c})" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><ellipse cx="50" cy="78" rx="32" ry="10" fill="var(${c})" stroke="var(--ink)" stroke-width="3"/><ellipse cx="50" cy="78" rx="32" ry="10" fill="#000" fill-opacity=".18"/>`},
+  cylinder:{name:'cylinder', c:'--c-cyl',    d:c=>`<path d="M20 24 V78 A30 10 0 0 0 80 78 V24" fill="var(${c})" stroke="var(--ink)" stroke-width="3"/><ellipse cx="50" cy="24" rx="30" ry="10" fill="var(${c})" stroke="var(--ink)" stroke-width="3"/><ellipse cx="50" cy="24" rx="30" ry="10" fill="#fff" fill-opacity=".35"/>`},
+  red:     {name:'red cube', c:'--c-red',    d:cubeSVG},
+  blue:    {name:'blue cube',c:'--c-blue',   d:cubeSVG},
+};
+function cubeSVG(c){
+  return `<g stroke="var(--ink)" stroke-width="3" stroke-linejoin="round">
+    <polygon points="16,32 34,16 84,16 66,32" fill="var(${c})"/><polygon points="16,32 34,16 84,16 66,32" fill="#fff" fill-opacity=".38" stroke="none"/>
+    <polygon points="66,32 84,16 84,66 66,84" fill="var(${c})"/><polygon points="66,32 84,16 84,66 66,84" fill="#000" fill-opacity=".2" stroke="none"/>
+    <rect x="16" y="32" width="50" height="52" fill="var(${c})"/></g>`;
+}
+const svg = k => `<svg viewBox="0 0 100 100" aria-hidden="true">${S[k].d(S[k].c)}</svg>`;
+document.querySelectorAll('[data-shape]').forEach(e => e.innerHTML = svg(e.dataset.shape));
+
+/* ---------- Pattern math (one rule for everything) ---------- */
+const at = (core, n) => core[(n - 1) % core.length];          // shape at spot n (1-based)
+const unique = core => [...new Set(core)];
+function minPeriod(seq){ for(let L=1; L<=seq.length; L++){ if(seq.every((x,i)=> x===seq[i%L])) return L; } return seq.length; }
+function hint(core, n){
+  const L = core.length, ends = [];
+  for(let m=L; m<=n; m+=L) ends.push(m);
+  return `The core has ${L} shapes. It ends at ${ends.join(', ')}. Then it starts over.`;
+}
+function why(core, n){
+  const L = core.length, full = Math.floor(n / L), r = n % L, ends = [];
+  for(let m=L; m<=n; m+=L) ends.push(m);
+  const endTxt = ends.length > 6 ? ends.slice(0,5).join(', ') + ' … ' + ends[ends.length-1] : ends.join(', ');
+  if(r === 0) return `The core has ${L} shapes. It ends at ${endTxt}. The ${n}th is the <b>last</b> shape of the core.`;
+  return `The core has ${L} shapes. It ends at ${endTxt}. Then it starts over, so the ${n}th is the <b>${ORD[r]}</b> shape of the core.`;
+}
+
+/* ---------- Pattern strip ---------- */
+function drawStrip(el, o){
+  // o: {core,total,built,targets,box,miss,bandsTo,tap}
+  el.classList.toggle('bands', !!o.bandsTo);
+  el.classList.toggle('tapme', !!o.tap);
+  let h = '';
+  const L = o.core.length;
+  for(let n=1; n<=o.total; n++){
+    const filled = n <= o.built, tgt = o.targets.includes(n);
+    let cls = 'slot' + (filled?' filled':'') + (tgt?' target':'');
+    if(o.box && n <= o.box){ cls += ' inbox ' + (o.box===1?'b-only': n===1?'b-first': n===o.box?'b-last':'b-mid'); }
+    if(o.miss && o.miss.n===n) cls += ' miss';
+    if(o.tap && n <= o.built) cls += ' can';
+    const rep = Math.floor((n-1)/L);
+    const band = o.bandsTo && n <= o.bandsTo ? `<span class="band${rep%2?' odd':''}${n%L===0?' end':''}"><b>${rep+1}</b></span>` : `<span class="band"></span>`;
+    const inner = filled ? svg(at(o.core,n)) : (tgt ? '<span class="q">?</span>' : '');
+    const ghost = o.miss && o.miss.n===n ? `<span class="ghostshape">${svg(o.miss.expect)}</span>` : '';
+    const lab = filled ? `${n}, ${S[at(o.core,n)].name}` : `${n}, empty`;
+    h += `<${o.tap?'button':'div'} class="${cls}" data-n="${n}" aria-label="${lab}"><span class="box">${inner}${ghost}${o.box&&n<=o.box?'<span class="boxline"></span>':''}</span>${band}<span class="n">${n}</span></${o.tap?'button':'div'}>`;
+  }
+  el.innerHTML = h;
+  if(o.pop) { const p = el.querySelector(`[data-n="${o.pop}"] .box svg`); if(p) p.classList.add('pop'); }
+  if(o.tap) el.querySelectorAll('.slot.can').forEach(b => b.onclick = () => o.tap(+b.dataset.n));
+}
+
+/* ---------- The investigation lab (reused by Launch, Patterns, Warm start) ---------- */
+function Lab(root, cfg){
+  const st = {box:null, boxOk:false, miss:null, guess:{}, votes:{}, built:cfg.shown, bandsTo:0, busy:false, gen:0, results:null};
+  const opts = unique(cfg.core);
+  root.innerHTML = `
+    ${cfg.boxStep ? `<p class="say" style="font-size:clamp(20px,2.2vw,30px)">1. Box the part that repeats.<small>Tap the shape where the repeat ends.</small></p>` : ''}
+    <div class="strip"></div>
+    ${cfg.boxStep ? `<div class="actions"><button class="secondary" data-a="checkbox">Check my box</button></div>` : ''}
+    ${cfg.boxStep ? `<p class="say" style="font-size:clamp(20px,2.2vw,30px)">2. Guess. Then build to check.</p>` : ''}
+    <div class="rows">${cfg.targets.map(t => `<div class="ask" data-t="${t}"><h3><span class="tag">${t}th</span> ${cfg.vote ? 'Vote!' : 'shape?'} <span class="mark"></span></h3><div class="choices">${opts.map(k => `<button class="pick" data-k="${k}" aria-pressed="false" aria-label="${S[k].name}">${svg(k)}${cfg.vote?'<span class="ct">0</span>':''}</button>`).join('')}</div></div>`).join('')}</div>
+    <div class="actions">
+      ${cfg.vote ? '' : '<button class="secondary" data-a="checkguess">Check my guess</button>'}
+      <button class="primary" data-a="build">Build to check</button>
+      <button class="secondary" data-a="bands">${cfg.vote ? 'Convince me: show the cores' : 'Show the cores'}</button>
+    </div>
+    <p class="msg" aria-live="polite"></p>`;
+  const strip = root.querySelector('.strip'), msg = root.querySelector('.msg');
+  const say = (html, kind) => { msg.className = 'msg' + (kind ? ' '+kind : ''); msg.innerHTML = html; };
+  function draw(pop){ drawStrip(strip, {core:cfg.core, total:cfg.total, built:st.built, targets:cfg.targets, box:st.box, miss:st.miss, bandsTo:st.bandsTo, tap: cfg.boxStep && !st.busy ? tapBox : null, pop}); }
+  function tapBox(n){ if(n > cfg.shown) return; st.box = n; st.boxOk = false; st.miss = null; draw(); say(`Your box has ${n} shape${n>1?'s':''}. Tap “Check my box”.`); }
+  function checkBox(){
+    st.miss = null;
+    if(!st.box){ say('Tap a shape to end your box.'); return; }
+    const seen = cfg.core.length >= 1 ? Array.from({length:cfg.shown}, (_,i) => at(cfg.core, i+1)) : [];
+    const cand = seen.slice(0, st.box), L = minPeriod(seen);
+    let bad = 0;
+    for(let n=1; n<=cfg.shown; n++){ if(seen[n-1] !== cand[(n-1)%st.box]){ bad = n; break; } }
+    if(bad){
+      st.miss = {n:bad, expect:cand[(bad-1)%st.box]};
+      draw();
+      say(`If your box repeats, spot ${bad} would be a ${S[st.miss.expect].name}. But it is a ${S[seen[bad-1]].name}. Try a bigger box.`, 'no');
+    } else if(st.box > L){
+      draw();
+      say(`That part does repeat. Is there a smaller part that repeats?`, 'no');
+    } else {
+      st.boxOk = true; draw();
+      say(`Yes! The core is <span>${cand.map(k=>`<span class="inl">${svg(k)}</span>`).join('')}</span>. It has ${L} shapes.`, 'ok');
+    }
+  }
+  function renderPicks(){
+    root.querySelectorAll('.ask').forEach(a => {
+      const t = +a.dataset.t;
+      a.querySelectorAll('.pick').forEach(p => {
+        p.setAttribute('aria-pressed', cfg.vote ? 'false' : String(st.guess[t] === p.dataset.k));
+        if(cfg.vote) p.querySelector('.ct').textContent = st.votes[p.dataset.k] || 0;
+      });
+      const mk = a.querySelector('.mark');
+      if(st.results && st.results[t] != null){ mk.className = 'mark ' + (st.results[t] ? 'ok' : 'no'); mk.textContent = st.results[t] ? '✓' : 'Look again'; }
+      else { mk.className = 'mark'; mk.textContent = ''; }
+    });
+  }
+  root.querySelectorAll('.ask').forEach(a => a.querySelectorAll('.pick').forEach(p => p.onclick = () => {
+    const t = +a.dataset.t, k = p.dataset.k;
+    if(cfg.vote){ st.votes[k] = (st.votes[k]||0) + 1; st.guess[t] = k; }
+    else { st.guess[t] = k; if(st.results) st.results[t] = null; }
+    renderPicks();
+  }));
+  function checkGuess(){
+    const missing = cfg.targets.filter(t => !st.guess[t]);
+    if(missing.length){ say(`Pick a shape for the ${missing.map(t=>t+'th').join(' and ')} first.`); return; }
+    st.results = {};
+    const wrong = cfg.targets.filter(t => st.guess[t] !== at(cfg.core, t));
+    cfg.targets.forEach(t => st.results[t] = st.guess[t] === at(cfg.core, t) ? true : false);
+    renderPicks();
+    if(!wrong.length){ say(`Both guesses match the pattern rule. Now build to check!`, 'ok'); return; }
+    const t = wrong[0];
+    st.bandsTo = st.built; draw();
+    say(`Not yet for the ${t}th. ${hint(cfg.core, t)} Where does the ${t}th land? Change your guess and check again.`, 'no');
+  }
+  async function build(){
+    if(st.busy) return;
+    const missing = cfg.targets.filter(t => !st.guess[t]);
+    if(missing.length){ say(cfg.vote ? 'Vote first! Tap the color you think is 10th.' : 'Before you build, tell me your guess and why.', 'no'); return; }
+    st.busy = true; const g = ++st.gen; st.bandsTo = 0;
+    while(st.built < cfg.total){ st.built++; draw(st.built); await sleep(cfg.total > 12 ? 160 : 260); if(g !== st.gen) return; }
+    st.busy = false; st.bandsTo = cfg.total; draw();
+    st.results = {}; const lines = [];
+    cfg.targets.forEach(t => {
+      const ans = at(cfg.core, t), ok = cfg.vote ? null : st.guess[t] === ans;
+      if(!cfg.vote) st.results[t] = ok;
+      lines.push(`<span class="ico">${svg(ans)}</span> <span>The ${t}th is a <b>${S[ans].name}</b>${ok===true?' — just like you guessed!':ok===false?` (you guessed ${S[st.guess[t]].name}).`:'.'} ${why(cfg.core, t)}</span>`);
+    });
+    renderPicks();
+    const allOk = cfg.vote || cfg.targets.every(t => st.results[t]);
+    say(lines.join('<br>'), allOk ? 'ok' : 'no');
+  }
+  function bands(){
+    st.bandsTo = st.bandsTo ? 0 : st.built; draw();
+    if(st.bandsTo) say(`Each color band is one core. The dot shows how many cores so far.`);
+  }
+  root.querySelector('[data-a="build"]').onclick = build;
+  root.querySelector('[data-a="bands"]').onclick = bands;
+  const cb = root.querySelector('[data-a="checkbox"]'); if(cb) cb.onclick = checkBox;
+  const cg = root.querySelector('[data-a="checkguess"]'); if(cg) cg.onclick = checkGuess;
+  draw(); renderPicks(); say('');
+  return { stop(){ st.gen++; } };
+}
+
+/* ---------- Warm-up ---------- */
+const BEATS = ['clap','snap','clap','snap'];
+let warmDone = false, warmGen = 0;
+function drawBeats(on, boxed){
+  $('#beats').innerHTML = BEATS.map((b,i) => `<span class="beat ${b}${on===i?' on':''}${boxed && i<2?' boxed':''}">${b.toUpperCase()}</span>`).join('') +
+    `<span class="beat ${warmDone?'clap':'q'}${on===4?' on':''}">${warmDone?'CLAP':'?'}</span>`;
+}
+$('#playBeats').onclick = async () => {
+  const g = ++warmGen;
+  for(let r=0; r<2; r++) for(let i=0;i<5;i++){ if(g!==warmGen) return; drawBeats(i, warmDone); await sleep(520); }
+  drawBeats(-1, warmDone);
+};
+document.querySelectorAll('[data-beat]').forEach(b => b.onclick = () => {
+  const m = $('#warmMsg');
+  if(b.dataset.beat === 'clap'){ warmDone = true; drawBeats(-1, true); m.className='msg ok'; m.innerHTML = 'Yes, CLAP! The part that repeats is <b>clap, snap</b>. It is in the box.'; }
+  else { drawBeats(-1, false); m.className='msg no'; m.innerHTML = 'Listen again. Clap, snap, clap, snap… After a snap comes a ___? Tap Play and say it out loud.'; }
+});
+
+/* ---------- Patterns ---------- */
+const PATTERNS = [
+  {label:'1', core:['circle','square']},
+  {label:'2', core:['cube','cone','cylinder']},
+  {label:'3', core:['triangle','triangle','square']},
+];
+const EASY = [
+  {label:'A', core:['circle','triangle']},
+  {label:'B', core:['red','blue']},
+  {label:'C', core:['square','circle']},
+];
+let labs = [];
+function mountTabs(holder, list, labEl, cfgFn){
+  let cur = 0;
+  holder.innerHTML = list.map((p,i) => `<button aria-pressed="${i===0}" data-i="${i}">${p.label}<span class="mini">${p.core.map(k=>`<span>${svg(k)}</span>`).join('')}</span></button>`).join('');
+  let lab = Lab(labEl, cfgFn(list[0])); labs.push(lab);
+  holder.querySelectorAll('button').forEach(b => b.onclick = () => {
+    cur = +b.dataset.i; holder.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x===b));
+    lab.stop(); lab = Lab(labEl, cfgFn(list[cur])); labs.push(lab);
+  });
+}
+
+/* ---------- Talk ---------- */
+const ABC = PATTERNS[1].core;
+let talkState = {bands:0, ten:false};
+function drawTalk(){ drawStrip($('#talkStrip'), {core:ABC, total:10, built: talkState.ten ? 10 : 9, targets:[10], bandsTo:talkState.bands}); }
+$('#talkCount').onclick = () => { talkState.bands = 9; drawTalk(); const m=$('#talkMsg'); m.className='msg'; m.innerHTML='1 core, 2 cores, 3 cores. After 9 shapes the core has finished <b>3 times</b>.'; };
+$('#talkTen').onclick = () => { talkState.ten = true; talkState.bands = 10; drawTalk(); const m=$('#talkMsg'); m.className='msg ok'; m.innerHTML=`So the 10th starts over: <span class="ico">${svg(at(ABC,10))}</span> a <b>${S[at(ABC,10)].name}</b>!`; };
+function drawChart(){
+  const t = $('#chart');
+  t.innerHTML = `<tr><th>Pattern</th><th>Core</th><th>10th</th><th>20th</th></tr>` + PATTERNS.map((p,i) => `<tr><td style="font-family:var(--display);font-weight:700;font-size:24px">${p.label}</td><td><span class="cores">${p.core.map(k=>`<span>${svg(k)}</span>`).join('')}</span></td>${[10,20].map(n=>`<td><button class="reveal" data-p="${i}" data-n="${n}">Show</button></td>`).join('')}</tr>`).join('');
+  t.querySelectorAll('.reveal').forEach(b => b.onclick = () => { const k = at(PATTERNS[+b.dataset.p].core, +b.dataset.n); b.outerHTML = `<span class="ans" title="${S[k].name}" aria-label="${S[k].name}">${svg(k)}</span>`; });
+}
+
+/* ---------- Challenge: make your own ---------- */
+const MAKE_OPTS = ['circle','square','triangle'];
+let make = {core:['circle','square','circle']};
+function drawMake(){
+  $('#lenPick').innerHTML = 'Core size:' + [2,3,4].map(L => `<button aria-pressed="${make.core.length===L}" data-l="${L}">${L}</button>`).join('');
+  $('#lenPick').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const L = +b.dataset.l; const c = make.core.slice(0, L); while(c.length < L) c.push(MAKE_OPTS[c.length % 3]); make.core = c; drawMake();
+  });
+  $('#coreEdit').innerHTML = make.core.map((k,i) => `<button class="pick" data-i="${i}" aria-label="Core shape ${i+1}: ${S[k].name}. Tap to change.">${svg(k)}</button>`).join('');
+  $('#coreEdit').querySelectorAll('.pick').forEach(b => b.onclick = () => { const i=+b.dataset.i; make.core[i] = MAKE_OPTS[(MAKE_OPTS.indexOf(make.core[i])+1)%3]; drawMake(); });
+  drawStrip($('#makeStrip'), {core:make.core, total:12, built:12, targets:[10,11], bandsTo:12});
+  const t10 = at(make.core,10), t11 = at(make.core,11), m = $('#makeMsg');
+  if(t10==='triangle' && t11==='square'){ m.className='msg ok'; m.innerHTML = `It works! 10th <span class="inl">${svg('triangle')}</span> and 11th <span class="inl">${svg('square')}</span>. Can you find a different core that works too?`; }
+  else {
+    const bad = t10!=='triangle' ? 10 : 11, want = bad===10?'triangle':'square', got = at(make.core,bad);
+    m.className='msg no'; m.innerHTML = `Your ${bad}th is a ${S[got].name}, not a ${want}. ${why(make.core,bad)} Change that shape in the core.`;
+  }
+}
+$('#oneWay').onclick = () => { make.core = ['square','triangle']; drawMake(); };
+
+/* ---------- Challenge: 100th cube ---------- */
+function drawHundred(guess){
+  $('#hundredPick').innerHTML = ['red','blue'].map(k => `<button class="pick" data-k="${k}" aria-pressed="${guess===k}" aria-label="${S[k].name}">${svg(k)}</button>`).join('');
+  $('#hundredPick').querySelectorAll('.pick').forEach(b => b.onclick = () => drawHundred(b.dataset.k));
+  const grid = $('#hundredGrid'), m = $('#hundredMsg');
+  if(!guess){ grid.hidden = true; m.className='msg'; m.innerHTML=''; return; }
+  const ans = at(['red','blue'], 100);
+  grid.hidden = false;
+  grid.innerHTML = Array.from({length:100}, (_,i) => `<i class="${at(['red','blue'], i+1)==='blue'?'b':''}${i===99?' last':''}" title="${i+1}"></i>`).join('');
+  if(guess === ans){ m.className='msg ok'; m.innerHTML = `Yes, <b>blue</b>! Blue is at 2, 4, 6, 8… every even spot. 100 is even.`; }
+  else { m.className='msg no'; m.innerHTML = `Look at the grid. Red is at 1, 3, 5… Blue is at 2, 4, 6… Is 100 in the counting-by-2s? Try again.`; }
+}
+
+/* ---------- Views, reset, full screen ---------- */
+function show(v){
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.v===v));
+  document.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'v-'+v);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+function init(){
+  labs.forEach(l => l.stop()); labs = []; warmGen++; warmDone = false;
+  drawBeats(-1, false); $('#warmMsg').innerHTML=''; $('#warmMsg').className='msg';
+  labs.push(Lab($('#launchLab'), {core:['red','blue'], shown:6, total:10, targets:[10], vote:true}));
+  mountTabs($('#patTabs'), PATTERNS, $('#mainLab'), p => ({core:p.core, shown:6, total:20, targets:[10,20], boxStep:true}));
+  mountTabs($('#easyTabs'), EASY, $('#easyLab'), p => ({core:p.core, shown:4, total:10, targets:[6,8], boxStep:true}));
+  talkState = {bands:0, ten:false}; drawTalk(); $('#talkMsg').innerHTML=''; drawChart();
+  make = {core:['circle','square','circle']}; drawMake(); drawHundred(null);
+}
+$('#resetBtn').onclick = () => { init(); show('warm'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+/* exposed for checking */
+window.__wct = {at, why, hint, minPeriod, PATTERNS};
+init();
+})();
+</script>
+
+</body></html>

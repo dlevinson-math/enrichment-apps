@@ -1,0 +1,840 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Clothesline Numbers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a wide "laundry line" stage across the room, cards clipped on with wooden pins; tabs follow the lesson flow. */
+:root{
+  --sky:#E9EFF4; --paper:#FFFFFF; --ink:#18232F; --muted:#566475; --rule:#C9D3DD;
+  --rope:#8A6A43; --rope-hi:#B08A5C; --pin:#C9934F; --pin-dk:#9C6E35;
+  --accent:#2450B8; --accent-soft:#DEE7F8;
+  --ok:#1C7F47; --ok-soft:#DDF1E5; --off:#B8480E; --off-soft:#FBE7DB; --twin:#D9A100; --twin-soft:#FBF0CF;
+  --dec:#2450B8; --frac:#0B7C71; --mixed:#8335A8; --whole:#18232F;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sky:#0F151C; --paper:#1A232D; --ink:#E7EDF3; --muted:#9AA8B7; --rule:#2F3C49;
+    --rope:#A88560; --rope-hi:#C9A479; --pin:#D2A062; --pin-dk:#9E7440;
+    --accent:#86A6F0; --accent-soft:#1E2B45;
+    --ok:#52C584; --ok-soft:#173326; --off:#F2914F; --off-soft:#3A2416; --twin:#F2C744; --twin-soft:#3A3014;
+    --dec:#86A6F0; --frac:#43C3B4; --mixed:#C990E8; --whole:#E7EDF3;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sky:#0F151C; --paper:#1A232D; --ink:#E7EDF3; --muted:#9AA8B7; --rule:#2F3C49;
+  --rope:#A88560; --rope-hi:#C9A479; --pin:#D2A062; --pin-dk:#9E7440;
+  --accent:#86A6F0; --accent-soft:#1E2B45;
+  --ok:#52C584; --ok-soft:#173326; --off:#F2914F; --off-soft:#3A2416; --twin:#F2C744; --twin-soft:#3A3014;
+  --dec:#86A6F0; --frac:#43C3B4; --mixed:#C990E8; --whole:#E7EDF3;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--sky); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 28px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1500px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; padding-top:6px}
+.brand{min-width:0}
+.eyebrow{font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:0}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,52px); line-height:1; margin:4px 0 0; letter-spacing:-.01em; text-wrap:balance}
+.dq{margin:6px 0 0; color:var(--muted); font-size:clamp(16px,1.3vw,20px)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--rule); background:var(--paper); border-radius:12px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex; gap:4px; border-bottom:2px solid var(--rule); overflow-x:auto; scrollbar-width:none}
+.tabs button{border:0; background:none; padding:12px 14px 10px; font-weight:700; font-size:clamp(16px,1.35vw,20px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; white-space:nowrap; min-height:52px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tabs .n{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--rule); color:var(--ink); font-size:14px; margin-right:8px}
+.tabs button[aria-selected="true"] .n{background:var(--accent); color:var(--paper)}
+.view{display:flex; flex-direction:column; gap:16px}
+
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.2vw,34px); line-height:1.2; margin:0; text-wrap:balance}
+.sub{color:var(--muted); margin:0; max-width:60ch}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--paper); font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:12px 24px; border-radius:14px; min-height:54px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--paper); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:10px 20px; border-radius:14px; min-height:54px}
+.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; background:var(--paper); border:2px solid var(--rule); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 16px; border-radius:10px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.check{display:inline-flex; align-items:center; gap:10px; font-size:16px; color:var(--muted); cursor:pointer; min-height:44px}
+.check input{width:22px; height:22px; accent-color:var(--accent)}
+
+/* Fractions */
+.fr{display:inline-flex; flex-direction:column; align-items:center; line-height:1; vertical-align:middle}
+.fr>span{padding:0 .12em}
+.fr>span:first-child{border-bottom:.08em solid currentColor; padding-bottom:.06em}
+.fr>span:last-child{padding-top:.06em}
+.mx{margin-right:.14em}
+.if{white-space:nowrap; font-weight:700}
+.if sup,.if sub{font-size:.72em}
+.if sup{vertical-align:.45em} .if sub{vertical-align:-.15em}
+
+/* ---------- Clothesline ---------- */
+.stage{background:var(--paper); border:2px solid var(--rule); border-radius:18px; padding:8px 0 14px; position:relative}
+.scroller{overflow-x:auto; overflow-y:hidden; padding:0 0 4px}
+.zone{position:relative; min-width:760px; margin:0 26px; touch-action:pan-x}
+.hang,.tray .card{touch-action:none}
+[hidden]{display:none!important}
+.rope{position:absolute; left:-26px; right:-26px; top:34px; height:7px; border-radius:4px;
+  background:repeating-linear-gradient(115deg, var(--rope) 0 6px, var(--rope-hi) 6px 9px)}
+.post{position:absolute; top:22px; width:12px; height:30px; border-radius:4px; background:var(--pin-dk)}
+.post.l{left:-26px} .post.r{right:-26px}
+.tick{position:absolute; top:28px; width:2px; height:19px; margin-left:-1px; background:var(--muted); opacity:.45; border-radius:1px; pointer-events:none}
+.guide{position:absolute; top:0; bottom:0; width:3px; margin-left:-1.5px; background:var(--accent); opacity:.6; border-radius:2px; pointer-events:none}
+.ghostspot{position:absolute; top:30px; width:18px; height:18px; margin-left:-9px; border-radius:50%; border:3px dashed var(--ok); pointer-events:none}
+
+.hang{position:absolute; top:30px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; transition:left .45s cubic-bezier(.3,1.3,.5,1)}
+.hang .str{width:2px; background:var(--muted); opacity:.6}
+.pin{width:12px; height:26px; border-radius:3px; background:linear-gradient(90deg,var(--pin-dk),var(--pin) 45%,var(--pin-dk)); position:relative; z-index:2; margin-bottom:-8px}
+.pin::after{content:""; position:absolute; left:2px; right:2px; top:9px; height:3px; border-radius:2px; background:var(--pin-dk)}
+.card{--c:var(--dec); position:relative; background:var(--paper); color:var(--c); border:2px solid var(--rule); border-top:6px solid var(--c);
+  border-radius:8px; min-width:var(--cw,70px); height:var(--ch,66px); padding:0 8px; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:var(--cf,26px); box-shadow:0 3px 0 color-mix(in srgb, var(--ink) 10%, transparent); user-select:none; -webkit-user-select:none;
+  font-variant-numeric:tabular-nums}
+.card.k-frac{--c:var(--frac)} .card.k-mixed{--c:var(--mixed)} .card.k-whole{--c:var(--whole)}
+.card .fr{font-size:.82em}
+.hang.fixed .card{border-color:var(--ink); border-top-color:var(--ink); background:var(--sky)}
+.hang.drag-src{opacity:.25}
+.hang.movable{cursor:grab}
+.hang.sel .card,.tray .card.sel{outline:4px solid var(--accent); outline-offset:2px}
+.hang.ok .card{border-color:var(--ok); background:var(--ok-soft)}
+.hang.ok .pin{background:var(--ok)}
+.hang.twin .card{border-color:var(--twin); background:var(--twin-soft)}
+.hang.twin .pin{background:var(--twin)}
+.hang.off .card{border-style:dashed; border-color:var(--off); background:var(--off-soft)}
+.hang.off .card::after{content:"?"; position:absolute; top:-12px; right:-12px; width:26px; height:26px; border-radius:50%; background:var(--off); color:var(--paper); font-size:17px; display:grid; place-items:center}
+.drag-ghost{position:fixed; z-index:50; pointer-events:none; transform:translate(-50%,-30%) rotate(-3deg); opacity:.95}
+
+.tray-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:0 18px}
+.tray-head b{font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.tray{display:flex; gap:12px; flex-wrap:wrap; padding:8px 18px 0; min-height:86px; align-items:center}
+.tray .card{cursor:grab; touch-action:none}
+.tray .empty{color:var(--muted); font-size:16px}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:15px; color:var(--muted); padding:0 18px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:16px; height:16px; border-radius:4px; background:var(--c)}
+
+.feedback{background:var(--paper); border:2px solid var(--rule); border-radius:16px; padding:14px 18px; display:flex; flex-direction:column; gap:10px}
+.feedback:empty{display:none}
+.feedback .sum{font-family:var(--display); font-weight:600; font-size:clamp(19px,1.6vw,24px); margin:0}
+.fb-item{display:flex; gap:12px; align-items:flex-start; border-top:1.5px solid var(--rule); padding-top:10px}
+.fb-item p{margin:0; flex:1; min-width:0; font-size:clamp(17px,1.3vw,20px)}
+.fb-item .tag{flex:none; min-width:58px; text-align:center; font-weight:700; font-size:22px; color:var(--off); border:2px dashed var(--off); border-radius:8px; padding:4px 8px; background:var(--off-soft)}
+.fb-item button{flex:none}
+.small{font-size:15px; padding:8px 14px; min-height:44px; border-radius:10px}
+.ask{background:var(--accent-soft); border-radius:14px; padding:12px 16px; font-size:clamp(17px,1.35vw,21px); margin:0}
+.ask b{color:var(--accent)}
+
+/* Warm-up */
+.vs{display:grid; grid-template-columns:1fr auto 1fr; gap:18px; align-items:center; max-width:900px}
+.vs .or{font-family:var(--display); font-size:28px; color:var(--muted); font-weight:800}
+.pick{border:3px solid var(--rule); background:var(--paper); border-radius:20px; padding:18px; display:flex; flex-direction:column; align-items:center; gap:14px; min-height:120px}
+.pick .big{font-size:clamp(48px,6vw,84px); font-weight:700; line-height:1; color:var(--c,var(--ink))}
+.pick .big .fr{font-size:.8em}
+.pick[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent)}
+.pick.win{border-color:var(--ok)}
+.grid100{display:grid; grid-template-columns:repeat(10,1fr); gap:2px; width:min(240px,100%); aspect-ratio:1; max-width:100%}
+.grid100 i{background:var(--sky); border-radius:2px}
+.grid100 i.on{background:var(--c)}
+.gcap{font-size:18px; color:var(--muted); text-align:center}
+.gcap b{color:var(--ink)}
+
+/* Part C */
+.pc{display:flex; flex-direction:column; gap:14px}
+.pc-row{background:var(--paper); border:2px solid var(--rule); border-radius:16px; padding:14px 16px; display:flex; flex-direction:column; gap:12px}
+.pc-row .row button{min-width:110px; font-size:24px}
+.pc-row .row button.same{font-size:17px}
+.pc-row .row button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--rule); background:var(--paper); font-weight:700; font-size:20px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.evidence{background:var(--paper); border:2px solid var(--rule); border-radius:18px; padding:10px 12px; overflow-x:auto}
+.evidence:empty{display:none}
+.evidence svg{display:block; width:100%; min-width:640px; height:auto}
+.evidence svg + svg{margin-top:6px}
+.qresult{font-size:clamp(18px,1.45vw,22px); line-height:1.45; margin:0; padding:14px 18px; background:var(--accent-soft); border-radius:14px; max-width:62ch}
+.qresult:empty{display:none}
+.hint{font-size:15px; color:var(--muted); margin:0}
+svg text{font-family:var(--body); font-weight:700}
+
+@media (max-width:700px){
+  body{font-size:17px}
+  .vs{grid-template-columns:1fr; justify-items:stretch}
+  .vs .or{text-align:center}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){ .hang{transition:none} *{animation:none!important; scroll-behavior:auto!important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <p class="eyebrow">Grade 4 · Week 8 · Lesson 4.8</p>
+    <h1>Clothesline Numbers</h1>
+    <p class="dq">Where does each number belong, and how do you convince someone?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-tab="line" aria-selected="false"><span class="n">2</span>The clothesline</button>
+  <button role="tab" data-tab="sheet" aria-selected="false"><span class="n">3</span>Handout B &amp; C</button>
+  <button role="tab" data-tab="q" aria-selected="false"><span class="n">4</span>Detective questions</button>
+</nav>
+
+<!-- Warm-up -->
+<section class="view" id="v-warm">
+  <p class="prompt" id="wPrompt">Which is bigger?</p>
+  <p class="sub" id="wSub">Thumbs up for one side. Then give one reason for each side before you tap.</p>
+  <div class="vs" id="wVs"></div>
+  <div class="row">
+    <button class="primary" id="wWhy">Show why</button>
+    <button class="secondary" id="wNext">Next pair</button>
+  </div>
+  <p class="qresult" id="wMsg" aria-live="polite"></p>
+</section>
+
+<!-- Clothesline -->
+<section class="view" id="v-line" hidden>
+  <div class="row">
+    <div class="seg" role="group" aria-label="Card set">
+      <button data-set="floor" aria-pressed="false">Tenths only</button>
+      <button data-set="class" aria-pressed="true">Class set</button>
+      <button data-set="ceiling" aria-pressed="false">Class set + thirds</button>
+    </div>
+    <label class="check"><input type="checkbox" id="tickToggle"> Show tenth marks</label>
+  </div>
+  <p class="ask" id="lineAsk"></p>
+  <div class="stage" id="mainStage"></div>
+  <div class="row">
+    <button class="primary" id="lineCheck">Check the line</button>
+    <button class="secondary" id="lineDeal">Deal next pair</button>
+    <button class="secondary" id="lineAll">Show all cards</button>
+    <button class="secondary" id="lineSolve">Hang every card</button>
+  </div>
+  <div class="feedback" id="lineFb" aria-live="polite"></div>
+  <p class="hint">Drag a card onto the line, or tap a card and then tap the line. Anyone may move a card, but only with a reason the class accepts.</p>
+</section>
+
+<!-- Handout -->
+<section class="view" id="v-sheet" hidden>
+  <p class="prompt">Part B. Place these eight numbers on the line, in order.</p>
+  <div class="stage" id="bStage"></div>
+  <div class="row">
+    <button class="primary" id="bCheck">Check Part B</button>
+    <button class="secondary" id="bClear">Take them all down</button>
+  </div>
+  <div class="feedback" id="bFb" aria-live="polite"></div>
+  <p class="prompt" style="margin-top:10px">Part C. Which number is closer to 1?</p>
+  <p class="sub">Decide first, then tap. The line shows how far each one is from 1.</p>
+  <div class="pc" id="pc"></div>
+</section>
+
+<!-- Detective -->
+<section class="view" id="v-q" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="prompt" id="qText"></p>
+  <div class="row" id="qActions"></div>
+  <div class="evidence" id="qEvidence"></div>
+  <div class="qresult" id="qResult" aria-live="polite"></div>
+  <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+</section>
+</div>
+
+<script id="mathlib">
+/* ---------- Exact number cards ---------- */
+const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a; };
+function makeCard(spec){
+  let m, c = {id:spec, spec};
+  if((m = spec.match(/^(\d+) (\d+)\/(\d+)$/))){ c.kind='mixed'; c.w=+m[1]; c.n=+m[2]; c.d=+m[3]; c.vn=c.w*c.d+c.n; c.vd=c.d; }
+  else if((m = spec.match(/^(\d+)\/(\d+)$/))){ c.kind='frac'; c.n=+m[1]; c.d=+m[2]; c.vn=c.n; c.vd=c.d; }
+  else { const [a,b=''] = spec.split('.'); c.kind = b ? 'dec' : 'whole'; c.vd = 10**b.length; c.vn = +(a+b); }
+  const g = gcd(c.vn, c.vd) || 1; c.vn/=g; c.vd/=g; c.v = c.vn/c.vd; return c;
+}
+const cmp = (a,b) => a.vn*b.vd - b.vn*a.vd;              // exact compare
+const same = (a,b) => cmp(a,b)===0;
+const exactHundredths = c => (c.vn*100) % c.vd === 0;
+const hundredths = c => c.vn*100/c.vd;
+function hPhrase(c){
+  if(!exactHundredths(c)){ const f = Math.floor(c.vn*100/c.vd); return `a little more than ${f} hundredths`; }
+  const h = hundredths(c);
+  if(h < 100) return `${h} hundredth${h===1?'':'s'}`;
+  const w = Math.floor(h/100), r = h%100;
+  return r===0 ? `${w} whole${w===1?'':'s'}` : `${w} and ${r} hundredth${r===1?'':'s'}`;
+}
+const QL = ['0','1/4','1/2','3/4','1','1 1/4','1 1/2','1 3/4','2'];
+const QW = ['right at 0','a quarter of the way from 0 to 1','halfway from 0 to 1','three quarters of the way from 0 to 1','right at 1',
+  'a quarter of the way from 1 to 2','halfway from 1 to 2','three quarters of the way from 1 to 2','right at 2'];
+function inl(c){
+  if(typeof c==='string') c = makeCard(c);
+  if(c.kind==='frac') return `<span class="if"><sup>${c.n}</sup>&frasl;<sub>${c.d}</sub></span>`;
+  if(c.kind==='mixed') return `<span class="if">${c.w}&nbsp;<sup>${c.n}</sup>&frasl;<sub>${c.d}</sub></span>`;
+  return `<span class="if">${c.spec}</span>`;
+}
+function benchHint(c){
+  if(c.spec==='2') return `From 1 to 2 must be just as long as from 0 to 1.`;
+  if((c.vn*4) % c.vd === 0){
+    const k = c.vn*4/c.vd;
+    if(c.spec===QL[k]) return `${inl(c)} is ${QW[k]}.`;
+    return `${inl(c)} is the same as ${inl(QL[k])}: ${QW[k]}.`;
+  }
+  const lo = Math.floor(c.vn*4/c.vd), hi = lo+1;
+  const twice = 2*(c.vn*4 - lo*c.vd);              // compare (4v - lo) with 1/2, exactly
+  const near = twice < c.vd ? QL[lo] : QL[hi];
+  return `${inl(c)} is ${hPhrase(c)}. That puts it between ${inl(QL[lo])} and ${inl(QL[hi])}, closer to ${inl(near)}.`;
+}
+const EXTRA = {
+  '1.05':'Careful: 1.05 is 1 and 5 <b>hundredths</b>. 1.5 is 1 and 5 <b>tenths</b>. Which is more?',
+};
+function orderHint(a,b){ // a and b in wrong order on the line
+  const [s,l] = cmp(a,b)<0 ? [a,b] : [b,a];
+  return `${inl(s)} is ${hPhrase(s)} and ${inl(l)} is ${hPhrase(l)}, so ${inl(l)} is bigger. It belongs to the right of ${inl(s)}.`;
+}
+function equalGroups(cards){
+  const groups = [];
+  for(const c of cards){ const g = groups.find(g => same(g[0],c)); g ? g.push(c) : groups.push([c]); }
+  return groups;
+}
+const SETS = {
+  floor:  {min:-0.12, max:1.14, fixed:['0','1'], deck:['0.1','2/10','0.3','4/10','0.5','5/10','0.6','0.7','7/10','9/10'],
+           rounds:[['0.5','0.1'],['9/10','0.3'],['5/10','7/10'],['2/10','0.6'],['4/10','0.7']]},
+  class:  {min:-0.2, max:2.25, fixed:['0','1'], deck:['2','1/2','1/4','3/4','0.5','0.25','0.7','7/10','1.5','3/2','1 1/4','0.1','9/10','1.75','5/4','0.3','2/10','1.05'],
+           rounds:[['2'],['1/2'],['1/4','3/4'],['0.7','0.3'],['1.5','0.25'],['7/10','1 1/4'],['0.1','9/10'],['1.75','0.5'],['3/2','5/4'],['2/10','1.05']]},
+  ceiling:{min:-0.2, max:2.25, fixed:['0','1'], deck:['2','1/2','1/4','3/4','0.5','0.25','0.7','7/10','1.5','3/2','1 1/4','0.1','9/10','1.75','5/4','0.3','2/10','1.05','1/3','0.33','2/3','0.66'],
+           rounds:[['2'],['1/2'],['1/4','3/4'],['0.7','0.3'],['1.5','0.25'],['7/10','1 1/4'],['0.1','9/10'],['1.75','0.5'],['3/2','5/4'],['2/10','1.05'],['1/3','0.33'],['2/3','0.66']]},
+  partB:  {min:-0.12, max:2.14, fixed:['0','1','2'], deck:['0.4','3/4','1.2','5/4','0.05','9/10','1 1/2','1.09'], rounds:null},
+};
+const TOL = 0.04;
+/* Judge a line: placed = [{card, p}] including fixed. Returns Map id -> {ok, why:[...]} */
+function judge(placed){
+  const res = new Map();
+  for(const {card,p} of placed) res.set(card.id, {ok:true, far: Math.abs(p-card.v) > TOL + 1e-9, err:Math.abs(p-card.v), swaps:[]});
+  for(let i=0;i<placed.length;i++) for(let j=i+1;j<placed.length;j++){
+    const A = placed[i], B = placed[j];
+    if(Math.abs(A.card.v - B.card.v) < TOL - 1e-9) continue;     // too close to judge by eye (e.g. 1/3 and 0.33)
+    if((A.p - B.p) * cmp(A.card,B.card) < 0){
+      const ea = res.get(A.card.id).err, eb = res.get(B.card.id).err;
+      if(!A.fixed && (ea >= eb - 1e-9 || B.fixed)) res.get(A.card.id).swaps.push(B.card);
+      if(!B.fixed && (eb >= ea - 1e-9 || A.fixed)) res.get(B.card.id).swaps.push(A.card);
+    }
+  }
+  for(const r of res.values()) r.ok = !r.far && r.swaps.length===0;
+  return res;
+}
+</script>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function face(c){
+  if(c.kind==='frac') return `<span class="fr"><span>${c.n}</span><span>${c.d}</span></span>`;
+  if(c.kind==='mixed') return `<span class="mx">${c.w}</span><span class="fr"><span>${c.n}</span><span>${c.d}</span></span>`;
+  return c.spec;
+}
+function cardEl(c){
+  const d = document.createElement('div');
+  d.className = `card k-${c.kind}`; d.innerHTML = face(c);
+  d.setAttribute('aria-label', c.spec);
+  return d;
+}
+
+/* ================= Clothesline component ================= */
+class Line{
+  constructor(stage, setKey, opts={}){
+    this.stage = stage; this.opts = opts; this.ticks = false; this.sel = null;
+    stage.innerHTML = `<div class="scroller"><div class="zone"><div class="post l"></div><div class="rope"></div><div class="post r"></div></div></div>
+      <div class="tray-head"><b>${opts.trayLabel||'Cards to hang'}</b></div><div class="tray"></div>
+      <div class="legend"><span style="--c:var(--dec)"><i></i>decimal</span><span style="--c:var(--frac)"><i></i>fraction</span><span style="--c:var(--mixed)"><i></i>mixed number</span></div>`;
+    this.zone = stage.querySelector('.zone'); this.tray = stage.querySelector('.tray');
+    this.zone.addEventListener('pointerup', e => { if(this.sel && !this.dragging && e.target.closest('.hang')==null) this.hangAt(this.sel, this.valueAt(e.clientX)); });
+    new ResizeObserver(() => this.layout()).observe(this.zone);
+    this.load(setKey);
+  }
+  load(setKey){
+    const S = SETS[setKey]; this.S = S; this.key = setKey;
+    this.cards = new Map(); [...S.fixed, ...S.deck].forEach(s => this.cards.set(s, makeCard(s)));
+    this.hung = new Map(); S.fixed.forEach(s => this.hung.set(s, {p:this.cards.get(s).v, fixed:true, st:null}));
+    this.roundIdx = 0; this.hand = []; this.sel = null;
+    if(S.rounds) this.deal(); else this.hand = [...S.deck];
+    this.render();
+  }
+  undealt(){ return this.S.deck.filter(s => !this.hand.includes(s) && !this.hung.has(s)); }
+  deal(){
+    const R = this.S.rounds;
+    while(this.roundIdx < R.length){
+      const r = R[this.roundIdx++].filter(s => !this.hand.includes(s) && !this.hung.has(s));
+      if(r.length){ this.hand.push(...r); break; }
+    }
+    this.render();
+  }
+  dealAll(){ this.hand.push(...this.undealt()); this.roundIdx = this.S.rounds ? this.S.rounds.length : 0; this.render(); }
+  x(v){ return (v - this.S.min) / (this.S.max - this.S.min) * 100; }
+  valueAt(clientX){
+    const r = this.zone.getBoundingClientRect();
+    let v = this.S.min + (clientX - r.left) / r.width * (this.S.max - this.S.min);
+    v = Math.min(this.S.max - 0.02, Math.max(this.S.min + 0.02, v));
+    return Math.round(v*400)/400;
+  }
+  hangAt(id, v){
+    this.hand = this.hand.filter(s => s!==id);
+    this.hung.set(id, {p:v, fixed:false, st:null});
+    this.sel = null; this.render(); this.opts.onChange?.(this);
+  }
+  unhang(id){ this.hung.delete(id); if(!this.hand.includes(id)) this.hand.push(id); this.sel=null; this.render(); this.opts.onChange?.(this); }
+  takeDown(){ for(const [id,h] of [...this.hung]) if(!h.fixed) this.unhang(id); }
+  solve(){
+    this.dealAll();
+    for(const s of this.S.deck){ this.hung.set(s, {p:this.cards.get(s).v, fixed:false, st:'ok'}); }
+    this.hand = []; this.markTwins(); this.render();
+  }
+  check(){
+    const placed = [...this.hung].map(([id,h]) => ({card:this.cards.get(id), p:h.p, fixed:h.fixed}));
+    const res = judge(placed); const off = [];
+    for(const [id,h] of this.hung){
+      if(h.fixed) continue;
+      const r = res.get(id), c = this.cards.get(id);
+      if(r.ok){ h.st='ok'; h.p = c.v; }
+      else { h.st='off'; off.push({c, r, p:h.p}); }
+    }
+    this.markTwins(); this.render();
+    return {off, okCount:[...this.hung.values()].filter(h=>h.st==='ok'||h.st==='twin').length, left:this.hand.length + this.undealt().length};
+  }
+  markTwins(){
+    const ok = [...this.hung].filter(([id,h]) => !h.fixed && (h.st==='ok'||h.st==='twin')).map(([id]) => this.cards.get(id));
+    const all = [...ok, ...this.S.fixed.map(s=>this.cards.get(s))];
+    for(const g of equalGroups(all)){
+      for(const c of g){ const h = this.hung.get(c.id); if(!h.fixed) h.st = g.length>1 ? 'twin' : 'ok'; }
+    }
+  }
+  showMe(id){ const h = this.hung.get(id); h.p = this.cards.get(id).v; h.st='ok'; this.markTwins(); this.render(); }
+  render(){
+    const z = this.zone;
+    z.querySelectorAll('.hang,.tick').forEach(e => e.remove());
+    if(this.ticks){
+      for(let k=Math.ceil(this.S.min*10); k<=Math.floor(this.S.max*10); k++){
+        const t = document.createElement('div'); t.className='tick'; t.style.left = this.x(k/10)+'%';
+        if(k%10===0) t.style.opacity='.8';
+        z.appendChild(t);
+      }
+    }
+    for(const [id,h] of this.hung){
+      const c = this.cards.get(id);
+      const w = document.createElement('div');
+      w.className = 'hang' + (h.fixed?' fixed':' movable') + (h.st?' '+h.st:'') + (this.sel===id?' sel':'');
+      w.dataset.id = id; w.style.left = this.x(h.p)+'%';
+      w.innerHTML = `<div class="str"></div><div class="pin"></div>`;
+      const ce = cardEl(c); w.appendChild(ce);
+      if(!h.fixed){
+        w.tabIndex = 0;
+        w.setAttribute('aria-label', `${c.spec}, hanging on the line${h.st==='off'?', look again':h.st?', checked':''}. Arrow keys move it.`);
+        this.bindDrag(w, id, true);
+        w.addEventListener('keydown', e => {
+          if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+            e.preventDefault(); const step = e.shiftKey ? 0.1 : 0.01;
+            h.p = Math.min(this.S.max-0.02, Math.max(this.S.min+0.02, h.p + (e.key==='ArrowRight'?step:-step))); h.st=null;
+            this.render(); this.zone.querySelector(`.hang[data-id="${CSS.escape(id)}"]`)?.focus();
+          }
+        });
+      }
+      z.appendChild(w);
+    }
+    this.tray.innerHTML = '';
+    if(!this.hand.length){
+      const left = this.S.rounds ? this.undealt().length : 0;
+      this.tray.innerHTML = `<span class="empty">${left ? 'Deal the next pair when the class agrees.' : 'Every card is on the line.'}</span>`;
+    }
+    for(const id of this.hand){
+      const ce = cardEl(this.cards.get(id)); ce.dataset.id = id; ce.tabIndex = 0; ce.setAttribute('role','button');
+      ce.setAttribute('aria-label', `${id}. Press Enter to pick it up, then click the line.`);
+      if(this.sel===id) ce.classList.add('sel');
+      this.bindDrag(ce, id, false);
+      ce.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); this.sel = this.sel===id?null:id; this.render(); } });
+      this.tray.appendChild(ce);
+    }
+    this.layout();
+    this.opts.onRender?.(this);
+  }
+  layout(){
+    const els = [...this.zone.querySelectorAll('.hang')];
+    if(!els.length){ this.zone.style.height='150px'; return; }
+    const W = this.zone.clientWidth;
+    const cardW = Math.max(...els.map(e => e.querySelector('.card').offsetWidth)) || 70;
+    const cardH = els[0].querySelector('.card').offsetHeight || 66;
+    const items = els.map(e => ({e, x:parseFloat(e.style.left)/100*W, w:e.querySelector('.card').offsetWidth || cardW})).sort((a,b)=>a.x-b.x);
+    const ends = []; let maxL = 0;
+    for(const it of items){
+      let L = 0; while(ends[L] !== undefined && ends[L] > it.x - it.w/2 - 6) L++;
+      ends[L] = it.x + it.w/2; it.L = L; maxL = Math.max(maxL, L);
+      it.e.querySelector('.str').style.height = (14 + L*(cardH+14))+'px';
+      it.e.style.zIndex = 20 - L;
+    }
+    this.zone.style.height = (30 + 14 + 26 + (maxL+1)*(cardH+14) + 10) + 'px';
+  }
+  bindDrag(el, id, isHung){
+    el.addEventListener('pointerdown', e => {
+      if(e.button>0) return;
+      e.preventDefault();
+      const sx = e.clientX, sy = e.clientY; let ghost = null, guide = null;
+      const move = ev => {
+        if(!ghost && Math.hypot(ev.clientX-sx, ev.clientY-sy) > 7){
+          this.dragging = true;
+          ghost = cardEl(this.cards.get(id)); ghost.classList.add('drag-ghost'); document.body.appendChild(ghost);
+          (isHung ? el : el).classList.add(isHung?'drag-src':'sel');
+          guide = document.createElement('div'); guide.className='guide'; this.zone.appendChild(guide);
+        }
+        if(ghost){
+          ghost.style.left = ev.clientX+'px'; ghost.style.top = ev.clientY+'px';
+          const r = this.zone.getBoundingClientRect(); const over = ev.clientY > r.top - 60 && ev.clientY < r.bottom + 30;
+          guide.style.display = over ? '' : 'none';
+          guide.style.left = this.x(this.valueAt(ev.clientX))+'%';
+        }
+      };
+      const up = ev => {
+        window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+        if(ghost){
+          ghost.remove(); guide.remove();
+          const r = this.zone.getBoundingClientRect();
+          const over = ev.type!=='pointercancel' && ev.clientY > r.top - 60 && ev.clientY < r.bottom + 30 && ev.clientX >= r.left - 20 && ev.clientX <= r.right + 20;
+          if(over) this.hangAt(id, this.valueAt(ev.clientX));
+          else if(isHung) this.unhang(id);
+          else this.render();
+          setTimeout(() => this.dragging = false, 0);
+        } else {
+          // a tap: select / deselect
+          if(isHung && this.sel===id){ this.sel=null; }
+          else this.sel = id;
+          this.render();
+          if(isHung) this.opts.onTapHung?.(this, id);
+        }
+      };
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+    });
+  }
+}
+
+/* ---------- Feedback text ---------- */
+function offText(line, o){
+  const {c, r, p} = o; const parts = [];
+  if(r.far || !r.swaps.length) parts.push(`Look again: ${inl(c)} needs to move <b>${p < c.v ? 'right' : 'left'}</b>.`);
+  else parts.push(orderHint(c, r.swaps[0]));
+  parts.push(benchHint(c));
+  if(EXTRA[c.spec] && p > 1.3) parts.push(EXTRA[c.spec]);
+  return parts.join(' ');
+}
+function renderFeedback(box, line, res, doneMsg){
+  const {off, left} = res;
+  if(!off.length && !left){ box.innerHTML = `<p class="sum">${doneMsg}</p>`; return; }
+  let sum = off.length ? `${off.length} card${off.length===1?' needs':'s need'} another look. Can someone convince the class where ${off.length===1?'it goes':'they go'}?`
+                       : `Every card on the line is in a good spot.`;
+  if(left) sum += ` ${left} card${left===1?' is':'s are'} still waiting to be hung.`;
+  box.innerHTML = `<p class="sum">${sum}</p>`;
+  for(const o of off){
+    const d = document.createElement('div'); d.className='fb-item';
+    d.innerHTML = `<span class="tag">${inl(o.c)}</span><p>${offText(line,o)}</p>`;
+    const b = document.createElement('button'); b.className='secondary small'; b.textContent='Show me';
+    b.onclick = () => { line.showMe(o.c.id); d.remove(); if(!box.querySelector('.fb-item')) box.querySelector('.sum').textContent = 'Every card on the line is in a good spot now.'; };
+    d.appendChild(b); box.appendChild(d);
+  }
+}
+
+/* ================= Warm-up ================= */
+const WARM = [['0.7','3/4'],['0.3','1/4']];
+let wIdx = 0, wPick = null;
+function renderWarm(){
+  const [a,b] = WARM[wIdx].map(makeCard);
+  $('#wPrompt').innerHTML = `Which is bigger: ${inl(a)} or ${inl(b)}?`;
+  const box = $('#wVs'); box.innerHTML = '';
+  [a,b].forEach((c,i) => {
+    if(i===1){ const o = document.createElement('div'); o.className='or'; o.textContent='or'; box.appendChild(o); }
+    const p = document.createElement('button'); p.className='pick'; p.setAttribute('aria-pressed', wPick===c.id);
+    p.style.setProperty('--c', `var(--${c.kind==='frac'?'frac':'dec'})`);
+    p.innerHTML = `<span class="big">${face(c)}</span>`;
+    p.onclick = () => { wPick = c.id; renderWarm(); };
+    p.dataset.id = c.id; box.appendChild(p);
+  });
+  $('#wMsg').innerHTML = '';
+  $('#wNext').textContent = wIdx < WARM.length-1 ? 'Next pair' : 'Back to the first pair';
+}
+function warmWhy(){
+  const [a,b] = WARM[wIdx].map(makeCard);
+  const big = cmp(a,b) > 0 ? a : b, small = big===a ? b : a;
+  $$('#wVs .pick').forEach(p => {
+    const c = makeCard(p.dataset.id), h = hundredths(c);
+    if(!p.querySelector('.grid100')){
+      p.insertAdjacentHTML('beforeend', `<div class="grid100">${Array.from({length:100},(_,i)=>`<i class="${i<h?'on':''}"></i>`).join('')}</div>
+        <div class="gcap">${inl(c)} = <b>${h} hundredths</b>${c.kind==='frac' ? ` (${inl(c)} = ${inl(c.d===4?`${c.n*25}/100`:`${c.n*10}/100`)})` : ''}</div>`);
+    }
+    p.classList.toggle('win', c.id===big.id);
+  });
+  const diff = hundredths(big) - hundredths(small);
+  const lead = wPick == null ? '' : wPick===big.id ? 'Yes. ' : `Look at the grids. `;
+  $('#wMsg').innerHTML = `${lead}${inl(big)} shades ${hundredths(big)} squares and ${inl(small)} shades ${hundredths(small)}, so <b>${inl(big)} is bigger</b>, by ${diff} hundredths.` +
+    (wPick && wPick!==big.id ? ` Fourths are bigger pieces than tenths, so counting digits alone can fool you.` : '');
+}
+$('#wWhy').onclick = warmWhy;
+$('#wNext').onclick = () => { wIdx = (wIdx+1) % WARM.length; wPick = null; renderWarm(); };
+
+/* ================= Main clothesline ================= */
+const ASKS = {
+  '2':'Where does <b>2</b> go? Remember: 0 and 1 are already hung, and they are not at the ends.',
+  '1/2':'Where does <b>1/2</b> go? Who can say why?',
+  '1/4':'Does 1/4 go a quarter of the way, or wherever there is room?',
+  '0.7':'Is <b>0.7</b> closer to 1/2 or to 1? How do you know?',
+  '1.5':'Which cards are the same number? When you find two, hang them on the same spot.',
+  '7/10':'Is there already a card with the same value as 7/10 on the line?',
+  '0.1':'How far from 0 is 0.1? How far from 1 is 9/10?',
+  '1.75':'1.75 is past 1. How far past?',
+  '3/2':'3/2 and 5/4 are bigger than 1. How can you tell from the numerator and denominator?',
+  '2/10':'The trickiest card: 1.05. Is it closer to 1 or to 1.5?',
+  '1/3':'Is 1/3 exactly 0.33? Which card would be hardest to place, and why?',
+  '2/3':'Is 2/3 the same as 0.66? How could you check?',
+  '0.5':'0.5 and 1/2: same spot or different spots?',
+  '0.6':'Is 0.6 closer to 1/2 or to 1?',
+  '4/10':'Is 4/10 closer to 0 or to 1?',
+};
+function updateAsk(line){
+  const h = line.hand; let t = null;
+  for(const s of h) if(ASKS[s]){ t = ASKS[s]; break; }
+  if(!t) t = line.hand.length ? 'Place your two cards and say why. The class may challenge.' : 'All dealt cards are up. Walk the line: which cards are the same number?';
+  $('#lineAsk').innerHTML = t;
+  $('#lineDeal').disabled = !line.S.rounds || !line.undealt().length;
+  $('#lineAll').disabled = !line.undealt().length;
+}
+let main = new Line($('#mainStage'), 'class', {onRender: updateAsk, onChange: () => {}});
+$$('[data-set]').forEach(b => b.onclick = () => {
+  $$('[data-set]').forEach(x => x.setAttribute('aria-pressed', x===b));
+  main.load(b.dataset.set); $('#lineFb').innerHTML='';
+});
+$('#tickToggle').onchange = e => { main.ticks = e.target.checked; main.render(); };
+$('#lineDeal').onclick = () => main.deal();
+$('#lineAll').onclick = () => main.dealAll();
+$('#lineSolve').onclick = () => { main.solve(); $('#lineFb').innerHTML = `<p class="sum">Here is the whole line. Yellow pins mark cards that share a spot: they are the same number.</p>`; };
+$('#lineCheck').onclick = () => {
+  const r = main.check();
+  const twins = equalGroups([...main.hung].filter(([,h])=>h.st==='twin').map(([id])=>main.cards.get(id))).filter(g=>g.length>1);
+  let msg = 'Every card is where it belongs.';
+  if(twins.length) msg += ` Yellow pins: ${twins.map(g=>g.map(inl).join(' = ')).join(', ')}. Same spot, same number.`;
+  if(main.key==='ceiling' && main.hung.has('1/3') && main.hung.has('0.33')) msg += ` 1/3 and 0.33 look like they share a spot. Are they the same number? Try the challenge in Detective questions.`;
+  renderFeedback($('#lineFb'), main, r, msg);
+};
+
+/* ================= Part B ================= */
+const partB = new Line($('#bStage'), 'partB', {trayLabel:'Part B numbers'});
+$('#bCheck').onclick = () => {
+  const r = partB.check();
+  const order = [...partB.S.deck].map(makeCard).sort(cmp).map(inl).join(' &lt; ');
+  renderFeedback($('#bFb'), partB, r, `All eight are in order: ${order}.`);
+};
+$('#bClear').onclick = () => { partB.takeDown(); $('#bFb').innerHTML=''; };
+
+/* ================= Part C ================= */
+const PC = [['0.9','1.2'],['3/4','1 1/4'],['0.95','1.1']];
+function distText(c){ // distance from 1, in the card's own language
+  const one = makeCard('1');
+  const dn = Math.abs(c.vn - c.vd), dd = c.vd;                // |v - 1| = dn/dd
+  if(c.kind==='dec'){ const h = dn*100/dd; return h%10===0 ? `${h/10} tenth${h===10?'':'s'} (0.${h/10})` : `${h} hundredths (0.${String(h).padStart(2,'0')})`; }
+  const g = gcd(dn,dd); return `${inl(`${dn/g}/${dd/g}`)}`;
+}
+function renderPC(){
+  const box = $('#pc'); box.innerHTML='';
+  PC.forEach(([sa,sb], i) => {
+    const a = makeCard(sa), b = makeCard(sb);
+    const row = document.createElement('div'); row.className='pc-row';
+    row.innerHTML = `<div class="row"></div><div class="evidence" hidden></div><p class="qresult"></p>`;
+    const btns = row.querySelector('.row');
+    [[sa, inl(a)], ['same','Same distance'], [sb, inl(b)]].forEach(([k,html]) => {
+      const bt = document.createElement('button'); bt.className = 'secondary' + (k==='same'?' same':''); bt.innerHTML = html; bt.setAttribute('aria-pressed','false');
+      bt.onclick = () => {
+        btns.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x===bt));
+        const da = Math.abs(a.v-1), db = Math.abs(b.v-1);
+        const ea = Math.abs(a.vn-a.vd)*b.vd, eb = Math.abs(b.vn-b.vd)*a.vd;   // exact compare of distances
+        const ans = ea===eb ? 'same' : ea<eb ? sa : sb;
+        const ev = row.querySelector('.evidence'); ev.hidden = false;
+        ev.innerHTML = svgLine({min:0.5, max:1.5, major:0.1, minor:0.05, label:v=>fmt(v,1),
+          marks:[{v:a.v, t:sa, c:'var(--accent)'},{v:1, t:'1', c:'var(--ink)'},{v:b.v, t:sb, c:'var(--mixed)'}],
+          spans:[{a:a.v,b:1,c:'var(--accent)'},{a:1,b:b.v,c:'var(--mixed)'}]});
+        const why = `${inl(a)} is ${distText(a)} from 1. ${inl(b)} is ${distText(b)} from 1.`;
+        const verdict = ans==='same' ? `They are the same distance from 1.` : `So <b>${inl(ans===sa?a:b)}</b> is closer to 1.`;
+        row.querySelector('.qresult').innerHTML = (k===ans ? 'Yes. ' : 'Look at the two gaps on the line. ') + why + ' ' + verdict;
+      };
+      btns.appendChild(bt);
+    });
+    box.appendChild(row);
+  });
+}
+
+/* ================= SVG number line ================= */
+function fmt(v, dp){ return (+v.toFixed(dp)).toString(); }
+function svgLine(o){
+  const W = 1000, pad = 50;
+  const X0 = v => pad + (v - o.min)/(o.max - o.min)*(W - 2*pad);
+  { const ends = []; // greedy rows for marks without a fixed row, so labels never overlap
+    for(const m of [...(o.marks||[])].filter(m => m.row==null).sort((a,b)=>a.v-b.v)){
+      const tw = Math.max(34, m.t.length*13 + 16), x = X0(m.v);
+      let r = 0; while(ends[r] !== undefined && ends[r] > x - tw/2 - 6) r++;
+      ends[r] = x + tw/2; m.row = r;
+    } }
+  const rows = Math.max(1, ...(o.marks||[]).map(m => (m.row||0)+1));
+  const top = 16 + rows*44, axisY = top + 18, H = axisY + 46 + (o.spans?.length ? 30 : 0) + (o.title?0:0);
+  const X = v => pad + (v - o.min)/(o.max - o.min)*(W - 2*pad);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.aria||'Number line'}">`;
+  if(o.title) s += `<text x="${pad}" y="16" font-size="17" fill="var(--muted)">${o.title}</text>`;
+  s += `<line x1="${pad-30}" x2="${W-pad+30}" y1="${axisY}" y2="${axisY}" stroke="var(--ink)" stroke-width="3"/>`;
+  const steps = (st) => { const r=[]; const k0=Math.ceil(o.min/st-1e-9), k1=Math.floor(o.max/st+1e-9); for(let k=k0;k<=k1;k++) r.push(k*st); return r; };
+  if(o.minor) for(const v of steps(o.minor)) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${axisY-6}" y2="${axisY+6}" stroke="var(--muted)" stroke-width="1.5"/>`;
+  for(const v of steps(o.major)){
+    s += `<line x1="${X(v)}" x2="${X(v)}" y1="${axisY-12}" y2="${axisY+12}" stroke="var(--ink)" stroke-width="2.5"/>`;
+    s += `<text x="${X(v)}" y="${axisY+34}" text-anchor="middle" font-size="19" fill="var(--muted)">${o.label(v)}</text>`;
+  }
+  for(const sp of (o.spans||[])){
+    const y = axisY + 52, x1 = X(Math.min(sp.a,sp.b)), x2 = X(Math.max(sp.a,sp.b));
+    s += `<path d="M${x1} ${y-8} V${y} H${x2} V${y-8}" fill="none" stroke="${sp.c}" stroke-width="3"/>`;
+    if(sp.t) s += `<text x="${(x1+x2)/2}" y="${y+22}" text-anchor="middle" font-size="18" fill="${sp.c}">${sp.t}</text>`;
+  }
+  for(const m of (o.marks||[])){
+    const x = X(m.v), y = top - (m.row||0)*44;
+    s += `<line x1="${x}" x2="${x}" y1="${y+4}" y2="${axisY}" stroke="${m.c}" stroke-width="2" stroke-dasharray="${m.row?'4 4':'0'}"/>`;
+    s += `<circle cx="${x}" cy="${axisY}" r="7" fill="${m.c}"/>`;
+    const tw = Math.max(34, m.t.length*13 + 16);
+    s += `<rect x="${x-tw/2}" y="${y-28}" width="${tw}" height="32" rx="7" fill="var(--paper)" stroke="${m.c}" stroke-width="2.5"/>`;
+    s += `<text x="${x}" y="${y-5}" text-anchor="middle" font-size="20" fill="${m.c}">${m.t}</text>`;
+  }
+  return s + '</svg>';
+}
+
+/* ================= Detective questions ================= */
+const CLASS = SETS.class;
+function classCards(extra=[]){ return [...CLASS.fixed, ...CLASS.deck, ...extra].map(makeCard); }
+function stackMarks(cards, colorFn){
+  // give equal values the same x and stack them in rows; nearby values alternate rows to avoid overlap
+  const marks = [];
+  for(const g of equalGroups(cards)) g.forEach(c => marks.push({v:c.v, t:c.spec, c:colorFn(g,c)}));
+  return marks;
+}
+let q = 1, zoomLevel = 0, add02 = false;
+const ev = html => $('#qEvidence').innerHTML = html;
+const say = html => $('#qResult').innerHTML = html;
+const PAIR_COL = ['var(--accent)','var(--frac)','var(--mixed)','var(--off)','var(--ok)','var(--twin)'];
+const Q = {
+  1:{text:'Which cards turned out to be the same number? Clip them together.',
+     acts:[{l:'Clip the equal cards', f(){ showEquals(); }},
+           {l:()=> add02 ? 'Take away the 0.2 card' : 'Add a 0.2 card', f(){ add02 = !add02; showEquals(); renderQ(); }}]},
+  2:{text:'Is 0.7 closer to 1/2 or to 1? How do you know?',
+     acts:[{l:'Measure both gaps', f(){
+        ev(svgLine({min:0.4, max:1.1, major:0.1, minor:0.05, label:v=>fmt(v,1),
+          marks:[{v:0.5,t:'1/2',c:'var(--frac)'},{v:0.7,t:'0.7',c:'var(--accent)'},{v:1,t:'1',c:'var(--ink)'}],
+          spans:[{a:0.5,b:0.7,t:'0.2',c:'var(--frac)'},{a:0.7,b:1,t:'0.3',c:'var(--ink)'}]}));
+        say(`${inl('1/2')} = 0.5. From 0.5 to 0.7 is 2 tenths. From 0.7 to 1 is 3 tenths. So <b>0.7 is closer to ${inl('1/2')}</b>, but only by 1 tenth.`);
+     }}]},
+  3:{text:'The trickiest card: 1.05. Why did some people put it past 1.5?',
+     acts:[{l:'Zoom to 1 – 1.6', f(){
+        ev(svgLine({min:0.98, max:1.62, major:0.1, minor:0.01, label:v=>fmt(v,1),
+          marks:[{v:1,t:'1',c:'var(--ink)'},{v:1.05,t:'1.05',c:'var(--off)', row:1},{v:1.5,t:'1.5',c:'var(--accent)'}],
+          spans:[{a:1,b:1.05,t:'5 hundredths',c:'var(--off)'},{a:1.05,b:1.5,t:'45 hundredths more',c:'var(--accent)'}]}));
+        say(`1.05 is 1 and 5 <b>hundredths</b>. 1.5 is 1 and 5 <b>tenths</b>, which is 50 hundredths. Both have a 5, but the 5 in 1.5 is worth ten times as much. 1.05 sits just past 1.`);
+       }},
+       {l:'Zoom closer: 1 – 1.1', f(){
+        ev(svgLine({min:1, max:1.1, major:0.01, label:v=>fmt(v,2),
+          marks:[{v:1,t:'1',c:'var(--ink)'},{v:1.05,t:'1.05',c:'var(--off)'},{v:1.1,t:'1.1',c:'var(--accent)'}]}));
+        say(`Between 1 and 1.1 there are ten hundredths. 1.05 is right in the middle: halfway between 1 and 1.1. That is a long way from 1.5.`);
+       }}]},
+  4:{text:'If 0 is here and 1 is here, where must 2 be? Does 1/4 go a quarter of the way, or wherever there is room?',
+     acts:[{l:'Evenly spaced vs. to scale', f(){
+        const vals = equalGroups(classCards()).map(g=>g[0]).sort(cmp);
+        const n = vals.length - 1, i1 = vals.findIndex(c=>c.spec==='1'), i2 = vals.findIndex(c=>c.spec==='2'), iq = vals.findIndex(c=>same(c,makeCard('1/4')));
+        const even = vals.map((c,i) => ({v: i/n*2, t:c.spec, c: ['0','1','2'].includes(c.spec)?'var(--ink)':'var(--muted)'}));
+        const scale = vals.map((c,i) => ({v:c.v, t:c.spec, c: ['0','1','2'].includes(c.spec)?'var(--ink)':'var(--accent)'}));
+        ev(svgLine({title:'Just in order, evenly spaced', min:0, max:2, major:2, label:()=> '', marks:even,
+               spans:[{a:0,b:i1/n*2,t:`0 to 1: ${i1} gaps`,c:'var(--off)'},{a:i1/n*2,b:2,t:`1 to 2: ${i2-i1} gaps`,c:'var(--off)'}]}) +
+           svgLine({title:'To scale', min:0, max:2, major:0.25, label:v=>['0','1/4','1/2','3/4','1','1 1/4','1 1/2','1 3/4','2'][Math.round(v*4)], marks:scale,
+               spans:[{a:0,b:1,t:'0 to 1',c:'var(--ok)'},{a:1,b:2,t:'1 to 2: same length',c:'var(--ok)'}]}));
+        say(`Spaced evenly, 0 to 1 gets ${i1} gaps and 1 to 2 gets only ${i2-i1}, so 2 lands much too close to 1, and ${inl('1/4')} sits ${iq} of ${i1} steps along instead of a quarter of the way. On a true number line, every whole is the same length, and ${inl('1/4')} is exactly a quarter of the way from 0 to 1.`);
+       }}]},
+  5:{star:true, text:'Challenge: add 1/3 and 0.33 to the line. Are they the same number? How do you know?',
+     acts:[{l:()=> zoomLevel<3 ? 'Zoom in' : 'Back to 0 – 1', f(){ zoomLevel = (zoomLevel+1)%4; showThirds(); renderQ(); }},
+           {l:'Compare as fractions', f(){
+             ev('');
+             say(`0.33 = ${inl('33/100')} = ${inl('99/300')}. &nbsp; ${inl('1/3')} = ${inl('100/300')}. <br>So ${inl('1/3')} is a little more than 0.33, by ${inl('1/300')}. <br>Same with ${inl('2/3')} = ${inl('200/300')} and 0.66 = ${inl('198/300')}: ${inl('2/3')} is bigger, by ${inl('1/150')}.`);
+           }}]},
+  6:{text:'Which card was hardest to place? What convinced you?',
+     acts:[{l:'Show the finished line', f(){
+        ev(svgLine({min:-0.05, max:2.05, major:0.5, minor:0.1, label:v=>fmt(v,1), marks:stackMarks(classCards(), g => g.length>1 ? 'var(--twin)' : 'var(--accent)')}));
+        say('Pick one card. Tell the class where you first put it, where it ended up, and the argument that moved it.');
+       }}]},
+};
+function showEquals(){
+  const cards = classCards(add02 ? ['0.2'] : []);
+  const groups = equalGroups(cards).filter(g => g.length>1).sort((a,b)=>cmp(a[0],b[0]));
+  const col = new Map(groups.map((g,i) => [g[0].id, PAIR_COL[i%PAIR_COL.length]]));
+  ev(svgLine({min:-0.05, max:2.05, major:0.5, minor:0.1, label:v=>fmt(v,1),
+    marks: stackMarks(cards, g => g.length>1 ? col.get(g[0].id) : 'var(--muted)')}));
+  const lone = cards.find(c => c.spec==='2/10');
+  say(`<b>${groups.length} pairs share a spot:</b> ` + groups.map(g => `${g.map(inl).join(' = ')} (${hPhrase(g[0])})`).join('; ') + '.' +
+      (add02 ? '' : ` ${inl(lone)} has no partner yet. What decimal would match it?`));
+}
+function showThirds(){
+  const L = [
+    {min:0, max:1, major:0.1, minor:0.05, dp:1, note:'From 0 to 1, the two cards look like they share a spot.'},
+    {min:0.3, max:0.4, major:0.01, dp:2, note:'Zoom into 0.3 to 0.4. Now 0.33 sits on a hundredth mark, and 1/3 is just past it.'},
+    {min:0.33, max:0.34, major:0.001, dp:3, note:'Zoom again: 0.33 to 0.34. 1/3 is still one third of the way along. It never lands on a mark.'},
+    {min:0.333, max:0.334, major:0.0001, dp:4, note:'And again: 0.333 to 0.334. 0.33 is far off to the left now. 1/3 = 0.3333… with 3s that never stop.'},
+  ][zoomLevel];
+  const marks = [{v:1/3, t:'1/3', c:'var(--frac)'}];
+  if(0.33 >= L.min - 1e-12) marks.push({v:0.33, t:'0.33', c:'var(--accent)', row: zoomLevel===0 ? 1 : 0});
+  ev(svgLine({min:L.min, max:L.max, major:L.major, minor:L.minor, label:v=>fmt(v,L.dp), marks}));
+  say(`<b>Zoom ${zoomLevel+1} of 4.</b> ${L.note}`);
+}
+function renderQ(){
+  const nav = $('#qnav');
+  nav.innerHTML = Object.keys(Q).map(k => `<button data-q="${k}" aria-pressed="${+k===q}">${Q[k].star?'★ Challenge':k}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { q = +b.dataset.q; zoomLevel = 0; ev(''); say(''); renderQ(); });
+  const Qq = Q[q];
+  $('#qText').innerHTML = Qq.text.replace(/(\d+)\/(\d+)/g, (m,a,b) => inl(`${a}/${b}`));
+  const box = $('#qActions'); box.innerHTML = '';
+  Qq.acts.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0?'primary':'secondary'; b.innerHTML = typeof a.l==='function'?a.l():a.l; b.onclick = () => a.f(); box.appendChild(b); });
+}
+
+/* ================= Tabs, reset, full screen ================= */
+function selectTab(t){
+  $$('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','line','sheet','q'].forEach(k => $('#v-'+k).hidden = k!==t);
+  if(t==='line') main.render(); if(t==='sheet') partB.render();
+}
+$$('.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+function resetAll(){
+  wIdx = 0; wPick = null; renderWarm();
+  $$('[data-set]').forEach(x => x.setAttribute('aria-pressed', x.dataset.set==='class'));
+  $('#tickToggle').checked = false; main.ticks = false; main.load('class'); $('#lineFb').innerHTML='';
+  partB.load('partB'); $('#bFb').innerHTML=''; renderPC();
+  q = 1; zoomLevel = 0; add02 = false; ev(''); say(''); renderQ();
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ main.sel=null; main.render(); partB.sel=null; partB.render(); } });
+
+renderWarm(); renderPC(); renderQ();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,607 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tangram Teasers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a puzzle table. Step tabs across the top; a felt build mat with a piece tray beside it; feedback bubble under the mat. */
+:root{
+  --bg:#E8EEF3; --card:#FFFFFF; --ink:#17263A; --muted:#566579; --line:#C9D4DE;
+  --mat:#F4F7FA; --tray:#DCE5EC; --dot:#A9B8C6;
+  --accent:#D9472F; --accent-ink:#FFFFFF; --accent-soft:#FBE3DD;
+  --good:#16865A; --good-soft:#DDF3E8; --try:#B45309; --try-soft:#FCEBD3;
+  --l1:#EE6744; --l2:#3A6FD6; --m:#F2B232; --q:#27A067; --p:#8656D8; --s1:#13A2B4; --s2:#E0508F;
+  --seam:#FFFFFF;
+  --display:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111923; --card:#1A2431; --ink:#E9EFF5; --muted:#9CABBC; --line:#2D3A4B;
+    --mat:#16202C; --tray:#0E151D; --dot:#3B4B5E;
+    --accent:#F2674C; --accent-ink:#1A0D09; --accent-soft:#3A221D;
+    --good:#43C98D; --good-soft:#15302A; --try:#F0A04B; --try-soft:#36281A;
+    --l1:#F57C5B; --l2:#5B8BEA; --m:#F5C14F; --q:#3DBB7E; --p:#9F78EC; --s1:#2CBFD0; --s2:#EE6BA6;
+    --seam:#0E151D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111923; --card:#1A2431; --ink:#E9EFF5; --muted:#9CABBC; --line:#2D3A4B;
+  --mat:#16202C; --tray:#0E151D; --dot:#3B4B5E;
+  --accent:#F2674C; --accent-ink:#1A0D09; --accent-soft:#3A221D;
+  --good:#43C98D; --good-soft:#15302A; --try:#F0A04B; --try-soft:#36281A;
+  --l1:#F57C5B; --l2:#5B8BEA; --m:#F5C14F; --q:#3DBB7E; --p:#9F78EC; --s1:#2CBFD0; --s2:#EE6BA6;
+  --seam:#0E151D; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:12px 28px}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.brand svg{width:56px; height:56px; flex:none}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(28px,3.4vw,46px); line-height:1; margin:0; letter-spacing:.005em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:clamp(13px,1.1vw,16px); letter-spacing:.02em}
+.htools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:500; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+nav.steps button{flex:none; display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px;
+  padding:8px 18px 8px 8px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,22px); min-height:56px}
+nav.steps button .ic{width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--bg)}
+nav.steps button .ic svg{width:28px; height:28px}
+nav.steps button[aria-selected="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav.steps button[aria-selected="true"] .ic{background:var(--card)}
+
+.view[hidden]{display:none}
+.view{display:flex; flex-direction:column; gap:14px}
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.6vw,38px); line-height:1.15; margin:0; text-wrap:balance}
+.prompt small{display:block; font-family:var(--body); font-weight:400; font-size:clamp(15px,1.25vw,19px); color:var(--muted); margin-top:6px}
+
+/* Playground */
+.pg{display:flex; flex-direction:column; gap:10px; min-width:0}
+.board{width:100%; height:auto; display:block; touch-action:none; user-select:none; -webkit-user-select:none; background:var(--card); border-radius:18px; border:2px solid var(--line)}
+.board .tray{fill:var(--tray)}
+.board .matbg{fill:var(--mat); stroke:var(--line); stroke-width:.05}
+.board .dot{fill:var(--dot)}
+.board .lab{font-family:var(--display); font-weight:600; font-size:.55px; fill:var(--muted); letter-spacing:.02px}
+.pc{stroke:var(--seam); stroke-width:.07; stroke-linejoin:round; cursor:grab; transition:filter .15s}
+.pc:active{cursor:grabbing}
+.pc.sel{stroke:var(--ink); stroke-width:.12; filter:drop-shadow(0 .12px .18px rgba(0,0,0,.35))}
+.pc.bad{stroke:var(--accent); stroke-width:.16; stroke-dasharray:.25 .15}
+.pc.pulse{animation:pulse 1s ease-in-out 3}
+.pc.dim{opacity:.28}
+@keyframes pulse{50%{stroke:var(--ink); stroke-width:.2; filter:brightness(1.15)}}
+.ghostline{fill:none; stroke:var(--ink); stroke-width:.09; stroke-dasharray:.3 .2; opacity:.55; stroke-linejoin:round}
+.outline{fill:none; stroke:var(--ink); stroke-width:.14; stroke-linejoin:round}
+.outline.good{stroke:var(--good)}
+.holeline{fill:var(--accent-soft); stroke:var(--accent); stroke-width:.12; stroke-dasharray:.25 .15}
+.cdot{fill:var(--ink)}
+.cdot.good{fill:var(--good)}
+.cnum{font-family:var(--display); font-weight:700; font-size:.42px; fill:var(--card); text-anchor:middle; dominant-baseline:central}
+.tools{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.tbtn{display:inline-flex; align-items:center; gap:8px; border:2px solid var(--line); background:var(--card); border-radius:16px; padding:10px 16px; min-height:56px; font-weight:600; font-size:clamp(16px,1.3vw,19px)}
+.tbtn svg{width:24px; height:24px}
+.tbtn:hover{border-color:var(--ink)}
+.tbtn.go{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-family:var(--display); font-size:clamp(19px,1.6vw,24px); padding:10px 26px}
+.tbtn[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.spacer{flex:1}
+.say{display:flex; gap:14px; align-items:flex-start; padding:14px 18px; border-radius:18px; background:var(--card); border:2px solid var(--line); font-size:clamp(17px,1.5vw,22px); min-height:64px}
+.say .face{flex:none; width:40px; height:40px}
+.say p{margin:0} .say p+p{margin-top:6px; color:var(--muted); font-size:.85em}
+.say.good{background:var(--good-soft); border-color:var(--good)}
+.say.try{background:var(--try-soft); border-color:var(--try)}
+.say b{font-family:var(--display); font-weight:600}
+.say .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+.mini{border:2px solid var(--ink); background:var(--card); border-radius:12px; padding:8px 14px; font-weight:600; min-height:44px}
+
+/* Quick look */
+.ql{display:grid; grid-template-columns:minmax(220px,340px) 1fr; gap:18px; align-items:start}
+.flash{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:16px; display:flex; flex-direction:column; gap:12px; align-items:stretch}
+.flashbox{position:relative; aspect-ratio:1; max-width:100%; border-radius:14px; background:var(--mat); display:grid; place-items:center; overflow:hidden}
+.flashbox svg{width:72%; height:72%}
+.cover{position:absolute; inset:0; display:grid; place-items:center; background:var(--tray); font-family:var(--display); font-weight:700; font-size:120px; color:var(--muted)}
+.timer{height:10px; border-radius:6px; background:var(--tray); overflow:hidden}
+.timer i{display:block; height:100%; width:0; background:var(--accent)}
+.bigbtn{border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px); border-radius:16px; padding:14px 20px; min-height:60px}
+.bigbtn.alt{background:var(--card); color:var(--ink); border:2px solid var(--ink)}
+
+/* Goals */
+.goals{display:flex; gap:12px; flex-wrap:wrap}
+.goal{display:flex; flex-direction:column; align-items:center; gap:6px; width:132px; padding:12px 8px; border-radius:18px; border:2px dashed var(--line); background:var(--card)}
+.goal .gpic{width:84px; height:84px; display:grid; place-items:center; font-family:var(--display); font-size:48px; font-weight:700; color:var(--line)}
+.goal .gpic svg{width:84px; height:84px}
+.goal span{font-family:var(--display); font-weight:600; font-size:17px; color:var(--muted)}
+.goal.found{border-style:solid; border-color:var(--good); background:var(--good-soft)}
+.goal.found span{color:var(--ink)}
+.two{display:grid; grid-template-columns:1fr minmax(240px,320px); gap:18px; align-items:start}
+
+/* Build */
+.build{display:grid; grid-template-columns:minmax(200px,250px) minmax(0,1fr); gap:18px; align-items:start}
+.cards{display:flex; flex-direction:column; gap:8px}
+.card{display:flex; align-items:center; gap:12px; text-align:left; border:2px solid var(--line); background:var(--card); border-radius:16px; padding:8px 44px 8px 12px; min-height:64px; position:relative}
+.card svg.glyph{width:44px; height:44px; flex:none}
+.card .ct{display:flex; flex-direction:column; gap:2px; min-width:0}
+.card .ct b{font-family:var(--display); font-weight:600; font-size:20px; line-height:1.1}
+.pips{display:flex; gap:4px; flex-wrap:wrap}
+.pips i{width:11px; height:11px; border-radius:50%; background:var(--ink)}
+.pips em{font-style:normal; font-size:13px; color:var(--muted)}
+.card[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 0 0 0 2px var(--ink)}
+.card.done::after{content:""; position:absolute; right:10px; top:50%; width:26px; height:26px; margin-top:-13px; border-radius:50%;
+  background:var(--good) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat}
+.card.star b{color:var(--accent)}
+.helps{display:flex; gap:8px; flex-wrap:wrap}
+.record h3,.sect h3{font-family:var(--display); font-weight:600; font-size:20px; margin:0 0 8px}
+.thumbs{display:flex; gap:8px; flex-wrap:wrap}
+.thumb{width:92px; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px; background:var(--card); border:2px solid var(--line); border-radius:12px; font-size:12px; color:var(--muted); text-align:center}
+.thumb svg{width:76px; height:76px}
+.thumb.app{border-style:dashed}
+.empty{color:var(--muted); font-size:15px}
+
+/* Ladder */
+.ladder{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; overflow-x:auto}
+.rung{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:10px 8px; display:flex; flex-direction:column; align-items:center; gap:8px; min-width:104px}
+.rung .num{font-family:var(--display); font-weight:700; font-size:clamp(36px,4vw,56px); line-height:1}
+.rung .lbl{font-size:13px; color:var(--muted); margin-top:-6px}
+.rung .slot{flex:1; width:100%; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border-radius:12px; background:var(--mat)}
+.rung .slot .q{font-family:var(--display); font-size:48px; font-weight:700; color:var(--line)}
+.rung .slot svg{width:min(88px,100%); height:auto; aspect-ratio:1}
+.rung .slot .x{font-family:var(--display); font-size:54px; font-weight:700; color:var(--accent); line-height:1}
+.rung.has{border-color:var(--good)}
+.rung.gap{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.rung .more{font-size:12px; color:var(--muted)}
+.rung button{border:2px solid var(--line); background:var(--card); border-radius:10px; padding:6px 8px; font-size:14px; font-weight:600; min-height:40px; width:100%}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:60px; height:60px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:24px}
+.qnav button.star{width:auto; padding:0 20px; border-radius:30px; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.4vw,34px); margin:0; line-height:1.2; max-width:30em; text-wrap:balance}
+.qact{display:flex; gap:10px; flex-wrap:wrap}
+.stage{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:16px; min-height:220px; display:flex; flex-direction:column; gap:12px}
+.figs{display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end}
+.fig{display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--display); font-weight:600; font-size:18px}
+.fig svg{height:150px; width:auto; max-width:100%}
+.fig .eq{font-size:44px; font-weight:700; color:var(--muted); align-self:center}
+.note{font-size:clamp(17px,1.45vw,21px); margin:0; max-width:40em}
+.note.teacher{font-size:15px; color:var(--muted); border-top:2px solid var(--line); padding-top:10px}
+.hint{font-size:14px; color:var(--muted); margin:0}
+.tally{display:flex; gap:10px; flex-wrap:wrap; align-items:center; font-family:var(--display); font-weight:600; font-size:20px}
+.tally .chip{display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:12px; background:var(--mat); border:2px solid var(--line)}
+.tally .chip svg{width:34px; height:34px}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+@media (max-width: 900px){
+  .build,.two,.ql{grid-template-columns:1fr}
+  .cards{flex-direction:row; overflow-x:auto; padding-bottom:4px}
+  .card{flex:none; min-width:150px}
+  .ladder{grid-template-columns:repeat(7,104px)}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg id="brandMark" viewBox="-0.2 -0.2 4.4 4.4" aria-hidden="true"></svg>
+    <div>
+      <h1>Tangram Teasers</h1>
+      <p class="sub">Grade 1 · Week 8 · Lesson 1.8 · Same pieces, new shapes</p>
+    </div>
+  </div>
+  <div class="htools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="steps" role="tablist" aria-label="Lesson steps">
+  <button role="tab" data-tab="look" aria-selected="true"><span class="ic"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--ink)"/><circle cx="12" cy="12" r="3.2" fill="var(--accent)"/></svg></span>Quick look</button>
+  <button role="tab" data-tab="two" aria-selected="false"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 18h9l-4.5-9z" fill="var(--s1)"/><path d="M12 18h9l-4.5-9z" fill="var(--s2)"/></svg></span>Two triangles</button>
+  <button role="tab" data-tab="build" aria-selected="false"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16L12 12z" fill="var(--l1)"/><path d="M4 4v16l8-8z" fill="var(--l2)"/><path d="M20 4v8l-4 4z" fill="var(--m)"/><path d="M12 12l4 4-4 4-4-4z" fill="var(--q)"/></svg></span>Build it</button>
+  <button role="tab" data-tab="ladder" aria-selected="false"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="15" width="4" height="5" rx="1" fill="var(--q)"/><rect x="10" y="10" width="4" height="10" rx="1" fill="var(--m)"/><rect x="17" y="4" width="4" height="16" rx="1" fill="var(--l1)"/></svg></span>Square ladder</button>
+  <button role="tab" data-tab="detect" aria-selected="false"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" fill="none" stroke="var(--ink)" stroke-width="2.4"/><path d="M14.5 14.5L21 21" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg></span>Detective questions</button>
+</nav>
+
+<!-- 1. Quick look -->
+<section class="view" id="v-look">
+  <p class="prompt">Look fast! What do you see?<small>Tap “Show me”. The picture hides after 3 seconds. Then build it from memory.</small></p>
+  <div class="ql">
+    <div class="flash">
+      <div class="flashbox"><svg id="flashPic" viewBox="-0.15 -0.15 2.3 2.3" aria-label="Two small triangles"></svg><div class="cover" id="flashCover">?</div></div>
+      <div class="timer" aria-hidden="true"><i id="flashBar"></i></div>
+      <button class="bigbtn" id="flashBtn">Show me</button>
+    </div>
+    <div id="pgLook"></div>
+  </div>
+</section>
+
+<!-- 2. Two triangles -->
+<section class="view" id="v-two" hidden>
+  <p class="prompt">Two small triangles. How many shapes?<small>Sides must match all the way. Try turning and flipping.</small></p>
+  <div class="two">
+    <div id="pgTwo"></div>
+    <div class="sect">
+      <h3>Shapes we found</h3>
+      <div class="goals" id="goals"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Build it -->
+<section class="view" id="v-build" hidden>
+  <div class="build">
+    <div class="cards" id="cards" role="group" aria-label="Challenges"></div>
+    <div class="pg">
+      <p class="prompt" id="buildPrompt"></p>
+      <div id="pgBuild"></div>
+      <div class="helps">
+        <button class="tbtn" id="hintPieces">Which pieces?</button>
+        <button class="tbtn" id="hintOutline" aria-pressed="false">Outline</button>
+        <button class="tbtn" id="hintShow">Show a way</button>
+      </div>
+      <div class="record"><h3 id="recordTitle">Our answers</h3><div class="thumbs" id="recordThumbs"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Square ladder -->
+<section class="view" id="v-ladder" hidden>
+  <p class="prompt">Squares from 1 piece to 7 pieces<small>Every square you check in “Build it” lands here. Which numbers are still missing?</small></p>
+  <div class="ladder" id="ladder"></div>
+  <div class="qact">
+    <button class="tbtn" id="ladGaps">Find the gaps</button>
+    <button class="tbtn" id="ladFill">Show a way for every number</button>
+    <button class="tbtn" id="ladWhy">Could a trade fill the gap?</button>
+  </div>
+  <div class="stage" id="ladStage" hidden></div>
+</section>
+
+<!-- 5. Detective questions -->
+<section class="view" id="v-detect" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="qtext" id="qtext"></p>
+  <div class="qact" id="qact"></div>
+  <div class="stage" id="qstage"></div>
+  <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+</section>
+</div>
+
+<script id="geo">
+/* ---------- Pieces and geometry (all pieces live on a grid; every corner is a whole-number point) ---------- */
+const BASE={L1:[[0,0],[4,0],[2,2]],L2:[[0,0],[4,0],[2,2]],M:[[0,0],[2,0],[0,2]],Q:[[1,0],[2,1],[1,2],[0,1]],P:[[0,0],[2,0],[3,1],[1,1]],S1:[[0,0],[2,0],[1,1]],S2:[[0,0],[2,0],[1,1]]};
+const TYPE={L1:'L',L2:'L',M:'M',Q:'Q',P:'P',S1:'S',S2:'S'};
+const SIZE={L:4,M:2,Q:2,P:2,S:1}; // measured in small triangles
+function pip(poly,x,y){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+const QC=[[.5,1/6],[5/6,.5],[.5,5/6],[1/6,.5]];
+function rasterize(v){const xs=v.map(p=>p[0]),ys=v.map(p=>p[1]);const out=[];
+  for(let x=Math.floor(Math.min(...xs));x<Math.ceil(Math.max(...xs));x++)for(let y=Math.floor(Math.min(...ys));y<Math.ceil(Math.max(...ys));y++)for(let q=0;q<4;q++){if(pip(v,x+QC[q][0],y+QC[q][1]))out.push(x+','+y+','+q)}
+  return out}
+function cellTri(k){const [x,y,q]=k.split(',').map(Number);const A=[2*x,2*y],B=[2*x+2,2*y],C=[2*x+2,2*y+2],D=[2*x,2*y+2],O=[2*x+1,2*y+1];return [[A,B,O],[B,C,O],[C,D,O],[D,A,O]][q]}
+function polyArea(l){let s=0;for(let i=0;i<l.length;i++){const p=l[i],q=l[(i+1)%l.length];s+=p[0]*q[1]-q[0]*p[1]}return s/2}
+function classify(v){const m=v.length;const e=v.map((p,i)=>{const q=v[(i+1)%m];return [q[0]-p[0],q[1]-p[1]]});
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1],cr=(a,b)=>a[0]*b[1]-a[1]*b[0],L=a=>dot(a,a);
+  const crs=e.map((a,i)=>cr(a,e[(i+1)%m]));const convex=crs.every(c=>c>0)||crs.every(c=>c<0);
+  let type='poly';
+  if(m===3)type='triangle';
+  else if(m===4){const right=e.every((a,i)=>dot(a,e[(i+1)%m])===0);
+    if(right)type=L(e[0])===L(e[1])?'square':'rectangle';
+    else{const p1=cr(e[0],e[2])===0,p2=cr(e[1],e[3])===0;type=p1&&p2?'parallelogram':(p1||p2)?'trapezoid':'quad'}}
+  return {type,m,convex}}
+function analyze(list){
+  if(!list.length)return {status:'empty'};
+  const owner=new Map(),over=new Set();
+  for(const p of list)for(const k of rasterize(p.verts)){if(owner.has(k)){over.add(owner.get(k));over.add(p.id)}else owner.set(k,p.id)}
+  if(over.size)return {status:'overlap',ids:[...over]};
+  const parent=new Map();const find=a=>{while(parent.get(a)!==a){parent.set(a,parent.get(parent.get(a)));a=parent.get(a)}return a};
+  for(const k of owner.keys())parent.set(k,k);
+  const edges=new Map();
+  for(const k of owner.keys()){const t=cellTri(k);for(let i=0;i<3;i++){const a=t[i],b=t[(i+1)%3];const ks=a+'>'+b,rk=b+'>'+a;
+    if(edges.has(rk)){parent.set(find(edges.get(rk)),find(k));edges.delete(rk)}else edges.set(ks,k)}}
+  const roots=new Set([...owner.keys()].map(find));
+  if(roots.size>1)return {status:'apart'};
+  const out=new Map();
+  for(const ks of edges.keys()){const [a,b]=ks.split('>');if(!out.has(a))out.set(a,[]);out.get(a).push(b)}
+  for(const [a,l] of out)if(l.length>1)return {status:'corner',at:a.split(',').map(n=>n/2)};
+  const used=new Set(),loops=[];
+  for(const a0 of out.keys()){if(used.has(a0))continue;const loop=[];let a=a0;while(!used.has(a)){used.add(a);loop.push(a.split(',').map(Number));a=out.get(a)[0]}loops.push(loop)}
+  if(loops.length>1){loops.sort((a,b)=>Math.abs(polyArea(b))-Math.abs(polyArea(a)));return {status:'hole',holes:loops.slice(1).map(l=>l.map(p=>[p[0]/2,p[1]/2]))}}
+  let v=loops[0],changed=true;
+  while(changed&&v.length>3){changed=false;for(let i=0;i<v.length;i++){const a=v[(i-1+v.length)%v.length],b=v[i],c=v[(i+1)%v.length];
+    if((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0])===0){v.splice(i,1);changed=true;break}}}
+  return Object.assign({status:'ok',n:list.length,ids:list.map(p=>p.id),types:list.map(p=>TYPE[p.id]).sort().join(''),verts:v.map(p=>[p[0]/2,p[1]/2]),area:Math.abs(polyArea(v))/4},classify(v));
+}
+const SOLS={"sq2":[{"t":"SS","pl":{"S1":[[1,0],[1,2],[0,1]],"S2":[[1,2],[1,0],[2,1]]}},{"t":"Q","pl":{"Q":[[1,0],[2,1],[1,2],[0,1]]}}],"sq4":[{"t":"MSS","pl":{"M":[[0,0],[2,0],[0,2]],"S1":[[2,2],[0,2],[1,1]],"S2":[[2,0],[2,2],[1,1]]}}],"sq8":[{"t":"LL","pl":{"L1":[[2,0],[2,4],[0,2]],"L2":[[2,4],[2,0],[4,2]]}},{"t":"LMSS","pl":{"L1":[[2,0],[2,4],[0,2]],"M":[[2,2],[4,2],[2,0]],"S1":[[2,2],[4,2],[3,3]],"S2":[[2,4],[2,2],[3,3]]}},{"t":"LQSS","pl":{"L1":[[2,0],[2,4],[0,2]],"S1":[[2,2],[2,0],[3,1]],"Q":[[3,1],[4,2],[3,3],[2,2]],"S2":[[2,4],[2,2],[3,3]]}},{"t":"LPSS","pl":{"L1":[[2,0],[2,4],[0,2]],"S1":[[2,2],[2,0],[3,1]],"P":[[3,1],[3,3],[2,4],[2,2]],"S2":[[3,3],[3,1],[4,2]]}},{"t":"MPQSS","pl":{"M":[[2,2],[2,0],[0,2]],"S1":[[0,2],[2,2],[1,3]],"Q":[[2,2],[3,3],[2,4],[1,3]],"P":[[3,3],[3,1],[2,0],[2,2]],"S2":[[3,3],[3,1],[4,2]]}}],"sq16":[{"t":"LLMPQSS","pl":{"L1":[[0,0],[4,0],[2,2]],"L2":[[0,4],[0,0],[2,2]],"S1":[[2,4],[0,4],[1,3]],"Q":[[2,2],[3,3],[2,4],[1,3]],"S2":[[3,1],[3,3],[2,2]],"M":[[4,4],[4,2],[2,4]],"P":[[4,0],[4,2],[3,3],[3,1]]}}],"tri2":[{"t":"M","pl":{"M":[[0,0],[2,0],[0,2]]}},{"t":"SS","pl":{"S1":[[0,0],[2,0],[1,1]],"S2":[[0,2],[0,0],[1,1]]}}],"tri4":[{"t":"L","pl":{"L1":[[0,0],[4,0],[2,2]]}},{"t":"MSS","pl":{"M":[[2,0],[0,0],[2,2]],"S1":[[2,0],[4,0],[3,1]],"S2":[[2,2],[2,0],[3,1]]}},{"t":"QSS","pl":{"S1":[[0,0],[2,0],[1,1]],"Q":[[2,0],[3,1],[2,2],[1,1]],"S2":[[2,0],[4,0],[3,1]]}},{"t":"PSS","pl":{"S1":[[0,0],[2,0],[1,1]],"P":[[4,0],[2,0],[1,1],[3,1]],"S2":[[1,1],[3,1],[2,2]]}}],"tri8":[{"t":"LL","pl":{"L1":[[0,0],[4,0],[2,2]],"L2":[[0,4],[0,0],[2,2]]}},{"t":"LMSS","pl":{"L1":[[0,0],[4,0],[2,2]],"M":[[0,2],[2,2],[0,0]],"S1":[[0,2],[2,2],[1,3]],"S2":[[0,4],[0,2],[1,3]]}},{"t":"LQSS","pl":{"L1":[[0,0],[4,0],[2,2]],"S1":[[0,2],[0,0],[1,1]],"Q":[[1,1],[2,2],[1,3],[0,2]],"S2":[[0,4],[0,2],[1,3]]}},{"t":"LPSS","pl":{"L1":[[0,0],[4,0],[2,2]],"S1":[[0,2],[0,0],[1,1]],"P":[[1,1],[1,3],[0,4],[0,2]],"S2":[[1,3],[1,1],[2,2]]}},{"t":"MPQSS","pl":{"M":[[0,0],[2,0],[0,2]],"Q":[[1,1],[2,2],[1,3],[0,2]],"S1":[[0,4],[0,2],[1,3]],"P":[[4,0],[2,0],[1,1],[3,1]],"S2":[[1,1],[3,1],[2,2]]}}],"rect4":[{"t":"MSS","pl":{"S1":[[1,0],[1,2],[0,1]],"M":[[1,2],[3,2],[1,0]],"S2":[[1,2],[3,2],[2,3]]}},{"t":"QSS","pl":{"S1":[[1,0],[1,2],[0,1]],"S2":[[1,2],[1,0],[2,1]],"Q":[[2,1],[3,2],[2,3],[1,2]]}},{"t":"PSS","pl":{"S1":[[1,0],[1,2],[0,1]],"P":[[2,3],[2,1],[1,0],[1,2]],"S2":[[2,3],[2,1],[3,2]]}}]};
+const SHAPE_OF={sq2:'square',sq4:'square',sq8:'square',sq16:'square',tri2:'triangle',tri4:'triangle',tri8:'triangle',rect4:'rectangle'};
+const ALL_SOLS=[];for(const k in SOLS)for(const s of SOLS[k])ALL_SOLS.push({key:k,shape:SHAPE_OF[k],n:s.t.length,t:s.t,pl:Object.entries(s.pl).map(([id,verts])=>({id,verts}))});
+function solsFor(shape,n){return ALL_SOLS.filter(s=>s.shape===shape&&s.n===n)}
+</script>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COL=id=>`var(--${id.toLowerCase()})`;
+const NICE={L:'big triangle',M:'medium triangle',Q:'square',P:'parallelogram',S:'small triangle'};
+const ptsStr=v=>v.map(p=>p.join(',')).join(' ');
+function shapeName(r){
+  if(r.type==='poly')return r.m===5?'pentagon (5 sides)':r.m===6?'hexagon (6 sides)':`${r.m}-sided shape`;
+  if(r.type==='quad')return '4-sided shape';
+  return r.type;}
+const article=w=>/^[aeiou]/i.test(w)?'an':'a';
+const FACE={
+  good:'<svg class="face" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--good)"/><path d="M11 21l6 6 12-13" fill="none" stroke="var(--card)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  try:'<svg class="face" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--try)"/><path d="M20 10v13" stroke="var(--card)" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="30" r="2.6" fill="var(--card)"/></svg>',
+  info:'<svg class="face" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="var(--ink)"/><path d="M8 20l6-8 6 8z M20 20h12l-6 8z" fill="var(--card)"/></svg>'};
+function bbox(pl){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const p of pl)for(const [x,y] of p.verts){a=Math.min(a,x);b=Math.min(b,y);c=Math.max(c,x);d=Math.max(d,y)}return {x:a,y:b,w:c-a,h:d-b}}
+function thumbSVG(pl,opt={}){const b=bbox(pl);const s=Math.max(b.w,b.h,2);const pad=s*.06;
+  const vx=b.x-(s-b.w)/2-pad,vy=b.y-(s-b.h)/2-pad;
+  const polys=pl.map(p=>`<polygon points="${ptsStr(p.verts)}" fill="${COL(p.id)}" stroke="var(--seam)" stroke-width="${s*.018}" stroke-linejoin="round" ${opt.dim&&!opt.dim.includes(p.id)?'opacity=".3"':''}/>`).join('');
+  const splits=(opt.splits||[]).map(l=>`<line x1="${l[0][0]}" y1="${l[0][1]}" x2="${l[1][0]}" y2="${l[1][1]}" stroke="var(--card)" stroke-width="${s*.03}" stroke-dasharray="${s*.05} ${s*.035}"/>`).join('');
+  const out=opt.outline?`<polygon points="${ptsStr(opt.outline)}" fill="none" stroke="var(--ink)" stroke-width="${s*.03}" stroke-dasharray="${s*.06} ${s*.04}"/>`:'';
+  return `<svg viewBox="${vx} ${vy} ${s+2*pad} ${s+2*pad}" ${opt.h?`style="height:${opt.h}px"`:''} aria-hidden="true">${polys}${splits}${out}</svg>`}
+function outlineOf(pl){const r=analyze(pl);return r.status==='ok'?r.verts:null}
+
+/* ---------- Playground ---------- */
+function Playground(host,cfg){
+  const self={cfg};const W=cfg.W,H=cfg.H;
+  let pieces=[],sel=null,drag=null;
+  host.classList.add('pg');
+  host.innerHTML=`<svg class="board" viewBox="-0.3 -0.3 ${W+0.6} ${H+0.6}" role="application" aria-label="Tangram mat. Drag pieces to move. Tap a piece to turn it."></svg>
+   <div class="tools">
+     <button class="tbtn go" data-a="check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Check</button>
+     <button class="tbtn" data-a="turn"><svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.2-5.1" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M17.5 2.5v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Turn</button>
+     <button class="tbtn" data-a="flip"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2"/><path d="M9 6L3 18h6z" fill="currentColor"/><path d="M15 6l6 12h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Flip</button>
+     <span class="spacer"></span>
+     <button class="tbtn" data-a="back"><svg viewBox="0 0 24 24"><path d="M9 7L4 12l5 5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12h10a6 6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" transform="translate(0 -6)"/></svg>Put back</button>
+   </div>
+   <div class="say" aria-live="polite"></div>`;
+  const svg=host.querySelector('svg.board'),sayEl=host.querySelector('.say');
+  const mk=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+  // background
+  const [tx,ty,tw,th]=cfg.trayRect,[mx,my,mw,mh]=cfg.matRect;
+  mk('rect',{x:tx-.2,y:ty-.2,width:tw+.4,height:th+.4,rx:.4,class:'tray'},svg);
+  mk('rect',{x:mx-.2,y:my-.2,width:mw+.4,height:mh+.4,rx:.4,class:'matbg'},svg);
+  for(let x=mx;x<=mx+mw;x++)for(let y=my;y<=my+mh;y++)mk('circle',{cx:x,cy:y,r:.055,class:'dot'},svg);
+  const ghostG=mk('g',{},svg),pieceG=mk('g',{},svg),overG=mk('g',{'pointer-events':'none'},svg);
+  const home=()=>cfg.ids.map(id=>({id,verts:BASE[id].map(([x,y])=>[x+cfg.tray[id][0],y+cfg.tray[id][1]])}));
+  function render(){pieceG.innerHTML='';for(const p of pieces){const e=mk('polygon',{points:ptsStr(p.verts),fill:COL(p.id),class:'pc'+(p.id===sel?' sel':''),'data-id':p.id,tabindex:0,'aria-label':NICE[TYPE[p.id]]},pieceG)}}
+  const get=id=>pieces.find(p=>p.id===id);
+  function center(v){const xs=v.map(p=>p[0]),ys=v.map(p=>p[1]);return [(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]}
+  function clamp(v){const xs=v.map(p=>p[0]),ys=v.map(p=>p[1]);let dx=0,dy=0;
+    if(Math.min(...xs)<0)dx=-Math.min(...xs);if(Math.max(...xs)>W)dx=W-Math.max(...xs);
+    if(Math.min(...ys)<0)dy=-Math.min(...ys);if(Math.max(...ys)>H)dy=H-Math.max(...ys);
+    return v.map(([x,y])=>[x+dx,y+dy])}
+  function snap(v){const dx=Math.round(v[0][0])-v[0][0],dy=Math.round(v[0][1])-v[0][1];return v.map(([x,y])=>[Math.round(x+dx),Math.round(y+dy)])}
+  function changed(){overG.innerHTML='';pieceG.querySelectorAll('.bad').forEach(e=>e.classList.remove('bad'));cfg.onChange&&cfg.onChange(self)}
+  function toFront(id){const i=pieces.findIndex(p=>p.id===id);if(i>=0){const [p]=pieces.splice(i,1);pieces.push(p)}}
+  function select(id){sel=id;pieceG.querySelectorAll('.pc').forEach(e=>e.classList.toggle('sel',e.dataset.id===id))}
+  function move(id,dx,dy){const p=get(id);p.verts=clamp(p.verts.map(([x,y])=>[x+dx,y+dy]));render();changed()}
+  function turn(id){const p=get(id);if(!p)return;const [cx,cy]=center(p.verts);p.verts=clamp(snap(p.verts.map(([x,y])=>[cx-(y-cy),cy+(x-cx)])));render();changed()}
+  function flip(id){const p=get(id);if(!p)return;const [cx]=center(p.verts);p.verts=clamp(snap(p.verts.map(([x,y])=>[2*cx-x,y]).reverse()));render();changed()}
+  function pt(e){const m=svg.getScreenCTM().inverse();return new DOMPoint(e.clientX,e.clientY).matrixTransform(m)}
+  svg.addEventListener('pointerdown',e=>{const t=e.target.closest('.pc');if(!t)return;e.preventDefault();const id=t.dataset.id;toFront(id);sel=id;render();
+    const el=pieceG.querySelector(`[data-id="${id}"]`);drag={id,el,start:pt(e),moved:false};try{svg.setPointerCapture(e.pointerId)}catch(_){}});
+  svg.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);const dx=p.x-drag.start.x,dy=p.y-drag.start.y;if(Math.hypot(dx,dy)>.25)drag.moved=true;if(drag.moved)drag.el.setAttribute('transform',`translate(${dx} ${dy})`)});
+  const end=(e,cancel)=>{if(!drag)return;const d=drag;drag=null;d.el.removeAttribute('transform');
+    if(cancel)return;const p=pt(e);if(d.moved)move(d.id,Math.round(p.x-d.start.x),Math.round(p.y-d.start.y));else turn(d.id);
+    const el=pieceG.querySelector(`[data-id="${d.id}"]`);};
+  svg.addEventListener('pointerup',e=>end(e));svg.addEventListener('pointercancel',e=>end(e,true));
+  svg.addEventListener('keydown',e=>{const t=e.target.closest('.pc');if(!t)return;const id=t.dataset.id;const K={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+    if(K[e.key]){e.preventDefault();sel=id;move(id,...K[e.key])}else if(e.key==='r'||e.key==='R'||e.key==='Enter'){e.preventDefault();sel=id;turn(id)}else if(e.key==='f'||e.key==='F'){e.preventDefault();sel=id;flip(id)}else return;
+    const n=pieceG.querySelector(`[data-id="${id}"]`);n&&n.focus()});
+  host.querySelector('.tools').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='check')self.check();
+    else if(a==='turn'||a==='flip'){if(!sel||!get(sel)){self.say('info','Tap a piece first. Then tap <b>'+(a==='turn'?'Turn':'Flip')+'</b>.');return}a==='turn'?turn(sel):flip(sel)}
+    else if(a==='back'){self.reset();}});
+  self.onMat=()=>pieces.filter(p=>{const [cx,cy]=center(p.verts);return cfg.inMat(cx,cy)});
+  self.say=(kind,html)=>{sayEl.className='say '+(kind||'');sayEl.innerHTML=(FACE[kind]||FACE.info)+'<div>'+html+'</div>'};
+  self.reset=(msg)=>{pieces=home();sel=null;render();overG.innerHTML='';ghostG.innerHTML='';self.say('info',msg||cfg.hello);cfg.onChange&&cfg.onChange(self)};
+  self.ghost=v=>{ghostG.innerHTML='';if(v)mk('polygon',{points:ptsStr(v),class:'ghostline'},ghostG)};
+  self.pulse=ids=>{render();ids.forEach(id=>{const e=pieceG.querySelector(`[data-id="${id}"]`);if(e){e.classList.remove('pulse');void e.getBBox();e.classList.add('pulse');if(reduced)e.classList.add('sel')}})};
+  self.solOffset=pl=>{const b=bbox(pl);return [Math.round(mx+(mw-b.w)/2-b.x),Math.round(my+(mh-b.h)/2-b.y)]};
+  self.place=(pl)=>{const [ox,oy]=self.solOffset(pl);pieces=home();for(const s of pl){const p=get(s.id);p.verts=s.verts.map(([x,y])=>[x+ox,y+oy])}
+    pieces.sort((a,b)=>(pl.some(s=>s.id===a.id)?1:0)-(pl.some(s=>s.id===b.id)?1:0));sel=null;render();changed()};
+  self.ghostFor=pl=>{const o=outlineOf(pl);if(!o)return;const [ox,oy]=self.solOffset(pl);self.ghost(o.map(([x,y])=>[x+ox,y+oy]))};
+  self.snapshot=()=>self.onMat().map(p=>({id:p.id,verts:p.verts.map(v=>v.slice())}));
+  self.drawOutline=(v,good)=>{overG.innerHTML='';mk('polygon',{points:ptsStr(v),class:'outline'+(good?' good':'')},overG);
+    v.forEach((p,i)=>{mk('circle',{cx:p[0],cy:p[1],r:.3,class:'cdot'+(good?' good':'')},overG);const t=mk('text',{x:p[0],y:p[1]+.02,class:'cnum'},overG);t.textContent=i+1})};
+  self.check=()=>{overG.innerHTML='';const list=self.onMat();const r=analyze(list);
+    if(r.status==='empty'){self.say('try','Drag pieces onto the mat first.');return r}
+    if(r.status==='overlap'){r.ids.forEach(id=>{const e=pieceG.querySelector(`[data-id="${id}"]`);e&&e.classList.add('bad')});self.say('try','<b>Two pieces are on top of each other.</b> Slide one off. No overlaps!');return r}
+    if(r.status==='apart'){self.say('try','<b>Some pieces are not touching.</b> Push them together so the sides meet.');return r}
+    if(r.status==='corner'){mk('circle',{cx:r.at[0],cy:r.at[1],r:.4,class:'holeline'},overG);self.say('try','<b>These pieces only touch at a corner.</b> Slide them so a whole side touches.');return r}
+    if(r.status==='hole'){r.holes.forEach(h=>mk('polygon',{points:ptsStr(h),class:'holeline'},overG));self.say('try','<b>There is a gap inside.</b> Can you close it? No gaps!');return r}
+    cfg.onResult(r,self);return r};
+  return self;
+}
+
+/* Layouts: wide (tray left, mat right) or tall (tray on top) */
+const narrow=()=>window.innerWidth<640;
+function bigCfg(){return narrow()?
+  {W:10,H:18,tray:{L1:[0,0],L2:[5,0],M:[0,3],Q:[3,3],S1:[6,3],S2:[6,5],P:[0,6]},trayRect:[0,0,10,7],matRect:[0,8,10,10],inMat:(x,y)=>y>7.5}:
+  {W:20,H:8,tray:{L1:[0,0],L2:[5,0],M:[0,3],Q:[3,3],P:[6,3],S1:[0,6],S2:[3,6]},trayRect:[0,0,9,8],matRect:[10,0,10,8],inMat:(x,y)=>x>9.5}}
+function smallCfg(){return narrow()?
+  {W:8,H:9,tray:{S1:[1,0],S2:[5,0]},trayRect:[0,0,8,1],matRect:[1,3,6,6],inMat:(x,y)=>y>2}:
+  {W:10,H:6,tray:{S1:[0,1],S2:[0,4]},trayRect:[0,0,2,6],matRect:[4,0,6,6],inMat:(x,y)=>x>3}}
+
+/* ---------- App state ---------- */
+const S={ladder:{},records:{},goals:{},card:'sq2',hint:0,outline:false,q:1,qstep:0,six:false};
+function resetState(){S.ladder={1:[],2:[],3:[],4:[],5:[],6:[],7:[]};S.records={};S.goals={};S.hint=0;S.outline=false;S.six=false;S.q=1;S.qstep=0}
+resetState();
+function addLadder(r,pl,app){if(r.type!=='square')return;const L=S.ladder[r.n];if(!L)return;
+  const ex=L.find(x=>x.t===r.types);if(ex){if(!app)ex.app=false;return}L.push({t:r.types,pl,app:!!app})}
+
+/* ---------- 1. Quick look ---------- */
+const sqSS=solsFor('square',2).find(s=>s.t==='SS');
+$('#flashPic').innerHTML=sqSS.pl.map(p=>`<polygon points="${ptsStr(p.verts)}" fill="${COL(p.id)}" stroke="var(--seam)" stroke-width=".05" stroke-linejoin="round"/>`).join('');
+let flashTimer=null;
+function flash(){clearTimeout(flashTimer);const cover=$('#flashCover'),bar=$('#flashBar');cover.hidden=true;
+  bar.style.transition='none';bar.style.width='100%';void bar.offsetWidth;bar.style.transition=reduced?'none':'width 3s linear';bar.style.width='0%';
+  $('#flashBtn').textContent='Peek again';
+  flashTimer=setTimeout(()=>{cover.hidden=false;bar.style.width='0%';pgLook.say('info','Now build what you saw. Then tap <b>Check</b>.')},3000)}
+$('#flashBtn').onclick=flash;
+const pgLook=Playground($('#pgLook'),Object.assign(smallCfg(),{ids:['S1','S2'],hello:'Tap <b>Show me</b>. Look fast!',
+  onResult(r,pg){if(r.type==='square'&&r.n===2){pg.drawOutline(r.verts,true);addLadder(r,pg.snapshot());
+      pg.say('good','<b>Yes! Two triangles make a square.</b><p>What did you see first? Tell a friend.</p>')}
+    else if(r.n<2){pg.drawOutline(r.verts);pg.say('try','Use <b>both</b> triangles. Peek again if you need to.')}
+    else{pg.drawOutline(r.verts);pg.say('try',`You made ${article(shapeName(r))} <b>${shapeName(r)}</b>. It has ${r.m} corners.<p>Peek again and compare. What was different?</p>`)}}}));
+
+/* ---------- 2. Two triangles ---------- */
+const GOALS=[['square','Square'],['triangle','Triangle'],['parallelogram','Parallelogram']];
+function renderGoals(){$('#goals').innerHTML=GOALS.map(([k,l])=>{const g=S.goals[k];
+  return `<div class="goal ${g?'found':''}"><div class="gpic">${g?thumbSVG(g):'?'}</div><span>${g?l:'?'}</span></div>`}).join('')}
+const pgTwo=Playground($('#pgTwo'),Object.assign(smallCfg(),{ids:['S1','S2'],hello:'Put both triangles on the mat. Then tap <b>Check</b>.',
+  onResult(r,pg){
+    if(r.n<2){pg.drawOutline(r.verts);pg.say('try','Use <b>both</b> small triangles.');return}
+    const k=r.type;if(GOALS.some(g=>g[0]===k)){pg.drawOutline(r.verts,true);addLadder(r,pg.snapshot());
+      const isNew=!S.goals[k];if(isNew)S.goals[k]=pg.snapshot();renderGoals();
+      const n=Object.keys(S.goals).length;
+      if(!isNew)pg.say('info',`That's the <b>${k}</b> again. Can you make a different shape?`);
+      else if(n<3)pg.say('good',`<b>New shape: ${article(k)} ${k}!</b> ${n} of 3 found.<p>Turn or flip a triangle to find another.</p>`);
+      else pg.say('good','<b>All 3 shapes!</b> Square, triangle, parallelogram.<p>Next: make a square with exactly 3 pieces.</p><div class="row"><button class="mini" id="toSq3">Go to Build it</button></div>'),
+        $('#toSq3').onclick=()=>{selectTab('build');pickCard('sq3')};
+    }else{pg.drawOutline(r.verts);pg.say('try',`That's ${article(shapeName(r))} <b>${shapeName(r)}</b> with ${r.m} corners.<p>Slide so the sides match <b>all the way</b>. Count the corners.</p>`)}}}));
+
+/* ---------- 3. Build it ---------- */
+const CARDS=[
+  {id:'sq2',shape:'square',n:2,title:'Square'},
+  {id:'sq3',shape:'square',n:3,title:'Square'},
+  {id:'sq4',shape:'square',n:4,title:'Square'},
+  {id:'tri2',shape:'triangle',n:2,title:'Triangle'},
+  {id:'rect3',shape:'rectangle',n:3,title:'Rectangle',sub:'not a square'},
+  {id:'own',shape:null,n:null,title:'Your own shape'},
+  {id:'all7',shape:'square',n:7,title:'All 7!',star:true}];
+const GLYPH={square:'<rect x="8" y="8" width="28" height="28" rx="2"/>',triangle:'<path d="M4 36h36L22 9z"/>',rectangle:'<rect x="3" y="13" width="38" height="19" rx="2"/>',
+  own:'<path d="M6 30l10-20 12 6 10-6-4 26H10z"/>'};
+function glyph(c){return `<svg class="glyph" viewBox="0 0 44 44"><g fill="${c.star?'var(--accent)':'var(--ink)'}" opacity="${c.star?1:.85}">${GLYPH[c.shape||'own']}</g></svg>`}
+function renderCards(){$('#cards').innerHTML=CARDS.map(c=>`<button class="card ${S.records[c.id]&&S.records[c.id].length?'done':''} ${c.star?'star':''}" data-c="${c.id}" aria-pressed="${S.card===c.id}">
+  ${glyph(c)}<span class="ct"><b>${c.title}</b>${c.n?`<span class="pips" aria-label="${c.n} pieces">${'<i></i>'.repeat(c.n)}</span>`:'<span class="pips"><em>any pieces</em></span>'}${c.sub?`<span class="pips"><em>${c.sub}</em></span>`:''}</span></button>`).join('');
+  $('#cards').querySelectorAll('.card').forEach(b=>b.onclick=()=>pickCard(b.dataset.c))}
+const card=()=>CARDS.find(c=>c.id===S.card);
+function cardSols(c){return c.shape?solsFor(c.shape,c.n):[]}
+function pickCard(id){S.card=id;S.hint=0;S.outline=false;$('#hintOutline').setAttribute('aria-pressed','false');renderCards();const c=card();
+  $('#buildPrompt').innerHTML=c.id==='own'?'Make your own shape. Name it!':c.id==='all7'?'Make one big square with <u>all 7</u> pieces.':
+    `Make ${article(c.title)} ${c.title.toLowerCase()}${c.sub?' (not a square)':''} with <u>${c.n}</u> pieces.`;
+  const has=cardSols(c).length>0;['hintPieces','hintOutline','hintShow'].forEach(i=>$('#'+i).disabled=!has);
+  pgBuild.reset(c.id==='own'?'Use any pieces. Then tap <b>Check</b> to find out what shape you made.':'Drag pieces to the mat. Tap a piece to turn it. Tap <b>Check</b> when you are done.');
+  renderRecord()}
+function renderRecord(){const c=card();const rec=S.records[c.id]||[];
+  $('#recordTitle').textContent=c.id==='own'?'Our own shapes':'Our answers for this card';
+  $('#recordThumbs').innerHTML=rec.length?rec.map(x=>`<div class="thumb">${thumbSVG(x.pl)}<span>${x.label}</span></div>`).join(''):'<span class="empty">Nothing yet. Check a build to add it here.</span>'}
+function addRecord(c,r,pl,label){const rec=S.records[c.id]=S.records[c.id]||[];
+  const key=c.id==='own'?r.types+'|'+r.type:r.types;if(rec.some(x=>x.key===key))return false;rec.push({key,pl,label});return true}
+const tradeTip=(have,want)=>have>want?'Trade <b>2 small triangles</b> for <b>1 piece</b> to use one fewer.':'Trade <b>1 piece</b> for <b>2 small triangles</b> to use one more.';
+const WHAT={square:'A square has 4 corners, and all 4 sides are the same length.',triangle:'A triangle has 3 corners and 3 sides.',
+  rectangle:'A rectangle has 4 square corners. Two sides are long and two are short.'};
+const pgBuild=Playground($('#pgBuild'),Object.assign(bigCfg(),{ids:['L1','L2','M','Q','P','S1','S2'],hello:'',
+  onChange(){if(S.outline&&cardSols(card()).length){/* keep outline */}},
+  onResult(r,pg){const c=card();const pl=pg.snapshot();addLadder(r,pl);renderLadder();
+    const used=`${r.n} piece${r.n===1?'':'s'}`;
+    if(c.id==='own'){pg.drawOutline(r.verts,true);const nm=shapeName(r);const isNew=addRecord(c,r,pl,nm);renderRecord();renderCards();
+      pg.say('good',`You made ${article(nm)} <b>${nm}</b> with ${used}. Count the corners: ${r.m}.<p>${isNew?'What would you name it? Tell the class.':'You made this one already. Try a new one!'}</p>`);return}
+    if(r.type===c.shape&&r.n===c.n){pg.drawOutline(r.verts,true);
+      const label=r.types.split('').map(t=>t).join('+');const isNew=addRecord(c,r,pl,piecesWords(r.types,true));renderRecord();renderCards();
+      pg.say('good',`<b>Yes! ${article(c.shape)[0].toUpperCase()+article(c.shape).slice(1)} ${c.shape} with ${used}.</b>${c.id==='all7'?'<p>You solved the 7-piece square. That is the whole tangram!</p>':isNew?'<p>New way! Can you find a different way?</p>':'<p>You found this way already. Is there another way?</p>'}`);return}
+    if(c.id==='rect3'&&r.type==='square'){pg.drawOutline(r.verts);
+      pg.say('try',`That's a <b>square</b>. A square is a special rectangle! This card wants one that is longer than it is tall.<p>Can you make the square longer?</p>`);return}
+    if(r.type===c.shape){pg.drawOutline(r.verts,true);
+      pg.say('try',`That's ${article(c.shape)} <b>${c.shape}</b>, with <b>${used}</b>. This card needs <b>${c.n}</b>.<p>${Math.abs(r.n-c.n)===1?tradeTip(r.n,c.n):'Try different pieces.'}${r.type==='square'?' Your square is on the Square ladder now.':''}</p>`);return}
+    pg.drawOutline(r.verts);
+    pg.say('try',`You made ${article(shapeName(r))} <b>${shapeName(r)}</b>. It has <b>${r.m} corners</b>.<p>${WHAT[c.shape]}</p>`)}}));
+function piecesWords(t,short){const c={};for(const x of t)c[x]=(c[x]||0)+1;const ab={L:'big △',M:'medium △',Q:'square',P:'parallelogram',S:'small △'};
+  return Object.entries(c).map(([k,n])=>short?(n>1?n+' ':'')+ab[k]:(n>1?n+' '+NICE[k]+'s':'1 '+NICE[k])).join(' + ')}
+$('#hintPieces').onclick=()=>{const s=cardSols(card());if(!s.length)return;const sol=s[S.hint%s.length];S.hint++;
+  pgBuild.pulse(sol.pl.map(p=>p.id));pgBuild.say('info',`Try these: <b>${piecesWords(sol.t)}</b>.${s.length>1?`<p>Tap again for another set. There ${s.length===1?'is':'are'} ${s.length} different sets.</p>`:''}`)};
+$('#hintOutline').onclick=()=>{const s=cardSols(card());if(!s.length)return;S.outline=!S.outline;$('#hintOutline').setAttribute('aria-pressed',S.outline);
+  if(S.outline){pgBuild.ghostFor(s[(Math.max(S.hint,1)-1)%s.length].pl);pgBuild.say('info','Fill the dotted outline. No gaps, no overlaps.')}else pgBuild.ghost(null)};
+$('#hintShow').onclick=()=>{const s=cardSols(card());if(!s.length)return;const sol=s[(Math.max(S.hint,1)-1)%s.length];S.hint=(S.hint%s.length)+1;
+  pgBuild.place(sol.pl);pgBuild.ghost(null);S.outline=false;$('#hintOutline').setAttribute('aria-pressed','false');
+  pgBuild.say('info',`Here is one way: <b>${piecesWords(sol.t)}</b>.<p>Tap <b>Check</b> to test it.${s.length>1?' Tap “Show a way” again to see another.':''}</p>`)};
+
+/* ---------- 4. Square ladder ---------- */
+function renderLadder(mark){$('#ladder').innerHTML=[1,2,3,4,5,6,7].map(n=>{const L=S.ladder[n];
+  let slot;if(n===6&&S.six)slot='<span class="x">✕</span><span class="more">no square</span>';
+  else if(L.length){slot=thumbSVG(L[0].pl)+(L.length>1?`<span class="more">+${L.length-1} more way${L.length>2?'s':''}</span>`:'')+(L.every(x=>x.app)?'<span class="more">shown by app</span>':'')}
+  else slot='<span class="q">?</span>';
+  const cls=(L.length?'has':'')+(mark&&!L.length?' gap':'');
+  return `<div class="rung ${cls}"><div class="num">${n}</div><div class="lbl">piece${n>1?'s':''}</div><div class="slot">${slot}</div><button data-n="${n}">Show a way</button></div>`}).join('');
+  $('#ladder').querySelectorAll('button').forEach(b=>b.onclick=()=>showRung(+b.dataset.n))}
+function showRung(n){if(n===6){S.six=true;renderLadder();whySix();return}
+  const s=solsFor('square',n);for(const x of s)addLadder({type:'square',n,types:x.t},x.pl,true);renderLadder();
+  const st=$('#ladStage');st.hidden=false;
+  st.innerHTML=`<p class="note"><b>${n}-piece square${s.length>1?'s':''}:</b> ${s.length} way${s.length>1?'s':''}.</p><div class="figs">${s.map(x=>`<div class="fig">${thumbSVG(x.pl,{h:130})}<span>${piecesWords(x.t,true)}</span></div>`).join('')}</div>`}
+$('#ladGaps').onclick=()=>{renderLadder(true);const miss=[1,2,3,4,5,6,7].filter(n=>!S.ladder[n].length);const st=$('#ladStage');st.hidden=false;
+  st.innerHTML=miss.length?`<p class="note">Still missing: <b>${miss.join(', ')}</b>. Which ones do you think are possible? Go to <b>Build it</b> and try.</p>`:'<p class="note">Every number from 1 to 7 has a square, except 6. Tap “Could a trade fill the gap?”</p>'};
+$('#ladFill').onclick=()=>{[1,2,3,4,5,7].forEach(n=>{for(const x of solsFor('square',n))addLadder({type:'square',n,types:x.t},x.pl,true)});renderLadder(true);
+  const st=$('#ladStage');st.hidden=false;st.innerHTML='<p class="note">Squares with 1, 2, 3, 4, 5 and 7 pieces all work. <b>6 is the gap.</b> Nobody can make a square with exactly 6 pieces.</p><p class="note">Could a trade fill it? Tap the next button.</p>'};
+$('#ladWhy').onclick=()=>{S.six=true;renderLadder();whySix()};
+function whySix(){const st=$('#ladStage');st.hidden=false;
+  const chip=(id,n)=>`<span class="chip">${thumbSVG([{id,verts:BASE[id]}])}${n}</span>`;
+  const sq5=solsFor('square',5)[0],sq7=solsFor('square',7)[0];
+  st.innerHTML=`<p class="note"><b>A trade changes the count by one.</b> 2 small triangles ↔ 1 square, medium triangle, or parallelogram.</p>
+  <div class="figs"><div class="fig">${thumbSVG(sq5.pl,{h:130})}<span>5 pieces</span></div><div class="fig"><span class="eq">→ 6?</span></div><div class="fig">${thumbSVG(sq7.pl,{h:130})}<span>7 pieces</span></div></div>
+  <p class="note">To get 6, we would need a spare piece to trade. The 5-piece square already uses both small triangles. The 7-piece square already uses every piece. <b>No trade can make 6.</b></p>
+  <p class="note">Count in small triangles:</p><div class="tally">${chip('L1',4)}${chip('M',2)}${chip('Q',2)}${chip('P',2)}${chip('S1',1)}</div>
+  <p class="note teacher">Teacher note: the set totals 16 small triangles. Every tangram square uses 2, 4, 8 or 16 (1 piece and 2 small triangles both make 2; 3 pieces make 4; 2, 4 or 5 pieces make 8; 7 pieces make 16). Six pieces means leaving one piece out: 16 − 4 = 12, 16 − 2 = 14, or 16 − 1 = 15. None of those is a square size, so a 6-piece square is impossible.</p>`}
+
+/* ---------- 5. Detective questions ---------- */
+const SPLIT={M:[[[0,0],[1,1]]],Q:[[[1,0],[1,2]]],P:[[[2,0],[1,1]]]};
+const Q={
+ 1:{text:'Are there two different ways to make a square with 2 pieces?',acts:[
+   ['Show both',()=>{const s=solsFor('square',2).filter(x=>x.n===2);
+     return `<div class="figs">${s.map(x=>`<div class="fig">${thumbSVG(x.pl,{h:Math.round(70*Math.sqrt(bboxArea(x.pl)))})}<span>${piecesWords(x.t,true)}</span></div>`).join('')}</div>
+     <p class="note">Yes! <b>2 small triangles</b> make a little square. <b>2 big triangles</b> make a big square. Same idea, different size.</p>`}]]},
+ 2:{text:'How did you turn one answer into a new one?',acts:[
+   ['Show the trade',()=>{const two=solsFor('square',2).find(x=>x.t==='SS');
+     return `<div class="figs"><div class="fig">${thumbSVG(two.pl.map(p=>({id:p.id,verts:p.verts})),{h:110})}<span>2 small</span></div><div class="fig"><span class="eq">=</span></div>
+     ${['Q','M','P'].map(id=>`<div class="fig">${thumbSVG([{id,verts:BASE[id]}],{h:110,splits:SPLIT[id]})}<span>${NICE[id]}</span></div>`).join('')}</div>
+     <p class="note">The dotted line shows it: the square, the medium triangle and the parallelogram are each <b>2 small triangles</b> big.</p>`}],
+   ['Use a trade',()=>{const s=solsFor('square',4);
+     return `<div class="figs">${s.map(x=>{const sw=x.pl.find(p=>['M','Q','P'].includes(p.id)).id;return `<div class="fig">${thumbSVG(x.pl,{h:130,dim:[sw]})}<span>big △ + <b>${NICE[sw]}</b> + 2 small △</span></div>`}).join('')}</div>
+     <p class="note">Three 4-piece squares. Keep the big triangle and the 2 small triangles. <b>Trade the bright piece</b> to get a new answer.</p>`}]]},
+ 3:{text:'Which piece is hardest to use? Have you tried flipping it over?',acts:[
+   ['Flip the parallelogram',()=>{const f=BASE.P.map(([x,y])=>[3-x,y]);
+     return `<div class="figs"><div class="fig">${thumbSVG([{id:'P',verts:BASE.P}],{h:90})}<span>parallelogram</span></div><div class="fig"><span class="eq">⇋</span></div><div class="fig">${thumbSVG([{id:'P',verts:f}],{h:90})}<span>flipped over</span></div></div>
+     <p class="note">Flipped over, it leans the other way. <b>Turning alone never makes it lean the other way.</b> You have to flip it.</p>`}],
+   ['Try turning it',()=>{const r=v=>v.map(([x,y])=>[-y,x]);let v=BASE.P,out=[];for(let i=0;i<4;i++){out.push(v);v=r(v)}
+     return `<div class="figs">${out.map((v,i)=>`<div class="fig">${thumbSVG([{id:'P',verts:v}],{h:90})}<span>turn ${i}</span></div>`).join('')}</div>
+     <p class="note">Four turns, and it comes back. Compare with the flipped one. Does any turn match it?</p>`}]]},
+ 4:{text:'Challenge: how many different triangles can you make with exactly 3 pieces?',star:true,acts:[
+   ['Show one more',()=>{const s=solsFor('triangle',3);S.qstep=Math.min(S.qstep+1,s.length);return tri3(s)}],
+   ['Show all',()=>{const s=solsFor('triangle',3);S.qstep=s.length;return tri3(s)}]]}
+};
+function bboxArea(pl){const b=bbox(pl);return b.w*b.h/4}
+function tri3(s){const shown=s.slice(0,S.qstep);const L={id:'L1',verts:BASE.L1};
+  return `<div class="figs">${shown.map(x=>`<div class="fig">${thumbSVG(x.pl,{h:110})}<span>${piecesWords(x.t,true)}</span></div>`).join('')}</div>
+  <p class="note">${S.qstep<s.length?`${S.qstep} so far. Can you find another before you tap again?`:`<b>${s.length} ways</b>, and that's all of them. Each one is 2 small triangles plus one more piece.`}</p>
+  ${S.qstep===s.length?`<div class="figs"><div class="fig">${thumbSVG([L],{h:110})}<span>big triangle</span></div></div><p class="note">Look! All three are the same size as one big triangle.</p>`:''}`}
+function renderQ(){$('#qnav').innerHTML=[1,2,3,4].map(i=>`<button data-q="${i}" class="${Q[i].star?'star':''}" aria-pressed="${S.q===i}">${Q[i].star?'★ Challenge':i}</button>`).join('');
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.q=+b.dataset.q;S.qstep=0;renderQ()});
+  const q=Q[S.q];$('#qtext').textContent=q.text;
+  $('#qact').innerHTML='';q.acts.forEach(([label,fn],i)=>{const b=document.createElement('button');b.className='tbtn'+(i===0?' go':'');b.textContent=label;b.onclick=()=>{$('#qstage').innerHTML=fn()};$('#qact').appendChild(b)});
+  $('#qstage').innerHTML='<p class="hint">Evidence will appear here.</p>'}
+
+/* ---------- Tabs, reset, full screen ---------- */
+function selectTab(t){document.querySelectorAll('nav.steps button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['look','two','build','ladder','detect'].forEach(k=>$('#v-'+k).hidden=k!==t);if(t==='ladder')renderLadder();}
+document.querySelectorAll('nav.steps button').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+function startOver(){resetState();clearTimeout(flashTimer);$('#flashCover').hidden=false;$('#flashBtn').textContent='Show me';
+  pgLook.reset();pgTwo.reset();renderGoals();pickCard('sq2');renderLadder();$('#ladStage').hidden=true;renderQ()}
+$('#resetBtn').onclick=startOver;
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+$('#brandMark').innerHTML=solsFor('square',7)[0].pl.map(p=>`<polygon points="${ptsStr(p.verts)}" fill="${COL(p.id)}" stroke="var(--bg)" stroke-width=".08" stroke-linejoin="round"/>`).join('');
+startOver();
+})();
+</script>
+
+</body></html>

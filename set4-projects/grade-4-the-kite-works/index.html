@@ -1,0 +1,764 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Kite Works</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a drafting-table workshop. Blueprint-grid paper, one column of "Parts" per class, each a stage (drawing) beside its tools. */
+:root{
+  --paper:#EDF1F6; --card:#FFFFFF; --ink:#14223A; --muted:#55617A; --line:#CBD4E1; --grid:#DCE3EE;
+  --sail:#DE4329; --sail-soft:#FCE5DF; --sun:#F0AE2C; --sun-soft:#FDF1D8;
+  --fold:#0B8582; --fold-soft:#DDF2F0; --angle:#7445C9; --spar:#8A5A22;
+  --good:#1C7F45; --good-soft:#E1F3E8; --try:#B0402A; --try-soft:#FBEAE4;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1520; --card:#17202D; --ink:#E7ECF3; --muted:#9BA7B9; --line:#2D3A4D; --grid:#1B2533;
+    --sail:#FF6B4F; --sail-soft:#3A1E18; --sun:#F4C04F; --sun-soft:#3A2F14;
+    --fold:#3FCBC3; --fold-soft:#123331; --angle:#B192FF; --spar:#D39B55;
+    --good:#55C885; --good-soft:#15301F; --try:#FF8A6E; --try-soft:#3A201A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1520; --card:#17202D; --ink:#E7ECF3; --muted:#9BA7B9; --line:#2D3A4D; --grid:#1B2533;
+  --sail:#FF6B4F; --sail-soft:#3A1E18; --sun:#F4C04F; --sun-soft:#3A2F14;
+  --fold:#3FCBC3; --fold-soft:#123331; --angle:#B192FF; --spar:#D39B55;
+  --good:#55C885; --good-soft:#15301F; --try:#FF8A6E; --try-soft:#3A201A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:28px 28px;
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:1360px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:14px 40px}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--fold); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-block:6px 14px}
+.brand{min-width:0}
+.eyebrow{font-family:var(--mono); font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(34px,4.4vw,60px); line-height:1; margin:4px 0 6px; letter-spacing:-.02em; text-wrap:balance}
+h1 .k{color:var(--sail)}
+.premise{margin:0; color:var(--muted); font-size:clamp(16px,1.4vw,20px)}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.classes{display:flex; gap:8px; flex-wrap:wrap; z-index:5; background:var(--paper); padding-block:8px; border-bottom:2px solid var(--line); margin-bottom:18px}
+@media (min-width:700px){nav.classes{position:sticky; top:env(safe-area-inset-top,0px)}}
+nav.classes button{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; min-height:56px; text-align:left; display:flex; flex-direction:column; line-height:1.15}
+nav.classes button small{font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+nav.classes button b{font-family:var(--display); font-size:19px}
+nav.classes button[aria-selected="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+nav.classes button[aria-selected="true"] small{color:var(--card); opacity:.75}
+
+.view[hidden]{display:none}
+.part{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:clamp(14px,2vw,26px); margin-bottom:20px}
+.part-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:6px}
+.tag{font-family:var(--mono); font-weight:700; font-size:13px; letter-spacing:.08em; color:var(--card); background:var(--sail); padding:4px 10px; border-radius:8px}
+h2{font-family:var(--display); font-size:clamp(26px,2.6vw,36px); margin:0; line-height:1.1}
+h3{font-family:var(--display); font-size:clamp(20px,1.8vw,24px); margin:18px 0 8px}
+.lead{margin:4px 0 14px; color:var(--muted); max-width:62ch}
+.grid2{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:22px; align-items:start}
+.grid2 > *{min-width:0}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:8px; position:relative}
+.stage svg{display:block; width:100%; height:auto; touch-action:none; user-select:none}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.btn{border:0; background:var(--sail); color:#fff; font-weight:700; font-size:18px; padding:12px 22px; border-radius:14px; min-height:52px}
+.btn.alt{background:var(--card); color:var(--ink); border:2px solid var(--ink)}
+.btn.fold{background:var(--fold); color:#fff}
+.btn:disabled{opacity:.45; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; border:2px solid var(--line); border-radius:14px; padding:3px; background:var(--card); gap:2px}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:10px; font-weight:700; min-height:46px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.fb{border-radius:12px; padding:12px 16px; margin:10px 0 0; font-size:18px; max-width:62ch}
+.fb:empty{display:none}
+.fb.ok{background:var(--good-soft); border-left:6px solid var(--good)}
+.fb.try{background:var(--try-soft); border-left:6px solid var(--try)}
+.fb.info{background:var(--fold-soft); border-left:6px solid var(--fold)}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+
+/* Toolkit */
+.answers{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:10px}
+.answers button{border:2px solid var(--line); background:var(--card); border-radius:12px; min-height:56px; font-weight:700; font-size:17px; padding:8px}
+.answers button:hover{border-color:var(--ink)}
+.answers button.right{background:var(--good-soft); border-color:var(--good)}
+.answers button.wrong{background:var(--try-soft); border-color:var(--try)}
+.score{font-family:var(--mono); font-size:15px; color:var(--muted)}
+.hunt{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-top:14px}
+.hunt label{display:flex; flex-direction:column; gap:4px; font-weight:700; font-size:16px}
+.hunt input{border:2px solid var(--line); border-radius:10px; padding:10px 12px; background:var(--card); min-height:48px}
+
+/* Catalog table */
+.tblwrap{overflow-x:auto}
+table.cat{border-collapse:separate; border-spacing:0 6px; width:100%; min-width:520px}
+table.cat th{font-size:14px; text-align:center; color:var(--muted); font-weight:700; padding:0 4px; line-height:1.2}
+table.cat th:first-child{text-align:left}
+table.cat td{text-align:center; padding:0 3px}
+table.cat td:first-child{text-align:left}
+.shapebtn{display:flex; align-items:center; gap:8px; border:2px solid transparent; background:none; border-radius:10px; padding:4px 8px 4px 4px; font-weight:700; min-height:48px; text-align:left}
+.shapebtn svg{width:40px; height:34px; flex:none}
+.shapebtn[aria-pressed="true"]{border-color:var(--fold); background:var(--fold-soft)}
+.cyc{width:60px; height:48px; border:2px solid var(--line); border-radius:10px; background:var(--card); font-family:var(--mono); font-weight:700; font-size:19px}
+.cyc.empty{color:var(--muted)}
+.cyc.bad{border-color:var(--try); background:var(--try-soft)}
+.cyc.good{border-color:var(--good); background:var(--good-soft)}
+.marks{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-weight:700; font-size:15px; min-height:44px}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.chip.good{border-color:var(--good); background:var(--good-soft); color:var(--ink)}
+.chip.bad{border-color:var(--try); background:var(--try-soft); color:var(--ink)}
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+.tcard{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:6px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:150px}
+.tcard svg{width:100%; height:96px}
+.tcard .lab{font-weight:700; font-size:16px; padding:4px 10px; border-radius:999px; background:var(--paper)}
+.tcard.bad{border-color:var(--try)} .tcard.good{border-color:var(--good)}
+.yn{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0}
+.yn span{font-weight:700; min-width:15ch}
+
+/* Practice kite & blueprint fields */
+.qlist{display:flex; flex-direction:column; gap:12px; counter-reset:q; padding:0; margin:0; list-style:none}
+.qlist li{display:grid; grid-template-columns:36px minmax(0,1fr); gap:10px; align-items:start}
+.qlist li::before{counter-increment:q; content:counter(q); width:34px; height:34px; border-radius:50%; background:var(--ink); color:var(--card); display:grid; place-items:center; font-weight:700; font-family:var(--mono)}
+.qlist li.done::before{content:"✓"; background:var(--good)}
+.qtext{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px}
+.inp{width:84px; min-height:48px; border:2px solid var(--line); border-radius:10px; padding:6px 8px; text-align:center; font-family:var(--mono); font-weight:700; font-size:20px; background:var(--card)}
+.inp.bad{border-color:var(--try); background:var(--try-soft)} .inp.good{border-color:var(--good); background:var(--good-soft)}
+select.inp{width:auto; font-family:var(--body); font-size:17px; padding-inline:10px}
+.qfb{grid-column:2; font-size:16px; border-radius:10px; padding:8px 12px}
+.qfb:empty{display:none}
+.qfb.ok{background:var(--good-soft)} .qfb.try{background:var(--try-soft)}
+.sliders{display:grid; gap:10px; margin-top:10px}
+.sliders label{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 10px; align-items:center; font-weight:700}
+.sliders input[type=range]{grid-column:1 / -1; width:100%; height:36px; accent-color:var(--sail)}
+.spec{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 16px; font-size:16px; margin:10px 0}
+.spec div{display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:4px 0}
+.bp{display:flex; flex-direction:column; gap:12px}
+.bp .line{display:flex; flex-wrap:wrap; gap:6px 8px; align-items:center}
+.bp .line > b{min-width:11ch}
+.team{border:2px solid var(--line); border-radius:10px; padding:10px 12px; min-height:48px; background:var(--card); width:min(100%,260px)}
+
+/* Festival */
+.fest{display:grid; grid-template-columns:220px minmax(0,1.3fr) minmax(0,1fr); gap:18px; align-items:start}
+.fest > *{min-width:0}
+@media (max-width:1100px){.fest{grid-template-columns:minmax(0,1fr)}}
+.entries{display:flex; flex-direction:column; gap:6px}
+@media (max-width:1100px){.entries{flex-direction:row; flex-wrap:wrap}}
+.entries button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 12px; text-align:left; min-height:52px; font-weight:700}
+.entries button small{display:block; font-weight:400; color:var(--muted); font-size:13px}
+.entries button[aria-pressed="true"]{border-color:var(--sail); background:var(--sail-soft)}
+.card2{border:2px solid var(--line); border-radius:14px; padding:12px 14px; background:var(--card)}
+.claims{font-size:16px; display:grid; gap:4px}
+.claims div{display:flex; justify-content:space-between; gap:10px; border-bottom:1px dashed var(--line); padding:3px 0}
+.judge{display:grid; gap:10px; margin-top:12px}
+.jrow{border:2px solid var(--line); border-radius:12px; padding:10px 12px; display:grid; gap:8px}
+.jrow.good{border-color:var(--good)} .jrow.bad{border-color:var(--try)}
+.jrow .t{font-weight:700}
+.mm{display:flex; gap:6px}
+.mm button{flex:1; border:2px solid var(--line); border-radius:10px; background:var(--card); min-height:46px; font-weight:700}
+.mm button[aria-pressed="true"].y{background:var(--good); border-color:var(--good); color:#fff}
+.mm button[aria-pressed="true"].n{background:var(--try); border-color:var(--try); color:#fff}
+.tally{font-family:var(--display); font-size:24px; font-weight:800; margin-top:6px}
+body.present header .premise, body.present nav.classes, body.present .fest .entries, body.present .lead{display:none}
+body.present .fest{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:1100px){body.present .fest{grid-template-columns:minmax(0,1fr)}}
+
+/* Challenge */
+.goals{display:flex; flex-direction:column; gap:8px; margin:10px 0}
+.goal{display:flex; gap:10px; align-items:center; border:2px solid var(--line); border-radius:12px; padding:10px 12px; font-weight:700}
+.goal i{width:28px; height:28px; border-radius:50%; border:2px solid var(--line); display:grid; place-items:center; font-style:normal; flex:none}
+.goal.met{border-color:var(--good); background:var(--good-soft)}
+.goal.met i{background:var(--good); border-color:var(--good); color:#fff}
+.bigstat{font-family:var(--display); font-size:clamp(28px,3vw,44px); font-weight:800; line-height:1}
+table.res{border-collapse:collapse; font-size:17px; margin-top:8px}
+table.res td,table.res th{padding:6px 16px 6px 0; text-align:left; border-bottom:1px solid var(--line)}
+table.res td.num{text-align:right}
+
+svg text{font-family:var(--body)}
+.svg-ink{stroke:var(--ink)} 
+@media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+</style>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="eyebrow">Grade 4 · Set 4 project · 3 class periods</div>
+    <h1>The <span class="k">Kite</span> Works</h1>
+    <p class="premise">A shape earns its name from its lines and angles. Blueprint it, prove it, fly it.</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="presentBtn" hidden>Showcase mode</button>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="classes" role="tablist" aria-label="Classes">
+  <button role="tab" data-view="c1" aria-selected="true"><small>Class 1 · Parts 1–2</small><b>Toolkit &amp; Catalog</b></button>
+  <button role="tab" data-view="c2" aria-selected="false"><small>Class 2 · Parts 3–5</small><b>Practice kite &amp; Blueprint</b></button>
+  <button role="tab" data-view="c3" aria-selected="false"><small>Class 3 · Part 6</small><b>Kite Festival</b></button>
+  <button role="tab" data-view="ch" aria-selected="false"><small>Extension</small><b>★ Challenge</b></button>
+</nav>
+
+<section class="view" id="v-c1">
+  <div class="part" id="p1"></div>
+  <div class="part" id="p2"></div>
+  <div class="part" id="p2t"></div>
+</section>
+<section class="view" id="v-c2" hidden>
+  <div class="part" id="p3"></div>
+  <div class="part" id="p4"></div>
+  <div class="part" id="p5"></div>
+</section>
+<section class="view" id="v-c3" hidden>
+  <div class="part" id="p6"></div>
+</section>
+<section class="view" id="v-ch" hidden>
+  <div class="part" id="ch1"></div>
+  <div class="part" id="ch2"></div>
+</section>
+</div>
+<script>
+(function(){
+// ---- core geometry (shared with app) ----
+const EPS=1e-7;
+function centroid(P){let x=0,y=0;for(const p of P){x+=p[0];y+=p[1];}return [x/P.length,y/P.length];}
+function reflect(p,o,d){const vx=p[0]-o[0],vy=p[1]-o[1];const t=vx*d[0]+vy*d[1];return [o[0]+2*t*d[0]-vx, o[1]+2*t*d[1]-vy];}
+function same(a,b){return Math.abs(a[0]-b[0])<1e-6&&Math.abs(a[1]-b[1])<1e-6;}
+function isAxis(P,o,d){const n=P.length;const R=P.map(p=>reflect(p,o,d));
+  for(let k=0;k<n;k++){let ok=true;for(let i=0;i<n&&ok;i++){if(!same(R[i],P[((k-i)%n+n)%n]))ok=false;}if(ok)return true;}return false;}
+function candAxes(P){const o=centroid(P),n=P.length,out=[];
+  const pts=[];for(let i=0;i<n;i++){pts.push(P[i]);pts.push([(P[i][0]+P[(i+1)%n][0])/2,(P[i][1]+P[(i+1)%n][1])/2]);}
+  for(const q of pts){let dx=q[0]-o[0],dy=q[1]-o[1];const L=Math.hypot(dx,dy);if(L<1e-9)continue;dx/=L;dy/=L;if(dx<-1e-9||(Math.abs(dx)<1e-9&&dy<0)){dx=-dx;dy=-dy;}
+    if(!out.some(d=>Math.abs(d[0]-dx)<1e-6&&Math.abs(d[1]-dy)<1e-6))out.push([dx,dy]);}
+  return {o,axes:out};}
+function symLines(P){const {o,axes}=candAxes(P);return axes.filter(d=>isAxis(P,o,d));}
+// integer helpers
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1]], cross=(a,b)=>a[0]*b[1]-a[1]*b[0], dot=(a,b)=>a[0]*b[0]+a[1]*b[1], d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2;
+function segX(p1,p2,p3,p4){const o=(a,b,c)=>Math.sign(cross(sub(b,a),sub(c,a)));const on=(a,b,c)=>Math.min(a[0],b[0])<=c[0]&&c[0]<=Math.max(a[0],b[0])&&Math.min(a[1],b[1])<=c[1]&&c[1]<=Math.max(a[1],b[1]);
+  const o1=o(p1,p2,p3),o2=o(p1,p2,p4),o3=o(p3,p4,p1),o4=o(p3,p4,p2);
+  if(o1!==o2&&o3!==o4)return true;if(o1===0&&on(p1,p2,p3))return true;if(o2===0&&on(p1,p2,p4))return true;if(o3===0&&on(p3,p4,p1))return true;if(o4===0&&on(p3,p4,p2))return true;return false;}
+function polyIssue(P){const n=P.length;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(P[i][0]===P[j][0]&&P[i][1]===P[j][1])return 'dup';
+  for(let i=0;i<n;i++){if(cross(sub(P[(i+1)%n],P[i]),sub(P[(i+n-1)%n],P[i]))===0)return 'straight';}
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){if(j===i+1||(i===0&&j===n-1))continue;if(segX(P[i],P[(i+1)%n],P[j],P[(j+1)%n]))return 'cross';}return null;}
+// interior angle type at vertex i for a simple polygon: returns 'right'|'acute'|'obtuse'|'reflex'
+function area2(P){let s=0;for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length];s+=a[0]*b[1]-a[1]*b[0];}return s;}
+function angleType(P,i){const n=P.length,a=P[(i+n-1)%n],v=P[i],b=P[(i+1)%n];const u=sub(a,v),w=sub(b,v);
+  const sgn=Math.sign(area2(P));const cr=cross(sub(v,a),sub(b,v));// turn
+  const convex=Math.sign(cr)===sgn; if(!convex)return 'reflex';const dt=dot(u,w);return dt===0?'right':dt>0?'acute':'obtuse';}
+function parallelPairs(P){if(P.length!==4)return 0;let c=0;for(const [i,j] of [[0,2],[1,3]]){const e1=sub(P[i+1],P[i]),e2=sub(P[(j+1)%4],P[j]);if(cross(e1,e2)===0)c++;}return c;}
+function quadName(P){const s=[0,1,2,3].map(i=>d2(P[i],P[(i+1)%4]));const rights=[0,1,2,3].filter(i=>angleType(P,i)==='right').length;const allEq=s.every(x=>x===s[0]);
+  if(rights===4&&allEq)return 'square';if(rights===4)return 'rectangle';if(allEq)return 'rhombus';const pp=parallelPairs(P);if(pp===2)return 'parallelogram';if(pp===1)return 'trapezoid';
+  if((s[0]===s[1]&&s[2]===s[3])||(s[1]===s[2]&&s[3]===s[0]))return 'kite';return 'quadrilateral';}
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const RAD=Math.PI/180;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pts=(A,M)=>A.map(p=>{const q=M(p);return q[0].toFixed(2)+','+q[1].toFixed(2);}).join(' ');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fit(P,W,H,pad){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const p of P){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}
+  const k=Math.min((W-2*pad)/((x1-x0)||1),(H-2*pad)/((y1-y0)||1));const ox=(W-(x1-x0)*k)/2-x0*k,oy=(H-(y1-y0)*k)/2-y0*k;const M=p=>[p[0]*k+ox,p[1]*k+oy];M.k=k;return M;}
+const len=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+const unit=(a,b)=>{const L=len(a,b);return [(b[0]-a[0])/L,(b[1]-a[1])/L];};
+function angleAt(a,v,b){const u=unit(v,a),w=unit(v,b);return Math.acos(Math.max(-1,Math.min(1,u[0]*w[0]+u[1]*w[1])))/RAD;}
+function parseNum(v){const t=String(v).trim();if(!/^\d+(\.\d+)?$/.test(t))return null;return Number(t);}
+function fbox(el,cls,html){el.className='fb '+cls;el.innerHTML=html;}
+function linePts(o,d,bounds){// extend line through o along d to box [x0,y0,x1,y1]
+  const [x0,y0,x1,y1]=bounds;let ts=[];
+  if(Math.abs(d[0])>1e-9){ts.push((x0-o[0])/d[0],(x1-o[0])/d[0]);} if(Math.abs(d[1])>1e-9){ts.push((y0-o[1])/d[1],(y1-o[1])/d[1]);}
+  const ok=ts.map(t=>[o[0]+t*d[0],o[1]+t*d[1]]).filter(p=>p[0]>=x0-1e-6&&p[0]<=x1+1e-6&&p[1]>=y0-1e-6&&p[1]<=y1+1e-6);
+  ok.sort((a,b)=>(a[0]-b[0])||(a[1]-b[1]));return [ok[0],ok[ok.length-1]];}
+function bbox(P,m){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const p of P){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}return [x0-m,y0-m,x1+m,y1+m];}
+/* float-tolerant properties of a polygon */
+function props(P){const n=P.length,S=[];for(let i=0;i<n;i++)S.push(len(P[i],P[(i+1)%n]));const sc=Math.max(...S);
+  const eq=(a,b)=>Math.abs(a-b)<1e-6*sc;
+  const angs=P.map((v,i)=>angleAt(P[(i+n-1)%n],v,P[(i+1)%n]));
+  const rights=angs.filter(a=>Math.abs(a-90)<1e-6).length;
+  let par=0;const parPairs=[];if(n===4){for(const [i,j] of [[0,2],[1,3]]){const e1=unit(P[i],P[i+1]),e2=unit(P[j],P[(j+1)%4]);if(Math.abs(e1[0]*e2[1]-e1[1]*e2[0])<1e-9){par++;parPairs.push([i,j]);}}}
+  const allEq=S.every(s=>eq(s,S[0]));
+  let eqCount=0;if(n===3){if(allEq)eqCount=3;else if(eq(S[0],S[1])||eq(S[1],S[2])||eq(S[0],S[2]))eqCount=2;}
+  return {S,angs,rights,par,parPairs,allEq,eqCount,lines:symLines(P).length};}
+/* marks overlay: right-angle squares, equal-side ticks, parallel arrows. M maps to screen. */
+function marksSVG(P,M,opt){const n=P.length;let s='';const pr=props(P);const k=opt.size||14;
+  if(opt.right){for(let i=0;i<n;i++){if(Math.abs(pr.angs[i]-90)<1e-6){const v=M(P[i]),a=M(P[(i+n-1)%n]),b=M(P[(i+1)%n]);const u=unit(v,a),w=unit(v,b);
+    s+=`<path d="M${v[0]+u[0]*k},${v[1]+u[1]*k} L${v[0]+u[0]*k+w[0]*k},${v[1]+u[1]*k+w[1]*k} L${v[0]+w[0]*k},${v[1]+w[1]*k}" fill="none" stroke="var(--angle)" stroke-width="3"/>`;}}}
+  if(opt.equal){const groups=[];const sc=Math.max(...pr.S);pr.S.forEach((L,i)=>{let g=groups.find(g=>Math.abs(g.L-L)<1e-6*sc);if(!g){g={L,ids:[]};groups.push(g);}g.ids.push(i);});
+    let t=1;for(const g of groups){if(g.ids.length<2)continue;for(const i of g.ids){const a=M(P[i]),b=M(P[(i+1)%n]);const mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];const u=unit(a,b),nn=[-u[1],u[0]];
+      for(let j=0;j<t;j++){const off=(j-(t-1)/2)*7;const c=[mid[0]+u[0]*off,mid[1]+u[1]*off];s+=`<line x1="${c[0]-nn[0]*9}" y1="${c[1]-nn[1]*9}" x2="${c[0]+nn[0]*9}" y2="${c[1]+nn[1]*9}" stroke="var(--sail)" stroke-width="3.5" stroke-linecap="round"/>`;}}t++;}}
+  if(opt.parallel&&n===4){let t=1;for(const [i,j] of pr.parPairs){for(const e of [i,j]){const a=M(P[e]),b=M(P[(e+1)%4]);const mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];let u=unit(a,b);
+      if(e===j){u=[-u[0],-u[1]];} // same physical direction for both sides of the pair
+      const nn=[-u[1],u[0]];for(let q=0;q<t;q++){const c=[mid[0]+u[0]*(q*9-((t-1)*9)/2+4),mid[1]+u[1]*(q*9-((t-1)*9)/2+4)];
+        s+=`<path d="M${c[0]-u[0]*9+nn[0]*8},${c[1]-u[1]*9+nn[1]*8} L${c[0]},${c[1]} L${c[0]-u[0]*9-nn[0]*8},${c[1]-u[1]*9-nn[1]*8}" fill="none" stroke="var(--fold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;}}t++;}}
+  return s;}
+/* fold animation: draws a ghost of P reflected across (o,d) into layer g; calls done(match) */
+function animateFold(g,P,M,o,d,done){const dur=reduced?0:800;const t0=performance.now();
+  const part=(p,s)=>{const u=[p[0]-o[0],p[1]-o[1]];const along=u[0]*d[0]+u[1]*d[1];const pa=[d[0]*along,d[1]*along];return [o[0]+pa[0]+s*(u[0]-pa[0]),o[1]+pa[1]+s*(u[1]-pa[1])];};
+  const match=isAxis(P,o,d);
+  function frame(now){const t=dur?Math.min(1,(now-t0)/dur):1;const s=1-2*(t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2);
+    const Q=P.map(p=>part(p,s));const col=t<1?'var(--fold)':(match?'var(--good)':'var(--try)');
+    g.innerHTML=`<polygon points="${pts(Q,M)}" fill="${t<1?'var(--fold-soft)':(match?'var(--good-soft)':'var(--try-soft)')}" fill-opacity=".55" stroke="${col}" stroke-width="3" stroke-dasharray="${t<1?'7 5':'0'}"/>`;
+    if(t<1)requestAnimationFrame(frame);else done&&done(match);}
+  requestAnimationFrame(frame);}
+function foldLinesSVG(P,M,cls,bounds){const {o,axes}=candAxes(P);let s='';axes.forEach((d,i)=>{const [a,b]=linePts(o,d,bounds);const A=M(a),B=M(b);
+  s+=`<g class="${cls}" data-i="${i}" style="cursor:pointer"><line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="transparent" stroke-width="26"/><line class="vis" x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--fold)" stroke-width="2.5" stroke-dasharray="8 7" opacity=".75"/></g>`;});return {svg:s,o,axes};}
+/* ---------- PART 1: Geometry Toolkit ---------- */
+const TERMS=[
+ {k:'segment',name:'Line segment',def:'A line segment has two endpoints. It stops at both ends.',clue:'This one has a dot at each end and no arrows.'},
+ {k:'ray',name:'Ray',def:'A ray has one endpoint and goes on forever in one direction.',clue:'This one has one dot and one arrow.'},
+ {k:'line',name:'Line',def:'A line has no endpoints. It goes on forever both ways.',clue:'This one has an arrow on each end.'},
+ {k:'right',name:'Right angle',def:'A right angle is a square corner. It measures exactly 90°.',clue:'Hold a paper corner to it. It fits exactly.'},
+ {k:'acute',name:'Acute angle',def:'An acute angle is smaller than a right angle: less than 90°.',clue:'Its opening is narrower than a paper corner.'},
+ {k:'obtuse',name:'Obtuse angle',def:'An obtuse angle is bigger than a right angle and smaller than a straight line: between 90° and 180°.',clue:'Its opening is wider than a paper corner.'},
+ {k:'parallel',name:'Parallel lines',def:'Parallel lines go the same way, stay the same distance apart, and never meet.',clue:'These two never cross, even if you keep drawing them.'},
+ {k:'perp',name:'Perpendicular lines',def:'Perpendicular lines cross and make four square corners.',clue:'These two cross and make square corners.'}];
+function arrowHead(tip,dir,size=14){const n=[-dir[1],dir[0]];const b=[tip[0]-dir[0]*size,tip[1]-dir[1]*size];
+  return `<polygon points="${tip[0]},${tip[1]} ${b[0]+n[0]*size*.55},${b[1]+n[1]*size*.55} ${b[0]-n[0]*size*.55},${b[1]-n[1]*size*.55}" fill="var(--ink)"/>`;}
+function figure(kind){const W=420,H=280;const th=Math.random()*Math.PI;let prims=[];// prims: {t:'seg',a,b,arrA,arrB,dotA,dotB} | {t:'sq',v,u,w} | {t:'arc',v,a1,a2}
+  const dir=a=>[Math.cos(a),Math.sin(a)];let measure=null;
+  if(kind==='segment'||kind==='ray'||kind==='line'){const u=dir(th);prims.push({t:'seg',a:[-130*u[0],-130*u[1]],b:[130*u[0],130*u[1]],dotA:kind!=='line',dotB:kind==='segment',arrA:kind==='line',arrB:kind!=='segment'});}
+  else if(kind==='right'||kind==='acute'||kind==='obtuse'){const m=kind==='right'?90:kind==='acute'?25+Math.round(Math.random()*45):110+Math.round(Math.random()*45);measure=m;
+    const a1=th,a2=th+m*RAD;const u=dir(a1),w=dir(a2);prims.push({t:'seg',a:[0,0],b:[150*u[0],150*u[1]],dotA:true,arrB:true},{t:'seg',a:[0,0],b:[150*w[0],150*w[1]],arrB:true});
+    if(m===90)prims.push({t:'sq',v:[0,0],u,w});else prims.push({t:'arc',v:[0,0],a1,a2});}
+  else if(kind==='parallel'){const u=dir(th),n=[-u[1],u[0]];for(const s of [-42,42])prims.push({t:'seg',a:[-140*u[0]+s*n[0],-140*u[1]+s*n[1]],b:[140*u[0]+s*n[0],140*u[1]+s*n[1]],arrA:true,arrB:true});}
+  else {const u=dir(th),w=dir(th+Math.PI/2);prims.push({t:'seg',a:[-120*u[0],-120*u[1]],b:[120*u[0],120*u[1]],arrA:true,arrB:true},{t:'seg',a:[-110*w[0],-110*w[1]],b:[110*w[0],110*w[1]],arrA:true,arrB:true},{t:'sq',v:[0,0],u,w});}
+  let all=[];prims.forEach(p=>{if(p.t==='seg')all.push(p.a,p.b);});const bb=bbox(all,0);const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;const T=p=>[p[0]-cx+W/2,p[1]-cy+H/2];
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="A mystery figure">`;
+  for(const p of prims){if(p.t==='seg'){const a=T(p.a),b=T(p.b);const u=unit(a,b);s+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>`;
+      if(p.arrB)s+=arrowHead([b[0]+u[0]*6,b[1]+u[1]*6],u,18);if(p.arrA)s+=arrowHead([a[0]-u[0]*6,a[1]-u[1]*6],[-u[0],-u[1]],18);
+      if(p.dotA)s+=`<circle cx="${a[0]}" cy="${a[1]}" r="7" fill="var(--sail)"/>`;if(p.dotB)s+=`<circle cx="${b[0]}" cy="${b[1]}" r="7" fill="var(--sail)"/>`;}
+    else if(p.t==='sq'){const v=T(p.v),k=22;s+=`<path d="M${v[0]+p.u[0]*k},${v[1]+p.u[1]*k} L${v[0]+(p.u[0]+p.w[0])*k},${v[1]+(p.u[1]+p.w[1])*k} L${v[0]+p.w[0]*k},${v[1]+p.w[1]*k}" fill="none" stroke="var(--angle)" stroke-width="3"/>`;}
+    else if(p.t==='arc'){const v=T(p.v),r=38;const A=[v[0]+r*Math.cos(p.a1),v[1]+r*Math.sin(p.a1)],B=[v[0]+r*Math.cos(p.a2),v[1]+r*Math.sin(p.a2)];s+=`<path d="M${A[0]},${A[1]} A${r},${r} 0 0 1 ${B[0]},${B[1]}" fill="none" stroke="var(--angle)" stroke-width="3"/>`;}}
+  return {svg:s+'</svg>',measure};}
+function mountToolkit(){const el=$('#p1');let cur=null,score=0,tries=0,answered=false,last=null;
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 1</span><h2>Geometry Toolkit</h2></div>
+  <p class="lead">Every kite is built from these eight ideas. Name the mystery figure, then draw and label one of each on your sheet.</p>
+  <div class="grid2"><div class="stage" id="tkStage"></div>
+  <div><div class="row" style="justify-content:space-between"><b>What is this figure?</b><span class="score" id="tkScore"></span></div>
+  <div class="answers" id="tkAns">${TERMS.map(t=>`<button data-k="${t.k}">${t.name}</button>`).join('')}</div>
+  <div class="fb" id="tkFb" aria-live="polite"></div>
+  <div class="row" style="margin-top:12px"><button class="btn" id="tkNext">Next figure</button></div>
+  <div class="hunt"><label for="huntPerp">Find in the room: something perpendicular<input id="huntPerp" placeholder="e.g. the corner of the door frame"></label>
+  <label for="huntPar">Find in the room: something parallel<input id="huntPar" placeholder="e.g. the top and bottom of the board"></label></div></div></div>`;
+  function next(){let k;do{k=TERMS[Math.floor(Math.random()*TERMS.length)].k;}while(k===last);last=k;cur={k,...figure(k)};answered=false;
+    $('#tkStage').innerHTML=cur.svg;$$('#tkAns button').forEach(b=>b.className='');$('#tkFb').innerHTML='';$('#tkFb').className='fb';}
+  function upd(){$('#tkScore').textContent=tries?`${score} of ${tries} right on the first try`:'';}
+  $$('#tkAns button').forEach(b=>b.onclick=()=>{const pick=TERMS.find(t=>t.k===b.dataset.k),real=TERMS.find(t=>t.k===cur.k);
+    const deg=cur.measure!=null?` This one measures <b class="num">${cur.measure}°</b>.`:'';
+    if(!answered){tries++;if(pick.k===cur.k)score++;answered=true;upd();}
+    if(pick.k===cur.k){b.className='right';fbox($('#tkFb'),'ok',`<b>Yes, ${real.name.toLowerCase()}.</b> ${real.def}${deg}`);}
+    else{b.className='wrong';fbox($('#tkFb'),'try',`<b>Not a ${pick.name.toLowerCase()}.</b> ${pick.def} Look again: ${real.clue} Try another button.`);}});
+  $('#tkNext').onclick=next;next();upd();}
+/* ---------- PART 2: Shape Catalog ---------- */
+const QUADS=[
+ {id:'square',name:'Square',P:[[-1,-1],[1,-1],[1,1],[-1,1]]},
+ {id:'rectangle',name:'Rectangle',P:[[-1.6,-1],[1.6,-1],[1.6,1],[-1.6,1]]},
+ {id:'rhombus',name:'Rhombus',P:[[0,-1.5],[1,0],[0,1.5],[-1,0]]},
+ {id:'kite',name:'Kite',P:[[0,-0.8],[1,0],[0,2],[-1,0]]},
+ {id:'para',name:'Parallelogram',P:[[-1.5,-1],[1,-1],[1.5,1],[-1,1]]},
+ {id:'trap',name:'Isosceles trapezoid',P:[[-1,-1],[1,-1],[1.7,1],[-1.7,1]]}];
+const TRIS=[
+ {id:'equi',name:'Equilateral',P:[[0,-2/Math.sqrt(3)],[1,1/Math.sqrt(3)],[-1,1/Math.sqrt(3)]]},
+ {id:'iso',name:'Isosceles',P:[[0,-1.6],[1,1],[-1,1]]},
+ {id:'scal',name:'Scalene',P:[[-1.2,1],[1.4,1],[0.4,-1.3]]}];
+function miniSVG(P){const M=fit(P,40,34,3);return `<svg viewBox="0 0 40 34" aria-hidden="true"><polygon points="${pts(P,M)}" fill="var(--sun-soft)" stroke="var(--ink)" stroke-width="1.6"/></svg>`;}
+function makeInspector(stage,ctl,shape){let st={shape,marks:{parallel:false,right:false,equal:false},found:new Set(),busy:false,msg:''};
+  const W=440,H=330;
+  ctl.innerHTML=`<div class="row"><b id="${stage.id}-nm"></b></div>
+   <p class="small muted" style="margin:4px 0">Tap a dashed line to fold the card along it.</p>
+   <div class="marks" role="group" aria-label="Show marks">
+     <button class="chip" data-m="parallel" aria-pressed="false">Show parallel sides</button>
+     <button class="chip" data-m="right" aria-pressed="false">Show right angles</button>
+     <button class="chip" data-m="equal" aria-pressed="false">Show equal sides</button></div>
+   <div class="fb" id="${stage.id}-fb" aria-live="polite"></div>`;
+  $$('[data-m]',ctl).forEach(b=>b.onclick=()=>{st.marks[b.dataset.m]=!st.marks[b.dataset.m];b.setAttribute('aria-pressed',st.marks[b.dataset.m]);draw();});
+  function draw(){const P=st.shape.P;const bounds=bbox(P,0.35);const M=fit([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],W,H,14);
+    const fl=foldLinesSVG(P,M,'fl',bounds);
+    stage.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(st.shape.name)} card with possible fold lines"><polygon points="${pts(P,M)}" fill="var(--sun-soft)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+      ${marksSVG(P,M,{...st.marks,size:18})}<g class="ghost"></g>${fl.svg}</svg>`;
+    $('#'+stage.id+'-nm').textContent=`${st.shape.name} card · ${st.found.size} fold line${st.found.size===1?'':'s'} found so far`;
+    $$('.fl',stage).forEach(g=>{const i=+g.dataset.i;if(st.found.has(i))g.querySelector('.vis').setAttribute('stroke-dasharray','0'),g.querySelector('.vis').setAttribute('opacity','1');
+      g.onclick=()=>{if(st.busy)return;st.busy=true;animateFold(stage.querySelector('.ghost'),P,M,fl.o,fl.axes[i],m=>{st.busy=false;if(m)st.found.add(i);
+        const fb=$('#'+stage.id+'-fb');const tot=symLines(P).length;
+        if(m)fbox(fb,'ok',`<b>It folds onto itself.</b> Every corner lands on a corner. That's a line of symmetry. Found ${st.found.size} so far.${st.found.size===tot?' Have you tried every dashed line?':''}`);
+        else fbox(fb,'try',`<b>No match on this fold.</b> See the part that sticks out? The two halves are different, so this is not a line of symmetry. Try another line.`);
+        const keep=stage.querySelector('.ghost').innerHTML;draw();stage.querySelector('.ghost').innerHTML=keep;});};});}
+  return {set(shape){st.shape=shape;st.found=new Set();const fb=$('#'+stage.id+'-fb');fb.innerHTML='';fb.className='fb';draw();},draw};}
+function cycler(opts){return {opts,val:null};}
+function mountCatalog(){const el=$('#p2');
+  const cols=[{k:'par',label:'Pairs of parallel sides',opts:[0,1,2]},{k:'rights',label:'Right angles',opts:[0,1,2,3,4]},{k:'allEq',label:'All sides equal?',opts:['yes','no']},{k:'lines',label:'Lines of symmetry',opts:[0,1,2,3,4]}];
+  const why={par:'Show the parallel sides on the card, or stretch each side with a ruler: which pairs would never meet?',rights:'Test every corner with your paper right angle, or tap “Show right angles”.',allEq:'Compare the side lengths, or tap “Show equal sides”. Matching tick marks mean equal sides.',lines:'Fold along every dashed line on the card. Count only the folds that match.'};
+  const ans={};const truth={};QUADS.forEach(q=>{const p=props(q.P);truth[q.id]={par:p.par,rights:p.rights,allEq:p.allEq?'yes':'no',lines:p.lines};ans[q.id]={};});
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 2</span><h2>The Shape Catalog</h2></div>
+  <p class="lead">Pick a shape card. Fold it to hunt for lines of symmetry. Then tap the boxes in the table to fill in what you found.</p>
+  <div class="grid2"><div><div class="stage" id="qInsp"></div><div id="qCtl" style="margin-top:10px"></div></div>
+  <div><div class="tblwrap"><table class="cat"><thead><tr><th>Shape</th>${cols.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead><tbody>
+  ${QUADS.map(q=>`<tr><td><button class="shapebtn" data-s="${q.id}" aria-pressed="false">${miniSVG(q.P)}${q.name}</button></td>${cols.map(c=>`<td><button class="cyc empty" data-s="${q.id}" data-c="${c.k}" aria-label="${q.name}: ${c.label}">?</button></td>`).join('')}</tr>`).join('')}
+  </tbody></table></div><p class="small muted" style="margin:4px 0 0">Tap a box to change it.</p>
+  <div class="row" style="margin-top:10px"><button class="btn" id="qCheck">Check my catalog</button></div>
+  <div class="fb" id="qFb" aria-live="polite"></div></div></div>`;
+  const insp=makeInspector($('#qInsp'),$('#qCtl'),QUADS[0]);
+  const sel=id=>{$$('.shapebtn',el).forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===id));insp.set(QUADS.find(q=>q.id===id));};
+  $$('.shapebtn',el).forEach(b=>b.onclick=()=>sel(b.dataset.s));sel('square');
+  $$('.cyc',el).forEach(b=>b.onclick=()=>{const c=cols.find(c=>c.k===b.dataset.c);const cur=ans[b.dataset.s][c.k];const i=cur==null?0:(c.opts.indexOf(cur)+1)%c.opts.length;
+    ans[b.dataset.s][c.k]=c.opts[i];b.textContent=c.opts[i];b.className='cyc';});
+  $('#qCheck').onclick=()=>{let wrong=[],blank=0;$$('.cyc',el).forEach(b=>{const v=ans[b.dataset.s][b.dataset.c];if(v==null){blank++;b.className='cyc empty';return;}
+    const ok=v===truth[b.dataset.s][b.dataset.c];b.className='cyc '+(ok?'good':'bad');if(!ok)wrong.push(b);});
+    if(!wrong.length&&!blank)fbox($('#qFb'),'ok','<b>Every box is right.</b> Look down the “Lines of symmetry” column. Which shapes have the most? What do they have in common?');
+    else if(!wrong.length)fbox($('#qFb'),'ok',`Everything you filled in is right. ${blank} box${blank===1?' is':'es are'} still empty.`);
+    else{const b=wrong[0];const q=QUADS.find(q=>q.id===b.dataset.s);const c=cols.find(c=>c.k===b.dataset.c);sel(q.id);
+      fbox($('#qFb'),'try',`<b>${wrong.length} box${wrong.length===1?' needs':'es need'} another look</b> (red). Start with <b>${q.name} · ${c.label.toLowerCase()}</b>. ${why[c.k]} I put the ${q.name.toLowerCase()} card on the folding table for you.`);}};}
+/* ---------- PART 2b: triangles, angle sort, square vs rectangle ---------- */
+const SORT=[[90,45,45],[60,60,60],[120,30,30],[30,60,90],[50,60,70],[100,50,30],[80,50,50]];
+function triFromAngles(a){// base from A to B, angles at A=a[1], B=a[2], apex angle a[0]
+  const A=[0,0],B=[1,0];const ta=a[1]*RAD,tb=a[2]*RAD;const sideAC=Math.sin(tb)/Math.sin(a[0]*RAD);return [A,B,[Math.cos(ta)*sideAC,-Math.sin(ta)*sideAC]];}
+function mountTriangles(){const el=$('#p2t');
+  const tcols=[{k:'eqCount',label:'Equal sides',opts:[0,2,3]},{k:'lines',label:'Lines of symmetry',opts:[0,1,2,3]}];
+  const ans={},truth={};TRIS.forEach(t=>{const p=props(t.P);truth[t.id]={eqCount:p.eqCount,lines:p.lines};ans[t.id]={};});
+  const sortAns={};const kinds=['Right','Acute','Obtuse'];const kindOf=a=>Math.max(...a)===90?'Right':Math.max(...a)>90?'Obtuse':'Acute';
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 2</span><h2>Triangles</h2></div>
+  <p class="lead">Sort the triangle cards by sides, then fold. Then sort a new pile by their angles.</p>
+  <div class="grid2"><div><div class="stage" id="tInsp"></div><div id="tCtl" style="margin-top:10px"></div></div>
+  <div><div class="tblwrap"><table class="cat" style="min-width:360px"><thead><tr><th>Triangle</th>${tcols.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead><tbody>
+  ${TRIS.map(t=>`<tr><td><button class="shapebtn" data-s="${t.id}" aria-pressed="false">${miniSVG(t.P)}${t.name}</button></td>${tcols.map(c=>`<td><button class="cyc empty" data-s="${t.id}" data-c="${c.k}" aria-label="${t.name}: ${c.label}">?</button></td>`).join('')}</tr>`).join('')}
+  </tbody></table></div>
+  <div class="row" style="margin-top:10px"><button class="btn" id="tCheck">Check triangles</button></div><div class="fb" id="tFb" aria-live="polite"></div>
+  <h3>Is a square a rectangle?</h3>
+  <div class="yn"><span>Is a square a rectangle?</span><button class="chip" data-yn="sq" data-v="yes" aria-pressed="false">Yes</button><button class="chip" data-yn="sq" data-v="no" aria-pressed="false">No</button></div>
+  <div class="yn"><span>Is a rectangle a square?</span><button class="chip" data-yn="rc" data-v="yes" aria-pressed="false">Yes</button><button class="chip" data-yn="rc" data-v="no" aria-pressed="false">No</button></div>
+  <div class="fb" id="ynFb" aria-live="polite"></div></div></div>
+  <h3>Sort by angles</h3><p class="small muted" style="margin-top:0">Tap a card to sort it: right, acute or obtuse. Every card is drawn to scale.</p>
+  <div class="cards" id="sortCards">${SORT.map((a,i)=>{const P=triFromAngles(a);const M=fit(P,150,96,12);
+    const lab=P.map((v,j)=>{const c=centroid(P);const u=unit(v,c);const q=M(v);const ang=[a[1],a[2],a[0]][j];return `<text x="${q[0]+u[0]*20}" y="${q[1]+u[1]*20+5}" font-size="13" text-anchor="middle" fill="var(--angle)" font-weight="700">${ang}°</text>`;}).join('');
+    return `<button class="tcard" data-i="${i}" aria-label="Triangle card ${i+1}"><svg viewBox="0 0 150 96" aria-hidden="true"><polygon points="${pts(P,M)}" fill="var(--sun-soft)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>${lab}</svg><span class="lab">?</span></button>`;}).join('')}</div>
+  <div class="row" style="margin-top:10px"><button class="btn" id="sortCheck">Check my sort</button></div><div class="fb" id="sortFb" aria-live="polite"></div>`;
+  const insp=makeInspector($('#tInsp'),$('#tCtl'),TRIS[0]);
+  const sel=id=>{$$('.shapebtn',el).forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===id));insp.set(TRIS.find(q=>q.id===id));};
+  $$('.shapebtn',el).forEach(b=>b.onclick=()=>sel(b.dataset.s));sel('equi');
+  $$('.cyc',el).forEach(b=>b.onclick=()=>{const c=tcols.find(c=>c.k===b.dataset.c);const cur=ans[b.dataset.s][c.k];const i=cur==null?0:(c.opts.indexOf(cur)+1)%c.opts.length;ans[b.dataset.s][c.k]=c.opts[i];b.textContent=c.opts[i];b.className='cyc';});
+  $('#tCheck').onclick=()=>{let wrong=[],blank=0;$$('.cyc',el).forEach(b=>{const v=ans[b.dataset.s][b.dataset.c];if(v==null){blank++;return;}const ok=v===truth[b.dataset.s][b.dataset.c];b.className='cyc '+(ok?'good':'bad');if(!ok)wrong.push(b);});
+    if(!wrong.length)fbox($('#tFb'),'ok',blank?`Everything you filled in is right. ${blank} box${blank===1?' is':'es are'} still empty.`:'<b>All right.</b> Notice the pattern: more equal sides, more lines of symmetry.');
+    else{const b=wrong[0];const t=TRIS.find(t=>t.id===b.dataset.s);sel(t.id);fbox($('#tFb'),'try',b.dataset.c==='lines'?`<b>${t.name}:</b> fold it along every dashed line and count only the folds that match. It's on the folding table now.`:`<b>${t.name}:</b> tap “Show equal sides”. Matching tick marks mean equal sides. (A scalene triangle has no equal sides, so write 0.)`);}};
+  const yn={};$$('[data-yn]',el).forEach(b=>b.onclick=()=>{yn[b.dataset.yn]=b.dataset.v;$$(`[data-yn="${b.dataset.yn}"]`,el).forEach(x=>x.setAttribute('aria-pressed',x===b));
+    if(yn.sq&&yn.rc){const ok=yn.sq==='yes'&&yn.rc==='no';
+      if(ok)fbox($('#ynFb'),'ok','<b>Yes, then no.</b> A rectangle needs four right angles. A square has them, so every square is a rectangle. A square also needs four equal sides, and most rectangles don’t have that.');
+      else fbox($('#ynFb'),'try',`Check the rules. A <b>rectangle</b> needs 4 right angles. A <b>square</b> needs 4 right angles <i>and</i> 4 equal sides. ${yn.sq!=='yes'?'Does a square pass the rectangle test?':''} ${yn.rc!=='no'?'Does every rectangle pass the square test? Look at the rectangle card in the catalog.':''}`);}});
+  $$('.tcard',el).forEach(b=>b.onclick=()=>{const i=+b.dataset.i;const cur=sortAns[i];const j=cur==null?0:(kinds.indexOf(cur)+1)%3;sortAns[i]=kinds[j];b.querySelector('.lab').textContent=kinds[j];b.classList.remove('good','bad');});
+  $('#sortCheck').onclick=()=>{let wrong=[],blank=0;$$('.tcard',el).forEach(b=>{const i=+b.dataset.i;if(!sortAns[i]){blank++;return;}const ok=sortAns[i]===kindOf(SORT[i]);b.classList.toggle('good',ok);b.classList.toggle('bad',!ok);if(!ok)wrong.push(i);});
+    if(!wrong.length)fbox($('#sortFb'),'ok',blank?`So far so good. ${blank} card${blank===1?' is':'s are'} still unsorted.`:'<b>Sorted!</b> A triangle can have at most one right or obtuse angle. Why? (Hint: all three angles add to 180°.)');
+    else{const a=SORT[wrong[0]];const big=Math.max(...a);fbox($('#sortFb'),'try',`<b>Look at the biggest angle on the red card: ${big}°.</b> ${big===90?'Exactly 90° means a right triangle.':big>90?'More than 90° means an obtuse triangle.':'It is less than 90°, so every angle is acute. That makes an acute triangle.'} Tap it to change it.`);}};}
+/* ---------- Geoboard ---------- */
+function makeBoard(host,{n,k,onChange,overlay}){const B={P:[],drag:-1,k};const G=60,pad=36,W=(n-1)*G+2*pad;
+  const M=p=>[pad+p[0]*G,pad+p[1]*G];
+  host.innerHTML=`<svg viewBox="0 0 ${W} ${W}" role="img" aria-label="Dot board"></svg>`;const svg=host.querySelector('svg');
+  function render(){let s='';
+    for(let x=0;x<n;x++)for(let y=0;y<n;y++){const q=M([x,y]);s+=`<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="var(--muted)" opacity=".55"/>`;}
+    const P=B.P;if(P.length>=3)s+=`<polygon points="${pts(P,M)}" fill="var(--sun-soft)" fill-opacity=".9" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>`;
+    else if(P.length===2){const a=M(P[0]),b=M(P[1]);s+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--ink)" stroke-width="4"/>`;}
+    if(overlay)s+=overlay(P,M,W,G,pad);
+    P.forEach((p,i)=>{const q=M(p);s+=`<circle cx="${q[0]}" cy="${q[1]}" r="15" fill="var(--sail)" stroke="var(--card)" stroke-width="3"/><text x="${q[0]}" y="${q[1]+5}" font-size="14" font-weight="700" text-anchor="middle" fill="#fff">${String.fromCharCode(65+i)}</text>`;});
+    svg.innerHTML=s;svg.setAttribute('aria-label',`Dot board with ${P.length} corners placed`);}
+  const toGrid=e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const r=pt.matrixTransform(svg.getScreenCTM().inverse());return [Math.round((r.x-pad)/G),Math.round((r.y-pad)/G),r];};
+  svg.addEventListener('pointerdown',e=>{const [gx,gy,r]=toGrid(e);if(gx<0||gy<0||gx>=n||gy>=n)return;const q=M([gx,gy]);if(Math.hypot(r.x-q[0],r.y-q[1])>G*.48)return;
+    const hit=B.P.findIndex(p=>p[0]===gx&&p[1]===gy);if(hit>=0){B.drag=hit;try{svg.setPointerCapture(e.pointerId);}catch(_){}return;}
+    if(B.P.length<B.k){B.P.push([gx,gy]);onChange&&onChange();render();}else onChange&&onChange('full');});
+  svg.addEventListener('pointermove',e=>{if(B.drag<0)return;let [gx,gy]=toGrid(e);gx=Math.max(0,Math.min(n-1,gx));gy=Math.max(0,Math.min(n-1,gy));const p=B.P[B.drag];
+    if((p[0]!==gx||p[1]!==gy)&&!B.P.some(q=>q[0]===gx&&q[1]===gy)){B.P[B.drag]=[gx,gy];onChange&&onChange();render();}});
+  const up=()=>{B.drag=-1;};svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  B.render=render;B.set=P=>{B.P=P.map(p=>p.slice());onChange&&onChange();render();};B.clear=()=>{B.P=[];onChange&&onChange();render();};B.M=M;render();return B;}
+function intMarks(P,M,opt){// same marks as marksSVG for integer polygons
+  return marksSVG(P,M,opt);}
+/* ---------- PART 3: Warm-up sketches ---------- */
+function mountWarmup(){const el=$('#p3');let mode='q';let show=false;
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 3</span><h2>Warm-Up Sketches</h2></div>
+  <p class="lead">Tap dots to place the corners, drag a corner to move it, then check your sketch against the spec. Matching marks show parallel sides (arrows), right angles (squares) and equal sides (ticks).</p>
+  <div class="seg" role="group" aria-label="Which sketch"><button data-w="q" aria-pressed="true">Sketch 1 · quadrilateral</button><button data-w="t" aria-pressed="false">Sketch 2 · triangle</button></div>
+  <div class="grid2" style="margin-top:12px"><div class="stage" id="wuBoard"></div>
+  <div><p id="wuSpec" style="font-size:20px;font-weight:700;margin:0 0 8px"></p>
+  <div class="row"><button class="btn" id="wuCheck">Check my sketch</button><button class="btn alt" id="wuClear">Clear</button></div>
+  <div class="fb" id="wuFb" aria-live="polite"></div><div class="row" id="wuMore" style="margin-top:10px"></div><div class="fb" id="wuMoreFb" aria-live="polite"></div></div></div>`;
+  const spec={q:'A quadrilateral with exactly one pair of parallel sides and one right angle.',t:'A triangle with one obtuse angle and two equal sides.'};
+  const board=makeBoard($('#wuBoard'),{n:7,k:4,onChange:w=>{if(w==='full')fbox($('#wuFb'),'info','All corners are placed. Drag a corner to move it, or tap Clear.');else{show=false;}},overlay:(P,M)=>show&&P.length===(mode==='q'?4:3)?intMarks(P,M,{parallel:true,right:true,equal:true,size:16}):''});
+  function setMode(m){mode=m;board.k=m==='q'?4:3;$$('[data-w]',el).forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===m));$('#wuSpec').textContent=spec[m];$('#wuMore').innerHTML='';$('#wuMoreFb').innerHTML='';$('#wuMoreFb').className='fb';$('#wuFb').innerHTML='';$('#wuFb').className='fb';board.clear();}
+  board.k=4;
+  $$('[data-w]',el).forEach(b=>b.onclick=()=>setMode(b.dataset.w));
+  $('#wuClear').onclick=()=>{show=false;board.clear();$('#wuFb').className='fb';$('#wuFb').innerHTML='';};
+  $('#wuCheck').onclick=()=>{const P=board.P,fb=$('#wuFb');const need=mode==='q'?4:3;
+    if(P.length<need){fbox(fb,'info',`Place ${need-P.length} more corner${need-P.length===1?'':'s'} first.`);return;}
+    const iss=polyIssue(P);if(iss){fbox(fb,'try',iss==='straight'?'Three corners sit on one straight line, so one “corner” is really flat. Move it off the line.':'Two sides cross each other. Move a corner so the sides only meet at the corners.');return;}
+    show=true;board.render();const types=P.map((_,i)=>angleType(P,i));const rights=types.filter(t=>t==='right').length;
+    if(mode==='q'){const pp=parallelPairs(P);let msg=[];
+      if(pp===0)msg.push('No sides are parallel yet. Make two opposite sides go the same direction.');
+      if(pp===2)msg.push('Both pairs of opposite sides are parallel (see the arrows). The spec says <b>exactly one</b> pair.');
+      if(rights===0)msg.push('There is no right angle yet. Check a corner with your paper square.');
+      if(msg.length){fbox(fb,'try',msg.join(' ')+' Drag a corner and check again.');$('#wuMore').innerHTML='';return;}
+      fbox(fb,'ok',`<b>It meets the spec.</b> One pair of parallel sides and a right angle. Now count the right-angle marks. How many do you see? <b class="num">${rights}</b>.`);
+      $('#wuMore').innerHTML='<button class="btn fold" id="wuSearch">Can it have only ONE right angle? Test every one</button>';
+      $('#wuSearch').onclick=()=>{let total=0,counts={};const N=7,G=[];for(let x=0;x<N;x++)for(let y=0;y<N;y++)G.push([x,y]);
+        for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++)for(let a=j+1;a<G.length;a++)for(let b=a+1;b<G.length;b++){const q=[G[i],G[j],G[a],G[b]];
+          for(const o of [[0,1,2,3],[0,1,3,2],[0,2,1,3]]){const Q=o.map(t=>q[t]);if(polyIssue(Q)||parallelPairs(Q)!==1)continue;const r=Q.filter((_,t)=>angleType(Q,t)==='right').length;if(r>0){total++;counts[r]=(counts[r]||0)+1;}}}
+        const one=counts[1]||0;fbox($('#wuMoreFb'),'info',`I tested every quadrilateral on this 7 × 7 board with exactly one pair of parallel sides and a right angle: <b class="num">${total.toLocaleString()}</b> of them. Exactly one right angle: <b class="num">${one}</b>. Exactly two: <b class="num">${(counts[2]||0).toLocaleString()}</b>.${one===0?' The right angle always brings a partner. A side that is perpendicular to one parallel side is perpendicular to the other one too.':''}`);};}
+    else{const obt=types.filter(t=>t==='obtuse').length;const s=[0,1,2].map(i=>d2(P[i],P[(i+1)%3]));const eq=(s[0]===s[1]||s[1]===s[2]||s[0]===s[2]);let msg=[];
+      if(!obt)msg.push(rights?'This triangle has a right angle, not an obtuse one. Open that corner wider than a square corner.':'All three angles are acute. Make one corner wider than a square corner.');
+      if(!eq)msg.push('No two sides are the same length yet (no matching ticks). Try putting the obtuse corner in the middle, with the same steps to each side.');
+      if(msg.length){fbox(fb,'try',msg.join(' ')+' Drag a corner and check again.');return;}
+      fbox(fb,'ok','<b>It meets the spec.</b> One obtuse angle and two equal sides (matching ticks): an obtuse isosceles triangle. Could a triangle have <i>two</i> obtuse angles? Why not?');}};
+  setMode('q');}
+/* ---------- Kite geometry ---------- */
+const PROPS=[
+ {k:'adj',t:'Two pairs of equal sides next to each other'},
+ {k:'all',t:'All four sides equal'},
+ {k:'par2',t:'Two pairs of parallel sides'},
+ {k:'par1',t:'Exactly one pair of parallel sides'},
+ {k:'rt',t:'Four right angles'},
+ {k:'diag',t:'Spars on the diagonals cross at a right angle'}];
+function geoOf(d){let P,spars,S=[0,0],pieces,angles,cm;
+  if(d.mode==='box'){const w=d.w,h=d.h;P=[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];spars=[[[0,-h/2],[0,h/2]],[[-w/2,0],[w/2,0]]];angles=[90,90,90,90];
+    const T=[0,-h/2],R=[w/2,0],Bm=[0,h/2],L=[-w/2,0];pieces=[[S,L,P[0],T],[S,T,P[1],R],[S,R,P[2],Bm],[S,Bm,P[3],L]];}
+  else{const c=30,a=c/Math.tan(d.A/2*RAD),b=c/Math.tan(d.C/2*RAD);P=[[0,-a],[c,0],[0,b],[-c,0]];spars=[[P[0],P[2]],[P[3],P[1]]];const B=(360-d.A-d.C)/2;angles=[d.A,B,d.C,B];
+    pieces=[[S,P[0],P[1]],[S,P[1],P[2]],[S,P[2],P[3]],[S,P[3],P[0]]];}
+  const pr=props(P);const sc=Math.max(...pr.S);const eq=(x,y)=>Math.abs(x-y)<1e-6*sc;const Sd=pr.S;
+  const diagPerp=Math.abs((P[2][0]-P[0][0])*(P[3][0]-P[1][0])+(P[2][1]-P[0][1])*(P[3][1]-P[1][1]))<1e-6*sc*sc;
+  const truth={adj:(eq(Sd[0],Sd[3])&&eq(Sd[1],Sd[2]))||(eq(Sd[0],Sd[1])&&eq(Sd[2],Sd[3])),all:pr.allEq,par2:pr.par===2,par1:pr.par===1,rt:pr.rights===4,diag:diagPerp};
+  const name=pr.rights===4&&pr.allEq?'Square':pr.rights===4?'Rectangle':pr.allEq?'Rhombus':truth.adj?'Kite':'Quadrilateral';
+  // congruence classes of pieces by sorted side lengths
+  const keys=pieces.map(q=>q.map((p,i)=>len(p,q[(i+1)%q.length])).sort((x,y)=>x-y));const cls=[];const reps=[];keys.forEach((kk,i)=>{let j=reps.findIndex(r=>r.every((v,t)=>Math.abs(v-kk[t])<1e-6*sc));if(j<0){reps.push(kk);j=reps.length-1;}cls.push(j);});
+  const pieceKind=d.mode==='box'?(d.w===d.h?'squares':'rectangles'):'right triangles';
+  const sides=Sd.map(x=>Math.round(x));
+  return {d,P,spars,S,pieces,cls,angles,sum:angles.reduce((x,y)=>x+y,0),truth,name,lines:symLines(P),pr,pieceKind,sides,labels:['A','B','C','D']};}
+function drawKite(host,g,cfg={}){const W=520,H=460;const P=g.P;const ys=P.map(p=>p[1]);const bottom=Math.max(...ys);const span=Math.max(...ys)-Math.min(...ys);
+  const tailLen=cfg.noTail?0:span*0.32;const xs=P.map(p=>p[0]);const bnds=bbox([...P,[0,bottom+tailLen]],Math.max(span,Math.max(...xs)-Math.min(...xs))*0.1);
+  const M=fit([[bnds[0],bnds[1]],[bnds[2],bnds[3]]],W,H,18);const k=M.k;
+  const fills=['var(--sail)','var(--sun)','var(--fold)','var(--angle)'];let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.aria||'Kite drawing')}">`;
+  g.pieces.forEach((q,i)=>{s+=`<polygon points="${pts(q,M)}" fill="${fills[g.cls[i]%4]}" fill-opacity="${cfg.dim?0.18:0.55}" stroke="none"/>`;});
+  if(cfg.highlight)s+=cfg.highlight(M);
+  s+=`<polygon points="${pts(P,M)}" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>`;
+  g.spars.forEach(([a,b])=>{const A=M(a),B=M(b);s+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--spar)" stroke-width="7" stroke-linecap="round"/>`;});
+  if(!cfg.noTail){const t0=M([0,bottom]);const L=tailLen*k;let path=`M${t0[0]},${t0[1]}`;for(let i=1;i<=24;i++){const y=t0[1]+L*i/24;path+=` L${t0[0]+Math.sin(i/24*Math.PI*3)*12},${y}`;}
+    s+=`<path d="${path}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;for(const f of [.33,.66,1]){const y=t0[1]+L*f,x=t0[0]+Math.sin(f*Math.PI*3)*12;s+=`<path d="M${x-12},${y-7} L${x+12},${y+7} L${x+12},${y-7} L${x-12},${y+7}Z" fill="${f===.66?'var(--sun)':'var(--sail)'}"/>`;}}
+  const Sv=M(g.S);if(cfg.sparMark){const u=unit(g.spars[0][0],g.spars[0][1]),w=unit(g.spars[1][0],g.spars[1][1]);const kk=16;for(const [a,b] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const ux=[u[0]*a,u[1]*a],wx=[w[0]*b,w[1]*b];s+=`<path d="M${Sv[0]+ux[0]*kk},${Sv[1]+ux[1]*kk} L${Sv[0]+(ux[0]+wx[0])*kk},${Sv[1]+(ux[1]+wx[1])*kk} L${Sv[0]+wx[0]*kk},${Sv[1]+wx[1]*kk}" fill="none" stroke="var(--angle)" stroke-width="3"/>`;}}
+  if(cfg.sLabel)s+=`<text x="${Sv[0]+12}" y="${Sv[1]-10}" font-size="20" font-weight="700" fill="var(--ink)">${cfg.sLabel}</text>`;
+  if(cfg.marks)s+=marksSVG(P,M,{...cfg.marks,size:18});
+  const c=centroid(P);const labels=cfg.labels||g.labels;
+  P.forEach((p,i)=>{const v=M(p);const u=unit(M(c),v);const tl=!cfg.noTail&&Math.abs(p[1]-bottom)<1e-9&&Math.abs(p[0])<1e-9;const lx=tl?v[0]+26:v[0]+u[0]*24,ly=tl?v[1]+4:v[1]+u[1]*24+8;s+=`<text x="${lx}" y="${ly}" font-size="24" font-weight="800" text-anchor="middle" fill="var(--ink)" style="font-family:var(--display)">${labels[i]}</text>`;
+    const at=cfg.angleText?cfg.angleText(i):null;if(at!=null){const ui=[-u[0],-u[1]];const r=Math.min(52,len(v,M(c))*0.55);s+=`<text x="${v[0]+ui[0]*r}" y="${v[1]+ui[1]*r+7}" font-size="20" font-weight="700" text-anchor="middle" fill="var(--angle)" class="num">${at}</text>`;}});
+  if(cfg.protractor!=null){const i=cfg.protractor,n=4;const v=M(P[i]),a=M(P[(i+n-1)%n]),b=M(P[(i+1)%n]);const r=46;let a1=Math.atan2(a[1]-v[1],a[0]-v[0]),a2=Math.atan2(b[1]-v[1],b[0]-v[0]);let dd=a2-a1;while(dd<=-Math.PI)dd+=2*Math.PI;while(dd>Math.PI)dd-=2*Math.PI;
+    const A=[v[0]+r*Math.cos(a1),v[1]+r*Math.sin(a1)],B=[v[0]+r*Math.cos(a1+dd),v[1]+r*Math.sin(a1+dd)];s+=`<path d="M${v[0]},${v[1]} L${A[0]},${A[1]} A${r},${r} 0 0 ${dd>0?1:0} ${B[0]},${B[1]} Z" fill="var(--angle)" fill-opacity=".25" stroke="var(--angle)" stroke-width="3"/>`;
+    const mid=a1+dd/2;s+=`<rect x="${v[0]+Math.cos(mid)*(r+34)-34}" y="${v[1]+Math.sin(mid)*(r+34)-17}" width="68" height="34" rx="8" fill="var(--angle)"/><text x="${v[0]+Math.cos(mid)*(r+34)}" y="${v[1]+Math.sin(mid)*(r+34)+7}" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">${g.angles[i]}°</text>`;}
+  s+='<g class="ghost"></g>';
+  let fl=null;if(cfg.fold){const fb=bbox(P,(bnds[2]-bnds[0])*0.06);fl=foldLinesSVG(P,M,'kfl',fb);s+=fl.svg;}
+  if(cfg.onVertex)P.forEach((p,i)=>{const v=M(p);s+=`<circle class="vhit" data-i="${i}" cx="${v[0]}" cy="${v[1]}" r="28" fill="var(--angle)" fill-opacity="${cfg.protractor===i?0:.12}" stroke="var(--angle)" stroke-dasharray="4 4" style="cursor:pointer"><title>Measure angle ${labels[i]}</title></circle>`;});
+  host.innerHTML=s+'</svg>';
+  if(cfg.onVertex)$$('.vhit',host).forEach(c=>c.onclick=()=>cfg.onVertex(+c.dataset.i));
+  if(fl){$$('.kfl',host).forEach(gl=>gl.onclick=()=>{const i=+gl.dataset.i;if(host._busy)return;host._busy=true;animateFold(host.querySelector('.ghost'),P,M,fl.o,fl.axes[i],m=>{host._busy=false;cfg.onFold&&cfg.onFold(m,i,fl.axes.length);});});}
+  return M;}
+/* ---------- PART 4: Practice kite ---------- */
+function mountPractice(){const el=$('#p4');const g=geoOf({mode:'diamond',A:100,C:40});const LB=['T','R','B','L'];
+  const TL=len(g.P[0],g.P[3]),LBl=len(g.P[3],g.P[2]),TB=len(g.P[0],g.P[2]);
+  let view={angles:false,tri:false,fold:false,spar:false};
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 4</span><h2>The Practice Kite</h2></div>
+  <p class="lead">The spars cross at S. The spar from T to B is a line of symmetry. Answer each question, then put evidence on the kite.</p>
+  <div class="grid2"><div><div class="stage" id="pkStage"></div>
+   <div class="row" style="margin-top:10px"><button class="btn alt" id="pkAngles">Measure every angle</button><button class="btn alt" id="pkFold">Fold test</button><button class="btn alt" id="pkSpar">Check the spars</button><button class="btn alt" id="pkTri">Show triangle TLB</button></div>
+   <div class="fb" id="pkEv" aria-live="polite"></div></div>
+  <div><ol class="qlist">
+   <li id="q1"><div class="qtext">The four angles of a quadrilateral add to <input class="inp" id="a1" inputmode="numeric" aria-label="Sum of angles"> °.</div><div class="qfb"></div></li>
+   <li id="q2"><div class="qtext">T is 100° and B is 40°. Angles L and R are equal. Each one is <input class="inp" id="a2" inputmode="numeric" aria-label="Angle L"> °.</div><div class="qfb"></div></li>
+   <li id="q3"><div class="qtext">Spar TB splits the 100° angle at T into two equal angles: <input class="inp" id="a3a" inputmode="numeric" aria-label="First part"> ° and <input class="inp" id="a3b" inputmode="numeric" aria-label="Second part"> °.</div><div class="qfb"></div></li>
+   <li id="q4"><div class="qtext">The spars meet at S. Each of the four angles there is <input class="inp" id="a4a" inputmode="numeric" aria-label="Each angle at S"> °. Together: <input class="inp" id="a4b" inputmode="numeric" aria-label="Total at S"> °.</div><div class="qfb"></div></li>
+   <li id="q5"><div class="qtext">How many lines of symmetry does this kite have? <input class="inp" id="a5" inputmode="numeric" aria-label="Lines of symmetry"></div><div class="qfb"></div></li>
+   <li id="q6"><div class="qtext">Name triangle TLB by its sides: <select class="inp" id="a6" aria-label="Triangle name"><option value="">choose…</option><option>equilateral</option><option>isosceles</option><option>scalene</option></select></div><div class="qfb"></div></li>
+  </ol><div class="row" style="margin-top:14px"><button class="btn" id="pkCheck">Check my answers</button></div></div></div>`;
+  function draw(){drawKite($('#pkStage'),g,{labels:LB,sLabel:'S',sparMark:view.spar,aria:'Practice kite TRBL',
+    angleText:i=>view.angles?g.angles[i]+'°':(i===0?'100°':i===2?'40°':'?'),fold:view.fold,
+    onFold:(m,i)=>{const d=candAxes(g.P).axes[i];const vertical=Math.abs(d[0])<1e-6;const horiz=Math.abs(d[1])<1e-6;
+      fbox($('#pkEv'),m?'ok':'try',m?(vertical?'<b>Fold along TB: it matches.</b> L lands exactly on R.':'<b>It matches.</b>'):(horiz?'<b>Fold along LR: no match.</b> T is 100° and B is only 40°, so the top half is short and wide and the bottom half is long and thin.':'<b>No match.</b> The halves are different shapes. Try another line.'));},
+    highlight:view.tri?(M=>`<polygon points="${pts([g.P[0],g.P[3],g.P[2]],M)}" fill="var(--fold)" fill-opacity=".35" stroke="var(--fold)" stroke-width="5"/>`):null});}
+  const tog=(k,msg)=>{view[k]=!view[k];draw();if(view[k]&&msg)fbox($('#pkEv'),'info',msg);};
+  $('#pkAngles').onclick=()=>tog('angles','T = 100°, R = 110°, B = 40°, L = 110°. Add them: 100 + 110 + 40 + 110 = 360.');
+  $('#pkFold').onclick=()=>tog('fold','Tap a dashed line to fold the kite along it.');
+  $('#pkSpar').onclick=()=>tog('spar','All four angles at S are square corners: 90°, 90°, 90°, 90°. Together they make a full turn.');
+  $('#pkTri').onclick=()=>tog('tri',`Triangle TLB. If spar LR is 60 cm long: TL ≈ ${Math.round(TL)} cm, LB ≈ ${Math.round(LBl)} cm, TB ≈ ${Math.round(TB)} cm. Its angles: 50° at T, 110° at L, 20° at B.`);
+  draw();
+  const say=(id,ok,html)=>{const li=$('#'+id);li.classList.toggle('done',ok);const f=li.querySelector('.qfb');f.className='qfb '+(ok?'ok':'try');f.innerHTML=html;};
+  const mark=(inp,ok)=>{inp.classList.toggle('good',ok);inp.classList.toggle('bad',!ok);};
+  $('#pkCheck').onclick=()=>{
+    const v1=parseNum($('#a1').value);if(v1!=null){const ok=v1===360;mark($('#a1'),ok);say('q1',ok,ok?'Yes. A diagonal cuts any quadrilateral into two triangles: 180 + 180 = 360.':v1===180?'180° is one triangle. A diagonal cuts the kite into <i>two</i> triangles.':'Draw a diagonal. It cuts the kite into two triangles, and each triangle’s angles add to 180°.');}
+    const v2=parseNum($('#a2').value);if(v2!=null){const ok=v2===110;mark($('#a2'),ok);say('q2',ok,ok?'Yes. 360 − 100 − 40 = 220, and 220 ÷ 2 = 110.':v2===220?'220° is L and R <i>together</i>. They are equal, so share 220 between them.':'Start with 360. Take away T and B: 360 − 100 − 40. Then share what is left equally between L and R.');}
+    const x=parseNum($('#a3a').value),y=parseNum($('#a3b').value);if(x!=null&&y!=null){const ok=x===50&&y===50;mark($('#a3a'),x===50);mark($('#a3b'),y===50);say('q3',ok,ok?'Yes. 100 = 50 + 50. The fold line cuts the angle exactly in half.':x+y===100?'They add to 100, good. But TB is a line of symmetry, so the two halves must be equal.':'The two parts must add back to the whole 100° angle, and they are equal. What is half of 100?');}
+    const e=parseNum($('#a4a').value),t=parseNum($('#a4b').value);if(e!=null&&t!=null){const ok=e===90&&t===360;mark($('#a4a'),e===90);mark($('#a4b'),t===360);say('q4',ok,ok?'Yes. The spars are perpendicular: 4 × 90 = 360, a full turn.':e!==90?'The spars cross at a right angle. Tap “Check the spars” to see the four square corners.':'Add the four angles at S: 90 + 90 + 90 + 90.');}
+    const v5=parseNum($('#a5').value);if(v5!=null){const ok=v5===1;mark($('#a5'),ok);say('q5',ok,ok?'Yes, just one: TB. Folding along LR fails because T (100°) and B (40°) don’t match.':v5===2?'Try the fold along LR. T is 100° but B is 40°, so the top and bottom can’t match. Tap “Fold test”.':'Tap “Fold test” and try every dashed line. Count only the folds that match.');}
+    const v6=$('#a6').value;if(v6){const ok=v6==='scalene';mark($('#a6'),ok);say('q6',ok,ok?`Yes, scalene. TL ≈ ${Math.round(TL)} cm, LB ≈ ${Math.round(LBl)} cm and TB ≈ ${Math.round(TB)} cm: no two sides match. Its angles (50°, 110°, 20°) are all different too.`:v6==='isosceles'?'Measure the three sides: TL, LB and TB. Are any two the same? Tap “Show triangle TLB”.':'An equilateral triangle has three 60° angles. Triangle TLB has 50° at T and 20° at B.');}};}
+/* ---------- PART 5: Blueprint ---------- */
+const FEST=[];
+function mountBlueprint(){const el=$('#p5');let d={mode:'diamond',A:90,C:50,w:60,h:40};let fold=false,marks=false;
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 5</span><h2>Our Kite Blueprint</h2></div>
+  <p class="lead">Spec: at least one line of symmetry, and two spars crossing at a right angle along a diagonal or a line of symmetry. Shape your kite, then fill in the blueprint card yourself and check it.</p>
+  <div class="grid2"><div>
+   <div class="seg" role="group" aria-label="Spar layout"><button data-m="diamond" aria-pressed="true">Spars on the diagonals</button><button data-m="box" aria-pressed="false">Spars on lines of symmetry</button></div>
+   <div class="stage" id="bpStage" style="margin-top:10px"></div>
+   <div class="sliders" id="bpSl"></div>
+   <div class="row" style="margin-top:10px"><button class="btn alt" id="bpFold">Fold test</button><button class="btn alt" id="bpMarks">Show marks</button></div>
+   <div class="fb" id="bpEv" aria-live="polite"></div>
+   <div class="spec" id="bpSides"></div></div>
+  <div class="bp" id="bpCard"></div></div>`;
+  function sliders(){const s=$('#bpSl');s.innerHTML=d.mode==='diamond'?
+    `<label for="slA">Angle A (top) <span class="num" id="vA">${d.A}°</span><input type="range" id="slA" min="30" max="160" step="2" value="${d.A}"></label>
+     <label for="slC">Angle C (bottom) <span class="num" id="vC">${d.C}°</span><input type="range" id="slC" min="30" max="160" step="2" value="${d.C}"></label><p class="small muted" style="margin:0">Cross spar DB is 60 cm long.</p>`:
+    `<label for="slW">Width <span class="num" id="vW">${d.w} cm</span><input type="range" id="slW" min="20" max="80" step="5" value="${d.w}"></label>
+     <label for="slH">Height <span class="num" id="vH">${d.h} cm</span><input type="range" id="slH" min="20" max="80" step="5" value="${d.h}"></label>`;
+    $$('input',s).forEach(r=>r.oninput=()=>{if(r.id==='slA')d.A=+r.value;if(r.id==='slC')d.C=+r.value;if(r.id==='slW')d.w=+r.value;if(r.id==='slH')d.h=+r.value;
+      const lab=r.parentElement.querySelector('span');lab.textContent=r.id==='slA'||r.id==='slC'?r.value+'°':r.value+' cm';draw();resetCard();});}
+  function given(i){const g=geoOf(d);if(d.mode==='diamond')return i===0?g.angles[0]+'°':i===2?g.angles[2]+'°':'?';return null;}
+  function draw(){const g=geoOf(d);drawKite($('#bpStage'),g,{angleText:given,sparMark:true,fold,marks:marks?{right:true,equal:true,parallel:true}:null,aria:'Your kite blueprint',
+      onFold:(m)=>fbox($('#bpEv'),m?'ok':'try',m?'<b>It folds onto itself.</b> That is a line of symmetry.':'<b>No match on this fold.</b> The halves are different. Try another dashed line.')});
+    $('#bpSides').innerHTML=['AB','BC','CD','DA'].map((n,i)=>`<div><span>Side ${n}</span><b class="num">${g.sides[i]} cm</b></div>`).join('')+`<div class="small muted" style="grid-column:1/-1;border:0">Measured with a ruler, to the nearest cm.</div>`;}
+  function resetCard(){const g=geoOf(d);const dia=d.mode==='diamond';const c=$('#bpCard');
+    c.innerHTML=`<h3 style="margin-top:0">Blueprint card</h3>
+    <div class="line"><b>Angles</b> A <span class="num">${dia?g.angles[0]+'°':'<input class="inp" id="bA" inputmode="numeric" aria-label="Angle A">'}</span> B <input class="inp" id="bB" inputmode="numeric" aria-label="Angle B"> C <span class="num">${dia?g.angles[2]+'°':'<input class="inp" id="bC" inputmode="numeric" aria-label="Angle C">'}</span> D <input class="inp" id="bD" inputmode="numeric" aria-label="Angle D"></div>
+    <div class="line"><b>Sum</b><input class="inp" id="bSum" inputmode="numeric" aria-label="Sum of angles"> °</div>
+    <div class="line"><b>Shape name</b><select class="inp" id="bName" aria-label="Shape name"><option value="">choose…</option><option>Kite</option><option>Rhombus</option><option>Square</option><option>Rectangle</option><option>Parallelogram</option><option>Trapezoid</option></select></div>
+    <div><b>Properties that earn the name</b> <span class="small muted">(tap all that are true)</span><div class="marks" id="bProps">${PROPS.map(p=>`<button class="chip" data-p="${p.k}" aria-pressed="false">${p.t}</button>`).join('')}</div></div>
+    <div class="line"><b>Lines of symmetry</b><input class="inp" id="bLines" inputmode="numeric" aria-label="Lines of symmetry"></div>
+    <div class="line"><b>Spar crossing</b> four angles of <input class="inp" id="bSp1" inputmode="numeric" aria-label="Each angle at the crossing"> ° = <input class="inp" id="bSp2" inputmode="numeric" aria-label="Total at the crossing"> °</div>
+    ${dia?`<div class="line"><b>Split tip A</b> whole <input class="inp" id="bT0" inputmode="numeric" aria-label="Whole angle A"> ° = part <input class="inp" id="bT1" inputmode="numeric" aria-label="First part"> ° + part <input class="inp" id="bT2" inputmode="numeric" aria-label="Second part"> °</div>`:`<div class="line small muted">Split tip: these spars meet the sides, not the corners, so no corner gets split.</div>`}
+    <div class="line"><b>Sail pieces</b><input class="inp" id="bPc" inputmode="numeric" aria-label="Number of pieces"><select class="inp" id="bPk" aria-label="Kind of pieces"><option value="">kind…</option><option>right triangles</option><option>rectangles</option><option>squares</option></select></div>
+    <div class="row"><button class="btn" id="bCheck">Check blueprint</button></div><div class="fb" id="bFb" aria-live="polite"></div>
+    <div class="line" style="margin-top:6px"><label for="bTeam"><b>Team name</b></label><input class="team" id="bTeam" placeholder="e.g. Team Falcon"><button class="btn alt" id="bSend">Send to the Festival</button></div><div class="fb" id="bSendFb" aria-live="polite"></div>`;
+    $$('#bProps .chip').forEach(b=>b.onclick=()=>{b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');b.classList.remove('good','bad');});
+    $('#bCheck').onclick=check;$('#bSend').onclick=send;}
+  function read(){const g=geoOf(d);const v=id=>{const e=$('#'+id);return e?parseNum(e.value):null;};
+    return {A:d.mode==='diamond'?g.angles[0]:v('bA'),B:v('bB'),C:d.mode==='diamond'?g.angles[2]:v('bC'),D:v('bD'),sum:v('bSum'),name:$('#bName').value,props:$$('#bProps .chip').filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.p),
+      lines:v('bLines'),sp1:v('bSp1'),sp2:v('bSp2'),t0:v('bT0'),t1:v('bT1'),t2:v('bT2'),pc:v('bPc'),pk:$('#bPk').value};}
+  function check(){const g=geoOf(d),r=read(),dia=d.mode==='diamond';const tips=[];let good=0,total=0;
+    const t=(id,ok,tip)=>{const e=$('#'+id);if(!e)return;const blank=e.tagName==='SELECT'?!e.value:parseNum(e.value)==null;e.classList.remove('good','bad');if(blank){tips.push('__blank');return;}total++;e.classList.add(ok?'good':'bad');if(ok)good++;else tips.push(tip);};
+    const other=dia?(360-g.angles[0]-g.angles[2]):0;
+    if(!dia){t('bA',r.A===90,'Every corner of a rectangle is a square corner. Check one with your paper right angle.');t('bC',r.C===90,'Every corner of a rectangle is a square corner.');}
+    t('bB',r.B===g.angles[1],dia?`Angles B and D are equal (DB is the cross spar and AC is a fold line). 360 − ${g.angles[0]} − ${g.angles[2]} = ${other}, then share it equally.`:'Every corner of a rectangle is a square corner.');
+    t('bD',r.D===g.angles[3],dia?`Angle D matches angle B. Fold along AC and D lands on B.`:'Every corner of a rectangle is a square corner.');
+    t('bSum',r.sum===360,'Any quadrilateral splits into two triangles: 180 + 180.');
+    t('bName',r.name===g.name,`Use the properties. ${g.truth.rt?'It has four right angles.':'It has no four right angles.'} ${g.truth.all?'All four sides are equal.':'Not all four sides are equal (look at the side lengths).'}`);
+    t('bLines',r.lines===g.lines.length,'Tap “Fold test” and try every dashed line. Count only the folds that match.');
+    t('bSp1',r.sp1===90,'The spars cross at a right angle. Each angle at the crossing is a square corner.');t('bSp2',r.sp2===360,'Four angles around a point make a full turn: 4 × 90.');
+    if(dia){const A=g.angles[0];t('bT0',r.t0===A,`The whole tip is angle A, ${A}°.`);t('bT1',r.t1===A/2,`AC is a line of symmetry, so it cuts angle A into two equal parts. Half of ${A}?`);t('bT2',r.t2===A/2,`Both parts are equal and add back to ${A}.`);}
+    t('bPc',r.pc===4,'Two spars crossing in the middle cut the sail into how many pieces? Count the colors on the drawing.');
+    const pkOk=r.pk===g.pieceKind||(g.pieceKind==='squares'&&r.pk==='rectangles');t('bPk',pkOk,dia?'Each piece has a corner at S, where the spars make a right angle. Each piece has three sides.':'Each piece has four square corners.');
+    let propBad=0;$$('#bProps .chip').forEach(b=>{b.classList.remove('good','bad');const on=b.getAttribute('aria-pressed')==='true';const tr=g.truth[b.dataset.p];if(on){b.classList.add(tr?'good':'bad');if(!tr)propBad++;}});
+    const missing=PROPS.filter(p=>g.truth[p.k]&&!r.props.includes(p.k)).length;
+    const blanks=tips.filter(x=>x==='__blank').length;const real=tips.filter(x=>x!=='__blank');
+    let html='';if(!real.length&&!propBad)html=`<b>${good} of ${total} filled boxes are right.</b>${blanks?` ${blanks} still empty.`:''}${missing?` One more thing: ${missing} true propert${missing===1?'y is':'ies are'} not tapped yet.`:''}${!blanks&&!missing?' This blueprint is festival-ready.':''}`;
+    else html=`<b>${real.length+propBad} thing${real.length+propBad===1?' needs':'s need'} another look</b> (red). ${real[0]?real[0]:'A red property is not true for this kite. Use “Show marks” to check it.'}`;
+    fbox($('#bFb'),!real.length&&!propBad?'ok':'try',html);if(sendWarn)sendWarn=false;}
+  let sendWarn=false;
+  function send(){const r=read();const name=($('#bTeam').value||'').trim()||`Team ${FEST.filter(f=>!f.sample).length+1}`;
+    FEST.push({team:name,sample:false,d:{...d},claims:{angles:[r.A,r.B,r.C,r.D],name:r.name,props:r.props,lines:r.lines,sp1:r.sp1,sp2:r.sp2}});
+    fbox($('#bSendFb'),'ok',`<b>${esc(name)}</b> is entered in the Kite Festival (Class 3). The judges will check the kite against this card, so blank boxes count as mismatches.`);if(window.__festRefresh)window.__festRefresh();}
+  $$('[data-m]',el).forEach(b=>b.onclick=()=>{d.mode=b.dataset.m;$$('[data-m]',el).forEach(x=>x.setAttribute('aria-pressed',x===b));fold=false;sliders();draw();resetCard();$('#bpEv').className='fb';$('#bpEv').innerHTML='';});
+  $('#bpFold').onclick=()=>{fold=!fold;draw();if(fold)fbox($('#bpEv'),'info','Tap a dashed line to fold the kite along it.');};
+  $('#bpMarks').onclick=()=>{marks=!marks;draw();};
+  sliders();draw();resetCard();}
+/* ---------- PART 6: Festival ---------- */
+const SAMPLES=[
+ {team:'Team Falcon',sample:true,d:{mode:'diamond',A:80,C:50},claims:{angles:[80,115,50,115],name:'Kite',props:['adj','diag'],lines:2,sp1:90,sp2:360}},
+ {team:'Team Comet',sample:true,d:{mode:'diamond',A:70,C:70},claims:{angles:[70,110,70,110],name:'Rhombus',props:['all','par2','adj','diag'],lines:2,sp1:90,sp2:360}},
+ {team:'Team Gust',sample:true,d:{mode:'box',w:60,h:40},claims:{angles:[90,90,90,90],name:'Square',props:['rt','all'],lines:2,sp1:90,sp2:360}},
+ {team:'Team Nimbus',sample:true,d:{mode:'diamond',A:100,C:60},claims:{angles:[100,110,60,110],name:'Kite',props:['adj','diag'],lines:1,sp1:90,sp2:360}}];
+function mountFestival(){const el=$('#p6');let cur=0,meas=null,fold=false,spar=false,judge={},checked=false;const list=()=>[...SAMPLES,...FEST];
+  el.innerHTML=`<div class="part-head"><span class="tag">PART 6</span><h2>Festival Judge Card</h2></div>
+  <p class="lead">Judge another team’s kite against its blueprint. Tap a corner to measure it with the protractor, fold the kite, and check the spars. Then mark each check.</p>
+  <div class="fest"><div class="entries" id="fEnt"></div><div><div class="stage" id="fStage"></div>
+   <div class="row" style="margin-top:10px"><button class="btn alt" id="fFold">Fold test</button><button class="btn alt" id="fSpar">Check the spars</button></div><div class="fb" id="fEv" aria-live="polite"></div></div>
+   <div><div class="card2"><h3 style="margin-top:0" id="fTeam"></h3><div class="claims" id="fClaims"></div></div>
+    <div class="judge" id="fJudge"></div><div class="tally" id="fTally"></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="fCheck">Check my judging</button></div><div class="fb" id="fFb" aria-live="polite"></div></div></div>`;
+  const ROWS=[{k:'name',t:'Shape name and properties are correct'},{k:'angle',t:'One angle checked with protractor'},{k:'fold',t:'Lines of symmetry checked by folding'},{k:'spar',t:'Spars cross at a right angle'}];
+  function truthOf(e,g){const c=e.claims;return {name:c.name===g.name&&c.props.length>0&&c.props.every(p=>g.truth[p]),angle:meas==null?null:c.angles[meas]===g.angles[meas],fold:c.lines===g.lines.length,spar:c.sp1===90&&c.sp2===360};}
+  function render(){const L=list();if(cur>=L.length)cur=0;const e=L[cur],g=geoOf(e.d);
+    $('#fEnt').innerHTML=L.map((x,i)=>`<button data-i="${i}" aria-pressed="${i===cur}">${esc(x.team)}<small>${x.sample?'Sample entry':'From Part 5'}</small></button>`).join('');
+    $$('#fEnt button').forEach(b=>b.onclick=()=>{cur=+b.dataset.i;meas=null;fold=false;spar=false;judge={};checked=false;$('#fEv').className='fb';$('#fEv').innerHTML='';$('#fFb').className='fb';$('#fFb').innerHTML='';render();});
+    drawKite($('#fStage'),g,{fold,sparMark:spar,protractor:meas,aria:`${e.team} kite`,onVertex:i=>{meas=i;judge.angle=undefined;render();fbox($('#fEv'),'info',`Angle ${'ABCD'[i]} measures <b class="num">${g.angles[i]}°</b>. The blueprint says <b class="num">${e.claims.angles[i]==null?'(blank)':e.claims.angles[i]+'°'}</b>.`);},
+      onFold:(m)=>fbox($('#fEv'),m?'ok':'try',m?'<b>It folds onto itself.</b> That is one line of symmetry. Keep folding to count them all.':'<b>No match on this fold.</b> Not a line of symmetry.')});
+    $('#fTeam').textContent=`${e.team}’s blueprint`;const c=e.claims;const pn=c.props.map(p=>PROPS.find(x=>x.k===p).t);
+    $('#fClaims').innerHTML=`<div><span>Shape name</span><b>${esc(c.name||'(blank)')}</b></div><div><span>Properties</span><b style="text-align:right">${pn.length?pn.map(esc).join('; '):'(blank)'}</b></div>
+      <div><span>Angles A, B, C, D</span><b class="num">${c.angles.map(a=>a==null?'?':a+'°').join(', ')}</b></div><div><span>Lines of symmetry</span><b class="num">${c.lines==null?'(blank)':c.lines}</b></div><div><span>Spar crossing</span><b class="num">4 × ${c.sp1??'?'}° = ${c.sp2??'?'}°</b></div>`;
+    const tr=truthOf(e,g);
+    $('#fJudge').innerHTML=ROWS.map(r=>{const extra=r.k==='angle'?(meas==null?' <span class="small muted">(tap a corner on the kite first)</span>':`: angle ${'ABCD'[meas]} = <b class="num">${g.angles[meas]}°</b>`):'';
+      const st=checked&&judge[r.k]!==undefined&&tr[r.k]!=null?(judge[r.k]===tr[r.k]?' good':' bad'):'';
+      return `<div class="jrow${st}"><div class="t">${r.t}${extra}</div><div class="mm" role="group" aria-label="${r.t}"><button class="y" data-r="${r.k}" data-v="1" aria-pressed="${judge[r.k]===true}" ${r.k==='angle'&&meas==null?'disabled':''}>Matches</button><button class="n" data-r="${r.k}" data-v="0" aria-pressed="${judge[r.k]===false}" ${r.k==='angle'&&meas==null?'disabled':''}>Mismatch</button></div></div>`;}).join('');
+    $$('#fJudge .mm button').forEach(b=>b.onclick=()=>{judge[b.dataset.r]=b.dataset.v==='1';checked=false;render();});
+    const mm=Object.values(judge).filter(v=>v===false).length;$('#fTally').innerHTML=`Mismatches: <span class="num">${mm}</span> &nbsp;·&nbsp; Score: <span class="num">${mm?'−'+mm:'0'}</span>`;}
+  $('#fFold').onclick=()=>{fold=!fold;render();if(fold)fbox($('#fEv'),'info','Tap a dashed line to fold the kite.');};
+  $('#fSpar').onclick=()=>{spar=!spar;render();if(spar)fbox($('#fEv'),'info','The spars cross at S with four square corners (90° each).');};
+  $('#fCheck').onclick=()=>{const e=list()[cur],g=geoOf(e.d),tr=truthOf(e,g);const done=ROWS.filter(r=>judge[r.k]!==undefined);
+    if(done.length<4){fbox($('#fFb'),'info',`Mark all four checks first. ${meas==null?'Start by tapping a corner to measure it.':''}`);return;}
+    checked=true;render();const wrong=ROWS.filter(r=>judge[r.k]!==tr[r.k]);
+    const why={name:()=>{const bad=e.claims.props.filter(p=>!g.truth[p]).map(p=>PROPS.find(x=>x.k===p).t.toLowerCase());return e.claims.name!==g.name?`This kite is a <b>${g.name.toLowerCase()}</b>, not a ${String(e.claims.name||'blank').toLowerCase()}. ${g.truth.all?'All sides are equal.':'Not all four sides are equal.'} ${g.truth.rt?'It has four right angles.':''}`:bad.length?`The name is right, but “${bad[0]}” is not true for this kite.`:'The name and every listed property are true.';},
+      angle:()=>`The protractor reads ${g.angles[meas]}° at ${'ABCD'[meas]}; the blueprint says ${e.claims.angles[meas]??'nothing'}.`,
+      fold:()=>`Folding finds ${g.lines.length} line${g.lines.length===1?'':'s'} of symmetry; the blueprint says ${e.claims.lines??'nothing'}.`,
+      spar:()=>`The spars cross at 90°, four times: 360°. The blueprint says 4 × ${e.claims.sp1??'?'}° = ${e.claims.sp2??'?'}°.`};
+    if(!wrong.length)fbox($('#fFb'),'ok',`<b>Sharp judging.</b> Every mark agrees with the evidence. ${e.team} gets ${Object.values(tr).filter(v=>v===false).length?'−'+Object.values(tr).filter(v=>v===false).length:'a perfect 0'}.`);
+    else fbox($('#fFb'),'try',`<b>${wrong.length} mark${wrong.length===1?'':'s'} to rethink</b> (red). ${why[wrong[0].k]()} Change your mark and check again.`);};
+  window.__festRefresh=render;render();}
+/* ---------- Challenge ---------- */
+const HEX2=[[1,4],[2,3],[6,3],[7,4],[6,5],[2,5]],HEX1=[[3,2],[5,2],[6,4],[5,7],[3,7],[2,4]],HEX1b=[[4,1],[6,3],[6,6],[4,7],[2,6],[2,3]];
+function mountSails(){const el=$('#ch1');let n=6;const met={h2:false,h1:false,q2:false};
+  el.innerHTML=`<div class="part-head"><span class="tag">CHALLENGE 1–2</span><h2>The Sail Lab</h2></div>
+  <p class="lead">Place the corners of a sail on the dot board. Every line of symmetry shows up as a teal dashed line as soon as the shape has one.</p>
+  <div class="seg" role="group" aria-label="Sail type"><button data-n="6" aria-pressed="true">Six-sided sail</button><button data-n="4" aria-pressed="false">Four-sided sail</button></div>
+  <div class="grid2" style="margin-top:12px"><div class="stage" id="slBoard"></div>
+  <div><div class="bigstat" id="slStat">0 corners</div><p class="muted" id="slSub" style="margin:6px 0 0"></p>
+   <div class="goals" id="slGoals"></div>
+   <div class="row"><button class="btn alt" id="slClear">Clear</button><button class="btn alt" id="slEx">Show an example</button></div>
+   <div class="fb" id="slFb" aria-live="polite"></div></div></div>`;
+  let exI=0;
+  const board=makeBoard($('#slBoard'),{n:9,k:6,onChange:w=>{if(w==='full')fbox($('#slFb'),'info','All corners are placed. Drag a corner to move it.');else if(typeof update==='function')update();},
+    overlay:(P,M,W,G,pad)=>{if(P.length!==n||polyIssue(P))return '';const L=symLines(P);const o=centroid(P);let s='';const bnd=[-pad/G,-pad/G,(W-pad)/G,(W-pad)/G];
+      for(const d of L){const [a,b]=linePts(o,d,bnd);const A=M(a),B=M(b);s+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="var(--fold)" stroke-width="4" stroke-dasharray="12 8"/>`;}
+      return s+(n===4?marksSVG(P,M,{right:true,equal:true,size:16}):'');}});
+  function update(){if(!board)return;const P=board.P;const stat=$('#slStat'),sub=$('#slSub');
+    if(P.length<n){stat.textContent=`${P.length} of ${n} corners`;sub.textContent='Tap dots to place corners in order around the sail.';}
+    else{const iss=polyIssue(P);if(iss){stat.textContent='Not a sail yet';sub.textContent=iss==='straight'?'Three corners are on one straight line, so one corner is flat. Move it.':'Two sides cross. Move a corner so the sides only meet at corners.';}
+      else{const L=symLines(P).length;stat.textContent=`${L} line${L===1?'':'s'} of symmetry`;
+        if(n===4){const nm=quadName(P);sub.textContent=`This quadrilateral is a ${nm}.`;if(L===2&&nm!=='rhombus')met.q2=true;}
+        else{sub.textContent=L===0?'No fold works yet. Try making the left and right sides mirror each other.':'';if(L===2)met.h2=true;if(L===1)met.h1=true;}}}
+    const goals=n===6?[['h2','A six-sided sail with exactly two lines of symmetry'],['h1','A six-sided sail with exactly one line of symmetry']]:[['q2','A quadrilateral with exactly two lines of symmetry that is NOT a rhombus']];
+    $('#slGoals').innerHTML=goals.map(([k,t])=>`<div class="goal ${met[k]?'met':''}"><i>${met[k]?'✓':''}</i>${t}</div>`).join('');}
+  const setN=v=>{n=v;board.k=v;exI=0;$$('[data-n]',el).forEach(b=>b.setAttribute('aria-pressed',+b.dataset.n===v));$('#slFb').className='fb';$('#slFb').innerHTML='';board.clear();};
+  $$('[data-n]',el).forEach(b=>b.onclick=()=>setN(+b.dataset.n));
+  $('#slClear').onclick=()=>{board.clear();$('#slFb').className='fb';$('#slFb').innerHTML='';};
+  $('#slEx').onclick=()=>{const ex=n===6?[HEX2,HEX1,HEX1b]:[[[2,2],[7,2],[7,5],[2,5]]];const P=ex[exI%ex.length];exI++;board.set(P);const L=symLines(P).length;
+    fbox($('#slFb'),'info',n===6?`Here is one with ${L} line${L===1?'':'s'} of symmetry. Drag a corner to make your own version.`:'A rectangle that is not a square: fold it top-to-bottom or side-to-side. The diagonals do not work as folds.');};
+  update();}
+function mountThird(){const el=$('#ch2');
+  el.innerHTML=`<div class="part-head"><span class="tag">CHALLENGE 3</span><h2>Is there a third kind?</h2></div>
+  <p class="lead">A rhombus and a rectangle both have exactly two lines of symmetry. Is there any other quadrilateral that does? Make a prediction, then let the computer test every quadrilateral on a 7 × 7 dot board.</p>
+  <div class="row"><button class="btn" id="tkRun">Test every quadrilateral</button></div><div id="tkOut"></div>`;
+  $('#tkRun').onclick=()=>{const N=7,G=[];for(let x=0;x<N;x++)for(let y=0;y<N;y++)G.push([x,y]);const by={},two={};let total=0;
+    for(let i=0;i<G.length;i++)for(let j=i+1;j<G.length;j++)for(let a=j+1;a<G.length;a++)for(let b=a+1;b<G.length;b++){const q=[G[i],G[j],G[a],G[b]];
+      for(const o of [[0,1,2,3],[0,1,3,2],[0,2,1,3]]){const P=o.map(t=>q[t]);if(polyIssue(P))continue;total++;const L=symLines(P).length;by[L]=(by[L]||0)+1;if(L===2){const nm=quadName(P);two[nm]=(two[nm]||0)+1;}}}
+    const other=Object.entries(two).filter(([k])=>k!=='rectangle'&&k!=='rhombus').reduce((s,[,v])=>s+v,0);
+    $('#tkOut').innerHTML=`<div class="grid2" style="margin-top:14px"><div><div class="bigstat num">${total.toLocaleString()}</div><p class="muted" style="margin:4px 0 8px">quadrilaterals tested</p>
+      <table class="res"><tr><th>Lines of symmetry</th><th>How many</th></tr>${[0,1,2,3,4].map(L=>`<tr><td>${L}</td><td class="num">${(by[L]||0).toLocaleString()}</td></tr>`).join('')}</table></div>
+      <div><p style="margin:0 0 6px"><b>The ones with exactly two lines:</b></p><table class="res"><tr><td>Rectangles (not squares)</td><td class="num">${(two.rectangle||0).toLocaleString()}</td></tr><tr><td>Rhombuses (not squares)</td><td class="num">${(two.rhombus||0).toLocaleString()}</td></tr><tr><td><b>Anything else</b></td><td class="num"><b>${other}</b></td></tr></table>
+      <div class="fb info"><b>${other===0?'No third kind.':'Something else turned up!'}</b> ${other===0?'Here is why. A line of symmetry on a quadrilateral either joins two opposite corners or joins the middles of two opposite sides. Two corner-to-corner folds make all four sides equal: a rhombus. Two middle-to-middle folds make four right angles: a rectangle. One of each can’t happen: the second fold would have to run through corners too. (A square has both kinds, so it has four lines.)':''}</div></div></div>`;};}
+/* ---------- App shell ---------- */
+let curView='c1';
+function show(v){curView=v;$$('nav.classes button').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));['c1','c2','c3','ch'].forEach(x=>$('#v-'+x).hidden=x!==v);
+  $('#presentBtn').hidden=v!=='c3';if(v!=='c3'){document.body.classList.remove('present');$('#presentBtn').textContent='Showcase mode';}}
+function mountAll(){FEST.length=0;mountToolkit();mountCatalog();mountTriangles();mountWarmup();mountPractice();mountBlueprint();mountFestival();mountSails();mountThird();}
+$$('nav.classes button').forEach(b=>b.onclick=()=>{show(b.dataset.view);window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});});
+$('#resetBtn').onclick=()=>{document.body.classList.remove('present');mountAll();show('c1');window.scrollTo(0,0);};
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+$('#presentBtn').onclick=()=>{const on=document.body.classList.toggle('present');$('#presentBtn').textContent=on?'Exit showcase':'Showcase mode';};
+mountAll();show('c1');
+})();
+</script>
+
+</body></html>

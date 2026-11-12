@@ -1,0 +1,1094 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flag Designers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: a drafting table. The flag (on its cm rulers) is the stage on the left; the class's steps and tools sit in a panel on the right. */
+:root{
+  --paper:#EDF1F6; --sheet:#FFFFFF; --ink:#14213A; --muted:#55627A; --line:#C9D2DE;
+  --accent:#2556D6; --accent-ink:#FFFFFF; --accent-soft:#E1E8FB;
+  --good:#11744A; --good-soft:#DCF2E6; --warn:#B3362C; --warn-soft:#FBE5E2;
+  --ruler:#F3C645; --ruler-ink:#3A2D05; --gridline:rgba(20,33,58,.28);
+  --f-red:#D3243B; --f-blue:#1E4DB5; --f-white:#FFFFFF; --f-gold:#F2B705; --f-green:#15864A;
+  --f-black:#1B1C21; --f-orange:#EE7A1A; --f-purple:#7539B5; --f-blank:#E6EAF0; --f-outline:#1B1C21;
+  --on-dark:#FFFFFF; --on-light:#16171C;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"DM Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1522; --sheet:#172136; --ink:#E8EDF5; --muted:#9EABC0; --line:#2D3A52;
+    --accent:#86A6FF; --accent-ink:#0E1522; --accent-soft:#1D2A49;
+    --good:#55D394; --good-soft:#123425; --warn:#FF8F84; --warn-soft:#3B1D1B;
+    --gridline:rgba(20,33,58,.32); --f-outline:#0B0C10; --f-blank:#C9D0DB;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1522; --sheet:#172136; --ink:#E8EDF5; --muted:#9EABC0; --line:#2D3A52;
+  --accent:#86A6FF; --accent-ink:#0E1522; --accent-soft:#1D2A49;
+  --good:#55D394; --good-soft:#123425; --warn:#FF8F84; --warn-soft:#3B1D1B;
+  --gridline:rgba(20,33,58,.32); --f-outline:#0B0C10; --f-blank:#C9D0DB;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 32px;
+  -webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+.top{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding-block:18px 10px; max-width:1500px; margin:0 auto}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.pennant{width:46px; height:46px; flex:none}
+.brand h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.2vw,44px); line-height:1; margin:0; letter-spacing:-.01em}
+.sub{margin:2px 0 0; color:var(--muted); font-size:clamp(14px,1.2vw,17px); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{min-height:48px; padding:8px 18px; border-radius:12px; border:2px solid var(--line); background:var(--sheet); font-weight:700; font-size:16px}
+.ghost:hover{border-color:var(--ink)}
+.ghost.armed{border-color:var(--warn); color:var(--warn)}
+
+.tabs{display:flex; gap:6px; flex-wrap:wrap; max-width:1500px; margin:0 auto 14px; border-bottom:2px solid var(--line)}
+.tabs button{border:0; background:none; padding:12px 14px 10px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.5vw,22px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px}
+.tabs button small{display:block; font-family:var(--body); font-weight:400; font-size:13px; letter-spacing:.06em; text-transform:uppercase; line-height:1}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+
+.view{max-width:1500px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:28px; align-items:start}
+.stage{background:var(--sheet); border:2px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.stage h2{font-family:var(--display); font-size:clamp(22px,2vw,30px); margin:0; line-height:1.15; text-wrap:balance}
+.eyebrow{font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.panel{display:flex; flex-direction:column; gap:16px; min-width:0}
+.panel h3{font-family:var(--display); font-size:22px; margin:0; line-height:1.2}
+.panel p{margin:0}
+.prompt{font-size:clamp(19px,1.6vw,24px); line-height:1.4}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+
+.steps{display:flex; flex-wrap:wrap; gap:8px}
+.steps button{min-height:46px; padding:6px 16px; border-radius:999px; border:2px solid var(--line); background:var(--sheet); font-weight:700; font-size:16px; color:var(--muted)}
+.steps button[aria-pressed="true"]{background:var(--ink); color:var(--sheet); border-color:var(--ink)}
+
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--sheet); border:2px solid var(--line); border-radius:14px; padding:4px}
+.seg button{border:0; background:none; min-height:46px; padding:6px 16px; border-radius:10px; font-weight:700; font-size:17px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.seg button:disabled{opacity:.35; cursor:default}
+.field-label{font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.group{display:flex; flex-direction:column; gap:8px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:19px; min-height:54px; padding:10px 24px; border-radius:14px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--sheet); font-weight:700; font-size:17px; min-height:50px; padding:8px 18px; border-radius:14px}
+.secondary:disabled{opacity:.4; cursor:default}
+.choice{min-width:64px; min-height:58px; font-size:22px; font-weight:700; border-radius:14px; border:2px solid var(--line); background:var(--sheet)}
+.choice[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+
+.note{padding:14px 16px; border-radius:14px; background:var(--accent-soft); font-size:18px; line-height:1.45}
+.note.good{background:var(--good-soft)}
+.note.warn{background:var(--warn-soft)}
+.note b{font-weight:700}
+.note:empty{display:none}
+
+.flagwrap{width:100%}
+.flagsvg{display:block; width:100%; height:auto; max-height:62vh; overflow:visible}
+.flagsvg text{font-family:var(--mono)}
+.ruler{fill:var(--ruler)}
+.tick{stroke:var(--ruler-ink); stroke-width:.06}
+.rnum{fill:var(--ruler-ink); font-size:.6px; text-anchor:middle}
+.part{stroke:var(--f-outline); stroke-width:.07; stroke-linejoin:round; transition:fill .2s}
+.part.tap{cursor:pointer}
+.part.tap:hover{filter:brightness(1.06)}
+.part.hl{stroke:var(--accent); stroke-width:.3}
+.part.dim{opacity:.3}
+.border{fill:none; stroke:var(--f-outline); stroke-width:.14}
+.gridl{stroke:var(--gridline); stroke-width:.04}
+.plabel{font-weight:500; text-anchor:middle; dominant-baseline:middle; pointer-events:none}
+.emb{stroke:var(--f-outline); stroke-width:.1; stroke-linejoin:round}
+.ebadge{fill:var(--ink)} .ebadge-t{fill:var(--sheet); font-size:.7px; text-anchor:middle; dominant-baseline:central}
+.fold{stroke:var(--accent); stroke-width:.12; stroke-dasharray:.4 .25}
+.handle{cursor:grab; outline:none}
+.handle circle{fill:var(--accent); stroke:var(--sheet); stroke-width:.12}
+.handle text{fill:var(--accent-ink); font-size:.75px; text-anchor:middle; dominant-baseline:central; pointer-events:none}
+.handle:focus-visible circle{stroke:var(--ink); stroke-width:.2}
+.hit{stroke:transparent; stroke-width:1.6}
+.dimtext{fill:var(--ink); font-size:.7px; text-anchor:middle; dominant-baseline:middle}
+.overtext{fill:var(--warn); font-size:.7px; text-anchor:middle; font-weight:500}
+.sq-n{fill:var(--on-light); font-size:.42px; text-anchor:middle; dominant-baseline:central; pointer-events:none}
+.sq-whole{fill:rgba(255,255,255,.55); stroke:var(--f-outline); stroke-width:.03}
+.sq-half{fill:url(#hatchHalf); stroke:var(--f-outline); stroke-width:.03}
+
+.stack{display:block; width:100%; height:auto; max-height:180px}
+.stack .sp{stroke-width:.14; fill-opacity:.16}
+.stack text{font-family:var(--mono); font-size:.7px; fill:var(--ink)}
+
+.checklist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.checklist li{display:flex; gap:10px; align-items:flex-start; font-size:17px}
+.checklist li::before{content:""; flex:none; width:24px; height:24px; border-radius:7px; border:2px solid var(--line); margin-top:1px}
+.checklist li.ok::before{content:"✓"; background:var(--good); border-color:var(--good); color:var(--sheet); display:grid; place-items:center; font-weight:700; font-size:16px}
+
+.swatches{display:flex; flex-wrap:wrap; gap:8px}
+.sw{width:52px; height:52px; border-radius:12px; border:2px solid var(--f-outline); box-shadow:0 0 0 3px var(--sheet), 0 0 0 5px transparent}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--sheet), 0 0 0 6px var(--accent)}
+.shapes{display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:8px}
+.shapebtn{display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px; border-radius:12px; border:2px solid var(--line); background:var(--sheet); font-size:14px; font-weight:700; min-height:84px}
+.shapebtn svg{width:40px; height:34px}
+.shapebtn svg *{fill:var(--accent-soft); stroke:var(--ink); stroke-width:.12; stroke-linejoin:round}
+.shapebtn:disabled{opacity:.4; cursor:default}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{display:inline-flex; align-items:center; gap:8px; padding:6px 6px 6px 12px; border-radius:999px; border:2px solid var(--line); background:var(--sheet); font-size:15px}
+.chip button{width:34px; height:34px; border-radius:50%; border:0; background:var(--paper); font-weight:700}
+select,input[type="number"],input[type="text"]{min-height:48px; padding:6px 10px; border-radius:10px; border:2px solid var(--line); background:var(--sheet); font-size:18px; max-width:100%}
+input[type="number"]{width:5.2em; font-family:var(--mono); text-align:center}
+input.bad,select.bad{border-color:var(--warn); background:var(--warn-soft)}
+input.okf,select.okf{border-color:var(--good)}
+
+.specform{display:flex; flex-direction:column; gap:12px; background:var(--sheet); border:2px solid var(--line); border-radius:16px; padding:16px}
+.specform .line{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:18px}
+.results{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.results li{padding:10px 14px; border-radius:12px; background:var(--good-soft); font-size:17px}
+.results li.no{background:var(--warn-soft)}
+.results li .rt{display:block; font-weight:700}
+
+.speccard{font-family:var(--body); font-size:clamp(20px,1.9vw,27px); line-height:1.5; padding:18px 20px; border-radius:14px; border:2px dashed var(--line); background:var(--paper)}
+.speccard .nation{font-family:var(--display); font-weight:800; font-size:1.2em; display:block}
+.gap{display:inline-block; min-width:6em; border-bottom:3px solid var(--warn); color:var(--warn); font-weight:700; text-align:center}
+
+.gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px}
+.card{display:flex; flex-direction:column; gap:6px; padding:10px; border-radius:14px; border:2px solid var(--line); background:var(--sheet); text-align:left}
+.card b{font-family:var(--display); font-size:19px; line-height:1.1}
+.card span{font-size:14px; color:var(--muted)}
+.card[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent)}
+.card.found{border-color:var(--good); box-shadow:0 0 0 2px var(--good)}
+.card.nope{border-color:var(--warn)}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.pair figure,.trio figure{margin:0; display:flex; flex-direction:column; gap:6px}
+.pair figcaption,.trio figcaption{font-weight:700; font-size:16px}
+.trio{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+table.partd{border-collapse:collapse; width:100%; font-size:17px}
+table.partd th,table.partd td{padding:10px 8px; border-bottom:1.5px solid var(--line); text-align:left; vertical-align:top}
+table.partd th{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.yes{color:var(--good); font-weight:700} .no{color:var(--warn); font-weight:700}
+.tbl-wrap{overflow-x:auto}
+.partb{border-collapse:collapse}
+.partb th,.partb td{padding:6px 10px; text-align:left; border-bottom:1.5px solid var(--line)}
+.partb th{font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.dots .dot{fill:var(--ink)}
+.dots .dothit{fill:transparent; cursor:pointer}
+.dots .dothit:hover{fill:var(--accent-soft)}
+.dots .first{fill:var(--accent)}
+.dots .poly{fill:var(--accent-soft); stroke:var(--accent); stroke-width:.09; stroke-linejoin:round}
+.dots .open{fill:none; stroke:var(--accent); stroke-width:.09; stroke-linejoin:round; stroke-linecap:round}
+.dots .vx{fill:var(--accent)}
+.dots .lbl{fill:var(--ink); font-family:var(--mono); font-size:.32px; text-anchor:middle; dominant-baseline:central}
+.paintgrid{touch-action:none}
+.pcell{stroke:var(--f-outline); stroke-width:.04; cursor:pointer}
+.tally{display:flex; flex-wrap:wrap; gap:10px}
+.tally div{display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:12px; background:var(--sheet); border:2px solid var(--line); font-family:var(--mono); font-size:18px}
+.tally i{width:20px; height:20px; border-radius:5px; border:1.5px solid var(--f-outline)}
+.big-num{font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,40px); line-height:1}
+
+@media (max-width: 960px){
+  .view{grid-template-columns:minmax(0,1fr)}
+  .trio{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 520px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  .stage{padding:12px}
+  .seg button{padding:6px 12px; font-size:16px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="hatchWarn" patternUnits="userSpaceOnUse" width=".5" height=".5" patternTransform="rotate(45)">
+      <rect width=".5" height=".5" style="fill:var(--warn-soft)"/><line x1="0" y1="0" x2="0" y2=".5" style="stroke:var(--warn);stroke-width:.18"/>
+    </pattern>
+    <pattern id="hatchHalf" patternUnits="userSpaceOnUse" width=".3" height=".3" patternTransform="rotate(45)">
+      <rect width=".3" height=".3" style="fill:rgba(255,255,255,.55)"/><line x1="0" y1="0" x2="0" y2=".3" style="stroke:var(--f-outline);stroke-width:.06"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="brand">
+    <svg class="pennant" viewBox="0 0 46 46" aria-hidden="true"><rect x="5" y="4" width="3" height="40" rx="1.5" style="fill:var(--ink)"/><rect x="8" y="6" width="32" height="20" style="fill:var(--f-blue);stroke:var(--f-outline);stroke-width:1.2"/><rect x="18.67" y="6" width="10.67" height="20" style="fill:var(--f-white)"/><polygon points="24,11 28,18 20,18" style="fill:var(--f-gold);stroke:var(--f-outline);stroke-width:.9"/><rect x="8" y="6" width="32" height="20" style="fill:none;stroke:var(--f-outline);stroke-width:1.2"/></svg>
+    <div><h1>Flag Designers</h1><p class="sub">Grade 2 · Set 3 project · three class periods · Flag Specification</p></div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="fsBtn" type="button">Full screen</button>
+    <button class="ghost" id="resetBtn" type="button">Start over</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Project classes">
+  <button role="tab" data-tab="c1" aria-selected="true"><small>Class 1</small>Equal Parts</button>
+  <button role="tab" data-tab="c2" aria-selected="false"><small>Class 2</small>Design to Spec</button>
+  <button role="tab" data-tab="c3" aria-selected="false"><small>Class 3</small>Flag Day</button>
+  <button role="tab" data-tab="ch" aria-selected="false"><small>Extension</small>★ Challenge</button>
+</nav>
+
+<main id="app"></main>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= Math core ================= */
+const COLORS = ['red','blue','white','gold','green','black','orange','purple'];
+const DARK = new Set(['red','blue','green','black','purple']);
+const onColor = c => c && DARK.has(c) ? 'var(--on-dark)' : 'var(--on-light)';
+const ONE = {2:'half',3:'third',4:'fourth'}, MANY = {2:'halves',3:'thirds',4:'fourths'};
+const fracName = (k,n) => k===n ? 'the whole field' : `${k} ${k===1 ? ONE[n] : MANY[n]}`;
+const listText = a => a.length<=1 ? a.join('') : a.length===2 ? a.join(' and ') : a.slice(0,-1).join(', ') + ', and ' + a[a.length-1];
+const plus = (g,n) => Array(n).fill(g).join(' + ');
+
+const NAMES = {
+  v:{2:['left half','right half'],3:['left third','middle third','right third'],4:['stripe 1 (left)','stripe 2','stripe 3','stripe 4 (right)']},
+  h:{2:['top half','bottom half'],3:['top third','middle third','bottom third'],4:['stripe 1 (top)','stripe 2','stripe 3','stripe 4 (bottom)']},
+  grid:{4:['top-left fourth','top-right fourth','bottom-left fourth','bottom-right fourth']},
+  mixed:{3:['left stripe','top-right part','bottom-right part'],4:['stripe 1 (left)','stripe 2','upper triangle','lower triangle']},
+  diag:{2:['upper triangle','lower triangle']}
+};
+const rect = (x0,y0,x1,y1,name) => ({pts:[[x0,y0],[x1,y0],[x1,y1],[x0,y1]], name, w:x1-x0, h:y1-y0, isRect:true});
+const tri = (a,b,c,name) => ({pts:[a,b,c], name, isTri:true});
+function getParts(f){
+  if(f.parts) return f.parts;
+  const n=f.n, W=24, H=12, P=[];
+  if(f.layout==='v') for(let i=0;i<n;i++) P.push(rect(W*i/n,0,W*(i+1)/n,H,NAMES.v[n][i]));
+  else if(f.layout==='h') for(let i=0;i<n;i++) P.push(rect(0,H*i/n,W,H*(i+1)/n,NAMES.h[n][i]));
+  else if(f.layout==='grid'){ const N=NAMES.grid[4]; P.push(rect(0,0,12,6,N[0]),rect(12,0,24,6,N[1]),rect(0,6,12,12,N[2]),rect(12,6,24,12,N[3])); }
+  else if(f.layout==='mixed' && n===3){ const N=NAMES.mixed[3]; P.push(rect(0,0,8,12,N[0]),rect(8,0,24,6,N[1]),rect(8,6,24,12,N[2])); }
+  else if(f.layout==='mixed' && n===4){ const N=NAMES.mixed[4]; P.push(rect(0,0,6,12,N[0]),rect(6,0,12,12,N[1]),tri([12,0],[24,0],[24,12],N[2]),tri([12,0],[24,12],[12,12],N[3])); }
+  else if(f.layout==='diag'){ const N=NAMES.diag[2]; P.push(tri([0,0],[24,0],[24,12],N[0]),tri([0,0],[24,12],[0,12],N[1])); }
+  return P;
+}
+function polyArea(pts){ let a=0; for(let i=0;i<pts.length;i++){ const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length]; a+=x1*y2-x2*y1; } return a/2; }
+const areaOf = p => Math.abs(polyArea(p.pts));
+function centroid(pts){
+  let a=0,cx=0,cy=0;
+  for(let i=0;i<pts.length;i++){ const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length]; const k=x1*y2-x2*y1; a+=k; cx+=(x1+x2)*k; cy+=(y1+y2)*k; }
+  a/=2; return [cx/(6*a), cy/(6*a)];
+}
+function incircle(pts){
+  const [A,B,C]=pts, d=(p,q)=>Math.hypot(p[0]-q[0],p[1]-q[1]);
+  const a=d(B,C), b=d(A,C), c=d(A,B), s=(a+b+c)/2, ar=Math.abs(polyArea(pts));
+  return {x:(a*A[0]+b*B[0]+c*C[0])/(2*s), y:(a*A[1]+b*B[1]+c*C[1])/(2*s), r:ar/s};
+}
+function bbox(pts){ const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]); return {x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys)}; }
+// canonical shape key under turns and flips (for "same shape?")
+function shapeKey(pts){
+  const T=[(x,y)=>[x,y],(x,y)=>[-x,y],(x,y)=>[x,-y],(x,y)=>[-x,-y],(x,y)=>[y,x],(x,y)=>[-y,x],(x,y)=>[y,-x],(x,y)=>[-y,-x]];
+  let best=null;
+  for(const t of T){ const q=pts.map(p=>t(p[0],p[1])); const mx=Math.min(...q.map(p=>p[0])), my=Math.min(...q.map(p=>p[1]));
+    const s=q.map(p=>[+(p[0]-mx).toFixed(4), +(p[1]-my).toFixed(4)]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p.join(',')).join(';');
+    if(best===null||s<best) best=s; }
+  return best;
+}
+const allSameShape = parts => new Set(parts.map(p=>shapeKey(p.pts))).size===1;
+const allEqual = parts => new Set(parts.map(p=>areaOf(p).toFixed(4))).size===1;
+// exact area of a unit square inside a convex part (Sutherland–Hodgman)
+function clipArea(sq, poly){
+  const sgn = Math.sign(polyArea(poly));
+  let out = sq;
+  for(let i=0;i<poly.length && out.length;i++){
+    const A=poly[i], B=poly[(i+1)%poly.length];
+    const side = p => sgn*((B[0]-A[0])*(p[1]-A[1])-(B[1]-A[1])*(p[0]-A[0]));
+    const inp=out; out=[];
+    for(let j=0;j<inp.length;j++){
+      const P=inp[j], Q=inp[(j+1)%inp.length], sp=side(P), sq2=side(Q);
+      if(sp>=0) out.push(P);
+      if((sp>=0)!==(sq2>=0)){ const t=sp/(sp-sq2); out.push([P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])]); }
+    }
+  }
+  return out.length<3 ? 0 : Math.abs(polyArea(out));
+}
+function countSquares(part){
+  const b=bbox(part.pts), whole=[], half=[];
+  for(let y=Math.floor(b.y0); y<Math.ceil(b.y1); y++) for(let x=Math.floor(b.x0); x<Math.ceil(b.x1); x++){
+    const a = clipArea([[x,y],[x+1,y],[x+1,y+1],[x,y+1]], part.pts);
+    if(Math.abs(a-1)<1e-9) whole.push([x,y]); else if(Math.abs(a-.5)<1e-9) half.push([x,y]);
+  }
+  return {whole, half};
+}
+
+/* Emblem shapes */
+const reg = (n,rot) => Array.from({length:n},(_,k)=>{const t=(rot+360*k/n)*Math.PI/180; return [Math.cos(t),Math.sin(t)];});
+const SH = {
+  triangle:{label:'Triangle', name:'triangle', sides:3, pts:reg(3,-90).map(([x,y])=>[x,y+.18]), desc:'triangle with 3 sides and 3 vertices'},
+  square:{label:'Square', name:'square', sides:4, pts:[[-.75,-.75],[.75,-.75],[.75,.75],[-.75,.75]], desc:'square with 4 equal sides and 4 vertices'},
+  rectangle:{label:'Rectangle', name:'rectangle', sides:4, pts:[[-1,-.55],[1,-.55],[1,.55],[-1,.55]], desc:'rectangle with 4 sides and 4 vertices'},
+  trapezoid:{label:'Trapezoid', name:'trapezoid', sides:4, pts:[[-.5,-.6],[.5,-.6],[1,.6],[-1,.6]], desc:'trapezoid with 4 sides and 4 vertices'},
+  rhombus:{label:'Rhombus', name:'rhombus', sides:4, pts:[[0,-1],[.66,0],[0,1],[-.66,0]], desc:'rhombus (diamond) with 4 equal sides and 4 vertices'},
+  pentagon:{label:'Pentagon', name:'pentagon', sides:5, pts:reg(5,-90).map(([x,y])=>[x,y+.08]), desc:'pentagon with 5 sides and 5 vertices'},
+  hexagon:{label:'Hexagon', name:'hexagon', sides:6, pts:reg(6,0), desc:'hexagon with 6 equal sides and 6 vertices'},
+  longhex:{label:'Long hexagon', name:'hexagon', sides:6, pts:[[-.62,-.5],[.62,-.5],[1,0],[.62,.5],[-.62,.5],[-1,0]], desc:'hexagon with 2 long sides, 6 sides in all, and 6 vertices'},
+  star:{label:'Star', name:'star', sides:10, pts:Array.from({length:10},(_,k)=>{const t=(-90+36*k)*Math.PI/180, r=k%2?.43:1; return [r*Math.cos(t), r*Math.sin(t)+.08];}), desc:'star with 10 sides and 10 vertices'},
+  circle:{label:'Circle', name:'circle', sides:0, pts:null, desc:'circle (no straight sides and no vertices)'}
+};
+const SHAPE_ORDER = ['triangle','square','rectangle','trapezoid','rhombus','pentagon','hexagon','longhex','star','circle'];
+const NAME_OPTIONS = ['triangle','quadrilateral','square','rectangle','rhombus','trapezoid','pentagon','hexagon','star','circle'];
+const QUADS = new Set(['square','rectangle','trapezoid','rhombus']);
+function nameVerdict(shapeId, picked){
+  const s=SH[shapeId];
+  if(picked===s.name) return 'exact';
+  if(QUADS.has(shapeId) && picked==='quadrilateral') return 'general';
+  if(shapeId==='square' && (picked==='rectangle'||picked==='rhombus')) return 'general';
+  return 'wrong';
+}
+const shapeIcon = id => {
+  const s=SH[id];
+  const body = s.pts ? `<polygon points="${s.pts.map(p=>p.map(v=>v.toFixed(3)).join(',')).join(' ')}"/>` : `<circle cx="0" cy="0" r=".9"/>`;
+  return `<svg viewBox="-1.2 -1.2 2.4 2.4" aria-hidden="true">${body}</svg>`;
+};
+
+/* ================= Drawing ================= */
+const P = pts => pts.map(p=>p.map(v=>+v.toFixed(3)).join(',')).join(' ');
+function rulers(W,H){
+  let s=`<rect x="0" y="-2.45" width="${W}" height="2.1" rx=".2" class="ruler"/><rect x="-2.45" y="0" width="2.1" height="${H}" rx=".2" class="ruler"/>`;
+  for(let c=0;c<=W;c++) s+=`<line x1="${c}" x2="${c}" y1="-.35" y2="${c%5===0?-1.2:-.8}" class="tick"/><text x="${c}" y="-1.48" class="rnum">${c}</text>`;
+  for(let r=0;r<=H;r++) s+=`<line y1="${r}" y2="${r}" x1="-.35" x2="${r%5===0?-1.2:-.8}" class="tick"/><text x="-1.82" y="${r+.21}" class="rnum">${r}</text>`;
+  s+=`<text x="-1.4" y="-1.25" class="rnum" style="font-size:.5px">cm</text>`;
+  return s;
+}
+function emblemSpots(parts, emblems){
+  const groups={}; emblems.forEach((e,i)=>{ (groups[e.part]=groups[e.part]||[]).push(i); });
+  const spots={};
+  for(const k in groups){
+    const p=parts[k]; if(!p) continue; const list=groups[k], m=list.length;
+    if(p.isTri){ const c=incircle(p.pts); const r=c.r*(m>1?.5:.72);
+      list.forEach((ei,j)=>{ spots[ei]={x:c.x+(j-(m-1)/2)*r*2.1, y:c.y, r}; }); }
+    else { const b=bbox(p.pts), w=b.x1-b.x0, h=b.y1-b.y0;
+      if(w>=h){ const r=Math.min(h*.36,(w/m)*.36); list.forEach((ei,j)=>{ spots[ei]={x:b.x0+(j+.5)*w/m, y:(b.y0+b.y1)/2, r}; }); }
+      else { const r=Math.min(w*.3,(h/m)*.36); list.forEach((ei,j)=>{ spots[ei]={x:(b.x0+b.x1)/2, y:b.y0+(j+.5)*h/m, r}; }); } }
+  }
+  return spots;
+}
+function emblemSVG(e, sp, num){
+  const s=SH[e.shape]; const st=`fill:var(--f-${e.color})`;
+  let out = s.pts ? `<polygon class="emb" points="${P(s.pts.map(([x,y])=>[sp.x+x*sp.r, sp.y+y*sp.r]))}" style="${st}"/>` : `<circle class="emb" cx="${sp.x.toFixed(3)}" cy="${sp.y.toFixed(3)}" r="${(sp.r*.9).toFixed(3)}" style="${st}"/>`;
+  if(num) out += `<circle class="ebadge" cx="${(sp.x+sp.r*.95).toFixed(3)}" cy="${(sp.y-sp.r*.95).toFixed(3)}" r=".55"/><text class="ebadge-t" x="${(sp.x+sp.r*.95).toFixed(3)}" y="${(sp.y-sp.r*.95).toFixed(3)}">${num}</text>`;
+  return out;
+}
+function flagSVG(f, o={}){
+  const W=f.W||24, H=f.H||12, parts=getParts(f);
+  const L=o.ruler?2.7:.3, T=o.ruler?2.7:.3, R=(o.padR||0)+(o.ruler?.7:.3), B=(o.padB||0)+.3, VW=o.viewW||W;
+  let s=`<svg class="flagsvg" viewBox="${-L} ${-T} ${VW+L+R} ${H+T+B}" role="img" aria-label="${esc(o.aria||'Flag')}">`;
+  if(o.ruler) s+=rulers(W,H);
+  parts.forEach((p,i)=>{
+    const c=f.colors&&f.colors[i];
+    const fill = p.over ? 'url(#hatchWarn)' : p.gap ? 'var(--paper)' : c ? `var(--f-${c})` : 'var(--f-blank)';
+    const cls=['part', o.tap?'tap':'', o.hl&&o.hl.includes(i)?'hl':'', o.hl&&o.dim&&!o.hl.includes(i)?'dim':''].join(' ');
+    const act = o.tap ? ` data-act="${o.tap}" data-key="${o.key||''}" data-i="${i}"` : '';
+    s+=`<polygon class="${cls}"${act} points="${P(p.pts)}" style="fill:${fill}${p.gap?';stroke-dasharray:.3 .2':''}"/>`;
+  });
+  if(o.grid){ for(let x=1;x<W;x++) s+=`<line class="gridl" x1="${x}" x2="${x}" y1="0" y2="${H}"/>`; for(let y=1;y<H;y++) s+=`<line class="gridl" y1="${y}" y2="${y}" x1="0" x2="${W}"/>`; }
+  if(o.under) s+=o.under;
+  if(o.labels) parts.forEach((p,i)=>{ const t=o.labels(p,i); if(t==null) return;
+    let c = p.isTri ? incircle(p.pts) : (()=>{const q=centroid(p.pts); return {x:q[0],y:q[1]};})();
+    if(o.corner){ const b=bbox(p.pts); c = p.isTri ? {x:c.x+(p.name==='upper triangle'?1.6:-1.6), y:c.y+(p.name==='upper triangle'?-1.6:1.6)} : {x:b.x0+.75, y:b.y0+.85}; }
+    const fs = o.labelSize || Math.min(1.25, (p.isRect?Math.min(p.w,p.h):6)*.32);
+    s+=`<text class="plabel" x="${c.x.toFixed(3)}" y="${c.y.toFixed(3)}" style="font-size:${fs}px;fill:${p.over?'var(--warn)':onColor(f.colors&&f.colors[i])}">${esc(t)}</text>`; });
+  if(f.emblems && f.emblems.length && !o.noEmblems){ const sp=emblemSpots(parts,f.emblems); f.emblems.forEach((e,i)=>{ if(sp[i]) s+=emblemSVG(e,sp[i],o.emblemNums?i+1:0); }); }
+  s+=`<rect class="border" x="0" y="0" width="${W}" height="${H}"/>`;
+  if(o.extra) s+=o.extra;
+  return s+`</svg>`;
+}
+// Cut-and-stack: overlay every part at the same corner (turning a piece around if that makes it fit)
+function stackSVG(parts){
+  const norm = pts => { const b=bbox(pts); return pts.map(p=>[p[0]-b.x0,p[1]-b.y0]); };
+  const key = pts => pts.map(p=>p.join(',')).sort().join(';');
+  const base = norm(parts[0].pts);
+  const shown = parts.map(p=>{ let q=norm(p.pts); if(key(q)!==key(base)){ const b=bbox(q); const r=q.map(([x,y])=>[b.x1-x,b.y1-y]); if(key(r)===key(base)) q=r; } return q; });
+  const W=Math.max(...shown.map(q=>bbox(q).x1)), H=Math.max(...shown.map(q=>bbox(q).y1));
+  const cols=['var(--f-red)','var(--f-blue)','var(--f-green)','var(--f-purple)'];
+  let s=`<svg class="stack" viewBox="-.5 -1.6 ${W+1} ${H+2.1}" role="img" aria-label="The parts cut out and stacked on top of each other"><text x="0" y="-.6">Cut and stack</text>`;
+  shown.forEach((q,i)=>{ s+=`<polygon class="sp" points="${P(q)}" style="fill:${cols[i%4]};stroke:${cols[i%4]}"/>`; });
+  return s+'</svg>';
+}
+
+/* ================= Sample nations (invented) ================= */
+const SAMPLES = [
+  {nation:'Kestrel Bay', layout:'v', n:3, colors:['blue','white','blue'], emblems:[{shape:'hexagon',part:1,color:'gold'}]},
+  {nation:'Isle of Marrow', layout:'h', n:2, colors:['green','gold'], emblems:[{shape:'triangle',part:0,color:'red'}]},
+  {nation:'Pinecrest Union', layout:'grid', n:4, colors:['red','white','white','red'], emblems:[{shape:'star',part:0,color:'gold'},{shape:'pentagon',part:3,color:'blue'}]},
+  {nation:'Tallow Reach', layout:'mixed', n:4, colors:['purple','orange','gold','purple'], emblems:[{shape:'circle',part:1,color:'white'}]},
+  {nation:'Wren Hollow', layout:'mixed', n:3, colors:['green','white','black'], emblems:[{shape:'trapezoid',part:0,color:'gold'}]},
+  {nation:'North Fennick', layout:'h', n:4, colors:['red','white','red','white'], emblems:[{shape:'star',part:0,color:'blue'}]}
+];
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ================= Spec language ================= */
+function partsLine(f){
+  const n=f.n;
+  if(f.layout==='v') return `${n} equal stripes running up and down, ${24/n} cm wide each.`;
+  if(f.layout==='h') return `${n} equal stripes running across, ${12/n} cm wide each.`;
+  if(f.layout==='grid') return `4 equal parts in a 2 by 2 grid, each 12 cm long and 6 cm tall.`;
+  if(f.layout==='mixed' && n===3) return `3 equal parts, not all stripes: a left stripe 8 cm wide, then the rest cut across into a top part and a bottom part. Each part covers 96 square centimeters.`;
+  if(f.layout==='mixed' && n===4) return `4 equal parts, not all the same shape: two stripes 6 cm wide on the left, and the right half (a 12 cm square) cut from its top-left corner to its bottom-right corner into two triangles. Each part covers 72 square centimeters.`;
+  return '';
+}
+function colorsLine(f){
+  const c=f.colors.map(x=>x||'(no color yet)');
+  if(f.layout==='v') return `Colors from left to right: ${c.join(', ')}.`;
+  if(f.layout==='h') return `Colors from top to bottom: ${c.join(', ')}.`;
+  const parts=getParts(f); return `Colors: ${parts.map((p,i)=>`${p.name} ${c[i]}`).join(', ')}.`;
+}
+function emblemLines(f){
+  const parts=getParts(f);
+  if(!f.emblems.length) return ['No emblem.'];
+  return f.emblems.map(e=>`In the ${parts[e.part].name}: a ${e.color} ${SH[e.shape].desc}.`);
+}
+const specHTML = f => `<span class="nation">${esc(f.nation||'Our nation')}</span>Flag size: 24 cm × 12 cm. ${esc(partsLine(f))} ${esc(colorsLine(f))} ${emblemLines(f).map(esc).join(' ')}`;
+
+/* ================= State ================= */
+let S;
+function freshState(){
+  return {
+    tab:'c1',
+    c1:{step:'warm', wi:0, wCount:null, wEq:null, fold:{n:2, way:'v', cuts:[10], measure:false, result:null, tries:0, done:{}}, prac:{n:2, guess:{2:'',3:'',4:''}, checked:{}}, share:0},
+    c2:{step:'shapes', dots:[], closed:false, target:'quad', partB:{}, partBChecked:false,
+        flag:{nation:'', layout:'v', n:3, colors:[null,null,null], emblems:[]}, paint:'blue', place:0, grid:false,
+        form:{nation:'',count:'',word:'',dir:'',m1:'',m2:'',colors:[],em:[]}, results:null, saved:false, missI:0, missPick:null, showFull:false, readAloud:false, reveal:false},
+    c3:{step:'rebuild', src:0, built:{layout:'v',n:2,colors:[null,null],emblems:[]}, paint:'blue', place:0, compared:false, verdict:{}, quiz:null, hunt:false, huntMarks:{}, sel:null},
+    ch:{step:'four', counted:{}, prog:{}, paint:{n:4, color:'red', cells:null, result:null}},
+    gallery: clone(SAMPLES)
+  };
+}
+S = freshState();
+
+/* ================= Shell ================= */
+const app = $('#app');
+function render(){
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===S.tab));
+  ({c1:renderC1, c2:renderC2, c3:renderC3, ch:renderCh})[S.tab]();
+}
+function steps(list, cur, act){
+  return `<div class="steps" role="group" aria-label="Steps">${list.map(([k,l])=>`<button type="button" data-act="${act}" data-v="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`;
+}
+const seg = (items, cur, act, extra='') => `<div class="seg" role="group">${items.map(([v,l,dis])=>`<button type="button" data-act="${act}" data-v="${v}" ${extra} aria-pressed="${String(v)===String(cur)}" ${dis?'disabled':''}>${l}</button>`).join('')}</div>`;
+
+/* ================= Class 1: Equal Parts ================= */
+const WARM = [
+  {f:{layout:'v',n:2,colors:['purple','gold']}, n:2},
+  {f:{parts:[rect(0,0,16,12,'fat stripe'),rect(16,0,24,12,'thin stripe')], colors:['blue','gold']}, n:2},
+  {f:{layout:'v',n:3,colors:['blue','white','blue']}, n:3},
+  {f:{parts:[rect(0,0,6,12,'a'),rect(6,0,18,12,'b'),rect(18,0,24,12,'c')], colors:['green','white','green']}, n:3},
+  {f:{layout:'grid',n:4,colors:['gold','blue','blue','gold']}, n:4},
+  {f:{layout:'diag',n:2,colors:['orange','green']}, n:2}
+];
+function foldParts(fd){
+  const c=fd.cuts;
+  if(fd.way==='v'){ const xs=[0,...c,24]; return xs.slice(0,-1).map((x,i)=>rect(x,0,xs[i+1],12,'')); }
+  if(fd.way==='h'){ const ys=[0,...c,12]; return ys.slice(0,-1).map((y,i)=>rect(0,y,24,ys[i+1],'')); }
+  const [x,y]=c; return [rect(0,0,x,y,''),rect(x,0,24,y,''),rect(0,y,x,12,''),rect(x,y,24,12,'')];
+}
+function defaultCuts(n,way){
+  if(way==='grid') return [9,4];
+  if(way==='v') return {2:[10],3:[6,15],4:[5,11,18]}[n];
+  return {2:[5],3:[3,7],4:[2,5,9]}[n];
+}
+const sizeText = (p,way) => way==='v' ? `${p.w} cm` : way==='h' ? `${p.h} cm` : `${p.w} × ${p.h}`;
+function renderC1(){
+  const c=S.c1;
+  const list=[['warm','Warm-up: Are they equal?'],['fold','Explore: Fold lab'],['prac','Part A: Practice flags'],['share','Share']];
+  let stage='', panel=steps(list,c.step,'c1step');
+  if(c.step==='warm'){
+    const w=WARM[c.wi], parts=getParts(w.f), eq=allEqual(parts);
+    const showNums = c.wCount!==null && c.wCount!==w.n;
+    const showProof = c.wEq!==null;
+    stage = `<span class="eyebrow">Warm-up · flag ${c.wi+1} of ${WARM.length}</span><h2>Are these parts equal?</h2>
+      <div class="flagwrap">${flagSVG(w.f,{ruler:true, aria:'Flag to check', labels: showProof ? ((p,i)=>p.isRect ? `${p.w} cm` : `part ${i+1}`) : showNums ? ((p,i)=>String(i+1)) : null, labelSize:1.1})}</div>
+      ${showProof ? stackSVG(parts) : ''}`;
+    panel += `<p class="prompt">1. How many parts?</p>
+      <div class="row">${[2,3,4].map(k=>`<button class="choice" type="button" data-act="wcount" data-v="${k}" aria-pressed="${c.wCount===k}">${k}</button>`).join('')}</div>`;
+    if(c.wCount!==null){
+      panel += c.wCount===w.n ? `<div class="note good">Yes, <b>${w.n} parts</b>.</div>` : `<div class="note warn">Count again. The parts are numbered on the flag now: touch each one as you count.</div>`;
+    }
+    if(c.wCount===w.n){
+      panel += `<p class="prompt">2. Are the parts equal?</p><div class="row"><button class="choice" type="button" data-act="weq" data-v="yes" aria-pressed="${c.wEq==='yes'}">Equal</button><button class="choice" type="button" data-act="weq" data-v="no" aria-pressed="${c.wEq==='no'}">Not equal</button></div>`;
+      if(c.wEq!==null){
+        const said = c.wEq==='yes', right = said===eq;
+        let why;
+        if(w.f.layout==='diag') why = `Turn one triangle around and it covers the other exactly. Two equal parts are <b>halves</b>, even though the line goes corner to corner.`;
+        else if(eq) why = `Measure: ${parts.map(p=>p.w+' cm').join(', ')}. Every part matches, and ${plus(parts[0].w, parts.length)} = 24. These are <b>${MANY[w.n]}</b>.`;
+        else { const ws=parts.map(p=>p.w); why = `Measure: ${ws.map(x=>x+' cm').join(', ')}. In the stack, the ${Math.max(...ws)} cm part sticks out past the ${Math.min(...ws)} cm part. ${w.n} parts, but not ${MANY[w.n]}.`; }
+        panel += `<div class="note ${right?'good':'warn'}">${right ? '<b>Right.</b> ' : '<b>Look at the proof.</b> '}${why}${right?'':' Want to try the next flag?'}</div>`;
+      }
+    }
+    panel += `<div class="row"><button class="secondary" type="button" data-act="wnav" data-v="-1" ${c.wi===0?'disabled':''}>◀ Back</button><button class="primary" type="button" data-act="wnav" data-v="1" ${c.wi===WARM.length-1?'disabled':''}>Next flag ▶</button></div>
+      <p class="muted small">Ask first: how could you prove it without a ruler? (Fold it!) Then choose an answer to put the proof on screen.</p>`;
+  }
+  else if(c.step==='fold'){
+    const fd=c.fold, parts=foldParts(fd), n=fd.way==='grid'?4:fd.n;
+    let extra='';
+    const cutLine=(k,val,dir)=>{
+      if(dir==='x') return `<line class="fold" x1="${val}" x2="${val}" y1="-.2" y2="12.2"/><g class="handle" tabindex="0" role="slider" aria-label="Fold line ${k+1}, at ${val} cm" aria-valuenow="${val}" data-cut="${k}" data-dir="x"><line class="hit" x1="${val}" x2="${val}" y1="0" y2="12"/><circle cx="${val}" cy="13.1" r=".8"/><text x="${val}" y="13.1">↔</text></g>`;
+      return `<line class="fold" y1="${val}" y2="${val}" x1="-.2" x2="24.2"/><g class="handle" tabindex="0" role="slider" aria-label="Fold line ${k+1}, at ${val} cm" aria-valuenow="${val}" data-cut="${k}" data-dir="y"><line class="hit" y1="${val}" y2="${val}" x1="0" x2="24"/><circle cx="25.1" cy="${val}" r=".8"/><text x="25.1" y="${val}">↕</text></g>`;
+    };
+    fd.cuts.forEach((v,k)=>{ const dir = fd.way==='v' ? 'x' : fd.way==='h' ? 'y' : (k===0?'x':'y'); extra+=cutLine(k,v,dir); });
+    const okNow = fd.result && fd.result.ok;
+    const f={parts, colors:parts.map((_,i)=>okNow?['white','white','white','white'][i]:null)};
+    stage = `<span class="eyebrow">Explore · paper 24 cm × 12 cm</span><h2>Drag the fold lines to make ${MANY[n]}</h2>
+      <div class="flagwrap" id="foldStage" style="touch-action:none">${flagSVG(f,{ruler:true, padB:fd.way!=='h'?1.6:0, padR:fd.way!=='v'?1.4:0, aria:'Paper with fold lines',
+        labels: okNow ? (()=>`1 ${ONE[n]}`) : fd.measure ? (p=>sizeText(p,fd.way)) : null, extra})}</div>
+      ${fd.result ? stackSVG(parts) : ''}`;
+    const ways=[['v','Up and down'],['h','Across'],['grid','2 × 2', n!==4 && fd.n!==4]];
+    panel += `<div class="group"><span class="field-label">Make</span>${seg([[2,'Halves'],[3,'Thirds'],[4,'Fourths']], fd.n, 'fn')}</div>
+      <div class="group"><span class="field-label">Folds run</span>${seg(ways, fd.way, 'fway')}</div>
+      <div class="row"><button class="primary" type="button" data-act="fcheck">Check equal parts</button><button class="secondary" type="button" data-act="fmeasure" aria-pressed="${fd.measure}">${fd.measure?'Hide':'Measure'} parts</button></div>`;
+    if(fd.result) panel += `<div class="note ${fd.result.ok?'good':'warn'}">${fd.result.html}</div>`;
+    const G=[['halves-v','Halves, up and down'],['halves-h','Halves, across'],['thirds','Thirds'],['fourths-s','Fourths: 4 stripes'],['fourths-g','Fourths: 2 × 2']];
+    panel += `<div class="group"><span class="field-label">Your folds today</span><ul class="checklist">${G.map(([k,l])=>`<li class="${fd.done[k]?'ok':''}">${l}</li>`).join('')}</ul></div>
+      <p class="muted small">Thirds are the hard one. Tip from the lesson: fold an S, or mark 8 cm.</p>`;
+  }
+  else if(c.step==='prac'){
+    const pr=c.prac, n=pr.n, g=pr.guess[n], chk=pr.checked[n];
+    const correct=12/n;
+    let f, labels=null, note='';
+    const H=8;
+    if(chk && +g===correct){ f={W:12,H, parts:Array.from({length:n},(_,i)=>rect(i*correct,0,(i+1)*correct,H,'')), colors:Array(n).fill(0).map((_,i)=>['blue','white','gold','green'][i%4])}; labels=()=>`${correct} cm`;
+      note=`<div class="note good"><b>Yes.</b> ${plus(correct,n)} = 12, so each of the ${n} equal parts is <b>${correct} cm</b> wide. Each one is 1 ${ONE[n]}.</div>`; }
+    else if(chk && g!==''){
+      const x=+g, tot=x*n, parts=[];
+      for(let i=0;i<n;i++){ const a=i*x, b=(i+1)*x; if(b<=12) parts.push(rect(a,0,b,H,'')); else if(a>=12){ const p=rect(a,0,b,H,''); p.over=true; parts.push(p);} else { parts.push(rect(a,0,12,H,'')); const p=rect(12,0,b,H,''); p.over=true; parts.push(p);} }
+      if(tot<12){ const p=rect(tot,0,12,H,''); p.gap=true; parts.push(p); }
+      f={W:12,H,parts, colors:parts.map((p,i)=>p.over||p.gap?null:['blue','white','gold','green'][i%4])};
+      labels=p=>p.over?'too far':p.gap?'left over':null;
+      const msg = tot>12 ? `Your ${n} parts reach <b>${tot} cm</b>, past the end of the 12 cm flag by ${tot-12} cm. Try a smaller number.` : `Your ${n} parts only reach <b>${tot} cm</b>. ${12-tot} cm of the flag is left over. Try a bigger number.`;
+      note=`<div class="note warn">${plus(x,n)} = ${tot}. ${msg} How could you check? Count ${n} jumps of the same size on the ruler and land on 12.</div>`;
+    } else { f={W:12,H,parts:[rect(0,0,12,H,'')],colors:[null]}; }
+    stage=`<span class="eyebrow">Part A · practice flag · 12 cm wide</span><h2>${MANY[n][0].toUpperCase()+MANY[n].slice(1)}: each part is how wide?</h2>
+      <div class="flagwrap">${flagSVG(f,{ruler:true, viewW: Math.max(12, chk&&g!==''?+g*n:12), labels, labelSize:.8, aria:'Practice flag'})}</div>`;
+    panel+=`<div class="group"><span class="field-label">Practice flag</span>${seg([[2,'Halves'],[3,'Thirds'],[4,'Fourths']], n, 'pn')}</div>
+      <label class="prompt" for="pracIn">${MANY[n][0].toUpperCase()+MANY[n].slice(1)}: each part is <input id="pracIn" type="number" min="1" max="12" step="1" value="${esc(g)}" inputmode="numeric"> cm wide.</label>
+      <div class="row"><button class="primary" type="button" data-act="pcheck">Check</button></div>${note}
+      <ul class="checklist">${[2,3,4].map(k=>`<li class="${pr.checked[k]&&+pr.guess[k]===12/k?'ok':''}">${MANY[k][0].toUpperCase()+MANY[k].slice(1)}</li>`).join('')}</ul>`;
+  }
+  else {
+    const fl=[{f:{layout:'h',n:4,colors:['gold','blue','gold','blue']},cap:'4 stripes across: 24 × 3'},{f:{layout:'grid',n:4,colors:['gold','blue','blue','gold']},cap:'2 × 2 grid: 12 × 6'},{f:{layout:'v',n:4,colors:['gold','blue','gold','blue']},cap:'4 stripes up and down: 6 × 12'}];
+    const showCount=c.share>=1;
+    stage=`<span class="eyebrow">Share</span><h2>Three ways to make fourths</h2><div class="trio">${fl.map(x=>`<figure>${flagSVG(x.f,{grid:showCount, labels: showCount?(()=> '72'):null, labelSize:1.6, aria:x.cap})}<figcaption>${x.cap} cm</figcaption></figure>`).join('')}</div>`;
+    panel+=`<p class="prompt">Who made fourths two ways? Are the parts the <b>same shape</b>? The <b>same size</b>?</p>
+      <div class="row"><button class="primary" type="button" data-act="share" data-v="1">Count the squares</button><button class="secondary" type="button" data-act="share" data-v="2">Same shape?</button></div>`;
+    if(c.share===1) panel+=`<div class="note">Each part covers <b>72 square centimeters</b> on all three flags. 24 rows of 3 is 72, and 6 rows of 12 is 72. Same size, so every part is 1 fourth.</div>`;
+    if(c.share===2) panel+=`<div class="note">Not always! A <b>24 × 3</b> stripe is long and thin. A <b>12 × 6</b> piece is short and wide. (The 6 × 12 stripe is the 12 × 6 piece turned on its side.) Every part still covers 72 squares. <b>Equal shares do not have to be the same shape.</b></div>`;
+  }
+  app.innerHTML = `<section class="view"><div class="stage">${stage}</div><div class="panel">${panel}</div></section>`;
+}
+function checkFold(){
+  const fd=S.c1.fold, parts=foldParts(fd), n=fd.way==='grid'?4:fd.n, eq=allEqual(parts);
+  fd.tries++;
+  let html;
+  if(eq){
+    const sz=sizeText(parts[0],fd.way);
+    html = fd.way==='grid' ? `<b>4 equal parts!</b> Each is 12 cm by 6 cm. The stack shows they match exactly. Each part is <b>1 fourth</b>.` :
+      `<b>${n} equal parts!</b> Each is ${sz}${fd.way==='v'?' wide':' tall'}. ${plus(fd.way==='v'?parts[0].w:parts[0].h,n)} = ${fd.way==='v'?24:12}. Each part is <b>1 ${ONE[n]}</b>.`;
+    const k = n===2 ? 'halves-'+fd.way : n===3 ? 'thirds' : fd.way==='grid' ? 'fourths-g' : 'fourths-s';
+    fd.done[k]=true; fd.tries=0;
+  } else {
+    if(fd.way==='grid'){ const [x,y]=fd.cuts;
+      html = `The parts are ${parts.map(p=>`${p.w} × ${p.h}`).join(', ')}. In the stack they don't match. The up-and-down fold cuts 24 cm into ${x} and ${24-x}; the across fold cuts 12 cm into ${y} and ${12-y}. Both folds need to make two equal sides.`;
+      if(fd.tries>1) html+=` Hint: 12 + 12 = 24 and 6 + 6 = 12.`;
+    } else {
+      const sz=parts.map(p=>fd.way==='v'?p.w:p.h), tot=fd.way==='v'?24:12;
+      html = `Your parts are ${sz.map(x=>x+' cm').join(', ')}. ${sz.join(' + ')} = ${tot}, so all the paper is there, but the parts are different sizes. In the stack, the biggest sticks out. Move a fold line and check again.`;
+      if(fd.tries>1) html+=` Hint: find a number that makes ${n} equal jumps to ${tot}.`;
+    }
+  }
+  fd.result={ok:eq, html};
+}
+
+/* ================= Class 2: Design to Spec ================= */
+const TARGETS = {quad:'A quadrilateral that is not a rectangle', five:'A shape with exactly 5 vertices', hex2:'A hexagon with two long sides'};
+const DOT_W=7, DOT_H=5;
+function analyzeDots(pts){
+  let q=pts.slice(), merged=0, changed=true;
+  while(changed && q.length>=3){ changed=false;
+    for(let i=0;i<q.length;i++){ const a=q[(i-1+q.length)%q.length], b=q[i], c=q[(i+1)%q.length];
+      if((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0])===0){ q.splice(i,1); merged++; changed=true; break; } } }
+  if(q.length<3) return {err:'All your dots are in one straight line, so there is no shape inside. Try dots that turn a corner.'};
+  const n=q.length, orient=(a,b,c)=>Math.sign((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]));
+  const onSeg=(a,b,c)=>Math.min(a[0],b[0])<=c[0]&&c[0]<=Math.max(a[0],b[0])&&Math.min(a[1],b[1])<=c[1]&&c[1]<=Math.max(a[1],b[1]);
+  const cross=(p1,p2,p3,p4)=>{ const d1=orient(p3,p4,p1),d2=orient(p3,p4,p2),d3=orient(p1,p2,p3),d4=orient(p1,p2,p4);
+    if(d1!==d2&&d3!==d4) return true; if(d1===0&&onSeg(p3,p4,p1))return true; if(d2===0&&onSeg(p3,p4,p2))return true; if(d3===0&&onSeg(p1,p2,p3))return true; if(d4===0&&onSeg(p1,p2,p4))return true; return false; };
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){ if(j===i+1 || (i===0&&j===n-1)) continue; if(cross(q[i],q[(i+1)%n],q[j],q[(j+1)%n])) return {err:'Two of your sides cross each other. Sides of a shape only meet at the corners. Clear it and try again.'}; }
+  const L=q.map((p,i)=>{const r=q[(i+1)%n]; return (r[0]-p[0])**2+(r[1]-p[1])**2;});
+  const isRect = n===4 && q.every((p,i)=>{ const a=q[(i-1+n)%n], c=q[(i+1)%n]; return (a[0]-p[0])*(c[0]-p[0])+(a[1]-p[1])*(c[1]-p[1])===0; });
+  const isSquare = isRect && new Set(L).size===1;
+  const mx=Math.max(...L), longCount=L.filter(v=>v===mx).length;
+  const nm={3:'triangle',4:'quadrilateral',5:'pentagon',6:'hexagon',7:'heptagon',8:'octagon'}[n]||`${n}-sided shape`;
+  return {q,n,merged,isRect,isSquare,longCount,allSame:new Set(L).size===1,name:nm};
+}
+function dotsFeedback(c){
+  const A=analyzeDots(c.dots); if(A.err) return {cls:'warn', html:A.err};
+  let base=`You drew a <b>${A.isSquare?'square':A.isRect?'rectangle':A.name}</b>: ${A.n} sides and ${A.n} vertices.`;
+  if(A.merged) base+=` (Some dots sit in a straight line along a side, so they are not vertices. A vertex is where the side turns.)`;
+  let ok=false, why='';
+  if(c.target==='quad'){ ok = A.n===4 && !A.isRect; why = A.n!==4 ? `A quadrilateral needs exactly 4 sides.` : `Every corner is a square corner, so it is a rectangle${A.isSquare?' (a square is a special rectangle)':''}. Tilt one side so a corner is not square.`; }
+  if(c.target==='five'){ ok = A.n===5; why = `Count the corners: you need exactly 5.`; }
+  if(c.target==='hex2'){ ok = A.n===6 && A.longCount===2; why = A.n!==6 ? `A hexagon needs 6 sides.` : A.allSame || A.longCount>2 ? `Your longest sides: ${A.longCount} of them are tied for longest. Make exactly two sides longer than the rest.` : `Only one side is the longest. Make two sides long.`; }
+  return {cls: ok?'good':'warn', html: base + ' ' + (ok ? '<b>It meets the challenge!</b> Partner check: count the sides and vertices out loud.' : why + ' Try again.')};
+}
+function dotsSVG(c){
+  let s=`<svg class="flagsvg dots" viewBox="-.7 -.7 ${DOT_W+.4} ${DOT_H+.4}" role="img" aria-label="Dot grid for drawing shapes">`;
+  if(c.dots.length){ const pts=P(c.dots); s += c.closed ? `<polygon class="poly" points="${pts}"/>` : `<polyline class="open" points="${pts}"/>`; }
+  if(c.closed){ const A=analyzeDots(c.dots); if(!A.err) A.q.forEach((p,i)=>{ s+=`<circle class="vx" cx="${p[0]}" cy="${p[1]}" r=".22"/>`; }); }
+  for(let y=0;y<DOT_H;y++) for(let x=0;x<DOT_W;x++){
+    const first = c.dots.length && c.dots[0][0]===x && c.dots[0][1]===y && !c.closed;
+    s+=`<circle class="dot ${first?'first':''}" cx="${x}" cy="${y}" r="${first?.2:.1}"/><circle class="dothit" data-act="dot" data-x="${x}" data-y="${y}" cx="${x}" cy="${y}" r=".45"><title>dot</title></circle>`;
+  }
+  return s+'</svg>';
+}
+function emblemReq(f){
+  const has = pred => f.emblems.some(e=>pred(e.shape));
+  return [
+    ['Every part has a color', f.colors.every(Boolean)],
+    ['A triangle', has(s=>s==='triangle')],
+    ['A quadrilateral that is not a square', has(s=>QUADS.has(s)&&s!=='square')],
+    ['A pentagon or hexagon', has(s=>s==='pentagon'||s==='hexagon'||s==='longhex')]
+  ];
+}
+// Designer controls, shared by Class 2 (design) and Class 3 (rebuild)
+const D = { c2:{get:()=>S.c2.flag, st:()=>S.c2}, c3:{get:()=>S.c3.built, st:()=>S.c3} };
+function setFracLayout(f, n, lay){
+  if(lay==='grid' && n!==4) lay='v';
+  if(lay==='mixed' && n===2) lay='v';
+  f.n=n; f.layout=lay;
+  const cols=f.colors.slice(0,n); while(cols.length<n) cols.push(null); f.colors=cols;
+  f.emblems.forEach(e=>{ if(e.part>=n) e.part=0; });
+}
+function designerControls(key){
+  const f=D[key].get(), st=D[key].st(), parts=getParts(f);
+  if(st.place>=parts.length) st.place=0;
+  return `<div class="group"><span class="field-label">Equal parts</span>${seg([[2,'Halves'],[3,'Thirds'],[4,'Fourths']], f.n, 'dfrac', `data-key="${key}"`)}</div>
+   <div class="group"><span class="field-label">Parts run</span>${seg([['v','Up and down'],['h','Across'],['grid','2 × 2 grid', f.n!==4],['mixed','Not all stripes', f.n===2]], f.layout, 'dlay', `data-key="${key}"`)}</div>
+   <div class="group"><span class="field-label">Paint: pick a color, then tap a part</span><div class="swatches">${COLORS.map(c=>`<button type="button" class="sw" data-act="dcolor" data-key="${key}" data-v="${c}" aria-pressed="${st.paint===c}" aria-label="${c}" title="${c}" style="background:var(--f-${c})"></button>`).join('')}</div></div>
+   <div class="group"><span class="field-label">Emblem shapes (up to 3) · they use the paint color</span>
+     <label class="row small" for="place-${key}">Put the next shape in the <select id="place-${key}" data-ch="dplace" data-key="${key}">${parts.map((p,i)=>`<option value="${i}" ${i===st.place?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
+     <div class="shapes">${SHAPE_ORDER.map(id=>`<button type="button" class="shapebtn" data-act="dshape" data-key="${key}" data-v="${id}" ${f.emblems.length>=3?'disabled':''}>${shapeIcon(id)}${SH[id].label}</button>`).join('')}</div>
+     ${f.emblems.length ? `<div class="chips">${f.emblems.map((e,i)=>`<span class="chip">${i+1}. ${e.color} ${SH[e.shape].label.toLowerCase()} · ${esc(parts[e.part].name)}<button type="button" data-act="ddel" data-key="${key}" data-v="${i}" aria-label="Remove shape ${i+1}">×</button></span>`).join('')}</div>` : ''}
+   </div>`;
+}
+function defaultForm(f){
+  const F=S.c2.form;
+  while(F.colors.length<f.n) F.colors.push(''); F.colors.length=f.n;
+  while(F.em.length<f.emblems.length) F.em.push({name:'',sides:'',verts:'',part:''}); F.em.length=f.emblems.length;
+  return F;
+}
+const DIRV = {v:'up and down', h:'across', grid:'2 by 2 grid', mixed:'not all stripes'};
+function checkSpec(f, F){
+  const R=[], n=f.n, parts=getParts(f);
+  const cnt = +F.count===n;
+  R.push({ok:cnt, t:'Number of equal parts', m: cnt ? `${n} equal parts.` : F.count==='' ? 'Write how many equal parts the field has.' : `The spec says ${F.count}. Count the parts on your flag again, touching each one.`});
+  const word = F.word===MANY[n];
+  R.push({ok:word, t:'Fraction word', m: word ? `${n} equal parts are ${MANY[n]}.` : `Match the word to the count: 2 equal parts are halves, 3 are thirds, 4 are fourths.`});
+  const dir = F.dir===f.layout;
+  const dirWhy = {v:'Your stripes stand tall, top to bottom, so they run up and down.', h:'Your stripes lie flat, side to side, so they run across.', grid:'Your flag has 2 rows and 2 columns of parts.', mixed:'Your parts are not all stripes, so say so, and describe each one.'}[f.layout];
+  R.push({ok:dir, t:'Which way the parts run', m: dir ? `${DIRV[f.layout][0].toUpperCase()+DIRV[f.layout].slice(1)}.` : dirWhy});
+  if(dir){
+    let ok, m;
+    if(f.layout==='v'||f.layout==='h'){ const tot=f.layout==='v'?24:12, want=tot/n, g=+F.m1; ok = F.m1!=='' && g===want;
+      m = ok ? `${plus(want,n)} = ${tot}. Each part is ${want} cm wide.` : F.m1==='' ? 'Measure one part and write its width in cm.' :
+        `Check: ${plus(g,n)} = ${g*n} cm, but ${f.layout==='v'?'the flag is 24 cm long, side to side':'across stripes stack top to bottom on the 12 cm side'}. Find the width that makes ${n} equal jumps land on ${tot}.`; }
+    else if(f.layout==='grid'){ const a=+F.m1, b=+F.m2; ok = (a===12&&b===6)||(a===6&&b===12);
+      m = ok ? 'Each part is 12 cm by 6 cm: 12 + 12 = 24 and 6 + 6 = 12.' : 'Two parts fit across the 24 cm side and two fit down the 12 cm side. Measure one part both ways.'; }
+    else { const want=288/n, g=+F.m1; ok = g===want;
+      m = ok ? `Each part covers ${want} square centimeters.` : `Turn on the square grid and count the squares in one part (two half squares make one whole). ${F.m1!==''?`You wrote ${g}.`:''}`; }
+    R.push({ok, t: f.layout==='mixed' ? 'Size of each part' : 'Width in cm', m});
+  } else R.push({ok:false, t:'Measurement', m:'Fix which way the parts run first. Then measure.'});
+  const badCols = f.colors.map((c,i)=>[c,F.colors[i],i]).filter(([c,s])=>c!==s);
+  R.push({ok:!badCols.length, t:'Colors in order', m: !badCols.length ? 'Every color is in the right place.' : badCols.map(([c,s,i])=>`Part ${i+1} (${parts[i].name}) is ${c} on the flag, but the spec says ${s||'nothing yet'}.`).join(' ')});
+  f.emblems.forEach((e,i)=>{
+    const E=F.em[i]||{}, sh=SH[e.shape], nv=nameVerdict(e.shape,E.name), sOk=E.sides!==''&&+E.sides===sh.sides, vOk=E.verts!==''&&+E.verts===sh.sides, pOk=String(E.part)===String(e.part);
+    const ok = nv!=='wrong' && sOk && vOk && pOk; const bits=[];
+    if(nv==='wrong') bits.push(E.name ? `It isn't a ${E.name}. Count its sides, then pick the name that matches.` : 'Pick the shape’s name.');
+    if(nv==='general') bits.push(`True! Is there a more exact name, so the rebuild team draws the same shape?`);
+    if(!sOk) bits.push(e.shape==='circle' ? 'A circle has no straight sides: write 0.' : 'Count the straight sides again, touching each one.');
+    if(!vOk) bits.push(e.shape==='circle' ? 'A circle has no corners, so 0 vertices.' : 'A vertex is a corner where two sides meet. Count the corners.');
+    if(!pOk) bits.push(`Look where shape ${i+1} sits on the flag. Which part is it in?`);
+    R.push({ok, t:`Shape ${i+1} (${e.color})`, m: ok ? `A ${sh.desc}, in the ${parts[e.part].name}.${nv==='general'?' '+bits[0]:''}` : bits.join(' ')});
+  });
+  return R;
+}
+const MISS = [
+  {f:0, text:'<b>Kestrel Bay.</b> The field is 3 equal stripes running up and down, 8 cm wide each. <span class="gap">?</span> In the middle third: a hexagon with 6 sides and 6 vertices.', missing:'colors',
+   q:{parts:'3 equal stripes', dir:'running up and down', width:'8 cm wide each', shape:'a hexagon with 6 sides and 6 vertices', where:'In the middle third'}},
+  {f:1, text:'<b>Isle of Marrow.</b> 2 equal stripes running across, 6 cm wide each. Colors from top to bottom: green, gold. <span class="gap">?</span> a red triangle with 3 sides and 3 vertices.', missing:'where',
+   q:{parts:'2 equal stripes', dir:'running across', width:'6 cm wide each', colors:'green, gold', shape:'a red triangle with 3 sides and 3 vertices'}},
+  {f:5, text:'<b>North Fennick.</b> 4 equal stripes running across, <span class="gap">?</span>. Colors from top to bottom: red, white, red, white. In stripe 1: a blue star with 10 sides and 10 vertices.', missing:'width',
+   q:{parts:'4 equal stripes', dir:'running across', colors:'red, white, red, white', shape:'a blue star with 10 sides and 10 vertices', where:'In stripe 1'}},
+  {f:4, text:'<b>Wren Hollow.</b> 3 equal parts, not all stripes: a left stripe 8 cm wide, then the rest cut across into a top part and a bottom part. Each part covers 96 square centimeters. Colors: left stripe green, top-right part white, bottom-right part black. In the left stripe: a gold <span class="gap">?</span>.', missing:'shape',
+   q:{parts:'3 equal parts', dir:'not all stripes', width:'a left stripe 8 cm wide … 96 square centimeters', colors:'left stripe green, top-right part white, bottom-right part black', where:'In the left stripe'}}
+];
+const MISS_CHOICES = [['parts','How many equal parts'],['dir','Which way the parts run'],['width','How wide each part is'],['colors','Colors in order'],['shape','Each shape’s name, sides and vertices'],['where','Which part the emblem goes in']];
+function renderC2(){
+  const c=S.c2, f=c.flag;
+  const list=[['shapes','Warm-up: Shapes'],['build','Build our flag'],['spec','Part C: Write the spec'],['share','Share: Read it aloud']];
+  let stage='', panel=steps(list,c.step,'c2step');
+  if(c.step==='shapes'){
+    const fb = c.closed ? dotsFeedback(c) : null;
+    stage=`<span class="eyebrow">Warm-up · dot paper</span><h2>${TARGETS[c.target]}</h2><div class="flagwrap">${dotsSVG(c)}</div>
+      <p class="muted small">${c.closed ? 'Done! Clear it to draw another.' : c.dots.length ? 'Keep tapping dots. Tap the blue starting dot to close the shape.' : 'Tap a dot to start. Tap dot to dot, then tap the first dot to close.'}</p>`;
+    panel+=`<div class="group"><span class="field-label">Draw challenge</span>${seg([['quad','Not a rectangle'],['five','5 vertices'],['hex2','Hexagon, 2 long sides']], c.target, 'dtarget')}</div>
+      <div class="row"><button class="secondary" type="button" data-act="dundo" ${!c.dots.length||c.closed?'disabled':''}>Undo dot</button><button class="secondary" type="button" data-act="dclear">Clear</button></div>
+      ${fb?`<div class="note ${fb.cls}">${fb.html}</div>`:''}
+      <div class="group"><h3>Part B: Shapes for the Emblem</h3><div class="tbl-wrap"><table class="partb"><tr><th>Shape</th><th>Sides</th><th>Vertices</th></tr>
+      ${[['triangle','Triangle',3],['quad','Quadrilateral (not a rectangle)',4],['pent','Pentagon',5],['hex','Hexagon',6]].map(([k,l,v])=>{ const s=c.partB[k+'s']??'', t=c.partB[k+'v']??''; const cs=c.partBChecked?(s!==''&&+s===v?'okf':'bad'):'', cv=c.partBChecked?(t!==''&&+t===v?'okf':'bad'):'';
+        return `<tr><td>${l}</td><td><input type="number" min="0" max="12" id="pb-${k}s" data-ch="pb" data-k="${k}s" class="${cs}" value="${esc(s)}" aria-label="${l} sides"></td><td><input type="number" min="0" max="12" id="pb-${k}v" data-ch="pb" data-k="${k}v" class="${cv}" value="${esc(t)}" aria-label="${l} vertices"></td></tr>`; }).join('')}
+      </table></div><div class="row"><button class="primary" type="button" data-act="pbcheck">Check Part B</button></div>
+      ${c.partBChecked ? (()=>{ const all=[['triangle',3],['quad',4],['pent',5],['hex',6]].every(([k,v])=>+c.partB[k+'s']===v&&+c.partB[k+'v']===v&&c.partB[k+'s']!==''&&c.partB[k+'v']!==''); return all ? `<div class="note good"><b>All correct.</b> Notice: every one of these shapes has the same number of sides as vertices.</div>` : `<div class="note warn">Boxes outlined in red need another look. Draw that shape on the dot paper and count its sides and corners.</div>`; })() : ''}</div>`;
+  }
+  else if(c.step==='build'){
+    stage=`<span class="eyebrow">Build · 24 cm × 12 cm</span><h2>Design your nation’s flag</h2>
+      <div class="flagwrap">${flagSVG(f,{ruler:true, tap:'dpart', key:'c2', grid:c.grid, aria:'Our flag design'})}</div>`;
+    const req=emblemReq(f);
+    panel+=designerControls('c2')+`<div class="group"><span class="field-label">Our flag needs</span><ul class="checklist">${req.map(([l,ok])=>`<li class="${ok?'ok':''}">${l}</li>`).join('')}</ul></div>
+      ${req.every(r=>r[1]) ? `<div class="row"><button class="primary" type="button" data-act="c2step" data-v="spec">Write the spec ▶</button></div>` : ''}`;
+  }
+  else if(c.step==='spec'){
+    const F=defaultForm(f), parts=getParts(f), R=c.results;
+    const cls = (i) => R ? (R[i].ok?'okf':'bad') : '';
+    stage=`<span class="eyebrow">Part C · our flag</span><h2>Measure it. Then write the spec.</h2>
+      <div class="flagwrap">${flagSVG(f,{ruler:true, grid:c.grid, emblemNums:true, corner:true, labels:(p,i)=>String(i+1), labelSize:.9, aria:'Our flag with numbered parts'})}</div>
+      <div class="row"><button class="secondary" type="button" data-act="c2grid" aria-pressed="${c.grid}">${c.grid?'Hide':'Show'} square-centimeter grid</button></div>`;
+    if(!f.colors.every(Boolean)){ panel+=`<div class="note warn">Some parts have no color yet. Go back to <b>Build our flag</b> and paint every part.</div>`; }
+    else {
+      const dirSel = F.dir;
+      let meas='';
+      if(dirSel==='v'||dirSel==='h'||dirSel==='') meas=`Each part is <input type="number" id="sf-m1" data-ch="sf" data-k="m1" min="1" max="24" value="${esc(F.m1)}" class="${R?cls(3):''}" aria-label="Width in cm"> cm wide.`;
+      else if(dirSel==='grid') meas=`Each part is <input type="number" id="sf-m1" data-ch="sf" data-k="m1" min="1" max="24" value="${esc(F.m1)}" class="${R?cls(3):''}" aria-label="Length in cm"> cm by <input type="number" id="sf-m2" data-ch="sf" data-k="m2" min="1" max="24" value="${esc(F.m2)}" class="${R?cls(3):''}" aria-label="Height in cm"> cm.`;
+      else meas=`Each part covers <input type="number" id="sf-m1" data-ch="sf" data-k="m1" min="1" max="288" value="${esc(F.m1)}" class="${R?cls(3):''}" aria-label="Square centimeters"> square centimeters.`;
+      panel+=`<div class="specform">
+        <label class="line" for="sf-nation">Nation: <input type="text" id="sf-nation" data-ch="sf" data-k="nation" value="${esc(F.nation)}" placeholder="Name your nation"></label>
+        <div class="line">The field is divided into <input type="number" id="sf-count" data-ch="sf" data-k="count" min="1" max="8" value="${esc(F.count)}" class="${cls(0)}" aria-label="Number of equal parts"> equal parts:
+          <select id="sf-word" data-ch="sf" data-k="word" class="${cls(1)}" aria-label="Fraction word"><option value="">choose…</option>${['halves','thirds','fourths'].map(w=>`<option ${F.word===w?'selected':''}>${w}</option>`).join('')}</select></div>
+        <div class="line">The parts run <select id="sf-dir" data-ch="sf" data-k="dir" data-rerender="1" class="${cls(2)}" aria-label="Which way the parts run"><option value="">choose…</option>${Object.entries(DIRV).map(([v,l])=>`<option value="${v}" ${F.dir===v?'selected':''}>${l}</option>`).join('')}</select>.</div>
+        <div class="line">${meas}</div>
+        <div class="line">Colors in order: ${parts.map((p,i)=>`<label class="row small" for="sf-col${i}">${i+1}. <select id="sf-col${i}" data-ch="sfcol" data-i="${i}" class="${R?(F.colors[i]===f.colors[i]?'okf':'bad'):''}" aria-label="Color of part ${i+1}"><option value="">color…</option>${COLORS.map(cc=>`<option ${F.colors[i]===cc?'selected':''}>${cc}</option>`).join('')}</select></label>`).join('')}</div>
+        ${f.emblems.map((e,i)=>`<div class="line">Shape ${i+1}: a <select id="sf-en${i}" data-ch="sfem" data-i="${i}" data-k="name" aria-label="Shape ${i+1} name"><option value="">shape…</option>${NAME_OPTIONS.map(nm=>`<option ${F.em[i].name===nm?'selected':''}>${nm}</option>`).join('')}</select>
+          with <input type="number" id="sf-es${i}" data-ch="sfem" data-i="${i}" data-k="sides" min="0" max="12" value="${esc(F.em[i].sides)}" aria-label="Shape ${i+1} sides"> sides and <input type="number" id="sf-ev${i}" data-ch="sfem" data-i="${i}" data-k="verts" min="0" max="12" value="${esc(F.em[i].verts)}" aria-label="Shape ${i+1} vertices"> vertices, in the
+          <select id="sf-ep${i}" data-ch="sfem" data-i="${i}" data-k="part" aria-label="Shape ${i+1} part"><option value="">part…</option>${parts.map((p,j)=>`<option value="${j}" ${String(F.em[i].part)===String(j)?'selected':''}>${esc(p.name)}</option>`).join('')}</select>.</div>`).join('')}
+        <div class="row"><button class="primary" type="button" data-act="speccheck">Check our spec</button></div></div>`;
+      if(R){
+        const all=R.every(r=>r.ok);
+        panel+=`<ul class="results">${R.map(r=>`<li class="${r.ok?'':'no'}"><span class="rt">${r.ok?'✓':'↺'} ${esc(r.t)}</span>${esc(r.m)}</li>`).join('')}</ul>`;
+        if(all){ f.nation = F.nation.trim() || 'Our Nation';
+          panel+=`<div class="note good"><b>Complete!</b> Another team could rebuild your flag from these words and numbers.</div><div class="speccard">${specHTML(f)}</div>
+            <div class="row"><button class="primary" type="button" data-act="savefd" ${c.saved?'disabled':''}>${c.saved?'Saved for Flag Day ✓':'Save for Flag Day'}</button></div>`; }
+      }
+    }
+  }
+  else {
+    if(c.readAloud && c.results && c.results.every(r=>r.ok)){
+      stage=`<span class="eyebrow">Read-aloud test</span><h2>Listen and sketch. No peeking!</h2><div class="speccard">${specHTML(f)}</div>
+        ${c.reveal ? `<div class="flagwrap">${flagSVG(f,{aria:'Our flag'})}</div>` : ''}`;
+      panel+=steps([['miss','What’s missing?'],['read','Read our spec aloud']],'read','c2share')+`<p class="prompt">Everyone sketches what they hear. Then compare. What was missing from the spec?</p>
+        <div class="row"><button class="primary" type="button" data-act="c2reveal">${c.reveal?'Hide':'Reveal'} the flag</button></div>`;
+    } else if(c.readAloud){
+      stage=`<span class="eyebrow">Read-aloud test</span><h2>Finish your spec first</h2><p class="prompt">When your spec passes the check in Part C, it will appear here, ready to read aloud.</p>`;
+      panel+=steps([['miss','What’s missing?'],['read','Read our spec aloud']],'read','c2share');
+    } else {
+      const m=MISS[c.missI], src=S.gallery[m.f] || SAMPLES[m.f];
+      const show = c.showFull;
+      stage=`<span class="eyebrow">Spec ${c.missI+1} of ${MISS.length}</span><h2>Could you rebuild this flag?</h2>
+        <div class="speccard">${show ? specHTML(src) : m.text}</div>${show?`<div class="flagwrap">${flagSVG(src,{aria:src.nation})}</div>`:''}`;
+      panel+=steps([['miss','What’s missing?'],['read','Read our spec aloud']],'miss','c2share')+`<p class="prompt">One thing is missing. Which one?</p>
+        <div class="group">${MISS_CHOICES.map(([k,l])=>`<button type="button" class="secondary" style="text-align:left" data-act="miss" data-v="${k}" aria-pressed="${c.missPick===k}">${l}</button>`).join('')}</div>`;
+      if(c.missPick){
+        if(c.missPick===m.missing) panel+=`<div class="note good"><b>Yes!</b> Without it, the rebuild team would have to guess. <button type="button" class="secondary" data-act="missfull">${show?'Hide':'Show'} the full spec</button></div>`;
+        else panel+=`<div class="note warn">That one is there: “${esc(m.q[c.missPick])}.” Read the spec again and look for the gap.</div>`;
+      }
+      panel+=`<div class="row"><button class="secondary" type="button" data-act="missnav" data-v="-1" ${c.missI===0?'disabled':''}>◀ Back</button><button class="primary" type="button" data-act="missnav" data-v="1" ${c.missI===MISS.length-1?'disabled':''}>Next spec ▶</button></div>`;
+    }
+  }
+  app.innerHTML = `<section class="view"><div class="stage">${stage}</div><div class="panel">${panel}</div></section>`;
+}
+
+/* ================= Class 3: Flag Day ================= */
+function compareFlags(src, b){
+  const out=[];
+  const pOk = src.layout===b.layout && src.n===b.n;
+  out.push({k:'partition', label:'Partition: same fraction, equal parts', ok:pOk, why: pOk ? `Both: ${partsLine(src)}` : `The spec says: “${partsLine(src)}” You built: “${partsLine(b)}”`});
+  const cOk = src.colors.length===b.colors.length && src.colors.every((c,i)=>c===b.colors[i]);
+  out.push({k:'shapes', label:'Shapes: same sides and vertices', ok:null});
+  const keyOf = e => `${SH[e.shape].sides}|${e.part}`;
+  const A=src.emblems.map(keyOf).sort(), B=b.emblems.map(keyOf).sort();
+  const sOk = A.length===B.length && A.every((x,i)=>x===B[i]);
+  const sp=getParts(src);
+  out[1].ok=sOk; out[1].why = sOk ? `Every shape matches: ${src.emblems.map(e=>`${SH[e.shape].sides} sides and ${SH[e.shape].sides} vertices`).join('; ') || 'no emblem'}.` :
+    `The spec asks for: ${src.emblems.map(e=>`${SH[e.shape].sides===0?'a circle':`a ${SH[e.shape].sides}-sided shape`} in the ${sp[e.part].name}`).join('; ') || 'no emblem'}. You built: ${b.emblems.map(e=>`${SH[e.shape].sides===0?'a circle':`a ${SH[e.shape].sides}-sided shape`} in the ${(getParts(b)[e.part]||{}).name}`).join('; ') || 'no emblem'}.`;
+  out.push({k:'colors', label:'Colors in the right order', ok:cOk, why: cOk ? `${src.colors.join(', ')}.` : `Spec: ${src.colors.join(', ')}. Built: ${b.colors.map(c=>c||'blank').join(', ')}.`});
+  return out;
+}
+function newQuiz(){
+  const G=S.gallery; const fi=Math.floor(Math.random()*G.length), f=G[fi];
+  const cols=[...new Set(f.colors)]; const color=cols[Math.floor(Math.random()*cols.length)];
+  S.c3.quiz={fi,color,pick:null}; S.c3.sel=fi;
+}
+function renderC3(){
+  const c=S.c3, G=S.gallery;
+  const list=[['rebuild','Rebuild from a spec'],['exhibit','Exhibit']];
+  let stage='', panel=steps(list,c.step,'c3step');
+  if(c.step==='rebuild'){
+    const src=G[c.src]||G[0];
+    if(c.compared){
+      const res=compareFlags(src,c.built), score=res.filter(r=>r.ok).length;
+      stage=`<span class="eyebrow">Compare · ${esc(src.nation)}</span><h2>Original and rebuilt, side by side</h2>
+        <div class="pair"><figure>${flagSVG(src,{aria:'Original flag'})}<figcaption>Original</figcaption></figure><figure>${flagSVG(c.built,{aria:'Rebuilt flag'})}<figcaption>Rebuilt</figcaption></figure></div>
+        <div class="speccard">${specHTML(src)}</div>`;
+      panel+=`<h3>Part D: Rebuild Score · ${score} of 3</h3><div class="tbl-wrap"><table class="partd"><tr><th>Check</th><th>Match?</th><th>If not: unclear spec, or misread?</th></tr>
+        ${res.map(r=>`<tr><td><b>${esc(r.label)}</b><br><span class="small muted">${esc(r.why)}</span></td><td class="${r.ok?'yes':'no'}">${r.ok?'Yes':'No'}</td><td>${r.ok?'':seg([['unclear','Unclear spec'],['misread','Misread']], c.verdict[r.k]||'', 'verdict', `data-k="${r.k}"`)}</td></tr>`).join('')}
+        </table></div>
+        ${score===3 ? `<div class="note good"><b>A perfect rebuild.</b> The spec said everything that mattered, and the team read it carefully.</div>` : `<div class="note">Talk it over: was the spec missing words or numbers, or did the rebuild team read past something? Pick one for each “No”.</div>`}
+        <div class="row"><button class="secondary" type="button" data-act="rebuildagain">Back to my rebuild</button><button class="primary" type="button" data-act="rebuildnew">Try another spec</button></div>`;
+    } else {
+      stage=`<span class="eyebrow">Rebuild · words and numbers only</span><div class="speccard">${specHTML(src)}</div>
+        <div class="flagwrap">${flagSVG(c.built,{ruler:true, tap:'dpart', key:'c3', aria:'Our rebuilt flag'})}</div>`;
+      panel+=`<label class="group" for="srcSel"><span class="field-label">Spec card</span><select id="srcSel" data-ch="src">${G.map((g,i)=>`<option value="${i}" ${i===c.src?'selected':''}>${esc(g.nation)}${g.ours?' (our class)':''}</option>`).join('')}</select></label>
+        ${designerControls('c3')}
+        <div class="row"><button class="primary" type="button" data-act="compare">Compare with the original</button></div>`;
+    }
+  } else {
+    const q=c.quiz;
+    stage=`<span class="eyebrow">Exhibit · ${G.length} flags</span><h2>${c.hunt ? 'Hunt: fourths that are not all the same shape' : 'Flag Day gallery'}</h2>
+      <div class="gallery">${G.map((g,i)=>{ const hlParts = q && q.fi===i && q.pick!==null && q.pick!==g.colors.filter(x=>x===q.color).length ? g.colors.map((x,j)=>x===q.color?j:-1).filter(j=>j>=0) : null;
+        const mark=c.huntMarks[i]; return `<button type="button" class="card ${mark==='y'?'found':mark==='n'?'nope':''}" data-act="card" data-i="${i}" aria-pressed="${c.sel===i}">${flagSVG(g,{aria:g.nation, hl:hlParts||undefined, dim:!!hlParts})}<b>${esc(g.nation)}</b><span>${MANY[g.n]}${g.ours?' · our class':''}</span></button>`; }).join('')}</div>`;
+    panel+=`<div class="group"><span class="field-label">Visitor activities</span>${seg([['quiz','Name the fraction'],['hunt','Shape hunt']], c.hunt?'hunt':'quiz', 'exmode')}</div>`;
+    if(!c.hunt){
+      if(!q){ panel+=`<p class="prompt">Visitors name the fraction of each color: “one third is white.”</p><div class="row"><button class="primary" type="button" data-act="quiznew">Ask a visitor question</button></div>`; }
+      else { const f=G[q.fi], k=f.colors.filter(x=>x===q.color).length, n=f.n;
+        panel+=`<p class="prompt">What fraction of <b>${esc(f.nation)}</b>’s field is <b>${q.color}</b>? <span class="muted small">(Skip the emblems.)</span></p>
+          <div class="row">${Array.from({length:n},(_,i)=>i+1).map(j=>`<button type="button" class="choice" style="font-size:19px;padding:0 14px" data-act="quizpick" data-v="${j}" aria-pressed="${q.pick===j}">${fracName(j,n)}</button>`).join('')}</div>`;
+        if(q.pick!==null){
+          if(q.pick===k) panel+=`<div class="note good"><b>Yes.</b> ${k} of the ${n} equal parts ${k===1?'is':'are'} ${q.color}, so ${fracName(k,n)} ${k===1?'is':'are'} ${q.color}.${k===2&&n===4?' (2 fourths is the same amount as 1 half.)':''}</div>`;
+          else panel+=`<div class="note warn">You said ${fracName(q.pick,n)}. The ${q.color} parts are outlined on the flag now. Count them. How many of the ${n} equal parts are ${q.color}?</div>`;
+        }
+        panel+=`<div class="row"><button class="primary" type="button" data-act="quiznew">Next question</button></div>`;
+      }
+    } else {
+      const found = Object.keys(c.huntMarks).filter(i=>c.huntMarks[i]==='y').length, total=G.filter(g=>g.n===4 && !allSameShape(getParts(g))).length;
+      panel+=`<p class="prompt">Tap a flag whose <b>fourths are not all the same shape</b>.</p>${c.huntMsg?`<div class="note ${c.huntMsg.ok?'good':'warn'}">${c.huntMsg.html}</div>`:''}<p class="muted">Found ${found} of ${total}.</p>`;
+    }
+  }
+  app.innerHTML = `<section class="view"><div class="stage">${stage}</div><div class="panel">${panel}</div></section>`;
+}
+function huntTap(i){
+  const g=S.gallery[i], parts=getParts(g); let ok=false, html;
+  if(g.n!==4) html=`${esc(g.nation)} has ${g.n} equal parts, so they are ${MANY[g.n]}, not fourths.`;
+  else if(allSameShape(parts)){ const p=parts[0]; html=`All four parts of ${esc(g.nation)} are the same shape: each is a ${p.w} cm by ${p.h} cm rectangle.`; }
+  else { ok=true; html=`<b>Found it!</b> ${esc(g.nation)} has two stripes and two triangles. Different shapes, but each covers 72 square centimeters, so all four are fourths.`; }
+  S.c3.huntMarks[i]= ok?'y':'n'; S.c3.huntMsg={ok,html}; S.c3.sel=i;
+}
+
+/* ================= Challenge ================= */
+const CH_FLAGS = {four:{layout:'mixed',n:4,colors:['purple','orange','gold','white'],emblems:[]}, three:{layout:'mixed',n:3,colors:['green','white','gold'],emblems:[]}};
+const PW=6, PH=4, PCOL=['red','blue','gold','green'];
+function paintDefault(n){ return Array.from({length:PW*PH},(_,k)=>{ const x=k%PW, y=Math.floor(k/PW); return n===4 ? PCOL[y] : n===3 ? PCOL[Math.floor(x/2)] : PCOL[Math.floor(x/3)]; }); }
+function checkPaint(){
+  const p=S.ch.paint, n=p.n, want=PW*PH/n, cols=PCOL.slice(0,n);
+  const blank=p.cells.filter(c=>!c).length;
+  if(blank) return {ok:false, html:`${blank} square${blank===1?' is':'s are'} still blank. Every square belongs to one part.`};
+  const cnt=cols.map(c=>p.cells.filter(x=>x===c).length);
+  const off=cols.map((c,i)=>[c,cnt[i]]).filter(([,k])=>k!==want);
+  if(off.length) return {ok:false, html:`${MANY[n][0].toUpperCase()+MANY[n].slice(1)} of 24 squares need <b>${want} each</b> (${plus(want,n)} = 24). ${off.map(([c,k])=>`${c[0].toUpperCase()+c.slice(1)} has ${k}, ${k>want?`${k-want} too many`:`${want-k} too few`}.`).join(' ')}`};
+  const pieces = c => { const set=new Set(p.cells.map((x,k)=>x===c?k:-1).filter(k=>k>=0)); let comps=0; const seen=new Set();
+    for(const s of set){ if(seen.has(s)) continue; comps++; const st=[s]; seen.add(s); while(st.length){ const k=st.pop(), x=k%PW, y=Math.floor(k/PW);
+      [[x+1,y],[x-1,y],[x,y+1],[x,y-1]].forEach(([a,b])=>{ if(a<0||b<0||a>=PW||b>=PH) return; const j=b*PW+a; if(set.has(j)&&!seen.has(j)){ seen.add(j); st.push(j);} }); } } return comps; };
+  const split=cols.filter(c=>pieces(c)>1);
+  if(split.length) return {ok:false, html:`${listText(split.map(c=>c[0].toUpperCase()+c.slice(1)))} ${split.length===1?'is':'are'} in separate pieces. Join each color into one piece so each part is one shape.`};
+  const keys=cols.map(c=>shapeKey(p.cells.map((x,k)=>x===c?[k%PW,Math.floor(k/PW)]:null).filter(Boolean)));
+  const same=new Set(keys).size===1;
+  return {ok:true, same, html:`<b>Equal parts!</b> Each color covers ${want} squares, so each is 1 ${ONE[n]}. ${same ? 'All the parts are the same shape (turn or flip them and they match). Can you make them different shapes but still '+want+' squares each?' : '<b>And they are not all the same shape.</b> That is the challenge: equal shares do not have to match.'}`};
+}
+let countTimer=null;
+function renderCh(){
+  const c=S.ch;
+  const list=[['four','Fourths, different shapes'],['three','Thirds, not stripes'],['paint','Square painter']];
+  let stage='', panel=steps(list,c.step,'chstep');
+  panel = `<p class="prompt"><i>Design a flag cut into fourths where the four parts are not all the same shape, and prove each is a fourth by counting square centimeters. Then try thirds that are not stripes.</i></p>` + panel;
+  if(c.step==='four'||c.step==='three'){
+    const f=CH_FLAGS[c.step], parts=getParts(f), counted=c.counted[c.step]||{}, prog=c.prog[c.step]||{};
+    let under='';
+    parts.forEach((p,i)=>{ if(!(i in counted)) return; const {whole,half}=countSquares(p), shown=prog[i]??Infinity; let k=0;
+      whole.forEach(([x,y])=>{ k++; if(k>shown) return; under+=`<rect class="sq-whole" x="${x}" y="${y}" width="1" height="1"/><text class="sq-n" x="${x+.5}" y="${y+.5}">${k}</text>`; });
+      if(shown>=whole.length) half.forEach(([x,y])=>{ const tri = p.pts; // draw only the half inside the part
+        const inUpper = p.name==='upper triangle';
+        const pts = inUpper ? [[x,y],[x+1,y],[x+1,y+1]] : [[x,y],[x+1,y+1],[x,y+1]];
+        under+=`<polygon class="sq-half" points="${P(pts)}"/>`; });
+    });
+    stage=`<span class="eyebrow">Extension · 1 square = 1 square centimeter</span><h2>${c.step==='four'?'Four parts, two shapes. Are they all fourths?':'Three parts, not stripes. Are they all thirds?'}</h2>
+      <div class="flagwrap">${flagSVG(f,{ruler:true, grid:true, under, aria:'Flag on a square grid'})}</div>`;
+    panel+=`<p>Tap a part to count its squares.</p><div class="group">${parts.map((p,i)=>`<button type="button" class="secondary" style="text-align:left" data-act="chcount" data-v="${i}">Count the ${esc(p.name)}</button>`).join('')}</div>`;
+    const done=Object.keys(counted);
+    if(done.length){
+      panel+=`<ul class="results">${done.map(i=>{ const p=parts[i], {whole,half}=countSquares(p);
+        const m = half.length ? `${whole.length} whole squares + ${half.length} half squares. Two halves make one whole, so ${half.length} halves = ${half.length/2} wholes. ${whole.length} + ${half.length/2} = <b>${whole.length+half.length/2} squares</b>.` : `${p.h} rows of ${p.w} squares = <b>${whole.length} squares</b>.`;
+        return `<li><span class="rt">${esc(p.name)}</span>${m}</li>`; }).join('')}</ul>`;
+      if(done.length===parts.length){ const each=areaOf(parts[0]);
+        panel+=`<div class="note good"><b>Every part covers ${each} squares.</b> ${plus(each,parts.length)} = 288, the whole flag. So each part is 1 ${ONE[parts.length]}, ${c.step==='four'?'even though two are rectangles and two are triangles':'even though one is a tall stripe and two are long flat pieces'}.</div>`; }
+    }
+  } else {
+    const p=c.paint; if(!p.cells) p.cells=paintDefault(p.n);
+    const want=24/p.n, cols=PCOL.slice(0,p.n);
+    let cells=''; p.cells.forEach((col,k)=>{ const x=k%PW, y=Math.floor(k/PW); cells+=`<rect class="pcell" data-pc="${k}" x="${x}" y="${y}" width="1" height="1" style="fill:${col?`var(--f-${col})`:'var(--f-blank)'}"/>`; });
+    stage=`<span class="eyebrow">Square painter · mini flag 6 cm × 4 cm = 24 squares</span><h2>Paint ${MANY[p.n]}: ${want} squares each</h2>
+      <div class="flagwrap" id="paintStage"><svg class="flagsvg paintgrid" viewBox="-.2 -.2 ${PW+.4} ${PH+.4}" role="img" aria-label="Painting grid">${cells}<rect class="border" x="0" y="0" width="${PW}" height="${PH}" style="stroke-width:.08"/></svg></div>`;
+    panel+=`<div class="group"><span class="field-label">Make</span>${seg([[2,'Halves'],[3,'Thirds'],[4,'Fourths']], p.n, 'pnn')}</div>
+      <div class="group"><span class="field-label">Paint color (drag to paint)</span><div class="swatches">${cols.map(cc=>`<button type="button" class="sw" data-act="pcolor" data-v="${cc}" aria-pressed="${p.color===cc}" aria-label="${cc}" style="background:var(--f-${cc})"></button>`).join('')}<button type="button" class="sw" data-act="pcolor" data-v="" aria-pressed="${p.color===''}" aria-label="eraser" style="background:var(--f-blank)">⌫</button></div></div>
+      <div class="tally">${cols.map(cc=>`<div><i style="background:var(--f-${cc})"></i>${p.cells.filter(x=>x===cc).length}</div>`).join('')}</div>
+      <div class="row"><button class="primary" type="button" data-act="pcheck2">Check my ${MANY[p.n]}</button><button class="secondary" type="button" data-act="preset">Back to stripes</button><button class="secondary" type="button" data-act="pclear">Clear</button></div>
+      ${p.result?`<div class="note ${p.result.ok?'good':'warn'}">${p.result.html}</div>`:''}`;
+  }
+  app.innerHTML = `<section class="view"><div class="stage">${stage}</div><div class="panel">${panel}</div></section>`;
+}
+function startCount(step,i){
+  const parts=getParts(CH_FLAGS[step]); const {whole}=countSquares(parts[i]);
+  S.ch.counted[step]=S.ch.counted[step]||{}; S.ch.counted[step][i]=true;
+  S.ch.prog[step]=S.ch.prog[step]||{};
+  clearInterval(countTimer);
+  if(reduced){ S.ch.prog[step][i]=whole.length; render(); return; }
+  S.ch.prog[step][i]=0; render();
+  countTimer=setInterval(()=>{ const pr=S.ch.prog[step]; pr[i]=Math.min(whole.length, pr[i]+3); if(S.tab==='ch'&&S.ch.step===step) render(); if(pr[i]>=whole.length) clearInterval(countTimer); }, 40);
+}
+
+/* ================= Events ================= */
+const ACT = {
+  c1step:d=>{ S.c1.step=d.v; },
+  wcount:d=>{ S.c1.wCount=+d.v; S.c1.wEq=null; },
+  weq:d=>{ S.c1.wEq=d.v; },
+  wnav:d=>{ S.c1.wi=Math.max(0,Math.min(WARM.length-1,S.c1.wi+ +d.v)); S.c1.wCount=null; S.c1.wEq=null; },
+  fn:d=>{ const fd=S.c1.fold; fd.n=+d.v; if(fd.way==='grid'&&fd.n!==4) fd.way='v'; fd.cuts=defaultCuts(fd.way==='grid'?4:fd.n,fd.way); fd.result=null; fd.tries=0; },
+  fway:d=>{ const fd=S.c1.fold; fd.way=d.v; if(d.v==='grid') fd.n=4; fd.cuts=defaultCuts(fd.n,fd.way); fd.result=null; fd.tries=0; },
+  fmeasure:()=>{ S.c1.fold.measure=!S.c1.fold.measure; },
+  fcheck:()=>checkFold(),
+  pn:d=>{ S.c1.prac.n=+d.v; },
+  pcheck:()=>{ const v=$('#pracIn').value.trim(); const pr=S.c1.prac; pr.guess[pr.n]= v===''?'':String(Math.max(1,Math.min(12,Math.round(+v)||1))); pr.checked[pr.n]=true; },
+  share:d=>{ S.c1.share=+d.v; },
+  c2step:d=>{ S.c2.step=d.v; },
+  dtarget:d=>{ S.c2.target=d.v; },
+  dot:d=>{ const c=S.c2; if(c.closed) return; const x=+d.x, y=+d.y;
+    if(c.dots.length>=3 && c.dots[0][0]===x && c.dots[0][1]===y){ c.closed=true; return; }
+    if(c.dots.some(p=>p[0]===x&&p[1]===y)) return;
+    c.dots.push([x,y]); },
+  dundo:()=>{ S.c2.dots.pop(); },
+  dclear:()=>{ S.c2.dots=[]; S.c2.closed=false; },
+  pbcheck:()=>{ S.c2.partBChecked=true; },
+  dfrac:d=>{ const f=D[d.key].get(); setFracLayout(f,+d.v,f.layout); afterDesign(d.key); },
+  dlay:d=>{ const f=D[d.key].get(); setFracLayout(f,f.n,d.v); afterDesign(d.key); },
+  dcolor:d=>{ D[d.key].st().paint=d.v; },
+  dpart:d=>{ const f=D[d.key].get(); f.colors[+d.i]=D[d.key].st().paint; afterDesign(d.key); },
+  dshape:d=>{ const f=D[d.key].get(), st=D[d.key].st(); if(f.emblems.length>=3) return; f.emblems.push({shape:d.v, part:st.place, color:st.paint}); afterDesign(d.key); },
+  ddel:d=>{ D[d.key].get().emblems.splice(+d.v,1); afterDesign(d.key); },
+  c2grid:()=>{ S.c2.grid=!S.c2.grid; },
+  speccheck:()=>{ S.c2.results=checkSpec(S.c2.flag, defaultForm(S.c2.flag)); },
+  savefd:()=>{ const f=clone(S.c2.flag); f.ours=true; S.gallery.push(f); S.c2.saved=true; S.c3.src=S.gallery.length-1; },
+  c2share:d=>{ S.c2.readAloud = d.v==='read'; S.c2.reveal=false; },
+  c2reveal:()=>{ S.c2.reveal=!S.c2.reveal; },
+  miss:d=>{ S.c2.missPick=d.v; },
+  missfull:()=>{ S.c2.showFull=!S.c2.showFull; },
+  missnav:d=>{ S.c2.missI=Math.max(0,Math.min(MISS.length-1,S.c2.missI+ +d.v)); S.c2.missPick=null; S.c2.showFull=false; },
+  c3step:d=>{ S.c3.step=d.v; },
+  compare:()=>{ S.c3.compared=true; S.c3.verdict={}; },
+  rebuildagain:()=>{ S.c3.compared=false; },
+  rebuildnew:()=>{ S.c3.compared=false; S.c3.src=(S.c3.src+1)%S.gallery.length; S.c3.built={layout:'v',n:2,colors:[null,null],emblems:[]}; },
+  verdict:(d,b)=>{ S.c3.verdict[b.closest('[data-k]')?.dataset.k||d.k]=d.v; },
+  exmode:d=>{ S.c3.hunt = d.v==='hunt'; S.c3.huntMsg=null; },
+  quiznew:()=>newQuiz(),
+  quizpick:d=>{ S.c3.quiz.pick=+d.v; },
+  card:d=>{ const i=+d.i; if(S.c3.hunt) huntTap(i); else S.c3.sel=i; },
+  chstep:d=>{ S.ch.step=d.v; },
+  chcount:d=>{ startCount(S.ch.step,+d.v); return 'norender'; },
+  pnn:d=>{ const p=S.ch.paint; p.n=+d.v; p.cells=paintDefault(p.n); p.color=PCOL[0]; p.result=null; },
+  pcolor:d=>{ S.ch.paint.color=d.v; },
+  pcheck2:()=>{ S.ch.paint.result=checkPaint(); },
+  preset:()=>{ const p=S.ch.paint; p.cells=paintDefault(p.n); p.result=null; },
+  pclear:()=>{ const p=S.ch.paint; p.cells=Array(PW*PH).fill(''); p.result=null; }
+};
+function afterDesign(key){ if(key==='c2'){ S.c2.results=null; S.c2.saved=false; } }
+
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-tab]');
+  if(t){ S.tab=t.dataset.tab; render(); return; }
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const fn=ACT[b.dataset.act]; if(!fn) return;
+  // keep the "verdict" row key
+  const d=Object.assign({}, b.dataset);
+  if(b.dataset.act==='verdict'){ d.k=b.closest('.seg')?.querySelector('[data-k]')?.dataset.k || b.dataset.k; }
+  const r=fn(d,b); if(r!=='norender') render();
+});
+document.addEventListener('change', e=>{
+  const el=e.target, ch=el.dataset.ch; if(!ch) return;
+  if(ch==='dplace'){ D[el.dataset.key].st().place=+el.value; return; }
+  if(ch==='sf'){ S.c2.form[el.dataset.k]=el.value; if(el.dataset.rerender){ render(); } return; }
+  if(ch==='sfcol'){ S.c2.form.colors[+el.dataset.i]=el.value; return; }
+  if(ch==='sfem'){ S.c2.form.em[+el.dataset.i][el.dataset.k]=el.value; return; }
+  if(ch==='pb'){ S.c2.partB[el.dataset.k]=el.value; return; }
+  if(ch==='src'){ S.c3.src=+el.value; S.c3.compared=false; render(); return; }
+});
+document.addEventListener('input', e=>{
+  const el=e.target, ch=el.dataset.ch; if(!ch) return;
+  if(ch==='sf' && el.tagName==='INPUT') S.c2.form[el.dataset.k]=el.value;
+  if(ch==='sfem' && el.tagName==='INPUT') S.c2.form.em[+el.dataset.i][el.dataset.k]=el.value;
+  if(ch==='pb') S.c2.partB[el.dataset.k]=el.value;
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.id==='pracIn'){ ACT.pcheck(); render(); }
+});
+
+/* Fold-line dragging */
+let drag=null;
+function toCm(e){ const svg=$('#foldStage svg'); if(!svg) return null; const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+function setCut(k, val){
+  const fd=S.c1.fold; const c=fd.cuts.slice();
+  if(fd.way==='grid'){ c[k]=Math.max(1,Math.min(k===0?23:11,val)); }
+  else { const max=fd.way==='v'?24:12, lo=(k===0?0:c[k-1])+1, hi=(k===c.length-1?max:c[k+1])-1; c[k]=Math.max(lo,Math.min(hi,val)); }
+  if(c[k]!==fd.cuts[k]){ fd.cuts=c; fd.result=null; return true; } return false;
+}
+document.addEventListener('pointerdown', e=>{
+  const h=e.target.closest('[data-cut]'); if(!h||!$('#foldStage')) return;
+  e.preventDefault(); drag={k:+h.dataset.cut, dir:h.dataset.dir};
+});
+window.addEventListener('pointermove', e=>{
+  if(drag){ const p=toCm(e); if(!p) return; if(setCut(drag.k, Math.round(drag.dir==='x'?p.x:p.y))) render(); return; }
+  if(paintDrag) paintAt(e);
+});
+window.addEventListener('pointerup', ()=>{ drag=null; paintDrag=false; });
+window.addEventListener('pointercancel', ()=>{ drag=null; paintDrag=false; });
+document.addEventListener('keydown', e=>{
+  const h=e.target.closest && e.target.closest('[data-cut]'); if(!h) return;
+  const k=+h.dataset.cut, step = (e.key==='ArrowRight'||e.key==='ArrowDown')?1:(e.key==='ArrowLeft'||e.key==='ArrowUp')?-1:0;
+  if(!step) return; e.preventDefault();
+  const fd=S.c1.fold; if(setCut(k, fd.cuts[k]+step)){ render(); const nh=document.querySelector(`[data-cut="${k}"]`); nh&&nh.focus(); }
+});
+/* Square painter */
+let paintDrag=false;
+function paintAt(e){
+  const el=document.elementFromPoint(e.clientX,e.clientY); const r=el&&el.closest&&el.closest('[data-pc]'); if(!r) return;
+  const p=S.ch.paint, k=+r.dataset.pc; if(p.cells[k]===p.color) return;
+  p.cells[k]=p.color; p.result=null; render();
+}
+document.addEventListener('pointerdown', e=>{ const r=e.target.closest('[data-pc]'); if(!r) return; e.preventDefault(); paintDrag=true; paintAt(e); });
+
+/* Header tools */
+$('#fsBtn').addEventListener('click', ()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else { const p=document.documentElement.requestFullscreen(); p&&p.catch&&p.catch(()=>{}); } }catch(_){} });
+document.addEventListener('fullscreenchange', ()=>{ $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+let armT=null;
+$('#resetBtn').addEventListener('click', e=>{
+  const b=e.currentTarget;
+  if(!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent='Tap again to clear everything'; clearTimeout(armT); armT=setTimeout(()=>{ b.classList.remove('armed'); b.textContent='Start over'; },3500); return; }
+  clearTimeout(armT); b.classList.remove('armed'); b.textContent='Start over'; clearInterval(countTimer);
+  const tab=S.tab; S=freshState(); S.tab=tab; render();
+});
+
+render();
+})();
+</script>
+
+</body></html>

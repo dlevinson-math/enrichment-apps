@@ -1,0 +1,847 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The 1,089 Trick</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Red+Hat+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a magician's ledger. Flow tabs on top; a column-arithmetic workbench on the left,
+   the class record (five tricks, 99s ladder, sealed envelope) on the right. */
+:root{
+  --paper:#F2F5FA; --sheet:#FFFFFF; --ink:#18213D; --muted:#58607A; --line:#D4DAE6; --grid:#E6EBF3;
+  --seal:#B8323F; --seal-soft:#F8E3E5; --gold:#C98A06; --gold-soft:#FBF0D3;
+  --ok:#0D7F6E; --ok-soft:#DDF3EE; --blue:#2B5FC4; --blue-soft:#E2EAFA;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"Red Hat Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11141E; --sheet:#1A1F2D; --ink:#E9ECF4; --muted:#A3AABF; --line:#343B50; --grid:#20263A;
+    --seal:#F06470; --seal-soft:#3C1E25; --gold:#F2BC45; --gold-soft:#3A2F14;
+    --ok:#3FCDB4; --ok-soft:#15352F; --blue:#7EA6F5; --blue-soft:#1C2A48; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11141E; --sheet:#1A1F2D; --ink:#E9ECF4; --muted:#A3AABF; --line:#343B50; --grid:#20263A;
+  --seal:#F06470; --seal-soft:#3C1E25; --gold:#F2BC45; --gold-soft:#3A2F14;
+  --ok:#3FCDB4; --ok-soft:#15352F; --blue:#7EA6F5; --blue-soft:#1C2A48; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+.wrap{max-width:1400px; margin:0 auto; padding-block:14px 28px; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center}
+.ttl h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.2vw,44px); margin:0; line-height:1; letter-spacing:-.01em}
+.ttl p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--sheet); border-radius:12px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.flow{display:flex; gap:6px; flex-wrap:wrap; border-bottom:2px solid var(--line)}
+nav.flow button{border:0; background:none; padding:12px 14px; font-weight:700; font-size:clamp(16px,1.4vw,20px); color:var(--muted);
+  border-bottom:4px solid transparent; margin-bottom:-2px; display:flex; gap:8px; align-items:center; min-height:52px}
+nav.flow button .n{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:14px; background:var(--grid); color:var(--muted)}
+nav.flow button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--seal)}
+nav.flow button[aria-selected="true"] .n{background:var(--seal); color:#fff}
+
+[hidden]{display:none!important}
+.card{background:var(--sheet); border:1.5px solid var(--line); border-radius:16px; padding:20px; min-width:0}
+.label{font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+.big{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.2vw,32px); line-height:1.2; margin:0; text-wrap:balance}
+.lead{font-size:clamp(18px,1.5vw,22px); margin:0; max-width:36em}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--seal); color:#fff; font-weight:700; font-size:clamp(17px,1.4vw,21px); padding:14px 24px; border-radius:14px; min-height:56px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--sheet); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:12px 20px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.chipbtn{border:2px solid var(--line); background:var(--sheet); border-radius:999px; padding:8px 16px; font-family:var(--mono); font-weight:700; font-size:19px; min-height:48px}
+.chipbtn[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--sheet)}
+
+/* grid paper for arithmetic */
+.bench{background-color:var(--sheet);
+  background-image:linear-gradient(var(--grid) 1.5px,transparent 1.5px),linear-gradient(90deg,var(--grid) 1.5px,transparent 1.5px);
+  background-size:28px 28px; background-position:-1px -1px}
+
+/* ---------- Trick view ---------- */
+.trick{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:16px; align-items:start}
+.steps{list-style:none; display:flex; flex-wrap:wrap; gap:6px; padding:0; margin:0 0 14px}
+.steps li{display:flex; align-items:center; gap:8px; padding:6px 14px 6px 6px; border-radius:999px; border:1.5px solid var(--line); background:var(--sheet); font-size:15px; color:var(--muted)}
+.steps li i{font-style:normal; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background:var(--grid); font-size:13px; font-weight:700}
+.steps li.now{border-color:var(--seal); color:var(--ink); font-weight:700}
+.steps li.now i{background:var(--seal); color:#fff}
+.steps li.done{color:var(--ink)}
+.steps li.done i{background:var(--ok); color:#fff}
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.3vw,32px); margin:0 0 6px; line-height:1.2}
+.sub{color:var(--muted); margin:0 0 12px}
+
+.colwork{display:inline-grid; gap:4px; font-family:var(--mono); font-weight:700; font-size:clamp(40px,5vw,64px); line-height:1; padding:12px 18px; border-radius:12px}
+.colwork .r{display:grid; grid-auto-flow:column; grid-auto-columns:1.05em; justify-items:center; align-items:center}
+.colwork .r .op{color:var(--muted)}
+.colwork .bar{height:5px; background:var(--ink); border-radius:3px; margin:4px 0}
+.colwork .r span.d9{color:var(--gold)}
+.dig{width:.95em; height:1.15em; border:3px solid var(--line); border-radius:10px; background:var(--sheet); font:inherit; display:grid; place-items:center; padding:0; color:var(--ink)}
+.dig.act{border-color:var(--blue); box-shadow:0 0 0 4px var(--blue-soft)}
+.dig.bad{border-color:var(--seal)}
+.dig.good{border-color:var(--ok); background:var(--ok-soft)}
+
+.keypad{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; max-width:520px; margin-top:14px}
+.keypad button{min-height:60px; border-radius:12px; border:2px solid var(--line); background:var(--sheet); font-family:var(--mono); font-size:26px; font-weight:700}
+.keypad button:active{background:var(--grid)}
+.keypad .wide{grid-column:span 2; font-family:var(--body); font-size:18px}
+.keypad .go{background:var(--ink); color:var(--sheet); border-color:var(--ink)}
+
+.fb{margin-top:14px; padding:14px 18px; border-radius:12px; font-size:clamp(17px,1.4vw,20px); max-width:36em}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft); border-left:6px solid var(--ok)}
+.fb.no{background:var(--seal-soft); border-left:6px solid var(--seal)}
+.fb.info{background:var(--gold-soft); border-left:6px solid var(--gold)}
+.fb b{font-family:var(--mono)}
+
+.side{display:flex; flex-direction:column; gap:16px}
+table.five{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.five th{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-align:right; padding:4px 6px; font-weight:700}
+.five th:first-child,.five td:first-child{text-align:left}
+.five td{font-family:var(--mono); font-weight:700; font-size:clamp(16px,1.4vw,20px); text-align:right; padding:6px; border-top:1px solid var(--line)}
+.five td.empty{color:var(--line)}
+.five td.sum{color:var(--seal)}
+.tblwrap{overflow-x:auto}
+
+.ladder{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.slot{position:relative; border:2px dashed var(--line); border-radius:12px; background:var(--sheet); padding:10px 4px; font-family:var(--mono); font-weight:700; font-size:clamp(20px,1.9vw,26px); color:var(--muted); min-height:56px}
+.slot.has{border-style:solid; border-color:var(--ink); color:var(--ink)}
+.slot .ct{position:absolute; top:-10px; right:-8px; min-width:26px; height:26px; padding:0 6px; border-radius:13px; background:var(--seal); color:#fff; font-family:var(--body); font-size:14px; display:none; place-items:center}
+.slot.has .ct{display:grid}
+.small{font-size:14px; color:var(--muted); margin:8px 0 0}
+
+/* envelope */
+.env{position:relative; width:100%; max-width:300px; aspect-ratio:1.6; margin:4px auto 0}
+.env .body{position:absolute; inset:0; background:var(--blue-soft); border:2px solid var(--ink); border-radius:10px; overflow:hidden}
+.env .flap{position:absolute; left:0; right:0; top:0; height:58%; transform-origin:top; transition:transform .6s ease; z-index:3}
+.env .flap svg{width:100%; height:100%; display:block}
+.env .note{position:absolute; left:10%; right:10%; top:18%; bottom:10%; background:var(--sheet); border:1.5px solid var(--line); border-radius:6px; display:grid; place-items:center;
+  font-family:var(--mono); font-weight:700; font-size:clamp(34px,4vw,50px); color:var(--seal); opacity:0; transition:transform .6s ease .2s, opacity .3s ease .2s; z-index:2}
+.env .seal{position:absolute; left:50%; top:52%; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%; background:var(--seal); z-index:4; display:grid; place-items:center; color:#fff; font-weight:700; font-family:var(--display); font-size:15px; transition:opacity .3s}
+.env.open .flap{transform:rotateX(90deg); opacity:0; transition:transform .5s ease, opacity .2s ease .35s}
+.env.open .seal{opacity:0}
+.env.open .note{transform:translateY(-30%); opacity:1; z-index:5; box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.env{perspective:600px}
+.env:not(.open) .note span{visibility:hidden}
+
+/* ---------- Warm-up ---------- */
+.warm{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px}
+.count{display:flex; flex-direction:column; gap:6px}
+.cnum{display:flex; align-items:center; gap:16px; font-family:var(--mono); font-weight:700; font-size:clamp(30px,3.4vw,46px); line-height:1.1}
+.cnum .k{font-family:var(--body); font-size:15px; color:var(--muted); width:5.5em; font-weight:400}
+.cnum .h{color:var(--blue)} .cnum .t{color:var(--gold)} .cnum .o{color:var(--seal)}
+.cnum .arrow{font-family:var(--body); font-size:15px; color:var(--muted); font-weight:400}
+.plain .cnum .h,.plain .cnum .t,.plain .cnum .o{color:var(--ink)}
+.cnum.q{color:var(--line)}
+
+/* ---------- Launch ---------- */
+.launch{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px}
+ol.recipe{margin:0; padding-left:1.4em; display:flex; flex-direction:column; gap:10px; font-size:clamp(18px,1.6vw,23px)}
+ol.recipe li::marker{font-weight:700; color:var(--seal)}
+.votes{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.vote{border:2px solid var(--line); background:var(--sheet); border-radius:14px; padding:12px; font-weight:700; font-size:18px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:96px}
+.vote b{font-family:var(--mono); font-size:36px; line-height:1}
+.dq{font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); line-height:1.1; margin:0; text-wrap:balance}
+
+/* ---------- Detective / challenge ---------- */
+.det{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start}
+.qnav{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--sheet); font-weight:700; font-size:19px; padding:0 18px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--sheet); border-color:var(--ink)}
+.stage{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; min-height:120px}
+.tile{border:2px solid var(--line); border-radius:12px; padding:10px 14px; background:var(--sheet); text-align:center}
+.tile .num{font-family:var(--mono); font-weight:700; font-size:clamp(32px,3.4vw,46px); line-height:1}
+.tile .num span{transition:color .3s, background-color .3s; border-radius:6px; padding:0 2px}
+.tile .num span.mid{background:var(--gold-soft); color:var(--gold)}
+.tile .num span.out{background:var(--blue-soft); color:var(--blue)}
+.tile .cap{font-size:15px; color:var(--muted); margin-top:4px; font-variant-numeric:tabular-nums}
+.tile.lit{border-color:var(--ink)}
+.result{font-size:clamp(18px,1.5vw,21px); padding:14px 18px; border-radius:12px; background:var(--gold-soft); max-width:36em}
+.result:empty{display:none}
+.hint{font-size:15px; color:var(--muted); margin:10px 0 0}
+
+/* regrouping / carrying column */
+.rg{display:inline-grid; gap:2px; font-family:var(--mono); font-weight:700; font-size:clamp(40px,4.6vw,60px); line-height:1; padding:14px 18px; border-radius:12px}
+.rg .r{display:grid; grid-auto-flow:column; grid-auto-columns:1.5em; justify-items:center; align-items:end}
+.rg .mini{font-size:.42em; color:var(--blue); min-height:1.1em; display:flex; gap:.25em; align-items:flex-end}
+.rg .mini s{color:var(--muted)}
+.rg .old{position:relative; color:var(--muted)}
+.rg .old::after{content:""; position:absolute; left:-6%; right:-6%; top:50%; height:.08em; background:var(--seal); transform:rotate(-30deg)}
+.rg .op{color:var(--muted)}
+.rg .bar{height:5px; background:var(--ink); border-radius:3px; margin:4px 0}
+.rg .hot{color:var(--seal)}
+.rg .nine{color:var(--gold)}
+.rg .carry{font-size:.42em; color:var(--seal); min-height:1.1em}
+.rg .blank{color:transparent}
+
+.chal{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start}
+.runlog{font-family:var(--mono); font-weight:500; font-size:clamp(17px,1.5vw,21px); line-height:1.6; margin:12px 0 0; padding:0; list-style:none}
+.runlog b{color:var(--seal)}
+.bars{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.bars .b{display:grid; grid-template-columns:6.5em 1fr 3.5em; gap:10px; align-items:center; font-variant-numeric:tabular-nums}
+.bars .b span:first-child{font-family:var(--mono); font-weight:700; font-size:20px}
+.bars .track{height:22px; background:var(--grid); border-radius:6px; overflow:hidden}
+.bars .fill{height:100%; background:var(--blue); border-radius:6px; transition:width .4s}
+.bars .b span:last-child{text-align:right; font-weight:700}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
+@media (max-width: 920px){
+  .trick,.warm,.launch,.det,.chal{grid-template-columns:minmax(0,1fr)}
+  .keypad{max-width:none}
+}
+@media (max-width: 480px){
+  body{font-size:17px}
+  .card{padding:14px}
+  .keypad{grid-template-columns:repeat(5,1fr)}
+  .keypad .wide{grid-column:span 5}
+  .keypad .wide + .wide{grid-column:span 5}
+  nav.flow button{padding:10px 8px}
+  .votes{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="ttl">
+    <h1>The 1,089 Trick</h1>
+    <p>Grade 3 · Math in Focus Ch 3 · Lesson 3.3-B</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="flow" role="tablist" aria-label="Lesson flow">
+  <button role="tab" data-tab="warm" aria-selected="false"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-tab="launch" aria-selected="false"><span class="n">2</span>Launch</button>
+  <button role="tab" data-tab="trick" aria-selected="true"><span class="n">3</span>Run the trick</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span class="n">4</span>Detective questions</button>
+  <button role="tab" data-tab="chal" aria-selected="false"><span class="n">★</span>Break the trick</button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm" hidden>
+  <div class="warm">
+    <div class="card">
+      <p class="label">Warm-up · 5 min</p>
+      <p class="big">Count by 99s. What happens to the digits?</p>
+      <div class="row" style="margin-top:14px">
+        <button class="primary" id="wNext">Add 99</button>
+        <button class="secondary" id="wPattern">Show the pattern</button>
+        <button class="secondary" id="wReset">Start again</button>
+      </div>
+      <div class="result" id="wMsg" style="margin-top:14px"></div>
+    </div>
+    <div class="card bench">
+      <div class="count plain" id="wList" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LAUNCH -->
+<section class="view" id="v-launch" hidden>
+  <div class="launch">
+    <div class="card">
+      <p class="label">Launch · 5 min</p>
+      <ol class="recipe">
+        <li>Write a <b>3-digit number</b>. Its first and last digits must differ by <b>2 or more</b>.</li>
+        <li><b>Reverse</b> it.</li>
+        <li><b>Subtract</b> the smaller number from the larger.</li>
+        <li><b>Reverse the difference and add.</b> Always write the difference with 3 digits (write 99 as 099).</li>
+      </ol>
+      <p class="label" style="margin-top:22px">Predict first</p>
+      <p class="lead">Everyone picks a different start number. Will we all get the same final answer?</p>
+      <div class="votes" style="margin-top:12px">
+        <button class="vote" data-v="yes"><b id="vyes">0</b>Same answer</button>
+        <button class="vote" data-v="no"><b id="vno">0</b>Different</button>
+        <button class="vote" data-v="unsure"><b id="vunsure">0</b>Not sure</button>
+      </div>
+      <p class="small">Tap to count hands. <button class="ghost" id="vUndo" style="min-height:40px;padding:6px 12px;font-size:14px">Undo last vote</button></p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <p class="dq">Why does everyone get the same answer?</p>
+      <div class="env" id="env1" aria-label="Sealed envelope">
+        <div class="body"></div>
+        <div class="note"><span>1,089</span></div>
+        <div class="flap"><svg viewBox="0 0 160 58" preserveAspectRatio="none" aria-hidden="true"><path d="M1 1 L80 56 L159 1 Z" fill="var(--blue-soft)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+        <div class="seal">?</div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="secondary envBtn">Open the envelope</button>
+        <button class="primary" data-go="trick">Run the trick</button>
+      </div>
+      <p class="small" style="text-align:center">The envelope was sealed before anyone picked a number.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TRICK -->
+<section class="view" id="v-trick">
+  <div class="trick">
+    <div class="card bench" id="workCard">
+      <ol class="steps" id="steps"></ol>
+      <p class="prompt" id="prompt"></p>
+      <p class="sub" id="subp"></p>
+      <div id="work"></div>
+      <div class="keypad" id="keypad" aria-label="Number keypad">
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button>
+        <button data-k="del" aria-label="Delete">⌫</button>
+        <button data-k="6">6</button><button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="0">0</button>
+        <button data-k="clr" aria-label="Clear">C</button>
+        <button class="wide go" data-k="ok" id="checkBtn">Check</button>
+        <button class="wide" data-k="show" id="showBtn">Show me</button>
+        <button class="wide" data-k="easy" id="easyBtn">Easy start</button>
+      </div>
+      <div class="fb" id="fb" aria-live="polite"></div>
+      <div class="row" id="afterRow" style="margin-top:14px" hidden>
+        <button class="primary" id="againBtn">Do another trick</button>
+        <button class="secondary envBtn">Open the envelope</button>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <p class="label">My five tricks</p>
+        <div class="tblwrap">
+          <table class="five" id="five">
+            <thead><tr><th>Trick</th><th>Start</th><th>Reverse</th><th>Difference</th><th>Reverse</th><th>Sum</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <p class="label">Class list of differences</p>
+        <div class="ladder" id="ladder"></div>
+        <p class="small">Your tricks land here on their own. Tap a number to add a difference another pair found. <button class="ghost" id="lUndo" style="min-height:40px;padding:6px 12px;font-size:14px">Undo last tap</button></p>
+        <p class="small" id="lNote"></p>
+      </div>
+      <div class="card">
+        <p class="label">Sealed envelope</p>
+        <div class="env" id="env2" aria-label="Sealed envelope">
+          <div class="body"></div>
+          <div class="note"><span>1,089</span></div>
+          <div class="flap"><svg viewBox="0 0 160 58" preserveAspectRatio="none" aria-hidden="true"><path d="M1 1 L80 56 L159 1 Z" fill="var(--blue-soft)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <div class="seal">?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETECTIVE -->
+<section class="view" id="v-det" hidden>
+  <div class="card">
+    <p class="label">Share and reflect · 10 min</p>
+    <div class="qnav" id="qnav"></div>
+    <p class="big" id="qtext"></p>
+    <div class="row" id="qacts" style="margin-top:14px"></div>
+    <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+  </div>
+  <div class="det" style="margin-top:16px">
+    <div class="card bench"><div class="stage" id="qstage"></div></div>
+    <div class="card"><div class="result" id="qres" aria-live="polite"></div><p class="hint" id="qhint">Evidence notes appear here.</p></div>
+  </div>
+</section>
+
+<!-- CHALLENGE -->
+<section class="view" id="v-chal" hidden>
+  <div class="chal">
+    <div class="card">
+      <p class="label">Challenge A</p>
+      <p class="big">Try a start whose first and last digits are <b>the same</b>, like 525. What goes wrong?</p>
+      <div class="row" style="margin-top:14px" id="sameChips"></div>
+      <ul class="runlog" id="sameLog"></ul>
+      <div class="result" id="sameMsg" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <p class="label">Challenge B</p>
+      <p class="big">Try a <b>4-digit</b> start. Do you always get the same sum?</p>
+      <p class="sub" style="margin-top:8px">Same rules: first and last digits differ by 2 or more, and write every difference with 4 digits.</p>
+      <div class="row">
+        <div class="colwork" style="font-size:clamp(34px,4vw,48px);padding:0"><div class="r" id="c4entry"></div></div>
+        <button class="primary" id="c4Run">Run it</button>
+        <button class="secondary" id="c4Rand">Random start</button>
+      </div>
+      <div class="keypad" id="keypad4" aria-label="Keypad for 4-digit start">
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button>
+        <button data-k="del" aria-label="Delete">⌫</button>
+        <button data-k="6">6</button><button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="0">0</button>
+        <button data-k="clr" aria-label="Clear">C</button>
+      </div>
+      <ul class="runlog" id="c4Log"></ul>
+      <div class="fb" id="c4fb"></div>
+      <p class="label" style="margin-top:18px">Sums we have found</p>
+      <div class="bars" id="c4Bars"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="secondary" id="c4Twenty">Run 20 random starts</button>
+        <button class="secondary" id="c4All">Check every 4-digit start</button>
+      </div>
+      <div class="result" id="c4Msg" style="margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = n => n.toLocaleString('en-US');
+const pad = (n,w) => String(n).padStart(w,'0');
+const rev = s => s.split('').reverse().join('');
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+const DIFFS = [99,198,297,396,495,594,693,792,891];
+
+/* Pure trick math, written once and reused everywhere */
+function runTrick(start, w){
+  const s = pad(start, w), r = rev(s), rn = Number(r);
+  const big = Math.max(start, rn), small = Math.min(start, rn);
+  const d = big - small, ds = pad(d, w), dr = rev(ds), sum = d + Number(dr);
+  return {s, r, rn, big, small, d, ds, dr, drn:Number(dr), sum};
+}
+
+const S = {};
+function freshState(){
+  Object.assign(S, {tab:'trick', step:0, t:null, tricks:[], counts:Object.fromEntries(DIFFS.map(d=>[d,0])), tapStack:[],
+    votes:{yes:0,no:0,unsure:0}, voteStack:[], env:false, warm:0, warmPattern:false, q:1, c4:{}, entry:null});
+}
+
+/* ---------- Digit entry ---------- */
+let ACTIVE = null;
+function makeEntry(host, w, cls){
+  const e = {w, d:Array(w).fill(''), i:0, boxes:[]};
+  for(let k=0;k<w;k++){
+    const b = document.createElement('button');
+    b.className = 'dig' + (cls?' '+cls:''); b.type='button';
+    b.setAttribute('aria-label', `Digit ${k+1} of ${w}`);
+    b.onclick = () => { ACTIVE = e; e.i = k; paint(e); };
+    host.appendChild(b); e.boxes.push(b);
+  }
+  e.mark = st => { e.stale = st==='bad'; e.boxes.forEach(b => { b.classList.remove('good','bad'); if(st) b.classList.add(st); }); };
+  paint(e); return e;
+}
+function paint(e){ e.boxes.forEach((b,k) => { b.textContent = e.d[k]; b.classList.toggle('act', ACTIVE===e && e.i===k); }); }
+function press(e, k){
+  if(!e) return;
+  const stale = e.stale;
+  e.mark(null);
+  if(stale && /^\d$/.test(k)){ e.d.fill(''); e.i=0; }
+  if(k==='del'){ if(e.d[e.i]==='' && e.i>0) e.i--; e.d[e.i]=''; }
+  else if(k==='clr'){ e.d.fill(''); e.i=0; }
+  else if(/^\d$/.test(k)){ e.d[e.i]=k; if(e.i<e.w-1) e.i++; }
+  paint(e);
+}
+function read(e){
+  const str = e.d.join('');
+  if(!str.length) return {empty:true};
+  const first = e.d.findIndex(x=>x!=='');
+  let last = e.d.length-1; while(e.d[last]==='') last--;
+  const gap = e.d.slice(first,last+1).some(x=>x==='');
+  const full = !e.d.some(x=>x==='');
+  return {empty:false, gap, full, lead:!full, val:gap?null:Number(str), str};
+}
+function fill(e, s){ e.d = s.split(''); e.i = e.w-1; paint(e); }
+
+/* ---------- Tabs ---------- */
+function setTab(t){
+  S.tab = t;
+  $$('nav.flow button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','launch','trick','det','chal'].forEach(v => $('#v-'+v).hidden = v!==t);
+  if(t==='trick' && S.entry) ACTIVE = S.entry.e;
+  if(t==='chal') ACTIVE = S.c4.e;
+  if(t==='det') renderQ();
+  if(ACTIVE) paint(ACTIVE);
+}
+$$('nav.flow button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$$('[data-go]').forEach(b => b.onclick = () => setTab(b.dataset.go));
+
+/* ---------- Warm-up ---------- */
+function renderWarm(){
+  const box = $('#wList'); box.classList.toggle('plain', !S.warmPattern);
+  let h = '';
+  for(let k=1;k<=9;k++){
+    if(k<=S.warm){
+      const s = pad(99*k,3);
+      const label = k===1 ? (S.warmPattern ? '99 → 099' : '') : '';
+      h += `<div class="cnum"><span class="k">99 × ${k}</span><span><span class="h">${s[0]}</span><span class="t">${s[1]}</span><span class="o">${s[2]}</span></span><span class="arrow">${label}</span></div>`;
+    } else if(k===S.warm+1){
+      h += `<div class="cnum q"><span class="k">99 × ${k}</span><span>? ? ?</span></div>`;
+    }
+  }
+  if(S.warm===0) h = `<div class="cnum q"><span class="k">99 × 1</span><span>? ? ?</span></div>`;
+  box.innerHTML = h;
+  $('#wNext').disabled = S.warm>=9;
+}
+$('#wNext').onclick = () => {
+  S.warm = Math.min(9, S.warm+1); renderWarm();
+  $('#wMsg').innerHTML = S.warm===9 ? 'That’s 99 × 9 = 891. Look down the list. What changes and what stays the same?' :
+    (S.warm>1 ? `${fmt(99*(S.warm-1))} + 99 = <b>${fmt(99*S.warm)}</b>. Predict the next one before you tap.` : 'Start at 99. Predict the next number before you tap.');
+};
+$('#wPattern').onclick = () => {
+  S.warm = 9; S.warmPattern = true; renderWarm();
+  $('#wMsg').innerHTML = 'Write 99 as <b>099</b>. Then each time: the <b style="color:var(--blue)">hundreds go up 1</b>, the <b style="color:var(--seal)">ones go down 1</b>, and the <b style="color:var(--gold)">tens stay 9</b>. Why? Adding 99 is the same as adding 100, then taking away 1. Every number on the list has a 9 in the middle, and its outside digits add to 9.';
+};
+$('#wReset').onclick = () => { S.warm=0; S.warmPattern=false; $('#wMsg').textContent=''; renderWarm(); };
+
+/* ---------- Launch votes and envelope ---------- */
+function renderVotes(){ ['yes','no','unsure'].forEach(k => $('#v'+k).textContent = S.votes[k]); }
+$$('.vote').forEach(b => b.onclick = () => { S.votes[b.dataset.v]++; S.voteStack.push(b.dataset.v); renderVotes(); });
+$('#vUndo').onclick = () => { const v = S.voteStack.pop(); if(v){ S.votes[v]--; renderVotes(); } };
+function renderEnv(){
+  ['#env1','#env2'].forEach(id => $(id).classList.toggle('open', S.env));
+  $$('.envBtn').forEach(b => b.textContent = S.env ? 'Seal it again' : 'Open the envelope');
+}
+$$('.envBtn').forEach(b => b.onclick = () => { S.env = !S.env; renderEnv(); });
+
+/* ---------- The trick, step by step ---------- */
+const STEPS = ['Pick a start','Reverse it','Subtract','Reverse the difference','Add'];
+function renderSteps(){
+  $('#steps').innerHTML = STEPS.map((l,i) => `<li class="${i<S.step?'done':''} ${i===S.step?'now':''}"><i>${i<S.step?'✓':i+1}</i>${l}</li>`).join('');
+}
+function colRows(rows, w){
+  // rows: [{op, s}] strings right-aligned into w columns
+  return rows.map(r => {
+    const cells = [`<span class="op">${r.op||''}</span>`];
+    const s = r.s.padStart(w,' ');
+    for(const ch of s) cells.push(`<span>${ch===' '?'':ch}</span>`);
+    return `<div class="r">${cells.join('')}</div>`;
+  }).join('');
+}
+function buildStep(){
+  const t = S.t, work = $('#work');
+  $('#fb').className='fb'; $('#fb').innerHTML='';
+  $('#afterRow').hidden = S.step<5;
+  $('#keypad').hidden = S.step>=5;
+  $('#easyBtn').hidden = S.step!==0;
+  $('#showBtn').hidden = S.step===0;
+  renderSteps();
+  let w = 3, rows = [], prompt='', sub='';
+  if(S.step===0){ prompt='Pick a 3-digit start number.'; sub='Its first and last digits must differ by 2 or more. Stuck? Tap “Easy start”.'; }
+  if(S.step===1){ prompt=`Reverse ${t.s}.`; sub='Write the digits in the opposite order.'; rows=[{s:t.s}]; }
+  if(S.step===2){ prompt='Subtract the smaller number from the larger.'; sub=`The larger number goes on top. Write the difference with 3 digits.`; rows=[{s:pad(t.big,3)},{op:'−',s:pad(t.small,3)}]; }
+  if(S.step===3){ prompt=`Reverse the difference, ${t.ds}.`; sub='Keep all 3 digits, even a 0 at the front.'; rows=[{s:t.ds}]; }
+  if(S.step===4){ prompt='Add the difference and its reverse.'; sub='Add column by column, starting with the ones.'; w=4; rows=[{s:t.ds},{op:'+',s:t.dr}]; }
+  if(S.step===5){ renderDone(); return; }
+  $('#prompt').textContent = prompt; $('#subp').textContent = sub;
+  const hasBar = S.step===2 || S.step===4;
+  work.innerHTML = `<div class="colwork"><div>${colRows(rows,w)}</div>${hasBar?'<div class="bar"></div>':''}<div class="r" id="entryRow"><span class="op">${S.step===1||S.step===3?'→':''}</span></div></div>`;
+  const e = makeEntry($('#entryRow'), w);
+  S.entry = {e}; ACTIVE = e; paint(e);
+}
+function say(kind, html){ const f=$('#fb'); f.className='fb '+kind; f.innerHTML=html; }
+
+function check(){
+  const e = S.entry.e, v = read(e), t = S.t;
+  if(v.empty){ say('info','Type your answer with the keypad first.'); return; }
+  if(v.gap){ say('no','There’s a gap between your digits. Fill every box from the left, or clear and try again.'); e.mark('bad'); return; }
+
+  if(S.step===0){
+    if(!v.full){ say('no','Fill all three boxes. A 3-digit number has a hundreds, a tens and a ones digit.'); e.mark('bad'); return; }
+    if(e.d[0]==='0'){ say('no',`${v.str} starts with 0, so it is really a ${v.val<10?'1':'2'}-digit number. Pick a first digit from 1 to 9.`); e.mark('bad'); return; }
+    const a = +e.d[0], c = +e.d[2], gap = Math.abs(a-c);
+    if(gap===0){ say('no',`The first and last digits are both ${a}. Reversing ${v.str} gives ${v.str} again, so there is nothing to subtract. Pick a different start, or save this one for the ★ Break the trick tab.`); e.mark('bad'); return; }
+    S.t = runTrick(v.val,3); S.t.gap = gap;
+    e.mark('good');
+    if(gap===1) S.t.warn = true;
+    next(gap===1 ? `Okay. Heads up: ${a} and ${c} differ by only 1, which breaks our rule. Let’s see what happens anyway.` : null);
+    return;
+  }
+  if(S.step===1){
+    if(v.val===t.rn && (v.full || t.r[0]==='0')){ e.mark('good'); fill(e,t.r); next(); return; }
+    e.mark('bad');
+    say('no',`Reversing flips the order: the last digit comes first. Read ${t.s} from right to left: <b>${t.s[2]}</b>, then <b>${t.s[1]}</b>, then <b>${t.s[0]}</b>. Try again.`);
+    return;
+  }
+  if(S.step===2){
+    if(v.val===t.d){
+      e.mark('good');
+      const padNote = v.lead ? ` We write ${t.d} as <b>${t.ds}</b> so it keeps 3 digits.` : '';
+      fill(e,t.ds); next(padNote ? 'Right.'+padNote : null); return;
+    }
+    e.mark('bad');
+    const B = pad(t.big,3), Sm = pad(t.small,3);
+    const naive = [0,1,2].map(i => Math.abs(+B[i] - +Sm[i])).join('');
+    const back = v.val + t.small;
+    let msg = `Check the subtraction by adding back: ${fmt(v.val)} + ${fmt(t.small)} = <b>${fmt(back)}</b>. It should make ${fmt(t.big)}.`;
+    if(v.val === Number(naive)) msg += ` In the ones, ${B[2]} − ${Sm[2]} needs regrouping: you can’t take ${Sm[2]} ones from ${B[2]}, and you can’t flip it around to ${Sm[2]} − ${B[2]}. Regroup 1 ten as 10 ones.`;
+    say('no', msg + ' Try again.'); return;
+  }
+  if(S.step===3){
+    if(v.val===t.drn && v.full){ e.mark('good'); next(); return; }
+    e.mark('bad');
+    if(t.d===99 && (v.val===99)){ say('no','Write it with three digits: <b>099</b>. Its reverse?'); return; }
+    if(v.val===t.drn && !v.full){ say('no',`Close. Fill all three boxes so it reads <b>${t.dr}</b>.`); return; }
+    say('no',`Reverse means the last digit comes first. Read ${t.ds} from right to left: <b>${t.ds[2]}</b>, <b>${t.ds[1]}</b>, <b>${t.ds[0]}</b>.`); return;
+  }
+  if(S.step===4){
+    if(v.val===t.sum){ e.mark('good'); fill(e,pad(t.sum,4)); finish(); return; }
+    e.mark('bad');
+    const A = t.ds, Bv = t.dr;
+    const o = +A[2] + +Bv[2], te = +A[1] + +Bv[1] + Math.floor(o/10), h = +A[0] + +Bv[0] + Math.floor(te/10);
+    say('no',`Add one column at a time. Ones: ${A[2]} + ${Bv[2]} = ${o}. Tens: ${A[1]} + ${Bv[1]}${o>=10?' + 1 carried':''} = ${te}${te>=10?', so write '+(te%10)+' and carry 1':''}. Hundreds: ${A[0]} + ${Bv[0]}${te>=10?' + 1 carried':''} = ${h}. If your sum still doesn’t match your partner’s, check the subtraction by adding back.`);
+  }
+}
+function next(note){
+  const done = S.step; S.step++; buildStep();
+  if(note) say('info', note);
+  else if(done>0) say('ok','Yes! On to the next step.');
+}
+function show(){
+  const t = S.t, e = S.entry.e;
+  if(S.step===1) fill(e,t.r);
+  if(S.step===2) fill(e,t.ds);
+  if(S.step===3) fill(e,t.dr);
+  if(S.step===4) fill(e,pad(t.sum,4));
+  check();
+}
+function finish(){
+  const t = S.t;
+  S.tricks.push(t);
+  if(S.counts[t.d]!=null) S.counts[t.d]++;
+  S.step = 5; buildStep(); renderFive(); renderLadder();
+}
+function renderDone(){
+  const t = S.t;
+  $('#prompt').textContent = `${t.s} made ${fmt(t.sum)}.`;
+  $('#subp').textContent = S.env ? 'Look at the envelope. Same number?' : 'Keep it secret. Compare with a partner, then open the envelope.';
+  $('#work').innerHTML = `<div class="colwork"><div>${colRows([{s:t.ds},{op:'+',s:t.dr}],4)}</div><div class="bar"></div><div>${colRows([{s:pad(t.sum,4)}],4)}</div></div>`;
+  const n = S.tricks.length;
+  let msg = `Trick ${n} is in your table. Your difference, <b>${t.ds}</b>, went on the class list.`;
+  if(t.warn) msg += ' Your outside digits differed by only 1, and you still got 1,089, because you wrote 99 as 099.';
+  if(n===5) msg += ' That’s five tricks. Head to the Detective questions to find out why.';
+  say('ok', msg);
+}
+function newTrick(){ S.step=0; S.t=null; buildStep(); }
+
+$('#keypad').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if(!b) return;
+  const k = b.dataset.k;
+  if(k==='ok') return check();
+  if(k==='show') return show();
+  if(k==='easy') return easyStart();
+  press(S.entry.e, k);
+});
+function easyStart(){
+  // floor: no zeros, outside digits differ by 2+
+  let a,b,c; do{ a=1+rnd(9); b=1+rnd(9); c=1+rnd(9); } while(Math.abs(a-c)<2);
+  fill(S.entry.e, ''+a+b+c);
+  say('info',`Here’s a start with no zeros: <b>${a}${b}${c}</b>. Tap Check to use it.`);
+}
+const rnd = n => Math.floor(Math.random()*n);
+$('#againBtn').onclick = newTrick;
+
+function renderFive(){
+  const rows = [];
+  const list = S.tricks.slice(-5), off = Math.max(0, S.tricks.length-5);
+  for(let i=0;i<5;i++){
+    const t = list[i];
+    rows.push(t ? `<tr><td>${off+i+1}</td><td>${t.s}</td><td>${t.r}</td><td>${t.ds}</td><td>${t.dr}</td><td class="sum">${fmt(t.sum)}</td></tr>`
+                : `<tr><td>${off+i+1}</td><td class="empty">···</td><td class="empty">···</td><td class="empty">···</td><td class="empty">···</td><td class="empty">···</td></tr>`);
+  }
+  $('#five tbody').innerHTML = rows.join('');
+}
+function renderLadder(){
+  $('#ladder').innerHTML = DIFFS.map(d => `<button class="slot ${S.counts[d]?'has':''}" data-d="${d}" aria-label="Difference ${pad(d,3)}, found ${S.counts[d]} times">${pad(d,3)}<span class="ct">${S.counts[d]}</span></button>`).join('');
+  $$('#ladder .slot').forEach(b => b.onclick = () => { const d=+b.dataset.d; S.counts[d]++; S.tapStack.push(d); renderLadder(); });
+  const total = DIFFS.reduce((a,d)=>a+S.counts[d],0);
+  $('#lNote').textContent = total ? `${total} difference${total===1?'':'s'} recorded. A pair got something not on this list? Their subtraction needs a check: add back.` : 'Every difference the trick can make has a spot here.';
+}
+$('#lUndo').onclick = () => { const d = S.tapStack.pop(); if(d){ S.counts[d]--; renderLadder(); } };
+
+/* ---------- Detective questions ---------- */
+const found = () => DIFFS.filter(d => S.counts[d]>0);
+function diffPool(){ const f = found(); return f.length ? {list:f, note:''} : {list:DIFFS.slice(1), note:'No differences recorded yet, so here are all the ones the trick can make. '}; }
+function tile(d, opts={}){
+  const s = pad(d,3);
+  const a = opts.out ? 'out' : '', m = opts.mid ? 'mid' : '';
+  return `<div class="tile ${opts.lit?'lit':''}"><div class="num"><span class="${a}">${s[0]}</span><span class="${m}">${s[1]}</span><span class="${a}">${s[2]}</span></div>${opts.cap?`<div class="cap">${opts.cap}</div>`:''}</div>`;
+}
+let qPick = null;
+const Q = {
+  1:{ text:'Look at the class list. What do all the differences share? Look at the middle digit and the two outside digits.',
+    acts:[
+      {l:'Line up our differences', run(){ const p=diffPool(); stage(p.list.map(d=>tile(d)).join('')); res(p.note+'What do you notice? Talk with your partner before you tap the next button.'); }},
+      {l:'Spotlight the middle digit', run(){ const p=diffPool(); stage(p.list.map(d=>tile(d,{mid:1})).join('')); res(p.note+'The middle digit is <b>9</b> every time.'); }},
+      {l:'Add the outside digits', run(){ const p=diffPool(); stage(p.list.map(d=>{const s=pad(d,3); return tile(d,{mid:1,out:1,cap:`${s[0]} + ${s[2]} = ${+s[0]+ +s[2]}`});}).join('')); res(p.note+'The two outside digits always add to <b>9</b>.'); }}
+    ]},
+  2:{ text:'Are the differences on our warm-up list of 99s? How far apart were the start’s first and last digits?',
+    acts:[
+      {l:'Line them up with the 99s', run(){ const f=new Set(found()); stage(DIFFS.map((d,i)=>tile(d,{lit:f.has(d),cap:`99 × ${i+1}`})).join('')); res((f.size?'The outlined ones are differences our class found. ':'')+'Every difference is on the 99s list.'); }},
+      {l:'Compare with the outside digits', run(){
+        const ts = S.tricks.length ? S.tricks.slice(-6) : [742,851,631,952].map(n=>runTrick(n,3));
+        stage(ts.map(t=>{const g=Math.abs(+t.s[0]- +t.s[2]); return tile(t.d,{cap:`start ${t.s}: ${t.s[0]} and ${t.s[2]} are ${g} apart → 99 × ${g}`});}).join(''));
+        res((S.tricks.length?'':'No tricks recorded yet, so these use sample starts. ')+'The difference is always 99 times how far apart the outside digits are.'); }}
+    ]},
+  3:{ text:'Now add a difference to its reverse, column by column. Why is it always 1,089?',
+    acts:[ {l:'Add the columns', run(){ addAnim(); }} ], picker:true },
+  4:{ text:'Journal: Why is the middle digit of the difference always 9?',
+    acts:[ {l:'Show the regrouping', run(){ regroupAnim(); }} ], picker:'start' }
+};
+function stage(h){ $('#qstage').innerHTML = h; }
+function res(h){ $('#qres').innerHTML = h; $('#qhint').hidden = !!h; }
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${S.q===i}">${i===4?'Journal':i}</button>`).join('');
+  $$('#qnav button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; qPick=null; renderQ(); });
+  const q = Q[S.q];
+  $('#qtext').textContent = q.text;
+  const box = $('#qacts'); box.innerHTML='';
+  if(q.picker){
+    const pool = q.picker==='start' ? (S.tricks.length ? [...new Set(S.tricks.map(t=>t.s))].slice(-5) : ['742','851','306']) : diffPool().list.map(d=>pad(d,3));
+    if(qPick==null || !pool.includes(qPick)) qPick = pool[pool.length-1];
+    pool.forEach(p => { const b=document.createElement('button'); b.className='chipbtn'; b.textContent=p; b.setAttribute('aria-pressed', p===qPick); b.onclick=()=>{ qPick=p; renderQ(); }; box.appendChild(b); });
+  }
+  q.acts.forEach((a,i) => { const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=()=>a.run(); box.appendChild(b); });
+  stage(''); res('');
+}
+
+let animGen = 0;
+async function addAnim(){
+  const g = ++animGen;
+  const A = qPick, B = rev(A);
+  const o = +A[2] + +B[2], te = +A[1] + +B[1] + (o>=10?1:0), h = +A[0] + +B[0] + (te>=10?1:0);
+  const total = Number(A) + Number(B);
+  const out = ['','','',''], carry = ['','','',''];
+  const draw = (hot) => stage(`<div class="rg">
+    <div class="r"><span class="carry"></span>${carry.map(c=>`<span class="carry">${c}</span>`).join('')}</div>
+    <div class="r"><span class="op"></span><span></span>${[...A].map((d,i)=>`<span class="${hot===i?'hot':''}">${d}</span>`).join('')}</div>
+    <div class="r"><span class="op">+</span><span></span>${[...B].map((d,i)=>`<span class="${hot===i?'hot':''}">${d}</span>`).join('')}</div>
+    <div class="bar"></div>
+    <div class="r"><span class="op"></span>${out.map(d=>`<span>${d}</span>`).join('')}</div></div>`);
+  draw(-1); res('');
+  const lines = [];
+  await sleep(500); if(g!==animGen) return;
+  out[3] = String(o%10); draw(2); lines.push(`Ones: ${A[2]} + ${B[2]} = <b>${o}</b>. The outside digits add to 9.`); res(lines.join('<br>'));
+  await sleep(1300); if(g!==animGen) return;
+  out[2] = String(te%10); if(te>=10) carry[1]='1'; draw(1); lines.push(`Tens: ${A[1]} + ${B[1]} = <b>${te}</b>. Write ${te%10}, carry 1.`); res(lines.join('<br>'));
+  await sleep(1300); if(g!==animGen) return;
+  out[1] = String(h%10); out[0] = h>=10 ? '1' : ''; draw(0); lines.push(`Hundreds: ${A[0]} + ${B[0]} + 1 carried = <b>${h}</b>.`);
+  lines.push(`Total: <b>${fmt(total)}</b>. Every difference has 9 in the middle and outside digits that add to 9, so the columns always make 9, 18 and 9 + 1. That is why it’s always 1,089.`);
+  res(lines.join('<br>'));
+}
+
+async function regroupAnim(){
+  const g = ++animGen;
+  const t = runTrick(Number(qPick),3);
+  const T = pad(t.big,3).split('').map(Number), Bm = pad(t.small,3).split('').map(Number);
+  const A = T[0], b = T[1], C = T[2];   // top = A b C, bottom = C b A, with A > C
+  // top column states: arrays of values, last is current
+  const top = [[A],[b],[C]], ans = ['','',''];
+  const mini = (col) => top[col].length>1 ? `<span class="mini">${top[col].slice(0,-1).map(x=>`<s>${x}</s>`).join('')}<span>${top[col][top[col].length-1]}</span></span>` : '<span class="mini"></span>';
+  const draw = () => stage(`<div class="rg">
+    <div class="r"><span></span>${[0,1,2].map(mini).join('')}</div>
+    <div class="r"><span class="op"></span>${[0,1,2].map(c => top[c].length>1 ? `<span class="old">${top[c][0]}</span>` : `<span>${top[c][0]}</span>`).join('')}</div>
+    <div class="r"><span class="op">−</span>${Bm.map(d=>`<span>${d}</span>`).join('')}</div>
+    <div class="bar"></div>
+    <div class="r"><span class="op"></span>${ans.map((d,i)=>`<span class="${i===1&&d!==''?'nine':''}">${d===''?'&nbsp;':d}</span>`).join('')}</div></div>`);
+  draw();
+  const lines = [`${t.s} reversed is ${t.r}. Larger on top: ${pad(t.big,3)} − ${pad(t.small,3)}.`]; res(lines.join('<br>'));
+  await sleep(1100); if(g!==animGen) return;
+  if(b>0){
+    top[1].push(b-1); top[2].push(C+10); ans[2]=String(C+10-A); draw();
+    lines.push(`Ones: ${C} − ${A}? Not enough ones. Regroup 1 ten as 10 ones. Now ${C+10} − ${A} = <b>${C+10-A}</b>.`);
+    res(lines.join('<br>'));
+    await sleep(1700); if(g!==animGen) return;
+    top[0].push(A-1); top[1].push(b-1+10); ans[1]='9'; draw();
+    lines.push(`Tens: ${b-1} − ${b}? One short, because both numbers had ${b} tens and we lent one away. Regroup 1 hundred as 10 tens: ${b+9} − ${b} = <b>9</b>.`);
+  } else {
+    top[0].push(A-1); top[1].push(10); top[1].push(9); top[2].push(C+10); ans[2]=String(C+10-A); draw();
+    lines.push(`Ones: ${C} − ${A}? Not enough ones, and there are 0 tens. Regroup 1 hundred as 10 tens, then 1 ten as 10 ones. Now ${C+10} − ${A} = <b>${C+10-A}</b>.`);
+    res(lines.join('<br>'));
+    await sleep(1700); if(g!==animGen) return;
+    ans[1]='9'; draw();
+    lines.push(`Tens: 9 − 0 = <b>9</b>. Both numbers had 0 tens, and we lent one away, so 10 − 1 − 0 = 9.`);
+  }
+  res(lines.join('<br>'));
+  await sleep(1700); if(g!==animGen) return;
+  ans[0]=String(A-1-C); draw();
+  lines.push(`Hundreds: ${A-1} − ${C} = <b>${A-1-C}</b>. Difference: <b>${t.ds}</b>.`);
+  lines.push(`The middle digits always match (reversing doesn’t move them), and the ones always borrow one ten. So the tens are always one short and become 10 − 1 = <b>9</b>.`);
+  res(lines.join('<br>'));
+}
+
+/* ---------- Challenge ---------- */
+function renderSame(){
+  const box = $('#sameChips'); box.innerHTML='';
+  ['525','747','303','191'].forEach(s => { const b=document.createElement('button'); b.className='chipbtn'; b.textContent=s; b.onclick=()=>{
+    const t = runTrick(Number(s),3);
+    $('#sameLog').innerHTML = `<li>${t.s} reversed is ${t.r}</li><li>${t.s} − ${t.r} = ${t.ds}</li><li>${t.ds} + ${t.dr} = <b>${t.sum}</b></li>`;
+    $('#sameMsg').innerHTML = `Reversing ${s} gives the same number, so the difference is <b>000</b> and the sum is <b>0</b>, not 1,089. The trick needs the first and last digits to be different.`;
+  }; box.appendChild(b); });
+}
+function c4Tally(sum){ S.c4.tally[sum] = (S.c4.tally[sum]||0)+1; renderBars(); }
+function renderBars(){
+  const keys = Object.keys(S.c4.tally).map(Number).sort((a,b)=>a-b);
+  const max = Math.max(1, ...keys.map(k=>S.c4.tally[k]));
+  $('#c4Bars').innerHTML = keys.length ? keys.map(k => `<div class="b"><span>${fmt(k)}</span><span class="track"><span class="fill" style="display:block;width:${100*S.c4.tally[k]/max}%"></span></span><span>${S.c4.tally[k]}</span></div>`).join('')
+    : '<p class="small" style="margin:0">Run a 4-digit trick to start the tally.</p>';
+}
+function c4Run(n, quiet){
+  const t = runTrick(n,4);
+  if(!quiet) c4Log(t);
+  c4Tally(t.sum); return t;
+}
+function c4Log(t){ $('#c4Log').innerHTML = `<li>${t.s} reversed is ${t.r}</li><li>${pad(t.big,4)} − ${pad(t.small,4)} = ${t.ds}</li><li>${t.ds} + ${t.dr} = <b>${fmt(t.sum)}</b></li>`; }
+function rand4(){ let n; do{ n = 1000+rnd(9000); } while(Math.abs(Math.floor(n/1000) - n%10) < 2); return n; }
+function c4Check(){
+  const v = read(S.c4.e), f=$('#c4fb'); f.className='fb'; f.innerHTML='';
+  if(v.empty || !v.full){ f.className='fb no'; f.textContent='Fill all four boxes.'; return; }
+  if(S.c4.e.d[0]==='0'){ f.className='fb no'; f.textContent='A 4-digit number can’t start with 0.'; return; }
+  if(Math.abs(+S.c4.e.d[0] - +S.c4.e.d[3])<2){ f.className='fb no'; f.textContent=`${S.c4.e.d[0]} and ${S.c4.e.d[3]} differ by less than 2. Pick a start that follows the rule.`; return; }
+  c4Run(v.val);
+}
+$('#keypad4').addEventListener('click', ev => { const b=ev.target.closest('button'); if(b){ ACTIVE=S.c4.e; press(S.c4.e, b.dataset.k); } });
+$('#c4Run').onclick = c4Check;
+$('#c4Rand').onclick = () => { const n=rand4(); fill(S.c4.e, String(n)); c4Run(n); };
+$('#c4Twenty').onclick = () => { let last; for(let i=0;i<20;i++) last = c4Run(rand4(), true); fill(S.c4.e, last.s); c4Log(last);
+  $('#c4Msg').innerHTML = 'Look at the bars. Is there one sum, or more than one?'; };
+$('#c4All').onclick = () => {
+  const tally = {}; let n4 = 0;
+  for(let n=1000;n<=9999;n++){ if(Math.abs(Math.floor(n/1000) - n%10) < 2) continue; n4++; const s = runTrick(n,4).sum; tally[s]=(tally[s]||0)+1; }
+  const keys = Object.keys(tally).map(Number).sort((a,b)=>b-a);
+  $('#c4Msg').innerHTML = `We checked all <b>${fmt(n4)}</b> four-digit starts that follow the rule. The sums: ` +
+    keys.map(k => `<b>${fmt(k)}</b> (${fmt(tally[k])} starts)`).join(', ') + '. So no, a 4-digit start doesn’t always give the same sum. Can you find a start for each one?';
+};
+
+/* ---------- Physical keyboard ---------- */
+document.addEventListener('keydown', ev => {
+  if(ev.metaKey||ev.ctrlKey||ev.altKey) return;
+  const e = S.tab==='trick' && S.step<5 ? S.entry.e : S.tab==='chal' ? S.c4.e : null; if(!e) return;
+  if(/^\d$/.test(ev.key)){ press(e, ev.key); ev.preventDefault(); }
+  else if(ev.key==='Backspace'){ press(e,'del'); ev.preventDefault(); }
+  else if(ev.key==='Enter'){ ev.preventDefault(); if(S.tab==='trick') check(); else c4Check(); }
+  else if(ev.key==='ArrowLeft'){ e.i=Math.max(0,e.i-1); paint(e); }
+  else if(ev.key==='ArrowRight'){ e.i=Math.min(e.w-1,e.i+1); paint(e); }
+});
+
+/* ---------- Reset / fullscreen ---------- */
+function resetAll(){
+  animGen++;
+  const tab = S.tab || 'trick';
+  freshState(); S.tab = tab;
+  $('#c4entry').innerHTML=''; S.c4 = {e: makeEntry($('#c4entry'),4), tally:{}};
+  $('#c4Log').innerHTML=''; $('#c4Msg').innerHTML=''; $('#c4fb').className='fb'; $('#c4fb').innerHTML='';
+  $('#sameLog').innerHTML=''; $('#sameMsg').innerHTML=''; $('#wMsg').textContent='';
+  renderWarm(); renderVotes(); renderEnv(); renderFive(); renderLadder(); renderSame(); renderBars();
+  newTrick(); setTab(tab);
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+resetAll();
+setTab('warm');
+})();
+</script>
+
+</body></html>

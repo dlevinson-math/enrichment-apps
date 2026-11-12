@@ -1,0 +1,516 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Two Bars, Two Clues</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: the bar picture is the stage on the left; the lesson steps and number pad sit on the right. */
+:root{
+  --bg:#EAF0F7; --card:#FFFFFF; --ink:#14233B; --muted:#56647A; --line:#C9D4E3;
+  --a:#2C6BDD; --b:#12998A; --extra:#F5B21B; --extra-ink:#3A2A00; --soft:#FFF4D6;
+  --ok:#17804F; --ok-bg:#E0F5E9; --no:#C23A34; --no-bg:#FDE9E6; --tick:rgba(255,255,255,.55);
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101724; --card:#1A2333; --ink:#EEF2F8; --muted:#A3AFC2; --line:#35425A;
+    --a:#5B93F5; --b:#2FC2B0; --extra:#F7C140; --extra-ink:#2B1F00; --soft:#3A3018;
+    --ok:#5AD093; --ok-bg:#153324; --no:#FF8279; --no-bg:#3C1B19; --tick:rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101724; --card:#1A2333; --ink:#EEF2F8; --muted:#A3AFC2; --line:#35425A;
+  --a:#5B93F5; --b:#2FC2B0; --extra:#F7C140; --extra-ink:#2B1F00; --soft:#3A3018;
+  --ok:#5AD093; --ok-bg:#153324; --no:#FF8279; --no-bg:#3C1B19; --tick:rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-weight:500;
+  font-size:clamp(16px,1.25vw,21px); line-height:1.4; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--extra); outline-offset:2px}
+b{font-weight:800}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:10px 20px; padding-block:12px 8px;
+  padding-left:max(20px, env(safe-area-inset-left, 0px)); padding-right:max(20px, env(safe-area-inset-right, 0px))}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.5vw,38px); line-height:1.05; margin:0; text-wrap:balance}
+.sub{margin:2px 0 0; color:var(--muted); font-size:.82em; font-weight:700}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; font-weight:700; font-size:.85em}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap; padding-block:4px 10px;
+  padding-left:max(20px, env(safe-area-inset-left, 0px)); padding-right:max(20px, env(safe-area-inset-right, 0px))}
+nav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; font-family:var(--display); font-weight:600; font-size:1em; display:flex; align-items:center; gap:8px; color:var(--muted)}
+nav button i{font-style:normal; width:1.7em; height:1.7em; border-radius:50%; background:var(--bg); display:grid; place-items:center; font-size:.85em}
+nav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav button[aria-pressed="true"] i{background:var(--extra); color:var(--extra-ink)}
+
+main{flex:1; min-height:0; display:flex; gap:18px; padding-block:0 16px;
+  padding-left:max(20px, env(safe-area-inset-left, 0px)); padding-right:max(20px, env(safe-area-inset-right, 0px))}
+.stage{flex:1.35; min-width:0; background:var(--card); border-radius:20px; padding:clamp(14px,2vw,28px); display:flex; flex-direction:column; gap:clamp(12px,2vh,24px); overflow:auto}
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:14px; overflow:auto; padding:2px}
+.story{font-family:var(--display); font-weight:500; font-size:clamp(20px,2.1vw,34px); line-height:1.25; margin:0; text-wrap:balance}
+.story b{font-weight:700; background:var(--soft); padding:0 .2em; border-radius:.25em}
+
+/* Bars */
+.bars{display:flex; align-items:stretch; gap:10px}
+.rows{flex:1; min-width:0; display:flex; flex-direction:column; gap:clamp(10px,1.6vh,18px)}
+.brow{display:flex; flex-direction:column; gap:3px}
+.bname{font-weight:800; font-size:.9em}
+.btrack{display:flex; align-items:center; height:clamp(46px,7.5vh,84px)}
+.seg{height:100%; border:0; padding:0; min-width:0; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.9vw,30px); color:#fff; overflow:hidden; white-space:nowrap; cursor:default; transition:opacity .25s, transform .25s}
+.seg:first-child{border-radius:10px 0 0 10px} .seg:last-of-type{border-radius:0 10px 10px 0} .seg:first-child:last-of-type{border-radius:10px}
+.r0 .seg{background-color:var(--a)} .r1 .seg{background-color:var(--b)} .r2 .seg{background-color:var(--a)}
+.rows .seg.extra{background-color:var(--extra); color:var(--extra-ink); box-shadow:inset 3px 0 0 var(--card)}
+.seg.hide{color:transparent}
+.seg.tap{cursor:pointer}
+.seg.tap:hover{filter:brightness(1.1)}
+.seg.glow{animation:glow 1s ease-in-out 2}
+.rows .seg.cover{background-color:transparent; color:var(--muted); font-size:.8em; font-family:var(--body);
+  background-image:repeating-linear-gradient(45deg, var(--line) 0 6px, transparent 6px 12px); outline:2px dashed var(--muted); outline-offset:-2px; box-shadow:none}
+.ticks .seg:not(.cover){background-image:linear-gradient(to right, transparent calc(100% - 2px), var(--tick) 0); background-size:calc(100% / var(--n)) 100%}
+.blen{margin-left:10px; font-family:var(--display); font-weight:700; font-size:clamp(20px,2.2vw,34px); white-space:nowrap}
+.brace{flex:none; display:flex; align-items:center; gap:8px; margin-top:1.4em}
+.brace::before{content:""; align-self:stretch; width:14px; border:3px solid var(--ink); border-left:0; border-radius:0 12px 12px 0}
+.brace div{font-family:var(--display); font-weight:700; font-size:clamp(22px,2.4vw,38px); line-height:1; text-align:center}
+.brace small{display:block; font-family:var(--body); font-weight:700; font-size:.42em; color:var(--muted); margin-top:4px}
+@keyframes glow{50%{transform:scaleY(1.12); filter:brightness(1.15)}}
+
+.clues{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr)); gap:12px}
+.clue{border:2.5px solid var(--line); background:var(--card); border-radius:14px; padding:10px 14px; text-align:left; display:flex; gap:10px; align-items:center; min-height:64px}
+button.clue{border-style:dashed; border-color:var(--ink)}
+.clue .box{flex:none; width:1.7em; height:1.7em; border:2.5px solid var(--muted); border-radius:6px; display:grid; place-items:center; font-weight:800}
+.clue .t{font-weight:800} .clue .m{font-family:var(--display); font-weight:600; font-size:1.15em; display:block}
+.clue.ok{border-color:var(--ok); background:var(--ok-bg); border-style:solid} .clue.ok .box{border-color:var(--ok); background:var(--ok); color:var(--card)}
+.clue.no{border-color:var(--no); background:var(--no-bg); border-style:solid} .clue.no .box{border-color:var(--no); color:var(--no)}
+
+/* Panel pieces */
+.lead{font-family:var(--display); font-weight:500; font-size:clamp(18px,1.7vw,27px); line-height:1.3; margin:0; text-wrap:balance}
+.note{color:var(--muted); font-size:.88em; margin:0}
+.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-family:var(--display); font-weight:600; font-size:1.1em; padding:12px 22px; border-radius:14px}
+.primary:disabled{opacity:.4; cursor:default}
+.second{border:2.5px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:600; font-size:1em; padding:10px 18px; border-radius:14px}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; min-width:46px; height:46px; padding:0 14px; font-family:var(--display); font-weight:600}
+.chip[aria-pressed="true"]{background:var(--extra); border-color:var(--extra); color:var(--extra-ink)}
+.chip.done::after{content:" ✓"}
+.seg2{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:12px; padding:3px; align-self:flex-start}
+.seg2 button{border:0; background:none; padding:8px 14px; border-radius:9px; font-weight:800; font-size:.88em; color:var(--muted)}
+.seg2 button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.steps{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:5px; counter-reset:s}
+.steps li{counter-increment:s; font-size:.78em; font-weight:800; padding:4px 10px 4px 5px; border-radius:999px; border:2px solid var(--line); color:var(--muted); display:flex; gap:6px; align-items:center; background:var(--card)}
+.steps li::before{content:counter(s); width:1.6em; height:1.6em; border-radius:50%; background:var(--bg); display:grid; place-items:center}
+.steps li.done{color:var(--ink)} .steps li.done::before{content:"✓"; background:var(--ok); color:var(--card)}
+.steps li.now{border-color:var(--extra); color:var(--ink); background:var(--soft)} .steps li.now::before{background:var(--extra); color:var(--extra-ink)}
+.fields{display:flex; gap:10px; flex-wrap:wrap}
+.field{border:3px solid var(--line); background:var(--card); border-radius:14px; padding:6px 14px; min-width:120px; text-align:left; flex:1}
+.field span{display:block; font-size:.75em; font-weight:800; color:var(--muted)}
+.field strong{font-family:var(--display); font-weight:700; font-size:1.9em; line-height:1.1; display:block; min-height:1.1em; font-variant-numeric:tabular-nums}
+.field[aria-pressed="true"]{border-color:var(--a); box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 25%, transparent)}
+.pad{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; max-width:520px}
+.pad button{border:2px solid var(--line); background:var(--card); border-radius:12px; height:52px; font-family:var(--display); font-weight:600; font-size:1.25em}
+.pad button:active{background:var(--soft)}
+.pad .go{grid-column:span 2; background:var(--ink); color:var(--card); border-color:var(--ink)}
+.msg{margin:0; padding:12px 16px; border-radius:14px; background:var(--soft); font-weight:700; font-size:1.02em}
+.msg.ok{background:var(--ok-bg)} .msg.no{background:var(--no-bg)}
+.msg q{font-family:var(--display); font-weight:600; font-size:1.15em; quotes:"“" "”"; display:block}
+.msg:empty{display:none}
+.votes{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px}
+.vote{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:8px 10px; font-weight:800; font-size:.9em; display:flex; flex-direction:column; align-items:center; gap:2px}
+.vote strong{font-family:var(--display); font-size:1.7em; line-height:1}
+.stepper{display:flex; align-items:center; gap:8px; font-weight:800}
+.stepper button{width:44px; height:44px; border-radius:50%; border:2px solid var(--ink); background:var(--card); font-size:1.3em; font-weight:800; line-height:1}
+.stepper strong{font-family:var(--display); font-size:1.5em; min-width:2.2em; text-align:center}
+hr{border:0; border-top:2px solid var(--line); margin:2px 0; width:100%}
+
+/* Warm-up cubes */
+.train{display:grid; grid-template-columns:repeat(10,1fr); gap:4px; max-width:760px}
+.cube{aspect-ratio:1; border:0; border-radius:18%; background:var(--line); font-family:var(--display); font-weight:700; color:#fff; font-size:clamp(14px,1.8vw,26px)}
+.cube.x{background:var(--a)} .cube.y{background:var(--b)}
+.big{font-family:var(--display); font-weight:700; font-size:clamp(30px,4vw,60px); line-height:1; margin:0}
+.big .ca{color:var(--a)} .big .cb{color:var(--b)}
+.pairs{display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+.pair{border:2.5px solid var(--line); background:var(--card); border-radius:14px; padding:8px 12px; text-align:left; display:flex; flex-direction:column; gap:4px; cursor:default}
+.pair.pick{cursor:pointer; border-color:var(--ink); border-style:dashed}
+.pair strong{font-family:var(--display); font-size:1.25em}
+.pair .mini{display:grid; grid-template-columns:repeat(10,1fr); gap:2px}
+.pair .mini i{aspect-ratio:1; border-radius:20%; background:var(--b)} .pair .mini i.x{background:var(--a)}
+.pair.out{opacity:.5; border-style:solid; border-color:var(--no)} .pair.out strong{text-decoration:line-through}
+.pair.win{border-style:solid; border-color:var(--ok); background:var(--ok-bg)}
+.pair small{font-weight:800; font-size:.82em}
+table.gc{border-collapse:collapse; font-family:var(--display); font-size:1.15em; font-variant-numeric:tabular-nums}
+table.gc td,table.gc th{padding:4px 18px 4px 0; text-align:left} table.gc th{font-family:var(--body); font-size:.7em; color:var(--muted)}
+
+@media (max-width:900px),(orientation:portrait){
+  body{height:auto; min-height:100%}
+  main{flex-direction:column}
+  .stage,.panel{overflow:visible; flex:none}
+  header,nav,main{padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .brace div{font-size:22px}
+  .pad button{height:48px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+</style>
+
+<header>
+  <div>
+    <h1>Two Bars, Two Clues</h1>
+    <p class="sub">Grade 2 · Math in Focus Ch 4 · Lesson 2.4-A</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav id="nav" aria-label="Lesson parts"></nav>
+<main id="app">
+  <section class="stage" id="stage" aria-live="polite"></section>
+  <section class="panel" id="panel"></section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+
+/* ---------- The problems (numbers match the worksheet) ---------- */
+const P = [
+  {id:'easy', chip:'Easy start', T:10, d:2, names:['Bigger','Smaller'], text:'Two numbers add to <b>10</b>. One is <b>2 more</b> than the other. Each little square is 1 cube.', c2:'One is 2 more.'},
+  {id:'1', chip:'1', T:24, d:6, names:['Maya','Eli'], who:true, text:'Maya and Eli have <b>24</b> stickers together. Maya has <b>6 more</b> than Eli. How many does each have?', c2:'Maya has 6 more.'},
+  {id:'2', chip:'2', T:50, d:10, names:['Bigger','Smaller'], text:'Two numbers add to <b>50</b>. One is <b>10 more</b> than the other.', c2:'One is 10 more.'},
+  {id:'3', chip:'3', T:80, d:20, names:['Bigger box','Smaller box'], text:'Two boxes hold <b>80</b> crayons together. One box has <b>20 fewer</b> than the other.', c2:'One has 20 fewer.'},
+  {id:'4', chip:'4', T:100, d:16, names:['Bigger','Smaller'], text:'Two numbers add to <b>100</b>. One is <b>16 more</b> than the other.', c2:'One is 16 more.'},
+  {id:'5', chip:'★ 5', T:60, d:5, n:3, names:['First','Second','Third'], text:'Three numbers add to <b>60</b>. Each number is <b>5 more</b> than the one before. Find the three numbers.', c2:'Each is 5 more than the one before.'},
+  {id:'6', chip:'Journal 6', T:30, d:4, names:['Bigger','Smaller'], text:'Draw the bars for <b>total 30, difference 4</b>. What are the two numbers?', c2:'One is 4 more.'},
+  {id:'own', chip:'Make my own', own:true, names:['Bigger','Smaller']}
+];
+/* Pure math: remove the extra, split what is left, put the extra back. */
+function model(p){
+  const n = p.n || 2, E = p.d * n * (n - 1) / 2, rest = p.T - E, each = rest / n;
+  const vals = n === 2 ? [each + p.d, each] : [each, each + p.d, each + 2 * p.d];
+  const ex = n === 2 ? [1, 0] : [0, 1, 2];
+  return {n, E, rest, each, vals, ex};
+}
+function judge(p, v){
+  const n = p.n || 2, sum = v.reduce((a, b) => a + b, 0);
+  const sumOk = sum === p.T;
+  const stepOk = n === 2 ? v[0] - v[1] === p.d : (v[1] - v[0] === p.d && v[2] - v[1] === p.d);
+  return {sum, sumOk, stepOk, ok: sumOk && stepOk};
+}
+window.__twoBars = {P, model, judge};
+
+const KEYS2 = ['tap','rest','each','back','check'], KEYS3 = ['tap','etot','rest','each','back','check'];
+const LABEL = {tap:'Find the extra', etot:'Add the extra', rest:'Cover it', each:'Split what is left', back:'Put it back', check:'Check both clues'};
+
+/* ---------- State ---------- */
+let S;
+function fresh(){
+  return {view:'warm',
+    warm:{k:null, found:[], clue:false, tested:{}, msg:''},
+    votes:[0,0,0],
+    launch:{f:['',''], act:0, res:null, msg:null},
+    solve:{pi:1, mode:'steps', step:0, f:[''], act:0, res:null, msg:null, checks:[false,false], glow:false, done:{}},
+    own:{T:40, d:8},
+    talk:{q:0, show:'plain', gc:0, msg:''}};
+}
+const prob = () => { const p = P[S.solve.pi]; return p.own ? Object.assign({}, p, {T:S.own.T, d:S.own.d, text:`Two numbers add to <b>${S.own.T}</b>. One is <b>${S.own.d} more</b> than the other.`, c2:`One is ${S.own.d} more.`}) : p; };
+const keysOf = p => (p.n || 2) === 2 ? KEYS2 : KEYS3;
+
+/* ---------- Bar drawing ---------- */
+function barsHTML(rows, maxU, brace, ticks){
+  const r = rows.map((row, i) => {
+    const segs = row.segs.filter(s => s.u > 0).map(s =>
+      `<button class="seg ${s.cls || ''}" style="width:${s.u / maxU * 100}%;--n:${s.u}" ${s.act ? `data-a="${s.act}" data-v="${s.v}"` : 'tabindex="-1"'} aria-label="${s.aria || s.label || ''}">${s.label == null ? '' : s.label}</button>`).join('');
+    return `<div class="brow r${i}"><div class="bname">${row.name}</div><div class="btrack">${segs}<span class="blen">${row.end == null ? '' : row.end}</span></div></div>`;
+  }).join('');
+  const b = brace ? `<div class="brace"><div>${brace[0]}<small>${brace[1]}</small></div></div>` : '';
+  return `<div class="bars ${ticks ? 'ticks' : ''}"><div class="rows">${r}</div>${b}</div>`;
+}
+/* The bar model for a problem. fl: found, cover, each, all, tap, glow, rest */
+function modelBars(p, fl){
+  const m = model(p);
+  const rows = m.vals.map((val, i) => {
+    const segs = [{u:m.each, cls:'same' + (fl.tap ? ' tap' : ''), label: fl.each ? m.each : '?', act: fl.tap ? 'seg' : null, v:'same', aria:'same part'}];
+    for(let j = 0; j < m.ex[i]; j++){
+      segs.push({u:p.d, cls:'extra' + (fl.tap ? ' tap' : '') + (fl.cover ? ' cover' : '') + (fl.found ? '' : ' hide') + (fl.glow ? ' glow' : ''),
+        label: fl.found ? p.d : '?', act: fl.tap ? 'seg' : null, v:'extra', aria:'extra part'});
+    }
+    const end = fl.all ? val : (fl.each && !m.ex[i] ? m.each : '?');
+    return {name:p.names[i], segs, end};
+  });
+  const brace = fl.cover && fl.rest ? [m.rest, 'left'] : [p.T, 'in all'];
+  return barsHTML(rows, Math.max(...m.vals), brace, p.T <= 30);
+}
+/* Bars drawn to scale for a guess. */
+function guessBars(p, v){
+  const n = v.length, lo = Math.min(...v), maxU = Math.max(...v, 1);
+  const rows = v.map((val, i) => {
+    const segs = [{u: n === 2 ? lo : val, cls:'same', label: n === 2 ? '' : ''}];
+    if(n === 2 && val > lo) segs.push({u: val - lo, cls:'extra', label: (val - lo) + ' more'});
+    return {name:p.names[i], segs, end:val};
+  });
+  return barsHTML(rows, maxU, null, maxU <= 30);
+}
+function clueCards(p, v, opt){
+  opt = opt || {};
+  const n = p.n || 2, labels = [`They add to ${p.T}.`, p.c2];
+  let math = ['', ''], ok = [null, null];
+  if(v){
+    const j = judge(p, v);
+    math[0] = v.join(' + ') + ' = ' + j.sum; ok[0] = j.sumOk;
+    math[1] = n === 2 ? (v[0] >= v[1] ? `${v[0]} − ${v[1]} = ${v[0] - v[1]}` : `${p.names[1]} has ${v[1] - v[0]} more`) : `${v[1]} − ${v[0]} = ${v[1] - v[0]} and ${v[2]} − ${v[1]} = ${v[2] - v[1]}`;
+    ok[1] = j.stepOk;
+  }
+  return '<div class="clues">' + [0, 1].map(i => {
+    const shown = v && (!opt.tap || opt.checks[i]);
+    const cls = shown ? (ok[i] ? 'ok' : 'no') : '';
+    const inner = `<span class="box">${shown ? (ok[i] ? '✓' : '✗') : ''}</span><span><span class="t">Clue ${i + 1}: ${labels[i]}</span><span class="m">${shown ? math[i] : (opt.tap ? 'Tap to check' : '')}</span></span>`;
+    return opt.tap && !shown ? `<button class="clue" data-a="clue" data-v="${i}">${inner}</button>` : `<div class="clue ${cls}">${inner}</div>`;
+  }).join('') + '</div>';
+}
+/* Feedback for a tested answer. Uses the lesson plan's teacher questions. */
+function feedback(p, v){
+  const n = p.n || 2, j = judge(p, v);
+  if(j.ok) return {ok:true, html: n === 2 ? `Both clues fit! ${v[0]} + ${v[1]} = ${p.T}, and ${v[0]} is ${p.d} more than ${v[1]}.` : `Both clues fit! ${v.join(' + ')} = ${p.T}, and each jump is ${p.d}.`};
+  if(n === 2 && v[0] < v[1]) return {html:`<q>Which bar should be longer?</q>In your answer ${p.names[1]} has more than ${p.names[0]}. Swap them or try new numbers.`};
+  if(!j.sumOk){
+    const lo = [...v].sort((a, b) => a - b), off = j.sum - p.T;
+    return {html:`<q>Do ${lo.slice(0, -1).join(', ')} and ${lo[lo.length - 1]} make ${p.T}?</q>${v.join(' + ')} = ${j.sum}. That is ${Math.abs(off)} too ${off > 0 ? 'many' : 'few'}.` + (j.stepOk ? ' The “more” clue fits, but the total clue does not.' : '') + ' Try again.'};
+  }
+  if(n === 2) return {html:`<q>How many more ${p.who ? 'does ' + p.names[0] + ' have' : 'is the bigger one'} in your answer?</q>${v[0]} − ${v[1]} = ${v[0] - v[1]}. The clue says ${p.d} more. The total fits, so keep ${p.T} and move some across.`};
+  return {html:`<q>Is each number ${p.d} more than the one before?</q>Your jumps are ${v[1] - v[0]} and ${v[2] - v[1]}. The total fits. Try again.`};
+}
+
+/* ---------- Number pad ---------- */
+function fieldsHTML(c, labels){
+  return '<div class="fields">' + labels.map((l, i) => `<button class="field" id="field${i}" data-a="field" data-v="${i}" aria-pressed="${c.act === i}"><span>${l}</span><strong>${c.f[i] || ''}</strong></button>`).join('') + '</div>';
+}
+function padHTML(go){
+  return '<div class="pad">' + [1,2,3,4,5,6,7,8,9,0].map(d => `<button data-a="key" data-v="${d}">${d}</button>`).join('') +
+    `<button data-a="key" data-v="back" aria-label="Erase">⌫</button><button class="go" data-a="enter" style="grid-column:span 1">${go}</button></div>`;
+}
+const msgHTML = m => m ? `<p class="msg ${m.ok ? 'ok' : (m.no ? 'no' : '')}">${m.html}</p>` : '';
+const ctx = () => S.view === 'launch' ? S.launch : S.solve;
+
+/* ---------- Views ---------- */
+const VIEWS = {
+  warm(){
+    const w = S.warm, k = w.k;
+    const cubes = Array.from({length:10}, (_, i) => `<button class="cube ${k == null ? '' : (i < k ? 'x' : 'y')}" data-a="cube" data-v="${i + 1}" aria-label="Split after ${i + 1}">${i + 1}</button>`).join('');
+    const stage = `<p class="story">Two numbers add to <b>10</b>. What could they be?</p>
+      <div class="train">${cubes}</div>
+      <p class="big">${k == null ? '&nbsp;' : `<span class="ca">${k}</span> and <span class="cb">${10 - k}</span>`}</p>
+      <p class="note">Tap a cube to snap the train of 10 into two parts.</p>`;
+    const sorted = [...w.found].sort((a, b) => b - a);
+    const pairs = sorted.map(a => {
+      const b = 10 - a, t = w.tested[a], win = a - b === 2;
+      const mini = Array.from({length:10}, (_, i) => `<i class="${i < a ? 'x' : ''}"></i>`).join('');
+      const tag = !w.clue ? '' : t ? `<small>${a} − ${b} = ${a - b}. ${win ? 'It fits!' : 'Not 2 more.'}</small>` : '<small>Tap to test</small>';
+      return w.clue && !t ? `<button class="pair pick" data-a="testpair" data-v="${a}"><strong>${a} and ${b}</strong><span class="mini">${mini}</span>${tag}</button>`
+        : `<div class="pair ${t ? (win ? 'win' : 'out') : ''}"><strong>${a} and ${b}</strong><span class="mini">${mini}</span>${tag}</div>`;
+    }).join('');
+    const all = w.found.length === 6;
+    const panel = `<p class="lead">${w.clue ? 'Clue 2: <b>one number is 2 more than the other.</b> Which pairs still work? Tap each pair to test it.' : 'Clue 1: the two numbers add to 10. Find every pair.'}</p>
+      <p class="note">${w.clue ? '' : `Pairs found: <b>${w.found.length} of 6</b>. (7 and 3 is the same pair as 3 and 7.)`}</p>
+      <div class="pairs">${pairs}</div>
+      ${w.msg ? `<p class="msg">${w.msg}</p>` : ''}
+      <div class="row">${w.clue ? `<button class="primary" data-a="go" data-v="launch">Next: the sticker puzzle</button>` :
+        `<button class="primary" data-a="addclue" ${all ? '' : 'disabled'}>Add clue 2</button><button class="second" data-a="allpairs">Show all pairs</button>`}</div>`;
+    return {stage, panel};
+  },
+  launch(){
+    const p = P[1], L = S.launch;
+    const stage = `<p class="story">${p.text}</p>` + (L.res ? guessBars(p, L.res) : '<p class="note">Type a guess, or tap a class guess, to see its two bars here.</p>') + clueCards(p, L.res);
+    const vl = ['Yes, just one answer', 'Many answers work', 'We need more clues'];
+    const presets = [[12,12],[18,6],[18,12],[20,4],[14,10]];
+    const panel = `<p class="lead">If you know the <b>total</b> and <b>how much more</b> one has, can you find both?</p>
+      <div class="votes">${vl.map((t, i) => `<button class="vote" data-a="vote" data-v="${i}"><strong>${S.votes[i]}</strong>${t}</button>`).join('')}</div>
+      <p class="note">Tap to count hands for each vote.</p><hr>
+      <p class="lead">Take a guess and test it. A good guess must fit <b>both</b> clues.</p>
+      ${fieldsHTML(L, p.names)}${padHTML('Test')}
+      <div class="row"><span class="note">Class guesses to test:</span>${presets.map(g => `<button class="chip" data-a="preset" data-v="${g.join(',')}">${g[0]} and ${g[1]}</button>`).join('')}</div>
+      ${msgHTML(L.msg)}
+      <div class="row"><button class="primary" data-a="go" data-v="solve">Next: solve it with two bars</button></div>`;
+    return {stage, panel};
+  },
+  solve(){
+    const p = prob(), m = model(p), keys = keysOf(p), V = S.solve, k = keys[V.step], n = m.n;
+    const past = key => V.step > keys.indexOf(key), at = key => k === key;
+    let stage = `<p class="story">${p.text}</p>`, body = '';
+    const chips = `<div class="chips" role="group" aria-label="Problems">${P.map((q, i) => `<button class="chip ${V.done[q.id] ? 'done' : ''}" data-a="prob" data-v="${i}" aria-pressed="${i === V.pi}">${q.chip}</button>`).join('')}</div>`;
+    const own = p.own ? `<div class="row"><div class="stepper">Total <button data-a="own" data-v="T-" aria-label="Total down">−</button><strong>${p.T}</strong><button data-a="own" data-v="T+" aria-label="Total up">+</button></div>
+      <div class="stepper">How much more <button data-a="own" data-v="d-" aria-label="Difference down">−</button><strong>${p.d}</strong><button data-a="own" data-v="d+" aria-label="Difference up">+</button></div></div>` : '';
+    const modeSeg = `<div class="seg2" role="group" aria-label="How to solve"><button data-a="mode" data-v="steps" aria-pressed="${V.mode === 'steps'}">Bar steps</button><button data-a="mode" data-v="check" aria-pressed="${V.mode === 'check'}">Test my own answer</button></div>`;
+    if(V.mode === 'check'){
+      stage += (V.res ? guessBars(p, V.res) : modelBars(p, {})) + clueCards(p, V.res);
+      body = `<p class="lead">Solved it on your worksheet? Type your numbers and test them against both clues.</p>${fieldsHTML(V, p.names)}${padHTML('Test')}${msgHTML(V.msg)}`;
+    } else {
+      const fl = {tap:at('tap'), found:past('tap'), cover:at('rest') || at('each'), rest:at('each'), each:past('each'), all:past('back'), glow:V.glow};
+      stage += modelBars(p, fl) + clueCards(p, past('back') ? m.vals : null, {tap:at('check'), checks:V.checks});
+      const steps = `<ol class="steps">${keys.map((key, i) => `<li class="${i < V.step ? 'done' : ''} ${i === V.step ? 'now' : ''}">${LABEL[key]}</li>`).join('')}</ol>`;
+      const big = n === 2 ? p.names[0] : '', small = n === 2 ? p.names[1] : '';
+      const prompt = {
+        tap: n === 2 ? `Where is the <b>${p.d}</b> in the picture? Tap that piece of the bars.` : `Each bar is <b>${p.d}</b> longer than the one before. Tap an extra piece.`,
+        etot: `The extra pieces are ${p.d}, ${p.d} and ${p.d}. How much extra in all?`,
+        rest: `Cover the extra <b>${m.E}</b>. The bars held <b>${p.T}</b> in all. How much is left?`,
+        each: `Now the ${n === 2 ? 'two' : 'three'} bars are the same length. Together they make <b>${m.rest}</b>. How long is each bar?`,
+        back: n === 2 ? `Uncover the ${p.d}. ${small} is <b>${m.each}</b>. ${big} is ${m.each} and <b>${p.d} more</b>. How much is that?` : `The first number is <b>${m.each}</b>. Each one is ${p.d} more. What are the second and third?`,
+        check: `Now check your answer against <b>both</b> clues. Tap each clue on the board.`
+      }[k] || (n === 2 ? (p.who ? `Solved! Maya has <b>${m.vals[0]}</b> and Eli has <b>${m.vals[1]}</b>.` : `Solved! The two ${p.id === '3' ? 'boxes hold' : 'numbers are'} <b>${m.vals[0]}</b> and <b>${m.vals[1]}</b>.`) : `Solved! The numbers are <b>${m.vals.join(', ')}</b>.`);
+      const labels = {etot:['Extra in all'], rest:['What is left'], each:['Each bar'], back: n === 2 ? [big] : [p.names[1], p.names[2]]}[k];
+      body = steps + `<p class="lead">${prompt}</p>` + (labels ? fieldsHTML(V, labels) + padHTML('Check') : '') + msgHTML(V.msg) +
+        (k ? '' : `<div class="row"><button class="primary" data-a="nextprob">Next problem</button><button class="second" data-a="go" data-v="talk">Talk about it</button></div>`);
+    }
+    return {stage, panel: chips + own + modeSeg + body};
+  },
+  talk(){
+    const p = P[1], m = model(p), T = S.talk, sh = T.show;
+    const Q = [
+      {t:'Where is the 6 in the picture? If you cover it, what is left?', a:[['Show the 6','six'],['Cover the 6','cover']]},
+      {t:'Cover Maya’s extra 6. What do the two bars look like now?', a:[['Cover it','cover'],['Split what is left','split'],['Put the 6 back','all']]},
+      {t:'Here are two ways to solve it: guess and check, or two bars. How are they the same? Which is faster when the numbers are big?', a:[['Guess and check','gc'],['The bar way','barway']]},
+      {t:'Sam says 12 and 18. Rae says 18 and 6. Is either one right? Test each answer against both clues.', a:[['Test Sam: 18 and 12','sam'],['Test Rae: 18 and 6','rae']]},
+      {t:'If you know the total and how much more one has, can you always find both? Draw the bars for total 30, difference 4. Then make a puzzle for a partner.', a:[['Try total 30, difference 4','j6'],['Make my own puzzle','own']]}
+    ];
+    const q = Q[T.q];
+    let bars, cards = clueCards(p, null), say = '';
+    if(sh === 'sam' || sh === 'rae'){
+      const v = sh === 'sam' ? [18,12] : [18,6];
+      bars = guessBars(p, v); cards = clueCards(p, v); say = feedback(p, v).html;
+    } else {
+      const fl = {found: sh !== 'plain' && sh !== 'gc', cover: sh === 'cover' || sh === 'split', rest: sh === 'cover' || sh === 'split', each: sh === 'split' || sh === 'all' || sh === 'barway', all: sh === 'all' || sh === 'barway', glow: sh === 'six'};
+      bars = modelBars(p, fl);
+      if(fl.all) cards = clueCards(p, m.vals);
+      say = {six:'The 6 is the yellow piece. It is the part of Maya’s bar that sticks out past Eli’s.',
+        cover:'24 − 6 = 18. With the 6 covered, 18 stickers are left in the two bars.',
+        split:'Now the bars are the same length. 9 + 9 = 18, so each bar is 9.',
+        all:'Eli has 9. Maya has 9 + 6 = 15. Check: 15 + 9 = 24, and 15 is 6 more than 9.',
+        barway:'<b>The bar way:</b> 24 − 6 = 18. Then 18 is 9 + 9. Then 9 + 6 = 15. Three steps, no guessing.'}[sh] || '';
+      if(sh === 'gc'){
+        const g = [[12,12],[13,11],[14,10],[15,9]].slice(0, T.gc);
+        say = `<table class="gc"><tr><th>Maya</th><th>Eli</th><th>Add to 24?</th><th>How many more?</th></tr>${g.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>✓</td><td>${r[0] - r[1]}${r[0] - r[1] === 6 ? ' ✓' : ''}</td></tr>`).join('')}</table>` +
+          (T.gc < 4 ? 'Tap again for the next guess.' : 'Four guesses to get there. Each guess keeps the total at 24 and moves one sticker across.');
+      }
+    }
+    const stage = `<p class="story">${p.text}</p>${bars}${cards}`;
+    const panel = `<div class="chips" role="group" aria-label="Questions">${Q.map((_, i) => `<button class="chip" data-a="q" data-v="${i}" aria-pressed="${i === T.q}">${i === 4 ? '★ Big question' : i + 1}</button>`).join('')}</div>
+      <p class="lead">${q.t}</p>
+      <div class="row">${q.a.map((b, i) => `<button class="${i ? 'second' : 'primary'}" data-a="show" data-v="${b[1]}">${b[0]}</button>`).join('')}</div>
+      ${say ? `<div class="msg">${say}</div>` : ''}
+      <p class="note">Talk it over first. Then tap a button to put the evidence on the board.</p>`;
+    return {stage, panel};
+  }
+};
+
+/* ---------- Actions ---------- */
+function setStep(i){
+  const V = S.solve, p = prob(), k = keysOf(p)[i];
+  V.step = i; V.msg = null; V.glow = false; V.checks = [false, false]; V.act = 0;
+  V.f = (k === 'back' && (p.n || 2) === 3) ? ['', ''] : [''];
+}
+function startProb(i){
+  const V = S.solve; V.pi = i; V.res = null; V.msg = null;
+  if(V.mode === 'check'){ V.f = prob().names.map(() => ''); V.act = 0; V.step = 0; } else setStep(0);
+}
+function readFields(c){
+  if(c.f.some(x => x === '')){ c.msg = {html:'Type a number in each box first.'}; return null; }
+  return c.f.map(Number);
+}
+function testGuess(c, p){
+  const v = readFields(c); if(!v) return;
+  c.res = v; const fb = feedback(p, v); c.msg = {ok:fb.ok, no:!fb.ok, html:fb.html};
+  if(fb.ok && c === S.solve) S.solve.done[P[S.solve.pi].id] = true;
+}
+function checkStep(){
+  const V = S.solve, p = prob(), m = model(p), keys = keysOf(p), k = keys[V.step], n = m.n;
+  const v = readFields(V); if(!v) return;
+  const x = v[0];
+  const want = {etot:[m.E], rest:[m.rest], each:[m.each], back: n === 2 ? [m.vals[0]] : [m.vals[1], m.vals[2]]}[k];
+  if(want.every((w, i) => w === v[i])){ setStep(V.step + 1);
+    V.msg = {ok:true, html:{etot:`Yes. ${p.d} + ${p.d} + ${p.d} = ${m.E}.`, rest:`Yes. ${p.T} − ${m.E} = ${m.rest}.`, each: n === 2 ? `Yes. ${m.each} + ${m.each} = ${m.rest}.` : `Yes. ${m.each} + ${m.each} + ${m.each} = ${m.rest}.`, back: n === 2 ? `Yes. ${m.each} + ${p.d} = ${m.vals[0]}.` : `Yes. ${m.vals.join(', ')}.`}[k]};
+    return; }
+  const why = {
+    etot:`The second bar has one extra ${p.d}. The third bar has two. ${p.d} + ${p.d} + ${p.d} is not ${x}. Try again.`,
+    rest:`${x} + ${m.E} = ${x + m.E}, but the bars hold ${p.T} in all. What number plus ${m.E} makes ${p.T}?`,
+    each: n === 2 ? `${x} + ${x} = ${2 * x}. The two equal bars must make ${m.rest}. Try again.` : `${x} + ${x} + ${x} = ${3 * x}. The three equal bars must make ${m.rest}. Try again.`,
+    back: n === 2 ? `${p.names[0]} is ${m.each} and ${p.d} more. Start at ${m.each} and count on ${p.d}. That is not ${x}. Try again.` : `Second is ${m.each} + ${p.d}. Third is ${m.each} + ${p.d} + ${p.d}. Try again.`
+  }[k];
+  V.msg = {no:true, html:why};
+}
+const ACT = {
+  go(v){ S.view = v; },
+  cube(v){ const w = S.warm; if(w.clue) { w.k = +v; return; } w.k = +v; const a = Math.max(w.k, 10 - w.k);
+    if(w.found.includes(a)) w.msg = `${a} and ${10 - a}: you already have that pair.`; else { w.found.push(a); w.msg = w.found.length === 6 ? 'That is all 6 pairs. Now add clue 2.' : ''; } },
+  allpairs(){ S.warm.found = [10,9,8,7,6,5]; S.warm.msg = 'Here are all 6 pairs. So far any of them could be right.'; },
+  addclue(){ S.warm.clue = true; S.warm.msg = ''; },
+  testpair(v){ const w = S.warm; w.tested[v] = true; const a = +v, n = Object.keys(w.tested).length;
+    w.k = a;
+    if(n === 6) w.msg = 'One pair survives: <b>6 and 4</b>. Clue 1 left six pairs. Clue 2 left just one.';
+    else if(a === 6) w.msg = '6 and 4 fits both clues. Does any other pair fit too? Test them.';
+    else w.msg = `${a} and ${10 - a} add to 10, but ${a} is ${a - (10 - a)} more than ${10 - a}. Cross it out.`; },
+  vote(v){ S.votes[v]++; },
+  field(v){ ctx().act = +v; },
+  key(v){ const c = ctx(); if(!c.f.length) return; let s = c.f[c.act] || '';
+    if(v === 'back') s = s.slice(0, -1); else if(s.length < 3) s = (s === '0' ? '' : s) + v;
+    c.f[c.act] = s; },
+  enter(){ const c = ctx();
+    if(S.view === 'launch') return testGuess(c, P[1]);
+    if(S.view !== 'solve') return;
+    if(S.solve.mode === 'check') return testGuess(c, prob());
+    const k = keysOf(prob())[S.solve.step];
+    if(k && k !== 'tap' && k !== 'check') checkStep(); },
+  preset(v){ const L = S.launch; L.f = v.split(','); testGuess(L, P[1]); },
+  prob(v){ startProb(+v); },
+  nextprob(){ startProb(Math.min(S.solve.pi + 1, P.length - 1)); },
+  mode(v){ S.solve.mode = v; startProb(S.solve.pi); },
+  own(v){ const o = S.own;
+    if(v === 'T+') o.T = Math.min(100, o.T + 2); if(v === 'T-') o.T = Math.max(10, o.T - 2);
+    if(v === 'd+') o.d += 2; if(v === 'd-') o.d -= 2;
+    o.d = Math.max(2, Math.min(o.d, o.T - 2)); startProb(S.solve.pi); },
+  seg(v){ const V = S.solve, p = prob();
+    if(v === 'extra'){ setStep(1); V.msg = {ok:true, html: (p.n || 2) === 2 ? `Yes. That piece is the ${p.d} more.` : `Yes. Each yellow piece is ${p.d}.`}; }
+    else V.msg = {no:true, html:'That part is the same in every bar. Find the piece that only the longer bar has.'}; },
+  clue(v){ const V = S.solve; V.checks[v] = true;
+    if(V.checks[0] && V.checks[1]){ V.step++; V.done[P[V.pi].id] = true; V.msg = {ok:true, html:'Both clues fit. An answer that fits only one clue is not done yet.'}; } },
+  q(v){ S.talk.q = +v; S.talk.show = 'plain'; S.talk.gc = 0; },
+  show(v){ const T = S.talk;
+    if(v === 'j6'){ S.view = 'solve'; S.solve.mode = 'steps'; startProb(6); return; }
+    if(v === 'own'){ S.view = 'solve'; S.solve.mode = 'steps'; startProb(7); return; }
+    if(v === 'gc'){ T.gc = T.show === 'gc' ? Math.min(4, T.gc + 1) : 1; }
+    T.show = v; }
+};
+
+/* ---------- Render ---------- */
+const NAV = [['warm','Warm-up'],['launch','The puzzle'],['solve','Two bars'],['talk','Talk about it']];
+function render(){
+  $('#nav').innerHTML = NAV.map((n, i) => `<button data-a="go" data-v="${n[0]}" aria-pressed="${S.view === n[0]}"><i>${i + 1}</i>${n[1]}</button>`).join('');
+  const v = VIEWS[S.view]();
+  $('#stage').innerHTML = v.stage; $('#panel').innerHTML = v.panel;
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if(!el || el.disabled) return;
+  const prev = S.view;
+  ACT[el.dataset.a](el.dataset.v); render();
+  if(S.view !== prev){ $('#stage').scrollTop = 0; $('#panel').scrollTop = 0; }
+});
+document.addEventListener('keydown', e => {
+  if(S.view !== 'launch' && S.view !== 'solve') return;
+  if(/^[0-9]$/.test(e.key)){ ACT.key(e.key); render(); }
+  else if(e.key === 'Backspace'){ e.preventDefault(); ACT.key('back'); render(); }
+  else if(e.key === 'Enter' && !(e.target.closest && e.target.closest('button'))){ ACT.enter(); render(); }
+});
+$('#resetBtn').onclick = () => { S = fresh(); render(); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }catch(err){} };
+document.addEventListener('fullscreenchange', () => { $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+
+S = fresh(); render();
+})();
+</script>
+
+</body></html>

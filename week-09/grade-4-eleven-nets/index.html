@@ -1,0 +1,685 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Eleven Nets</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a craft table. A big 3D folding stage on the left (grid paper), a working panel on the right; stacks on phones. */
+:root{
+  --paper:#EEF1EC; --card:#FFFFFF; --ink:#1E2433; --muted:#5A6272; --line:#CDD4CF; --grid:#D3DEE6;
+  --accent:#2C5FD0; --accent-ink:#FFFFFF; --accent-soft:#E3EAFB; --tape:#E9B63B; --tape-soft:#FBF0D3;
+  --good:#1D8A55; --good-soft:#DDF2E7; --clash:#D23B3B; --clash-soft:#FBE3E1;
+  --c0:#E8806A; --c1:#EDBE4E; --c2:#3FA89A; --c3:#5A86E0; --c4:#A877C9; --c5:#7DB55A;
+  --die:#FBFAF6; --edge:rgba(20,26,40,.55);
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#15181F; --card:#1F232D; --ink:#ECEDEA; --muted:#A3A9B6; --line:#363C49; --grid:#262C38;
+  --accent:#7EA3FF; --accent-ink:#0F1420; --accent-soft:#232F4D; --tape:#F0C25A; --tape-soft:#3A3120;
+  --good:#4FCB8C; --good-soft:#18352A; --clash:#FF7A72; --clash-soft:#3D2023;
+  --c0:#D9705B; --c1:#D7A93E; --c2:#36978A; --c3:#4E78CF; --c4:#9668B6; --c5:#6CA34B;
+  --die:#ECEBE4; --edge:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#15181F; --card:#1F232D; --ink:#ECEDEA; --muted:#A3A9B6; --line:#363C49; --grid:#262C38;
+  --accent:#7EA3FF; --accent-ink:#0F1420; --accent-soft:#232F4D; --tape:#F0C25A; --tape-soft:#3A3120;
+  --good:#4FCB8C; --good-soft:#18352A; --clash:#FF7A72; --clash-soft:#3D2023;
+  --c0:#D9705B; --c1:#D7A93E; --c2:#36978A; --c3:#4E78CF; --c4:#9668B6; --c5:#6CA34B;
+  --die:#ECEBE4; --edge:rgba(0,0,0,.6); color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+
+header{display:flex;align-items:center;gap:16px 24px;padding-block:14px 8px;flex-wrap:wrap}
+.title h1{font-size:clamp(28px,3vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1}
+.title p{margin:4px 0 0;color:var(--muted);font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.tools{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.ghost{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:9px 16px;font-weight:700;font-size:15px;min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs{display:flex;gap:4px 22px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:12px}
+.tabs button{border:0;background:none;padding:10px 2px;font-family:var(--display);font-weight:600;font-size:clamp(17px,1.5vw,21px);color:var(--muted);border-bottom:4px solid transparent;margin-bottom:-2px;min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--tape)}
+
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;padding-bottom:18px}
+.stage-col{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
+.stage{position:relative;flex:1;min-height:360px;border-radius:16px;overflow:hidden;touch-action:none;cursor:grab;
+  background-color:var(--card);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;background-position:center;border:2px solid var(--line);perspective:1500px;contain:paint}
+.stage.dragging{cursor:grabbing}
+.scene{position:absolute;left:50%;top:54%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateZ(var(--rz))}
+.pivot{position:absolute;left:0;top:0;transform-style:preserve-3d;
+  transform:translate3d(calc((var(--fx) + (0.5 - var(--fx)) * var(--t)) * var(--s) * -1),calc((var(--fy) + (0.5 - var(--fy)) * var(--t)) * var(--s) * -1),calc(var(--t) * var(--s) * -0.5))}
+.sq{position:absolute;left:0;top:0;width:var(--s);height:var(--s);transform-style:preserve-3d}
+.sq.r{left:var(--s);transform-origin:0 50%;transform:rotateY(calc(var(--t) * -90deg))}
+.sq.l{left:calc(var(--s) * -1);transform-origin:100% 50%;transform:rotateY(calc(var(--t) * 90deg))}
+.sq.d{top:var(--s);transform-origin:50% 0;transform:rotateX(calc(var(--t) * 90deg))}
+.sq.u{top:calc(var(--s) * -1);transform-origin:50% 100%;transform:rotateX(calc(var(--t) * -90deg))}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--c);border:2px solid var(--edge);
+  display:grid;place-items:center;color:#14161c;font-family:var(--display);font-weight:800;font-size:calc(var(--s) * .42);line-height:1;
+  transform:translateZ(calc(var(--t) * var(--lift,0) * -1px))}
+.face.back{transform:rotateY(180deg) translateZ(calc(var(--t) * var(--lift,0) * 1px))}
+.face .word{font-family:var(--body);font-weight:700;font-size:calc(var(--s) * .2);text-transform:uppercase;letter-spacing:.04em}
+.face.base::after{content:"";position:absolute;inset:7%;border:3px dashed rgba(20,22,28,.55);border-radius:4px}
+.face.lidhl{box-shadow:inset 0 0 0 calc(var(--s) * .07) var(--tape)}
+.face.pick{box-shadow:inset 0 0 0 calc(var(--s) * .07) var(--ink)}
+.stage.folded .face.clashy{background:repeating-linear-gradient(45deg,var(--c) 0 10px,var(--clash) 10px 16px);box-shadow:inset 0 0 0 4px var(--clash)}
+.face.die{background:var(--die)}
+.pips{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:74%;height:74%}
+.pips i{width:66%;height:66%;border-radius:50%;background:#1b1e26;place-self:center}
+.pips i.o{visibility:hidden}
+.stage-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:18px;text-align:center;padding:24px;pointer-events:none}
+.stage-badge{position:absolute;left:12px;top:12px;right:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;font-size:14px;color:var(--muted)}
+.stage-badge b{color:var(--ink)}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.primary{border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:clamp(17px,1.4vw,20px);padding:12px 26px;border-radius:14px;min-height:52px}
+.primary:disabled{opacity:.4;cursor:default}
+.secondary{border:2px solid var(--ink);background:var(--card);font-weight:700;font-size:clamp(16px,1.25vw,18px);padding:10px 18px;border-radius:14px;min-height:52px}
+.secondary:disabled{opacity:.4;cursor:default}
+.slider{display:flex;align-items:center;gap:8px;flex:1 1 220px;min-width:0;color:var(--muted);font-size:14px}
+.slider input{flex:1;min-width:0;width:100%;accent-color:var(--accent);height:32px}
+
+.panel{min-width:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
+.view{display:flex;flex-direction:column;gap:14px}
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.steps button{border:2px solid var(--line);background:var(--card);border-radius:24px;padding:8px 16px;font-weight:700;font-size:15px;min-height:44px;color:var(--muted)}
+.steps button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--tape-soft)}
+.big{font-family:var(--display);font-weight:600;font-size:clamp(22px,2vw,30px);line-height:1.2;margin:0;max-width:30em}
+.say{margin:0;font-size:clamp(17px,1.35vw,20px);max-width:36em}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:3px;gap:2px;align-self:flex-start}
+.seg button{border:0;background:none;padding:9px 16px;border-radius:10px;font-weight:700;font-size:16px;color:var(--muted);min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.result{margin:0;padding:14px 18px;border-radius:14px;background:var(--accent-soft);font-size:clamp(17px,1.35vw,20px);max-width:36em}
+.result:empty{display:none}
+.result.good{background:var(--good-soft)}
+.result.clash{background:var(--clash-soft)}
+.result b{font-weight:700}
+.hint{margin:0;color:var(--muted);font-size:15px}
+.label{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* grid-paper editor */
+.editor{display:grid;grid-template-columns:repeat(7,1fr);gap:0;width:min(100%,420px);aspect-ratio:7/6;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--card)}
+.editor button{border:0;border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);background:var(--card);padding:0;font-family:var(--display);font-weight:800;font-size:20px;color:#14161c}
+.editor button.on{background:var(--c);box-shadow:inset 0 0 0 2px var(--edge)}
+.editor button:hover:not(.on){background:var(--accent-soft)}
+.r4{display:grid;grid-template-columns:repeat(4,60px);grid-template-rows:repeat(3,60px);gap:4px}
+.r4 button{border:2px dashed var(--line);background:transparent;border-radius:6px;font-weight:700;color:var(--muted)}
+.r4 button.fixed{border:2px solid var(--edge);background:var(--c3);cursor:default}
+.r4 button.on{border:2px solid var(--edge);background:var(--c1)}
+
+/* class list */
+.fam{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;padding:10px 0;border-top:1.5px solid var(--line)}
+.fam .name{font-weight:700;font-size:15px}
+.fam .name small{display:block;font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;align-items:center}
+.thumbs .none{color:var(--muted);font-size:14px}
+.thumb{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:5px;display:inline-grid;place-items:center;position:relative;min-width:48px;min-height:48px}
+.thumb.flash{border-color:var(--tape);box-shadow:0 0 0 3px var(--tape)}
+.thumb.sel{border-color:var(--ink)}
+.thumb .tag{position:absolute;top:-8px;right:-8px;min-width:24px;height:24px;border-radius:12px;font-size:13px;font-weight:700;display:grid;place-items:center;padding:0 5px;background:var(--ink);color:var(--card)}
+.thumb .tag.y{background:var(--good);color:var(--card)}
+.thumb .tag.n{background:var(--muted);color:var(--card)}
+.thumb.fade{opacity:.35}
+.sortgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:460px}
+.sortgrid .thumb{min-height:96px}
+.all35{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.tally{display:flex;gap:22px;flex-wrap:wrap;padding-top:6px}
+.tally div b{display:block;font-family:var(--display);font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.tally div span{font-size:14px;color:var(--muted)}
+.qnav{display:flex;gap:8px;flex-wrap:wrap}
+.qnav button{width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:var(--card);font-weight:700;font-size:19px}
+.qnav button[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.qnav button.star{width:auto;padding:0 18px;border-radius:26px}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:56px;height:56px;border-radius:50%;border:2px solid var(--ink);background:var(--card);font-size:28px;font-weight:700;line-height:1}
+.stepper output{font-family:var(--display);font-weight:800;font-size:48px;min-width:2.2ch;text-align:center;font-variant-numeric:tabular-nums}
+.pal{display:flex;gap:8px;flex-wrap:wrap}
+.pal button{width:56px;height:56px;border-radius:12px;border:2px solid var(--line);background:var(--die);color:#1b1e26;font-family:var(--display);font-weight:800;font-size:24px}
+.pal button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent)}
+.pal button.used{opacity:.45}
+.match{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.match .box{border:2px solid var(--line);border-radius:12px;background:var(--card);width:150px;height:150px;display:grid;place-items:center}
+.match svg{transition:transform .35s ease}
+.eight{display:flex;gap:8px;flex-wrap:wrap}
+@media (prefers-reduced-motion: reduce){.match svg{transition:none}*{scroll-behavior:auto}}
+@media (max-width: 900px){
+  body{height:auto;min-height:100%}
+  main{display:flex;flex-direction:column;flex:none}
+  .stage-col{flex:none}
+  .stage{min-height:340px;flex:none;height:44vh}
+  .panel{overflow:visible}
+  .fam{grid-template-columns:1fr}
+}
+</style>
+<header>
+  <div class="title">
+    <h1>Eleven Nets</h1>
+    <p>Grade 4 · Week 9 · Lesson 4.9 · Which six squares fold into a cube?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" id="tab-warm" aria-selected="true">1 · Warm-up</button>
+  <button role="tab" id="tab-lab" aria-selected="false">2 · Net lab</button>
+  <button role="tab" id="tab-q" aria-selected="false">3 · Detective questions</button>
+  <button role="tab" id="tab-die" aria-selected="false">★ Die challenge</button>
+</nav>
+
+<main>
+  <div class="stage-col">
+    <div class="stage" id="stage" aria-label="Folding table: drag to turn the view">
+      <div class="scene" id="scene"><div class="pivot" id="pivot"></div></div>
+      <div class="stage-badge"><span id="stageLabel"></span><span>Drag to turn</span></div>
+      <div class="stage-empty" id="stageEmpty" hidden></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="foldBtn">Fold it</button>
+      <button class="secondary" id="unfoldBtn">Unfold</button>
+      <label class="slider" for="tSlider">Flat <input type="range" id="tSlider" min="0" max="100" value="0"> Folded</label>
+      <button class="ghost" id="viewBtn">Reset view</button>
+    </div>
+  </div>
+
+  <section class="panel" id="panel">
+    <!-- WARM-UP -->
+    <div class="view" id="v-warm">
+      <div class="steps" id="warmSteps">
+        <button data-w="0" aria-pressed="true">The cross</button>
+        <button data-w="1" aria-pressed="false">A row of 5</button>
+        <button data-w="2" aria-pressed="false">Make a guess</button>
+      </div>
+      <div class="view" id="w0">
+        <p class="big">Will this cross fold into a cube?</p>
+        <p class="say" id="w0say"><b>Step 1.</b> Tap the square that will be the <b>bottom</b>.</p>
+        <p class="result" id="w0res"></p>
+        <div class="row"><button class="secondary" id="w0again">Pick again</button></div>
+      </div>
+      <div class="view" id="w1" hidden>
+        <p class="big">Six squares: a row of 5 with one more on the side.</p>
+        <p class="say">Predict first. Will it fold into a cube?</p>
+        <div class="seg" id="w1pred"><button data-p="y" aria-pressed="false">Yes, a cube</button><button data-p="n" aria-pressed="false">No</button></div>
+        <p class="hint">Then press <b>Fold it</b> and watch the two end squares.</p>
+        <p class="result" id="w1res"></p>
+      </div>
+      <div class="view" id="w2" hidden>
+        <p class="big">Six squares joined edge to edge make a <b>hexomino</b>. There are 35 different hexominoes.</p>
+        <p class="say">How many of the 35 fold into a cube? Make a class guess.</p>
+        <div class="stepper"><button id="gMinus" aria-label="Guess one less">−</button><output id="gOut">10</output><button id="gPlus" aria-label="Guess one more">+</button></div>
+        <div class="row"><button class="primary" id="gLock">Lock in our guess</button></div>
+        <p class="result" id="gRes"></p>
+      </div>
+    </div>
+
+    <!-- NET LAB -->
+    <div class="view" id="v-lab" hidden>
+      <div class="seg" id="labMode"><button data-m="draw" aria-pressed="true">Draw your own</button><button data-m="sort" aria-pressed="false">Sort six</button></div>
+      <div class="view" id="labDraw">
+        <p class="say">Tap squares on the grid paper to draw a hexomino. Predict, then fold to check.</p>
+        <div class="editor" id="editor" aria-label="Grid paper, 7 by 6"></div>
+        <p class="hint" id="drawStatus"></p>
+        <div class="row"><button class="secondary" id="clearBtn">Clear</button><button class="secondary" id="surpriseBtn">Surprise me</button></div>
+      </div>
+      <div class="view" id="labSort" hidden>
+        <p class="say">Six hexominoes. Tap one, predict, then fold to check. How many fold into a cube?</p>
+        <div class="sortgrid" id="sortGrid"></div>
+      </div>
+      <div class="row"><span class="label">Prediction</span><div class="seg" id="labPred"><button data-p="y" aria-pressed="false">Cube</button><button data-p="n" aria-pressed="false">Not a cube</button></div></div>
+      <p class="result" id="labRes" aria-live="polite"></p>
+      <div id="classList">
+        <div class="row" style="justify-content:space-between"><h2 style="font-size:22px">Our class list</h2><button class="ghost" id="revealFam">How many in each family?</button></div>
+        <div id="famRows"></div>
+      </div>
+    </div>
+
+    <!-- DETECTIVE QUESTIONS -->
+    <div class="view" id="v-q" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="big" id="qText"></p>
+      <div class="view" id="qBody"></div>
+      <p class="result" id="qRes" aria-live="polite"></p>
+      <p class="hint">Talk it over first. Then tap a button to put evidence on the table.</p>
+    </div>
+
+    <!-- DIE CHALLENGE -->
+    <div class="view" id="v-die" hidden>
+      <p class="big">Put the dots of a die on a net so opposite faces add to 7.</p>
+      <div><div class="label">1 · Pick a net</div><div class="thumbs" id="dieNets"></div></div>
+      <div><div class="label">2 · Pick a number, then tap a square on the table</div><div class="pal" id="diePal"></div></div>
+      <div class="row"><button class="primary" id="dieCheck">Check my die</button><button class="secondary" id="diePairs">Show opposite pairs</button><button class="secondary" id="dieClear">Clear dots</button></div>
+      <p class="result" id="dieRes" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+<script>
+/* ---------- Pure net logic (verified in Node) ---------- */
+const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
+const K=(x,y)=>x+','+y;
+function normalize(cells){const mx=Math.min(...cells.map(c=>c[0])),my=Math.min(...cells.map(c=>c[1]));return cells.map(c=>[c[0]-mx,c[1]-my]).sort((a,b)=>a[1]-b[1]||a[0]-b[0]);}
+const SYMS=[(x,y)=>[x,y],(x,y)=>[-y,x],(x,y)=>[-x,-y],(x,y)=>[y,-x],(x,y)=>[-x,y],(x,y)=>[y,x],(x,y)=>[x,-y],(x,y)=>[-y,-x]];
+const str=cells=>normalize(cells).map(c=>c.join(',')).join(';');
+function canon(cells){return SYMS.map(f=>str(cells.map(c=>f(c[0],c[1])))).sort()[0];}
+function connected(cells){if(!cells.length)return false;const s=new Set(cells.map(c=>K(...c)));const seen=new Set([K(...cells[0])]);const q=[cells[0]];while(q.length){const [x,y]=q.pop();for(const [dx,dy] of DIRS){const k=K(x+dx,y+dy);if(s.has(k)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy]);}}}return seen.size===cells.length;}
+function longestRow(cells){const s=new Set(cells.map(c=>K(...c)));let best=0;for(const [x,y] of cells){for(const [dx,dy] of [[1,0],[0,1]]){if(s.has(K(x-dx,y-dy)))continue;let n=0;while(s.has(K(x+n*dx,y+n*dy)))n++;best=Math.max(best,n);}}return best;}
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],neg=a=>[-a[0],-a[1],-a[2]],half=a=>a.map(v=>v/2);
+function centerBase(cells){ // square with smallest eccentricity, then highest degree
+  const idx=new Map(cells.map((c,i)=>[K(...c),i]));let best=0,bestE=1e9,bestD=-1;
+  cells.forEach((c,i)=>{const dist=new Map([[i,0]]);const q=[i];while(q.length){const j=q.shift();for(const [dx,dy] of DIRS){const k=idx.get(K(cells[j][0]+dx,cells[j][1]+dy));if(k!=null&&!dist.has(k)){dist.set(k,dist.get(j)+1);q.push(k);}}}
+    const e=Math.max(...dist.values());const d=DIRS.filter(([dx,dy])=>idx.has(K(c[0]+dx,c[1]+dy))).length;
+    if(e<bestE||(e===bestE&&d>bestD)){best=i;bestE=e;bestD=d;}});
+  return best;}
+const FACE_AT=c=>{const r=c.map(v=>Math.round(v*2)/2);if(r[2]===0)return'bottom';if(r[2]===1)return'lid';if(r[0]===0)return'left';if(r[0]===1)return'right';if(r[1]===0)return'back';if(r[1]===1)return'front';return'?';};
+const OPP={bottom:'lid',lid:'bottom',left:'right',right:'left',front:'back',back:'front'};
+/* Fold every hinge 90° toward the same side. Returns the spanning tree and where each square lands. */
+function fold(cells,base){
+  if(base==null)base=centerBase(cells);
+  const idx=new Map(cells.map((c,i)=>[K(...c),i]));const n=cells.length;
+  const parent=Array(n).fill(-1),dir=Array(n).fill(null),fr=Array(n).fill(null),order=[base];
+  fr[base]={o:[0,0,0],u:[1,0,0],v:[0,1,0],w:[0,0,1]};const q=[base];
+  while(q.length){const i=q.shift();const F=fr[i];for(const [dx,dy] of DIRS){const j=idx.get(K(cells[i][0]+dx,cells[i][1]+dy));if(j==null||fr[j])continue;
+    parent[j]=i;dir[j]=[dx,dy];let G;
+    if(dx===1)G={o:add(F.o,F.u),u:F.w,v:F.v};else if(dx===-1)G={o:add(F.o,F.w),u:neg(F.w),v:F.v};
+    else if(dy===1)G={o:add(F.o,F.v),u:F.u,v:F.w};else G={o:add(F.o,F.w),u:F.u,v:neg(F.w)};
+    // inward normal for the child = old position direction of the parent relative to the child
+    if(dx===1)G.w=neg(F.u);else if(dx===-1)G.w=F.u;else if(dy===1)G.w=neg(F.v);else G.w=F.v;
+    fr[j]=G;order.push(j);q.push(j);}}
+  const center=fr.map(F=>F?add(add(F.o,half(F.u)),half(F.v)):null);
+  const face=center.map(c=>c?FACE_AT(c):'?');
+  const groups={};face.forEach((f,i)=>{(groups[f]=groups[f]||[]).push(i);});
+  const clashes=Object.entries(groups).filter(([f,a])=>a.length>1).map(([f,a])=>({face:f,squares:a}));
+  const open=['bottom','lid','left','right','front','back'].filter(f=>!groups[f]);
+  const ok=n===6&&connected(cells)&&clashes.length===0;
+  return {base,parent,dir,center,face,clashes,open,ok,order};
+}
+const isNet=cells=>cells.length===6&&connected(cells)&&fold(cells).ok;
+function hexominoes(){let set=new Map([[canon([[0,0]]),[[0,0]]]]);
+  for(let k=2;k<=6;k++){const nx=new Map();for(const cells of set.values()){const s=new Set(cells.map(c=>K(...c)));for(const [x,y] of cells)for(const [dx,dy] of DIRS){if(s.has(K(x+dx,y+dy)))continue;const nc=[...cells,[x+dx,y+dy]];const c=canon(nc);if(!nx.has(c))nx.set(c,normalize(nc));}}set=nx;}
+  return [...set.values()];}
+function fromCanon(s){return s.split(';').map(p=>p.split(',').map(Number));}
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const LET='ABCDEF';
+const FN={bottom:'the bottom',lid:'the lid',left:'the left side',right:'the right side',front:'the front',back:'the back'};
+const FWORD={bottom:'bottom',lid:'lid',left:'left',right:'right',front:'front',back:'back'};
+const PAIRC={bottom:'var(--c1)',lid:'var(--c1)',left:'var(--c2)',right:'var(--c2)',front:'var(--c4)',back:'var(--c4)'};
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+const listText=a=>a.length<=1?a.join(''):a.slice(0,-1).join(', ')+(a.length>2?',':'')+' and '+a[a.length-1];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const sortRM=cells=>cells.map(c=>[c[0],c[1]]).sort((a,b)=>a[1]-b[1]||a[0]-b[0]);
+const has2x2=cells=>{const s=new Set(cells.map(c=>K(...c)));return cells.some(([x,y])=>s.has(K(x+1,y))&&s.has(K(x,y+1))&&s.has(K(x+1,y+1)));};
+const famKey=cells=>{const r=longestRow(cells);return r>=5?'5':String(r);};
+
+/* Shapes used by the lesson */
+const CROSS=[[1,0],[0,1],[1,1],[2,1],[1,2],[1,3]];
+const ROW5=[[0,0],[1,0],[2,0],[3,0],[4,0],[1,1]];
+const ROW6=[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]];
+const SIX=[CROSS,ROW5,[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3]],[[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]],[[0,0],[0,1],[0,2],[1,2],[1,3],[1,4]],[[0,0],[2,0],[0,1],[1,1],[2,1],[3,1]]];
+const ALL=hexominoes().map(normalize).sort((a,b)=>(isNet(b)-isNet(a))||(longestRow(b)-longestRow(a))||(canon(a)<canon(b)?-1:1));
+const NETS=ALL.filter(isNet);
+
+/* ---------- Mini drawings ---------- */
+function svgNet(cells,o={}){
+  const u=o.u||12,n=normalize(cells),w=Math.max(...n.map(c=>c[0]))+1,h=Math.max(...n.map(c=>c[1]))+1;
+  const r=n.map((c,i)=>`<rect x="${c[0]*u+1}" y="${c[1]*u+1}" width="${u}" height="${u}" style="fill:${o.fills?o.fills[i]:(o.fill||'var(--c3)')};stroke:var(--edge);stroke-width:1.5"/>`).join('');
+  return `<svg width="${w*u+2}" height="${h*u+2}" viewBox="0 0 ${w*u+2} ${h*u+2}" aria-hidden="true">${r}</svg>`;
+}
+
+/* ---------- 3D stage ---------- */
+const stage=$('#stage'),pivot=$('#pivot'),root=document.documentElement;
+const ST={cells:[],base:null,f:null,t:0,mode:'letters',pips:{},cls:{},pairs:false,names:false,showBase:false,reported:true,onFolded:null,onTap:null,anim:0,rx:56,rz:-24};
+function setView(){stage.style.setProperty('--rx',ST.rx+'deg');stage.style.setProperty('--rz',ST.rz+'deg');}
+function setT(t){ST.t=t;stage.style.setProperty('--t',t);$('#tSlider').value=Math.round(t*100);
+  stage.classList.toggle('folded',t>=.999);
+  if(t<.999)ST.reported=false;
+  if(t>=.999&&!ST.reported&&ST.f){ST.reported=true;if(ST.onFolded)ST.onFolded(ST.f);}
+}
+function animateT(to){
+  cancelAnimationFrame(ST.anim);
+  if(reduced){setT(to);return;}
+  const from=ST.t,dur=1400*Math.abs(to-from)+1,t0=performance.now();
+  const step=now=>{let k=Math.min(1,(now-t0)/dur);k=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;setT(from+(to-from)*k);if(k<1)ST.anim=requestAnimationFrame(step);};
+  ST.anim=requestAnimationFrame(step);
+}
+function setNet(cells,o={}){
+  cancelAnimationFrame(ST.anim);
+  ST.cells=sortRM(cells);ST.base=o.base??null;ST.mode=o.mode||'letters';ST.pips=o.pips||{};ST.cls={};ST.pairs=!!o.pairs;ST.names=!!o.names;ST.showBase=!!o.showBase;
+  ST.label=o.label||'';ST.reported=true;setT(0);ST.reported=false;build();
+}
+function build(){
+  pivot.innerHTML='';const c=ST.cells;
+  const empty=$('#stageEmpty');
+  if(!c.length||!connected(c)){ST.f=null;empty.hidden=false;empty.textContent=c.length?'Every square must share a whole side with another square.':'Draw six squares on the grid paper.';updateButtons();$('#stageLabel').innerHTML=ST.label;return;}
+  empty.hidden=true;
+  const f=ST.f=fold(c,ST.base);ST.base=f.base;
+  const lift={};f.clashes.forEach(g=>g.squares.forEach((i,r)=>{lift[i]=r*7;}));
+  const clashSet=new Set(f.clashes.flatMap(g=>g.squares));
+  const xs=c.map(p=>p[0]),ys=c.map(p=>p[1]),b=c[f.base];
+  const w=Math.max(...xs)-Math.min(...xs)+1,h=Math.max(...ys)-Math.min(...ys)+1;
+  stage.style.setProperty('--fx',(Math.min(...xs)+Math.max(...xs)+1)/2-b[0]);
+  stage.style.setProperty('--fy',(Math.min(...ys)+Math.max(...ys)+1)/2-b[1]);
+  ST.wh=[w,h];sizeStage();
+  const els=[];
+  for(const i of f.order){
+    const el=document.createElement('div');el.className='sq';
+    const p=f.parent[i];
+    if(p>=0){const [dx,dy]=f.dir[i];el.classList.add(dx===1?'r':dx===-1?'l':dy===1?'d':'u');}
+    const color=ST.pairs?PAIRC[f.face[i]]:ST.mode==='die'?'var(--die)':`var(--c${i})`;
+    let inner='';
+    if(ST.mode==='die'){const v=ST.pips[i];inner=v?`<div class="pips">${[...Array(9)].map((_,k)=>`<i class="${PIPS[v].includes(k)?'':'o'}"></i>`).join('')}</div>`:'';}
+    else inner=ST.names?`<span class="word">${FWORD[f.face[i]]}</span>`:LET[i];
+    const cls=['face',ST.mode==='die'&&!ST.pairs?'die':'',clashSet.has(i)?'clashy':'',ST.showBase&&i===f.base?'base':'',...(ST.cls[i]||[])].join(' ');
+    const lab=`Square ${LET[i]}`;
+    el.innerHTML=`<div class="${cls} front" data-i="${i}" style="--c:${color};--lift:${lift[i]||0}" aria-label="${lab}">${inner}</div><div class="${cls} back" data-i="${i}" style="--c:${color};--lift:${lift[i]||0}">${inner}</div>`;
+    (p>=0?els[p]:pivot).appendChild(el);els[i]=el;
+  }
+  $('#stageLabel').innerHTML=ST.label;
+  updateButtons();
+}
+function setCls(i,arr){ST.cls[i]=arr;$$(`.face[data-i="${i}"]`).forEach(el=>{el.classList.remove('lidhl','pick');arr.forEach(a=>el.classList.add(a));});}
+function sizeStage(){
+  if(!ST.wh)return;const r=stage.getBoundingClientRect();const [w,h]=ST.wh;
+  const s=Math.max(30,Math.min(130,r.width/(w+1.2),r.height/(h*.75+1.9)));
+  stage.style.setProperty('--s',s+'px');
+}
+addEventListener('resize',sizeStage);
+function updateButtons(){const ok=!!ST.f&&ST.cells.length===6;$('#foldBtn').disabled=!ok;$('#unfoldBtn').disabled=!ST.f;$('#tSlider').disabled=!ok;}
+/* drag to turn, tap to pick */
+let drag=null,moved=false;
+stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,rx:ST.rx,rz:ST.rz};moved=false;});
+addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!moved&&Math.hypot(dx,dy)<6)return;moved=true;stage.classList.add('dragging');
+  ST.rz=drag.rz-dx*.35;ST.rx=Math.max(0,Math.min(85,drag.rx-dy*.3));setView();});
+addEventListener('pointerup',()=>{drag=null;stage.classList.remove('dragging');});
+stage.addEventListener('click',e=>{if(moved){moved=false;return;}const el=e.target.closest('.face');if(el&&ST.onTap)ST.onTap(+el.dataset.i);});
+$('#foldBtn').onclick=()=>animateT(1);
+$('#unfoldBtn').onclick=()=>animateT(0);
+$('#tSlider').oninput=e=>{cancelAnimationFrame(ST.anim);setT(e.target.value/100);};
+$('#viewBtn').onclick=()=>{ST.rx=56;ST.rz=-24;setView();};
+
+function verdict(cells,f){
+  if(f.ok)return{ok:true,html:'<b>It folds into a cube.</b> All six faces are covered, each one exactly once.'};
+  const parts=f.clashes.map(g=>`${listText(g.squares.map(i=>LET[i]))} ${g.squares.length>2?'all':'both'} land on ${FN[g.face]}`);
+  const open=f.open.map(x=>FN[x]);
+  let html=`<b>Not a cube.</b> ${cap(parts.join(', and '))}, so ${listText(open)} ${open.length>1?'are':'is'} left open.`;
+  if(longestRow(cells)>=5)html+=' A line of 5 is too long: 4 squares in a line already wrap all the way around the cube.';
+  if(has2x2(cells))html+=' Four squares meet at one corner, but a corner of a cube has only 3 faces.';
+  return{ok:false,html};
+}
+function setRes(el,html,kind){el.innerHTML=html;el.className='result'+(kind?' '+kind:'');}
+function oppositePairs(f){const r=[];['bottom','left','front'].forEach(a=>{const i=f.face.indexOf(a),j=f.face.indexOf(OPP[a]);if(i>=0&&j>=0)r.push([i,j]);});return r;}
+function twoApart(cells,i,j){const [a,b]=[cells[i],cells[j]];const dx=b[0]-a[0],dy=b[1]-a[1];if(!((Math.abs(dx)===2&&dy===0)||(Math.abs(dy)===2&&dx===0)))return false;const s=new Set(cells.map(c=>K(...c)));return s.has(K(a[0]+dx/2,a[1]+dy/2));}
+
+/* ---------- Tabs ---------- */
+let TAB='warm';
+function selectTab(t){
+  TAB=t;['warm','lab','q','die'].forEach(k=>{$('#tab-'+k).setAttribute('aria-selected',k===t);$('#v-'+k).hidden=k!==t;});
+  ({warm:enterWarm,lab:enterLab,q:enterQ,die:enterDie})[t]();
+}
+['warm','lab','q','die'].forEach(k=>$('#tab-'+k).onclick=()=>selectTab(k));
+
+/* ---------- Warm-up ---------- */
+const W={step:0,phase:'bottom',bottom:null,lid:null,pred:null,guess:10,locked:null};
+function enterWarm(){showWarmStep(W.step);}
+function showWarmStep(s){
+  W.step=s;$$('#warmSteps button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.w===s));
+  [0,1,2].forEach(k=>$('#w'+k).hidden=k!==s);
+  ST.onTap=null;ST.onFolded=null;
+  if(s===0)startCross();
+  if(s===1){setNet(ROW5,{label:'A row of 5 with one on the side'});ST.onFolded=row5Folded;renderPred('#w1pred',W.pred);setRes($('#w1res'),'');}
+  if(s===2){setNet(NETS[0],{label:'One hexomino'});ST.onFolded=null;renderGuess();}
+}
+$$('#warmSteps button').forEach(b=>b.onclick=()=>showWarmStep(+b.dataset.w));
+function startCross(){
+  W.phase='bottom';W.bottom=null;W.lid=null;
+  setNet(CROSS,{label:'The cross'});
+  $('#w0say').innerHTML='<b>Step 1.</b> Tap the square that will be the <b>bottom</b>.';setRes($('#w0res'),'');
+  ST.onTap=crossTap;ST.onFolded=crossFolded;
+}
+function crossTap(i){
+  if(ST.t>0.01)return;
+  if(W.phase==='bottom'){W.bottom=i;setNet(CROSS,{base:i,showBase:true,label:`The cross · bottom: <b>${LET[i]}</b>`});ST.onTap=crossTap;ST.onFolded=crossFolded;
+    W.phase='lid';$('#w0say').innerHTML=`<b>Step 2.</b> ${LET[i]} is the bottom (dashed). Now tap the square you think will be the <b>lid</b>.`;return;}
+  if(W.phase==='lid'||W.phase==='ready'){
+    if(i===W.bottom){$('#w0say').innerHTML=`${LET[i]} is the bottom, so it can't be the lid too. Tap a different square for the lid.`;return;}
+    if(W.lid!=null)setCls(W.lid,[]);W.lid=i;setCls(i,['pick']);W.phase='ready';
+    $('#w0say').innerHTML=`<b>Step 3.</b> You think <b>${LET[i]}</b> will be the lid. Press <b>Fold it</b> to check.`;}
+}
+function crossFolded(f){
+  const L=f.face.indexOf('lid'),B=f.base;
+  setCls(L,['lidhl']);
+  const why=twoApart(ST.cells,B,L)?` ${LET[B]} and ${LET[L]} are two apart in a straight line, with one square between them. That middle square becomes a wall.`:'';
+  let html;
+  if(W.lid==null)html=`<b>It's a cube!</b> ${LET[L]} is the lid (gold), right across from the bottom.${why}`;
+  else if(W.lid===L)html=`<b>It's a cube, and ${LET[L]} is the lid, just as you predicted.</b>${why}`;
+  else html=`<b>It's a cube!</b> Your pick, ${LET[W.lid]}, became ${FN[f.face[W.lid]]}. The lid is <b>${LET[L]}</b> (gold).${why} Try again with a new bottom.`;
+  setRes($('#w0res'),html,'good');W.phase='done';
+}
+$('#w0again').onclick=startCross;
+function renderPred(sel,v){$$(sel+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===v));}
+$$('#w1pred button').forEach(b=>b.onclick=()=>{W.pred=b.dataset.p;renderPred('#w1pred',W.pred);});
+function row5Folded(f){
+  const v=verdict(ST.cells,f);
+  const p=W.pred==='n'?' Your prediction holds up.':W.pred==='y'?' You predicted a cube. Look at where the two end squares went.':'';
+  setRes($('#w1res'),v.html+p,'clash');
+}
+function renderGuess(){$('#gOut').textContent=W.guess;setRes($('#gRes'),W.locked!=null?`Class guess: <b>${W.locked}</b> of the 35 fold into a cube. Head to the Net lab to find out.`:'');}
+$('#gMinus').onclick=()=>{W.guess=Math.max(0,W.guess-1);renderGuess();};
+$('#gPlus').onclick=()=>{W.guess=Math.min(35,W.guess+1);renderGuess();};
+$('#gLock').onclick=()=>{W.locked=W.guess;renderGuess();renderFam();};
+
+/* ---------- Net lab ---------- */
+const L={mode:'draw',cells:[],pred:null,found:new Map(),fails:new Map(),reveal:false,sortIdx:null,sortMarks:{},flash:null};
+const COLS=7,ROWS=6;
+function buildEditor(){
+  const ed=$('#editor');ed.innerHTML='';
+  for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const b=document.createElement('button');b.dataset.x=x;b.dataset.y=y;b.setAttribute('aria-label',`Grid square ${x+1}, ${y+1}`);b.onclick=()=>toggleCell(x,y);ed.appendChild(b);}
+}
+function renderEditor(){
+  const sorted=sortRM(L.cells);
+  $$('#editor button').forEach(b=>{const x=+b.dataset.x,y=+b.dataset.y;const i=sorted.findIndex(c=>c[0]===x&&c[1]===y);b.classList.toggle('on',i>=0);b.style.setProperty('--c',i>=0?`var(--c${i})`:'');b.textContent=i>=0?LET[i]:'';});
+  const n=L.cells.length,st=$('#drawStatus');
+  st.textContent=n<6?`${n} of 6 squares.`:connected(L.cells)?'Six squares, all joined edge to edge. Predict, then fold.':'All 6 are here, but some square does not share a whole side with another.';
+}
+function toggleCell(x,y){
+  const i=L.cells.findIndex(c=>c[0]===x&&c[1]===y);
+  if(i>=0)L.cells.splice(i,1);
+  else{if(L.cells.length>=6){$('#drawStatus').textContent='A hexomino has exactly 6 squares. Tap a square to remove it first.';return;}L.cells.push([x,y]);}
+  L.pred=null;renderPred('#labPred',null);setRes($('#labRes'),'');
+  renderEditor();loadLab(L.cells);
+}
+function loadLab(cells,label){setNet(cells,{label:label||(cells.length===6?'Your hexomino':'')});ST.onFolded=labFolded;ST.onTap=null;}
+function labFolded(f){
+  const cells=ST.cells,v=verdict(cells,f);let html=v.html;
+  if(L.pred)html+=(L.pred==='y')===v.ok?' Your prediction was right.':` You predicted ${L.pred==='y'?'a cube':'no cube'}. What surprised you?`;
+  const k=canon(cells);
+  if(v.ok){
+    if(L.found.has(k)){const e=L.found.get(k);html+=` <br>Already on our list: it is net #${e.n} turned or flipped. Lay one on top of the other to check.`;L.flash=k;}
+    else{L.found.set(k,{cells:normalize(cells),n:L.found.size+1,fam:famKey(cells)});L.flash=k;html+=` <br><b>New!</b> Net #${L.found.size} goes in the “longest row of ${longestRow(cells)}” family.`;
+      if(L.found.size===11)html+=` That makes <b>11 cube nets</b>.${W.locked!=null?` Our guess was ${W.locked}.`:''}`;}
+  }else if(!L.fails.has(k)){L.fails.set(k,normalize(cells));}
+  if(L.mode==='sort'&&L.sortIdx!=null){L.sortMarks[L.sortIdx]=v.ok;renderSort();
+    const done=Object.keys(L.sortMarks).length;if(done===6){const y=Object.values(L.sortMarks).filter(Boolean).length;html+=` <br>All six tested: <b>${y} of the 6</b> fold into a cube.`;}}
+  setRes($('#labRes'),html,v.ok?'good':'clash');renderFam();
+}
+$$('#labPred button').forEach(b=>b.onclick=()=>{L.pred=b.dataset.p;renderPred('#labPred',L.pred);});
+$('#clearBtn').onclick=()=>{L.cells=[];renderEditor();loadLab([]);setRes($('#labRes'),'');};
+$('#surpriseBtn').onclick=()=>{
+  const tested=new Set([...L.found.keys(),...L.fails.keys()]);
+  const pool=ALL.filter(c=>!tested.has(canon(c)));const pick=(pool.length?pool:ALL)[Math.floor(Math.random()*(pool.length||ALL.length))];
+  const sym=SYMS[Math.floor(Math.random()*8)];let c=normalize(pick.map(p=>sym(p[0],p[1])));
+  let w=Math.max(...c.map(p=>p[0]))+1,h=Math.max(...c.map(p=>p[1]))+1;
+  if(w>COLS||h>ROWS){c=normalize(c.map(p=>[p[1],p[0]]));w=Math.max(...c.map(p=>p[0]))+1;h=Math.max(...c.map(p=>p[1]))+1;}
+  const ox=Math.floor((COLS-w)/2),oy=Math.floor((ROWS-h)/2);
+  L.cells=c.map(p=>[p[0]+ox,p[1]+oy]);L.pred=null;renderPred('#labPred',null);setRes($('#labRes'),'');renderEditor();loadLab(L.cells);
+};
+function setLabMode(m){L.mode=m;$$('#labMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));$('#labDraw').hidden=m!=='draw';$('#labSort').hidden=m!=='sort';
+  L.pred=null;renderPred('#labPred',null);setRes($('#labRes'),'');
+  if(m==='draw')loadLab(L.cells);else{if(L.sortIdx==null)L.sortIdx=0;renderSort();loadLab(SIX[L.sortIdx],`Shape ${L.sortIdx+1} of 6`);}}
+$$('#labMode button').forEach(b=>b.onclick=()=>setLabMode(b.dataset.m));
+function renderSort(){
+  const g=$('#sortGrid');g.innerHTML='';
+  SIX.forEach((c,i)=>{const b=document.createElement('button');b.className='thumb'+(i===L.sortIdx?' sel':'');b.setAttribute('aria-label',`Shape ${i+1}`);
+    const m=L.sortMarks[i];b.innerHTML=svgNet(c,{u:14})+(m==null?`<span class="tag">${i+1}</span>`:`<span class="tag ${m?'y':'n'}">${m?'✓':'✗'}</span>`);
+    b.onclick=()=>{L.sortIdx=i;L.pred=null;renderPred('#labPred',null);setRes($('#labRes'),'');renderSort();loadLab(c,`Shape ${i+1} of 6`);};g.appendChild(b);});
+}
+const FAMS=[['4','Row of 4',6],['3','Longest row 3',4],['2','Longest row 2',1],['5','Row of 5 or 6',0]];
+function renderFam(){
+  const box=$('#famRows');const nets=[...L.found.entries()];
+  let html=FAMS.map(([k,name,target])=>{const list=nets.filter(([,e])=>e.fam===k);
+    const cnt=L.reveal?`${list.length} of ${target}`:`${list.length} found`;
+    const th=list.length?list.map(([key,e])=>`<button class="thumb${L.flash===key?' flash':''}" data-k="${key}" aria-label="Net ${e.n}">${svgNet(e.cells,{u:10})}<span class="tag">${e.n}</span></button>`).join(''):`<span class="none">${k==='5'&&L.reveal?'None. A row of 5 never folds.':'None yet'}</span>`;
+    return `<div class="fam"><div class="name">${name}<small>${cnt}</small></div><div class="thumbs">${th}</div></div>`;}).join('');
+  const fails=[...L.fails.entries()];
+  html+=`<div class="fam"><div class="name">Didn’t fold<small>${fails.length} shape${fails.length===1?'':'s'}</small></div><div class="thumbs">${fails.length?fails.map(([key,c])=>`<button class="thumb fade" data-f="${key}" aria-label="A shape that did not fold">${svgNet(c,{u:8,fill:'var(--muted)'})}</button>`).join(''):'<span class="none">None yet</span>'}</div></div>`;
+  html+=`<p class="hint" style="margin-top:6px">Cube nets found: <b>${L.found.size}${L.reveal?' of 11':''}</b>${W.locked!=null?` · Class guess: ${W.locked}`:''}</p>`;
+  box.innerHTML=html;
+  box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const e=L.found.get(b.dataset.k);loadLab(e.cells,`Net #${e.n}`);setRes($('#labRes'),`Net #${e.n}, longest row of ${longestRow(e.cells)}. Fold it again to see.`);});
+  box.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{loadLab(L.fails.get(b.dataset.f),'A shape that did not fold');setRes($('#labRes'),'This one did not fold. Fold it again to see which squares bump into each other.');});
+}
+$('#revealFam').onclick=()=>{L.reveal=!L.reveal;$('#revealFam').textContent=L.reveal?'Hide the family counts':'How many in each family?';renderFam();};
+function enterLab(){setLabMode(L.mode);renderFam();}
+
+/* ---------- Detective questions ---------- */
+const Q={i:1};
+const QS={
+ 1:{text:'Why can’t 5 squares be in a row? Why doesn’t a row of 5 with one on the side fold into a cube?',
+    build(body){body.innerHTML=`<div class="row"><button class="primary" data-a="r5">Fold a row of 5 + 1</button><button class="secondary" data-a="r6">Fold a row of 6</button><button class="secondary" data-a="r4">Compare: a row of 4 (the cross)</button></div>`;
+      const go=(c,lab)=>{setNet(c,{label:lab});ST.onFolded=f=>{const v=verdict(ST.cells,f);setRes($('#qRes'),v.html+(v.ok?' A row of 4 wraps exactly once around the cube: bottom, side, lid, side. The 2 extra squares cover the last two sides.':''),v.ok?'good':'clash');};animateT(1);};
+      body.querySelector('[data-a="r5"]').onclick=()=>go(ROW5,'A row of 5 + 1');
+      body.querySelector('[data-a="r6"]').onclick=()=>go(ROW6,'A row of 6');
+      body.querySelector('[data-a="r4"]').onclick=()=>go(CROSS,'The cross: a row of 4');
+      setNet(ROW5,{label:'A row of 5 + 1'});}},
+ 2:{text:'In the row-of-4 family, where can the two extra squares go? What happens if both are on the same side?',
+    build(body){
+      body.innerHTML=`<p class="say">Tap two dashed spots to place the extra squares, then fold.</p><div class="r4" id="r4"></div>
+      <div class="row"><button class="secondary" data-a="same">Both on the same side</button><button class="secondary" data-a="opp">One on each side</button><button class="secondary" data-a="all">Show all 16 one-on-each-side placements</button></div><div id="r4all"></div>`;
+      const R={on:[]};
+      const cellsOf=()=>[[0,1],[1,1],[2,1],[3,1],...R.on];
+      const draw=()=>{const g=$('#r4');g.innerHTML='';for(let y=0;y<3;y++)for(let x=0;x<4;x++){const b=document.createElement('button');
+        if(y===1){b.className='fixed';b.disabled=true;b.setAttribute('aria-label','Row square');}
+        else{const on=R.on.some(c=>c[0]===x&&c[1]===y);b.className=on?'on':'';b.setAttribute('aria-label',`${y===0?'Above':'Below'} square ${x+1}`);
+          b.onclick=()=>{const k=R.on.findIndex(c=>c[0]===x&&c[1]===y);if(k>=0)R.on.splice(k,1);else{if(R.on.length>=2)R.on.shift();R.on.push([x,y]);}draw();load();};}
+        g.appendChild(b);}};
+      const load=()=>{setRes($('#qRes'),'');if(R.on.length===2){setNet(cellsOf(),{label:'Row of 4 + 2'});ST.onFolded=f=>{const v=verdict(ST.cells,f);const same=R.on[0][1]===R.on[1][1];
+          setRes($('#qRes'),v.html+(same?' With both extras on the same side, they fight over one face and the opposite face stays open.':v.ok?' The row of 4 rolls up into a tube. The square above closes one open end and the square below closes the other.':''),v.ok?'good':'clash');};}
+        else{setNet(cellsOf(),{label:'Row of 4: place 2 more'});ST.onFolded=null;}};
+      body.querySelector('[data-a="same"]').onclick=()=>{R.on=[[0,0],[2,0]];draw();load();animateT(1);};
+      body.querySelector('[data-a="opp"]').onclick=()=>{R.on=[[1,0],[2,2]];draw();load();animateT(1);};
+      body.querySelector('[data-a="all"]').onclick=()=>{
+        const classes=[];const items=[];
+        for(let i=0;i<4;i++)for(let j=0;j<4;j++){const c=[[0,1],[1,1],[2,1],[3,1],[i,0],[j,2]];const k=canon(c);let ci=classes.indexOf(k);if(ci<0){classes.push(k);ci=classes.length-1;}items.push({c,ci,ok:isNet(c)});}
+        const allOk=items.every(x=>x.ok);
+        $('#r4all').innerHTML=`<div class="all35" style="grid-template-columns:repeat(4,minmax(0,1fr));max-width:420px">${items.map(x=>`<div class="thumb">${svgNet(x.c,{u:11,fills:sortRM(x.c).map(()=>`var(--c${x.ci})`)})}</div>`).join('')}</div>`;
+        setRes($('#qRes'),`${allOk?'All 16 placements fold into a cube.':''} But there are only <b>${classes.length} different nets</b>. Shapes with the same color are the same net, turned or flipped. That is why the row-of-4 family has ${classes.length}.`,'good');};
+      draw();load();}},
+ 3:{text:'How do you know this one isn’t the last one flipped over? Turn and flip the right shape. Same net or different?',
+    build(body){
+      body.innerHTML=`<div class="match"><div class="box" id="mL"></div><div class="box" id="mR"></div></div>
+      <div class="row"><button class="secondary" data-a="turn">Turn ↻</button><button class="secondary" data-a="flip">Flip ↔</button></div>
+      <div class="row"><button class="primary" data-a="same">Same net</button><button class="primary" data-a="diff">Different nets</button><button class="secondary" data-a="new">New pair</button></div><div class="eight" id="eight"></div>`;
+      const M={};
+      const show=()=>{$('#mL').innerHTML=svgNet(M.left,{u:22,fill:'var(--c3)'});$('#mR').innerHTML=svgNet(M.right,{u:22,fill:'var(--c1)'});};
+      const newPair=()=>{const a=NETS[Math.floor(Math.random()*11)];let b=a;
+        if(Math.random()<.45){do{b=NETS[Math.floor(Math.random()*11)];}while(b===a);}
+        M.left=normalize(a);let r;do{const s=SYMS[1+Math.floor(Math.random()*7)];r=normalize(b.map(p=>s(p[0],p[1])));}while(str(r)===str(M.left));
+        M.right=r;$('#eight').innerHTML='';setRes($('#qRes'),'');show();setNet(M.left,{label:'The left net'});ST.onFolded=null;};
+      const matched=()=>str(M.left)===str(M.right);
+      const after=()=>{show();if(matched())setRes($('#qRes'),'<b>They match!</b> The right shape lies exactly on top of the left one. Same net.','good');else setRes($('#qRes'),'');};
+      body.querySelector('[data-a="turn"]').onclick=()=>{M.right=normalize(M.right.map(p=>[-p[1],p[0]]));after();};
+      body.querySelector('[data-a="flip"]').onclick=()=>{M.right=normalize(M.right.map(p=>[-p[0],p[1]]));after();};
+      const eight=()=>{const L0=str(M.left);const seen=new Set();$('#eight').innerHTML=SYMS.map(s=>normalize(M.right.map(p=>s(p[0],p[1])))).filter(c=>{const k=str(c);if(seen.has(k))return false;seen.add(k);return true;}).map(c=>`<div class="thumb${str(c)===L0?' flash':''}">${svgNet(c,{u:9,fill:'var(--c1)'})}</div>`).join('');return seen.has(L0);};
+      body.querySelector('[data-a="same"]').onclick=()=>{const same=canon(M.left)===canon(M.right);const hit=eight();
+        setRes($('#qRes'),same?'<b>Yes, the same net.</b> Every way to turn and flip the right shape is shown below. The gold one lies exactly on the left shape.':'<b>Look again.</b> Below is every way to turn and flip the right shape. None of them lies exactly on the left shape, so these are different nets.',same?'good':'clash');};
+      body.querySelector('[data-a="diff"]').onclick=()=>{const same=canon(M.left)===canon(M.right);eight();
+        setRes($('#qRes'),same?'<b>Look again.</b> Below is every way to turn and flip the right shape. The gold one lies exactly on the left shape, so they are the same net.':`<b>Yes, different nets.</b> Below is every way to turn and flip the right shape, and none lies exactly on the left one.${longestRow(M.left)!==longestRow(M.right)?` Quick clue: their longest rows are ${longestRow(M.left)} and ${longestRow(M.right)}.`:''}`,same?'clash':'good');};
+      body.querySelector('[data-a="new"]').onclick=newPair;newPair();}},
+ 4:{text:'How do you know you have found them all? Test every one of the 35 hexominoes.',
+    build(body){
+      body.innerHTML=`<div class="row"><button class="primary" data-a="go">Test all 35</button></div><div class="all35" id="a35"></div><div class="tally" id="t35"></div>`;
+      const grid=$('#a35');grid.innerHTML=ALL.map((c,i)=>`<button class="thumb" data-i="${i}" aria-label="Hexomino ${i+1}">${svgNet(c,{u:8})}</button>`).join('');
+      grid.querySelectorAll('button').forEach(b=>b.onclick=()=>{const c=ALL[+b.dataset.i];setNet(c,{label:`Hexomino ${+b.dataset.i+1} of 35`});ST.onFolded=f=>setRes($('#qRes'),verdict(ST.cells,f).html,f.ok?'good':'clash');animateT(1);});
+      const run=async()=>{let y=0;const fam={4:0,3:0,2:0};const btns=grid.querySelectorAll('button');
+        for(let i=0;i<ALL.length;i++){const ok=isNet(ALL[i]);const b=btns[i];if(ok){y++;fam[longestRow(ALL[i])]++;b.insertAdjacentHTML('beforeend','<span class="tag y">✓</span>');}else b.classList.add('fade');
+          $('#t35').innerHTML=`<div><b>${y}</b><span>fold into a cube</span></div><div><b>${i+1-y}</b><span>don’t fold</span></div><div><b>${fam[4]} · ${fam[3]} · ${fam[2]}</b><span>longest row 4 · 3 · 2</span></div>`;
+          if(!reduced)await new Promise(r=>setTimeout(r,70));}
+        setRes($('#qRes'),`<b>${y} of the 35 hexominoes fold into a cube</b>: ${fam[4]} with a row of 4, ${fam[3]} with a longest row of 3 and ${fam[2]} with a longest row of 2. No row of 5 or 6 ever works.${W.locked!=null?` Our guess was ${W.locked}.`:''}${L.found.size?` Our class list has ${L.found.size}.`:''} Sorting by the longest row is how we can be sure no family is missing one. Tap any shape to fold it.`,'good');};
+      body.querySelector('[data-a="go"]').onclick=run;
+      setNet(NETS[0],{label:'Tap a shape to fold it'});}},
+ 5:{text:'Pick a bottom. Which squares end up opposite each other?',
+    build(body){
+      body.innerHTML=`<div class="thumbs" id="q5nets"></div><p class="say">Tap a square on the table to make it the bottom.</p><div class="row"><button class="secondary" data-a="names">Name the faces</button><button class="secondary" data-a="pairs">Color opposite pairs</button></div>`;
+      const P={net:0,base:null,names:false,pairs:false};
+      const load=()=>{setNet(NETS[P.net],{base:P.base,names:P.names,pairs:P.pairs,showBase:true,label:`Cube net ${P.net+1} of 11`});ST.onTap=i=>{if(ST.t>0.01)return;P.base=i;load();};ST.onFolded=null;
+        const pr=oppositePairs(ST.f);setRes($('#qRes'),`Opposite pairs: <b>${pr.map(p=>LET[p[0]]+' & '+LET[p[1]]).join(', ')}</b>. Each pair never touches on the net: opposite faces can’t share an edge.`);
+        $$('#q5nets .thumb').forEach((b,i)=>b.classList.toggle('sel',i===P.net));};
+      $('#q5nets').innerHTML=NETS.map((c,i)=>`<button class="thumb" aria-label="Net ${i+1}">${svgNet(c,{u:7})}</button>`).join('');
+      $$('#q5nets .thumb').forEach((b,i)=>b.onclick=()=>{P.net=i;P.base=null;load();});
+      body.querySelector('[data-a="names"]').onclick=e=>{P.names=!P.names;e.target.textContent=P.names?'Show letters':'Name the faces';load();};
+      body.querySelector('[data-a="pairs"]').onclick=e=>{P.pairs=!P.pairs;e.target.textContent=P.pairs?'Plain colors':'Color opposite pairs';load();};
+      load();}}
+};
+function enterQ(){renderQ();}
+function renderQ(){
+  $('#qnav').innerHTML=[1,2,3,4,5].map(i=>`<button data-q="${i}" aria-pressed="${Q.i===i}" aria-label="Question ${i}">${i}</button>`).join('');
+  $$('#qnav button').forEach(b=>b.onclick=()=>{Q.i=+b.dataset.q;renderQ();});
+  $('#qText').textContent=QS[Q.i].text;setRes($('#qRes'),'');ST.onTap=null;ST.onFolded=null;QS[Q.i].build($('#qBody'));
+}
+
+/* ---------- Die challenge ---------- */
+const D={net:4,pips:{},sel:1,pairs:false};
+function enterDie(){renderDie();loadDie();}
+function loadDie(){setNet(NETS[D.net],{mode:'die',pips:D.pips,pairs:D.pairs,label:'Tap a square to place the selected number'});ST.onTap=dieTap;ST.onFolded=null;}
+function renderDie(){
+  $('#dieNets').innerHTML=NETS.map((c,i)=>`<button class="thumb${i===D.net?' sel':''}" aria-label="Net ${i+1}">${svgNet(c,{u:7})}</button>`).join('');
+  $$('#dieNets .thumb').forEach((b,i)=>b.onclick=()=>{D.net=i;D.pips={};setRes($('#dieRes'),'');renderDie();loadDie();});
+  const used=new Set(Object.values(D.pips));
+  $('#diePal').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}" aria-pressed="${D.sel===n}" class="${used.has(n)?'used':''}">${n}</button>`).join('');
+  $$('#diePal button').forEach(b=>b.onclick=()=>{D.sel=+b.dataset.n;renderDie();});
+  $('#diePairs').textContent=D.pairs?'Hide opposite pairs':'Show opposite pairs';
+}
+function dieTap(i){
+  if(ST.t>0.01){setRes($('#dieRes'),'Unfold the net first, then place the dots.');return;}
+  for(const k in D.pips)if(D.pips[k]===D.sel)delete D.pips[k];
+  D.pips[i]=D.sel;
+  const next=[1,2,3,4,5,6].find(n=>!Object.values(D.pips).includes(n));if(next)D.sel=next;
+  renderDie();loadDie();setRes($('#dieRes'),'');
+}
+$('#dieCheck').onclick=()=>{
+  const n=Object.keys(D.pips).length;
+  if(n<6){setRes($('#dieRes'),`Place all six numbers first. ${6-n} to go.`);return;}
+  const pr=oppositePairs(ST.f);const lines=pr.map(([a,b])=>{const s=D.pips[a]+D.pips[b];return `${D.pips[a]} and ${D.pips[b]} are opposite: ${D.pips[a]} + ${D.pips[b]} = ${s}${s===7?' ✓':''}`;});
+  const good=pr.every(([a,b])=>D.pips[a]+D.pips[b]===7);
+  setRes($('#dieRes'),(good?'<b>A real die!</b> Every pair of opposite faces adds to 7. Press Fold it to roll it up.<br>':'<b>Not yet.</b> Opposite faces need to add to 7. Swap some numbers and check again.<br>')+lines.join('<br>'),good?'good':'clash');
+};
+$('#diePairs').onclick=()=>{D.pairs=!D.pairs;renderDie();loadDie();};
+$('#dieClear').onclick=()=>{D.pips={};D.sel=1;setRes($('#dieRes'),'');renderDie();loadDie();};
+
+/* ---------- Global ---------- */
+function resetAll(){
+  Object.assign(W,{step:0,phase:'bottom',bottom:null,lid:null,pred:null,guess:10,locked:null});
+  Object.assign(L,{mode:'draw',cells:[],pred:null,found:new Map(),fails:new Map(),reveal:false,sortIdx:null,sortMarks:{},flash:null});
+  Object.assign(D,{net:4,pips:{},sel:1,pairs:false});Q.i=1;
+  $('#revealFam').textContent='How many in each family?';renderEditor();renderFam();renderPred('#labPred',null);setRes($('#labRes'),'');
+  ST.rx=56;ST.rz=-24;setView();selectTab('warm');
+}
+$('#resetBtn').onclick=resetAll;
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>{$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen';setTimeout(sizeStage,100);});
+
+buildEditor();renderEditor();renderFam();setView();selectTab('warm');
+})();
+</script>
+
+</body></html>

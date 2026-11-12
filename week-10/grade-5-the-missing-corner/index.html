@@ -1,0 +1,794 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Missing Corner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: survey-sheet coordinate grid on the left, a lesson panel on the right (Warm-up → Treasure map → Investigate → Detective questions); stacks on phones. */
+:root{
+  --paper:#ECF1EF; --card:#FFFFFF; --ink:#15233A; --muted:#536071; --line:#C5D2CF; --gridline:#D3DEDB;
+  --accent:#0E7770; --accent-soft:#DAEEEA; --gold:#B97D00; --gold-soft:#FBEFCF; --wrong:#C2362C; --wrong-soft:#FBE5E2;
+  --plum:#6B4BB8; --plum-soft:#ECE6FA;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1618; --card:#162125; --ink:#E5EDEB; --muted:#98A8A6; --line:#2C3C40; --gridline:#213237;
+    --accent:#3EC1B4; --accent-soft:#143633; --gold:#F0B53A; --gold-soft:#382C10; --wrong:#FF7B6F; --wrong-soft:#3B1E1B;
+    --plum:#B39AF5; --plum-soft:#2A2340; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1618; --card:#162125; --ink:#E5EDEB; --muted:#98A8A6; --line:#2C3C40; --gridline:#213237;
+  --accent:#3EC1B4; --accent-soft:#143633; --gold:#F0B53A; --gold-soft:#382C10; --wrong:#FF7B6F; --wrong-soft:#3B1E1B;
+  --plum:#B39AF5; --plum-soft:#2A2340; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+header{display:flex; align-items:center; gap:12px 24px; padding-block:14px 8px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,2.8vw,40px); letter-spacing:-0.01em; line-height:1.05; text-wrap:balance}
+.title p{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.1vw,16px); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:15px; min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+
+main{flex:1; min-height:0; display:flex; gap:28px; padding-block:6px 20px}
+.board-col{flex:none; display:flex; flex-direction:column; gap:8px}
+.board{--size:min(calc(100dvh - 210px), 56vw); width:var(--size); height:var(--size); min-width:300px; min-height:300px; max-width:100%;
+  background:var(--card); border:1.5px solid var(--line); border-radius:14px; touch-action:manipulation; user-select:none}
+.board svg{width:100%; height:100%; display:block; cursor:crosshair}
+.readout{display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; font-size:15px; color:var(--muted)}
+.readout .here{font-family:var(--mono); font-weight:600; color:var(--ink); min-width:6.5em}
+.typept{display:inline-flex; align-items:center; gap:4px; margin-left:auto}
+.typept input{width:3.2em; text-align:center; padding:6px 4px; border:1.5px solid var(--line); border-radius:8px; background:var(--card); font-family:var(--mono)}
+.typept button{border:1.5px solid var(--line); background:var(--card); border-radius:8px; padding:6px 12px; font-weight:700}
+
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:14px; overflow:auto; padding-bottom:8px}
+.tabs{display:flex; gap:4px 18px; border-bottom:2px solid var(--line); flex-wrap:wrap}
+.tabs button{border:0; background:none; padding:10px 2px; font-family:var(--display); font-weight:600; font-size:clamp(16px,1.35vw,20px); color:var(--muted); border-bottom:3px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.tabs b{font-family:var(--mono); font-size:.8em; color:var(--accent); margin-right:4px}
+.view{display:flex; flex-direction:column; gap:14px}
+.lead{font-size:clamp(19px,1.65vw,26px); line-height:1.4; margin:0; max-width:32em; text-wrap:pretty}
+.lead .mono{font-size:.92em; white-space:nowrap}
+.sub{margin:0; color:var(--muted); font-size:16px; max-width:38em}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:700; font-size:clamp(17px,1.35vw,20px); padding:13px 24px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(15px,1.2vw,18px); padding:10px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:4px; gap:4px; align-self:flex-start}
+.seg button{border:0; background:none; padding:9px 16px; border-radius:10px; font-weight:700; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.say{margin:0; padding:14px 18px; border-radius:12px; font-size:clamp(17px,1.4vw,21px); line-height:1.45; max-width:34em; background:var(--accent-soft)}
+.say.try{background:var(--wrong-soft)}
+.say.gold{background:var(--gold-soft)}
+.say:empty{display:none}
+.say b{font-weight:700}
+.say p{margin:0} .say p+p{margin-top:8px}
+.steps{display:flex; flex-wrap:wrap; gap:6px; list-style:none; margin:0; padding:0}
+.steps li{font-size:14px; padding:6px 12px; border-radius:20px; border:1.5px solid var(--line); background:var(--card); color:var(--muted)}
+.steps li.done{color:var(--ink)} .steps li.done::before{content:"✓ "; color:var(--accent); font-weight:700}
+.steps li.now{border-color:var(--accent); color:var(--ink); font-weight:700}
+.pnav{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.pnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:18px; padding:0 14px}
+.pnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.pnav button.ok{border-color:var(--accent)}
+.pnav button.ok::after{content:" ✓"; color:var(--accent)}
+.pnav button[aria-pressed="true"].ok::after{color:var(--card)}
+.sheet{display:grid; grid-template-columns:auto 1fr; gap:10px 14px; align-items:center; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:16px 18px; max-width:34em}
+.sheet label{font-weight:700; font-size:16px}
+.sheet .fld{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-family:var(--mono); font-size:20px}
+.sheet .fld span.u{font-family:var(--body); font-size:15px; color:var(--muted)}
+.sheet input{width:3.4em; height:46px; text-align:center; border:2px solid var(--line); border-radius:10px; background:var(--paper); font-family:var(--mono); font-size:20px; font-weight:600}
+.sheet input.good{border-color:var(--accent); background:var(--accent-soft)}
+.sheet input.bad{border-color:var(--wrong); background:var(--wrong-soft)}
+.mark{font-weight:700; width:1.3em; display:inline-block; text-align:center}
+.mark.good{color:var(--accent)} .mark.bad{color:var(--wrong)}
+.fb{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.fb li{padding:10px 14px; border-radius:10px; background:var(--wrong-soft); font-size:clamp(16px,1.25vw,19px); line-height:1.4; max-width:36em}
+.fb li.ok{background:var(--accent-soft)}
+.fb:empty{display:none}
+.found{display:flex; flex-wrap:wrap; gap:8px}
+.found span{font-family:var(--mono); font-weight:600; font-size:18px; padding:6px 12px; border-radius:10px; background:var(--accent-soft)}
+.found span.new{background:var(--gold-soft)}
+.rule{background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; max-width:36em}
+.rule h3{margin:0; font-family:var(--display); font-size:20px}
+.rule .q{font-size:18px}
+.choices{display:flex; flex-wrap:wrap; gap:8px}
+.choices button{border:2px solid var(--line); background:var(--paper); border-radius:12px; padding:9px 14px; font-weight:700; min-height:46px}
+.choices button[aria-pressed="true"]{border-color:var(--ink)}
+.choices button.good{border-color:var(--accent); background:var(--accent-soft)}
+.choices button.bad{border-color:var(--wrong); background:var(--wrong-soft)}
+.xy{border-collapse:collapse; font-family:var(--mono); font-size:20px; margin-top:6px}
+.xy td,.xy th{padding:4px 12px; text-align:center}
+.xy th{font-family:var(--body); font-size:14px; color:var(--muted); text-align:left; padding-left:0}
+.xy td.odd{background:var(--gold-soft); border-radius:8px; font-weight:600}
+.hint{margin:0; font-size:15px; color:var(--muted)}
+.tag{display:inline-block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--plum); background:var(--plum-soft); padding:3px 9px; border-radius:6px}
+
+/* SVG */
+.g-line{stroke:var(--gridline); stroke-width:1}
+.g-axis{stroke:var(--ink); stroke-width:2.2}
+.g-tick{fill:var(--muted); font-family:var(--mono); font-size:13px}
+.g-axlab{fill:var(--ink); font-family:var(--body); font-size:15px; font-weight:700; font-style:italic}
+.rect{fill:color-mix(in srgb, var(--accent) 16%, transparent); stroke:var(--accent); stroke-width:3}
+.rect.faint{fill:color-mix(in srgb, var(--accent) 6%, transparent); stroke-width:1.6; stroke-opacity:.55}
+.rect.plum{fill:color-mix(in srgb, var(--plum) 14%, transparent); stroke:var(--plum)}
+.rect.gold{fill:color-mix(in srgb, var(--gold) 16%, transparent); stroke:var(--gold)}
+.side{stroke:var(--ink); stroke-width:3.5; stroke-linecap:round}
+.side.acc{stroke:var(--accent)}
+.side.plum{stroke:var(--plum)}
+.guide{stroke:var(--gold); stroke-width:2.5; stroke-dasharray:7 6}
+.guide.acc{stroke:var(--accent)}
+.walk{stroke:var(--accent); stroke-width:3; fill:none}
+.walk.bad{stroke:var(--wrong)}
+.p-given{fill:var(--ink)}
+.p-key{fill:var(--gold); stroke:var(--card); stroke-width:2}
+.p-ok{fill:var(--accent)}
+.p-plum{fill:var(--plum)}
+.p-bad{fill:none; stroke:var(--wrong); stroke-width:3.5}
+.p-dot{fill:var(--wrong)}
+.p-hl{fill:none; stroke:var(--gold); stroke-width:4}
+.lbl{font-family:var(--mono); font-weight:600; font-size:15px; fill:var(--ink); paint-order:stroke; stroke:var(--card); stroke-width:5px; stroke-linejoin:round}
+.lbl.bad{fill:var(--wrong)} .lbl.acc{fill:var(--accent)} .lbl.gold{fill:var(--gold)} .lbl.plum{fill:var(--plum)}
+.lbl.big{font-size:19px}
+.lbl.sm{font-size:12px}
+.hov{fill:none; stroke:var(--accent); stroke-width:2.5; opacity:.8}
+.mk-acc{fill:var(--accent)} .mk-bad{fill:var(--wrong)}
+.pop{animation:pop .35s ease-out; transform-box:fill-box; transform-origin:center}
+@keyframes pop{from{transform:scale(2.2); opacity:0}to{transform:scale(1); opacity:1}}
+@media (prefers-reduced-motion: reduce){.pop{animation:none}}
+
+@media (max-width: 900px), (orientation: portrait){
+  main{flex-direction:column; overflow:visible}
+  body{height:auto}
+  .board{--size:min(calc(100vw - 32px), 68dvh); min-width:0; min-height:0}
+  .panel{overflow:visible}
+  .typept{margin-left:0}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>The Missing Corner</h1>
+    <p>Grade 5 · Week 10 · Set 2 Lesson 5.10 · Coordinate plane, perimeter &amp; area</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <div class="board-col">
+    <div class="board" id="board"><svg id="svg" viewBox="0 0 548 548" role="img" aria-label="Coordinate grid from 0 to 12 on each axis. Tap a point to choose it."></svg></div>
+    <div class="readout">
+      <span>Pointer: <span class="here" id="here">—</span></span>
+      <form class="typept" id="typeForm" autocomplete="off">
+        <span>Type a point: (</span><input id="tx" inputmode="numeric" aria-label="x"><span>,</span><input id="ty" inputmode="numeric" aria-label="y"><span>)</span>
+        <button type="submit">Plot</button>
+      </form>
+    </div>
+  </div>
+  <section class="panel">
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="warm"><b>1</b>Warm-up</button>
+      <button role="tab" data-tab="launch"><b>2</b>Treasure map</button>
+      <button role="tab" data-tab="inv"><b>3</b>Investigate</button>
+      <button role="tab" data-tab="q"><b>4</b>Detective questions</button>
+    </div>
+    <div class="view" id="view"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+/* ===== MATH (pure) ===== */
+const MATH = (function(){
+  const eq=(p,q)=>p[0]===q[0]&&p[1]===q[1];
+  const fmt=p=>`(${p[0]}, ${p[1]})`;
+  // Missing corner of an upright rectangle: the x that appears once and the y that appears once.
+  function missingCorner(pts){
+    const odd=a=>a.find(v=>a.filter(w=>w===v).length===1);
+    return [odd(pts.map(p=>p[0])), odd(pts.map(p=>p[1]))];
+  }
+  function rectInfo(pts){
+    const m=missingCorner(pts), all=[...pts,m];
+    const xs=all.map(p=>p[0]), ys=all.map(p=>p[1]);
+    const minx=Math.min(...xs), maxx=Math.max(...xs), miny=Math.min(...ys), maxy=Math.max(...ys);
+    const w=maxx-minx, h=maxy-miny;
+    return {m,minx,maxx,miny,maxy,w,h,per:2*(w+h),area:w*h,
+      v:pts.find(p=>p[0]===m[0]), hz:pts.find(p=>p[1]===m[1]), opp:pts.find(p=>p[0]!==m[0]&&p[1]!==m[1])};
+  }
+  const A_PROBS=[[[2,1],[8,1],[2,5]],[[1,2],[1,7],[4,7]],[[3,3],[7,3],[7,7]],[[0,0],[9,0],[0,4]]];
+  // Teacher key (Answers & teacher notes, Lesson 5.10)
+  const A_KEY=[{m:[8,5],s:[4,6],p:20,a:24},{m:[4,2],s:[3,5],p:16,a:15},{m:[3,7],s:[4,4],p:16,a:16},{m:[9,4],s:[4,9],p:26,a:36}];
+  const B_SIDE=[[1,3],[4,3]];
+  function squaresOnSide(a,b){ // upright side a-b (horizontal): squares above and below
+    const s=Math.abs(b[0]-a[0]); return [[[a[0],a[1]+s],[b[0],b[1]+s]],[[a[0],a[1]-s],[b[0],b[1]-s]]];
+  }
+  const B_KEY=[[[1,6],[4,6]],[[1,0],[4,0]]];
+  function areaCorners(A,max){ const r=[]; for(let x=1;x<=max;x++) for(let y=1;y<=max;y++) if(x*y===A) r.push([x,y]); return r; }
+  const C_KEY=[[1,12],[2,6],[3,4],[4,3],[6,2],[12,1]];
+  // Square from two opposite corners (any orientation): rotate half-diagonal 90°
+  function squareFromDiagonal(p,q){
+    const cx=(p[0]+q[0])/2, cy=(p[1]+q[1])/2, dx=(q[0]-p[0])/2, dy=(q[1]-p[1])/2;
+    return [[cx-dy,cy+dx],[cx+dy,cy-dx]];
+  }
+  // Square from one side p→q: other corners on the left (counterclockwise) and right
+  function squaresFromSide(p,q){
+    const dx=q[0]-p[0], dy=q[1]-p[1];
+    return {left:[[q[0]-dy,q[1]+dx],[p[0]-dy,p[1]+dx]], right:[[q[0]+dy,q[1]-dx],[p[0]+dy,p[1]-dx]]};
+  }
+  const CH1=[[2,2],[5,5]], CH1_KEY=[[2,5],[5,2]];
+  const CH2=[[3,0],[6,3]], CH2_KEY=[[3,6],[0,3]];
+  function selfCheck(){
+    const errs=[]; const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+    const setEq=(a,b)=>a.length===b.length&&a.every(p=>b.some(q=>eq(p,q)));
+    A_PROBS.forEach((pts,i)=>{ const r=rectInfo(pts), k=A_KEY[i];
+      if(!eq(r.m,k.m)) errs.push('A'+(i+1)+' corner'); if(!same([r.w,r.h].sort((a,b)=>a-b),k.s)) errs.push('A'+(i+1)+' sides');
+      if(r.per!==k.p) errs.push('A'+(i+1)+' perimeter'); if(r.area!==k.a) errs.push('A'+(i+1)+' area'); });
+    const sq=squaresOnSide(...B_SIDE); if(!setEq(sq[0],B_KEY[0])||!setEq(sq[1],B_KEY[1])) errs.push('B');
+    if(!setEq(areaCorners(12,12),C_KEY)) errs.push('C');
+    if(!setEq(squareFromDiagonal(...CH1),CH1_KEY)) errs.push('CH1');
+    if(!setEq(squaresFromSide(...CH2).left,CH2_KEY)) errs.push('CH2');
+    const r=rectInfo([[0,0],[100,0],[0,50]]); if(!eq(r.m,[100,50])||r.area!==5000||r.per!==300) errs.push('Mishkan');
+    return errs;
+  }
+  return {eq,fmt,missingCorner,rectInfo,A_PROBS,A_KEY,B_SIDE,B_KEY,squaresOnSide,areaCorners,C_KEY,squareFromDiagonal,squaresFromSide,CH1,CH1_KEY,CH2,CH2_KEY,selfCheck};
+})();
+/* ===== END MATH ===== */
+const {eq,fmt,rectInfo,A_PROBS,A_KEY,B_SIDE,B_KEY,C_KEY,CH1,CH1_KEY,CH2,CH2_KEY}=MATH;
+const bad=MATH.selfCheck(); if(bad.length) console.error('Answer key mismatch:', bad);
+const has=(list,p)=>list.some(q=>eq(q,p));
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const nice=p=>`<span class="mono">${fmt(p)}</span>`;
+
+/* ===== Board ===== */
+const N=12, U=40, LX=50, TY=24;
+const X=x=>LX+U*x, Y=y=>TY+U*(N-y);
+const svg=$('#svg');
+let scale=1;
+function base(){
+  let s=`<defs>
+  <marker id="ahA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-acc"/></marker>
+  <marker id="ahB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk-bad"/></marker></defs>`;
+  for(let i=0;i<=N;i++){
+    s+=`<line class="g-line" x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(N)}"/><line class="g-line" x1="${X(0)}" y1="${Y(i)}" x2="${X(N)}" y2="${Y(i)}"/>`;
+    s+=`<text class="g-tick" x="${X(i)}" y="${Y(0)+20}" text-anchor="middle">${i*scale}</text>`;
+    if(i>0) s+=`<text class="g-tick" x="${X(0)-9}" y="${Y(i)+4}" text-anchor="end">${i*scale}</text>`;
+  }
+  s+=`<line class="g-axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(N)+8}" y2="${Y(0)}"/><line class="g-axis" x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(N)-8}"/>`;
+  s+=`<text class="g-axlab" x="${X(N)+2}" y="${Y(0)-8}" text-anchor="end">x</text><text class="g-axlab" x="${X(0)+8}" y="${Y(N)+4}">y</text>`;
+  return `<g id="base">${s}</g><g id="dyn"></g><g id="hov"></g>`;
+}
+function setScale(k){ if(scale===k) return; scale=k; svg.innerHTML=base(); }
+svg.innerHTML=base();
+let G=[];
+const D={
+  poly(pts,cls){ G.push(`<polygon class="${cls}" points="${pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}"/>`); },
+  rect(r,cls){ D.poly([[r.minx,r.miny],[r.maxx,r.miny],[r.maxx,r.maxy],[r.minx,r.maxy]],cls); },
+  seg(a,b,cls,marker){ G.push(`<line class="${cls}" x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b[0])}" y2="${Y(b[1])}"${marker?` marker-end="url(#${marker})"`:''}/>`); },
+  vline(x,cls){ D.seg([x,0],[x,N],cls); }, hline(y,cls){ D.seg([0,y],[N,y],cls); },
+  dot(p,cls,r=8,pop){ G.push(`<circle class="${cls}${pop&&!reduced?' pop':''}" cx="${X(p[0])}" cy="${Y(p[1])}" r="${r}"/>`); },
+  star(p,pop){ const cx=X(p[0]), cy=Y(p[1]); let d=''; for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, r=i%2?6:15; d+=(i?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1); }
+    G.push(`<path class="p-key${pop&&!reduced?' pop':''}" d="${d}z"/>`); },
+  label(p,text,cls='',pos){ // pos: auto placement away from edges
+    let dx=12, dy=-12, anchor='start';
+    if(pos==='below'){ dy=24; } if(pos==='left'){ dx=-12; anchor='end'; }
+    if(p[0]>=10 && pos!=='left'){ dx=-12; anchor='end'; }
+    if(p[1]>=11.5 && pos!=='below'){ dy=24; }
+    if(p[1]<=0.2 && dy>0) dy=-12;
+    G.push(`<text class="lbl ${cls}" x="${X(p[0])+dx}" y="${Y(p[1])+dy}" text-anchor="${anchor}">${text}</text>`); },
+  textAt(x,y,text,cls='',anchor='middle',rot){ G.push(`<text class="lbl ${cls}" x="${X(x)}" y="${Y(y)}" text-anchor="${anchor}" dominant-baseline="middle"${rot?` transform="rotate(${rot} ${X(x)} ${Y(y)})"`:''}>${text}</text>`); },
+  walk(p,isBad){ const c=isBad?'walk bad':'walk', m=isBad?'ahB':'ahA';
+    if(p[0]>0) D.seg([0,0],[p[0],0],c,m); if(p[1]>0) D.seg([p[0],0],p,c,m); },
+  dims(r,cls){ // width label inside bottom edge, height label inside left edge
+    if(r.w>=2) D.textAt((r.minx+r.maxx)/2, r.miny+0.38, `${r.maxx} − ${r.minx} = ${r.w}`, cls);
+    if(r.h>=2) D.textAt(r.minx+0.38, (r.miny+r.maxy)/2, `${r.maxy} − ${r.miny} = ${r.h}`, cls, 'middle', -90);
+  }
+};
+function draw(){
+  G=[]; const t=TABS[S.tab]; if(t.board) t.board(D);
+  $('#dyn').innerHTML=G.join('');
+}
+function toGrid(evt){
+  const pt=svg.createSVGPoint(); pt.x=evt.clientX; pt.y=evt.clientY;
+  const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+  const x=Math.round((p.x-LX)/U), y=Math.round(N-(p.y-TY)/U);
+  if(x<0||y<0||x>N||y>N) return null;
+  if(Math.hypot(p.x-X(x),p.y-Y(y))>U*0.62) return null;
+  return [x,y];
+}
+svg.addEventListener('pointermove',e=>{
+  const g=toGrid(e); const h=$('#hov');
+  if(!g || scale!==1){ h.innerHTML=''; $('#here').textContent='—'; return; }
+  h.innerHTML=`<circle class="hov" cx="${X(g[0])}" cy="${Y(g[1])}" r="12"/>`; $('#here').textContent=fmt(g);
+});
+svg.addEventListener('pointerleave',()=>{ $('#hov').innerHTML=''; $('#here').textContent='—'; });
+svg.addEventListener('click',e=>{ const g=toGrid(e); if(g) tap(g); });
+$('#typeForm').addEventListener('submit',e=>{
+  e.preventDefault(); const x=parseInt($('#tx').value,10), y=parseInt($('#ty').value,10);
+  if(Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&y>=0&&x<=N&&y<=N) tap([x,y]);
+  else { $('#tx').value=''; $('#ty').value=''; }
+});
+function tap(g){ const t=TABS[S.tab]; if(t.tap && scale===1){ t.tap(g); } }
+
+/* ===== State ===== */
+let S;
+function fresh(){
+  return {tab:'warm',
+    warm:{i:0, plotted:[], tries:null, msg:'', ok:false, same:null},
+    launch:{guess:null, solved:false, msg:'', fb:null, why:false, misses:0},
+    inv:{part:'A', a:0, A:A_PROBS.map(()=>({f:{x:'',y:'',s1:'',s2:'',p:'',ar:''}, ok:{}, fb:[], drawn:false, last:null})), rule:{x:null,y:null},
+      B:{found:[], miss:null, msg:''}, C:{found:[], last:null, miss:null, msg:''}},
+    q:{i:'rule', msg:'', mode:null, far:null, farShown:false, ch:{stage:1, found1:[], found2:[], miss:null, msg:'', step:false}, mish:{f:{}, ok:null, fb:[], show:false}}
+  };
+}
+const view=$('#view');
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===S.tab));
+  setScale(S.tab==='q'&&S.q.i==='mish'&&S.q.mish.show?10:1);
+  TABS[S.tab].panel(); draw();
+}
+function sayBox(msg,kind){ return `<div class="say ${kind||''}" aria-live="polite">${msg||''}</div>`; }
+
+/* ===== 1. Warm-up ===== */
+const W=[
+  {label:'Plot (3, 5)', p:`Plot <span class="mono">(3, 5)</span>. Tap the grid.`, t:[3,5]},
+  {label:'Plot (5, 3)', p:`Now plot <span class="mono">(5, 3)</span>.`, t:[5,3]},
+  {label:'Same point?', p:`<span class="mono">(3, 5)</span> and <span class="mono">(5, 3)</span>: are they the same point?`, ask:true},
+  {label:'x-axis', p:`Give me a point on the <b>x-axis</b>. Tap one.`, test:g=>g[1]===0, axis:'x'},
+  {label:'y-axis', p:`Now a point on the <b>y-axis</b>.`, test:g=>g[0]===0, axis:'y'},
+  {label:'(0, 0)', p:`Where is <span class="mono">(0, 0)</span>? Tap it.`, test:g=>eq(g,[0,0])}
+];
+const WARM={
+  panel(){
+    const w=S.warm, st=W[Math.min(w.i,W.length-1)], done=w.i>=W.length;
+    view.innerHTML=`<ol class="steps">${W.map((s,k)=>`<li class="${k<w.i?'done':''} ${k===w.i?'now':''}">${s.label}</li>`).join('')}</ol>
+      <p class="lead">${done?'Warm-up done. On to the treasure map.':st.p}</p>
+      ${st.ask&&!done?`<div class="row"><button class="secondary" id="wYes">Same point</button><button class="secondary" id="wNo">Different points</button></div>`:''}
+      ${sayBox(w.msg, w.ok?'':'try')}
+      <div class="row">${w.ok&&!done?`<button class="primary" id="wNext">Next</button>`:''}${done?`<button class="primary" id="wGo">Go to the treasure map</button>`:''}</div>
+      <p class="hint">Across first, then up. The first number is x (across), the second is y (up).</p>`;
+    const on=(id,f)=>{const b=$(id); if(b) b.onclick=f;};
+    on('#wNext',()=>{ w.i++; w.msg=''; w.ok=false; w.tries=null; render(); });
+    on('#wGo',()=>{ S.tab='launch'; render(); });
+    on('#wYes',()=>{ w.same='yes'; w.ok=true; w.msg=`<p>Look at the board: they landed in <b>different places</b>.</p><p><span class="mono">(3, 5)</span> is 3 across, 5 up. <span class="mono">(5, 3)</span> is 5 across, 3 up. Order matters.</p>`; render(); });
+    on('#wNo',()=>{ w.same='no'; w.ok=true; w.msg=`<p><b>Right: different points.</b> <span class="mono">(3, 5)</span> is 3 across, 5 up. <span class="mono">(5, 3)</span> is 5 across, 3 up. Same numbers, different order, different place.</p>`; render(); });
+  },
+  tap(g){
+    const w=S.warm; if(w.i>=W.length) return; const st=W[w.i]; if(st.ask||w.ok) return;
+    if(st.t){
+      if(eq(g,st.t)){ w.plotted.push(g); w.ok=true; w.tries=null; w.msg=`<p><b>Yes.</b> ${fmt(g)}: ${g[0]} across, then ${g[1]} up.</p>`; }
+      else { w.tries=g; w.msg = (eq(g,[st.t[1],st.t[0]]))
+        ? `<p>You tapped ${nice(g)}: that's ${g[0]} across and ${g[1]} up. The numbers are swapped.</p><p>The first number is x, so go <b>${st.t[0]} across</b> first, then <b>${st.t[1]} up</b>. Try again.</p>`
+        : `<p>You tapped ${nice(g)}: that's ${g[0]} across and ${g[1]} up.</p><p>For ${nice(st.t)}, go <b>${st.t[0]} across</b> first, then <b>${st.t[1]} up</b>. Try again.</p>`; }
+    } else {
+      if(st.test(g)){ w.plotted.push(g); w.ok=true; w.tries=null;
+        w.msg = st.axis==='x' ? `<p><b>Yes.</b> ${nice(g)} has y = 0. It's on the floor: 0 up.</p>`
+              : st.axis==='y' ? `<p><b>Yes.</b> ${nice(g)} has x = 0. It's on the wall: 0 across.</p>`
+              : `<p><b>That's the origin, (0, 0)</b>, where the two axes cross. Every trip on the grid starts here.</p>`; }
+      else { w.tries=g;
+        w.msg = st.axis==='x' ? `<p>${nice(g)} is ${g[1]} up from the x-axis. Every point on the x-axis has <b>y = 0</b>. Try again.</p>`
+              : st.axis==='y' ? `<p>${nice(g)} is ${g[0]} across from the y-axis. Every point on the y-axis has <b>x = 0</b>. Try again.</p>`
+              : `<p>${nice(g)} is ${g[0]} across and ${g[1]} up. The origin is 0 across and 0 up: where the axes cross. Try again.</p>`; }
+    }
+    render();
+  },
+  board(D){
+    const w=S.warm, st=W[w.i];
+    w.plotted.forEach((p,k)=>{ const last=k===w.plotted.length-1&&w.ok; if(k<2) D.walk(p,false); D.dot(p,'p-ok',9,last); D.label(p,fmt(p),'acc big'); });
+    if(w.tries){ D.walk(w.tries,true); D.dot(w.tries,'p-bad',11,true); D.label(w.tries,fmt(w.tries),'bad big'); }
+  }
+};
+
+/* ===== 2. Treasure map (Launch) ===== */
+const VAULT=A_PROBS[0], VR=rectInfo(VAULT);
+function cornerFeedback(pts,g){
+  const r=rectInfo(pts), m=r.m;
+  if(eq(g,m)) return {ok:true};
+  if(has(pts,g)) return {msg:`${nice(g)} is already one of the three corners. The key is at the fourth one.`};
+  if(g[0]===m[1]&&g[1]===m[0]) return {msg:`Close! You swapped x and y. ${nice(g)} means ${g[0]} across, then ${g[1]} up. Across the hall first, then up the stairs.`, both:true};
+  const parts=[], out={};
+  if(g[0]!==m[0]){ parts.push(`Your x is <b>${g[0]}</b>. The missing corner sits straight above or below ${nice(r.v)} (gold dashes). Which x must it share?`); out.v=r.v; }
+  if(g[1]!==m[1]){ parts.push(`Your y is <b>${g[1]}</b>. The missing corner sits straight across from ${nice(r.hz)}. Which y must it share?`); out.hz=r.hz; }
+  out.msg=parts.join('</p><p>'); return out;
+}
+const LAUNCH={
+  panel(){
+    const l=S.launch;
+    view.innerHTML=`<span class="tag">Treasure map</span>
+      <p class="lead">Three corners of the rectangular vault are at <span class="mono">(2, 1)</span>, <span class="mono">(8, 1)</span> and <span class="mono">(2, 5)</span>. The key is buried at the <b>fourth corner</b>. Where?</p>
+      <p class="sub">Vote first. Then tap your guess on the map.</p>
+      ${sayBox(l.msg, l.solved?'gold':'try')}
+      <div class="row">
+        ${l.solved?'':`<button class="secondary" id="lDraw">Draw the sides</button><button class="secondary" id="lReveal">Reveal the key</button>`}
+        <button class="${l.solved?'primary':'secondary'}" id="lWhy">Could you have known without plotting?</button>
+      </div>
+      ${l.why?`<div class="say"><p>Read the coordinates instead of the map:</p>
+        <table class="xy"><tr><th>x</th>${VAULT.map(p=>`<td class="${p[0]===VR.m[0]?'odd':''}">${p[0]}</td>`).join('')}<td>→ <b>${VR.m[0]}</b></td></tr>
+        <tr><th>y</th>${VAULT.map(p=>`<td class="${p[1]===VR.m[1]?'odd':''}">${p[1]}</td>`).join('')}<td>→ <b>${VR.m[1]}</b></td></tr></table>
+        <p>Each x belongs to two corners: one side of the vault is at x = 2, the other at x = 8. Only one corner has x = 8 so far, so the key needs the other <b>8</b>. Same with y: only one corner has y = 5, so the key's y is <b>5</b>.</p></div>`:''}
+      ${l.solved?`<div class="row"><button class="primary" id="lGo">Investigate: more missing corners</button></div>`:''}`;
+    const on=(id,f)=>{const b=$(id); if(b) b.onclick=f;};
+    on('#lDraw',()=>{ l.drawn=true; l.msg=`The two sides we know are drawn. The dashed lines show where the other two sides must run. Where do they meet?`; render(); });
+    on('#lReveal',()=>{ LAUNCH.solve(); render(); });
+    on('#lWhy',()=>{ l.why=!l.why; render(); });
+    on('#lGo',()=>{ S.tab='inv'; S.inv.part='A'; S.inv.a=0; render(); });
+  },
+  solve(){ const l=S.launch; l.solved=true; l.fb=null;
+    l.msg=`<p><b>The key is at (8, 5).</b> It shares x = 8 with <span class="mono">(8, 1)</span> below it and y = 5 with <span class="mono">(2, 5)</span> beside it.</p>`; },
+  tap(g){ const l=S.launch; if(l.solved) return; l.guess=g; const f=cornerFeedback(VAULT,g);
+    if(f.ok){ LAUNCH.solve(); } else { l.misses++; l.fb=f; l.msg=`<p>${f.msg}</p>`; }
+    render(); },
+  board(D){ const l=S.launch;
+    if(l.solved){ D.rect(VR,'rect gold'); }
+    else if(l.drawn){ D.seg(VR.opp,VR.v,'side'); D.seg(VR.opp,VR.hz,'side'); D.seg(VR.v,[VR.v[0],N],'guide'); D.seg(VR.hz,[N,VR.hz[1]],'guide'); }
+    if(!l.solved&&l.fb){ if(l.fb.v) D.vline(l.fb.v[0],'guide'); if(l.fb.hz) D.hline(l.fb.hz[1],'guide'); if(l.fb.v) D.dot(l.fb.v,'p-hl',15); if(l.fb.hz) D.dot(l.fb.hz,'p-hl',15); }
+    VAULT.forEach(p=>{ D.dot(p,'p-given',8); D.label(p,fmt(p),'big'); });
+    if(l.solved){ D.star(VR.m,true); D.label(VR.m,'key '+fmt(VR.m),'gold big'); }
+    else if(l.guess){ D.dot(l.guess,'p-bad',11,true); D.label(l.guess,fmt(l.guess),'bad big'); }
+  }
+};
+
+/* ===== 3. Investigate ===== */
+const INV={
+  panel(){
+    const v=S.inv;
+    let h=`<div class="seg" role="group" aria-label="Part">
+      <button data-part="A" aria-pressed="${v.part==='A'}">Part A · Missing corners</button>
+      <button data-part="B" aria-pressed="${v.part==='B'}">Part B · Square</button>
+      <button data-part="C" aria-pressed="${v.part==='C'}">Part C · Area 12</button></div>`;
+    if(v.part==='A') h+=INV.panelA(); if(v.part==='B') h+=INV.panelB(); if(v.part==='C') h+=INV.panelC();
+    view.innerHTML=h;
+    view.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>{ v.part=b.dataset.part; render(); });
+    if(v.part==='A') INV.wireA(); if(v.part==='B') INV.wireB(); if(v.part==='C') INV.wireC();
+  },
+  /* ---- Part A ---- */
+  panelA(){
+    const v=S.inv, i=v.a;
+    const allOk=v.A.every(x=>x.ok.done);
+    let h=`<div class="pnav" role="group" aria-label="Problem">${A_PROBS.map((_,k)=>`<button data-a="${k}" aria-pressed="${k===i&&!v.ruleOpen}" class="${v.A[k].ok.done?'ok':''}" aria-label="Problem ${k+1}">${k+1}</button>`).join('')}
+      <button data-a="rule" aria-pressed="${!!v.ruleOpen}" class="${v.rule.x==='v'&&v.rule.y==='h'?'ok':''}">The rule</button></div>`;
+    if(v.ruleOpen) return h+INV.ruleHTML();
+    const st=v.A[i], P=A_PROBS[i], f=st.f, ok=st.ok;
+    const cls=k=> ok[k]===true?'good':ok[k]===false?'bad':'';
+    const mk=k=> ok[k]===true?'<span class="mark good">✓</span>':ok[k]===false?'<span class="mark bad">?</span>':'<span class="mark"></span>';
+    const inp=(k,lab)=>`<input id="f_${k}" data-k="${k}" class="${cls(k)}" inputmode="numeric" value="${f[k]}" aria-label="${lab}">`;
+    h+=`<p class="lead">Three corners: ${P.map(nice).join(', ')}. Find the fourth corner, then the perimeter and area <b>from the coordinates</b>.</p>
+      <div class="sheet">
+        <label for="f_x">Fourth corner</label><div class="fld">(${inp('x','fourth corner x')},${inp('y','fourth corner y')})${mk('corner')}</div>
+        <label for="f_s1">Side lengths</label><div class="fld">${inp('s1','first side length')}<span class="u">and</span>${inp('s2','second side length')}<span class="u">units</span>${mk('sides')}</div>
+        <label for="f_p">Perimeter</label><div class="fld">${inp('p','perimeter')}<span class="u">units</span>${mk('per')}</div>
+        <label for="f_ar">Area</label><div class="fld">${inp('ar','area')}<span class="u">square units</span>${mk('area')}</div>
+      </div>
+      <div class="row"><button class="primary" id="aCheck">Check</button>${ok.corner?'':`<button class="secondary" id="aDraw">Draw the sides</button>`}
+        ${ok.done&&i<3?`<button class="primary" id="aNext">Next rectangle</button>`:''}${ok.done&&i===3?`<button class="primary" id="aRule">Write the rule</button>`:''}</div>
+      <ul class="fb" aria-live="polite">${st.fb.map(x=>`<li class="${x.ok?'ok':''}">${x.t}</li>`).join('')}</ul>
+      <p class="hint">Tap the grid to fill in the fourth corner. ${allOk?'All four rectangles solved.':''}</p>`;
+    return h;
+  },
+  wireA(){
+    const v=S.inv;
+    view.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ if(b.dataset.a==='rule'){ v.ruleOpen=true; } else { v.ruleOpen=false; v.a=+b.dataset.a; } render(); });
+    if(v.ruleOpen){ INV.wireRule(); return; }
+    const st=v.A[v.a];
+    view.querySelectorAll('.sheet input').forEach(inp=>inp.addEventListener('input',()=>{ st.f[inp.dataset.k]=inp.value.trim(); }));
+    view.querySelectorAll('.sheet input').forEach(inp=>inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); INV.checkA(); } }));
+    const on=(id,f)=>{const b=$(id); if(b) b.onclick=f;};
+    on('#aCheck',()=>INV.checkA());
+    on('#aDraw',()=>{ st.drawn=true; st.fb=[{t:'The two known sides are drawn in dark ink. The gold dashes show where the missing sides must run. Read off where they cross.'}]; render(); });
+    on('#aNext',()=>{ v.a++; render(); });
+    on('#aRule',()=>{ v.ruleOpen=true; render(); });
+  },
+  checkA(){
+    const v=S.inv, st=v.A[v.a], P=A_PROBS[v.a], r=rectInfo(P), f=st.f, ok={}, fb=[];
+    const num=s=>/^\d+$/.test(s)?parseInt(s,10):null;
+    const gx=num(f.x), gy=num(f.y);
+    // corner
+    if(gx===null||gy===null){ fb.push({t:'Fill in both numbers of the fourth corner (or tap it on the grid).'}); }
+    else { const c=cornerFeedback(P,[gx,gy]); ok.corner=!!c.ok; st.last=c.ok?null:{g:[gx,gy],c};
+      fb.push(c.ok?{ok:true,t:`Fourth corner ${nice(r.m)}: x from ${nice(r.v)}, y from ${nice(r.hz)}.`}:{t:c.msg}); }
+    // sides
+    const s1=num(f.s1), s2=num(f.s2);
+    if(s1===null||s2===null){ fb.push({t:'Fill in both side lengths.'}); }
+    else { const got=[s1,s2].sort((a,b)=>a-b), want=[r.w,r.h].sort((a,b)=>a-b);
+      if(got[0]===want[0]&&got[1]===want[1]){ ok.sides=true; fb.push({ok:true,t:`Sides ${r.w} and ${r.h}: across ${r.maxx} − ${r.minx} = ${r.w}, up ${r.maxy} − ${r.miny} = ${r.h}.`}); }
+      else { ok.sides=false;
+        const plusOne=[s1,s2].some(s=>s===r.w+1||s===r.h+1);
+        fb.push({t: plusOne ? `It looks like a side was measured by counting grid dots. From ${r.minx} to ${r.maxx} there are ${r.w+1} dots but only ${r.w} spaces between them. Subtract instead: bigger x − smaller x, bigger y − smaller y.`
+          : `Get each side by subtracting coordinates, no counting needed: across = bigger x − smaller x; up = bigger y − smaller y.`}); } }
+    // perimeter
+    const p=num(f.p);
+    if(p===null) fb.push({t:'Fill in the perimeter.'});
+    else if(p===r.per){ ok.per=true; fb.push({ok:true,t:`Perimeter ${r.w} + ${r.h} + ${r.w} + ${r.h} = ${r.per}.`}); }
+    else { ok.per=false; fb.push({t: p===r.w+r.h ? `${p} is one long side plus one short side: that's only halfway around. Keep walking the other two sides.`
+      : p===r.area ? `${p} is the area: the squares inside. Perimeter is the distance around the outside: add all four sides.`
+      : p===2*(r.w+r.h+2) ? `It looks like the dots were counted. Use the side lengths from subtracting, then add all four sides.`
+      : `Perimeter is the distance all the way around. Add all four sides: two long and two short.`}); }
+    // area
+    const a=num(f.ar);
+    if(a===null) fb.push({t:'Fill in the area.'});
+    else if(a===r.area){ ok.area=true; fb.push({ok:true,t:`Area ${r.w} × ${r.h} = ${r.area} square units.`}); }
+    else { ok.area=false; fb.push({t: a===r.per ? `${a} is the perimeter: the distance around. Area counts the unit squares inside: rows × columns.`
+      : a===(r.w+1)*(r.h+1) ? `That counts grid dots, not squares. There are ${r.w+1} dots across but ${r.w} squares. Multiply the side lengths.`
+      : a===r.w+r.h ? `Adding the sides gives a distance, not an area. Area = one side × the other side.`
+      : `Area counts the unit squares inside. Multiply the two side lengths (count a row, then how many rows).`}); }
+    st.ok={...ok, done: ok.corner&&ok.sides&&ok.per&&ok.area};
+    if(st.ok.done) fb.push({ok:true,t:`<b>Rectangle ${v.a+1} solved</b>, and you never had to count a square.`});
+    st.fb=fb; render();
+    if(st.ok.done) setTimeout(()=>{ const b=$('#aNext')||$('#aRule'); if(b) b.focus(); },0);
+  },
+  ruleHTML(){
+    const r=S.inv.rule;
+    const opts=[['v','the corner above or below it'],['h','the corner beside it'],['d','the corner across from it (diagonal)']];
+    const btn=(which,val,lab)=>{ const picked=r[which]===val; const right=(which==='x'&&val==='v')||(which==='y'&&val==='h');
+      return `<button data-w="${which}" data-v="${val}" aria-pressed="${picked}" class="${picked?(right?'good':'bad'):''}">${lab}</button>`; };
+    const fbx= r.x===null?'' : r.x==='v' ? `Yes. On the treasure map, the key ${nice([8,5])} is straight above ${nice([8,1])}: same x, 8.`
+      : r.x==='h' ? `Look at the map: the corner beside the key is ${nice([2,5])}. Its x is 2, but the key's x is 8. Moving sideways changes x.` : `The diagonal corner ${nice([2,1])} shares <b>neither</b> number with the key ${nice([8,5])}.`;
+    const fby= r.y===null?'' : r.y==='h' ? `Yes. The key ${nice([8,5])} is straight across from ${nice([2,5])}: same y, 5.`
+      : r.y==='v' ? `Look at the map: the corner below the key is ${nice([8,1])}. Its y is 1, but the key's y is 5. Moving up changes y.` : `The diagonal corner ${nice([2,1])} shares <b>neither</b> number with the key ${nice([8,5])}.`;
+    return `<div class="rule"><h3>Rule for the missing corner</h3>
+      <div class="q">It has the same <b>x</b> as …</div><div class="choices">${opts.map(o=>btn('x',o[0],o[1])).join('')}</div>${fbx?`<div class="say ${r.x==='v'?'':'try'}">${fbx}</div>`:''}
+      <div class="q">… and the same <b>y</b> as …</div><div class="choices">${opts.map(o=>btn('y',o[0],o[1])).join('')}</div>${fby?`<div class="say ${r.y==='h'?'':'try'}">${fby}</div>`:''}
+      ${r.x==='v'&&r.y==='h'?`<div class="say gold"><b>The rule:</b> the missing corner takes its x from the corner above or below it, and its y from the corner beside it. Side length is the difference of the coordinates.</div>`:''}
+      </div><p class="hint">The board shows the treasure map so you can test each choice.</p>`;
+  },
+  wireRule(){ view.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ S.inv.rule[b.dataset.w]=b.dataset.v; render(); }); },
+  /* ---- Part B ---- */
+  panelB(){
+    const b=S.inv.B, up=B_KEY[0].every(p=>has(b.found,p)), dn=B_KEY[1].every(p=>has(b.found,p));
+    return `<p class="lead">One side of a square goes from <span class="mono">(1, 3)</span> to <span class="mono">(4, 3)</span>. Tap the other two corners.</p>
+      <p class="sub">Is there more than one answer?</p>
+      ${sayBox(b.msg, b.miss?'try':(up&&dn?'gold':''))}
+      <div class="row"><button class="secondary" id="bHint">How long is the side?</button><button class="secondary" id="bClear">Clear my taps</button></div>`;
+  },
+  wireB(){ const b=S.inv.B;
+    $('#bHint').onclick=()=>{ b.hint=true; b.miss=null; b.msg=`<p>The side runs from x = 1 to x = 4: <b>4 − 1 = 3 units</b>. Every side of a square is 3 units, so the next corners are 3 units straight up or down from the ends.</p>`; render(); };
+    $('#bClear').onclick=()=>{ S.inv.B={found:[],miss:null,msg:''}; render(); };
+  },
+  tapB(g){ const b=S.inv.B; b.miss=null;
+    const all=[...B_KEY[0],...B_KEY[1]];
+    if(has(B_SIDE,g)){ b.msg=`<p>${nice(g)} is already an end of the side. Find the two corners that aren't drawn yet.</p>`; b.miss=g; }
+    else if(has(all,g)){ if(!has(b.found,g)) b.found.push(g);
+      const up=B_KEY[0].every(p=>has(b.found,p)), dn=B_KEY[1].every(p=>has(b.found,p));
+      if(up&&dn) b.msg=`<p><b>Two answers!</b> The square can sit above the side, ${nice([1,6])} and ${nice([4,6])}, or below it, ${nice([1,0])} and ${nice([4,0])}.</p>`;
+      else if(up||dn) b.msg=`<p><b>Square found.</b> The side is 3 units, and you went 3 ${up?'up':'down'} from each end.</p><p>Is there more than one answer? The side is at y = 3. Could the square go ${up?'down':'up'} instead?</p>`;
+      else b.msg=`<p><b>${fmt(g)} works:</b> 3 units straight ${g[1]>3?'up':'down'} from ${nice([g[0],3])}. Now the fourth corner.</p>`; }
+    else { b.miss=g;
+      if(g[0]!==1&&g[0]!==4) b.msg=`<p>${nice(g)} doesn't line up with either end. A square has square corners, so the new sides go straight up or down from ${nice([1,3])} and ${nice([4,3])}. Their x must be 1 or 4.</p>`;
+      else if(g[1]===3) b.msg=`<p>${nice(g)} is on the same line as the side. The square needs to go up or down from it.</p>`;
+      else { const d=Math.abs(g[1]-3); b.msg=`<p>From ${nice([g[0],3])} to ${nice(g)} is ${Math.max(g[1],3)} − ${Math.min(g[1],3)} = <b>${d} units</b>. The given side is 4 − 1 = 3 units, and all four sides of a square match. Try again.</p>`; } }
+    render(); },
+  /* ---- Part C ---- */
+  panelC(){
+    const c=S.inv.C, n=c.found.length;
+    const sorted=[...c.found].sort((a,b)=>a[0]-b[0]);
+    return `<p class="lead">A rectangle has <b>area 12</b>, one corner at <span class="mono">(0, 0)</span>, and sides along the axes. Tap every possible opposite corner.</p>
+      <div class="found" aria-label="Corners found">${sorted.map(p=>`<span class="${c.last&&eq(p,c.last)?'new':''}">${fmt(p)}</span>`).join('')||'<span style="background:none;color:var(--muted);font-family:var(--body);font-size:16px">None yet. Tap the grid.</span>'}</div>
+      ${sayBox(c.msg, c.miss?'try':(n===6?'gold':''))}
+      <div class="row"><button class="secondary" id="cDone">Have we found them all?</button><button class="secondary" id="cClear">Clear</button></div>`;
+  },
+  wireC(){ const c=S.inv.C;
+    $('#cDone').onclick=()=>{ c.miss=null; const left=6-c.found.length;
+      c.msg= left===0 ? `<p><b>All six.</b> There are exactly six, one for each way to write 12 as width × height: 1 × 12, 2 × 6, 3 × 4, 4 × 3, 6 × 2, 12 × 1.</p>`
+        : `<p>Not yet: <b>${left} more</b> to find. Try going through widths in order: width 1, width 2, width 3 … For each width, is there a whole-number height that makes 12?</p>`; render(); };
+    $('#cClear').onclick=()=>{ S.inv.C={found:[],last:null,miss:null,msg:''}; render(); };
+  },
+  tapC(g){ const c=S.inv.C; c.miss=null; const [x,y]=g;
+    if(x===0||y===0){ c.miss=g; c.msg=`<p>${nice(g)} is on an axis, so the "rectangle" from ${nice([0,0])} is flat: ${x} × ${y} = 0. It has no area. Try a point off the axes.</p>`; }
+    else if(x*y===12){ if(has(c.found,g)){ c.msg=`<p>${nice(g)} is already on the list. Look for a different width.</p>`; c.last=g; }
+      else { c.found.push(g); c.last=g; c.msg = c.found.length===6 ? `<p><b>All six found!</b> Each corner is a factor pair of 12.</p>` : `<p><b>Yes:</b> ${x} wide × ${y} tall = 12 square units. ${c.found.length} found.</p>`; } }
+    else { c.miss=g; c.msg=`<p>A rectangle from ${nice([0,0])} to ${nice(g)} is ${x} wide and ${y} tall: ${x} × ${y} = <b>${x*y}</b>, not 12. ${x*y<12?'Too small.':'Too big.'} ${12%x===0?`With width ${x}, what height makes 12?`:`Can ${x} go into 12 evenly?`}</p>`; }
+    render(); },
+  tap(g){ const p=S.inv.part;
+    if(p==='A'){ if(S.inv.ruleOpen) return; const st=S.inv.A[S.inv.a]; if(st.ok.corner) return; st.f.x=String(g[0]); st.f.y=String(g[1]); st.last=null; st.tapped=g; render(); }
+    if(p==='B') INV.tapB(g); if(p==='C') INV.tapC(g); },
+  board(D){ const v=S.inv;
+    if(v.part==='A'){
+      if(v.ruleOpen){ const r=VR; D.rect(r,'rect');
+        if(v.rule.x){ const src=v.rule.x==='v'?[8,1]:v.rule.x==='h'?[2,5]:[2,1]; D.dot(src,'p-hl',16); D.seg(src,[8,5],v.rule.x==='v'?'guide acc':'guide'); }
+        if(v.rule.y){ const src=v.rule.y==='h'?[2,5]:v.rule.y==='v'?[8,1]:[2,1]; D.dot(src,'p-hl',16); D.seg(src,[8,5],v.rule.y==='h'?'guide acc':'guide'); }
+        VAULT.forEach(p=>{ D.dot(p,'p-given',8); D.label(p,fmt(p),'big'); }); D.star(r.m); D.label(r.m,fmt(r.m),'gold big'); return; }
+      const st=v.A[v.a], P=A_PROBS[v.a], r=rectInfo(P);
+      if(st.ok.corner) D.rect(r,'rect');
+      else if(st.drawn){ D.seg(r.opp,r.v,'side'); D.seg(r.opp,r.hz,'side');
+        const vEnd=[r.v[0], r.m[1]>r.v[1]?N:0], hEnd=[r.m[0]>r.hz[0]?N:0, r.hz[1]]; D.seg(r.v,vEnd,'guide'); D.seg(r.hz,hEnd,'guide'); }
+      if(st.last&&st.last.c){ const c=st.last.c; if(c.v){ D.vline(c.v[0],'guide'); D.dot(c.v,'p-hl',15);} if(c.hz){ D.hline(c.hz[1],'guide'); D.dot(c.hz,'p-hl',15);} }
+      if(st.ok.sides) D.dims(r,'acc');
+      if(st.ok.area && r.w>=3 && r.h>=3) D.textAt((r.minx+r.maxx)/2,(r.miny+r.maxy)/2+0.15,`${r.w} × ${r.h} = ${r.area}`,'big');
+      if(st.ok.per && r.h>=2) D.textAt((r.minx+r.maxx)/2, r.maxy-0.38, `P = ${r.per}`, 'acc');
+      P.forEach(p=>{ D.dot(p,'p-given',8); D.label(p,fmt(p),'big'); });
+      if(st.ok.corner){ D.star(r.m,true); D.label(r.m,fmt(r.m),'gold big'); }
+      else { const t=st.last?st.last.g:(st.tapped&&st.f.x===String(st.tapped[0])&&st.f.y===String(st.tapped[1])?st.tapped:null);
+        if(t){ D.dot(t, st.last?'p-bad':'p-hl', 11, true); D.label(t,fmt(t), st.last?'bad big':'gold big'); } }
+    }
+    if(v.part==='B'){ const b=v.B;
+      B_KEY.forEach(sq=>{ if(sq.every(p=>has(b.found,p))) D.poly([B_SIDE[0],B_SIDE[1],sq[1],sq[0]],'rect'); });
+      if(b.hint){ D.seg([1,6],[1,0],'guide'); D.seg([4,6],[4,0],'guide'); }
+      D.seg(B_SIDE[0],B_SIDE[1],'side plum'); D.textAt(2.5,3.42,'3 units','plum');
+      B_SIDE.forEach(p=>{ D.dot(p,'p-plum',8); D.label(p,fmt(p),'plum big','below'); });
+      b.found.forEach(p=>{ D.dot(p,'p-ok',9); D.label(p,fmt(p),'acc big'); });
+      if(b.miss){ D.dot(b.miss,'p-bad',11,true); D.label(b.miss,fmt(b.miss),'bad big'); if(b.miss[0]===1||b.miss[0]===4) D.seg([b.miss[0],3],b.miss,'walk bad','ahB'); }
+    }
+    if(v.part==='C'){ const c=v.C;
+      c.found.forEach(p=>{ if(!(c.last&&eq(p,c.last))) D.rect({minx:0,miny:0,maxx:p[0],maxy:p[1]},'rect faint'); });
+      if(c.last) D.rect({minx:0,miny:0,maxx:c.last[0],maxy:c.last[1]},'rect');
+      if(c.miss && c.miss[0]>0 && c.miss[1]>0) D.rect({minx:0,miny:0,maxx:c.miss[0],maxy:c.miss[1]},'rect gold');
+      D.dot([0,0],'p-given',8);
+      c.found.forEach(p=>{ D.dot(p,'p-ok',9,c.last&&eq(p,c.last)); D.label(p,fmt(p),'acc'); });
+      if(c.last && c.last[0]>=2 && c.last[1]>=2) D.textAt(c.last[0]/2,c.last[1]/2,`${c.last[0]} × ${c.last[1]} = 12`,'big');
+      if(c.miss){ D.dot(c.miss,'p-bad',11,true); D.label(c.miss,fmt(c.miss),'bad big');
+        if(c.miss[0]>=2&&c.miss[1]>=2) D.textAt(c.miss[0]/2,c.miss[1]/2,`${c.miss[0]} × ${c.miss[1]} = ${c.miss[0]*c.miss[1]}`,'bad big'); }
+    }
+  }
+};
+
+/* ===== 4. Detective questions ===== */
+function farRect(){
+  const r=()=>10+Math.floor(Math.random()*90);
+  let x1=r(), x2=r(); while(x2===x1) x2=r(); let y1=r(), y2=r(); while(y2===y1) y2=r();
+  const corners=[[x1,y1],[x2,y1],[x2,y2],[x1,y2]]; const miss=Math.floor(Math.random()*4);
+  const given=corners.filter((_,k)=>k!==miss);
+  return {given, m:corners[miss]};
+}
+const QS={
+  rule:{nav:'1', text:`State the rule. How can you find the missing corner <b>without the grid</b>?`,
+    acts:[{l:'Show the rule on the map', f:()=>{ S.q.mode='rule'; S.q.msg=`<p>The key ${nice([8,5])} takes its <b>x</b> from the corner straight below it, ${nice([8,1])}, and its <b>y</b> from the corner beside it, ${nice([2,5])}.</p>`; }},
+          {l:'Test it on a giant vault', f:()=>{ S.q.mode='far'; S.q.far=farRect(); S.q.farShown=false; S.q.msg=''; }}]},
+  horiz:{nav:'2', text:`Which coordinate stays the same along a horizontal side? Why?`,
+    acts:[{l:'Walk along a horizontal side', f:()=>{ S.q.mode='walkH'; S.q.msg=`<p>Every point on the bottom side has <b>y = 1</b>. Walking across changes how far over you are (x), never how high you are (y).</p>`; }},
+          {l:'Walk up a vertical side', f:()=>{ S.q.mode='walkV'; S.q.msg=`<p>Every point on the right side has <b>x = 8</b>. Walking up changes y, never x.</p>`; }}]},
+  length:{nav:'3', text:`How do you get a side length from two points without counting?`,
+    acts:[{l:'Count the dots', f:()=>{ S.q.mode='dots'; S.q.msg=`<p>From ${nice([2,1])} to ${nice([8,1])} there are <b>7 dots</b>, but only <b>6 spaces</b> between them. A length counts the spaces. That's why counting dots gives one too many.</p>`; }},
+          {l:'Subtract', f:()=>{ S.q.mode='sub'; S.q.msg=`<p><b>8 − 2 = 6</b> units across and <b>5 − 1 = 4</b> units up. Subtracting counts the spaces for you, even for points far off the grid.</p>`; }}]},
+  square:{nav:'4', text:`Part B: one side of a square goes from (1, 3) to (4, 3). Why are there two answers?`,
+    acts:[{l:'Show both squares', f:()=>{ S.q.mode='twoSq'; S.q.msg=`<p>The side is 4 − 1 = 3 units. The square can fold <b>up</b> to y = 3 + 3 = 6, or <b>down</b> to y = 3 − 3 = 0. Both stay in the first quadrant.</p>`; }}]},
+  twelve:{nav:'5', text:`Part C's rectangles: 1 × 12, 2 × 6, 3 × 4 … Where have you seen these before?`,
+    acts:[{l:'Show all six rectangles', f:()=>{ S.q.mode='six'; S.q.msg=`<p>They are the <b>factor pairs of 12</b>: 1 × 12, 2 × 6, 3 × 4, and the same three turned on their side. ${nice([3,4])} and ${nice([4,3])} are the same rectangle rotated: 3 × 4 = 4 × 3.</p>`; }},
+          {l:'Look at the corners', f:()=>{ S.q.mode='curve'; S.q.msg=`<p>The six corners make a <b>curve</b>. As the width gets bigger, the height must get smaller so the product stays 12.</p>`; }}]},
+  ch:{nav:'★ Challenge', text:null, acts:[]},
+  mish:{nav:'Mishkan', text:null, acts:[]},
+  exit:{nav:'Exit ticket', text:`<b>Journal:</b> How can you find the missing corner without the grid?`,
+    acts:[{l:'Sentence starters', f:()=>{ S.q.mode=null; S.q.msg=`<p>"The missing corner's x is the same as …"</p><p>"Its y is the same as …"</p><p>"To find a side length, I …"</p>`; }}]}
+};
+const Q={
+  panel(){
+    const q=S.q, cur=QS[q.i];
+    let h=`<div class="pnav" role="group" aria-label="Question">${Object.keys(QS).map(k=>`<button data-q="${k}" aria-pressed="${q.i===k}">${QS[k].nav}</button>`).join('')}</div>`;
+    if(q.i==='ch') h+=Q.chHTML();
+    else if(q.i==='mish') h+=Q.mishHTML();
+    else {
+      h+=`<p class="lead">${cur.text}</p><div class="row" id="qacts">${cur.acts.map((a,k)=>`<button class="${k===0?'primary':'secondary'}" data-act="${k}">${a.l}</button>`).join('')}</div>`;
+      if(q.mode==='far'&&q.far){ const f=q.far, xs=f.given.map(p=>p[0]), ys=f.given.map(p=>p[1]);
+        h+=`<div class="say gold"><p>A giant vault, far too big for our grid. Three corners: ${f.given.map(nice).join(', ')}. Predict the fourth.</p>
+          ${q.farShown?`<table class="xy"><tr><th>x</th>${xs.map(x=>`<td class="${x===f.m[0]?'odd':''}">${x}</td>`).join('')}<td>→ <b>${f.m[0]}</b></td></tr><tr><th>y</th>${ys.map(y=>`<td class="${y===f.m[1]?'odd':''}">${y}</td>`).join('')}<td>→ <b>${f.m[1]}</b></td></tr></table>
+          <p>Missing corner <b>${fmt(f.m)}</b>. Sides ${Math.max(...xs)} − ${Math.min(...xs)} = ${Math.max(...xs)-Math.min(...xs)} and ${Math.max(...ys)} − ${Math.min(...ys)} = ${Math.max(...ys)-Math.min(...ys)}.</p>`:''}
+          <div class="row" style="margin-top:10px">${q.farShown?'':'<button class="primary" id="farShow">Reveal</button>'}<button class="secondary" id="farNew">Another vault</button></div></div>`; }
+      h+=sayBox(q.msg);
+      h+=`<p class="hint">Talk it over first, then tap a button to put evidence on the board.</p>`;
+    }
+    view.innerHTML=h;
+    view.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ q.i=b.dataset.q; q.mode=null; q.msg=''; render(); });
+    view.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ cur.acts[+b.dataset.act].f(); render(); });
+    const on=(id,f)=>{const b=$(id); if(b) b.onclick=f;};
+    on('#farShow',()=>{ q.farShown=true; render(); });
+    on('#farNew',()=>{ q.far=farRect(); q.farShown=false; render(); });
+    if(q.i==='ch') Q.chWire(); if(q.i==='mish') Q.mishWire();
+  },
+  /* Challenge */
+  chHTML(){ const c=S.q.ch;
+    const d1=CH1_KEY.every(p=>has(c.found1,p)), d2=CH2_KEY.every(p=>has(c.found2,p));
+    return `<div class="seg" role="group" aria-label="Challenge part"><button data-st="1" aria-pressed="${c.stage===1}">Opposite corners${d1?' ✓':''}</button><button data-st="2" aria-pressed="${c.stage===2}">Tilted square${d2?' ✓':''}</button></div>
+      <p class="lead">${c.stage===1?`Two <b>opposite</b> corners of a square are <span class="mono">(2, 2)</span> and <span class="mono">(5, 5)</span>. Tap the other two corners.`
+        :`One side of a <b>tilted</b> square goes from <span class="mono">(3, 0)</span> to <span class="mono">(6, 3)</span>. Tap the other two corners.`}</p>
+      ${sayBox(c.msg, c.miss?'try':((c.stage===1?d1:d2)?'gold':''))}
+      <div class="row">${c.stage===2&&!d2?`<button class="secondary" id="chStep">Show the step</button>`:''}${c.stage===1&&d1?`<button class="primary" id="chNext">Now try a tilted square</button>`:''}<button class="secondary" id="chClear">Clear</button></div>`; },
+  chWire(){ const c=S.q.ch;
+    view.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ c.stage=+b.dataset.st; c.msg=''; c.miss=null; c.step=false; render(); });
+    const on=(id,f)=>{const b=$(id); if(b) b.onclick=f;};
+    on('#chNext',()=>{ c.stage=2; c.msg=''; c.miss=null; render(); });
+    on('#chStep',()=>{ c.step=true; c.miss=null; c.msg=`<p>From ${nice([3,0])} to ${nice([6,3])} is <b>3 right, 3 up</b>. At a square corner, the next side turns a quarter turn: <b>3 left, 3 up</b>. Follow the arrows from ${nice([6,3])}.</p>`; render(); });
+    on('#chClear',()=>{ if(c.stage===1) c.found1=[]; else c.found2=[]; c.msg=''; c.miss=null; c.step=false; render(); });
+  },
+  chTap(g){ const c=S.q.ch; c.miss=null;
+    if(c.stage===1){
+      if(has(CH1,g)){ c.msg=`<p>${nice(g)} is one of the two given corners.</p>`; }
+      else if(has(CH1_KEY,g)){ if(!has(c.found1,g)) c.found1.push(g);
+        c.msg = CH1_KEY.every(p=>has(c.found1,p)) ? `<p><b>Square!</b> ${nice([2,5])} and ${nice([5,2])}. Each new corner borrows its x from one given corner and its y from the other, just like the missing-corner rule.</p>`
+          : `<p><b>${fmt(g)} works.</b> It takes x = ${g[0]} from one corner and y = ${g[1]} from the other. One more.</p>`; }
+      else { c.miss=g; c.msg=`<p>${nice(g)} doesn't fit. In an upright square, every corner lines up with the others: each new corner uses an x from one given corner and a y from the other. The x's available are 2 and 5; the y's are 2 and 5.</p>`; }
+    } else {
+      const right=MATH.squaresFromSide(...CH2).right;
+      if(has(CH2,g)){ c.msg=`<p>${nice(g)} is an end of the given side.</p>`; }
+      else if(has(CH2_KEY,g)){ if(!has(c.found2,g)) c.found2.push(g);
+        c.msg = CH2_KEY.every(p=>has(c.found2,p)) ? `<p><b>Tilted square!</b> ${nice([3,6])} and ${nice([0,3])}. Every side is 3 across and 3 up (or down), turned a quarter turn each time.</p><p>The square could also tilt the other way, to ${nice(right[0])} and ${nice(right[1])}, but ${nice(right[1])} is below the x-axis, off our first-quadrant map.</p>`
+          : `<p><b>${fmt(g)} works.</b> One more corner.</p>`; }
+      else if(has(right,g)){ c.msg=`<p>${nice(g)} would fit a square that tilts the other way, but its last corner ${nice(right[1])} is below the x-axis, off our map. Try the square on the other side of the given edge.</p>`; }
+      else { c.miss=g; const fromQ=[g[0]-6,g[1]-3];
+        c.msg=`<p>From ${nice([6,3])} to ${nice(g)} is ${Math.abs(fromQ[0])} ${fromQ[0]<0?'left':'right'} and ${Math.abs(fromQ[1])} ${fromQ[1]<0?'down':'up'}. The given side is 3 right and 3 up. A square's next side is the same size, turned a quarter turn. Tap “Show the step” if you're stuck.</p>`; }
+    }
+    render(); },
+  /* Mishkan */
+  mishHTML(){ const m=S.q.mish, f=m.f;
+    const inp=(k,lab)=>`<input id="m_${k}" data-k="${k}" inputmode="numeric" value="${f[k]||''}" aria-label="${lab}" class="${m.ok===null?'':(m.ok[k]?'good':'bad')}">`;
+    return `<span class="tag">Optional connection</span>
+      <p class="lead">The courtyard of the Mishkan was <b>100 cubits by 50 cubits</b> (Exodus 27:18). Put one corner at <span class="mono">(0, 0)</span> with the long side along the x-axis. Name the other three corners. What is the area?</p>
+      <div class="sheet">
+        <label>Corner on x-axis</label><div class="fld">(${inp('ax','corner on x-axis, x')},${inp('ay','corner on x-axis, y')})</div>
+        <label>Far corner</label><div class="fld">(${inp('fx','far corner x')},${inp('fy','far corner y')})</div>
+        <label>Corner on y-axis</label><div class="fld">(${inp('bx','corner on y-axis x')},${inp('by','corner on y-axis y')})</div>
+        <label>Area</label><div class="fld">${inp('ar','area')}<span class="u">square cubits</span></div>
+      </div>
+      <div class="row"><button class="primary" id="mCheck">Check</button><button class="secondary" id="mShow">Show it on the grid</button></div>
+      <ul class="fb" aria-live="polite">${m.fb.map(x=>`<li class="${x.ok?'ok':''}">${x.t}</li>`).join('')}</ul>`; },
+  mishWire(){ const m=S.q.mish;
+    view.querySelectorAll('.sheet input').forEach(inp=>inp.addEventListener('input',()=>{ m.f[inp.dataset.k]=inp.value.trim(); }));
+    $('#mShow').onclick=()=>{ m.show=!m.show; render(); };
+    $('#mCheck').onclick=()=>{ const n=k=>/^\d+$/.test(m.f[k]||'')?parseInt(m.f[k],10):null; const ok={}, fb=[];
+      ok.ax=n('ax')===100; ok.ay=n('ay')===0; ok.fx=n('fx')===100; ok.fy=n('fy')===50; ok.bx=n('bx')===0; ok.by=n('by')===50; ok.ar=n('ar')===5000;
+      if(ok.ax&&ok.ay) fb.push({ok:true,t:'(100, 0): 100 cubits along the x-axis.'}); else fb.push({t:'The long side (100 cubits) lies along the x-axis, starting at (0, 0). How far across is its other end? How high?'});
+      if(ok.bx&&ok.by) fb.push({ok:true,t:'(0, 50): 50 cubits up the y-axis.'}); else fb.push({t:'The short side (50 cubits) goes up the y-axis from (0, 0). Points on the y-axis have x = 0.'});
+      if(ok.fx&&ok.fy) fb.push({ok:true,t:'(100, 50): x from the corner below it, y from the corner beside it.'}); else fb.push({t:'Use the missing-corner rule: x from the corner below it, y from the corner beside it.'});
+      const a=n('ar'); if(ok.ar) fb.push({ok:true,t:'100 × 50 = 5,000 square cubits.'}); else fb.push({t: a===300?'300 is the perimeter (100 + 50 + 100 + 50). Area multiplies the sides.':a===150?'100 + 50 adds the sides. Area multiplies them.':'Area = long side × short side.'});
+      m.ok=ok; m.fb=fb; render(); };
+  },
+  tap(g){ if(S.q.i==='ch') Q.chTap(g); },
+  board(D){ const q=S.q;
+    if(q.i==='ch'){ const c=q.ch;
+      if(c.stage===1){ if(CH1_KEY.every(p=>has(c.found1,p))) D.poly([[2,2],[5,2],[5,5],[2,5]],'rect'); D.seg(CH1[0],CH1[1],'guide');
+        CH1.forEach(p=>{ D.dot(p,'p-plum',8); D.label(p,fmt(p),'plum big'); }); c.found1.forEach(p=>{ D.dot(p,'p-ok',9); D.label(p,fmt(p),'acc big'); }); }
+      else { if(CH2_KEY.every(p=>has(c.found2,p))) D.poly([[3,0],[6,3],[3,6],[0,3]],'rect');
+        D.seg(CH2[0],CH2[1],'side plum');
+        if(c.step){ D.seg([3,0],[6,0],'walk'); D.seg([6,0],[6,3],'walk','ahA'); D.seg([6,3],[3,3],'guide'); D.seg([3,3],[3,6],'guide'); D.textAt(4.5,0.4,'3 right','acc'); D.textAt(6.45,1.5,'3 up','acc','start'); D.textAt(4.5,3.4,'3 left','gold'); D.textAt(2.6,4.5,'3 up','gold','end'); }
+        CH2.forEach(p=>{ D.dot(p,'p-plum',8); D.label(p,fmt(p),'plum big',p[1]===0?'left':undefined); }); c.found2.forEach(p=>{ D.dot(p,'p-ok',9); D.label(p,fmt(p),'acc big','left'); }); }
+      if(c.miss){ D.dot(c.miss,'p-bad',11,true); D.label(c.miss,fmt(c.miss),'bad big'); }
+      return; }
+    if(q.i==='mish'){ if(q.mish.show){ D.poly([[0,0],[10,0],[10,5],[0,5]],'rect gold'); D.textAt(5,2.5,'100 × 50 cubits','big'); D.textAt(5,6,'Each square = 10 × 10 cubits','gold');
+        [[0,0],[10,0],[10,5],[0,5]].forEach(p=>D.dot(p,'p-given',7)); D.label([10,5],'(100, 50)','big'); D.label([10,0],'(100, 0)','big'); D.label([0,5],'(0, 50)','big'); } return; }
+    if(q.i==='square'&&q.mode==='twoSq'){ D.poly([[1,3],[4,3],[4,6],[1,6]],'rect'); D.poly([[1,3],[4,3],[4,0],[1,0]],'rect gold'); D.seg(B_SIDE[0],B_SIDE[1],'side plum');
+      [[1,6],[4,6]].forEach(p=>{ D.dot(p,'p-ok',8); D.label(p,fmt(p),'acc'); }); [[1,0],[4,0]].forEach(p=>{ D.dot(p,'p-key',8); D.label(p,fmt(p),'gold'); });
+      B_SIDE.forEach(p=>{ D.dot(p,'p-plum',8); }); D.textAt(5.2,3,'(1, 3) to (4, 3)','plum','start'); return; }
+    if(q.i==='twelve'&&(q.mode==='six'||q.mode==='curve')){
+      C_KEY.forEach(p=>D.rect({minx:0,miny:0,maxx:p[0],maxy:p[1]}, q.mode==='six'?'rect faint':'rect faint'));
+      if(q.mode==='curve'){ let d='M'; for(let x=1;x<=12;x+=0.1){ d+=`${X(x).toFixed(1)} ${Y(12/x).toFixed(1)} L`; } G.push(`<path d="${d.slice(0,-2)}" class="guide" fill="none"/>`); }
+      C_KEY.forEach(p=>{ D.dot(p,q.mode==='curve'?'p-key':'p-ok',9); D.label(p,`${p[0]}×${p[1]}`,'acc'); }); return; }
+    // default: the treasure-map vault
+    if(q.i==='square'){ D.seg(B_SIDE[0],B_SIDE[1],'side plum'); B_SIDE.forEach(p=>{ D.dot(p,'p-plum',8); D.label(p,fmt(p),'plum big','below'); }); return; }
+    if(q.i==='twelve'){ D.dot([0,0],'p-given',8); return; }
+    const r=VR; D.rect(r,'rect');
+    if(q.mode==='rule'){ D.seg([8,1],[8,5],'guide acc'); D.seg([2,5],[8,5],'guide'); D.textAt(8.35,3,'same x','acc','start'); D.textAt(5,5.4,'same y','gold'); }
+    if(q.mode==='walkH'){ for(let x=2;x<=8;x++){ D.dot([x,1],'p-ok',6); } D.textAt(5,0.45,'(2, 1) (3, 1) (4, 1) … (8, 1)','acc'); D.textAt(5,1.55,'y = 1 all the way','acc'); }
+    if(q.mode==='walkV'){ for(let y=1;y<=5;y++){ D.dot([8,y],'p-ok',6); } D.textAt(8.4,3,'x = 8 all the way','acc','start'); }
+    if(q.mode==='dots'){ for(let x=2;x<=8;x++){ D.dot([x,1],'p-dot',7); D.textAt(x,0.45,String(x-1),'bad'); } D.textAt(5,1.55,'7 dots, 6 spaces','bad'); }
+    if(q.mode==='sub'){ D.dims(r,'acc'); }
+    if(q.mode!=='walkH'&&q.mode!=='dots') VAULT.forEach(p=>{ D.dot(p,'p-given',8); D.label(p,fmt(p),'big'); });
+    D.star(r.m); if(q.mode!=='walkV') D.label(r.m,fmt(r.m),'gold big');
+  }
+};
+const TABS={warm:WARM, launch:LAUNCH, inv:INV, q:Q};
+
+/* ===== Wire ===== */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{ S.tab=b.dataset.tab; render(); });
+$('#resetBtn').onclick=()=>{ S=fresh(); render(); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>{ $('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen'; });
+S=fresh(); render();
+window.__MISSING_CORNER__={MATH};
+})();
+</script>
+
+</body></html>

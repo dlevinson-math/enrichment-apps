@@ -1,0 +1,532 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fair or Misleading?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a graph-paper evidence table. Big graph "exhibit" on the left, the detective's case notes on the right; case tabs across the top. */
+:root{
+  --paper:#EEF2F6; --sheet:#FFFFFF; --grid:#D3DDE8; --grid-strong:#9FB0C4;
+  --ink:#16223A; --muted:#55627A; --line:#C9D2DE;
+  --hi:#FFD84D; --hi-ink:#3D2E00; --hi-soft:#FFF4C7;
+  --sneaky:#C8362A; --sneaky-soft:#FBE5E2;
+  --fair:#1C7D52; --fair-soft:#DDF2E7;
+  --b1:#2B79A8; --b2:#E0892B; --b3:#7A55B8; --b4:#2E9A8A; --b5:#C4507A;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1522; --sheet:#182133; --grid:#26324A; --grid-strong:#3E4E6C;
+  --ink:#E9EEF6; --muted:#A3AFC4; --line:#33415C;
+  --hi:#FFD84D; --hi-ink:#2A2000; --hi-soft:#3A3315;
+  --sneaky:#FF7A6B; --sneaky-soft:#3E1F1C; --fair:#4FD08F; --fair-soft:#173A2B;
+  --b1:#5AAAE0; --b2:#F0A456; --b3:#A989E6; --b4:#4CC8B5; --b5:#EC7EA6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1522; --sheet:#182133; --grid:#26324A; --grid-strong:#3E4E6C;
+  --ink:#E9EEF6; --muted:#A3AFC4; --line:#33415C;
+  --hi:#FFD84D; --hi-ink:#2A2000; --hi-soft:#3A3315;
+  --sneaky:#FF7A6B; --sneaky-soft:#3E1F1C; --fair:#4FD08F; --fair-soft:#173A2B;
+  --b1:#5AAAE0; --b2:#F0A456; --b3:#A989E6; --b4:#4CC8B5; --b5:#EC7EA6; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;background-attachment:fixed;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 24px;max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:14px;min-height:100%}
+header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.title h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,3.4vw,48px);margin:0;line-height:1;letter-spacing:-.01em}
+.title h1 .q{background:var(--hi);color:var(--hi-ink);padding:0 .14em;border-radius:6px}
+.title p{margin:6px 0 0;color:var(--muted);font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.tools{margin-left:auto;display:flex;gap:10px}
+.ghost{border:2px solid var(--line);background:var(--sheet);border-radius:12px;padding:10px 18px;font-weight:700;font-size:16px;min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+nav.cases{display:flex;gap:8px;flex-wrap:wrap}
+nav.cases button{border:2px solid var(--line);background:var(--sheet);border-radius:999px;padding:10px 18px;font-weight:700;font-size:17px;min-height:50px;display:flex;align-items:center;gap:8px}
+nav.cases button .n{font-family:var(--display);font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+nav.cases button[aria-current="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+nav.cases button[aria-current="true"] .n{color:var(--hi)}
+nav.cases button.solved::after{content:"✓";color:var(--fair);font-weight:800}
+nav.cases button[aria-current="true"].solved::after{color:var(--hi)}
+main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;flex:1;align-items:start}
+.exhibit{background:var(--sheet);border:2px solid var(--ink);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;box-shadow:6px 6px 0 var(--grid-strong)}
+.exhibit-row{display:grid;gap:12px;grid-template-columns:1fr}
+.exhibit-row.two{grid-template-columns:1fr 1fr}
+.tag{font-family:var(--display);font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.tag .chip{background:var(--hi);color:var(--hi-ink);padding:2px 10px;border-radius:6px}
+svg.g{width:100%;height:auto;display:block}
+svg text{font-family:var(--body);fill:var(--ink)}
+.notes{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--sheet);border:2px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.card h2{font-family:var(--display);font-weight:800;font-size:clamp(22px,2vw,30px);margin:0;line-height:1.1;text-wrap:balance}
+.card p{margin:0;line-height:1.45;font-size:clamp(18px,1.45vw,22px);max-width:36em}
+.ask{font-size:clamp(20px,1.7vw,26px)!important;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:12px;padding:12px 20px;font-weight:700;font-size:clamp(17px,1.35vw,20px);min-height:54px;background:var(--ink);color:var(--sheet)}
+.btn.alt{background:var(--sheet);color:var(--ink);border:2px solid var(--ink)}
+.btn.choice{background:var(--sheet);color:var(--ink);border:2px solid var(--line);min-width:72px}
+.btn.choice:hover{border-color:var(--ink)}
+.btn.choice.picked-ok{border-color:var(--fair);background:var(--fair-soft)}
+.btn.choice.picked-no{border-color:var(--sneaky);background:var(--sneaky-soft)}
+.btn:disabled{opacity:.45;cursor:default}
+.fb{border-radius:10px;padding:12px 16px;font-size:clamp(17px,1.4vw,21px);line-height:1.45;border-left:6px solid var(--grid-strong);background:var(--paper)}
+.fb:empty{display:none}
+.fb.ok{border-color:var(--fair);background:var(--fair-soft)}
+.fb.try{border-color:var(--hi);background:var(--hi-soft)}
+.fb.clue{border-color:var(--b1)}
+.fb b{font-weight:700}
+.hint{font-size:15px;color:var(--muted);margin:0}
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
+.inputs label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:16px}
+.inputs input{font-size:28px;font-weight:700;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:var(--sheet);width:100%;min-height:56px;text-align:center;font-variant-numeric:tabular-nums}
+.inputs input.ok{border-color:var(--fair);background:var(--fair-soft)}
+.inputs input.no{border-color:var(--sneaky);background:var(--sneaky-soft)}
+.slider{display:flex;flex-direction:column;gap:6px}
+.slider label{font-weight:700;font-size:18px;display:flex;justify-content:space-between;gap:10px}
+.slider output{font-family:var(--display);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:44px;accent-color:var(--ink)}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:12px;padding:3px;background:var(--sheet)}
+.seg button{border:0;background:none;border-radius:9px;padding:10px 16px;font-weight:700;font-size:17px;min-height:46px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.checks li{display:flex;gap:10px;align-items:center;font-size:18px;font-weight:700}
+.checks li i{font-style:normal;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px;flex:none;background:var(--sneaky-soft);color:var(--sneaky)}
+.checks li.yes i{background:var(--fair-soft);color:var(--fair)}
+.meter{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:18px}
+.meter b{font-family:var(--display);font-size:clamp(30px,3vw,44px);font-weight:800;line-height:1}
+.stamp{display:inline-block;font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.08em;border:3px solid currentColor;border-radius:8px;padding:4px 12px;transform:rotate(-4deg);font-size:18px}
+.stamp.fair{color:var(--fair)} .stamp.sneaky{color:var(--sneaky)}
+.table{border-collapse:collapse;font-size:18px;font-variant-numeric:tabular-nums}
+.table th,.table td{padding:6px 14px 6px 0;text-align:left;border-bottom:1px solid var(--line)}
+.table th{color:var(--muted);font-size:15px}
+.qnav{display:flex;gap:8px;flex-wrap:wrap}
+.qnav button{min-width:54px;height:54px;border-radius:27px;border:2px solid var(--line);background:var(--sheet);font-weight:800;font-size:19px;padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rules button{text-align:left;border:2px solid var(--line);background:var(--sheet);border-radius:12px;padding:12px 14px;font-weight:700;font-size:18px;min-height:64px}
+.rules button.ok{border-color:var(--fair);background:var(--fair-soft)}
+.rules button.no{border-color:var(--sneaky);background:var(--sneaky-soft);text-decoration:line-through;text-decoration-color:var(--sneaky)}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+.grow rect.bar{transition:y .5s ease,height .5s ease}
+@media (prefers-reduced-motion: reduce){.pop{animation:none}.grow rect.bar{transition:none}}
+@media (max-width:980px){main{grid-template-columns:1fr}.exhibit-row.two{grid-template-columns:1fr}.tools{margin-left:0}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <h1><span class="q">Fair</span> or Misleading?</h1>
+    <p>Grade 3 · Week 10 · Lesson 3.10 · Can a graph be true and still trick you?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="cases" id="cases" aria-label="Lesson parts"></nav>
+<main>
+  <section class="exhibit" id="exhibit" aria-live="polite"></section>
+  <section class="notes" id="notes"></section>
+</main>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s);
+
+/* ---------------- Data (Lesson 3.10, Answers & teacher notes) ---------------- */
+const LUNCH={cats:['Pizza','Tacos','Pasta'],vals:[28,24,22]};
+const TEAMS={cats:['Hawks','Bears'],vals:[30,16]};
+const PICTO={days:['Mon','Tue','Wed','Thu'],symbols:[3,1.5,3.5,2],key:4};
+const RECESS={cats:['Mon','Tue','Wed','Thu','Fri'],vals:[25,30,28,26,32]};
+const COLORS=['var(--b1)','var(--b2)','var(--b3)','var(--b4)','var(--b5)'];
+
+/* ---------------- Math helpers ---------------- */
+// piecewise position of v on an axis whose ticks are drawn evenly spaced
+function axisPos(ticks,v){
+  if(v<=ticks[0]) return 0;
+  for(let i=0;i<ticks.length-1;i++) if(v<=ticks[i+1]) return i+(v-ticks[i])/(ticks[i+1]-ticks[i]);
+  return ticks.length-1;
+}
+function evenTicks(start,step,top){const t=[];for(let v=start;v<=top;v+=step)t.push(v);if(t[t.length-1]<top)t.push(t[t.length-1]+step);return t;}
+function timesWords(r){
+  const near=Math.round(r*2)/2;
+  if(Math.abs(r-Math.round(r))<1e-9) return Math.round(r)===1?'the same height as':`exactly ${Math.round(r)} times as tall as`;
+  if(Math.abs(r-near)<1e-9) return `${Math.floor(r)}½ times as tall as`;
+  if(r<1.5) return 'only a little taller than';
+  const f=r-Math.floor(r);
+  if(f>=0.75) return `almost ${Math.floor(r)+1} times as tall as`;
+  return `between ${Math.floor(r)} and ${Math.floor(r)+1} times as tall as`;
+}
+
+/* ---------------- Graph drawing ---------------- */
+// opts: {title,ylab,xlab,cats,vals,ticks,minor,labels,showVals,measure:[i,j],flagTicks:bool,id}
+function barGraph(o){
+  const W=640,H=420,L=78,R=W-20,T=o.labels===false?26:58,B=H-(o.labels===false?44:70);
+  const n=o.ticks.length, y=v=>B-axisPos(o.ticks,v)/(n-1)*(B-T);
+  let s=`<svg class="g grow" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria||o.title||'Bar graph')}">`;
+  s+=`<rect x="0" y="0" width="${W}" height="${H}" fill="var(--sheet)"/>`;
+  if(o.minor){ for(const m of o.minor){ if(m>o.ticks[0]&&m<o.ticks[n-1]) s+=`<line x1="${L}" x2="${R}" y1="${y(m)}" y2="${y(m)}" stroke="var(--grid)" stroke-width="1"/>`; } }
+  o.ticks.forEach((t,i)=>{
+    const yy=y(t);
+    s+=`<line x1="${L}" x2="${R}" y1="${yy}" y2="${yy}" stroke="var(--grid-strong)" stroke-width="${i===0?0:1.2}"/>`;
+    s+=`<text x="${L-12}" y="${yy+7}" text-anchor="end" font-size="20" font-weight="700">${t}</text>`;
+  });
+  if(o.flagTicks){
+    for(let i=0;i<n-1;i++){
+      const d=o.ticks[i+1]-o.ticks[i], mid=(y(o.ticks[i])+y(o.ticks[i+1]))/2, odd=d!==o.ticks[1]-o.ticks[0];
+      s+=`<g class="pop"><rect x="${L+6}" y="${mid-15}" width="56" height="30" rx="8" fill="${odd?'var(--sneaky)':'var(--fair)'}"/><text x="${L+34}" y="${mid+7}" text-anchor="middle" font-size="19" font-weight="700" style="fill:#fff">+${d}</text></g>`;
+    }
+  }
+  const k=o.cats.length, slot=(R-L)/k, bw=Math.min(110,slot*.56);
+  o.cats.forEach((c,i)=>{
+    const x=L+slot*i+(slot-bw)/2, top=y(o.vals[i]);
+    s+=`<rect class="bar" x="${x}" y="${top}" width="${bw}" height="${B-top}" fill="${COLORS[i%5]}" rx="3"/>`;
+    if(o.showVals) s+=`<text x="${x+bw/2}" y="${top-10}" text-anchor="middle" font-size="22" font-weight="700">${o.vals[i]}</text>`;
+    s+=`<text x="${x+bw/2}" y="${B+28}" text-anchor="middle" font-size="20" font-weight="700">${c}</text>`;
+  });
+  if(o.measure){
+    o.measure.forEach((i,j)=>{
+      const x=L+slot*i+(slot-bw)/2+bw+6, top=y(o.vals[i]), h=axisPos(o.ticks,o.vals[i]);
+      const label=o.measureLabel?o.measureLabel(i):'';
+      s+=`<g class="pop"><path d="M${x} ${top} h10 V${B} h-10" fill="none" stroke="var(--ink)" stroke-width="2.5"/><rect x="${x+14}" y="${(top+B)/2-17}" width="${Math.max(44,label.length*12+16)}" height="34" rx="8" fill="var(--hi)"/><text x="${x+22}" y="${(top+B)/2+7}" font-size="20" font-weight="700" style="fill:var(--hi-ink)">${label}</text></g>`;
+    });
+  }
+  s+=`<line x1="${L}" x2="${R}" y1="${B}" y2="${B}" stroke="var(--ink)" stroke-width="3"/><line x1="${L}" x2="${L}" y1="${T-8}" y2="${B}" stroke="var(--ink)" stroke-width="3"/>`;
+  if(o.ticks[0]!==0 && o.markCut){
+    s+=`<g class="pop"><circle cx="${L}" cy="${B}" r="24" fill="none" stroke="var(--sneaky)" stroke-width="4"/><text x="${L+30}" y="${B-14}" font-size="18" font-weight="700" style="fill:var(--sneaky)">starts at ${o.ticks[0]}!</text></g>`;
+  }
+  if(o.labels!==false){
+    if(o.title) s+=`<text x="${(L+R)/2}" y="30" text-anchor="middle" font-size="24" font-weight="700" font-family="var(--display)">${o.title}</text>`;
+    if(o.ylab) s+=`<text transform="translate(20 ${(T+B)/2}) rotate(-90)" text-anchor="middle" font-size="18" style="fill:var(--muted)">${o.ylab}</text>`;
+    if(o.xlab) s+=`<text x="${(L+R)/2}" y="${H-10}" text-anchor="middle" font-size="18" style="fill:var(--muted)">${o.xlab}</text>`;
+  }
+  return s+'</svg>';
+}
+
+// icon: a book drawn in a 40x46 box; fraction 0..1 shows that much (left part)
+let clipN=0;
+function iconSym(kind,x,y,size,frac,color){
+  const id='c'+(clipN++), s=size/46;
+  const body = kind==='book'
+    ? `<rect x="2" y="2" width="36" height="42" rx="4" fill="${color}"/><rect x="8" y="2" width="4" height="42" fill="rgba(0,0,0,.22)"/><rect x="16" y="12" width="16" height="4" rx="2" fill="rgba(255,255,255,.75)"/><rect x="16" y="20" width="12" height="4" rx="2" fill="rgba(255,255,255,.75)"/>`
+    : kind==='cat'
+    ? `<path d="M6 44 V16 L10 4 L17 13 H23 L30 4 L34 16 V44 Z" fill="${color}"/><circle cx="14" cy="22" r="2.6" fill="var(--sheet)"/><circle cx="26" cy="22" r="2.6" fill="var(--sheet)"/>`
+    : `<path d="M4 18 Q4 6 12 6 H28 Q36 6 36 18 V40 Q36 44 32 44 H8 Q4 44 4 40 Z" fill="${color}"/><path d="M2 10 Q0 26 8 28 V12 Z M38 10 Q40 26 32 28 V12 Z" fill="rgba(0,0,0,.28)"/><circle cx="14" cy="22" r="2.6" fill="var(--sheet)"/><circle cx="26" cy="22" r="2.6" fill="var(--sheet)"/>`;
+  return `<defs><clipPath id="${id}"><rect x="0" y="0" width="${40*frac}" height="46"/></clipPath></defs><g transform="translate(${x} ${y}) scale(${s})"><g clip-path="url(#${id})">${body}</g>${frac<1?`<rect x="1" y="1" width="38" height="44" rx="4" fill="none" stroke="var(--grid-strong)" stroke-dasharray="4 4"/>`:''}</g>`;
+}
+function pictograph(o){
+  // o: {title, rows:[{label,count,size,kind,color}], keyText, labels, showCounts}
+  const W=640, rowH=Math.max(...o.rows.map(r=>r.size))+22, top=o.title?56:16, H=top+rowH*o.rows.length+(o.keys?70:16);
+  let s=`<svg class="g" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title||'Pictograph')}"><rect width="${W}" height="${H}" fill="var(--sheet)"/>`;
+  if(o.title) s+=`<text x="${W/2}" y="34" text-anchor="middle" font-size="24" font-weight="700">${o.title}</text>`;
+  o.rows.forEach((r,i)=>{
+    const yy=top+i*rowH;
+    s+=`<line x1="20" x2="${W-20}" y1="${yy+rowH}" y2="${yy+rowH}" stroke="var(--grid)"/>`;
+    s+=`<text x="24" y="${yy+rowH/2+8}" font-size="22" font-weight="700">${r.label}</text>`;
+    const whole=Math.floor(r.count), part=r.count-whole, step=r.size*0.95;
+    for(let j=0;j<Math.ceil(r.count);j++){
+      const f=j<whole?1:part; s+=iconSym(r.kind,120+j*step,yy+(rowH-r.size)/2,r.size,f,r.color);
+    }
+    if(o.showCounts&&o.showCounts[i]!=null) s+=`<g class="pop"><rect x="${W-118}" y="${yy+rowH/2-18}" width="96" height="36" rx="8" fill="var(--hi)"/><text x="${W-70}" y="${yy+rowH/2+8}" text-anchor="middle" font-size="20" font-weight="700" style="fill:var(--hi-ink)">${o.showCounts[i]}</text></g>`;
+  });
+  if(o.keys){
+    const ky=top+rowH*o.rows.length+18;
+    s+=`<rect x="20" y="${ky}" width="${W-40}" height="46" rx="8" fill="var(--paper)"/>`;
+    (o.keys||[]).forEach(k=>{ s+=iconSym(k.kind,k.x,ky+3,40,1,k.color); s+=`<text x="${k.x+50}" y="${ky+30}" font-size="20" font-weight="700">${k.text}</text>`; });
+  }
+  return s+'</svg>';
+}
+
+/* ---------------- State ---------------- */
+const STEPS=[
+  {id:'warm',n:'Warm-up',label:'Half a book?'},
+  {id:'ab',n:'Case 1',label:'Graphs A & B'},
+  {id:'c',n:'Case 2',label:'Graph C'},
+  {id:'d',n:'Case 3',label:'Pictograph D'},
+  {id:'recess',n:'Case 4',label:'Recess graphs'},
+  {id:'q',n:'Share',label:'Detective questions'}
+];
+let S;
+function fresh(){return {step:'warm',solved:{},warm:{stage:0,fb:'',fbk:'',picked:null,half:false},
+  ab:{show:'A',measured:false,q1:null,q2:null},
+  c:{flag:false,vals:false,fixed:false,q:null},
+  d:{inputs:['','','','',''],marks:[],fb:'',fbk:'',reveal:false},
+  rc:{start:0,labels:true,goal:'fair',done:{}},
+  q:{n:1,trick:{},rules:{},why:false,ab:false}};}
+S=fresh();
+
+function renderNav(){
+  $('#cases').innerHTML=STEPS.map(s=>`<button data-s="${s.id}" aria-current="${S.step===s.id}" class="${S.solved[s.id]?'solved':''}"><span class="n">${s.n}</span>${s.label}</button>`).join('');
+  $('#cases').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.step=b.dataset.s;render();});
+}
+function nextBtn(id,label){return `<button class="btn alt" data-go="${id}">${label} →</button>`;}
+function wireGo(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{S.step=b.dataset.go;render();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});}
+function render(){renderNav();({warm:rWarm,ab:rAB,c:rC,d:rD,recess:rRecess,q:rQ})[S.step]();wireGo();}
+
+/* ---------------- Warm-up ---------------- */
+function rWarm(){
+  const W=S.warm;
+  $('#exhibit').innerHTML=`<div class="tag"><span class="chip">Warm-up</span> A pictograph</div>`+
+    pictograph({title:'Books our class read',rows:[{label:'Books',count:3.5,size:60,kind:'book',color:'var(--b1)'}],keys:[{kind:'book',color:'var(--b1)',text:'= 4 books',x:36}],
+      showCounts:W.half?['4+4+4+2']:null});
+  const choices=[3,4,12,14,16];
+  $('#notes').innerHTML=`<div class="card">
+    <h2>How many books?</h2>
+    <p>Each <b>whole</b> book stands for <b>4</b> books. Look at the last one.</p>
+    <p class="ask">How many books did our class read?</p>
+    <div class="row" id="wch">${choices.map(c=>`<button class="btn choice ${W.picked===c?(c===14?'picked-ok':'picked-no'):''}" data-c="${c}">${c}</button>`).join('')}</div>
+    <div class="fb ${W.fbk}" id="wfb">${W.fb}</div>
+    <div class="row"><button class="btn alt" id="halfBtn">What does the half mean?</button></div>
+  </div>
+  <div class="row">${nextBtn('ab','Case 1: Graphs A & B')}</div>`;
+  $('#wch').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const c=+b.dataset.c; W.picked=c;
+    const m={3:['try','You counted the <b>whole</b> symbols. Check the key: one book symbol stands for 4 books. And there is a half too.'],
+             4:['try','4 is what <b>one</b> symbol is worth. How many symbols are there? Count them, then use the key.'],
+             12:['try','12 is 3 whole books × 4. Nice! But don’t forget the half symbol at the end. Half of 4 is…?'],
+             16:['try','16 counts the half as a <b>whole</b>. Check the key. Half a symbol is half of what?'],
+             14:['ok','<b>Yes, 14 books.</b> 4 + 4 + 4 = 12, and half of 4 is 2. 12 + 2 = 14.']}[c];
+    W.fbk=m[0]; W.fb=m[1]; if(c===14) S.solved.warm=true; render();
+  });
+  $('#halfBtn').onclick=()=>{W.half=true; W.fbk='clue'; W.fb='The half symbol stands for <b>half of 4, which is 2</b> books. Count on the graph: 4, 8, 12, then 2 more makes 14.'; render();};
+}
+
+/* ---------------- Case 1: A & B ---------------- */
+const A_OPTS={title:'Favorite lunch',ylab:'Number of votes',xlab:'Lunch',cats:LUNCH.cats,vals:LUNCH.vals,ticks:evenTicks(20,2,30),minor:[21,23,25,27,29]};
+const B_OPTS={title:'Favorite lunch',ylab:'Number of votes',xlab:'Lunch',cats:LUNCH.cats,vals:LUNCH.vals,ticks:evenTicks(0,5,30)};
+function rAB(){
+  const X=S.ab, isA=X.show==='A', o=Object.assign({},isA?A_OPTS:B_OPTS);
+  if(X.measured){o.measure=[0,2];o.measureLabel=i=>{const h=LUNCH.vals[i]-o.ticks[0];return `${h} tall`;};o.markCut=isA;o.showVals=true;}
+  const ratio=(LUNCH.vals[0]-o.ticks[0])/(LUNCH.vals[2]-o.ticks[0]);
+  $('#exhibit').innerHTML=`<div class="row" style="justify-content:space-between"><div class="tag"><span class="chip">Graph ${X.show}</span> Same survey, ${isA?'axis starts at 20':'axis starts at 0'}</div>
+    <div class="seg"><button id="sa" aria-pressed="${isA}">Graph A</button><button id="sb" aria-pressed="${!isA}">Graph B</button></div></div>`+barGraph(o)+
+    (X.measured?`<div class="fb clue pop">On Graph ${X.show}, pizza’s bar is <b>${timesWords(ratio)}</b> pasta’s bar (${LUNCH.vals[0]-o.ticks[0]} vs ${LUNCH.vals[2]-o.ticks[0]}, measured from the bottom line at ${o.ticks[0]}).</div>`:'');
+  const q1=X.q1, q2=X.q2;
+  $('#notes').innerHTML=`<div class="card">
+    <h2>Pizza looks way more popular on Graph A. Is it?</h2>
+    <p>Flip between the graphs. <b>Where does each axis start?</b></p>
+    <div class="row"><button class="btn" id="measure">${X.measured?'Hide the measuring':'Measure the bars'}</button></div>
+    <p class="ask">Did pizza get 4 times as many votes as pasta?</p>
+    <div class="row" id="q1">${['Yes','No'].map(v=>`<button class="btn choice ${q1===v?(v==='No'?'picked-ok':'picked-no'):''}" data-v="${v}">${v}</button>`).join('')}</div>
+    <div class="fb ${q1==='No'?'ok':q1?'try':''}">${q1==='No'?'<b>Right.</b> Read the scale: pizza 28, pasta 22. Pizza got only 6 more votes. 4 times 22 would be 88!':q1==='Yes'?'The bars <i>look</i> that way on Graph A. Read the numbers on the scale instead: pizza 28, pasta 22. Is 28 four times 22? Try 22 + 22 + 22 + 22.':''}</div>
+  </div>
+  <div class="card">
+    <p class="ask">Which graph is fair?</p>
+    <div class="row" id="q2">${['Graph A','Graph B','Both'].map(v=>`<button class="btn choice ${q2===v?(v==='Graph B'?'picked-ok':'picked-no'):''}" data-v="${v}">${v}</button>`).join('')}</div>
+    <div class="fb ${q2==='Graph B'?'ok':q2?'try':''}">${q2==='Graph B'?'<b>Graph B is fair.</b> It starts at 0, so the bar heights compare like the real numbers. Graph A’s numbers are all true too, but cutting off the bottom 20 makes small differences look huge.':q2==='Graph A'?'Graph A’s numbers are true. But where does its axis start? It hides the first 20 votes of every bar. Flip to Graph B and compare.':q2==='Both'?'Both show true numbers, so what is misleading? Measure the bars on Graph A: pizza’s bar is 4 times as tall as pasta’s, but 28 is not 4 times 22.':''}</div>
+  </div>
+  <div class="row">${nextBtn('c','Case 2: Graph C')}</div>`;
+  $('#sa').onclick=()=>{X.show='A';render();}; $('#sb').onclick=()=>{X.show='B';render();};
+  $('#measure').onclick=()=>{X.measured=!X.measured;render();};
+  $('#q1').querySelectorAll('button').forEach(b=>b.onclick=()=>{X.q1=b.dataset.v;render();});
+  $('#q2').querySelectorAll('button').forEach(b=>b.onclick=()=>{X.q2=b.dataset.v;if(X.q2==='Graph B'&&X.q1==='No')S.solved.ab=true;render();});
+}
+
+/* ---------------- Case 2: C ---------------- */
+function rC(){
+  const X=S.c;
+  const o={title:'Points scored this season',ylab:'Points',xlab:'Team',cats:TEAMS.cats,vals:TEAMS.vals,
+    ticks:X.fixed?evenTicks(0,5,40):[0,5,10,20,40],flagTicks:X.flag,showVals:X.vals};
+  const r=axisPos(o.ticks,30)/axisPos(o.ticks,16);
+  $('#exhibit').innerHTML=`<div class="tag"><span class="chip">Graph ${X.fixed?'C, fixed':'C'}</span> ${X.fixed?'Equal steps of 5':'Look closely at the numbers up the side'}</div>`+barGraph(o)+
+    `<div class="meter"><span>Hawks’ bar is</span><b style="font-size:clamp(22px,2.2vw,32px)">${timesWords(r)}</b><span>the Bears’ bar.</span>${X.fixed?'<span class="stamp fair">Fair</span>':'<span class="stamp sneaky">Sneaky</span>'}</div>`;
+  $('#notes').innerHTML=`<div class="card">
+    <h2>What is wrong with Graph C?</h2>
+    <p>Count up the side: 0, 5, 10, 20, 40. <b>Does each step go up by the same amount?</b></p>
+    <div class="row"><button class="btn" id="flag">${X.flag?'Hide the steps':'Show each step'}</button><button class="btn alt" id="vals">${X.vals?'Hide the scores':'Show the scores'}</button></div>
+    <div class="fb ${X.flag?'clue':''}">${X.flag?(X.fixed?'Every step is +5 now. Equal space on the graph means an equal number of points.':'The first two steps are +5, then +10, then +20. The same space stands for different amounts, so the top of the graph gets squished.'):''}</div>
+  </div>
+  <div class="card">
+    <p class="ask">The Hawks scored 30 and the Bears scored 16. Is 30 a lot more than 16, or a little more?</p>
+    <div class="row" id="cq">${['A lot more','A little more'].map(v=>`<button class="btn choice ${X.q===v?(v==='A lot more'?'picked-ok':'picked-no'):''}" data-v="${v}">${v}</button>`).join('')}</div>
+    <div class="fb ${X.q==='A lot more'?'ok':X.q?'try':''}">${X.q==='A lot more'?'<b>Yes.</b> 16 + 16 = 32, so 30 is almost twice 16. On Graph C the Hawks’ bar looks barely taller. Tap “Fix the steps” to see a fair version.':X.q?'That is what Graph C makes you think. Check with numbers: 16 + 16 = 32. So 30 is almost twice as much as 16. Why does the bar look so short?':''}</div>
+    <div class="row"><button class="btn" id="fix">${X.fixed?'Show the uneven steps again':'Fix the steps'}</button></div>
+  </div>
+  <div class="row">${nextBtn('d','Case 3: Pictograph D')}</div>`;
+  $('#flag').onclick=()=>{X.flag=!X.flag;render();};
+  $('#vals').onclick=()=>{X.vals=!X.vals;render();};
+  $('#fix').onclick=()=>{X.fixed=!X.fixed;if(X.fixed&&X.q==='A lot more')S.solved.c=true;render();};
+  $('#cq').querySelectorAll('button').forEach(b=>b.onclick=()=>{X.q=b.dataset.v;if(X.q==='A lot more'&&X.fixed)S.solved.c=true;render();});
+}
+
+/* ---------------- Case 3: pictograph D ---------------- */
+const D_ANS=PICTO.symbols.map(s=>s*PICTO.key); // [12,6,14,8]
+const D_TOTAL=D_ANS.reduce((a,b)=>a+b,0);     // 40
+function rD(){
+  const X=S.d;
+  const rows=PICTO.days.map((d,i)=>({label:d,count:PICTO.symbols[i],size:50,kind:'book',color:'var(--b4)'}));
+  $('#exhibit').innerHTML=`<div class="tag"><span class="chip">Pictograph D</span> Read the key first</div>`+
+    pictograph({title:'Library books checked out',rows,keys:[{kind:'book',color:'var(--b4)',text:'= 4 books',x:36}],showCounts:X.reveal?D_ANS.map((v,i)=>`${String(PICTO.symbols[i]).replace('.5','½')} → ${v}`):null});
+  const labs=[...PICTO.days,'Total'];
+  $('#notes').innerHTML=`<div class="card">
+    <h2>Read pictograph D</h2>
+    <p>One book stands for <b>4</b> books. Half a book stands for half of 4.</p>
+    <div class="inputs">${labs.map((l,i)=>`<label for="d${i}">${l}<input id="d${i}" inputmode="numeric" autocomplete="off" value="${X.inputs[i]}" class="${X.marks[i]||''}"></label>`).join('')}</div>
+    <div class="row"><button class="btn" id="dcheck">Check my answers</button><button class="btn alt" id="dshow">${X.reveal?'Hide the counts':'Show the counting'}</button></div>
+    <div class="fb ${X.fbk}">${X.fb}</div>
+  </div>
+  <div class="row">${nextBtn('recess','Case 4: Recess graphs')}</div>`;
+  labs.forEach((l,i)=>$('#d'+i).oninput=e=>{X.inputs[i]=e.target.value.trim();});
+  $('#dshow').onclick=()=>{X.reveal=!X.reveal;render();};
+  $('#dcheck').onclick=()=>{
+    const want=[...D_ANS,D_TOTAL], msgs=[]; let right=0, blank=0;
+    X.marks=X.inputs.map((v,i)=>{
+      if(v===''){blank++;return '';}
+      const n=Number(v);
+      if(n===want[i]){right++;return 'ok';}
+      const sym=i<4?PICTO.symbols[i]:null;
+      if(sym!=null){
+        if(n===Math.ceil(sym)*PICTO.key) msgs.push(`${labs[i]}: you counted the half book as a whole. Check the key. Half a symbol is half of what?`);
+        else if(n===sym||n===Math.ceil(sym)||n===Math.floor(sym)) msgs.push(`${labs[i]}: ${n} is the number of symbols. Each one stands for 4 books.`);
+        else msgs.push(`${labs[i]}: count the symbols again, then skip-count by 4s.`);
+      } else {
+        const sum=X.inputs.slice(0,4).map(Number).reduce((a,b)=>a+b,0);
+        msgs.push(X.inputs.slice(0,4).every(x=>x!=='')&&n===sum&&sum!==D_TOTAL?`Total: you added your four answers correctly, so fix the day that is off and the total will follow.`:`Total: add the four days. You can check it another way: there are ${PICTO.symbols.reduce((a,b)=>a+b,0)} symbols in all, and 10 × 4 = 40.`);
+      }
+      return 'no';
+    });
+    if(right===5){X.fbk='ok';X.fb=`<b>All correct!</b> 12 + 6 + 14 + 8 = 40. Another check: 10 symbols × 4 = 40.`;S.solved.d=true;}
+    else if(!msgs.length){X.fbk='try';X.fb=`So far so good. ${blank} box${blank===1?' is':'es are'} still empty.`;}
+    else {X.fbk='try';X.fb=msgs.join('<br>');}
+    render();
+  };
+}
+
+/* ---------------- Case 4: recess builder ---------------- */
+function rcTicks(b){
+  const range=35-b, step=range>=20?5:range>=10?2:1;
+  return evenTicks(b,step,35);
+}
+function rRecess(){
+  const X=S.rc;
+  $('#notes').innerHTML=`<div class="card">
+    <div class="seg" style="align-self:flex-start"><button id="gf" aria-pressed="${X.goal==='fair'}">Mission 1: Fair</button><button id="gs" aria-pressed="${X.goal==='sneaky'}">Mission 2: Sneaky</button></div>
+    <h2>${X.goal==='fair'?'Draw a fair bar graph of recess':'Make Friday look like 4 times Monday'}</h2>
+    <p>${X.goal==='fair'?'Use the controls to build a graph that tells the truth.':'Friday had 32 minutes and Monday had 25. Change the graph so Friday’s bar is <b>at least 4 times</b> as tall as Monday’s. The numbers must stay true.'}</p>
+    <div class="slider"><label for="start"><span>Axis starts at</span><output id="startOut">${X.start}</output></label>
+      <input type="range" id="start" min="0" max="24" step="1" value="${X.start}"></div>
+    <div class="row"><button class="btn alt" id="lab"></button></div>
+    <ul class="checks" id="rcChecks"></ul>
+    <div class="fb" id="rcFb"></div>
+  </div>
+  <div class="row">${nextBtn('q','Detective questions')}</div>`;
+  $('#start').oninput=e=>{X.start=+e.target.value;rcUpdate();};
+  $('#lab').onclick=()=>{X.labels=!X.labels;rcUpdate();};
+  $('#gf').onclick=()=>{X.goal='fair';render();}; $('#gs').onclick=()=>{X.goal='sneaky';render();};
+  rcUpdate();
+}
+function rcUpdate(){
+  const X=S.rc, b=X.start, ticks=rcTicks(b);
+  const o={title:'Minutes of recess this week',ylab:'Minutes',xlab:'Day',cats:RECESS.cats,vals:RECESS.vals,ticks,labels:X.labels,
+    measure:[0,4],measureLabel:i=>`${RECESS.vals[i]-b} tall`,markCut:b>0};
+  const ratio=(32-b)/(25-b), tw=timesWords(ratio);
+  const fairRules=[['Starts at 0',b===0],['Equal steps',true],['Labels on everything',X.labels]];
+  const isFair=fairRules.every(r=>r[1]), sneakyHit=ratio>=4;
+  const before=S.solved.recess;
+  if(X.goal==='fair'&&isFair) X.done.fair=true;
+  if(X.goal==='sneaky'&&sneakyHit) X.done.sneaky=true;
+  if(X.done.fair&&X.done.sneaky) S.solved.recess=true;
+  $('#exhibit').innerHTML=`<div class="row" style="justify-content:space-between"><div class="tag"><span class="chip">Your graph</span> Mon 25 · Tue 30 · Wed 28 · Thu 26 · Fri 32</div>${isFair?'<span class="stamp fair">Fair</span>':'<span class="stamp sneaky">Sneaky</span>'}</div>`+barGraph(o)+
+    `<div class="meter"><span>Friday’s bar is</span><b style="font-size:clamp(22px,2.2vw,32px)">${tw}</b><span>Monday’s bar (${32-b} tall vs ${25-b} tall).</span></div>`;
+  $('#startOut').textContent=b;
+  $('#lab').textContent=X.labels?'Remove the labels':'Put the labels back';
+  $('#rcChecks').hidden=X.goal!=='fair';
+  $('#rcChecks').innerHTML=fairRules.map(r=>`<li class="${r[1]?'yes':''}"><i>${r[1]?'✓':'✗'}</i>${r[0]}</li>`).join('');
+  const fb=$('#rcFb');
+  if(X.goal==='fair'){
+    fb.className='fb '+(isFair?'ok':'try');
+    fb.innerHTML=isFair?'<b>Fair graph!</b> It starts at 0, the steps are equal (5 minutes each), and everything is labeled. Friday’s bar is only a little taller than Monday’s, just like 32 is only 7 more than 25.'
+      :`${b!==0?`Your axis starts at ${b}, so every bar is missing its bottom ${b} minutes. `:''}${!X.labels?'Without a title and labels, nobody knows what the bars mean. ':''}What would make it fair?`;
+  } else {
+    fb.className='fb '+(sneakyHit?'ok':'try');
+    fb.innerHTML=sneakyHit?`<b>Sneaky!</b> Starting at ${b} makes Friday’s bar ${32-b} tall and Monday’s only ${25-b} tall. Friday’s bar is now ${tw} Monday’s, but the real numbers are still 32 and 25. <b>What did you change?</b>`
+      :`Right now Friday’s bar is ${tw} Monday’s. ${b<20?'Try starting the axis higher. Watch the bottom of the bars.':`Close! ${32-b} is not yet 4 times ${25-b}. Keep going.`}`;
+  }
+  if(S.solved.recess!==before) renderNav();
+}
+
+/* ---------------- Detective questions ---------------- */
+const TRICKS=[
+  {opts:{title:'Minutes of recess',ylab:'Minutes',xlab:'Day',cats:RECESS.cats,vals:RECESS.vals,ticks:evenTicks(24,1,32),labels:true},type:'bar',ans:'start'},
+  {opts:{title:'Pages read',ylab:'Pages',xlab:'Reader',cats:['Ava','Ben','Cam'],vals:[15,30,45],ticks:[0,5,10,20,40,80],labels:true},type:'bar',ans:'steps'},
+  {type:'picto',ans:'symbols'}
+];
+const TRICK_NAMES={start:'The axis doesn’t start at 0',steps:'The steps are uneven',symbols:'The symbols stand for different amounts'};
+function trickPicto(reveal){
+  // Cats: 6 symbols × 2 = 12. Dogs: 3 symbols × 5 = 15.
+  const rows=[{label:'Cats',count:6,size:50,kind:'cat',color:'var(--b3)'},{label:'Dogs',count:3,size:50,kind:'dog',color:'var(--b2)'}];
+  return pictograph({title:'Our pets',rows,keys:[{kind:'cat',color:'var(--b3)',text:'= 2 cats',x:36},{kind:'dog',color:'var(--b2)',text:'= 5 dogs',x:260}],showCounts:reveal?['6×2 = 12','3×5 = 15']:null});
+}
+function rQ(){
+  const X=S.q;
+  const qs=[1,2,3,4,'★'];
+  let ex='',card='';
+  if(X.n===1){
+    ex=`<div class="exhibit-row two"><div><div class="tag"><span class="chip">A</span></div>${barGraph(Object.assign({},A_OPTS,{showVals:X.ab,labels:true}))}</div><div><div class="tag"><span class="chip">B</span></div>${barGraph(Object.assign({},B_OPTS,{showVals:X.ab}))}</div></div>`+
+      (X.ab?`<table class="table pop"><tr><th>Lunch</th><th>Graph A</th><th>Graph B</th></tr>${LUNCH.cats.map((c,i)=>`<tr><td><b>${c}</b></td><td>${LUNCH.vals[i]}</td><td>${LUNCH.vals[i]}</td></tr>`).join('')}</table>`:'');
+    card=`<p class="ask">“Graph A has the wrong numbers.” Do you agree?</p><p>Talk it over. Then put the evidence on the board.</p>
+      <div class="row"><button class="btn" id="qa">Show the numbers</button></div>
+      <div class="fb ${X.ab?'clue':''}">${X.ab?'The numbers are <b>all true</b> on both graphs: 28, 24, 22. So what is misleading about Graph A? Look at where its axis starts.':''}</div>`;
+  } else if(X.n===2){
+    const t=X.trick;
+    ex=TRICKS.map((tr,i)=>`<div><div class="tag"><span class="chip">Graph ${i+1}</span>${t[i]===tr.ans?' <span class="stamp sneaky" style="font-size:14px">'+TRICK_NAMES[tr.ans]+'</span>':''}</div>${tr.type==='bar'?barGraph(Object.assign({},tr.opts,{showVals:t[i]===tr.ans,markCut:t[i]===tr.ans&&tr.ans==='start',flagTicks:t[i]===tr.ans&&tr.ans==='steps'})):trickPicto(t[i]===tr.ans)}</div>`).join('');
+    ex=`<div class="exhibit-row">${ex}</div>`;
+    card=`<p class="ask">Name the trick in each graph.</p>
+      ${TRICKS.map((tr,i)=>`<div><p style="font-weight:700;margin-bottom:6px">Graph ${i+1}</p><div class="row" data-t="${i}">${Object.keys(TRICK_NAMES).map(k=>`<button class="btn choice ${t[i]===k?(k===tr.ans?'picked-ok':'picked-no'):''}" data-k="${k}" style="font-size:16px;min-height:48px">${TRICK_NAMES[k]}</button>`).join('')}</div></div>`).join('')}
+      <div class="fb ${X.tfk||''}">${X.tfb||''}</div>`;
+  } else if(X.n===3){
+    const R=X.rules;
+    ex=`<div class="tag"><span class="chip">Class rules</span> Tap the rules that make a graph fair</div>`+barGraph({title:'Minutes of recess this week',ylab:'Minutes',xlab:'Day',cats:RECESS.cats,vals:RECESS.vals,ticks:evenTicks(0,5,35),showVals:true});
+    const RULES=[['start','Start the axis at 0',true,'Then bar heights compare like the real numbers.'],
+      ['steps','Make every step the same size',true,'Equal space on the graph means an equal amount.'],
+      ['key','Same-size symbols, with a key',true,'Every symbol stands for the same amount, and the key says how much.'],
+      ['labels','Labels on everything',true,'A title and axis labels tell you what the bars mean.'],
+      ['bright','Use bright colors',false,'Colors can help you read a graph, but they don’t change whether it is fair.'],
+      ['tall','Make the bars as tall as possible',false,'Tall bars are easy to see, but stretching the bottom away is the Graph A trick!']];
+    card=`<p class="ask">What are the rules for a fair graph?</p><p>Some of these are real rules. Some are not. Tap each one.</p>
+      <div class="rules">${RULES.map(r=>`<button data-r="${r[0]}" class="${R[r[0]]?(r[2]?'ok':'no'):''}">${r[1]}${R[r[0]]?`<br><span style="font-weight:400;font-size:16px">${r[3]}</span>`:''}</button>`).join('')}</div>
+      <p class="hint">Exit ticket: write three rules for a fair graph in your journal.</p>`;
+    X._RULES=RULES;
+  } else if(X.n===4){
+    ex=`<div class="tag"><span class="chip">Think</span> A made-up ad</div>`+barGraph({title:'Kids who chose Zippy Juice',ylab:'Kids',xlab:'Juice',cats:['Zippy','Brand X'],vals:[52,48],ticks:evenTicks(46,1,52),markCut:X.why,showVals:X.why});
+    card=`<p class="ask">Why might someone make a misleading graph on purpose?</p><p>This graph is from a made-up juice ad. Who made it? What do they want you to think?</p>
+      <div class="row"><button class="btn" id="why">${X.why?'Hide the clues':'Show the clues'}</button></div>
+      <div class="fb ${X.why?'clue':''}">${X.why?'The axis starts at 46. Zippy’s bar looks 3 times as tall, but the real numbers are <b>52 and 48</b>, only 4 kids apart. People sometimes do this to sell something, win a vote, or make their team look better. A good detective always checks the scale.':''}</div>`;
+  } else {
+    ex=`<div class="tag"><span class="chip">★ Challenge</span> Graph hunt</div>`+barGraph(Object.assign({},A_OPTS,{labels:true}));
+    card=`<p class="ask">Find a real graph in a newspaper, a flyer, or an ad. Is it fair?</p>
+      <p>Check it like a detective:</p>
+      <ul class="checks"><li><i>1</i>Where does the axis start?</li><li><i>2</i>Does each step go up by the same amount?</li><li><i>3</i>What does one symbol stand for? A half symbol?</li><li><i>4</i>Is everything labeled?</li></ul>
+      <p>Then write two sentences to the person who made it.</p>`;
+  }
+  $('#exhibit').innerHTML=ex;
+  $('#notes').innerHTML=`<div class="card"><div class="qnav" id="qnav">${qs.map((q,i)=>`<button data-q="${i+1}" aria-pressed="${X.n===i+1}" aria-label="${q==='★'?'Challenge':'Question '+q}">${q==='★'?'★ Challenge':q}</button>`).join('')}</div>${card}</div>`;
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{X.n=+b.dataset.q;render();});
+  if(X.n===1) $('#qa').onclick=()=>{X.ab=true;render();};
+  if(X.n===2) document.querySelectorAll('[data-t]').forEach(row=>row.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const i=+row.dataset.t, k=b.dataset.k; X.trick[i]=k; const ok=k===TRICKS[i].ans;
+    const why={0:'Look at the bottom of the axis. Where does it start? Is Friday really 8 times Monday?',1:'Count up the side: 0, 5, 10, 20, 40, 80. Is every step the same?',2:'Read the key. Is a cat symbol worth the same as a dog symbol? Count: 6 × 2 and 3 × 5.'}[i];
+    const yes={0:'It starts at 24. Friday’s bar is 8 times as tall as Monday’s, but 32 minutes is not 8 times 25.',1:'The steps are +5, +5, +10, +20, +40. Cam read 3 times as many pages as Ava (45 vs 15), but the bars don’t show it.',2:'A cat symbol is 2 cats, a dog symbol is 5 dogs. Cats: 6 × 2 = 12. Dogs: 3 × 5 = 15. The cat row looks longer, but there are more dogs!'}[i];
+    X.tfk=ok?'ok':'try'; X.tfb=`<b>Graph ${i+1}:</b> `+(ok?yes:why);
+    render();
+  }));
+  if(X.n===3) document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{X.rules[b.dataset.r]=true;render();});
+  if(X.n===4) $('#why').onclick=()=>{X.why=!X.why;render();};
+}
+
+/* ---------------- Global controls ---------------- */
+$('#resetBtn').onclick=()=>{S=fresh();render();};
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>{$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen';});
+render();
+window.__test={axisPos,evenTicks,timesWords,D_ANS,D_TOTAL,rcTicks};
+})();
+</script>
+
+</body></html>

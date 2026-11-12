@@ -1,0 +1,1206 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Thousand Project</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom "counting floor" — big visual stage on the left (tray, cups, bags, road, museum), a step panel on the right; stacks at phone width. */
+:root{
+  --bg:#EDF0F4; --card:#FFFFFF; --ink:#1D2433; --muted:#596274; --line:#D2D8E2;
+  --kraft:#A4652B; --kraft-soft:#F4E6D6; --cup:#1C7A87; --cup-soft:#DAEEF0; --one:#C94F38; --one-soft:#FBE5E0;
+  --good:#257A45; --good-soft:#E0F2E6; --try:#9A5B00; --try-soft:#FFF1D9;
+  --t1:#3366CC; --t2:#C98012; --t3:#2A8F60; --t4:#8E49C4; --t5:#C93F72;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151C; --card:#1A2029; --ink:#E9EDF3; --muted:#A3ACBB; --line:#323B4A;
+    --kraft:#D9995A; --kraft-soft:#3A2A1A; --cup:#4CBCC9; --cup-soft:#163238; --one:#F1806A; --one-soft:#3D221C;
+    --good:#62CB86; --good-soft:#18301F; --try:#F2B544; --try-soft:#3A2C12;
+    --t1:#7DA2F0; --t2:#E8A944; --t3:#55C48E; --t4:#B98BEA; --t5:#F07CA5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151C; --card:#1A2029; --ink:#E9EDF3; --muted:#A3ACBB; --line:#323B4A;
+  --kraft:#D9995A; --kraft-soft:#3A2A1A; --cup:#4CBCC9; --cup-soft:#163238; --one:#F1806A; --one-soft:#3D221C;
+  --good:#62CB86; --good-soft:#18301F; --try:#F2B544; --try-soft:#3A2C12;
+  --t1:#7DA2F0; --t2:#E8A944; --t3:#55C48E; --t4:#B98BEA; --t5:#F07CA5;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 28px;
+  -webkit-tap-highlight-color:transparent; font-variant-numeric:tabular-nums}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cup); outline-offset:2px}
+h1,h2,h3{font-family:var(--display); line-height:1.1; text-wrap:balance; margin:0}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-block:16px 10px}
+.brand h1{font-size:clamp(30px,4vw,48px); font-weight:800; letter-spacing:-.01em}
+.brand h1 .k{color:var(--kraft)}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:15px; letter-spacing:.04em; text-transform:uppercase; font-weight:700}
+.htools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.classes{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin-bottom:14px}
+nav.classes button{border:2px solid var(--line); background:var(--card); border-radius:16px; padding:10px 14px; text-align:left; min-height:64px; display:flex; flex-direction:column; gap:0}
+nav.classes button small{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700}
+nav.classes button span{font-family:var(--display); font-weight:700; font-size:clamp(17px,1.7vw,22px); line-height:1.15}
+nav.classes button[aria-selected="true"]{border-color:var(--kraft); background:var(--kraft-soft)}
+@media (max-width:760px){ nav.classes{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+.subnav{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px}
+.subnav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px; font-weight:700; min-height:46px; display:flex; align-items:center; gap:8px}
+.subnav button b{font-family:var(--display); font-size:13px; background:var(--bg); border-radius:999px; padding:1px 9px}
+.subnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.subnav button[aria-pressed="true"] b{background:var(--kraft); color:#fff}
+
+.stage{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:20px; align-items:start}
+@media (max-width:980px){ .stage{grid-template-columns:minmax(0,1fr)} }
+.panel{background:var(--card); border:2px solid var(--line); border-radius:20px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel h2{font-size:clamp(22px,2.2vw,30px)}
+.panel h3{font-size:20px}
+.lead{margin:0; font-size:clamp(18px,1.5vw,21px)}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.btn{border:0; border-radius:14px; padding:12px 20px; font-weight:700; min-height:52px; background:var(--kraft); color:#fff; font-size:18px}
+.btn.alt{background:var(--card); color:var(--ink); border:2px solid var(--ink)}
+.btn.cupc{background:var(--cup)}
+.btn:disabled{opacity:.4; cursor:default}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:6px 14px 6px 8px; display:inline-flex; align-items:center; gap:8px; font-weight:700; min-height:46px}
+.chip i{width:20px; height:20px; border-radius:50%; background:var(--c)}
+.chip[aria-pressed="true"]{border-color:var(--c); box-shadow:inset 0 0 0 2px var(--c)}
+input.num{width:5.2em; font-size:22px; font-weight:700; text-align:center; border:2px solid var(--line); border-radius:12px; padding:8px 6px; background:var(--bg); min-height:50px}
+input.num.wide{width:7em}
+input.num.ok{border-color:var(--good); background:var(--good-soft)}
+input.num.no{border-color:var(--try); background:var(--try-soft)}
+.fb{margin:0; padding:12px 16px; border-radius:14px; font-size:18px; background:var(--try-soft)}
+.fb.good{background:var(--good-soft)}
+.fb.info{background:var(--cup-soft)}
+.fb:empty{display:none}
+.eq{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.6vw,34px); display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.eq .op{color:var(--muted)}
+.label{font-size:13px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--muted)}
+.hide{display:none!important}
+
+/* ---------- Jar ---------- */
+.jarwrap{display:flex; justify-content:center}
+.jarwrap svg{width:min(100%,420px); height:auto}
+.est-list{display:flex; flex-wrap:wrap; gap:8px}
+.est{background:var(--bg); border-radius:999px; padding:6px 14px; font-weight:700; font-size:20px}
+.est.best{background:var(--good-soft); box-shadow:inset 0 0 0 2px var(--good)}
+.vote{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.vote .q{grid-column:1/-1; font-family:var(--display); font-weight:700; font-size:22px}
+
+/* ---------- Bundling machine ---------- */
+.machine{display:flex; flex-direction:column; gap:12px}
+.zone{border:2px dashed var(--line); border-radius:16px; padding:10px 12px; min-height:84px}
+.zone .zl{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px}
+.zone .zl b{font-family:var(--display); font-size:22px}
+.tray{display:flex; flex-wrap:wrap; gap:3px; align-content:flex-start}
+.dot{width:11px; height:11px; border-radius:50%; background:var(--c, var(--one))}
+.cups{display:flex; flex-wrap:wrap; gap:6px}
+.cupv{width:26px; height:62px; border-radius:4px 4px 10px 10px; background:var(--cup-soft); border:2px solid var(--cup); display:grid; grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(5,1fr); padding:3px; gap:2px; position:relative}
+.cupv .dot{width:auto; height:auto; aspect-ratio:1; background:var(--c)}
+.cupv.counting{box-shadow:0 0 0 4px var(--cup)}
+.cupv .n{position:absolute; inset:auto 0 -22px; text-align:center; font-weight:700; font-size:14px; color:var(--cup)}
+.bags{display:flex; flex-wrap:wrap; gap:10px}
+.bagv{width:84px; height:94px; border-radius:10px 10px 14px 14px; background:var(--kraft-soft); border:3px solid var(--kraft); display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative}
+.bagv::before{content:""; position:absolute; top:-9px; left:24px; right:24px; height:12px; border:3px solid var(--kraft); border-bottom:0; border-radius:10px 10px 0 0}
+.bagv b{font-family:var(--display); font-size:30px; color:var(--kraft); line-height:1}
+.bagv span{font-size:12px; font-weight:700; color:var(--kraft)}
+.bagv .mini{display:flex; gap:2px; margin-top:4px}
+.bagv .mini i{width:5px; height:18px; border-radius:2px; background:var(--kraft); opacity:.55}
+.bagv .mini i.on{opacity:1; background:var(--cup)}
+.tally3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; text-align:center}
+.tally3 div{border-radius:14px; padding:8px; background:var(--bg)}
+.tally3 b{display:block; font-family:var(--display); font-size:34px; line-height:1}
+.tally3 .h b{color:var(--kraft)} .tally3 .t b{color:var(--cup)} .tally3 .o b{color:var(--one)}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.6); opacity:.2}to{transform:scale(1); opacity:1}}
+
+.logtable{border-collapse:separate; border-spacing:6px; width:100%}
+.logtable th{font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:center}
+.logtable td{text-align:center}
+.logtable input.num{width:100%; max-width:6em}
+
+/* ---------- Road ---------- */
+.road svg{width:100%; height:auto; display:block}
+.roadwrap{overflow-x:auto}
+
+/* ---------- Compare ---------- */
+.pv{border-collapse:separate; border-spacing:6px 4px; font-family:var(--display); font-size:28px; font-weight:700}
+.pv th{font-family:var(--body); font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:700}
+.pv td{text-align:center; min-width:56px; padding:2px 10px; border-radius:10px; background:var(--bg)}
+.pv td.decide{background:var(--kraft-soft); box-shadow:inset 0 0 0 3px var(--kraft)}
+.pv td.tie{background:var(--cup-soft)}
+.sym{display:flex; gap:10px}
+.sym button{width:72px; height:64px; border-radius:14px; border:2px solid var(--ink); background:var(--card); font-family:var(--display); font-size:36px; font-weight:800; line-height:1}
+
+/* ---------- Skip counter ---------- */
+.bigcount{font-family:var(--display); font-weight:800; font-size:clamp(64px,9vw,120px); line-height:1; color:var(--kraft); text-align:center}
+.trail{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:34px}
+.trail span{background:var(--bg); border-radius:8px; padding:2px 10px; font-weight:700}
+.trail span.last{background:var(--kraft-soft); color:var(--kraft)}
+table.res{border-collapse:collapse; font-size:18px}
+table.res th,table.res td{padding:6px 14px 6px 0; text-align:left}
+table.res th{font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+table.res tr.win td{color:var(--good); font-weight:700}
+
+.jumps{display:flex; flex-direction:column; gap:10px}
+.jstep{display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-family:var(--display); font-weight:700; font-size:24px}
+.jstep.done{color:var(--muted)}
+.jstep .tag{font-family:var(--body); font-size:13px; text-transform:uppercase; letter-spacing:.05em; padding:2px 10px; border-radius:999px; background:var(--kraft-soft); color:var(--kraft)}
+.jstep .tag.t{background:var(--cup-soft); color:var(--cup)}
+.jstep .tag.o{background:var(--one-soft); color:var(--one)}
+
+.sheet{display:flex; flex-direction:column; gap:14px}
+.sheet .line{display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:20px}
+.sheet .line .given{font-family:var(--display); font-weight:700; font-size:24px}
+
+/* ---------- Museum ---------- */
+.museum{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px}
+@media (max-width:560px){ .museum{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.mbag{background:var(--kraft-soft); border:3px solid var(--kraft); border-radius:12px 12px 16px 16px; padding:6px; display:flex; flex-direction:column; gap:5px; transition:opacity .25s}
+.mbag .mh{border:0; background:var(--kraft); color:#fff; border-radius:8px; font-family:var(--display); font-weight:700; font-size:16px; padding:3px 0; min-height:32px}
+.mbag .mc{display:grid; grid-template-columns:repeat(10,1fr); gap:2px}
+.mcup{border:0; padding:2px 1px; background:var(--card); border-radius:3px; display:grid; grid-template-rows:repeat(10,1fr); gap:1px; min-height:70px; transition:background .2s, opacity .25s}
+.mcup i{display:block; border-radius:50%; background:var(--cup); width:100%; aspect-ratio:1; max-width:7px; margin:auto}
+.mcup.sel{background:var(--kraft)}
+.mcup.sel i{background:#fff}
+.mcup.gone, .mbag.gone{opacity:.15}
+.mcup.point{background:var(--good)}
+.mcup.point i{background:#fff}
+.mbag.pointbag{box-shadow:0 0 0 4px var(--good)}
+.mbag .mcount{font-size:12px; text-align:center; font-weight:700; color:var(--kraft); min-height:16px}
+.card{border:3px solid var(--kraft); border-radius:20px; background:var(--card); padding:16px 18px; display:flex; flex-direction:column; gap:12px; box-shadow:6px 6px 0 var(--kraft-soft)}
+.card .ct{font-size:13px; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:var(--kraft)}
+.card .cq{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.6vw,34px); line-height:1.15}
+.selsum{font-family:var(--display); font-weight:700; font-size:24px}
+.reasons{display:flex; flex-direction:column; gap:8px}
+.reasons button{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 14px; text-align:left; font-size:18px; min-height:52px}
+.reasons button.ok{border-color:var(--good); background:var(--good-soft)}
+.reasons button.no{border-color:var(--try); background:var(--try-soft)}
+.museumlabel{border:3px double var(--ink); padding:16px; border-radius:6px; font-size:21px; line-height:2.1; background:var(--card)}
+
+/* Showcase */
+body.showcase nav.classes, body.showcase .subnav, body.showcase .noshow{display:none!important}
+body.showcase .stage{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+body.showcase .mcup{min-height:96px}
+body.showcase .card .cq{font-size:clamp(28px,3.2vw,44px)}
+@media (max-width:980px){ body.showcase .stage{grid-template-columns:minmax(0,1fr)} }
+
+/* Challenge */
+.chain{display:flex; flex-direction:column; gap:6px}
+.chainbar{height:16px; border-radius:8px; background:repeating-linear-gradient(90deg, var(--muted) 0 10px, transparent 10px 14px); opacity:.85}
+.chainbar.one{width:10%}
+.split{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+@media (max-width:560px){ body{font-size:17px} .panel{padding:14px} .bagv{width:70px; height:80px} .bagv b{font-size:24px} }
+</style>
+
+<header>
+  <div class="brand">
+    <h1>The <span class="k">Thousand</span> Project</h1>
+    <p>Grade 2 · Set 3 project · 3 class periods</p>
+  </div>
+  <div class="htools">
+    <button class="ghost hide" id="exitShow">Exit showcase</button>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="classes" role="tablist" aria-label="Class periods">
+  <button role="tab" data-tab="c1" aria-selected="true"><small>Class 1</small><span>How Big Is 1,000?</span></button>
+  <button role="tab" data-tab="c2" aria-selected="false"><small>Class 2</small><span>Skip-Count to 1,000</span></button>
+  <button role="tab" data-tab="c3" aria-selected="false"><small>Class 3</small><span>Museum of 1,000</span></button>
+  <button role="tab" data-tab="cx" aria-selected="false"><small>Extension</small><span>Challenge</span></button>
+</nav>
+
+<!-- ================= CLASS 1 ================= -->
+<section id="c1">
+  <div class="subnav" data-group="c1">
+    <button data-sub="warm" aria-pressed="true"><b>1</b>Warm-up: the jar</button>
+    <button data-sub="explore" aria-pressed="false"><b>2</b>Explore: bundle &amp; record</button>
+    <button data-sub="road" aria-pressed="false"><b>3</b>Road &amp; compare</button>
+    <button data-sub="share" aria-pressed="false"><b>4</b>Share: recheck</button>
+  </div>
+
+  <div class="stage" data-sub="warm">
+    <div class="panel">
+      <div class="jarwrap" id="jar1"></div>
+    </div>
+    <div class="panel">
+      <h2>How many are in the jar?</h2>
+      <div class="vote">
+        <div class="q">More than 100?</div>
+        <button class="btn alt" data-vote="100y">Yes, more</button><button class="btn alt" data-vote="100n">No, fewer</button>
+        <div class="q">More than 1,000?</div>
+        <button class="btn alt" data-vote="1000y">Yes, more</button><button class="btn alt" data-vote="1000n">No, fewer</button>
+      </div>
+      <p class="fb info" id="voteFb"></p>
+      <div class="label">Record a few estimates</div>
+      <div class="row">
+        <input class="num wide" id="estIn" type="number" min="0" max="5000" inputmode="numeric" aria-label="Estimate">
+        <button class="btn" id="estAdd">Add estimate</button>
+      </div>
+      <div class="est-list" id="estList"></div>
+      <p class="small muted">We set these aside. In Class 3 we count the jar by groups and see whose estimate was closest.</p>
+      <button class="btn alt" id="howCount">How could we count it without losing track?</button>
+      <p class="fb info" id="howFb"></p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="explore">
+    <div class="panel">
+      <div class="row" id="teamPick" aria-label="Choose a team"></div>
+      <div class="row small"><label for="setN" class="muted">Using your own collection? Type its real count:</label><input class="num" id="setN" type="number" min="1" max="999" inputmode="numeric"><button class="btn alt" id="setNGo">Use it</button></div>
+      <div class="machine">
+        <div class="zone"><div class="zl"><b>Bags of 100</b><span class="muted small">10 cups in each</span></div><div class="bags" id="mBags"></div></div>
+        <div class="zone"><div class="zl"><b>Cups of 10</b><span class="muted small">10 in each</span></div><div class="cups" id="mCups" style="padding-bottom:22px"></div></div>
+        <div class="zone"><div class="zl"><b>Loose</b><span class="muted small" id="looseNote"></span></div><div class="tray" id="mLoose"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 id="mTitle">Count into cups of 10</h2>
+      <div class="row">
+        <button class="btn cupc" id="cupOne">Fill a cup</button>
+        <button class="btn alt" id="cupAll">Fill all the cups</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="bagOne">Bag 10 cups</button>
+        <button class="btn alt" id="bagAll">Bag all I can</button>
+      </div>
+      <p class="fb info" id="mFb"></p>
+      <div class="tally3"><div class="h"><b id="tH">0</b>bags</div><div class="t"><b id="tT">0</b>cups</div><div class="o"><b id="tO">0</b>loose</div></div>
+      <div class="label">1. Our Count</div>
+      <table class="logtable">
+        <tr><th>Hundreds</th><th>Tens</th><th>Ones</th><th>Our number</th></tr>
+        <tr><td><input class="num" id="rH" type="number" inputmode="numeric" aria-label="Hundreds"></td><td><input class="num" id="rT" type="number" inputmode="numeric" aria-label="Tens"></td><td><input class="num" id="rO" type="number" inputmode="numeric" aria-label="Ones"></td><td><input class="num" id="rN" type="number" inputmode="numeric" aria-label="Our number"></td></tr>
+      </table>
+      <div class="label">Expanded form</div>
+      <div class="eq"><input class="num" id="x1" type="number" inputmode="numeric" aria-label="Hundreds value"><span class="op">+</span><input class="num" id="x2" type="number" inputmode="numeric" aria-label="Tens value"><span class="op">+</span><input class="num" id="x3" type="number" inputmode="numeric" aria-label="Ones value"><span class="op">=</span><input class="num" id="x4" type="number" inputmode="numeric" aria-label="Total"></div>
+      <button class="btn" id="rCheck">Check our count</button>
+      <p class="fb" id="rFb"></p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="road">
+    <div class="panel">
+      <h2>The Road to 1,000</h2>
+      <div class="roadwrap road" id="road1"></div>
+      <div class="row">
+        <button class="btn" id="close500">Which team is closest to 500?</button>
+        <button class="btn alt" id="placeAll">Place every team</button>
+      </div>
+      <p class="fb info" id="roadFb"></p>
+    </div>
+    <div class="panel">
+      <h2>2. Compare</h2>
+      <p class="lead">Which total is greater? Look at the hundreds first.</p>
+      <div class="row" id="cmpPick"></div>
+      <div class="row"><input class="num" id="cA" type="number" inputmode="numeric" aria-label="First number"><span class="eq">?</span><input class="num" id="cB" type="number" inputmode="numeric" aria-label="Second number"><button class="btn alt" id="tricky">Tricky pair</button></div>
+      <div class="sym"><button data-sym="<" aria-label="less than">&lt;</button><button data-sym=">" aria-label="greater than">&gt;</button><button data-sym="=" aria-label="equal to">=</button></div>
+      <div id="pvBox"></div>
+      <p class="fb" id="cmpFb"></p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="share">
+    <div class="panel">
+      <h2 id="shTitle">Show how you know</h2>
+      <div class="machine">
+        <div class="zone"><div class="bags" id="sBags"></div></div>
+        <div class="zone"><div class="cups" id="sCups" style="padding-bottom:22px"></div></div>
+        <div class="zone"><div class="tray" id="sLoose"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Recheck without starting over</h2>
+      <div class="row" id="shPick"></div>
+      <div class="row">
+        <button class="btn cupc" id="chkCup">Recount one cup</button>
+        <button class="btn" id="chkBag">Check a bag has 10 cups</button>
+      </div>
+      <p class="fb info" id="shFb"></p>
+      <h3>Why is a bagged count faster to recheck?</h3>
+      <button class="btn alt" id="byOnes">Compare: recheck by ones vs. by groups</button>
+      <p class="fb info" id="onesFb"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLASS 2 ================= -->
+<section id="c2" class="hide">
+  <div class="subnav" data-group="c2">
+    <button data-sub="warm" aria-pressed="true"><b>1</b>Warm-up: count around</button>
+    <button data-sub="build" aria-pressed="false"><b>2</b>Build: combine &amp; how many more</button>
+    <button data-sub="share" aria-pressed="false"><b>3</b>Share: two ways</button>
+    <button data-sub="sheet" aria-pressed="false"><b>4</b>Skip-count checks</button>
+  </div>
+
+  <div class="stage" data-sub="warm">
+    <div class="panel">
+      <div class="row" id="skipPick"></div>
+      <div class="bigcount" id="skipNow">0</div>
+      <div class="trail" id="skipTrail"></div>
+      <div class="roadwrap road" id="road2"></div>
+    </div>
+    <div class="panel">
+      <h2>Count around the circle</h2>
+      <p class="lead" id="skipLead"></p>
+      <div class="row">
+        <button class="btn" id="skipNext">Next count</button>
+        <button class="btn alt" id="skipRun">Run to 1,000</button>
+        <button class="btn alt" id="skipRestart">Restart this count</button>
+      </div>
+      <p class="fb info" id="skipFb"></p>
+      <h3>Where does each count land? Which gets there fastest?</h3>
+      <button class="btn alt" id="skipCompare">Show all three counts</button>
+      <div id="skipTable"></div>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="build">
+    <div class="panel">
+      <div class="roadwrap road" id="road3"></div>
+      <div class="label">3. Combine: hundreds first, then tens, then ones</div>
+      <div class="row">
+        <select id="selA" class="ghost" aria-label="Our team"></select><span class="eq">+</span><select id="selB" class="ghost" aria-label="Their team"></select>
+        <button class="btn alt" id="combStart">Start</button>
+      </div>
+      <div class="jumps" id="jumps"></div>
+      <p class="fb" id="combFb"></p>
+    </div>
+    <div class="panel" id="hmPanel">
+      <h2>4. How many more to 1,000?</h2>
+      <p class="lead" id="hmLead">Combine two teams first.</p>
+      <div id="hmBody" class="hide">
+        <div class="sheet">
+          <div class="line" id="hmL1"></div>
+          <div class="line" id="hmL2"></div>
+          <div class="line" id="hmL3"></div>
+        </div>
+        <div class="row" style="margin-top:12px"><button class="btn" id="hmCheck">Check my jumps</button></div>
+        <p class="fb" id="hmFb"></p>
+        <div id="landBox" class="hide">
+          <h3 style="margin-top:8px">Land on exactly 1,000</h3>
+          <p class="small muted">Choose what to add. Type a number of items.</p>
+          <div class="row"><span class="eq" id="landT"></span><span class="eq op">+</span><input class="num" id="landIn" type="number" inputmode="numeric" aria-label="Items to add"><button class="btn alt" id="landGo">Try it</button></div>
+          <p class="fb" id="landFb"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="share">
+    <div class="panel">
+      <h2>Two ways to find “how many more”</h2>
+      <p class="lead" id="twoLead"></p>
+      <div class="row"><input class="num wide" id="twoIn" type="number" inputmode="numeric" aria-label="Starting total"><button class="btn alt" id="twoSet">Use this number</button></div>
+      <div class="row"><button class="btn" id="twoUp">Count up</button><button class="btn cupc" id="twoSub">1,000 − on paper</button></div>
+      <div class="roadwrap road" id="road4"></div>
+    </div>
+    <div class="panel">
+      <div id="twoUpBox"></div>
+      <div id="twoSubBox"></div>
+      <p class="fb" id="twoFb"></p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="sheet">
+    <div class="panel">
+      <h2>5. Skip-Count Checks</h2>
+      <div class="sheet" id="sheet5"></div>
+      <div class="row"><button class="btn" id="s5Check">Check my answers</button><button class="btn alt" id="s5Clear">Clear</button></div>
+    </div>
+    <div class="panel">
+      <h3>How to check yourself</h3>
+      <p class="fb info" id="s5Fb">Fill in the blanks, then tap Check. Boxes that need another look turn gold, with a hint here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLASS 3 ================= -->
+<section id="c3" class="hide">
+  <div class="subnav" data-group="c3">
+    <button data-sub="museum" aria-pressed="true"><b>1</b>Setup &amp; tour</button>
+    <button data-sub="label" aria-pressed="false"><b>2</b>Museum label</button>
+    <button data-sub="reflect" aria-pressed="false"><b>3</b>Reflect: the jar again</button>
+  </div>
+
+  <div class="stage" data-sub="museum">
+    <div class="panel">
+      <div class="row noshow" style="justify-content:space-between"><h2>Exactly 1,000</h2><span class="muted small">10 bags · 10 cups in each bag · 10 in each cup</span></div>
+      <div class="museum" id="museum"></div>
+      <div class="selsum" id="selSum">Tap a cup to pick 10. Tap a bag’s label to pick 100.</div>
+    </div>
+    <div class="panel">
+      <div class="card" id="card">
+        <div class="ct" id="cardType">Question card</div>
+        <div class="cq" id="cardQ"></div>
+        <div id="cardBody"></div>
+        <p class="fb" id="cardFb"></p>
+      </div>
+      <div class="row">
+        <button class="btn" id="drawCard">Draw a new card</button>
+        <button class="btn alt" id="clearSel">Clear picks</button>
+        <button class="btn alt noshow" id="showMode">Showcase mode</button>
+      </div>
+      <p class="small muted noshow">Guides answer by skip counting and pointing: 100, 200, 300… then 310, 320…</p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="label">
+    <div class="panel">
+      <h2>6. Museum Label</h2>
+      <div class="museumlabel">
+        This bag holds <input class="num" id="lb1" type="number" inputmode="numeric" aria-label="Bag holds">.
+        There are <input class="num" id="lb2" type="number" inputmode="numeric" aria-label="Number of bags"> bags like it here.
+        Altogether that is <input class="num wide" id="lb3" type="number" inputmode="numeric" aria-label="Altogether">.
+      </div>
+      <button class="btn" id="lbCheck">Check the label</button>
+      <p class="fb" id="lbFb"></p>
+    </div>
+    <div class="panel">
+      <h3>Visitors can check without counting by ones because…</h3>
+      <div class="reasons" id="reasons"></div>
+      <p class="fb" id="rsFb"></p>
+    </div>
+  </div>
+
+  <div class="stage hide" data-sub="reflect">
+    <div class="panel"><div class="jarwrap" id="jar3"></div></div>
+    <div class="panel">
+      <h2>Count the jar by groups</h2>
+      <button class="btn" id="jarCount">Bundle the jar</button>
+      <div class="tally3 hide" id="jarTally"><div class="h"><b id="jH">0</b>bags</div><div class="t"><b id="jT">0</b>cups</div><div class="o"><b id="jO">0</b>loose</div></div>
+      <p class="fb info" id="jarFb"></p>
+      <div class="label">Our Class 1 estimates</div>
+      <div class="est-list" id="estList3"></div>
+      <h3>What makes 1,000 easier to picture now?</h3>
+      <button class="btn alt" id="jarVs">Put the jar next to 1,000</button>
+      <p class="fb info" id="jarVsFb"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EXTENSION ================= -->
+<section id="cx" class="hide">
+  <div class="stage">
+    <div class="panel">
+      <h2>How many 10s are in 1,000? How many 5s?</h2>
+      <div class="sheet">
+        <div class="line">Tens in 1,000: <input class="num" id="xTen" type="number" inputmode="numeric" aria-label="Tens in 1000"></div>
+        <div class="line">Fives in 1,000: <input class="num" id="xFive" type="number" inputmode="numeric" aria-label="Fives in 1000"></div>
+      </div>
+      <div class="row"><button class="btn" id="xCheck">Check</button><button class="btn alt" id="xWhy">Why twice as many?</button></div>
+      <p class="fb" id="xFb"></p>
+      <div id="xWhyBox" class="hide">
+        <div class="split" id="xSplit"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>A chain of 1,000 paper clips</h2>
+      <p class="lead">A paper clip is about 3 cm long. Estimate a chain of 100 first.</p>
+      <div class="sheet">
+        <div class="line">Chain of 100 clips: about <input class="num" id="pc100" type="number" inputmode="numeric" aria-label="Length of 100 clips in cm"> cm</div>
+        <div class="line">Chain of 1,000 clips: about <input class="num wide" id="pc1000" type="number" inputmode="numeric" aria-label="Length of 1000 clips in cm"> cm</div>
+      </div>
+      <div class="row"><button class="btn" id="pcCheck">Check</button><button class="btn alt" id="pcShow">Build the chains</button></div>
+      <p class="fb" id="pcFb"></p>
+      <div class="chain" id="chainBox"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 20) : ms));
+const fmt = n => n.toLocaleString('en-US');
+const JAR = 296;
+const TEAM_DEFAULT = [
+  {id:'a', name:'Buttons', n:347, c:'var(--t1)'},
+  {id:'b', name:'Pasta', n:280, c:'var(--t2)'},
+  {id:'c', name:'Bottle caps', n:215, c:'var(--t3)'},
+  {id:'d', name:'Paper clips', n:392, c:'var(--t4)'},
+  {id:'e', name:'Beads', n:158, c:'var(--t5)'}
+];
+const hto = n => ({h:Math.floor(n/100), t:Math.floor(n/10)%10, o:n%10});
+let S, gen = 0;
+
+function fresh(){
+  gen++;
+  S = {
+    tab:'c1', sub:{c1:'warm', c2:'warm', c3:'museum'},
+    teams: TEAM_DEFAULT.map(t => ({...t})),
+    bundle:{}, recorded:{}, cur:'a', shCur:'a',
+    estimates:[],
+    skip:{i:0, val:0, steps:0, trail:[], results:{}},
+    comb:null, total:null, two:627,
+    museum:{sel:new Set(), gone:new Set()}, card:null, cardIdx:0,
+  };
+  S.teams.forEach(t => S.bundle[t.id] = {loose:t.n, cups:0, bags:0});
+}
+const team = id => S.teams.find(t => t.id===id);
+const fb = (id, html, kind) => { const el=$(id); el.className = 'fb' + (kind ? ' '+kind : ''); el.innerHTML = html || ''; };
+
+/* ---------------- Navigation ---------------- */
+function showTab(t){
+  S.tab = t;
+  $$('nav.classes button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['c1','c2','c3','cx'].forEach(id => $('#'+id).classList.toggle('hide', id!==t));
+  if(t==='c3' && S.sub.c3==='reflect') renderEst();
+}
+function showSub(group, sub){
+  S.sub[group] = sub;
+  $$(`.subnav[data-group="${group}"] button`).forEach(b => b.setAttribute('aria-pressed', b.dataset.sub===sub));
+  $$(`#${group} .stage`).forEach(st => st.classList.toggle('hide', st.dataset.sub!==sub));
+  if(group==='c1' && sub==='road'){ renderRoad1(); renderCmpPick(); }
+  if(group==='c1' && sub==='share'){ renderShare(); }
+  if(group==='c3' && sub==='reflect'){ renderEst(); }
+  if(group==='c2' && sub==='share'){ setTwo(S.total && S.total<=1000 ? S.total : S.two); }
+}
+$$('nav.classes button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+$$('.subnav button').forEach(b => b.onclick = () => showSub(b.closest('.subnav').dataset.group, b.dataset.sub));
+
+/* ---------------- Jar ---------------- */
+function rng(seed){ let s=seed; return () => (s = (s*16807) % 2147483647) / 2147483647; }
+function jarSVG(colorFn){
+  const r = rng(42), dots=[];
+  // jar body: x 60..300, y 90..400 (rounded)
+  while(dots.length < JAR){
+    const x = 70 + r()*220, y = 105 + r()*285;
+    const dx = Math.max(0, Math.abs(x-180)-95), dy = Math.max(0, y-350);
+    if(dx*dx + dy*dy > 30*30) continue;
+    dots.push([x,y]);
+  }
+  dots.sort((a,b) => b[1]-a[1] || a[0]-b[0]);
+  const circles = dots.map((d,i) => `<circle cx="${d[0].toFixed(1)}" cy="${d[1].toFixed(1)}" r="6.2" fill="${colorFn ? colorFn(i) : 'var(--one)'}" opacity=".9"/>`).join('');
+  return `<svg viewBox="0 0 360 430" role="img" aria-label="A jar full of small beads">
+    <rect x="110" y="30" width="140" height="34" rx="8" fill="var(--kraft)"/>
+    <path d="M120 64 L120 82 Q60 92 58 130 L58 370 Q58 410 100 412 L260 412 Q302 410 302 370 L302 130 Q300 92 240 82 L240 64 Z" fill="var(--cup-soft)" stroke="var(--cup)" stroke-width="5"/>
+    ${circles}
+    <path d="M80 140 L80 360" stroke="var(--card)" stroke-width="8" stroke-linecap="round" opacity=".5"/>
+  </svg>`;
+}
+function renderJars(){ $('#jar1').innerHTML = jarSVG(); $('#jar3').innerHTML = jarSVG(); }
+$$('[data-vote]').forEach(b => b.onclick = () => {
+  const v = b.dataset.vote;
+  const m = {'100y':'You think more than 100.', '100n':'You think fewer than 100.', '1000y':'You think more than 1,000.', '1000n':'You think fewer than 1,000.'}[v];
+  fb('#voteFb', `${m} Hold that thought. We find out in Class 3.`, 'info');
+});
+function renderEst(){
+  const best = closestEst();
+  const html = S.estimates.length ? S.estimates.map(e => `<span class="est ${best && best.includes(e) && S.jarDone ? 'best':''}">${fmt(e)}</span>`).join('') : '<span class="muted small">No estimates yet. Add some in Class 1, warm-up.</span>';
+  $('#estList').innerHTML = S.estimates.map(e => `<span class="est">${fmt(e)}</span>`).join('');
+  $('#estList3').innerHTML = html;
+}
+function closestEst(){
+  if(!S.estimates.length) return null;
+  const d = Math.min(...S.estimates.map(e => Math.abs(e-JAR)));
+  return S.estimates.filter(e => Math.abs(e-JAR)===d);
+}
+$('#estAdd').onclick = () => {
+  const v = parseInt($('#estIn').value, 10);
+  if(!Number.isFinite(v) || v<0){ return; }
+  S.estimates.push(v); $('#estIn').value=''; renderEst(); $('#estIn').focus();
+};
+$('#estIn').addEventListener('keydown', e => { if(e.key==='Enter') $('#estAdd').click(); });
+$('#howCount').onclick = () => fb('#howFb', 'One idea: scoop items into cups of 10. When you have 10 cups, put them in a bag. That bag is 100. Then count bags, cups, and loose ones.', 'info');
+
+/* ---------------- Bundling machine ---------------- */
+function teamChips(el, cur, onPick){
+  el.innerHTML = S.teams.map(t => `<button class="chip" style="--c:${t.c}" data-id="${t.id}" aria-pressed="${t.id===cur}"><i></i>${t.name}${S.recorded[t.id] ? ' · '+t.n : ''}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => onPick(b.dataset.id));
+}
+function cupHTML(c, extra){ return `<div class="cupv ${extra||''}">${('<i class="dot" style="--c:'+c+'"></i>').repeat(10)}</div>`; }
+function bagHTML(){ return `<div class="bagv"><b>100</b><span>10 cups</span><div class="mini">${'<i></i>'.repeat(10)}</div></div>`; }
+function renderMachine(anim){
+  const t = team(S.cur), B = S.bundle[S.cur];
+  teamChips($('#teamPick'), S.cur, id => { S.cur=id; clearRecord(); renderMachine(); });
+  $('#mTitle').textContent = `${t.name}: count into cups of 10`;
+  $('#mBags').innerHTML = Array.from({length:B.bags}, bagHTML).join('');
+  $('#mCups').innerHTML = Array.from({length:B.cups}, () => cupHTML(t.c)).join('');
+  $('#mLoose').innerHTML = `<i class="dot" style="--c:${t.c}"></i>`.repeat(B.loose);
+  const done = B.loose<10 && B.cups<10;
+  $('#looseNote').textContent = done ? `${B.loose} left over` : 'not counted yet';
+  $('#tH').textContent = B.bags; $('#tT').textContent = B.cups; $('#tO').textContent = done ? B.loose : '?';
+  $('#cupOne').disabled = $('#cupAll').disabled = B.loose<10;
+  $('#bagOne').disabled = $('#bagAll').disabled = B.cups<10;
+  if(anim){ const el = anim==='cup' ? $('#mCups').lastElementChild : $('#mBags').lastElementChild; if(el && !reduced) el.classList.add('pop'); }
+}
+function fillCup(){ const B=S.bundle[S.cur]; if(B.loose>=10){ B.loose-=10; B.cups++; return true; } return false; }
+function bagIt(){ const B=S.bundle[S.cur]; if(B.cups>=10){ B.cups-=10; B.bags++; return true; } return false; }
+function machineMsg(){
+  const B=S.bundle[S.cur];
+  if(B.cups>=10) fb('#mFb', `You have ${B.cups} cups. Ten cups make 100. Bag them!`, 'info');
+  else if(B.loose>=10) fb('#mFb', 'There are still enough loose items to fill another cup.', 'info');
+  else fb('#mFb', `All bundled! Fewer than 10 loose and fewer than 10 cups. Now fill in Our Count.`, 'good');
+}
+$('#cupOne').onclick = () => { fillCup(); renderMachine('cup'); machineMsg(); };
+$('#cupAll').onclick = async () => { const g=gen, id=S.cur; while(S.cur===id && g===gen && fillCup()){ renderMachine('cup'); await sleep(70); } machineMsg(); };
+$('#bagOne').onclick = () => { bagIt(); renderMachine('bag'); machineMsg(); };
+$('#bagAll').onclick = async () => { const g=gen, id=S.cur; while(S.cur===id && g===gen && bagIt()){ renderMachine('bag'); await sleep(200); } machineMsg(); };
+
+$('#setNGo').onclick = () => {
+  const v=parseInt($('#setN').value,10);
+  if(!(v>=1 && v<=999)){ fb('#mFb','Type a count from 1 to 999.','info'); return; }
+  const t=team(S.cur); t.n=v; S.bundle[t.id]={loose:v,cups:0,bags:0}; delete S.recorded[t.id];
+  $('#setN').value=''; clearRecord(); renderMachine(); fillSelects();
+  fb('#mFb', `${t.name} now has your collection loaded. Start filling cups!`, 'info');
+};
+const recIds = ['rH','rT','rO','rN','x1','x2','x3','x4'];
+function clearRecord(){ recIds.forEach(i => { const el=$('#'+i); el.value=''; el.classList.remove('ok','no'); }); fb('#rFb',''); fb('#mFb',''); }
+const val = id => { const v = $('#'+id).value.trim(); return v==='' ? null : Number(v); };
+function mark(id, ok){ const el=$('#'+id); el.classList.toggle('ok', ok); el.classList.toggle('no', !ok); }
+$('#rCheck').onclick = () => {
+  const t = team(S.cur), B = S.bundle[S.cur];
+  recIds.forEach(i => $('#'+i).classList.remove('ok','no'));
+  if(B.loose>=10){ fb('#rFb', `Keep bundling first: there are still enough loose items to fill a cup.`); return; }
+  if(B.cups>=10){ fb('#rFb', `You have ${B.cups} cups. Ten of them can go in a bag first.`); return; }
+  const n = B.bags*100 + B.cups*10 + B.loose;
+  const msgs = [];
+  const H=val('rH'), T=val('rT'), O=val('rO'), N=val('rN');
+  mark('rH', H===B.bags); mark('rT', T===B.cups); mark('rO', O===B.loose);
+  if(H!==B.bags) msgs.push(`Hundreds: count the bags. Each bag is one hundred.`);
+  if(T!==B.cups) msgs.push(`Tens: count the cups. Each cup is one ten.`);
+  if(O!==B.loose) msgs.push(`Ones: count the loose items in the tray.`);
+  mark('rN', N===n);
+  if(N!==n){
+    if(N===null) msgs.push(`Our number: write the number your bags, cups and loose items make.`);
+    else { const d = hto(N); const parts=[];
+      if(N>999 || N<0) parts.push(`${N} has too many digits for bags, cups and loose items.`);
+      else { if(d.h!==B.bags) parts.push(`${N} has ${d.h} in the hundreds place, but there ${B.bags===1?'is':'are'} ${B.bags} bag${B.bags===1?'':'s'}.`);
+             if(d.t!==B.cups) parts.push(`${N} has ${d.t} in the tens place, but there ${B.cups===1?'is':'are'} ${B.cups} cup${B.cups===1?'':'s'}.`);
+             if(d.o!==B.loose) parts.push(`${N} has ${d.o} in the ones place, but there ${B.loose===1?'is':'are'} ${B.loose} loose.`); }
+      msgs.push('Our number: ' + parts.join(' '));
+    }
+  }
+  const X1=val('x1'), X2=val('x2'), X3=val('x3'), X4=val('x4');
+  const okX1 = X1===B.bags*100, okX2 = X2===B.cups*10, okX3 = X3===B.loose, okX4 = X4===n;
+  mark('x1',okX1); mark('x2',okX2); mark('x3',okX3); mark('x4',okX4);
+  if(!okX1) msgs.push(`Expanded form, first box: ${B.bags} bag${B.bags===1?'':'s'} of 100 is how many?`);
+  if(!okX2) msgs.push(`Expanded form, second box: ${B.cups} cup${B.cups===1?'':'s'} of 10 is how many?`);
+  if(!okX3) msgs.push(`Expanded form, third box: how many loose ones?`);
+  if(!okX4) msgs.push(`Expanded form, last box: add the three parts.`);
+  if(msgs.length){ fb('#rFb', msgs.map(m => '• '+m).join('<br>')); return; }
+  S.recorded[S.cur] = true;
+  fb('#rFb', `${B.bags} hundreds, ${B.cups} tens, ${B.loose} ones is <b>${n}</b>. ${B.bags*100} + ${B.cups*10} + ${B.loose} = ${n}. ${t.name} is now on the Road to 1,000.`, 'good');
+  renderMachine();
+};
+
+/* ---------------- Road to 1,000 ---------------- */
+const RX = v => 36 + v*0.92;   // 0..1000 -> 36..956
+function roadSVG(opts){
+  opts = opts || {};
+  let s = `<svg viewBox="0 0 1000 ${opts.h||150}" role="img" aria-label="Number line from 0 to 1,000 marked by hundreds">`;
+  const y = opts.y || 110;
+  s += `<line x1="${RX(0)}" y1="${y}" x2="${RX(1000)}" y2="${y}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>`;
+  for(let v=0; v<=1000; v+=10){
+    const big = v%100===0, mid = v%50===0;
+    s += `<line x1="${RX(v)}" y1="${y-(big?14:mid?9:5)}" x2="${RX(v)}" y2="${y+(big?14:mid?9:5)}" stroke="var(--${big?'ink':'muted'})" stroke-width="${big?3:1.5}"/>`;
+    if(big) s += `<text x="${RX(v)}" y="${y+40}" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="700" font-size="24" fill="var(--ink)">${fmt(v)}</text>`;
+  }
+  (opts.marks||[]).forEach(m => {
+    const x = RX(Math.min(m.v,1000));
+    s += `<g><line x1="${x}" y1="${y-14}" x2="${x}" y2="${y-(m.lift||48)}" stroke="${m.c}" stroke-width="3"/><circle cx="${x}" cy="${y}" r="9" fill="${m.c}" stroke="var(--card)" stroke-width="3"/>
+      <text x="${x}" y="${y-(m.lift||48)-6}" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="700" font-size="21" fill="${m.c}">${m.label}</text></g>`;
+  });
+  (opts.arcs||[]).forEach(a => {
+    const x1=RX(a.from), x2=RX(a.to), mx=(x1+x2)/2, h=Math.min(70, 22 + (x2-x1)*0.25);
+    s += `<path d="M${x1} ${y-6} Q${mx} ${y-6-h*2} ${x2} ${y-6}" fill="none" stroke="${a.c}" stroke-width="4" stroke-linecap="round"/>
+      <text x="${mx}" y="${y-10-h}" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="700" font-size="19" fill="${a.c}">${a.label}</text>`;
+  });
+  return s + `</svg>`;
+}
+function renderRoad1(extra){
+  const marks = S.teams.filter(t => S.recorded[t.id]).sort((a,b)=>a.n-b.n).map((t,i) => ({v:t.n, c:t.c, label:t.n, lift: 40 + (i%2)*34}));
+  if(extra) marks.push(extra);
+  $('#road1').innerHTML = roadSVG({marks, h:160, y:110});
+}
+$('#placeAll').onclick = () => {
+  S.teams.forEach(t => { S.bundle[t.id] = {bags:hto(t.n).h, cups:hto(t.n).t, loose:hto(t.n).o}; S.recorded[t.id]=true; });
+  renderRoad1(); renderCmpPick(); renderMachine(); fb('#roadFb', 'Every team is bundled and on the road.', 'info');
+};
+$('#close500').onclick = () => {
+  const on = S.teams.filter(t => S.recorded[t.id]);
+  if(on.length < 2){ fb('#roadFb', 'Put at least two teams on the road first: record a count in Explore, or tap “Place every team”.', 'info'); return; }
+  const ds = on.map(t => ({t, d:Math.abs(500-t.n)}));
+  const min = Math.min(...ds.map(x=>x.d));
+  const win = ds.filter(x => x.d===min);
+  renderRoad1({v:500, c:'var(--good)', label:'500', lift:100});
+  fb('#roadFb', ds.sort((a,b)=>a.d-b.d).map(x => `${x.t.name} (${x.t.n}) is ${x.d} from 500`).join('<br>') + `<br><b>Closest: ${win.map(x=>x.t.name).join(' and ')}.</b>`, 'info');
+};
+
+/* ---------------- Compare ---------------- */
+let cmpSlot = 0;
+function renderCmpPick(){
+  const el = $('#cmpPick');
+  el.innerHTML = S.teams.map(t => `<button class="chip" style="--c:${t.c}" data-id="${t.id}"><i></i>${t.name}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const t = team(b.dataset.id); $(cmpSlot===0 ? '#cA' : '#cB').value = t.n; cmpSlot = 1-cmpSlot; fb('#cmpFb',''); $('#pvBox').innerHTML='';
+  });
+}
+$('#tricky').onclick = () => { $('#cA').value = 289; $('#cB').value = 312; fb('#cmpFb', '289 has a 9 in it. Does that make it bigger? Pick a sign.', 'info'); $('#pvBox').innerHTML=''; };
+function pvTable(a, b, decide){
+  const A=hto(a), B=hto(b), cls = k => decide===k ? 'decide' : (['h','t','o'].indexOf(k) < ['h','t','o'].indexOf(decide) ? 'tie' : '');
+  return `<table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>
+    <tr><th>${a}</th><td class="${cls('h')}">${A.h}</td><td class="${cls('t')}">${A.t}</td><td class="${cls('o')}">${A.o}</td></tr>
+    <tr><th>${b}</th><td class="${cls('h')}">${B.h}</td><td class="${cls('t')}">${B.t}</td><td class="${cls('o')}">${B.o}</td></tr></table>`;
+}
+const PLACE = {h:'hundreds', t:'tens', o:'ones'};
+$$('[data-sym]').forEach(btn => btn.onclick = () => {
+  const a = parseInt($('#cA').value,10), b = parseInt($('#cB').value,10);
+  if(!(a>=0 && a<=999 && b>=0 && b<=999)){ fb('#cmpFb', 'Put two numbers from 0 to 999 in the boxes first (tap two teams, or try the tricky pair).', 'info'); return; }
+  const truth = a>b ? '>' : a<b ? '<' : '=';
+  const A=hto(a), B=hto(b);
+  const decide = A.h!==B.h ? 'h' : A.t!==B.t ? 't' : A.o!==B.o ? 'o' : null;
+  $('#pvBox').innerHTML = pvTable(a, b, decide || 'none');
+  const word = {'<':'is less than','>':'is greater than','=':'is equal to'};
+  let why;
+  if(!decide) why = `Same hundreds, same tens, same ones.`;
+  else { const k=decide, big = A[k]>B[k] ? a : b, small = big===a ? b : a;
+    why = (k!=='h' ? `The hundreds match${k==='o'?' and so do the tens':''}, so look at the ${PLACE[k]}. ` : `Start with the hundreds. `) +
+          `${hto(big)[k]} ${PLACE[k]} is more than ${hto(small)[k]} ${PLACE[k]}.`; }
+  if(btn.dataset.sym===truth){
+    let extra = '';
+    if(decide==='h'){ const maxA=Math.max(A.h,A.t,A.o), maxB=Math.max(B.h,B.t,B.o); if((a<b && maxA>maxB) || (a>b && maxB>maxA)) extra = ` The biggest digit doesn’t decide it. The hundreds do.`; }
+    fb('#cmpFb', `Yes! <b>${a} ${truth} ${b}</b>. ${a} ${word[truth]} ${b}. ${why}${extra}`, 'good');
+  } else {
+    fb('#cmpFb', `Look again. ${why} Which number has more? Try another sign.`);
+  }
+});
+
+/* ---------------- Share (Class 1) ---------------- */
+function renderShare(){
+  teamChips($('#shPick'), S.shCur, id => { S.shCur=id; renderShare(); fb('#shFb',''); fb('#onesFb',''); });
+  const t = team(S.shCur), d = hto(t.n);
+  $('#shTitle').textContent = `${t.name}: ${t.n}`;
+  $('#sBags').innerHTML = Array.from({length:d.h}, bagHTML).join('');
+  $('#sCups').innerHTML = Array.from({length:d.t}, () => cupHTML(t.c)).join('');
+  $('#sLoose').innerHTML = `<i class="dot" style="--c:${t.c}"></i>`.repeat(d.o);
+}
+$('#chkCup').onclick = async () => {
+  const cups = $$('#sCups .cupv'); if(!cups.length){ fb('#shFb','This team has no cups to recount. Pick another team.','info'); return; }
+  const g=gen, c = cups[0]; c.classList.add('counting'); const lab = document.createElement('span'); lab.className='n'; c.appendChild(lab);
+  const dots = c.querySelectorAll('.dot');
+  for(let i=0;i<dots.length;i++){ if(g!==gen) return; dots[i].style.outline='3px solid var(--ink)'; lab.textContent=i+1; await sleep(260); }
+  fb('#shFb', `One cup recounted: 10. We only checked 10 items, not the whole collection.`, 'info');
+};
+$('#chkBag').onclick = async () => {
+  const bag = $('#sBags .bagv'); if(!bag){ fb('#shFb','This team has no full bag yet. Pick another team.','info'); return; }
+  const g=gen, minis = bag.querySelectorAll('.mini i');
+  for(let i=0;i<minis.length;i++){ if(g!==gen) return; minis[i].classList.add('on'); fb('#shFb', `Cup ${i+1}…`, 'info'); await sleep(240); }
+  fb('#shFb', `10 cups of 10. That bag really is 100.`, 'info');
+};
+$('#byOnes').onclick = () => {
+  const t = team(S.shCur), d = hto(t.n), groups = d.h + d.t + d.o;
+  fb('#onesFb', `Recheck ${t.name} by ones: <b>${t.n} counts</b>.<br>Recheck by groups: ${d.h} bag${d.h===1?'':'s'} + ${d.t} cup${d.t===1?'':'s'} + ${d.o} loose = <b>${groups} counts</b>.<br>Every bag and cup was already counted once, so we just count the groups.`, 'info');
+};
+
+/* ---------------- Class 2 warm-up ---------------- */
+const SKIPS = [{by:5, from:0}, {by:10, from:340}, {by:100, from:250}];
+function skipReset(i){ const p = SKIPS[i]; S.skip.i=i; S.skip.val=p.from; S.skip.steps=0; S.skip.trail=[p.from]; renderSkip(); fb('#skipFb',''); }
+function renderSkip(){
+  const p = SKIPS[S.skip.i];
+  $('#skipPick').innerHTML = SKIPS.map((q,i) => `<button class="chip" style="--c:var(--${['one','cup','kraft'][i]})" data-i="${i}" aria-pressed="${i===S.skip.i}"><i></i>By ${q.by}s from ${q.from}</button>`).join('');
+  $('#skipPick').querySelectorAll('button').forEach(b => b.onclick = () => skipReset(+b.dataset.i));
+  $('#skipNow').textContent = fmt(S.skip.val);
+  const tr = S.skip.trail.slice(-12);
+  $('#skipTrail').innerHTML = tr.map((v,i) => `<span class="${i===tr.length-1?'last':''}">${fmt(v)}</span>`).join('');
+  $('#skipLead').textContent = `Count by ${p.by}s, starting at ${p.from}. Counts so far: ${S.skip.steps}.`;
+  $('#road2').innerHTML = roadSVG({h:150, y:105, marks:[{v:S.skip.val, c:'var(--kraft)', label:fmt(S.skip.val), lift:50}]});
+  const done = S.skip.val >= 1000;
+  $('#skipNext').disabled = $('#skipRun').disabled = done;
+}
+function skipStep(){
+  const p = SKIPS[S.skip.i]; if(S.skip.val>=1000) return;
+  S.skip.val += p.by; S.skip.steps++; S.skip.trail.push(S.skip.val);
+  if(S.skip.val>=1000){
+    S.skip.results[S.skip.i] = {land:S.skip.val, steps:S.skip.steps};
+    fb('#skipFb', S.skip.val===1000 ? `Landed right on <b>1,000</b> after ${S.skip.steps} counts. The next count would be ${fmt(1000+p.by)}.`
+      : `Jumped past 1,000 and landed on <b>${fmt(S.skip.val)}</b> after ${S.skip.steps} counts. The count before was ${fmt(S.skip.val-p.by)}.`, 'good');
+  }
+  renderSkip();
+}
+$('#skipNext').onclick = skipStep;
+$('#skipRestart').onclick = () => skipReset(S.skip.i);
+$('#skipRun').onclick = async () => {
+  const g=gen, i=S.skip.i, p=SKIPS[i]; const d = p.by===5 ? 25 : p.by===10 ? 70 : 380;
+  while(g===gen && S.skip.i===i && S.skip.val<1000){ skipStep(); await sleep(d); }
+};
+function skipOutcome(p){ let v=p.from, n=0; while(v<1000){ v+=p.by; n++; } return {land:v, steps:n}; }
+$('#skipCompare').onclick = () => {
+  const rows = SKIPS.map((p,i) => ({p, ...skipOutcome(p)}));
+  const min = Math.min(...rows.map(r=>r.steps));
+  $('#skipTable').innerHTML = `<table class="res"><tr><th>Count</th><th>Lands on</th><th>Counts needed</th></tr>${rows.map(r => `<tr class="${r.steps===min?'win':''}"><td>By ${r.p.by}s from ${r.p.from}</td><td>${fmt(r.land)}</td><td>${r.steps}</td></tr>`).join('')}</table>
+    <p class="small muted">Bigger jumps get there in fewer counts. By 100s from 250 jumps right over 1,000: 950, then 1,050.</p>`;
+};
+
+/* ---------------- Class 2 build: combine ---------------- */
+function fillSelects(){
+  ['#selA','#selB'].forEach((s,k) => { $(s).innerHTML = S.teams.map(t => `<option value="${t.id}">${t.name} (${t.n})</option>`).join(''); $(s).value = k===0 ? 'a' : 'b'; });
+}
+function jumpsFor(a, b){
+  const d = hto(b), js = [];
+  for(let i=0;i<d.h;i++) js.push({j:100, k:'h'});
+  if(d.t) js.push({j:d.t*10, k:'t'});
+  if(d.o) js.push({j:d.o, k:'o'});
+  return js;
+}
+function startCombine(){
+  const A = team($('#selA').value), B = team($('#selB').value);
+  if(A.id===B.id){ fb('#combFb', 'Pick two different teams to combine.', 'info'); return; }
+  S.comb = {A, B, cur:A.n, i:0, js:jumpsFor(A.n, B.n), arcs:[]};
+  S.total = null; $('#hmBody').classList.add('hide'); $('#hmLead').textContent = 'Finish the jumps first.';
+  fb('#combFb',''); renderComb();
+}
+function renderComb(){
+  const C = S.comb; if(!C){ $('#road3').innerHTML = roadSVG({h:170, y:130}); $('#jumps').innerHTML=''; return; }
+  const col = {h:'var(--kraft)', t:'var(--cup)', o:'var(--one)'};
+  $('#road3').innerHTML = roadSVG({h:170, y:130, arcs:C.arcs, marks:[{v:C.A.n, c:C.A.c, label:C.A.n, lift:30}].concat(C.i===C.js.length ? [{v:C.cur, c:'var(--good)', label:C.cur, lift:30}] : [])});
+  let h = `<div class="jstep"><span>Start at ${C.A.n}</span><span class="small muted">(${C.A.name})</span></div>`;
+  let v = C.A.n;
+  C.js.forEach((s,i) => {
+    const tg = `<span class="tag ${s.k==='t'?'t':s.k==='o'?'o':''}">${s.k==='h'?'hundred':s.k==='t'?'tens':'ones'}</span>`;
+    if(i < C.i){ h += `<div class="jstep done">${tg}${v} + ${s.j} = ${v+s.j}</div>`; }
+    else if(i===C.i){ h += `<div class="jstep">${tg}${v} + ${s.j} = <input class="num" id="jIn" type="number" inputmode="numeric" aria-label="Where do we land?"><button class="btn" id="jChk">Check</button><button class="btn alt" id="jSkip">Jump</button></div>`; }
+    v += s.j;
+  });
+  if(C.i===C.js.length) h += `<div class="eq">${C.A.n} <span class="op">+</span> ${C.B.n} <span class="op">=</span> ${C.cur}</div>`;
+  $('#jumps').innerHTML = h;
+  if(C.i < C.js.length){
+    const go = () => { const s=C.js[C.i]; C.arcs.push({from:C.cur, to:C.cur+s.j, c:col[s.k], label:'+'+s.j}); C.cur+=s.j; C.i++; renderComb(); if(C.i===C.js.length) finishComb(); else { const el=$('#jIn'); if(el) el.focus(); } };
+    $('#jChk').onclick = () => {
+      const s=C.js[C.i], want=C.cur+s.j, got=parseInt($('#jIn').value,10);
+      if(got===want){ fb('#combFb', `Yes, ${C.cur} + ${s.j} = ${want}.`, 'good'); go(); }
+      else if(Number.isFinite(got)) fb('#combFb', s.k==='h' ? `Adding 100 changes only the hundreds digit: ${hto(C.cur).h} hundreds becomes ${hto(C.cur).h+1} hundreds. Try again.`
+        : s.k==='t' ? `Count on by tens from ${C.cur}: ${Array.from({length:Math.min(3,s.j/10)},(_,k)=>C.cur+10*(k+1)).join(', ')}${s.j>30?'…':''}. Try again.`
+        : `Count on ${s.j} more by ones from ${C.cur}. Try again.`);
+    };
+    $('#jSkip').onclick = go;
+    $('#jIn').addEventListener('keydown', e => { if(e.key==='Enter') $('#jChk').click(); });
+  }
+}
+function finishComb(){
+  const C=S.comb, T=C.cur;
+  S.total = T;
+  fb('#combFb', `${C.A.n} + ${C.B.n} = <b>${T}</b>. Hundreds first, then tens, then ones.`, 'good');
+  setupHowMany(T);
+}
+$('#combStart').onclick = startCombine;
+
+/* How many more */
+function setupHowMany(T){
+  $('#hmBody').classList.remove('hide'); fb('#hmFb',''); $('#landBox').classList.add('hide'); fb('#landFb','');
+  if(T>1000){ $('#hmLead').innerHTML = `${T} is already past 1,000, by ${T-1000}. Pick two smaller collections.`; $('#hmBody').classList.add('hide'); return; }
+  if(T===1000){ $('#hmLead').innerHTML = `Exactly 1,000 already! Zero more needed.`; $('#hmBody').classList.add('hide'); return; }
+  const nh = Math.ceil(T/100)*100;
+  $('#hmLead').innerHTML = `Start at <b>${T}</b>. Jump to the next hundred, then to 1,000. Add the jumps.`;
+  if(nh===T){
+    $('#hmL1').innerHTML = `${T} is already a hundred. First jump: <span class="given">0</span>`;
+  } else {
+    $('#hmL1').innerHTML = `<span class="given">${T} → ${nh}</span> is <input class="num" id="hm1" type="number" inputmode="numeric" aria-label="First jump">`;
+  }
+  $('#hmL2').innerHTML = `<span class="given">${nh} → 1,000</span> is <input class="num" id="hm2" type="number" inputmode="numeric" aria-label="Second jump">`;
+  $('#hmL3').innerHTML = `Add the jumps: <input class="num" id="hm3" type="number" inputmode="numeric" aria-label="Total more"> more to reach 1,000`;
+  $('#road3').innerHTML = roadSVG({h:170, y:130, arcs:S.comb.arcs, marks:[{v:T, c:'var(--good)', label:T, lift:30}]});
+}
+$('#hmCheck').onclick = () => {
+  const T=S.total, nh=Math.ceil(T/100)*100, j1=nh-T, j2=1000-nh, R=1000-T;
+  const msgs=[];
+  if(j1>0){ const v=val('hm1'); mark('hm1', v===j1); if(v!==j1){ const nt=Math.ceil(T/10)*10; msgs.push(T%10 ? (nt===nh ? `${T} to ${nh}: count on by ones.` : `${T} to ${nh}: count on by ones to ${nt}, then by tens to ${nh}.`) : `${T} to ${nh}: count on by tens.`); } }
+  const v2=val('hm2'); mark('hm2', v2===j2); if(v2!==j2) msgs.push(`${nh} to 1,000: count by hundreds. ${Array.from({length:Math.min(3,j2/100)},(_,k)=>fmt(nh+100*(k+1))).join(', ')}${j2>300?'…':''}`);
+  const v3=val('hm3'); mark('hm3', v3===R); if(v3!==R && msgs.length===0) msgs.push(`Add your two jumps: ${j1} + ${j2}.`); else if(v3!==R) msgs.push(`Then add the two jumps.`);
+  if(msgs.length){ fb('#hmFb', msgs.map(m=>'• '+m).join('<br>')); return; }
+  const arcs = S.comb.arcs.slice();
+  if(j1) arcs.push({from:T, to:nh, c:'var(--good)', label:'+'+j1});
+  arcs.push({from:nh, to:1000, c:'var(--good)', label:'+'+j2});
+  $('#road3').innerHTML = roadSVG({h:190, y:150, arcs, marks:[{v:T, c:'var(--good)', label:T, lift:30}]});
+  fb('#hmFb', `${j1} + ${j2} = <b>${R}</b> more to reach 1,000. Check by subtracting: 1,000 − ${T} = ${R}.`, 'good');
+  S.two = T;
+  $('#landBox').classList.remove('hide'); $('#landT').textContent = T;
+};
+$('#landGo').onclick = () => {
+  const T=S.total, x=parseInt($('#landIn').value,10); if(!Number.isFinite(x)) return;
+  const sum = T+x;
+  if(sum===1000) fb('#landFb', `${T} + ${x} = <b>1,000</b>. Landed exactly!`, 'good');
+  else if(sum>1000) fb('#landFb', `${T} + ${x} = ${fmt(sum)}. That is ${sum-1000} past 1,000. How many should you take away from ${x}?`);
+  else fb('#landFb', `${T} + ${x} = ${sum}. That is ${1000-sum} short of 1,000. How many more should you add?`);
+};
+
+/* ---------------- Class 2 share: two ways ---------------- */
+function setTwo(T){ S.two=T; $('#twoIn').value = T; $('#twoLead').innerHTML = `How many more from <b>${T}</b> to 1,000? Try both ways. Do they match?`; $('#twoUpBox').innerHTML=''; $('#twoSubBox').innerHTML=''; fb('#twoFb',''); $('#road4').innerHTML = roadSVG({h:170,y:130, marks:[{v:T,c:'var(--kraft)',label:T,lift:30}]}); S.twoDone={}; }
+$('#twoSet').onclick = () => { const v=parseInt($('#twoIn').value,10); if(v>=1 && v<=999) setTwo(v); else fb('#twoFb','Use a number from 1 to 999.'); };
+function regroupSub(T){
+  // 1,000 regrouped as 9 hundreds, 9 tens, 10 ones (or fewer trades when T ends in zeros)
+  const d = hto(T);
+  if(d.o>0) return {top:[9,9,10], bot:[d.h,d.t,d.o], note:'1,000 = 9 hundreds, 9 tens, 10 ones'};
+  if(d.t>0) return {top:[9,10,0], bot:[d.h,d.t,0], note:'1,000 = 9 hundreds, 10 tens, 0 ones'};
+  return {top:[10,0,0], bot:[d.h,0,0], note:'1,000 = 10 hundreds'};
+}
+$('#twoUp').onclick = () => {
+  const T=S.two, nh=Math.ceil(T/100)*100, j1=nh-T, j2=1000-nh;
+  const arcs=[]; if(j1) arcs.push({from:T,to:nh,c:'var(--good)',label:'+'+j1}); arcs.push({from:nh,to:1000,c:'var(--good)',label:'+'+j2});
+  $('#road4').innerHTML = roadSVG({h:190,y:150, arcs, marks:[{v:T,c:'var(--kraft)',label:T,lift:30}]});
+  $('#twoUpBox').innerHTML = `<h3>Count up</h3><p class="eq">${j1?`${T} → ${nh} is ${j1}, `:''}${nh} → 1,000 is ${j2}</p><p class="eq">${j1?`${j1} + ${j2} = `:''}${j1+j2}</p>`;
+  S.twoDone.up = j1+j2; twoMatch();
+};
+$('#twoSub').onclick = () => {
+  const T=S.two, R=1000-T, g=regroupSub(T), d=[R>=100?Math.floor(R/100):0, Math.floor(R/10)%10, R%10];
+  const res = [g.top[0]-g.bot[0], g.top[1]-g.bot[1], g.top[2]-g.bot[2]];
+  $('#twoSubBox').innerHTML = `<h3>1,000 − ${T} on paper</h3><p class="small muted">${g.note}</p>
+    <table class="pv"><tr><th></th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>
+    <tr><th>1,000</th>${g.top.map(x=>`<td>${x}</td>`).join('')}</tr>
+    <tr><th>− ${T}</th>${g.bot.map(x=>`<td>${x}</td>`).join('')}</tr>
+    <tr><th>=</th>${res.map(x=>`<td class="decide">${x}</td>`).join('')}</tr></table>
+    <p class="eq">1,000 − ${T} = ${res[0]*100+res[1]*10+res[2]}</p>`;
+  S.twoDone.sub = res[0]*100+res[1]*10+res[2]; twoMatch();
+};
+function twoMatch(){
+  const d = S.twoDone; if(d.up==null || d.sub==null) return;
+  fb('#twoFb', d.up===d.sub ? `Both ways give <b>${d.up}</b>. Counting up and subtracting answer the same question.` : `These don’t match. Check each step.`, d.up===d.sub ? 'good' : '');
+}
+
+/* ---------------- Class 2 sheet ---------------- */
+const SHEET5 = [
+  {label:'By 100s from 347:', given:'347', ans:[447,547,647], step:100, from:347},
+  {label:'By 10s from 680:', given:'680', ans:[690,700,710,720], step:10, from:680},
+  {label:'By 5s from 985:', given:'985', ans:[990,995,1000], step:5, from:985},
+];
+function renderSheet5(){
+  let h = SHEET5.map((r,i) => `<div class="line"><span>${r.label}</span><span class="given">${r.given},</span>${r.ans.map((_,j) => `<input class="num" id="s5_${i}_${j}" type="number" inputmode="numeric" aria-label="${r.label} blank ${j+1}">`).join('')}</div>`).join('');
+  h += `<div class="line">How many more to 1,000 from 640? <input class="num" id="s5_more" type="number" inputmode="numeric" aria-label="How many more from 640"></div>`;
+  h += `<div class="line"><span class="given">347 + 280 =</span> <input class="num" id="s5_sum" type="number" inputmode="numeric" aria-label="347 plus 280"></div>`;
+  $('#sheet5').innerHTML = h;
+}
+$('#s5Check').onclick = () => {
+  const hints=[]; let all=true, blanks=0;
+  SHEET5.forEach((r,i) => {
+    let prev = r.from, rowHint=null;
+    r.ans.forEach((a,j) => { const v=val(`s5_${i}_${j}`); if(v===null){ blanks++; all=false; $(`#s5_${i}_${j}`).classList.remove('ok','no'); prev=a; return; }
+      mark(`s5_${i}_${j}`, v===a); if(v!==a){ all=false; if(!rowHint) rowHint = `${r.label} what is ${fmt(prev)} + ${r.step}? ${r.step===10 && prev%100===90 ? '9 tens plus 1 ten makes a new hundred.' : r.step===5 && prev%100===95 ? '95 + 5 makes a new hundred.' : r.step===100 ? 'Only the hundreds digit changes.' : ''}`; } prev=a; });
+    if(rowHint) hints.push(rowHint);
+  });
+  const m=val('s5_more'); if(m===null){blanks++; all=false;} else { mark('s5_more', m===360); if(m!==360){ all=false; hints.push('From 640: jump 60 to reach 700, then 300 to reach 1,000. Add the jumps.'); } }
+  const s=val('s5_sum'); if(s===null){blanks++; all=false;} else { mark('s5_sum', s===627); if(s!==627){ all=false; hints.push('347 + 280: add the hundreds first (447, 547), then the 8 tens.'); } }
+  if(all) fb('#s5Fb', 'Every answer checks out!', 'good');
+  else if(!hints.length) fb('#s5Fb', `So far so good. ${blanks} blank${blanks===1?'':'s'} left.`, 'info');
+  else fb('#s5Fb', hints.map(x=>'• '+x).join('<br>'));
+};
+$('#s5Clear').onclick = () => { renderSheet5(); fb('#s5Fb','Fill in the blanks, then tap Check.','info'); };
+
+/* ---------------- Class 3 museum ---------------- */
+function buildMuseum(){
+  let h='';
+  for(let b=0;b<10;b++){
+    h += `<div class="mbag" data-b="${b}"><button class="mh" data-bag="${b}" aria-label="Bag ${b+1}, 100">100</button><div class="mc">`;
+    for(let c=0;c<10;c++) h += `<button class="mcup" data-cup="${b*10+c}" aria-label="Cup of 10">${'<i></i>'.repeat(10)}</button>`;
+    h += `</div><div class="mcount"></div></div>`;
+  }
+  $('#museum').innerHTML = h;
+  $$('#museum .mh').forEach(btn => btn.onclick = () => {
+    if(S.card && S.card.type!=='find') return;
+    const b=+btn.dataset.bag; const ids=[...Array(10)].map((_,c)=>b*10+c);
+    const all = ids.every(i => S.museum.sel.has(i));
+    ids.forEach(i => all ? S.museum.sel.delete(i) : S.museum.sel.add(i)); renderMuseum();
+  });
+  $$('#museum .mcup').forEach(btn => btn.onclick = () => {
+    if(S.card && S.card.type!=='find') return;
+    const i=+btn.dataset.cup; S.museum.sel.has(i) ? S.museum.sel.delete(i) : S.museum.sel.add(i); renderMuseum();
+  });
+}
+function selDesc(){
+  const sel=S.museum.sel; let bags=0, cups=0;
+  for(let b=0;b<10;b++){ const k=[...Array(10)].filter((_,c)=>sel.has(b*10+c)).length; if(k===10) bags++; else cups+=k; }
+  return {bags, cups, total:sel.size*10};
+}
+function renderMuseum(){
+  $$('#museum .mcup').forEach(el => { const i=+el.dataset.cup; el.classList.toggle('sel', S.museum.sel.has(i)); el.classList.toggle('gone', S.museum.gone.has(i)); el.classList.remove('point'); });
+  $$('#museum .mbag').forEach(el => { el.classList.remove('pointbag'); el.querySelector('.mcount').textContent=''; });
+  if(S.card && S.card.type==='find'){
+    const d=selDesc();
+    $('#selSum').textContent = d.total ? `${d.bags} bag${d.bags===1?'':'s'} + ${d.cups} cup${d.cups===1?'':'s'} = ${fmt(d.total)}` : 'Tap a cup to pick 10. Tap a bag’s label to pick 100.';
+  }
+}
+function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+const FIXED_CARDS = [{type:'find', n:350}, {type:'take', n:230}];
+function makeCard(){
+  if(S.cardIdx < FIXED_CARDS.length) return {...FIXED_CARDS[S.cardIdx++]};
+  const k = randInt(0,3);
+  if(k===0){ let n; do{ n=randInt(11,99)*10; }while(n%100===0); return {type:'find', n}; }
+  if(k===1){ let n; do{ n=randInt(11,89)*10; }while(n%100===0); return {type:'take', n}; }
+  if(k===2){ const b=randInt(2,9); return {type:'cups', n:b}; }
+  return {type:'bags', n:randInt(2,9)*100};
+}
+function renderCard(){
+  const c=S.card; S.museum.sel.clear(); S.museum.gone.clear(); fb('#cardFb','');
+  const T = {find:'Find it', take:'Take away', cups:'Cups and bags', bags:'Cups and bags'}[c.type];
+  $('#cardType').textContent = 'Question card · ' + T;
+  if(c.type==='find'){
+    $('#cardQ').textContent = `Find ${c.n} items without counting by ones.`;
+    $('#cardBody').innerHTML = `<button class="btn" id="cardCheck">Check my picks</button>`;
+    $('#cardCheck').onclick = checkFind;
+  } else {
+    $('#cardQ').textContent = c.type==='take' ? `If ${c.n} were taken away, how many would be left?`
+      : c.type==='cups' ? `How many cups of 10 are in ${c.n} bags?` : `How many bags make ${c.n}?`;
+    $('#cardBody').innerHTML = `<div class="row"><input class="num wide" id="cardIn" type="number" inputmode="numeric" aria-label="Your answer"><button class="btn" id="cardCheck">Check</button><button class="btn alt" id="cardShow">Show it</button></div>`;
+    $('#cardCheck').onclick = checkAnswer; $('#cardShow').onclick = showAnswer;
+    $('#cardIn').addEventListener('keydown', e => { if(e.key==='Enter') checkAnswer(); });
+  }
+  $('#selSum').textContent = c.type==='find' ? 'Tap a cup to pick 10. Tap a bag’s label to pick 100.' : 'Guides: skip count and point.';
+  renderMuseum();
+}
+const answerOf = c => c.type==='take' ? 1000-c.n : c.type==='cups' ? c.n*10 : c.n/100;
+function checkFind(){
+  const d=selDesc(), n=S.card.n;
+  if(d.total===n){ fb('#cardFb', `Yes! ${d.bags} bag${d.bags===1?'':'s'} and ${d.cups} cup${d.cups===1?'':'s'}: ${skipText(d.bags,d.cups)}. That’s ${n}.`, 'good'); pointAt([...S.museum.sel]); }
+  else if(d.total<n) fb('#cardFb', `You have ${d.bags} bag${d.bags===1?'':'s'} + ${d.cups} cup${d.cups===1?'':'s'} = ${d.total}. You need ${n - d.total} more. How many cups is that?`);
+  else fb('#cardFb', `You have ${d.bags} bag${d.bags===1?'':'s'} + ${d.cups} cup${d.cups===1?'':'s'} = ${fmt(d.total)}. That’s ${d.total-n} too many. Which cups can you put back?`);
+}
+function skipText(bags, cups){
+  const a=[]; for(let i=1;i<=bags;i++) a.push(i*100); for(let j=1;j<=cups;j++) a.push(bags*100+j*10);
+  return a.length>8 ? a.slice(0,3).join(', ')+' … '+a.slice(-2).join(', ') : a.join(', ');
+}
+async function pointAt(cupIds){
+  const g=gen; cupIds.sort((a,b)=>a-b);
+  for(const i of cupIds){ if(g!==gen) return; const el=document.querySelector(`[data-cup="${i}"]`); if(el) el.classList.add('point'); await sleep(40); }
+}
+function checkAnswer(){
+  const c=S.card, v=parseInt($('#cardIn').value,10), a=answerOf(c); if(!Number.isFinite(v)) return;
+  mark('cardIn', v===a);
+  if(v===a){ fb('#cardFb', `Yes, ${fmt(a)}. Tap “Show it” to prove it on the museum.`, 'good'); return; }
+  if(c.type==='take') fb('#cardFb', `Picture taking away ${Math.floor(c.n/100)} bag${Math.floor(c.n/100)===1?'':'s'} and ${(c.n%100)/10} cup${(c.n%100)/10===1?'':'s'}. Then count what is left by 100s and 10s. Try again.`);
+  else if(c.type==='cups') fb('#cardFb', `Each bag has 10 cups. Count by 10s, one bag at a time. Try again.`);
+  else fb('#cardFb', `Each bag is 100. Count by 100s until you reach ${c.n}. Try again.`);
+}
+async function showAnswer(){
+  const c=S.card, g=gen; S.museum.gone.clear(); renderMuseum();
+  if(c.type==='take'){
+    const k=c.n/10; for(let i=0;i<k;i++) S.museum.gone.add(99-i);   // take from the last bags first
+    renderMuseum();
+    const left=[...Array(100).keys()].filter(i=>!S.museum.gone.has(i));
+    const bagsLeft = Math.floor(left.length/10), cupsLeft = left.length%10;
+    fb('#cardFb', `Took away ${Math.floor(c.n/100)} bag${Math.floor(c.n/100)===1?'':'s'} and ${(c.n%100)/10} cup${(c.n%100)/10===1?'':'s'}. Left: ${bagsLeft} full bag${bagsLeft===1?'':'s'} and ${cupsLeft} cup${cupsLeft===1?'':'s'}. Count: ${skipText(bagsLeft,cupsLeft)}. <b>${fmt(1000-c.n)} left.</b>`, 'good');
+    await pointAt(left);
+  } else if(c.type==='cups'){
+    const ids=[...Array(c.n*10).keys()]; for(const i of ids){ if(g!==gen) return; const el=document.querySelector(`[data-cup="${i}"]`); el.classList.add('point'); const b=Math.floor(i/10); document.querySelector(`.mbag[data-b="${b}"] .mcount`).textContent = `${(b+1)*10} cups`; await sleep(30); }
+    fb('#cardFb', `${c.n} bags × 10 cups: ${Array.from({length:c.n},(_,i)=>(i+1)*10).join(', ')}. <b>${c.n*10} cups.</b>`, 'good');
+  } else {
+    const b=c.n/100; for(let i=0;i<b;i++){ if(g!==gen) return; const el=document.querySelector(`.mbag[data-b="${i}"]`); el.classList.add('pointbag'); el.querySelector('.mcount').textContent=fmt((i+1)*100); await sleep(250); }
+    fb('#cardFb', `Count by 100s: ${Array.from({length:b},(_,i)=>fmt((i+1)*100)).join(', ')}. <b>${b} bags.</b>`, 'good');
+  }
+}
+$('#drawCard').onclick = () => { gen++; S.card = makeCard(); renderCard(); };
+$('#clearSel').onclick = () => { gen++; S.museum.sel.clear(); S.museum.gone.clear(); renderMuseum(); fb('#cardFb',''); };
+function setShowcase(on){ document.body.classList.toggle('showcase', on); $('#exitShow').classList.toggle('hide', !on); }
+$('#showMode').onclick = () => { showTab('c3'); showSub('c3','museum'); setShowcase(true); };
+$('#exitShow').onclick = () => setShowcase(false);
+
+/* Museum label */
+const REASONS = [
+  {t:'Each bag holds 100, so we count by 100s: 100, 200, 300 … 1,000.', ok:true, why:'Yes. Ten bags of 100 makes 1,000.'},
+  {t:'Each cup holds 10 and each bag holds 10 cups, so we can check one cup and one bag.', ok:true, why:'Yes. If a cup is 10 and a bag is 10 cups, every bag is 100.'},
+  {t:'The bags look full.', ok:false, why:'Looking full doesn’t tell us how many. What do we know is in each bag?'},
+  {t:'We guessed it was about 1,000.', ok:false, why:'A guess is a good start, but how could a visitor check it?'},
+];
+function renderReasons(){
+  $('#reasons').innerHTML = REASONS.map((r,i) => `<button data-r="${i}">${r.t}</button>`).join('');
+  $$('#reasons button').forEach(b => b.onclick = () => { const r=REASONS[+b.dataset.r]; b.classList.add(r.ok?'ok':'no'); fb('#rsFb', r.why, r.ok?'good':''); });
+}
+$('#lbCheck').onclick = () => {
+  const a=val('lb1'), b=val('lb2'), c=val('lb3'); const m=[];
+  mark('lb1', a===100); mark('lb2', b===10); mark('lb3', c===1000);
+  if(a!==100) m.push('A bag holds 10 cups of 10. How many is that?');
+  if(b!==10) m.push('Count the bags in the museum.');
+  if(c!==1000) m.push('Count the bags by 100s.');
+  fb('#lbFb', m.length ? m.map(x=>'• '+x).join('<br>') : 'This bag holds 100. There are 10 bags like it here. Altogether that is 1,000.', m.length?'':'good');
+};
+
+/* Reflect: jar */
+$('#jarCount').onclick = async () => {
+  const g=gen, d=hto(JAR);
+  $('#jarTally').classList.remove('hide');
+  // colour the jar: first 200 as two bags, next 90 as cups, last 6 loose
+  const col = i => i < d.h*100 ? 'var(--kraft)' : i < d.h*100 + d.t*10 ? 'var(--cup)' : 'var(--one)';
+  $('#jar3').innerHTML = jarSVG(col);
+  for(let b=1;b<=d.h;b++){ if(g!==gen) return; $('#jH').textContent=b; await sleep(400); }
+  for(let c=1;c<=d.t;c++){ if(g!==gen) return; $('#jT').textContent=c; await sleep(160); }
+  $('#jO').textContent=d.o;
+  S.jarDone = true; renderEst();
+  const best = closestEst();
+  fb('#jarFb', `${d.h} bags, ${d.t} cups, ${d.o} loose: <b>${JAR}</b> in the jar. ${best ? `Closest estimate: ${best.map(fmt).join(' and ')} (off by ${Math.abs(best[0]-JAR)}).` : 'Add estimates in Class 1 to see whose was closest.'}`, 'info');
+};
+$('#jarVs').onclick = () => {
+  const bagsNeeded = 1000-JAR;
+  fb('#jarVsFb', `The jar is ${JAR}, almost 3 bags. 1,000 is 10 bags. It would take ${bagsNeeded} more beads to make 1,000. That’s more than ${Math.floor(bagsNeeded/JAR)} more jars like this one!`, 'info');
+};
+
+/* ---------------- Extension ---------------- */
+$('#xCheck').onclick = () => {
+  const t=val('xTen'), f=val('xFive'), m=[];
+  mark('xTen', t===100); mark('xFive', f===200);
+  if(t!==100) m.push('Tens: the museum has 10 bags, and each bag has 10 cups of ten.');
+  if(f!==200) m.push('Fives: how many 5s fit in one cup of 10? Now do that for every cup.');
+  fb('#xFb', m.length ? m.map(x=>'• '+x).join('<br>') : '100 tens and 200 fives. There are twice as many fives.', m.length?'':'good');
+};
+$('#xWhy').onclick = () => {
+  $('#xWhyBox').classList.remove('hide');
+  $('#xSplit').innerHTML = `<div class="cupv">${'<i class="dot" style="--c:var(--cup)"></i>'.repeat(10)}</div><span class="eq">=</span>
+    <div class="cupv" style="height:36px; grid-template-rows:repeat(3,1fr)">${'<i class="dot" style="--c:var(--kraft)"></i>'.repeat(5)}</div><span class="eq">+</span>
+    <div class="cupv" style="height:36px; grid-template-rows:repeat(3,1fr)">${'<i class="dot" style="--c:var(--kraft)"></i>'.repeat(5)}</div>
+    <p class="lead" style="flex-basis:100%">Every ten splits into two fives. 100 tens → 100 × 2 = 200 fives.</p>`;
+};
+$('#pcCheck').onclick = () => {
+  const a=val('pc100'), b=val('pc1000'), m=[];
+  mark('pc100', a===300); mark('pc1000', b===3000);
+  if(a!==300) m.push('100 clips: 10 clips are about 30 cm. 10 groups of 30 cm is how many?');
+  if(b!==3000) m.push('1,000 clips is 10 chains of 100. Ten chains of 300 cm is how many cm?');
+  fb('#pcFb', m.length ? m.map(x=>'• '+x).join('<br>') : 'About 300 cm for 100 clips, and about 3,000 cm (30 meters) for 1,000 clips.', m.length?'':'good');
+};
+$('#pcShow').onclick = () => {
+  let h = `<div class="label">10 clips ≈ 30 cm</div><div class="chainbar" style="width:10%"></div><div class="label">100 clips ≈ 300 cm = 3 m</div><div class="chainbar" style="width:100%"></div><div class="label">1,000 clips ≈ 10 chains of 300 cm = 3,000 cm = 30 m</div>`;
+  for(let i=0;i<10;i++) h += `<div class="chainbar" style="width:100%"></div>`;
+  $('#chainBox').innerHTML = h;
+};
+
+/* ---------------- Reset / fullscreen ---------------- */
+function startOver(){
+  fresh(); setShowcase(false);
+  renderJars(); renderEst(); renderMachine(); clearRecord(); renderRoad1(); renderCmpPick(); renderShare();
+  skipReset(0); $('#skipTable').innerHTML=''; fillSelects(); S.comb=null; renderComb(); fb('#combFb','');
+  $('#hmBody').classList.add('hide'); $('#hmLead').textContent='Combine two teams first.';
+  renderSheet5(); fb('#s5Fb','Fill in the blanks, then tap Check. Boxes that need another look turn gold, with a hint here.','info');
+  buildMuseum(); S.card = makeCard(); renderCard(); renderReasons();
+  $$('input.num').forEach(el => { el.value=''; el.classList.remove('ok','no'); });
+  ['#voteFb','#howFb','#roadFb','#cmpFb','#shFb','#onesFb','#lbFb','#rsFb','#jarFb','#jarVsFb','#xFb','#pcFb','#twoFb'].forEach(id => fb(id,''));
+  $('#pvBox').innerHTML=''; $('#jarTally').classList.add('hide'); $('#jH').textContent=$('#jT').textContent=$('#jO').textContent='0';
+  $('#xWhyBox').classList.add('hide'); $('#chainBox').innerHTML='';
+  $('#cA').value=347; $('#cB').value=280;
+  setTwo(627);
+  ['c1','c2','c3'].forEach(g => showSub(g, S.sub[g]));
+  showTab('c1');
+}
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+startOver();
+window.__T = {hto, skipOutcome, regroupSub, jumpsFor, answerOf, SHEET5, JAR, closestEst};
+})();
+</script>
+
+</body></html>

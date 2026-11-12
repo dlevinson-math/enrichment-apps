@@ -1,0 +1,678 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Diffy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a big nested-square board on the left (corners = notes, middles = circles), a working panel on the right; stacks on phones. */
+:root{
+  --paper:#EEF2EE; --card:#FFFFFF; --ink:#1B2436; --muted:#596274; --line:#CFD7D1; --grid:#E0E7E1;
+  --corner:#F4B740; --corner-soft:#FDF0D2; --corner-ink:#3A2A05;
+  --mid:#139582; --mid-soft:#DDF3EF;
+  --accent:#2D5FD3; --accent-soft:#E3EBFB;
+  --good:#1C8A4C; --good-soft:#E1F4E8; --try:#B4521C; --try-soft:#FBEADF;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121714; --card:#1B221E; --ink:#EAF0EC; --muted:#A3AEA7; --line:#33403A; --grid:#1E2722;
+    --corner:#F1BC4E; --corner-soft:#3A2F14; --corner-ink:#2A1E03;
+    --mid:#3CC6B0; --mid-soft:#15332D;
+    --accent:#7FA4F5; --accent-soft:#1E2A45;
+    --good:#53C886; --good-soft:#163323; --try:#F29A64; --try-soft:#3A2416;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121714; --card:#1B221E; --ink:#EAF0EC; --muted:#A3AEA7; --line:#33403A; --grid:#1E2722;
+  --corner:#F1BC4E; --corner-soft:#3A2F14; --corner-ink:#2A1E03;
+  --mid:#3CC6B0; --mid-soft:#15332D;
+  --accent:#7FA4F5; --accent-soft:#1E2A45;
+  --good:#53C886; --good-soft:#163323; --try:#F29A64; --try-soft:#3A2416;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:28px 28px; -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1320px; margin:0 auto; padding-block:14px 28px; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:center; gap:14px 24px; flex-wrap:wrap}
+.brand h1{font-family:var(--display); font-weight:800; font-size:clamp(34px,4vw,52px); line-height:.95; margin:0; letter-spacing:-.01em}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+nav.steps{display:flex; gap:6px; flex-wrap:wrap; background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:4px}
+nav.steps button{border:0; background:none; border-radius:12px; padding:10px 16px; font-weight:700; font-size:17px; color:var(--muted); min-height:48px; display:flex; align-items:center; gap:8px}
+nav.steps button i{font-style:normal; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:14px; background:var(--paper); color:var(--muted)}
+nav.steps button[aria-current="true"]{background:var(--ink); color:var(--card)}
+nav.steps button[aria-current="true"] i{background:var(--corner); color:var(--corner-ink)}
+.tools{margin-left:auto; display:flex; gap:8px}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.view[hidden]{display:none!important}
+.card{background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:20px}
+h2{font-family:var(--display); font-weight:700; font-size:clamp(26px,2.6vw,36px); line-height:1.1; margin:0; text-wrap:balance}
+h3{font-family:var(--display); font-weight:700; font-size:22px; margin:0}
+.lead{font-size:clamp(19px,1.6vw,24px); margin:0; max-width:40em}
+.muted{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:700; font-size:19px; padding:12px 24px; border-radius:14px; min-height:54px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:17px; padding:10px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.num{font-variant-numeric:tabular-nums}
+
+/* Warm-up */
+.warm{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr)); gap:16px}
+.pair{display:flex; flex-direction:column; gap:12px}
+.pair .q{font-family:var(--display); font-size:clamp(28px,3vw,40px); font-weight:700; line-height:1.1}
+.pair .q b{color:var(--accent)}
+.ans{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.ans input{width:140px; font-size:30px; font-weight:700; padding:6px 12px; border-radius:12px; border:2px solid var(--line); background:var(--paper); text-align:center}
+.nl{width:100%; height:auto; display:block; overflow:visible}
+.fb{border-radius:14px; padding:12px 16px; font-size:19px; margin:0}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft); border-left:6px solid var(--good)}
+.fb.try{background:var(--try-soft); border-left:6px solid var(--try)}
+.fb.info{background:var(--accent-soft); border-left:6px solid var(--accent)}
+
+/* Launch */
+.launch{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px}
+.bigq{font-family:var(--display); font-weight:800; font-size:clamp(36px,4.4vw,64px); line-height:1.02; margin:6px 0 14px; text-wrap:balance}
+.eyebrow{font-size:14px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--muted)}
+.vote{display:flex; gap:10px; flex-wrap:wrap}
+.vote button{border:2px solid var(--line); background:var(--paper); border-radius:16px; padding:10px 18px; font-weight:700; font-size:20px; min-height:64px; min-width:130px; display:flex; align-items:center; justify-content:space-between; gap:14px}
+.vote button b{font-family:var(--display); font-size:30px; color:var(--accent)}
+.rules{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; counter-reset:r}
+.rules li{counter-increment:r; display:flex; gap:12px; align-items:flex-start; font-size:19px}
+.rules li::before{content:counter(r); flex:none; width:34px; height:34px; border-radius:50%; background:var(--ink); color:var(--card); display:grid; place-items:center; font-weight:700}
+
+/* Play */
+.play{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:18px; align-items:start}
+.boardcol{display:flex; flex-direction:column; gap:12px}
+.boardbox{background:var(--card); border:1.5px solid var(--line); border-radius:22px; padding:10px; position:relative}
+#board{width:100%; height:auto; display:block; max-height:min(64vh, 640px); touch-action:manipulation}
+#board .side{stroke:var(--ink); stroke-width:4; stroke-linecap:round}
+#board .side.on{stroke:var(--accent); stroke-width:9}
+#board .inner{stroke:var(--mid); stroke-width:3; stroke-dasharray:8 9; fill:none; opacity:.55}
+#board .inner.full{stroke-dasharray:none; opacity:.9}
+#board .crn rect{fill:var(--corner); stroke:var(--ink); stroke-width:3}
+#board .crn.on rect{stroke:var(--accent); stroke-width:6}
+#board .crn text{fill:var(--corner-ink); font-family:var(--body); font-weight:700}
+#board .md{cursor:pointer}
+#board .md circle{fill:var(--card); stroke:var(--mid); stroke-width:4; stroke-dasharray:7 6}
+#board .md.ok circle{fill:var(--mid-soft); stroke-dasharray:none}
+#board .md.shown circle{fill:var(--paper); stroke-dasharray:none}
+#board .md.sel circle{stroke:var(--accent); stroke-width:7; stroke-dasharray:none; fill:var(--accent-soft)}
+#board .md.miss circle{stroke:var(--try); stroke-width:7; stroke-dasharray:none}
+#board .md text{fill:var(--ink); font-family:var(--body); font-weight:700}
+#board .md .qm{fill:var(--muted)}
+#board .centre{fill:var(--muted); font-family:var(--display); font-weight:700}
+#board .centre.win{fill:var(--good)}
+#stage.grow{animation:grow .7s cubic-bezier(.3,.7,.3,1)}
+#stage{transform-origin:220px 220px; transform-box:view-box}
+@keyframes grow{from{transform:rotate(45deg) scale(.7071)} to{transform:none}}
+#board .md.pop circle{animation:pop .35s ease-out}
+#board .md{transform-box:fill-box; transform-origin:center}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+.ask{display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:clamp(20px,1.9vw,26px); font-weight:700}
+.ask .slot{min-width:3.2em; text-align:center; font-family:var(--body); font-size:1.4em; padding:2px 12px; border-radius:12px; border:3px solid var(--accent); background:var(--accent-soft)}
+.keypad{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+.keypad button{min-height:60px; border-radius:14px; border:1.5px solid var(--line); background:var(--card); font-size:26px; font-weight:700}
+.keypad button:active{background:var(--accent-soft)}
+.keypad .ok{background:var(--accent); color:var(--card); border-color:var(--accent); grid-column:span 2; font-size:21px}
+.keypad .back{font-size:20px}
+.keypad .wide{grid-column:span 2}
+
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chips button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-weight:700; font-size:16px; min-height:46px}
+.chips button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.chips button.star{border-color:var(--corner)}
+.own{display:flex; flex-direction:column; gap:10px}
+.own .ins{display:flex; gap:8px; flex-wrap:wrap}
+.own input{width:92px; font-size:22px; font-weight:700; text-align:center; padding:8px 6px; border-radius:12px; border:2px solid var(--line); background:var(--corner-soft)}
+.own label{font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:2px}
+.status{display:flex; gap:18px; align-items:flex-end; flex-wrap:wrap}
+.big{font-family:var(--display); font-weight:800; font-size:clamp(40px,4vw,56px); line-height:.9}
+.big + span{display:block; color:var(--muted); font-size:15px}
+.ledger{display:flex; flex-direction:column; gap:6px; max-height:340px; overflow:auto}
+.lrow{display:grid; grid-template-columns:5.2em repeat(4,minmax(0,1fr)); gap:6px; align-items:center}
+.lrow .lab{font-size:14px; color:var(--muted); font-weight:700}
+.lrow span.v{background:var(--paper); border-radius:10px; text-align:center; padding:4px 0; font-weight:700; font-size:20px; font-variant-numeric:tabular-nums}
+.lrow.start span.v{background:var(--corner-soft)}
+.lrow.zero span.v{background:var(--good-soft); color:var(--good)}
+.lrow span.v.max{outline:3px solid var(--try); outline-offset:-3px}
+table.rec{border-collapse:collapse; width:100%; font-size:18px}
+table.rec th{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); text-align:left; padding:4px 8px}
+table.rec td{padding:6px 8px; border-top:1px solid var(--line); font-variant-numeric:tabular-nums}
+table.rec tr.top td{background:var(--corner-soft); font-weight:700}
+.tbl{overflow-x:auto}
+
+/* Detectives */
+.det{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:18px; align-items:start}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:700; font-size:clamp(26px,2.6vw,38px); line-height:1.12; margin:0; text-wrap:balance}
+.evidence{display:flex; flex-direction:column; gap:12px; min-height:200px}
+.hist{width:100%; height:auto; display:block}
+.hist text{font-family:var(--body); fill:var(--ink)}
+.hist .ax{fill:var(--muted); font-size:13px}
+.minis{display:flex; flex-wrap:wrap; gap:10px}
+.mini{display:grid; grid-template-columns:repeat(2,2.4em); gap:4px; padding:6px; border-radius:12px; border:1.5px solid var(--line); background:var(--paper)}
+.mini span{background:var(--corner); color:var(--corner-ink); border-radius:6px; text-align:center; font-weight:700}
+.hint{font-size:15px; color:var(--muted); margin:0}
+
+@media (max-width: 960px){
+  .play,.det,.launch{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  nav.steps button{padding:8px 10px; font-size:15px}
+  .lrow{grid-template-columns:4.4em repeat(4,minmax(0,1fr))}
+  .card{padding:14px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <h1>Diffy</h1>
+    <p>Grade 2 · Math in Focus Ch 3 · Lesson 2.3-B</p>
+  </div>
+  <nav class="steps" aria-label="Lesson parts">
+    <button data-view="warm" aria-current="true"><i>1</i>Warm-up</button>
+    <button data-view="launch" aria-current="false"><i>2</i>Launch</button>
+    <button data-view="play" aria-current="false"><i>3</i>Play Diffy</button>
+    <button data-view="detect" aria-current="false"><i>4</i>Detectives</button>
+  </nav>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm">
+  <div class="card" style="margin-bottom:16px">
+    <h2>Difference means how far apart</h2>
+    <p class="lead">Take the bigger number minus the smaller one. Or count up from the smaller number to the bigger one.</p>
+  </div>
+  <div class="warm" id="warmCards"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="secondary" id="newPair">New pair to try</button>
+  </div>
+</section>
+
+<!-- LAUNCH -->
+<section class="view" id="v-launch" hidden>
+  <div class="launch">
+    <div class="card">
+      <div class="eyebrow">Today's big question</div>
+      <p class="bigq">Does every Diffy end in zeros?</p>
+      <p class="muted" style="margin:0 0 10px">Vote before you play. Tap to add a vote.</p>
+      <div class="vote" id="vote">
+        <button data-v="yes">Yes <b class="num">0</b></button>
+        <button data-v="no">No <b class="num">0</b></button>
+        <button data-v="unsure">Not sure <b class="num">0</b></button>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="ghost" id="clearVotes">Clear votes</button></div>
+    </div>
+    <div class="card" style="display:flex; flex-direction:column; gap:16px">
+      <h3>How to play</h3>
+      <ol class="rules">
+        <li>Put 4 numbers on the corners of the square.</li>
+        <li>On each side, find the difference of the two corners. Write it in the middle circle.</li>
+        <li>Those 4 new numbers make the next square.</li>
+        <li>Keep going until you get 0, 0, 0, 0. Count the rounds.</li>
+      </ol>
+      <p class="fb info" style="margin:0">Let's try 8, 3, 5, 1 together. After each square, ask: <b>Where is this heading?</b></p>
+      <div class="row"><button class="primary" id="goLaunch">Play 8, 3, 5, 1 together</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAY -->
+<section class="view" id="v-play" hidden>
+  <div class="play">
+    <div class="boardcol">
+      <div class="boardbox">
+        <svg id="board" viewBox="0 0 440 440" role="group" aria-label="Diffy board"></svg>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; gap:12px; padding:16px">
+        <div class="ask" id="ask" aria-live="polite"></div>
+        <div class="keypad" id="keypad"></div>
+        <p class="fb" id="fb" aria-live="polite"></p>
+        <div id="hintBox"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card" style="display:flex; flex-direction:column; gap:12px">
+        <h3>Choose a start</h3>
+        <div class="chips" id="starts"></div>
+        <div class="own" id="ownBox" hidden>
+          <div class="ins">
+            <label>Top left<input id="o0" inputmode="numeric" aria-label="Top left corner"></label>
+            <label>Top right<input id="o1" inputmode="numeric" aria-label="Top right corner"></label>
+            <label>Bottom right<input id="o2" inputmode="numeric" aria-label="Bottom right corner"></label>
+            <label>Bottom left<input id="o3" inputmode="numeric" aria-label="Bottom left corner"></label>
+          </div>
+          <div class="row">
+            <button class="primary" id="ownPlay">Play my start</button>
+            <button class="secondary" id="ownCount">Just count its rounds</button>
+          </div>
+          <p class="fb" id="ownFb"></p>
+        </div>
+        <p class="hint" id="startNote"></p>
+      </div>
+
+      <div class="card" style="display:flex; flex-direction:column; gap:12px">
+        <div class="status">
+          <div><div class="big num" id="roundNum">0</div><span>rounds so far</span></div>
+          <div class="row" style="margin-left:auto">
+            <button class="primary" id="nextBtn">Make the next square</button>
+          </div>
+        </div>
+        <div class="row">
+          <button class="secondary" id="showRound">Show this round</button>
+          <button class="secondary" id="runEnd">Run to the end</button>
+        </div>
+        <h3 style="font-size:19px">Our rounds</h3>
+        <div class="ledger" id="ledger"></div>
+      </div>
+
+      <div class="card" style="display:flex; flex-direction:column; gap:10px">
+        <h3>Class record</h3>
+        <p class="hint">Every board you finish lands here. Add a pair's start with “Board 2: your own” → “Just count its rounds”.</p>
+        <div class="tbl"><table class="rec" id="rec"></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETECTIVES -->
+<section class="view" id="v-detect" hidden>
+  <div class="det">
+    <div class="card" style="display:flex; flex-direction:column; gap:16px">
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <p class="muted" id="qsub" style="margin:0"></p>
+      <div class="row" id="qacts"></div>
+      <p class="hint">Talk it over first. Then tap a button to put evidence on the screen.</p>
+    </div>
+    <div class="card evidence" id="evidence" aria-live="polite"></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Math ---------- */
+const diffs = a => a.map((x,i) => Math.abs(x - a[(i+1)%4]));
+const allZero = a => a.every(x => x === 0);
+function chain(a){ const rows=[a.slice()]; let c=a.slice(), g=0; while(!allZero(c) && g<500){ c=diffs(c); rows.push(c); g++; } return rows; }
+const roundsOf = a => chain(a).length - 1;
+const SIDES = ['top','right','bottom','left'];
+const CORNERS = ['top-left','top-right','bottom-right','bottom-left'];
+const ends = i => [i, (i+1)%4];   // side i joins corner i and corner i+1 (side 3 = bottom-left back to top-left)
+const list = a => a.join(', ');
+
+/* Counting-up hops from small to big: to the next ten, next hundred, then on. */
+function hops(a,b){
+  const s=Math.min(a,b), B=Math.max(a,b);
+  const pts=[s, Math.ceil(s/10)*10, Math.ceil(s/100)*100, Math.floor(B/100)*100, Math.floor(B/10)*10, B]
+    .filter(x => x>=s && x<=B);
+  const u=[...new Set(pts)].sort((x,y)=>x-y);
+  return u;
+}
+function numberLine(a,b){
+  const s=Math.min(a,b), B=Math.max(a,b);
+  if(s===B) return `<p class="fb info">${a} and ${b} are the same number. They are 0 apart.</p>`;
+  const pts=hops(a,b), W=640, L=40, R=600;
+  const X = v => L + (v-s)/(B-s)*(R-L);
+  let svg=`<svg class="nl" viewBox="0 0 ${W} 150" role="img" aria-label="Number line from ${s} to ${B}">`;
+  svg+=`<line x1="${L-20}" y1="100" x2="${R+20}" y2="100" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`;
+  const parts=[];
+  for(let i=0;i<pts.length-1;i++){
+    const x1=X(pts[i]), x2=X(pts[i+1]), h=Math.min(62, Math.max(22,(x2-x1)/2.2)), mx=(x1+x2)/2;
+    svg+=`<path d="M${x1} 96 Q${mx} ${96-h*2} ${x2} 96" fill="none" stroke="var(--accent)" stroke-width="3.5"/>`;
+    svg+=`<text x="${mx}" y="${96-h-8}" text-anchor="middle" font-size="20" font-weight="700" fill="var(--accent)" font-family="var(--body)">+${pts[i+1]-pts[i]}</text>`;
+    parts.push(pts[i+1]-pts[i]);
+  }
+  let lastX=-99, lift=false;
+  pts.forEach(v=>{ const x=X(v); lift = (x-lastX<44) ? !lift : false; lastX=x;
+    svg+=`<line x1="${x}" y1="90" x2="${x}" y2="110" stroke="var(--ink)" stroke-width="3"/>`;
+    svg+=`<text x="${x}" y="${lift?146:132}" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)" font-family="var(--body)">${v}</text>`;
+  });
+  svg+='</svg>';
+  const sum = parts.length>1 ? `${parts.join(' + ')} = ${B-s}` : `${B-s}`;
+  return svg + `<p style="margin:4px 0 0; font-size:19px">Count up from ${s} to ${B}: ${sum}. <b>${s} and ${B} are ${B-s} apart.</b></p>`;
+}
+/* Feedback for a wrong difference. Never just "wrong": show why, invite another try. */
+function why(a,b,v){
+  const s=Math.min(a,b), B=Math.max(a,b);
+  if(v===a+b && a!==0 && b!==0) return `${v} is ${a} + ${b}. That's adding. A difference is how far apart: <b>how far apart are ${s} and ${B}?</b>`;
+  return `Check it: ${s} + ${v} = ${s+v}. That lands ${s+v>B?'past':'before'} ${B}. <b>How far apart are ${s} and ${B}?</b> Try again, or tap “Count up”.`;
+}
+
+/* ---------- Views ---------- */
+function show(v){
+  document.querySelectorAll('nav.steps button').forEach(b => b.setAttribute('aria-current', b.dataset.view===v));
+  ['warm','launch','play','detect'].forEach(k => $('#v-'+k).hidden = k!==v);
+  if(v==='detect') renderQ();
+  window.scrollTo({top:0, behavior: reduced?'auto':'smooth'});
+}
+document.querySelectorAll('nav.steps button').forEach(b => b.onclick = () => show(b.dataset.view));
+
+/* ---------- Warm-up ---------- */
+let warmPairs;
+function renderWarm(){
+  $('#warmCards').innerHTML = warmPairs.map((p,i)=>`
+    <div class="card pair">
+      <div class="q">How far apart are <b class="num">${p[0]}</b> and <b class="num">${p[1]}</b>?</div>
+      <div class="ans">
+        <input id="w${i}" inputmode="numeric" aria-label="Difference of ${p[0]} and ${p[1]}" autocomplete="off">
+        <button class="primary" data-w="${i}">Check</button>
+        <button class="secondary" data-show="${i}">Show me</button>
+      </div>
+      <p class="fb" id="wfb${i}"></p>
+      <div id="wnl${i}"></div>
+    </div>`).join('');
+  document.querySelectorAll('[data-w]').forEach(b => b.onclick = () => checkWarm(+b.dataset.w));
+  document.querySelectorAll('[data-show]').forEach(b => b.onclick = () => { const p=warmPairs[+b.dataset.show]; $('#wnl'+b.dataset.show).innerHTML = numberLine(p[0],p[1]); });
+  warmPairs.forEach((_,i)=> $('#w'+i).addEventListener('keydown', e => { if(e.key==='Enter') checkWarm(i); }));
+}
+function checkWarm(i){
+  const [a,b]=warmPairs[i], raw=$('#w'+i).value.trim(), fb=$('#wfb'+i);
+  if(!/^\d+$/.test(raw)){ fb.className='fb try'; fb.textContent='Type a whole number, then tap Check.'; return; }
+  const v=+raw, d=Math.abs(a-b);
+  if(v===d){ fb.className='fb good'; fb.innerHTML=`Yes! ${Math.max(a,b)} − ${Math.min(a,b)} = ${d}.`; $('#wnl'+i).innerHTML=numberLine(a,b); }
+  else { fb.className='fb try'; fb.innerHTML=why(a,b,v); }
+}
+$('#newPair').onclick = () => {
+  let a,b; do{ a=Math.floor(Math.random()*40)+2; b=Math.floor(Math.random()*40)+2; }while(Math.abs(a-b)<3);
+  warmPairs.push([a,b]); if(warmPairs.length>4) warmPairs.splice(2,1); renderWarm();
+};
+
+/* ---------- Launch votes ---------- */
+const votes={yes:0,no:0,unsure:0};
+function renderVotes(){ document.querySelectorAll('#vote button').forEach(b => b.querySelector('b').textContent = votes[b.dataset.v]); }
+document.querySelectorAll('#vote button').forEach(b => b.onclick = () => { votes[b.dataset.v]++; renderVotes(); });
+$('#clearVotes').onclick = () => { votes.yes=votes.no=votes.unsure=0; renderVotes(); };
+$('#goLaunch').onclick = () => { loadStart('launch'); show('play'); };
+
+/* ---------- Play ---------- */
+const STARTS = [
+  {id:'launch', label:'Launch: 8, 3, 5, 1', nums:[8,3,5,1], note:'Launch board. After each square, ask: where is this heading?'},
+  {id:'b1', label:'Board 1: 12, 7, 3, 20', nums:[12,7,3,20], note:'Worksheet item 1. Watch the side from 3 to 20.'},
+  {id:'b2', label:'Board 2: your own', own:true, note:'Worksheet item 2. Pick any four whole numbers (0 to 999).'},
+  {id:'b3', label:'Board 3: 120, 450, 300, 75', nums:[120,450,300,75], note:'Worksheet item 3. Go bigger with three-digit numbers.'},
+  {id:'easy', label:'Easy start (under 10)', easy:true, note:'Easier entry: four numbers under 10. Tap again for a new one.'},
+  {id:'ch', label:'★ Challenge: 0, 2, 6, 13', nums:[0,2,6,13], star:true, note:'Worksheet item 4. Can you find a start that takes more than 7 rounds?'}
+];
+const P = {startId:'b1', label:'', rows:[], val:[null,null,null,null], st:['','','',''], sel:0, typed:'', done:false};
+let record=[];
+
+function renderStarts(){
+  $('#starts').innerHTML = STARTS.map(s => `<button data-s="${s.id}" class="${s.star?'star':''}" aria-pressed="${P.startId===s.id}">${s.label}</button>`).join('');
+  document.querySelectorAll('#starts button').forEach(b => b.onclick = () => {
+    const s = STARTS.find(x => x.id===b.dataset.s);
+    if(s.own){ P.startId='b2'; renderStarts(); $('#ownBox').hidden=false; $('#startNote').textContent=s.note; $('#o0').focus(); return; }
+    loadStart(s.id);
+  });
+}
+function loadStart(id, custom){
+  const s = STARTS.find(x => x.id===id);
+  let nums = custom || s.nums;
+  if(s.easy){ nums = Array.from({length:4}, () => Math.floor(Math.random()*10)); if(allZero(nums)) nums[1]=4; }
+  P.startId=id; P.label = id==='b2' ? 'Board 2' : s.label.split(':')[0];
+  P.rows=[nums.slice()]; P.done=allZero(nums); newRound();
+  $('#ownBox').hidden = id!=='b2';
+  $('#startNote').textContent = s.note;
+  renderStarts(); render();
+  if(P.done) finish();
+}
+function newRound(){ P.val=[null,null,null,null]; P.st=['','','','']; P.sel=0; P.typed=''; setFb('',''); $('#hintBox').innerHTML=''; }
+const cur = () => P.rows[P.rows.length-1];
+function setFb(cls, html){ const f=$('#fb'); f.className='fb '+cls; f.innerHTML=html; }
+
+const C=[[70,70],[370,70],[370,370],[70,370]], M=[[220,70],[370,220],[220,370],[70,220]];
+function fs(n, base){ const L=String(n).length; return L<=2?base:L===3?base*.82:base*.68; }
+function render(anim){
+  const a=cur(), svg=$('#board'), selEnds = P.done||P.sel==null ? [] : ends(P.sel);
+  let h='<g id="stage">';
+  for(let i=0;i<4;i++){ const [p,q]=[C[i],C[(i+1)%4]];
+    h+=`<line class="side ${selEnds.length && P.sel===i?'on':''}" x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}"/>`; }
+  const full = P.val.every(v=>v!==null);
+  if(!P.done) h+=`<polygon class="inner ${full?'full':''}" points="${M.map(m=>m.join(',')).join(' ')}"/>`;
+  const r=P.rows.length-1;
+  h+= P.done
+    ? `<text class="centre win" x="220" y="212" text-anchor="middle" font-size="40">0, 0, 0, 0</text><text class="centre win" x="220" y="252" text-anchor="middle" font-size="26">${r} round${r===1?'':'s'}</text>`
+    : `<text class="centre" x="220" y="230" text-anchor="middle" font-size="24">Square ${r+1}</text>`;
+  for(let i=0;i<4;i++){ const [x,y]=C[i];
+    h+=`<g class="crn ${selEnds.includes(i)?'on':''}"><rect x="${x-50}" y="${y-34}" width="100" height="68" rx="16"/><text x="${x}" y="${y}" dy=".35em" text-anchor="middle" font-size="${fs(a[i],38)}">${a[i]}</text></g>`; }
+  if(!P.done) for(let i=0;i<4;i++){ const [x,y]=M[i], v=P.val[i], sel=P.sel===i;
+    const label = v!==null ? v : (sel && P.typed ? P.typed : '?');
+    h+=`<g class="md ${v!==null?(P.st[i]==='shown'?'shown':'ok'):''} ${sel?'sel':''} ${P.st[i]==='miss'?'miss':''}" data-m="${i}" tabindex="0" role="button" aria-label="${SIDES[i]} side circle: difference of ${a[ends(i)[0]]} and ${a[ends(i)[1]]}${v!==null?', '+v:''}">
+      <circle cx="${x}" cy="${y}" r="40"/><text class="${label==='?'?'qm':''}" x="${x}" y="${y}" dy=".35em" text-anchor="middle" font-size="${fs(label,32)}">${label}</text></g>`; }
+  h+='</g>';
+  svg.innerHTML=h;
+  svg.querySelectorAll('.md').forEach(g => { const i=+g.dataset.m;
+    g.onclick = () => select(i);
+    g.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(i); } }; });
+  if(anim && !reduced){ const st=$('#stage'); st.classList.add('grow'); st.addEventListener('animationend', () => st.classList.remove('grow'), {once:true}); setTimeout(() => st.classList.remove('grow'), 900); }
+  renderAsk(); renderLedger(); $('#roundNum').textContent = P.rows.length-1;
+  $('#nextBtn').disabled = P.done; $('#showRound').disabled = P.done; $('#runEnd').disabled = P.done;
+}
+function select(i){
+  if(P.done) return;
+  P.sel=i; P.typed=''; if(P.st[i]==='miss') P.st[i]='';
+  $('#hintBox').innerHTML=''; render();
+}
+function renderAsk(){
+  const box=$('#ask');
+  if(P.done){ box.innerHTML = `Four zeros! This start took <span class="slot num">${P.rows.length-1}</span> round${P.rows.length===2?'':'s'}.`; return; }
+  if(P.sel==null){ box.innerHTML = 'Every circle is full. Make the next square!'; return; }
+  const a=cur(), [p,q]=ends(P.sel), done=P.val[P.sel]!==null;
+  box.innerHTML = `${a[p]} and ${a[q]} are <span class="slot num">${done?P.val[P.sel]:(P.typed||'&nbsp;')}</span> apart`;
+}
+function buildKeypad(){
+  $('#keypad').innerHTML = ['1','2','3','4','5','6','7','8','9','0'].map(k=>`<button data-k="${k}">${k}</button>`).join('')
+    + `<button data-k="back" class="back" aria-label="Delete">⌫</button><button data-k="hint" class="back wide">Count up</button><button data-k="ok" class="ok">Check</button>`;
+  document.querySelectorAll('#keypad button').forEach(b => b.onclick = () => key(b.dataset.k));
+}
+function key(k){
+  if(P.done || P.sel==null) return;
+  if(P.val[P.sel]!==null && k!=='hint'){ // already correct: move to next empty
+    const n=nextEmpty(P.sel); if(n==null) return; P.sel=n; P.typed=''; }
+  if(/^\d$/.test(k)){ if(P.typed.length<3) P.typed = (P.typed==='0'?'':P.typed)+k; render(); }
+  else if(k==='back'){ P.typed=P.typed.slice(0,-1); render(); }
+  else if(k==='hint'){ const a=cur(), [p,q]=ends(P.sel); $('#hintBox').innerHTML = numberLine(a[p],a[q]); }
+  else if(k==='ok') check();
+}
+function nextEmpty(from){ for(let k=1;k<=4;k++){ const j=(from+k)%4; if(P.val[j]===null) return j; } return null; }
+function check(){
+  const i=P.sel, a=cur(), [p,q]=ends(i), d=Math.abs(a[p]-a[q]);
+  if(P.typed===''){ setFb('try',`Type how far apart ${a[p]} and ${a[q]} are, then tap Check.`); return; }
+  const v=+P.typed;
+  if(v===d){
+    P.val[i]=v; P.st[i]='ok'; P.typed='';
+    const n=nextEmpty(i);
+    setFb('good', `Yes! ${Math.max(a[p],a[q])} − ${Math.min(a[p],a[q])} = ${d}.` + (n==null?' All four sides done. Make the next square!':''));
+    $('#hintBox').innerHTML='';
+    P.sel = n; render();
+    const g=document.querySelector(`#board .md[data-m="${i}"]`); if(g&&!reduced){ g.classList.add('pop'); }
+  } else {
+    setFb('try', why(a[p],a[q],v)); P.typed=''; render();
+  }
+}
+function nextSquare(){
+  if(P.done) return;
+  const missing=[0,1,2,3].filter(i=>P.val[i]===null);
+  if(missing.length){
+    missing.forEach(i=>P.st[i]='miss'); P.sel=missing[0]; P.typed=''; render();
+    const only4 = missing.length===1 && missing[0]===3;
+    setFb('try', `<b>How many sides does the square have?</b> ${missing.length===1?'One circle is':missing.length+' circles are'} still empty.` +
+      (only4?' The last side goes from the bottom-left corner back up to the top-left corner.':''));
+    return;
+  }
+  P.rows.push(P.val.slice()); P.done=allZero(cur()); newRound(); render(true);
+  if(P.done) finish(); else setFb('info', `Square ${P.rows.length} is ready. Where is this heading?`);
+}
+function showRound(){
+  if(P.done) return; const d=diffs(cur());
+  for(let i=0;i<4;i++) if(P.val[i]===null){ P.val[i]=d[i]; P.st[i]='shown'; }
+  P.sel=null; setFb('info','Here are this round’s differences. Check one together, then make the next square.'); render();
+}
+function runEnd(){
+  if(P.done) return;
+  const rows=chain(cur()); P.rows.push(...rows.slice(1)); P.done=true; newRound(); render(true); finish();
+}
+function finish(){
+  P.sel=null; renderAsk();
+  const r=P.rows.length-1, start=P.rows[0];
+  setFb('good', `Four zeros! ${list(start)} took <b>${r} round${r===1?'':'s'}</b>.` + (r>7?' That beats 7 rounds!':''));
+  addRecord(start, P.label);
+}
+function addRecord(start, who){
+  const key=start.join(',');
+  if(!record.some(x=>x.key===key)) record.push({key, start:start.slice(), rounds:roundsOf(start), who});
+  renderRecord();
+}
+function renderRecord(top){
+  const rows = top ? record.slice().sort((a,b)=>b.rounds-a.rounds) : record;
+  const best = Math.max(0,...record.map(x=>x.rounds));
+  $('#rec').innerHTML = `<tr><th>Start</th><th>Rounds</th><th>From</th></tr>` +
+    (rows.length ? rows.map(x=>`<tr class="${top&&x.rounds===best?'top':''}"><td>${list(x.start)}</td><td>${x.rounds}</td><td>${x.who}</td></tr>`).join('')
+                 : `<tr><td colspan="3" class="muted">No boards finished yet.</td></tr>`);
+}
+function renderLedger(){
+  const showMax = $('#ledger').dataset.max==='1';
+  $('#ledger').innerHTML = P.rows.map((r,k)=>{ const m=Math.max(...r);
+    return `<div class="lrow ${k===0?'start':''} ${allZero(r)?'zero':''}"><span class="lab">${k===0?'Start':'Round '+k}</span>${r.map(v=>`<span class="v ${showMax&&v===m&&m>0?'max':''}">${v}</span>`).join('')}</div>`; }).join('');
+  const l=$('#ledger'); l.scrollTop=l.scrollHeight;
+}
+function readOwn(){
+  const v=[0,1,2,3].map(i=>$('#o'+i).value.trim());
+  if(v.some(x=>!/^\d{1,3}$/.test(x))){ $('#ownFb').className='fb try'; $('#ownFb').textContent='Put a whole number from 0 to 999 in each corner.'; return null; }
+  $('#ownFb').className='fb'; $('#ownFb').textContent=''; return v.map(Number);
+}
+$('#ownPlay').onclick = () => { const v=readOwn(); if(v) loadStart('b2', v); };
+$('#ownCount').onclick = () => { const v=readOwn(); if(!v) return; const r=roundsOf(v); addRecord(v,'Class'); $('#ownFb').className='fb info'; $('#ownFb').innerHTML=`${list(v)} takes <b>${r} round${r===1?'':'s'}</b>. Added to the class record.`; };
+$('#nextBtn').onclick = nextSquare;
+$('#showRound').onclick = showRound;
+$('#runEnd').onclick = runEnd;
+document.addEventListener('keydown', e => {
+  if($('#v-play').hidden || e.target.tagName==='INPUT') return;
+  if(/^\d$/.test(e.key)) key(e.key);
+  else if(e.key==='Backspace'){ e.preventDefault(); key('back'); }
+  else if(e.key==='Enter' && e.target.closest && !e.target.closest('button,[role=button]')) key('ok');
+});
+
+/* ---------- Detectives ---------- */
+let Q=1;
+function allStarts(N){
+  const counts=[], longest=[]; let best=0;
+  for(let a=0;a<N;a++)for(let b=0;b<N;b++)for(let c=0;c<N;c++)for(let d=0;d<N;d++){
+    const s=[a,b,c,d], r=roundsOf(s); counts[r]=(counts[r]||0)+1;
+    if(r>best){ best=r; longest.length=0; } if(r===best) longest.push(s);
+  }
+  for(let i=0;i<counts.length;i++) counts[i]=counts[i]||0;
+  return {counts, best, longest, total:N**4};
+}
+const cache={};
+const stats = N => cache[N] || (cache[N]=allStarts(N));
+function canon(s){ // same start turned or flipped around the square
+  const vs=[]; for(let k=0;k<4;k++){ const r=[0,1,2,3].map(i=>s[(i+k)%4]); vs.push(r, [r[0],r[3],r[2],r[1]]); }
+  return vs.map(v=>v.join(',')).sort()[0];
+}
+function hist(counts){
+  const W=640,H=260,L=46,B=214,T=26, n=counts.length, bw=(W-L-14)/n, mx=Math.max(...counts);
+  const step = Math.pow(10, Math.floor(Math.log10(mx)))/5;
+  const top = Math.ceil(mx/step)*step;
+  let s=`<svg class="hist" viewBox="0 0 ${W} ${H}" role="img" aria-label="How many starts take each number of rounds">`;
+  for(let g=0; g<=top; g+=top/2){ const y=B-(g/top)*(B-T); s+=`<line x1="${L}" x2="${W-8}" y1="${y}" y2="${y}" stroke="var(--line)"/><text class="ax" x="${L-6}" y="${y+4}" text-anchor="end">${g.toLocaleString()}</text>`; }
+  counts.forEach((c,i)=>{ const h=(c/top)*(B-T), x=L+i*bw+4, y=B-h;
+    s+=`<rect x="${x}" y="${y}" width="${bw-8}" height="${Math.max(h,c?2:0)}" rx="4" fill="${i===n-1?'var(--corner)':'var(--mid)'}"/>`;
+    s+=`<text x="${x+(bw-8)/2}" y="${y-6}" text-anchor="middle" font-size="${n>9?12:14}" font-weight="700">${c.toLocaleString()}</text>`;
+    s+=`<text class="ax" x="${x+(bw-8)/2}" y="${B+20}" text-anchor="middle" font-size="15">${i}</text>`; });
+  s+=`<text class="ax" x="${(W+L)/2}" y="${H-4}" text-anchor="middle">rounds to reach 0, 0, 0, 0</text></svg>`;
+  return s;
+}
+function mini(s){ return `<div class="mini" title="${list(s)}"><span>${s[0]}</span><span>${s[1]}</span><span>${s[3]}</span><span>${s[2]}</span></div>`; }
+const ev = html => $('#evidence').innerHTML = html;
+function boardForMax(){
+  if(P.rows.length<2){ loadStart('b1'); runEnd(); }
+  return P.rows;
+}
+const QS = {
+  1:{t:'Whose start lasts longest?', sub:'Look at the class record.', acts:[
+    {l:'Rank the class record', run(){ if(!record.length){ ev('<p class="fb info">No boards are finished yet. Play a board, or add pairs’ starts on the Play page with “Just count its rounds”.</p>'); return; }
+      renderRecord(true); const best=Math.max(...record.map(x=>x.rounds)); const w=record.filter(x=>x.rounds===best);
+      ev(`<h3>Longest so far: ${best} rounds</h3><div class="tbl"><table class="rec">${$('#rec').innerHTML}</table></div><p style="margin:0">${w.map(x=>list(x.start)).join(' and ')}. Can anyone beat it?</p>`); }}]},
+  2:{t:'What do the longest-lasting starts share?', sub:'Compare a long start with a short one.', acts:[
+    {l:'Longest starts under 10', run(){ const st=stats(10); const groups={}; st.longest.forEach(s=>{ const k=canon(s); (groups[k]=groups[k]||[]).push(s); });
+      const keys=Object.keys(groups);
+      ev(`<h3>${st.longest.length} starts under 10 take ${st.best} rounds, the most</h3>
+        <div class="minis">${st.longest.map(mini).join('')}</div>
+        <p style="margin:0">Turn or flip the square and they are really just <b>${keys.length} starts</b>: ${keys.map(k=>k.split(',').join(', ')).join(' and ')}. Where do the biggest and smallest numbers sit? How far apart are the neighbors?</p>`); }},
+    {l:'Shortest starts', run(){ const st=stats(10); const one=[]; for(let a=1;a<10;a++) one.push([a,a,a,a]);
+      ev(`<h3>${st.counts[1]} starts under 10 take just 1 round</h3><div class="minis">${one.map(mini).join('')}</div><p style="margin:0">All four corners are the same, so every difference is 0. Compare these with the long ones.</p>`); }}]},
+  3:{t:'Did anyone find a start that never ends?', sub:'Let the computer try every start with numbers 0 to 9.', acts:[
+    {l:'Test all 10,000 starts', run(){ const st=stats(10); const ok=st.counts.reduce((a,b)=>a+b,0);
+      ev(`<h3>All ${ok.toLocaleString()} starts reached 0, 0, 0, 0</h3>${hist(st.counts)}<p style="margin:0">Most took ${st.counts.indexOf(Math.max(...st.counts))} rounds. The longest took <b>${st.best}</b>. None went on forever.</p>`); }},
+    {l:'What mathematicians know', run(){
+      ev(`<h3>It always ends</h3><p style="margin:0; font-size:20px">Mathematicians have proved it: every Diffy square that starts with four whole numbers ends in 0, 0, 0, 0. Some starts just take a long time.</p>`); }}]},
+  4:{t:'Watch the biggest number in each round. What do you notice?', sub:'Uses the board on the Play page (or Board 1).', acts:[
+    {l:'Circle the biggest number', run(){ boardForMax(); $('#ledger').dataset.max='1'; renderLedger();
+      const m=P.rows.map(r=>Math.max(...r));
+      ev(`<h3>${list(P.rows[0])}</h3><div class="ledger" style="max-height:none">${$('#ledger').innerHTML}</div><p style="margin:0">Biggest each round: <b>${m.join(' → ')}</b>. Can the biggest number ever get bigger?</p>`); }},
+    {l:'Why not?', run(){ ev(`<h3>A difference is never more than the bigger number</h3>${numberLine(3,20)}<p style="margin:0">3 and 20 are 17 apart, and 17 is less than 20. You take something away from the bigger number, so the new numbers can't climb higher.</p>`); }}]},
+  5:{t:'★ Find a start that takes more than 7 rounds.', sub:'Try 0, 2, 6, 13 first. Then hunt for your own.', star:true, acts:[
+    {l:'Play 0, 2, 6, 13', run(){ loadStart('ch'); show('play'); }},
+    {l:'Longest with numbers 0 to 20', run(){ const st=stats(21);
+      ev(`<h3>${st.total.toLocaleString()} starts tested. The longest take ${st.best} rounds.</h3>${hist(st.counts)}<p style="margin:0">Only ${st.counts[st.best].toLocaleString()} starts reach ${st.best} rounds. Two of them: ${list(st.longest[0])} and ${list(st.longest[1])}. With bigger numbers you can last even longer.</p>`); }}]}
+};
+function renderQ(){
+  $('#qnav').innerHTML = Object.keys(QS).map(k=>`<button data-q="${k}" aria-pressed="${+k===Q}">${QS[k].star?'★ Challenge':k}</button>`).join('');
+  document.querySelectorAll('#qnav button').forEach(b => b.onclick = () => { Q=+b.dataset.q; $('#ledger').dataset.max=''; renderLedger(); ev('<p class="muted" style="margin:0">Evidence will appear here.</p>'); renderQ(); });
+  const q=QS[Q]; $('#qtext').textContent=q.t; $('#qsub').textContent=q.sub;
+  $('#qacts').innerHTML=''; q.acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i?'secondary':'primary'; b.textContent=a.l; b.onclick=()=>a.run(); $('#qacts').appendChild(b); });
+  if(!$('#evidence').innerHTML) ev('<p class="muted" style="margin:0">Evidence will appear here.</p>');
+}
+
+/* ---------- Reset / full screen ---------- */
+function resetAll(){
+  warmPairs=[[12,7],[3,20]]; renderWarm();
+  votes.yes=votes.no=votes.unsure=0; renderVotes();
+  record=[]; renderRecord(); [0,1,2,3].forEach(i=>$('#o'+i).value='');
+  $('#ownFb').className='fb'; $('#ownFb').textContent='';
+  $('#ledger').dataset.max=''; Q=1; ev('');
+  loadStart('b1'); show('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+buildKeypad(); resetAll();
+})();
+</script>
+
+</body></html>

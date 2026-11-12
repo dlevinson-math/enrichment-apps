@@ -1,0 +1,685 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Camp Half Past</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a camp trail of three class "stations" (tabs); each station is one big stage with a clock or snack board on the left and short prompts + big answer buttons on the right. */
+:root{
+  --bg:#EDF2EC; --card:#FFFFFF; --ink:#1B2A22; --muted:#56685D; --line:#CBD8CE;
+  --pine:#1F5A40; --pine-soft:#DCEBE1; --lake:#2A76B6; --lake-soft:#DDEBF7;
+  --sun:#E9A62A; --sun-soft:#FCF0D6; --ember:#D9602F; --ember-soft:#FBE3D8; --berry:#8A4FB8;
+  --face:#FFFFFF; --rim:#1F3A5A; --short:#1F3A5A; --long:#2F7FC4; --pin:#C9962A;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111915; --card:#1A251F; --ink:#E7EFE9; --muted:#A0B3A7; --line:#33463B;
+    --pine:#62C291; --pine-soft:#20372B; --lake:#6CB0EA; --lake-soft:#1B3040;
+    --sun:#F3C25C; --sun-soft:#3A311B; --ember:#F28D62; --ember-soft:#3E2519; --berry:#BE8BEA;
+    --face:#F4F7F5; --rim:#1F3A5A; --short:#1F3A5A; --long:#2F7FC4; --pin:#C9962A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111915; --card:#1A251F; --ink:#E7EFE9; --muted:#A0B3A7; --line:#33463B;
+  --pine:#62C291; --pine-soft:#20372B; --lake:#6CB0EA; --lake-soft:#1B3040;
+  --sun:#F3C25C; --sun-soft:#3A311B; --ember:#F28D62; --ember-soft:#3E2519; --berry:#BE8BEA;
+  --face:#F4F7F5; --rim:#1F3A5A; --short:#1F3A5A; --long:#2F7FC4; --pin:#C9962A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--lake); outline-offset:3px}
+.wrap{max-width:1320px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:14px 28px; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.brand svg{flex:none}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,48px); line-height:1; margin:0; letter-spacing:-.01em; color:var(--pine)}
+.sub{margin:4px 0 0; font-size:15px; color:var(--muted); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+/* class trail */
+.trail{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.trail button{border:2.5px solid var(--line); background:var(--card); border-radius:18px; padding:10px 14px; text-align:left; display:flex; gap:12px; align-items:center; min-height:64px}
+.trail .n{flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:22px; background:var(--pine-soft); color:var(--pine)}
+.trail b{display:block; font-family:var(--display); font-size:20px; line-height:1.1}
+.trail small{display:block; color:var(--muted); font-size:14px}
+.trail button[aria-selected="true"]{border-color:var(--pine); background:var(--pine-soft)}
+.trail button[aria-selected="true"] .n{background:var(--pine); color:var(--card)}
+
+.parts{display:flex; gap:8px; flex-wrap:wrap}
+.parts button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px; font-weight:700; font-size:16px; min-height:46px; color:var(--muted)}
+.parts button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+
+.stage{background:var(--card); border:2px solid var(--line); border-radius:24px; padding:clamp(16px,2.2vw,28px); display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:clamp(16px,3vw,40px); align-items:start}
+.stage.one{grid-template-columns:minmax(0,1fr)}
+.col{display:flex; flex-direction:column; gap:14px; min-width:0}
+.center{align-items:center}
+.ptitle{font-family:var(--display); font-weight:800; font-size:clamp(26px,2.6vw,36px); line-height:1.05; margin:0; color:var(--pine); text-wrap:balance}
+.eyebrow{font-size:13px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0}
+.big{font-family:var(--display); font-weight:700; font-size:clamp(24px,2.4vw,34px); line-height:1.15; margin:0; text-wrap:balance}
+.tip{font-size:17px; color:var(--muted); margin:0; max-width:36em}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+.choice{border:3px solid var(--line); background:var(--card); border-radius:20px; min-width:120px; min-height:76px; padding:8px 20px; font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,40px); font-variant-numeric:tabular-nums}
+.choice:hover{border-color:var(--lake)}
+.choice.right{border-color:var(--pine); background:var(--pine-soft)}
+.choice.miss{border-color:var(--ember); background:var(--ember-soft)}
+.choice.small{font-size:clamp(22px,2.2vw,28px); min-height:64px}
+.primary{border:0; background:var(--pine); color:var(--card); border-radius:16px; padding:14px 26px; font-weight:700; font-size:20px; min-height:58px}
+.secondary{border:2.5px solid var(--ink); background:var(--card); border-radius:16px; padding:11px 20px; font-weight:700; font-size:18px; min-height:54px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.fb{border-radius:18px; padding:14px 18px; font-size:clamp(19px,1.7vw,23px); line-height:1.35; margin:0; background:var(--lake-soft)}
+.fb:empty{display:none}
+.fb.good{background:var(--pine-soft)}
+.fb.try{background:var(--sun-soft)}
+.fb b{font-family:var(--display)}
+
+/* clocks */
+.clockbox{width:min(100%, 420px); aspect-ratio:1; max-width:100%}
+.clockbox.sm{width:min(100%, 300px)}
+.clock{width:100%; height:100%; display:block}
+.hand{transition:transform .45s cubic-bezier(.3,1.4,.5,1); transform-box:view-box; transform-origin:0 0}
+.glow{animation:glow 1s ease-in-out 3}
+@keyframes glow{50%{filter:drop-shadow(0 0 8px var(--sun)) drop-shadow(0 0 3px var(--sun))}}
+.handpad{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; width:min(100%,440px)}
+.handpad .lbl{grid-column:1/-1; display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; color:var(--muted); margin-top:2px}
+.handpad .lbl i{display:inline-block; height:8px; border-radius:4px}
+.hp{border:2.5px solid var(--line); background:var(--card); border-radius:16px; min-height:60px; font-weight:700; font-size:19px; display:flex; align-items:center; justify-content:center; gap:8px}
+.hp[aria-pressed="true"]{border-color:var(--lake); background:var(--lake-soft)}
+.readout{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,46px); line-height:1; font-variant-numeric:tabular-nums; min-height:1em}
+.readout small{display:block; font-family:var(--body); font-weight:400; font-size:17px; color:var(--muted); margin-top:6px}
+
+.minis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}
+.mini{border:3px solid var(--line); background:var(--card); border-radius:20px; padding:8px; display:flex; flex-direction:column; align-items:center; gap:4px}
+.mini[aria-pressed="true"]{border-color:var(--lake)}
+.mini .clockbox{width:100%}
+.mini span{font-family:var(--display); font-weight:800; font-size:22px; min-height:1.2em; font-variant-numeric:tabular-nums}
+.mini.done span{color:var(--pine)}
+
+.pad{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; width:min(100%,480px)}
+.pad button{border:2.5px solid var(--line); background:var(--card); border-radius:14px; min-height:56px; font-family:var(--display); font-weight:800; font-size:26px}
+.pad button[aria-pressed="true"]{background:var(--lake); color:var(--card); border-color:var(--lake)}
+.digital{display:inline-flex; align-items:center; gap:4px; font-family:var(--display); font-weight:800; font-size:clamp(46px,5vw,72px); line-height:1; background:var(--ink); color:var(--card); padding:12px 22px; border-radius:18px; font-variant-numeric:tabular-nums}
+.digital .slot{min-width:1.2em; text-align:center; color:var(--sun)}
+.words{font-family:var(--display); font-weight:800; font-size:clamp(34px,3.6vw,52px); line-height:1; color:var(--lake)}
+
+/* schedule */
+.sched{display:flex; flex-direction:column; gap:8px}
+.srow{display:grid; grid-template-columns:auto 72px minmax(0,1fr) auto; gap:12px; align-items:center; border:2.5px solid var(--line); border-radius:18px; padding:8px 12px; background:var(--card); text-align:left; min-height:76px; width:100%}
+.srow[aria-pressed="true"]{border-color:var(--lake); background:var(--lake-soft)}
+.srow .t{font-family:var(--display); font-weight:800; font-size:26px; min-width:3.2em; font-variant-numeric:tabular-nums}
+.srow .t.empty{color:var(--muted); font-weight:600}
+.srow .act{display:flex; align-items:center; gap:8px; font-weight:700; font-size:19px; min-width:0}
+.srow .tick{font-family:var(--display); font-weight:800; color:var(--pine); font-size:22px}
+.acts{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; width:100%}
+.acts button{border:2.5px solid var(--line); background:var(--card); border-radius:16px; min-height:64px; display:flex; align-items:center; gap:8px; padding:6px 10px; font-weight:700; font-size:18px}
+.acts button[aria-pressed="true"]{border-color:var(--sun); background:var(--sun-soft)}
+.ico{width:36px; height:36px; flex:none; color:var(--ink)}
+.stepper{display:inline-flex; align-items:center; gap:6px; border:2px solid var(--line); border-radius:16px; padding:4px; background:var(--card)}
+.stepper button{border:0; background:var(--bg); border-radius:12px; width:48px; height:48px; font-size:24px; font-weight:800}
+.stepper output{font-family:var(--display); font-weight:800; font-size:26px; min-width:3.4em; text-align:center; font-variant-numeric:tabular-nums}
+
+/* snacks */
+.snackgrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
+.board{width:min(100%,400px); aspect-ratio:1; max-width:100%}
+.board svg{width:100%; height:100%; display:block; overflow:visible}
+.cut{cursor:pointer}
+.cut .guide{stroke:var(--muted); stroke-width:1.2; stroke-dasharray:3 3; opacity:.55}
+.cut .knife{stroke:var(--ink); stroke-width:2.4; stroke-linecap:round; opacity:0}
+.cut.on .knife{opacity:1}
+.cut.on .guide{opacity:0}
+.cut .hit{stroke:transparent; stroke-width:12}
+.cut:hover .guide{opacity:1; stroke:var(--lake)}
+.piece{transition:transform .8s cubic-bezier(.4,0,.2,1), opacity .4s; transform-box:view-box; transform-origin:0 0; stroke:var(--ink); stroke-width:1.2}
+.campers{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap}
+.status{font-family:var(--display); font-weight:700; font-size:22px}
+.pick{display:flex; gap:8px; flex-wrap:wrap}
+
+details.key{border-top:2px dashed var(--line); padding-top:10px; font-size:16px; color:var(--muted)}
+details.key summary{cursor:pointer; font-weight:700; min-height:32px}
+details.key p{margin:6px 0}
+
+/* showcase */
+.show{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:center}
+.timeline{display:flex; gap:10px; flex-wrap:wrap}
+.tl{border:3px solid var(--line); border-radius:18px; padding:8px 12px; background:var(--card); display:flex; flex-direction:column; align-items:center; min-width:96px}
+.tl.now{border-color:var(--sun); background:var(--sun-soft)}
+.tl b{font-family:var(--display); font-size:24px; font-variant-numeric:tabular-nums}
+.gallery{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}
+.gal{border:2px solid var(--line); border-radius:18px; padding:10px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; font-weight:700}
+.gal .board{width:100%}
+.tag{font-size:14px; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--bg); color:var(--muted)}
+.tag.ok{background:var(--pine-soft); color:var(--pine)}
+
+@media (max-width: 900px){
+  .stage,.show{grid-template-columns:minmax(0,1fr)}
+  .trail{grid-template-columns:minmax(0,1fr)}
+  .trail button{min-height:56px}
+  .gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 520px){
+  .minis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .snackgrid{grid-template-columns:minmax(0,1fr)}
+  .acts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pad{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .srow{grid-template-columns:auto 56px minmax(0,1fr)}
+  .srow .tick{display:none}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .hand,.piece{transition:none !important}
+  .glow{animation:none; filter:drop-shadow(0 0 6px var(--sun))}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <svg width="58" height="58" viewBox="0 0 58 58" aria-hidden="true"><path d="M29 4 L52 50 H6 Z" fill="var(--pine)"/><path d="M29 22 L38 50 H20 Z" fill="var(--sun)"/><circle cx="46" cy="12" r="7" fill="var(--sun)"/></svg>
+    <div>
+      <h1>Camp Half Past</h1>
+      <p class="sub">Grade 1 · Set 4 project · 3 class periods · Read the camp clock. Plan the camp day. Share every snack fairly.</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="trail" role="tablist" aria-label="Class periods">
+  <button role="tab" data-cls="1" aria-selected="true"><span class="n">1</span><span><b>Read the clock</b><small>Class 1 · Parts 1–2</small></span></button>
+  <button role="tab" data-cls="2" aria-selected="false"><span class="n">2</span><span><b>Plan the day · Snacks</b><small>Class 2 · Parts 3–4 + Challenge</small></span></button>
+  <button role="tab" data-cls="3" aria-selected="false"><span class="n">3</span><span><b>Showcase</b><small>Class 3 · Show what we made</small></span></button>
+</nav>
+
+<div class="parts" id="parts" aria-label="Parts of this class"></div>
+<main id="main"></main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},html)=>{const e=document.createElement(tag);for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k]);}if(html!=null)e.innerHTML=html;return e;};
+
+/* ===== Time model =====
+   t = half-hour index 0..23 on a 12-hour clock. t=0 is 12:00, t=1 is 12:30, t=18 is 9:00, t=21 is 10:30.
+   Short hand position (in "numbers") = t/2. Long hand = 0 minutes if t even, 30 if t odd. */
+const hourOf=t=>{const h=Math.floor(((t%24)+24)%24/2);return h===0?12:h;};
+const minOf=t=>(((t%24)+24)%24)%2?30:0;
+const dig=t=>`${hourOf(t)}:${minOf(t)?'30':'00'}`;
+const wordsOf=t=>minOf(t)?`half past ${hourOf(t)}`:`${hourOf(t)} o’clock`;
+const tFrom=(h,m)=>((h%12)*2+(m?1:0));
+const next=t=>(t+1)%24;
+
+/* ===== Clock drawing ===== */
+function clockSVG(){
+  const s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','-110 -110 220 220');s.classList.add('clock');
+  let h=`<circle r="104" fill="var(--face)" stroke="var(--rim)" stroke-width="7"/>`;
+  for(let i=0;i<60;i++){const a=i*6*Math.PI/180,big=i%5===0,r1=big?88:94;h+=`<line x1="${(Math.sin(a)*r1).toFixed(2)}" y1="${(-Math.cos(a)*r1).toFixed(2)}" x2="${(Math.sin(a)*100).toFixed(2)}" y2="${(-Math.cos(a)*100).toFixed(2)}" stroke="var(--rim)" stroke-width="${big?3.4:1.4}" stroke-linecap="round"/>`;}
+  for(let n=1;n<=12;n++){const a=n*30*Math.PI/180;h+=`<text x="${(Math.sin(a)*72).toFixed(2)}" y="${(-Math.cos(a)*72+9).toFixed(2)}" text-anchor="middle" font-family="Baloo 2, Trebuchet MS, sans-serif" font-weight="800" font-size="26" fill="var(--rim)">${n}</text>`;}
+  h+=`<g class="hand sh"><line x1="0" y1="8" x2="0" y2="-50" stroke="var(--short)" stroke-width="11" stroke-linecap="round"/></g>`;
+  h+=`<g class="hand lh"><line x1="0" y1="10" x2="0" y2="-82" stroke="var(--long)" stroke-width="6.5" stroke-linecap="round"/></g>`;
+  h+=`<circle r="7" fill="var(--pin)"/>`;
+  s.innerHTML=h;
+  s._sa=0;s._la=0;
+  return s;
+}
+/* set hands: steps = short hand in half-number steps (0..23), long = 0 or 30. Keeps rotation continuous. */
+function setHands(svg,steps,long){
+  const target=steps*15, ltarget=long?180:0;
+  const near=(cur,tgt)=>{let d=((tgt-cur)%360+540)%360-180;return cur+d;};
+  svg._sa=near(svg._sa,target); svg._la=near(svg._la,ltarget);
+  svg.querySelector('.sh').style.transform=`rotate(${svg._sa}deg)`;
+  svg.querySelector('.lh').style.transform=`rotate(${svg._la}deg)`;
+  svg.setAttribute('aria-label',`Clock. Short hand ${steps%2?`between ${hourOf(steps-1)} and ${hourOf(steps+1)}`:`on ${hourOf(steps)}`}. Long hand on ${long?6:12}.`);
+  svg.setAttribute('role','img');
+}
+const setTime=(svg,t)=>setHands(svg,((t%24)+24)%24,minOf(t));
+function glow(svg,which){const g=svg.querySelector(which==='long'?'.lh':'.sh');g.classList.remove('glow');void g.getBoundingClientRect();g.classList.add('glow');setTimeout(()=>g.classList.remove('glow'),3100);}
+function clockBox(t,cls){const b=el('div',{class:'clockbox'+(cls?' '+cls:'')});const s=clockSVG();b.appendChild(s);if(t!=null)setTime(s,t);return {box:b,svg:s};}
+
+/* Hand control: students move each hand themselves. */
+function handControl(initSteps,onChange){
+  const c=clockBox(null);let steps=initSteps,long=initSteps%2?30:0;
+  const pad=el('div',{class:'handpad'});
+  pad.appendChild(el('div',{class:'lbl'},`<i style="width:34px;background:var(--short)"></i>Short hand`));
+  const back=el('button',{class:'hp','aria-label':'Move short hand back'},'⟲ back');
+  const fwd=el('button',{class:'hp','aria-label':'Move short hand forward'},'forward ⟳');
+  pad.append(back,fwd);
+  pad.appendChild(el('div',{class:'lbl'},`<i style="width:48px;height:5px;background:var(--long)"></i>Long hand`));
+  const up=el('button',{class:'hp'},'up to 12');const down=el('button',{class:'hp'},'down to 6');
+  pad.append(up,down);
+  const draw=()=>{setHands(c.svg,steps,long);up.setAttribute('aria-pressed',long===0);down.setAttribute('aria-pressed',long===30);onChange&&onChange(api);};
+  back.onclick=()=>{steps=(steps+23)%24;draw();};
+  fwd.onclick=()=>{steps=(steps+1)%24;draw();};
+  up.onclick=()=>{long=0;draw();};
+  down.onclick=()=>{long=30;draw();};
+  const api={box:c.box,svg:c.svg,pad,get steps(){return steps},get long(){return long},
+    set(s,l){steps=((s%24)+24)%24;long=l;draw();},
+    valid(){return (steps%2===1)===(long===30);},
+    time(){return this.valid()?steps:null;}};
+  draw();
+  return api;
+}
+/* Why a hand setting is not the target time. Returns HTML. */
+function handAdvice(hc,target){
+  const s=hc.steps,l=hc.long,tm=minOf(target),th=hourOf(target);
+  if(l!==(tm?30:0)) return {which:'long',msg: tm?`<b>Half past</b> means the long hand points <b>down to 6</b>.`:`<b>O’clock</b> means the long hand points <b>straight up to 12</b>.`};
+  if(tm && s%2===0) return {which:'short',msg:`The long hand is right! At half past, the short hand sits <b>between</b> two numbers: between <b>${th}</b> and <b>${hourOf(target+1)}</b>.`};
+  if(!tm && s%2===1) return {which:'short',msg:`The long hand is right! At o’clock, the short hand points <b>right at</b> a number: right at <b>${th}</b>.`};
+  if(tm) return {which:'short',msg:`Your clock says ${wordsOf(s)}. For ${wordsOf(target)}, the short hand goes just past <b>${th}</b>, before <b>${hourOf(target+1)}</b>.`};
+  return {which:'short',msg:`Your clock says ${wordsOf(s)}. For ${wordsOf(target)}, the short hand points at <b>${th}</b>.`};
+}
+function liveRead(hc){return hc.valid()?`${dig(hc.steps)}<small>${wordsOf(hc.steps)}</small>`:`?<small>Check where the long hand points.</small>`;}
+
+/* ===== Icons ===== */
+const ICON={
+  swim:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="27" cy="11" r="4.5" fill="var(--sun)" stroke="none"/><path d="M4 24c4-3 7 3 11 0s7 3 11 0 7 3 10 0"/><path d="M4 32c4-3 7 3 11 0s7 3 11 0 7 3 10 0" stroke="var(--lake)"/></svg>`,
+  crafts:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M28 5 15 24"/><path d="M15 24c-5 0-7 4-7 10 6 0 10-2 10-7" fill="var(--ember)" stroke="var(--ember)"/></svg>`,
+  lunch:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M5 33 20 7l15 26Z" fill="var(--sun)"/><path d="M10 26h20" stroke="var(--pine)"/></svg>`,
+  hike:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M3 33 15 12l7 11 4-6 11 16Z" fill="var(--pine)"/></svg>`,
+  games:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="20" cy="20" r="14" fill="var(--lake)"/><path d="M8 13c8 4 16 4 24 0M8 27c8-4 16-4 24 0" stroke="var(--face)"/></svg>`,
+  snack:`<svg class="ico" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 12c-8-4-15 1-14 10s6 13 10 12c2 0 3-1 4-1s2 1 4 1c4 1 9-4 10-12s-6-14-14-10Z" fill="var(--ember)"/><path d="M20 12c0-4 2-6 5-7"/></svg>`
+};
+const ACTS=[['swim','swim'],['crafts','crafts'],['lunch','lunch'],['hike','hike'],['games','games'],['snack','snack']];
+
+/* ===== Cutting geometry (square + round snacks) ===== */
+const SQ={V:{a:1,b:0,c:.5,p:[[.5,0],[.5,1]]},H:{a:0,b:1,c:.5,p:[[0,.5],[1,.5]]},D1:{a:1,b:-1,c:0,p:[[0,0],[1,1]]},D2:{a:1,b:1,c:1,p:[[1,0],[0,1]]},
+  V1:{a:1,b:0,c:.25,p:[[.25,0],[.25,1]]},V3:{a:1,b:0,c:.75,p:[[.75,0],[.75,1]]},H1:{a:0,b:1,c:.25,p:[[0,.25],[1,.25]]},H3:{a:0,b:1,c:.75,p:[[0,.75],[1,.75]]}};
+const EPS=1e-9;
+function cleanPoly(pts){let r=[];for(const p of pts){const l=r[r.length-1];if(!l||Math.hypot(l[0]-p[0],l[1]-p[1])>1e-7)r.push(p);}
+  if(r.length>1&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])<1e-7)r.pop();
+  let ch=true;while(ch&&r.length>2){ch=false;for(let i=0;i<r.length;i++){const A=r[(i-1+r.length)%r.length],B=r[i],C=r[(i+1)%r.length];if(Math.abs((B[0]-A[0])*(C[1]-A[1])-(B[1]-A[1])*(C[0]-A[0]))<1e-9){r.splice(i,1);ch=true;break;}}}return r;}
+function clip(poly,L,s){const out=[];const f=p=>s*(L.a*p[0]+L.b*p[1]-L.c);for(let i=0;i<poly.length;i++){const P=poly[i],Q=poly[(i+1)%poly.length],fp=f(P),fq=f(Q);if(fp<=EPS)out.push(P);if((fp<-EPS&&fq>EPS)||(fp>EPS&&fq<-EPS)){const t=fp/(fp-fq);out.push([P[0]+t*(Q[0]-P[0]),P[1]+t*(Q[1]-P[1])]);}}return cleanPoly(out);}
+const polyArea=p=>{let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1];}return Math.abs(s)/2;};
+const polyCen=p=>{let x=0,y=0;p.forEach(q=>{x+=q[0];y+=q[1]});return[x/p.length,y/p.length];};
+function sqPieces(keys){let ps=[[[0,0],[1,0],[1,1],[0,1]]];for(const k of keys){const nx=[];for(const p of ps)for(const s of[1,-1]){const q=clip(p,SQ[k],s);if(q.length>=3&&polyArea(q)>1e-9)nx.push(q);}ps=nx;}return ps;}
+const SYM=[[1,0,0,1],[0,-1,1,0],[-1,0,0,-1],[0,1,-1,0],[-1,0,0,1],[1,0,0,-1],[0,1,1,0],[0,-1,-1,0]];
+const pkey=p=>p.map(q=>q.map(v=>(Math.round(v*1e6)/1e6+0)).join(',')).sort().join(';');
+function matchTo(p,q){if(p.length!==q.length)return null;const cp=polyCen(p),cq=polyCen(q);const kq=pkey(q.map(v=>[v[0]-cq[0],v[1]-cq[1]]));
+  for(const m of SYM){const t=p.map(v=>{const x=v[0]-cp[0],y=v[1]-cp[1];return[m[0]*x+m[1]*y,m[2]*x+m[3]*y]});if(pkey(t)===kq)return{m,cp,cq};}return null;}
+/* round snack: cuts through the middle at these angles (degrees) */
+const RD={R0:0,R45:45,R90:90,R135:135};
+function rdPieces(keys){const rays=[];keys.forEach(k=>{rays.push(RD[k]%360,(RD[k]+180)%360);});rays.sort((a,b)=>a-b);
+  if(!rays.length)return[{a0:0,w:360}];return rays.map((a,i)=>{const b=i+1<rays.length?rays[i+1]:rays[0]+360;return{a0:a,w:b-a};});}
+
+const FILLS=['var(--sun)','var(--lake)','var(--ember)','var(--berry)','var(--pine)','var(--sun-soft)','var(--lake-soft)','var(--ember-soft)'];
+
+/* A cutting board. kind 'square' or 'round'. lines = allowed cut keys. */
+function cutBoard(kind,lines,state,onChange,opts={}){
+  const wrap=el('div',{class:'board'});
+  const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-8 -8 116 116');wrap.appendChild(svg);
+  const S=100;
+  function info(){
+    if(kind==='square'){const ps=sqPieces(state.cuts);const ar=ps.map(polyArea);const equal=ar.every(a=>Math.abs(a-ar[0])<1e-9);
+      const m=ps.map(p=>matchTo(p,ps[0]));return{n:ps.length,equal,stack:equal&&m.every(Boolean),ps,m};}
+    const ps=rdPieces(state.cuts);const equal=ps.every(p=>Math.abs(p.w-ps[0].w)<1e-9);return{n:ps.length,equal,stack:equal,ps};
+  }
+  function sector(a0,w){const r=46,cx=50,cy=50;if(w>=360)return`M${cx-r} ${cy}a${r} ${r} 0 1 0 ${2*r} 0a${r} ${r} 0 1 0 ${-2*r} 0Z`;
+    const p=a=>{const t=(a-90)*Math.PI/180;return[(cx+r*Math.cos(t)).toFixed(3),(cy+r*Math.sin(t)).toFixed(3)];};const A=p(a0),B=p(a0+w);
+    return`M${cx} ${cy}L${A[0]} ${A[1]}A${r} ${r} 0 ${w>180?1:0} 1 ${B[0]} ${B[1]}Z`;}
+  function render(){
+    const I=info();let h='';
+    if(kind==='square'){
+      h+=`<rect x="-4" y="-4" width="108" height="108" rx="10" fill="var(--sun-soft)" stroke="var(--sun)" stroke-width="2.5"/>`;
+      I.ps.forEach((p,i)=>{let tf='';if(state.stacked&&i>0){const mt=I.m[i];const c0=polyCen(I.ps[0]),ci=polyCen(p);
+          const mm=mt?mt.m:[1,0,0,1];tf=`translate(${c0[0]*S}px,${c0[1]*S}px) matrix(${mm[0]},${mm[2]},${mm[1]},${mm[3]},0,0) translate(${-ci[0]*S}px,${-ci[1]*S}px)`;}
+        h+=`<path class="piece" d="M${p.map(q=>`${(q[0]*S).toFixed(3)} ${(q[1]*S).toFixed(3)}`).join('L')}Z" fill="${FILLS[i%FILLS.length]}" style="${tf?`transform:${tf};opacity:.72`:''}"/>`;});
+      if(!state.stacked) lines.forEach(k=>{const L=SQ[k];const [a,b]=L.p;const on=state.cuts.includes(k);
+        h+=`<g class="cut${on?' on':''}" data-k="${k}" role="button" tabindex="0" aria-pressed="${on}" aria-label="Cut line ${k}"><line class="hit" x1="${a[0]*S}" y1="${a[1]*S}" x2="${b[0]*S}" y2="${b[1]*S}"/><line class="guide" x1="${a[0]*S}" y1="${a[1]*S}" x2="${b[0]*S}" y2="${b[1]*S}"/><line class="knife" x1="${a[0]*S}" y1="${a[1]*S}" x2="${b[0]*S}" y2="${b[1]*S}"/></g>`;});
+    } else {
+      h+=`<circle cx="50" cy="50" r="52" fill="var(--sun-soft)" stroke="var(--sun)" stroke-width="2.5"/>`;
+      I.ps.forEach((p,i)=>{const rot=state.stacked&&i>0?I.ps[0].a0-p.a0:0;
+        h+=`<path class="piece" d="${sector(p.a0,p.w)}" fill="${FILLS[i%FILLS.length]}" style="transform-origin:50px 50px;${rot?`transform:rotate(${rot}deg);opacity:.72`:''}"/>`;
+});
+      if(!state.stacked) lines.forEach(k=>{const a=RD[k]*Math.PI/180;const x1=50+50*Math.sin(a),y1=50-50*Math.cos(a),x2=50-50*Math.sin(a),y2=50+50*Math.cos(a);const on=state.cuts.includes(k);
+        h+=`<g class="cut${on?' on':''}" data-k="${k}" role="button" tabindex="0" aria-pressed="${on}" aria-label="Cut line"><line class="hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><line class="guide" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><line class="knife" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/></g>`;});
+    }
+    svg.innerHTML=h;
+    svg.querySelectorAll('.cut').forEach(g=>{const tog=()=>{const k=g.dataset.k;state.cuts=state.cuts.includes(k)?state.cuts.filter(x=>x!==k):[...state.cuts,k];state.stacked=false;render();onChange&&onChange(info());};
+      g.onclick=tog;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}};});
+    svg.setAttribute('aria-label',`${kind==='square'?'Square':'Round'} snack in ${I.n} piece${I.n===1?'':'s'}`);svg.setAttribute('role','img');
+  }
+  function stack(on){state.stacked=on;render();}
+  render();
+  return{wrap,info,stack,render};
+}
+
+/* ===== State ===== */
+const P1=[{t:18,opts:[19,18,0]},{t:21,opts:[21,23,20]},{t:6,opts:[7,0,6]},{t:3,opts:[5,3,2]}];
+const P2=[{h:7,m:30},{h:11,m:30}];
+let S;
+function fresh(){return{cls:1,part:{1:'play',2:'day',3:'show'},
+  play:{steps:18,long:0},
+  p1:{i:0,ans:[null,null,null,null]},
+  p2:{i:0,h:[null,null],m:[null,null],done:[false,false]},
+  day:{start:18,rows:Array.from({length:6},()=>({t:null,act:null})),sel:0},
+  sand:{cuts:[],stacked:false,word:null},pizza:{cuts:[],stacked:false,word:null},
+  w1:{cuts:[],stacked:false},w2:{cuts:[],stacked:false},stackAns:null,
+  ch:{clockOk:false,gone:false,owner:[0,1,2,3],q1:null,q2:null,q3:null},
+  quiz:{t:15,shown:false},showStep:-1};}
+S=fresh();
+
+const PARTS={1:[['play','Clock play'],['p1','Part 1 · Read the camp clock'],['p2','Part 2 · Say it two ways']],
+  2:[['day','Part 3 · Our camp day'],['snack','Part 4 · Snack time'],['chal','Camp Challenge']],
+  3:[['show','Our camp day'],['gal','Fair shares'],['quiz','Clock quiz']]};
+
+function renderNav(){
+  document.querySelectorAll('.trail button').forEach(b=>b.setAttribute('aria-selected',+b.dataset.cls===S.cls));
+  const p=$('#parts');p.innerHTML='';
+  PARTS[S.cls].forEach(([k,l])=>{const b=el('button',{'aria-pressed':S.part[S.cls]===k},l);b.onclick=()=>{S.part[S.cls]=k;render();};p.appendChild(b);});
+}
+function render(){renderNav();const m=$('#main');m.innerHTML='';const k=S.part[S.cls];(VIEWS[k])(m);}
+const fbBox=()=>el('p',{class:'fb','aria-live':'polite'});
+const say=(box,html,kind)=>{box.className='fb'+(kind?' '+kind:'');box.innerHTML=html;};
+function keyBox(html){return el('details',{class:'key'},`<summary>Teacher: answers</summary>${html}`);}
+
+/* ===== Views ===== */
+const VIEWS={
+/* --- Class 1 warm-up: free play with the hands --- */
+play(m){
+  const st=el('section',{class:'stage'});const L=el('div',{class:'col center'}),R=el('div',{class:'col'});
+  const read=el('div',{class:'readout','aria-live':'polite'});
+  const hc=handControl(S.play.steps,h=>{S.play.steps=h.steps;S.play.long=h.long;read.innerHTML=liveRead(h);});
+  hc.set(S.play.steps,S.play.long);
+  L.append(hc.box);
+  R.append(el('p',{class:'eyebrow'},'Warm up · Class 1'),el('h2',{class:'ptitle'},'Move the hands'),
+    el('p',{class:'big'},'Long hand up: <span style="color:var(--long)">o’clock</span>.<br>Long hand down: <span style="color:var(--long)">half past</span>.'),
+    hc.pad,read);
+  const tryRow=el('div',{class:'row'});
+  [['Show 8 o’clock',16],['Show half past 8',17]].forEach(([l,t])=>{const b=el('button',{class:'secondary'},l);b.onclick=()=>{hc.set(t,minOf(t));glow(hc.svg,'short');};tryRow.appendChild(b);});
+  R.append(tryRow,el('p',{class:'tip'},'Watch the short hand. At half past, it sits between two numbers.'));
+  st.append(L,R);m.appendChild(st);
+},
+/* --- Part 1 --- */
+p1(m){
+  const st=el('section',{class:'stage'});const L=el('div',{class:'col center'}),R=el('div',{class:'col'});
+  const i=S.p1.i,item=P1[i];
+  const c=clockBox(item.t);L.appendChild(c.box);
+  const minis=el('div',{class:'minis'});
+  P1.forEach((it,j)=>{const b=el('button',{class:'mini'+(S.p1.ans[j]===it.t?' done':''),'aria-pressed':j===i,'aria-label':`Clock ${j+1}`});const cb=clockBox(it.t);b.append(cb.box,el('span',{},S.p1.ans[j]===it.t?dig(it.t):'__:__'));b.onclick=()=>{S.p1.i=j;render();};minis.appendChild(b);});
+  const fb=fbBox();
+  const ch=el('div',{class:'row'});
+  item.opts.forEach(o=>{const b=el('button',{class:'choice'+(S.p1.ans[i]===o?(o===item.t?' right':' miss'):'')},dig(o));
+    b.onclick=()=>{S.p1.ans[i]=o;ch.querySelectorAll('.choice').forEach(x=>x.classList.remove('right','miss'));b.classList.add(o===item.t?'right':'miss');
+      if(o===item.t){say(fb,`<b>Yes! ${dig(o)}.</b> ${minOf(o)?`Long hand down at 6: half past. Short hand just past ${hourOf(o)}.`:`Long hand up at 12: o’clock. Short hand on ${hourOf(o)}.`}`,'good');minis.children[i].classList.add('done');minis.children[i].querySelector('span').textContent=dig(o);}
+      else if(minOf(o)!==minOf(item.t)){say(fb,minOf(item.t)?`Look at the <b>long hand</b>. It points <b>down to 6</b>. That means half past. Try again!`:`Look at the <b>long hand</b>. It points <b>up to 12</b>. That means o’clock. Try again!`,'try');glow(c.svg,'long');}
+      else if(minOf(item.t)&&hourOf(o)===hourOf(item.t+1)){say(fb,`Close! The short hand is <b>between ${hourOf(item.t)} and ${hourOf(o)}</b>. It went past ${hourOf(item.t)}, but it is not at ${hourOf(o)} yet. Try again!`,'try');glow(c.svg,'short');}
+      else {say(fb,`Look at the <b>short hand</b>. It ${minOf(item.t)?`is just past <b>${hourOf(item.t)}</b>`:`points at <b>${hourOf(item.t)}</b>`}. Try again!`,'try');glow(c.svg,'short');}};
+    ch.appendChild(b);});
+  const nav=el('div',{class:'row'});
+  const nx=el('button',{class:'primary'},i<3?'Next clock →':'Back to clock 1');nx.onclick=()=>{S.p1.i=(i+1)%4;render();};nav.appendChild(nx);
+  R.append(el('p',{class:'eyebrow'},`Part 1 · Clock ${i+1} of 4`),el('h2',{class:'ptitle'},'What time is it at camp?'),ch,fb,nav,minis,
+    el('p',{class:'tip'},'Tip: long hand straight up, o’clock. Long hand straight down, half past.'),
+    keyBox(`<p>1) 9:00 · 2) 10:30 · 3) 3:00 · 4) 1:30</p><p>Wrong choices are common mix-ups: reading the long hand as the hour, or naming the number the short hand is moving toward (11:30 for 10:30).</p>`));
+  st.append(L,R);m.appendChild(st);
+},
+/* --- Part 2 --- */
+p2(m){
+  const st=el('section',{class:'stage'});const L=el('div',{class:'col center'}),R=el('div',{class:'col'});
+  const i=S.p2.i,it=P2[i],target=tFrom(it.h,it.m);
+  const c=clockBox(null);const h=S.p2.h[i],mm=S.p2.m[i];
+  const showT=h!=null?tFrom(h,mm||0):null; if(showT!=null)setTime(c.svg,showT);else setTime(c.svg,0);
+  c.svg.style.opacity=h!=null?1:.35;
+  L.append(c.box,el('p',{class:'tip',style:'text-align:center'},h!=null?'The clock shows your time.':'Build the time. The clock will show it.'));
+  const disp=el('div',{class:'digital','aria-label':'Digital time'},`<span class="slot">${h??'?'}</span>:<span class="slot">${mm==null?'??':mm?'30':'00'}</span>`);
+  const pad=el('div',{class:'pad'});
+  for(let n=1;n<=12;n++){const b=el('button',{'aria-pressed':h===n},n);b.onclick=()=>{S.p2.h[i]=n;S.p2.done[i]=false;render();};pad.appendChild(b);}
+  const mins=el('div',{class:'row'});
+  [[0,':00'],[30,':30']].forEach(([v,l])=>{const b=el('button',{class:'choice small'+(mm===v?' right':''),style:mm===v?'border-color:var(--lake);background:var(--lake-soft)':''},l);b.onclick=()=>{S.p2.m[i]=v;S.p2.done[i]=false;render();};mins.appendChild(b);});
+  const fb=fbBox();
+  const chk=el('button',{class:'primary'},'Check');
+  chk.onclick=()=>{
+    if(h==null||mm==null){say(fb,'Pick an hour and pick :00 or :30.','try');return;}
+    if(tFrom(h,mm)===target){S.p2.done[i]=true;say(fb,`<b>Yes! half past ${it.h} = ${it.h}:30.</b> Half past means 30 minutes after ${it.h}.`,'good');}
+    else if(mm!==30){say(fb,`<b>Half past</b> means 30 minutes past. So the minutes are <b>:30</b>. Try again!`,'try');glow(c.svg,'long');}
+    else {say(fb,`Half past <b>${it.h}</b>: the hour is the number we just passed, <b>${it.h}</b>. Look: the short hand is just past ${h}. Try again!`,'try');glow(c.svg,'short');}
+  };
+  const tabs=el('div',{class:'row'});
+  P2.forEach((p,j)=>{const b=el('button',{class:'secondary',style:j===i?'background:var(--ink);color:var(--card)':''},(S.p2.done[j]?'✓ ':'')+`half past ${p.h}`);b.onclick=()=>{S.p2.i=j;render();};tabs.appendChild(b);});
+  R.append(el('p',{class:'eyebrow'},'Part 2 · Say it two ways'),el('h2',{class:'ptitle'},'Words → digital time'),tabs,
+    el('div',{class:'words'},`half past ${it.h}`),disp,pad,mins,chk,fb,
+    keyBox(`<p>half past 7 = 7:30 · half past 11 = 11:30</p>`));
+  chk.style.alignSelf='flex-start';
+  if(S.p2.done[i])say(fb,`<b>Yes! half past ${it.h} = ${it.h}:30.</b>`,'good');
+  st.append(L,R);m.appendChild(st);
+},
+/* --- Part 3 --- */
+day(m){
+  const D=S.day;const st=el('section',{class:'stage'});const L=el('div',{class:'col'}),R=el('div',{class:'col'});
+  const startRow=el('div',{class:'row'});
+  const out=el('output',{},dig(D.start));
+  const stp=el('div',{class:'stepper'});const mi=el('button',{'aria-label':'Earlier start'},'−'),pl=el('button',{'aria-label':'Later start'},'+');
+  const chStart=d=>{D.start=(D.start+d+24)%24;D.rows.forEach(r=>{r.t=null;});D.sel=0;render();};
+  mi.onclick=()=>chStart(-1);pl.onclick=()=>chStart(1);stp.append(mi,out,pl);
+  startRow.append(el('span',{style:'font-weight:700'},'Camp starts at'),stp);
+  const list=el('div',{class:'sched'});
+  const targetOf=i=>(D.start+i)%24;
+  D.rows.forEach((r,i)=>{
+    const b=el('button',{class:'srow','aria-pressed':D.sel===i});
+    const mc=el('div',{class:'clockbox',style:'width:72px'});const s=clockSVG();mc.appendChild(s);if(r.t!=null)setTime(s,r.t);else s.style.opacity=.3;
+    const a=r.act?ACTS.find(x=>x[0]===r.act):null;
+    b.append(el('span',{class:'t'+(r.t==null?' empty':'')},r.t==null?'__:__':dig(r.t)),mc,el('span',{class:'act'},a?`${ICON[a[0]]}${a[1]}`:'<span style="color:var(--muted);font-weight:400">pick an activity</span>'),el('span',{class:'tick'},r.t!=null&&r.act?'✓':''));
+    b.onclick=()=>{D.sel=i;render();};list.appendChild(b);});
+  L.append(el('p',{class:'eyebrow'},'Part 3 · Class 2'),el('h2',{class:'ptitle'},'Our camp day'),el('p',{class:'tip'},'Something new every half hour.'),startRow,list);
+
+  const i=D.sel,r=D.rows[i],target=targetOf(i);
+  const prompt=i===0?`Set the clock to <b>${dig(target)}</b>.`:(D.rows[i-1].t==null?`First finish ${dig(targetOf(i-1))} above.`:`<b>${dig(D.rows[i-1].t)}</b>. Then half an hour later is…?`);
+  const read=el('div',{class:'readout','aria-live':'polite'});
+  const initial=r.t!=null?r.t:(i>0&&D.rows[i-1].t!=null?D.rows[i-1].t:target);
+  const hc=handControl(initial,h=>{read.innerHTML=liveRead(h);});
+  const fb=fbBox();
+  const chk=el('button',{class:'primary'},'Check my clock');
+  const locked=i>0&&D.rows[i-1].t==null;
+  chk.disabled=locked;
+  chk.onclick=()=>{
+    const t=hc.time();
+    if(t===target){r.t=t;say(fb,i===0?`<b>${dig(t)}.</b> Camp begins!`:`<b>Yes! ${dig(t)}.</b> ${minOf(t)?`The long hand moved from 12 down to 6.`:`The long hand went from 6 back up to 12, and the short hand reached ${hourOf(t)}.`}`,'good');refreshRows();}
+    else{const a=handAdvice(hc,target);
+      let msg=a.msg;
+      if(hc.valid()&&i>0&&minOf(hc.steps)===minOf(target)){msg=`Your clock says ${dig(hc.steps)}. Half an hour after ${dig(D.rows[i-1].t)}: the long hand only goes half way around, ${minOf(target)?'from 12 down to 6':'from 6 up to 12'}.`;}
+      else if(hc.valid()&&i>0&&minOf(hc.steps)!==minOf(target)&&hc.steps!==target){msg=`Half an hour after ${dig(D.rows[i-1].t)}, the long hand points <b>${minOf(target)?'down to 6':'up to 12'}</b>. ${a.which==='short'?a.msg:''}`.trim();}
+      say(fb,msg+' Try again!','try');glow(hc.svg,a.which);}
+  };
+  const show=el('button',{class:'secondary'},'Show me');show.disabled=locked;
+  show.onclick=()=>{hc.set(target,minOf(target));glow(hc.svg,'short');say(fb,`${dig(target)} looks like this: ${wordsOf(target)}. Tap <b>Check my clock</b>.`);};
+  const acts=el('div',{class:'acts'});
+  ACTS.forEach(([k,l])=>{const b=el('button',{'aria-pressed':r.act===k},`${ICON[k]}${l}`);b.onclick=()=>{r.act=k;acts.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));refreshRows();};acts.appendChild(b);});
+  const nx=el('button',{class:'secondary'},'Next row →');nx.onclick=()=>{D.sel=Math.min(5,i+1);render();};
+  function refreshRows(){const rows=list.children;D.rows.forEach((rr,j)=>{const b=rows[j];const tEl=b.querySelector('.t');tEl.textContent=rr.t==null?'__:__':dig(rr.t);tEl.classList.toggle('empty',rr.t==null);const s=b.querySelector('svg');if(rr.t!=null){s.style.opacity=1;setTime(s,rr.t);}
+      const a=rr.act?ACTS.find(x=>x[0]===rr.act):null;b.querySelector('.act').innerHTML=a?`${ICON[a[0]]}${a[1]}`:'<span style="color:var(--muted);font-weight:400">pick an activity</span>';b.querySelector('.tick').textContent=rr.t!=null&&rr.act?'✓':'';});}
+  const cl=el('div',{class:'row center',style:'justify-content:center'});cl.append(hc.box);
+  const btnRow=el('div',{class:'row'});btnRow.append(chk,show);const nxRow=el('div',{class:'row'});nxRow.append(nx);
+  R.append(el('p',{class:'eyebrow'},`Row ${i+1} of 6`),el('p',{class:'big'},prompt),cl,hc.pad,read,btnRow,fb,el('p',{class:'eyebrow'},'Activity'),acts,nxRow);
+  hc.box.classList.add('sm');
+  if(r.t!=null)say(fb,`<b>${dig(r.t)}</b> is set.`,'good');
+  R.appendChild(keyBox(`<p>Each row is 30 minutes after the one before. Starting at ${dig(D.start)}: ${D.rows.map((_,j)=>dig(targetOf(j))).join(', ')}.</p><p>Activities are the class’s choice; any is fine.</p>`));
+  st.append(L,R);m.appendChild(st);
+},
+/* --- Part 4 --- */
+snack(m){
+  const st=el('section',{class:'stage one'});const C=el('div',{class:'col'});
+  C.append(el('p',{class:'eyebrow'},'Part 4 · Class 2'),el('h2',{class:'ptitle'},'Snack time: tap the dashed lines to cut'));
+  const grid=el('div',{class:'snackgrid'});
+  grid.append(snackCard('sand','2 campers share a sandwich','square',['V','H','D1','D2'],2,'half'),
+              snackCard('pizza','4 campers share a pizza','round',['R0','R45','R90','R135'],4,'fourth'));
+  C.append(grid);
+  /* fourths two ways */
+  const ft=el('div',{class:'col'});
+  ft.append(el('h3',{class:'ptitle',style:'font-size:clamp(22px,2.2vw,30px)'},'Fourths two ways'),el('p',{class:'tip'},'Cut each square into 4 equal pieces. Make the two ways different.'));
+  const g2=el('div',{class:'snackgrid'});
+  const fb=fbBox();
+  const boards={};
+  ['w1','w2'].forEach((k,j)=>{const col=el('div',{class:'col center'});const stt=el('div',{class:'status','aria-live':'polite'});
+    const bd=cutBoard('square',['V','H','D1','D2','V1','V3','H1','H3'],S[k],inf=>{stt.innerHTML=statusOf(inf,4);sb.textContent='Stack to check';});boards[k]=bd;
+    const sb=el('button',{class:'secondary'},'Stack to check');sb.onclick=()=>{const inf=bd.info();if(inf.n!==4){say(fb,`Way ${j+1} has ${inf.n} piece${inf.n===1?'':'s'}. Fourths means <b>4</b> equal pieces. Cut more or less, then stack.`,'try');return;}
+      bd.stack(!S[k].stacked);sb.textContent=S[k].stacked?'Unstack':'Stack to check';
+      if(S[k].stacked)say(fb,inf.stack?`Way ${j+1}: all 4 pieces stack on top of each other. They match, so they are <b>equal</b>. Fourths!`:`Way ${j+1}: the pieces do not match when stacked. Some are bigger. Not fourths yet.`,inf.stack?'good':'try');};
+    col.append(el('b',{style:'font-family:var(--display);font-size:22px'},`Way ${j+1}`),bd.wrap,stt,sb);stt.innerHTML=statusOf(bd.info(),4);g2.appendChild(col);});
+  const ask=el('div',{class:'row'});
+  ask.append(el('span',{style:'font-weight:700;font-size:19px'},'Did each way make 4 pieces that stack?'));
+  ['yes','no'].forEach(v=>{const b=el('button',{class:'choice small'+(S.stackAns===v?' right':'')},v);b.onclick=()=>{
+      const a=boards.w1.info(),c=boards.w2.info();
+      if(a.n!==4||c.n!==4||!S.w1.cuts.length||!S.w2.cuts.length){say(fb,'Cut both squares first. Then stack each one to check.','try');return;}
+      const truth=(a.n===4&&a.stack&&c.n===4&&c.stack)?'yes':'no';S.stackAns=v;
+      ask.querySelectorAll('.choice').forEach(x=>x.classList.remove('right','miss'));b.classList.add(v===truth?'right':'miss');
+      const same=[...S.w1.cuts].sort().join()===[...S.w2.cuts].sort().join();
+      if(v===truth)say(fb,(truth==='yes'?'Yes! Both ways make 4 pieces that stack. ':'Right: at least one way has pieces that do not match. ')+(same?'But both ways use the same cuts. Can you find a different way?':truth==='yes'?'And the two ways are different. Two ways to make fourths!':''),'good');
+      else say(fb,`Stack each square to see. ${truth==='yes'?'Both stacks match, so the answer is yes.':'One stack does not match, so the answer is no.'}`,'try');};ask.appendChild(b);});
+  ft.append(g2,ask,fb,keyBox(`<p>Sandwich: one straight cut through the middle (across, down or corner to corner) makes 2 equal pieces. Each camper gets one <b>half</b>.</p><p>Pizza: two cuts that cross at a square corner (straight across + straight down, or both corner-to-corner) make 4 equal pieces. Each camper gets one <b>fourth</b> (a quarter). One straight and one slanted cut makes 4 pieces that are NOT equal.</p><p>Fourths two ways (all checked): + cross, X cross, 3 cuts down, 3 cuts across. Every 4-equal-piece way on this board also stacks exactly.</p>`));
+  C.append(ft);st.append(C);m.appendChild(st);
+},
+/* --- Challenge --- */
+chal(m){
+  const st=el('section',{class:'stage'});const L=el('div',{class:'col'}),R=el('div',{class:'col'});
+  /* 1. half past 12 */
+  const read=el('div',{class:'readout','aria-live':'polite'});
+  const hc=handControl(S.ch.clockOk?1:0,h=>{read.innerHTML=liveRead(h);});
+  if(!S.ch.clockOk)hc.set(0,0);
+  const fb1=fbBox();const c1=el('button',{class:'primary'},'Check');
+  c1.onclick=()=>{if(hc.time()===1){S.ch.clockOk=true;say(fb1,'<b>Yes! 12:30.</b> Long hand down at 6. Short hand between 12 and 1.','good');}
+    else{let a=handAdvice(hc,1);if(hc.valid()&&hc.steps===23)a={which:'short',msg:'That is half past 11. At half past 12, the short hand has gone <b>past 12</b>, toward 1.'};say(fb1,a.msg+' Try again!','try');glow(hc.svg,a.which);}};
+  hc.box.classList.add('sm');
+  const cl=el('div',{class:'row',style:'justify-content:center'});cl.append(hc.box);
+  L.append(el('p',{class:'eyebrow'},'Camp Challenge 1'),el('p',{class:'big'},'Draw the hands for <span style="color:var(--lake)">half past 12</span>.'),cl,hc.pad,read,c1,fb1);
+  if(S.ch.clockOk)say(fb1,'<b>12:30.</b> Done!','good');
+  /* 2. cookie */
+  const CC=['var(--lake)','var(--ember)','var(--berry)','var(--pine)'];
+  const svgw=el('div',{class:'board',style:'width:min(100%,320px)'});
+  const campers=el('div',{class:'campers'});
+  const fb2=fbBox();
+  function drawCookie(){
+    const ps=rdPieces(['R0','R90']);let h=`<svg viewBox="-8 -8 116 116" role="img" aria-label="Cookie in 4 fourths">`;
+    ps.forEach((p,j)=>{const own=S.ch.owner[j];const r=46,cx=50,cy=50;const P=a=>{const t=(a-90)*Math.PI/180;return[(cx+r*Math.cos(t)).toFixed(2),(cy+r*Math.sin(t)).toFixed(2)];};const A=P(p.a0),B=P(p.a0+p.w);
+      const mid=(p.a0+p.w/2-90)*Math.PI/180;const dx=(own==null?6:0)*Math.cos(mid),dy=(own==null?6:0)*Math.sin(mid);
+      h+=`<g class="cpiece" data-j="${j}" role="button" tabindex="0" style="cursor:pointer" transform="translate(${dx.toFixed(2)} ${dy.toFixed(2)})"><path d="M50 50L${A[0]} ${A[1]}A46 46 0 0 1 ${B[0]} ${B[1]}Z" fill="${own==null?'var(--sun)':CC[own]}" stroke="var(--ink)" stroke-width="1.5"/>`+
+        `<circle cx="${(50+26*Math.cos(mid)).toFixed(1)}" cy="${(50+26*Math.sin(mid)).toFixed(1)}" r="3" fill="var(--ink)" opacity=".5"/><circle cx="${(50+34*Math.cos(mid+.35)).toFixed(1)}" cy="${(50+34*Math.sin(mid+.35)).toFixed(1)}" r="2.5" fill="var(--ink)" opacity=".5"/></g>`;});
+    h+='</svg>';svgw.innerHTML=h;
+    svgw.querySelectorAll('.cpiece').forEach(g=>{const give=()=>{if(!S.ch.gone)return;const j=+g.dataset.j;const o=S.ch.owner[j];S.ch.owner[j]=o==null?0:o===0?1:null;drawCookie();checkCookie();};g.onclick=give;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();give();}};});
+    campers.innerHTML='';
+    for(let k=0;k<4;k++){const away=S.ch.gone&&k>1;const n=S.ch.owner.filter(o=>o===k).length;
+      campers.appendChild(el('div',{style:`display:flex;flex-direction:column;align-items:center;gap:2px;opacity:${away?.25:1}`},
+        `<svg width="54" height="64" viewBox="0 0 54 64" aria-hidden="true"><path d="M8 22 27 4l19 18Z" fill="${CC[k]}"/><circle cx="27" cy="32" r="14" fill="var(--sun-soft)" stroke="var(--ink)" stroke-width="2"/><circle cx="22" cy="30" r="2" fill="var(--ink)"/><circle cx="32" cy="30" r="2" fill="var(--ink)"/><path d="M21 37q6 5 12 0" stroke="var(--ink)" stroke-width="2" fill="none"/><rect x="15" y="48" width="24" height="14" rx="6" fill="${CC[k]}"/></svg><b style="font-family:var(--display);font-size:20px">${away?'home':n}</b>`));}
+  }
+  function checkCookie(){if(!S.ch.gone)return;const a=S.ch.owner.filter(o=>o===0).length,b=S.ch.owner.filter(o=>o===1).length,left=S.ch.owner.filter(o=>o==null).length;
+    if(left)say(fb2,`${left} piece${left===1?' is':'s are'} left. Tap a piece to give it to a camper.`);
+    else if(a===b)say(fb2,`<b>Fair!</b> Each camper has <b>${a} fourths</b>.`,'good');
+    else say(fb2,`Not fair yet: ${Math.max(a,b)} pieces and ${Math.min(a,b)} piece${Math.min(a,b)===1?'':'s'}. Tap a piece to give it to the other camper.`,'try');}
+  const go=el('button',{class:'secondary'},S.ch.gone?'Bring everyone back':'2 campers go home');
+  go.onclick=()=>{S.ch.gone=!S.ch.gone;S.ch.owner=S.ch.gone?[0,1,null,null]:[0,1,2,3];go.textContent=S.ch.gone?'Bring everyone back':'2 campers go home';drawCookie();
+    if(S.ch.gone)say(fb2,'2 campers went home. Their 2 pieces are left over. Tap them to share.');else say(fb2,'');};
+  drawCookie();
+  const q=(label,opts,ans,key,why)=>{const wrap=el('div',{class:'col',style:'gap:8px'});wrap.appendChild(el('p',{style:'margin:0;font-weight:700;font-size:20px'},label));const row=el('div',{class:'pick'});const f=fbBox();
+    opts.forEach(o=>{const b=el('button',{class:'choice small'+(S.ch[key]===o?(o===ans?' right':' miss'):'')},o);b.onclick=()=>{S.ch[key]=o;row.querySelectorAll('.choice').forEach(x=>x.classList.remove('right','miss'));b.classList.add(o===ans?'right':'miss');say(f,o===ans?why.good:why.bad(o),o===ans?'good':'try');if(why.after)why.after(o===ans);};row.appendChild(b);});
+    wrap.append(row,f);return wrap;};
+  const halfPic=el('div',{class:'board',style:'width:min(100%,260px)'});
+  const showHalf=(mode)=>{halfPic.innerHTML=`<svg viewBox="-8 -8 116 116" role="img" aria-label="Half and fourth of the same cookie"><circle cx="50" cy="50" r="46" fill="var(--sun-soft)" stroke="var(--sun)" stroke-width="2"/>`+
+    (mode==='two'?`<path d="M50 50L50 4A46 46 0 0 1 96 50Z" fill="var(--lake)" stroke="var(--ink)" stroke-width="1.5"/><path d="M50 50L96 50A46 46 0 0 1 50 96Z" fill="var(--lake)" stroke="var(--ink)" stroke-width="1.5"/><path d="M50 4V96" stroke="var(--ink)" stroke-width="3" fill="none"/>`:
+     `<path d="M50 50L50 4A46 46 0 0 1 50 96Z" fill="var(--lake)" opacity=".85" stroke="var(--ink)" stroke-width="1.5"/><path d="M50 50L50 96A46 46 0 0 1 4 50Z" fill="var(--ember)" stroke="var(--ink)" stroke-width="1.5"/><text x="73" y="56" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="15" fill="var(--face)">half</text><text x="29" y="72" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="11" fill="var(--face)">fourth</text>`)+`</svg>`;};
+  showHalf('two');
+  R.append(el('p',{class:'eyebrow'},'Camp Challenge 2'),el('p',{class:'big'},'A cookie is cut into fourths for 4 campers.'),svgw,campers,go,fb2,
+    q('How many fourths does each camper get?',['1','2','4'],'2','q1',{good:'<b>2 fourths each.</b> 4 pieces, 2 campers: 2 and 2.',bad:o=>`Share the 4 pieces with the 2 campers who stayed. ${o==='1'?'Then 2 pieces are left over!':'Then the other camper gets none.'} Try the cookie above.`}),
+    q('What is another name for 2 fourths?',['one half','one fourth','one whole'],'one half','q2',{good:'<b>One half!</b> 2 fourths cover half the cookie.',bad:o=>o==='one fourth'?'One fourth is just 1 piece. Look: 2 fourths together.':'A whole is all 4 fourths. 2 fourths is part of it. Look at the picture.',after:()=>showHalf('two')}),
+    halfPic,
+    q('Which is bigger, a half or a fourth of the same cookie?',['a half','a fourth'],'a half','q3',{good:'<b>A half.</b> A half is 2 fourths. Fewer pieces means bigger pieces.',bad:()=>'Look at the picture. The half covers more cookie. Fewer pieces means bigger pieces.',after:()=>showHalf('cmp')}),
+    keyBox('<p>1) Hands at 12:30: long hand on 6, short hand between 12 and 1.</p><p>2) Each camper gets <b>2 fourths</b>. 2 fourths = <b>one half</b>.</p><p>Me: <b>a half</b> is bigger than a fourth of the same cookie.</p>'));
+  st.append(L,R);m.appendChild(st);
+},
+/* --- Class 3: showcase --- */
+show(m){
+  const D=S.day;const st=el('section',{class:'stage one'});
+  const built=D.rows.every(r=>r.t!=null);
+  const rows=built?D.rows.map(r=>({t:r.t,act:r.act||'games'})):[{t:18,act:'swim'},{t:19,act:'crafts'},{t:20,act:'hike'},{t:21,act:'games'},{t:22,act:'snack'},{t:23,act:'lunch'}];
+  const wrap=el('div',{class:'show'});
+  const c=clockBox(rows[Math.max(0,S.showStep)].t);
+  const side=el('div',{class:'col'});
+  const now=el('div',{'aria-live':'polite'});
+  const tl=el('div',{class:'timeline'});
+  rows.forEach((r,i)=>{const a=ACTS.find(x=>x[0]===r.act);tl.appendChild(el('div',{class:'tl'+(i===S.showStep?' now':'')},`<b>${dig(r.t)}</b>${ICON[a[0]]}<span>${a[1]}</span>`));});
+  function paint(){const i=S.showStep;[...tl.children].forEach((x,j)=>x.classList.toggle('now',j===i));
+    if(i<0){now.innerHTML=`<p class="big">Press <b>Play our day</b>.</p>`;setTime(c.svg,rows[0].t);return;}
+    const r=rows[i],a=ACTS.find(x=>x[0]===r.act);setTime(c.svg,r.t);
+    now.innerHTML=`<div class="words">${wordsOf(r.t)}</div><div class="readout" style="margin-top:10px">${dig(r.t)} · ${a[1]}</div>`;}
+  const nx=el('button',{class:'primary'},'Play our day ▶');
+  nx.onclick=()=>{S.showStep=S.showStep+1>=rows.length?0:S.showStep+1;nx.textContent=S.showStep===rows.length-1?'From the top ↺':'Next half hour ▶';paint();};
+  side.append(el('p',{class:'eyebrow'},built?'Class 3 · Our camp day':'Class 3 · Example day (build yours in Part 3)'),el('h2',{class:'ptitle'},'Show our camp day'),now,el('div',{class:'row'}),tl);
+  side.querySelector('.row').append(nx);
+  wrap.append(el('div',{class:'col center'}),side);wrap.firstChild.appendChild(c.box);
+  st.append(wrap,el('p',{class:'tip'},'Presenters: say each time two ways, “half past 9” and “9:30”. Ask the audience where the short hand is.'));
+  m.appendChild(st);paint();
+},
+gal(m){
+  const st=el('section',{class:'stage one'});const C=el('div',{class:'col'});
+  C.append(el('p',{class:'eyebrow'},'Class 3 · Showcase'),el('h2',{class:'ptitle'},'Fair shares: prove it by stacking'));
+  const g=el('div',{class:'gallery'});
+  const items=[['sand','Sandwich for 2','square',2],['pizza','Pizza for 4','round',4],['w1','Fourths: way 1','square',4],['w2','Fourths: way 2','square',4]];
+  items.forEach(([k,label,kind,need])=>{const copy={cuts:[...S[k].cuts],stacked:false};const bd=cutBoard(kind,[],copy,null);const inf=bd.info();
+    const ok=inf.n===need&&inf.stack;const card=el('div',{class:'gal'});
+    const tag=el('span',{class:'tag'+(ok?' ok':'')},!S[k].cuts.length?'not cut yet':ok?`${need} equal pieces`:`${inf.n} pieces, ${inf.equal?'equal':'not equal'}`);
+    const b=el('button',{class:'secondary'},'Stack');b.disabled=inf.n<2;b.onclick=()=>{bd.stack(!copy.stacked);b.textContent=copy.stacked?'Unstack':'Stack';};
+    card.append(el('span',{},label),bd.wrap,tag,b);g.appendChild(card);});
+  C.append(g,el('p',{class:'tip'},'Cut snacks in Class 2, Part 4. Stacked pieces that match exactly are equal shares.'));
+  st.append(C);m.appendChild(st);
+},
+quiz(m){
+  const st=el('section',{class:'stage'});const L=el('div',{class:'col center'}),R=el('div',{class:'col'});
+  const c=clockBox(S.quiz.t);L.appendChild(c.box);
+  const ans=el('div',{'aria-live':'polite'});
+  const paint=()=>{ans.innerHTML=S.quiz.shown?`<div class="digital">${dig(S.quiz.t)}</div><div class="words" style="margin-top:12px">${wordsOf(S.quiz.t)}</div>`:`<div class="digital"><span class="slot">?</span>:<span class="slot">??</span></div>`;};
+  const nw=el('button',{class:'primary'},'New camp clock');
+  nw.onclick=()=>{let t;do{t=Math.floor(Math.random()*24);}while(t===S.quiz.t);S.quiz.t=t;S.quiz.shown=false;setTime(c.svg,t);paint();};
+  const rv=el('button',{class:'secondary'},'Show the answer');rv.onclick=()=>{S.quiz.shown=true;paint();};
+  const row=el('div',{class:'row'});row.append(nw,rv);
+  R.append(el('p',{class:'eyebrow'},'Class 3 · Audience quiz'),el('h2',{class:'ptitle'},'What time is it at camp?'),el('p',{class:'big'},'Say it two ways!'),ans,row);
+  paint();st.append(L,R);m.appendChild(st);
+}
+};
+function statusOf(inf,need){if(inf.n<2)return'Not cut yet';return`${inf.n} pieces`+(inf.n===need?(inf.equal?' · equal?':' · not equal'):'');}
+function snackCard(k,title,kind,lines,need,word){
+  const col=el('div',{class:'col center',style:'border:2px solid var(--line);border-radius:20px;padding:14px'});
+  const stt=el('div',{class:'status','aria-live':'polite'});const fb=fbBox();
+  const bd=cutBoard(kind,lines,S[k],inf=>{stt.textContent=statusOf(inf,need);sb.textContent='Stack to check';});
+  const sb=el('button',{class:'secondary'},'Stack to check');
+  sb.onclick=()=>{const inf=bd.info();
+    if(inf.n!==need){say(fb,inf.n<2?`Tap a dashed line to cut.`:`You made <b>${inf.n}</b> pieces. ${need} campers need <b>${need}</b> pieces. ${inf.n>need?'Tap a cut to take it away.':'Cut again.'}`,'try');return;}
+    bd.stack(!S[k].stacked);sb.textContent=S[k].stacked?'Unstack':'Stack to check';
+    if(S[k].stacked)say(fb,inf.stack?`${need===2?'Both':'All '+need} pieces stack and match. <b>Fair!</b>`:`The pieces don’t match. Some are bigger. <b>Not fair.</b> Try other cuts.`,inf.stack?'good':'try');else say(fb,'');};
+  const pick=el('div',{class:'pick'});
+  pick.appendChild(el('span',{style:'font-weight:700;align-self:center'},'Each camper gets one'));
+  ['half','fourth','whole'].forEach(w=>{const b=el('button',{class:'choice small'+(S[k].word===w?(w===word?' right':' miss'):'')},w);
+    b.onclick=()=>{S[k].word=w;pick.querySelectorAll('.choice').forEach(x=>x.classList.remove('right','miss'));b.classList.add(w===word?'right':'miss');
+      const inf=bd.info();
+      if(w===word)say(fb,word==='half'?'<b>One half.</b> 2 equal pieces: each is a half.':'<b>One fourth</b> (a quarter). 4 equal pieces: each is a fourth.','good');
+      else say(fb,w==='whole'?`A whole is the entire snack. ${need} campers share it, so each gets one of ${need} equal pieces.`:w==='fourth'?'A fourth is 1 of 4 equal pieces. Here there are 2 equal pieces. Count them!':'A half is 1 of 2 equal pieces. Here there are 4 equal pieces. Count them!','try');};
+    pick.appendChild(b);});
+  col.append(el('b',{style:'font-family:var(--display);font-size:22px'},title),bd.wrap,stt,sb,pick,fb);
+  stt.textContent=statusOf(bd.info(),need);
+  return col;
+}
+
+/* ===== Wire up ===== */
+document.querySelectorAll('.trail button').forEach(b=>b.onclick=()=>{S.cls=+b.dataset.cls;render();});
+const confirmBar={armed:false,timer:null};
+$('#resetBtn').onclick=()=>{const b=$('#resetBtn');
+  if(!confirmBar.armed){confirmBar.armed=true;b.textContent='Tap again to erase all';clearTimeout(confirmBar.timer);confirmBar.timer=setTimeout(()=>{confirmBar.armed=false;b.textContent='Start over';},3000);return;}
+  confirmBar.armed=false;b.textContent='Start over';S=fresh();render();};
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+render();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,704 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Balance Puzzles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom bucket balance is the hero. Lesson steps run across the top; the balance fills the stage, controls sit in a side panel (stacked under it on narrow screens). */
+:root{
+  --paper:#E8F0F7; --card:#FFFFFF; --ink:#1D2A44; --muted:#56637E; --line:#C7D4E3;
+  --accent:#F2B300; --accent-ink:#1D2A44; --accent-soft:#FFF2CC;
+  --good:#17895A; --good-soft:#DDF3E7; --try:#B5541B; --try-soft:#FDEBDC;
+  --bear:#D9435B; --bear-face:#4A1420; --car:#21995F; --glass:#CDEBFF;
+  --c0:#2F7DD1; --c1:#F08A24; --c2:#11A09D; --c3:#8C5BD6;
+  --wood:#C98E55; --wood-dark:#93612F; --metal:#6F7F99; --tray:#AEBBCD; --tray-edge:#7F8DA4;
+  --book:#3E6FB0; --pencil:#F2BE2B; --marker:#8C5BD6; --water:#4BA8EA; --bottle:#D5E4F2;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111A2C; --card:#1A2440; --ink:#EAF0FA; --muted:#A1AEC6; --line:#2E3B5E;
+    --accent:#FFC531; --accent-ink:#1D2A44; --accent-soft:#3A3116;
+    --good:#4CD08E; --good-soft:#163A2B; --try:#F6A26B; --try-soft:#3B2617;
+    --bear:#F0647A; --bear-face:#3A0F18; --car:#3CC487; --glass:#9FD3F5;
+    --c0:#5B9EEB; --c1:#F7A04A; --c2:#2EC4C0; --c3:#A985EB;
+    --wood:#B57E48; --wood-dark:#7A4E27; --metal:#9AA8BE; --tray:#56647E; --tray-edge:#8391AA;
+    --book:#6C98D6; --pencil:#F5C232; --marker:#A985EB; --water:#5BB4F0; --bottle:#33435F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111A2C; --card:#1A2440; --ink:#EAF0FA; --muted:#A1AEC6; --line:#2E3B5E;
+  --accent:#FFC531; --accent-ink:#1D2A44; --accent-soft:#3A3116;
+  --good:#4CD08E; --good-soft:#163A2B; --try:#F6A26B; --try-soft:#3B2617;
+  --bear:#F0647A; --bear-face:#3A0F18; --car:#3CC487; --glass:#9FD3F5;
+  --c0:#5B9EEB; --c1:#F7A04A; --c2:#2EC4C0; --c3:#A985EB;
+  --wood:#B57E48; --wood-dark:#7A4E27; --metal:#9AA8BE; --tray:#56647E; --tray-edge:#8391AA;
+  --book:#6C98D6; --pencil:#F5C232; --marker:#A985EB; --water:#5BB4F0; --bottle:#33435F;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.wrap{max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:14px; padding-block:14px 28px}
+
+header.top{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.brand h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(28px,3.4vw,46px); line-height:1; letter-spacing:-.01em}
+.brand p{margin:4px 0 0; color:var(--muted); font-weight:700; font-size:15px; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; min-height:52px; font-family:var(--display); font-weight:600; font-size:18px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:8px; flex-wrap:wrap}
+nav.steps button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; min-height:56px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,21px); color:var(--muted)}
+nav.steps button .n{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--paper); color:var(--ink); font-size:18px}
+nav.steps button[aria-selected="true"]{border-color:var(--ink); color:var(--ink); background:var(--accent-soft)}
+nav.steps button[aria-selected="true"] .n{background:var(--ink); color:var(--card)}
+
+main{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr); gap:18px; align-items:start}
+@media (max-width:980px){ main{grid-template-columns:minmax(0,1fr)} }
+.stage{display:flex; flex-direction:column; gap:12px; min-width:0}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:20px; display:flex; flex-direction:column; gap:16px; min-width:0}
+.panel h2{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(24px,2.3vw,32px); line-height:1.15; text-wrap:balance}
+.panel p{margin:0}
+.lead{font-size:clamp(19px,1.6vw,23px); font-weight:700}
+.small{font-size:16px; color:var(--muted)}
+
+.scale{background:var(--card); border:2px solid var(--line); border-radius:22px; position:relative; min-width:0}
+.scale svg{display:block; width:100%; height:auto}
+.scale .tag{position:absolute; top:10px; left:14px; font-family:var(--display); font-weight:600; font-size:15px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+.scale.small{border-radius:16px}
+.row2{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px}
+.clues{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px}
+.clue{display:flex; flex-direction:column; gap:4px}
+.clue .eq{justify-content:center; font-size:22px}
+
+.eq{display:flex; align-items:center; flex-wrap:wrap; gap:4px 6px; font-family:var(--display); font-weight:600; font-size:clamp(26px,2.6vw,36px)}
+.eq .op{padding:0 6px}
+.eq .q{display:inline-grid; place-items:center; min-width:1.4em; height:1.4em; padding:0 .2em; border-radius:10px; background:var(--accent-soft); border:2px dashed var(--accent)}
+svg.ic{width:1.15em; height:1.15em; vertical-align:-.2em; overflow:visible}
+.eq svg.ic{width:1.25em; height:1.25em}
+
+.btn{border:0; border-radius:16px; min-height:60px; padding:12px 24px; font-family:var(--display); font-weight:600; font-size:clamp(19px,1.6vw,23px)}
+.btn.go{background:var(--accent); color:var(--accent-ink)}
+.btn.alt{background:var(--card); border:2px solid var(--ink)}
+.btn:disabled{opacity:.4; cursor:default}
+.btns{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.chipbtn{display:inline-flex; align-items:center; gap:8px; border:2px solid var(--line); background:var(--card); border-radius:14px; min-height:56px; padding:8px 16px; font-family:var(--display); font-weight:600; font-size:19px}
+.chipbtn:hover{border-color:var(--ink)}
+.chipbtn[aria-pressed="true"]{border-color:var(--ink); background:var(--accent-soft)}
+
+.stepper{display:flex; align-items:center; gap:10px}
+.stepper button{width:64px; height:64px; border-radius:50%; border:2px solid var(--ink); background:var(--card); font-family:var(--display); font-weight:700; font-size:32px; line-height:1}
+.stepper output{min-width:2.2ch; text-align:center; font-family:var(--display); font-weight:700; font-size:44px; font-variant-numeric:tabular-nums}
+.stepper .lbl{display:flex; align-items:center; gap:6px; font-family:var(--display); font-weight:600; font-size:20px}
+.stepper.sm button{width:52px; height:52px; font-size:26px}
+.stepper.sm output{font-size:32px}
+
+.msg{border-radius:16px; padding:14px 16px; font-size:clamp(18px,1.5vw,21px); font-weight:700; background:var(--paper); min-height:1em}
+.msg:empty{display:none}
+.msg.good{background:var(--good-soft)}
+.msg.good b{color:var(--good)}
+.msg.try{background:var(--try-soft)}
+.msg.try b{color:var(--try)}
+.msg .hint{display:block; margin-top:6px; font-weight:500}
+
+.pnav{display:flex; flex-wrap:wrap; gap:8px}
+.pnav button{width:60px; height:60px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:24px; position:relative}
+.pnav button.star{width:auto; padding:0 18px; border-radius:30px; font-size:20px}
+.pnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.pnav button.solved::after{content:"✓"; position:absolute; right:-4px; top:-6px; width:24px; height:24px; border-radius:50%; background:var(--good); color:var(--card); font-size:15px; display:grid; place-items:center}
+
+.known{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
+.known li{background:var(--paper); border-radius:12px; padding:6px 12px}
+.known li .eq{font-size:24px}
+.frame{border:2px dashed var(--line); border-radius:14px; padding:12px 14px; font-size:20px; font-weight:700}
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+.sidebox{background:var(--paper); border-radius:16px; padding:12px; display:flex; flex-direction:column; gap:10px}
+.sidebox h3{margin:0; font-family:var(--display); font-weight:600; font-size:20px}
+.secret{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-family:var(--display); font-weight:600; font-size:19px}
+.secret button{width:48px; height:48px; border-radius:12px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:20px}
+.secret button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+
+.item.tap{cursor:pointer}
+.item.tap:hover .hit,.item.tap:focus-visible .hit{fill:var(--accent); fill-opacity:.22}
+.item.tap:focus{outline:none}
+.pop{animation:pop .45s ease-out both; transform-box:fill-box; transform-origin:50% 100%}
+@keyframes pop{0%{transform:scale(.2); opacity:0}70%{transform:scale(1.12); opacity:1}100%{transform:scale(1)}}
+.leave{animation:leave .35s ease-in both; transform-box:fill-box; transform-origin:50% 100%}
+@keyframes leave{to{transform:translateY(-40px); opacity:0}}
+@media (prefers-reduced-motion: reduce){ .pop,.leave{animation:none} }
+.wood{fill:var(--wood)} .wood-dark{fill:var(--wood-dark)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <h1>Balance Puzzles</h1>
+    <p>Grade 1 · Week 9 · Lesson 1.9</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="steps" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><span class="n">1</span>Heavy or light?</button>
+  <button role="tab" data-tab="trade" aria-selected="false"><span class="n">2</span>Trade</button>
+  <button role="tab" data-tab="puz" aria-selected="false"><span class="n">3</span>Puzzles</button>
+  <button role="tab" data-tab="make" aria-selected="false"><span class="n">4</span>Make one</button>
+  <button role="tab" data-tab="talk" aria-selected="false"><span class="n">5</span>Talk about it</button>
+</nav>
+<main id="main"></main>
+</div>
+
+<script>
+(function(){
+'use strict';
+const $ = (s, r=document) => r.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 120) : ms));
+
+/* ================= Drawings (origin = bottom centre) ================= */
+const D = {
+  cube(g){ return `<rect x="-11" y="-22" width="22" height="22" rx="3" fill="var(--c${g||0})" stroke="var(--ink)" stroke-opacity=".35" stroke-width="1.2"/><rect x="-6.5" y="-17.5" width="13" height="13" rx="2" fill="none" stroke="var(--card)" stroke-opacity=".45" stroke-width="1.5"/>`; },
+  bear(){ return `<g fill="var(--bear)"><circle cx="-9.5" cy="-47" r="5"/><circle cx="9.5" cy="-47" r="5"/><circle cx="0" cy="-39" r="12"/><ellipse cx="0" cy="-17" rx="15" ry="16"/><ellipse cx="-15" cy="-22" rx="5" ry="8" transform="rotate(25 -15 -22)"/><ellipse cx="15" cy="-22" rx="5" ry="8" transform="rotate(-25 15 -22)"/><ellipse cx="-8" cy="-3.5" rx="7.5" ry="4.5"/><ellipse cx="8" cy="-3.5" rx="7.5" ry="4.5"/></g><circle cx="-4.5" cy="-41" r="1.9" fill="var(--bear-face)"/><circle cx="4.5" cy="-41" r="1.9" fill="var(--bear-face)"/><ellipse cx="0" cy="-35.5" rx="3.2" ry="2.3" fill="var(--bear-face)"/><ellipse cx="0" cy="-16" rx="8" ry="9" fill="var(--card)" fill-opacity=".25"/>`; },
+  car(){ return `<path d="M-19 -24 L-11 -37 L12 -37 L21 -24 Z" fill="var(--car)"/><path d="M-14 -25 L-9 -34 L-1 -34 L-1 -25 Z M2 -25 L2 -34 L10 -34 L16 -25 Z" fill="var(--glass)"/><rect x="-32" y="-26" width="64" height="17" rx="6" fill="var(--car)"/><rect x="24" y="-22" width="6" height="4" rx="1.5" fill="var(--accent)"/><circle cx="-18" cy="-8" r="8" fill="var(--ink)"/><circle cx="18" cy="-8" r="8" fill="var(--ink)"/><circle cx="-18" cy="-8" r="3" fill="var(--tray)"/><circle cx="18" cy="-8" r="3" fill="var(--tray)"/>`; },
+  book(){ return `<rect x="-36" y="-24" width="72" height="24" rx="3" fill="var(--book)"/><rect x="-32" y="-6" width="66" height="5" fill="var(--card)" fill-opacity=".85"/><rect x="-36" y="-24" width="8" height="24" rx="2" fill="var(--ink)" fill-opacity=".25"/>`; },
+  pencil(){ return `<rect x="-40" y="-11" width="68" height="10" fill="var(--pencil)"/><rect x="-46" y="-11" width="7" height="10" rx="2" fill="var(--bear)"/><rect x="-40" y="-11" width="5" height="10" fill="var(--tray)"/><path d="M28 -11 L44 -6 L28 -1 Z" fill="var(--wood)"/><path d="M39 -7.6 L44 -6 L39 -4.4 Z" fill="var(--ink)"/>`; },
+  marker(){ return `<rect x="-34" y="-14" width="50" height="13" rx="5" fill="var(--marker)"/><rect x="14" y="-14" width="22" height="13" rx="5" fill="var(--ink)" fill-opacity=".75"/><rect x="-24" y="-11" width="26" height="7" rx="3" fill="var(--card)" fill-opacity=".6"/>`; },
+  bottle(full){ return `<path d="M-6 -66 h12 v8 c0 4 10 7 10 14 v40 a4 4 0 0 1 -4 4 h-24 a4 4 0 0 1 -4 -4 v-40 c0 -7 10 -10 10 -14 Z" fill="var(--bottle)" stroke="var(--metal)" stroke-width="2"/>${full?`<path d="M-14 -44 h28 v38 a3 3 0 0 1 -3 3 h-22 a3 3 0 0 1 -3 -3 Z" fill="var(--water)"/>`:''}<rect x="-7" y="-72" width="14" height="7" rx="2" fill="var(--c0)"/>`; },
+};
+const WIDTH = {cube:24, bear:38, car:66, book:74, pencil:92, marker:72, bottleFull:32, bottleEmpty:32};
+const NAME = {bear:'bear', car:'car', cube:'cube', book:'book', pencil:'pencil', marker:'marker', bottleFull:'full bottle', bottleEmpty:'empty bottle'};
+function drawItem(t, g){
+  if(t==='cube') return D.cube(g);
+  if(t==='bottleFull') return D.bottle(true);
+  if(t==='bottleEmpty') return D.bottle(false);
+  return D[t]();
+}
+const VB = {cube:'-13 -24 26 26', bear:'-22 -54 44 56', car:'-34 -40 68 42', book:'-38 -40 76 42', pencil:'-48 -30 96 32', marker:'-36 -30 74 32', bottleFull:'-36 -74 72 76', bottleEmpty:'-36 -74 72 76'};
+const ic = (t, g) => `<svg class="ic" viewBox="${VB[t]}" aria-hidden="true">${drawItem(t,g)}</svg>`;
+
+/* ================= Sides ================= */
+let uid = 0;
+const mk = (t, g=0) => ({t, g, id:++uid, fresh:false});
+function parse(s){
+  if(!s) return [];
+  return s.split(',').flatMap(p => { const [t,n] = p.split('*'); return Array.from({length:+(n||1)}, () => mk(t)); });
+}
+function weight(side, W){ return side.reduce((a,it) => a + (it.t==='cube' ? 1 : W[it.t]), 0); }
+function count(side, t){ return side.filter(i => i.t===t).length; }
+function plural(n, t){ return `${n} ${NAME[t]}${n===1?'':'s'}`; }
+function eqHTML(spec){ // spec like 'bear*2,cube' -> icons
+  if(typeof spec === 'string') spec = parse(spec);
+  const groups = []; for(const it of spec){ const last = groups[groups.length-1]; if(last && last.t===it.t) last.n++; else groups.push({t:it.t, n:1}); }
+  return groups.map((g,i) => (i?'<span class="op">+</span>':'') + (g.n<=6 ? Array.from({length:g.n}, () => ic(g.t)).join('') : `${g.n} ${ic(g.t)}`)).join('');
+}
+
+/* ================= The balance ================= */
+const PX = 320, PY = 262, ARM = 210, TRAY = 204;
+function tiltFor(d){ return d===0 ? 0 : Math.sign(d) * Math.min(6 + 2*Math.abs(d), 15); }
+function Scale(host, opt={}){
+  const s = {L:[], R:[], W:{}, held:false, angle:0, target:0, onTap:opt.onTap||null, tapSide:opt.tapSide||'both', tappable:opt.tappable||(()=>true)};
+  host.classList.add('scale'); if(opt.small) host.classList.add('small');
+  const ticks = [-15,-8,0,8,15].map(a => { const r1=80, r2=a===0?100:94, rad=(90+a)*Math.PI/180; return `<line x1="${PX+r1*Math.cos(rad)}" y1="${PY+r1*Math.sin(rad)}" x2="${PX+r2*Math.cos(rad)}" y2="${PY+r2*Math.sin(rad)}" stroke="${a===0?'var(--good)':'var(--metal)'}" stroke-width="${a===0?7:4}" stroke-linecap="round" ${a===0?'class="zero"':''}/>`; }).join('');
+  host.innerHTML = (opt.tag ? `<span class="tag">${opt.tag}</span>` : '') + `<svg viewBox="0 0 640 400" role="img" aria-label="${opt.label||'Pan balance'}">
+    <rect x="232" y="370" width="176" height="20" rx="9" class="wood"/>
+    <rect x="${PX-9}" y="${PY}" width="18" height="112" rx="5" class="wood-dark"/>
+    <path d="M${PX-80*Math.sin(17*Math.PI/180)} ${PY+80*Math.cos(17*Math.PI/180)} A80 80 0 0 0 ${PX+80*Math.sin(17*Math.PI/180)} ${PY+80*Math.cos(17*Math.PI/180)}" fill="none" stroke="var(--metal)" stroke-width="3"/>
+    ${ticks}
+    <g class="blocks"></g>
+    <g class="panL"></g><g class="panR"></g>
+    <g class="beam"><rect x="${PX-ARM-6}" y="${PY-7}" width="${2*ARM+12}" height="14" rx="7" fill="var(--metal)"/><line x1="${PX}" y1="${PY}" x2="${PX}" y2="${PY+92}" stroke="var(--bear)" stroke-width="4" stroke-linecap="round"/><circle cx="${PX}" cy="${PY}" r="13" fill="var(--wood-dark)"/><circle cx="${PX}" cy="${PY}" r="5" fill="var(--tray)"/></g>
+  </svg>`;
+  const svg = $('svg', host), gL = $('.panL', svg), gR = $('.panR', svg), beam = $('.beam', svg), blocks = $('.blocks', svg), zero = $('.zero', svg);
+  function cols(side, sideName){
+    const out = [];
+    for(let i=0;i<side.length;i++){
+      const it = side[i];
+      if(it.t==='cube'){
+        const last = out[out.length-1];
+        if(last && last.t==='cube' && last.g===it.g && last.items.length<5){ last.items.push(it); continue; }
+        out.push({t:'cube', g:it.g, items:[it], w:WIDTH.cube});
+      } else out.push({t:it.t, items:[it], idx:i, w:WIDTH[it.t]});
+    }
+    return out;
+  }
+  function panSVG(side, sideName){
+    const cs = cols(side, sideName), gap = 6;
+    const total = cs.reduce((a,c)=>a+c.w,0) + gap*Math.max(0,cs.length-1);
+    const sc = Math.min(1.45, (TRAY-14)/Math.max(total,1));
+    let x = -total/2, body = '';
+    const canTap = s.onTap && (s.tapSide==='both' || s.tapSide===sideName);
+    for(const c of cs){
+      const cx = x + c.w/2;
+      if(c.t==='cube'){
+        body += `<g transform="translate(${cx.toFixed(1)},0)">` + c.items.map((it,k) => `<g class="${it.fresh?'pop':''}" transform="translate(0,${-22*k})">${D.cube(it.g)}</g>`).join('') + `</g>`;
+      } else {
+        const it = c.items[0], tap = canTap && s.tappable(it.t);
+        const h = it.t==='bear'?56:it.t==='car'?42:76;
+        body += `<g transform="translate(${cx.toFixed(1)},0)"${tap?` class="item tap" role="button" tabindex="0" aria-label="${NAME[it.t]}: tap to trade" data-side="${sideName}" data-i="${c.idx}"`:' class="item"'}>${tap?`<rect class="hit" x="${-c.w/2-3}" y="${-h}" width="${c.w+6}" height="${h+4}" rx="8" fill="transparent"/>`:''}<g class="${it.fresh?'pop':''}">${drawItem(it.t)}</g></g>`;
+      }
+      x += c.w + gap;
+    }
+    return `<rect x="-6" y="-36" width="12" height="36" fill="var(--metal)"/><path d="M${-TRAY/2} -40 h${TRAY} l-12 14 h${-(TRAY-24)} Z" fill="var(--tray)" stroke="var(--tray-edge)" stroke-width="2"/><g transform="translate(0,-40) scale(${sc.toFixed(3)})">${body}</g>`;
+  }
+  function geom(){
+    const r = s.angle*Math.PI/180;
+    beam.setAttribute('transform', `rotate(${(-s.angle).toFixed(2)} ${PX} ${PY})`);
+    gL.setAttribute('transform', `translate(${(PX-ARM*Math.cos(r)).toFixed(1)},${(PY+ARM*Math.sin(r)).toFixed(1)})`);
+    gR.setAttribute('transform', `translate(${(PX+ARM*Math.cos(r)).toFixed(1)},${(PY-ARM*Math.sin(r)).toFixed(1)})`);
+    zero.setAttribute('stroke-opacity', (!s.held && Math.abs(s.angle)<.3) ? 1 : .35);
+  }
+  let raf = 0;
+  function animate(){
+    cancelAnimationFrame(raf);
+    if(reduced){ s.angle = s.target; geom(); return; }
+    let v = 0;
+    const step = () => {
+      const a = (s.target - s.angle)*0.09; v = (v + a)*0.78; s.angle += v;
+      if(Math.abs(s.target - s.angle) < 0.05 && Math.abs(v) < 0.05){ s.angle = s.target; geom(); return; }
+      geom(); raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+  s.render = function(){
+    gL.innerHTML = panSVG(s.L, 'L'); gR.innerHTML = panSVG(s.R, 'R');
+    s.L.concat(s.R).forEach(i => i.fresh = false);
+    blocks.innerHTML = s.held ? [PX-ARM, PX+ARM].map(x => `<rect x="${x-22}" y="${PY+8}" width="44" height="${370-PY-8}" rx="6" class="wood"/><rect x="${x-22}" y="${PY+8}" width="44" height="8" rx="3" class="wood-dark"/>`).join('') : '';
+    s.target = s.held ? 0 : tiltFor(weight(s.L,s.W) - weight(s.R,s.W));
+    animate();
+  };
+  s.set = function(L, R, W, held){ s.L = L; s.R = R; if(W) s.W = W; s.held = !!held; s.render(); };
+  s.diff = () => weight(s.L,s.W) - weight(s.R,s.W);
+  svg.addEventListener('click', e => { const t = e.target.closest('.tap'); if(t && s.onTap) s.onTap(t.dataset.side, +t.dataset.i); });
+  svg.addEventListener('keydown', e => { if(e.key!=='Enter' && e.key!==' ') return; const t = e.target.closest('.tap'); if(t && s.onTap){ e.preventDefault(); s.onTap(t.dataset.side, +t.dataset.i); } });
+  geom();
+  return s;
+}
+
+/* ================= Puzzle data (Handout 1.9) ================= */
+const PUZ = [
+  { name:'1', W:{bear:2},
+    clues:[{L:'bear', R:'cube*2'}],
+    qs:[{L:'bear*3', ans:6,
+      because:`3 bears = 6 cubes, because each bear weighs the same as 2 cubes.`,
+      hint:`Tap a bear to trade it for 2 cubes. Then count all the cubes.`}],
+    trades:{bear:'cube*2'} },
+  { name:'2', W:{bear:3, car:6},
+    clues:[{L:'bear', R:'cube*3'}, {L:'car', R:'bear*2'}],
+    qs:[{L:'car', ans:6,
+      because:`A car = 6 cubes, because a car is 2 bears and each bear is 3 cubes.`,
+      hint:`Tap the car to trade it for 2 bears. Then trade each bear for cubes.`}],
+    trades:{car:'bear*2', bear:'cube*3'} },
+  { name:'3', W:{bear:3},
+    clues:[{L:'bear*2', R:'cube*6', work:true}],
+    qs:[{L:'bear', ans:3,
+          because:`1 bear = 3 cubes, because 2 bears share the 6 cubes: 3 each.`,
+          hint:`Press “Share the cubes” on the work balance. How many does each bear get?`},
+        {L:'bear,cube', ans:4,
+          because:`A bear and a cube = 4 cubes, because the bear is 3 cubes and 1 more cube makes 4.`,
+          hint:`Tap the bear to trade it for 3 cubes. Then count all the cubes.`}],
+    trades:{bear:'cube*3'}, unlock:{bear:1} },
+  { name:'4', W:{bear:2, car:3},
+    clues:[{L:'bear', R:'cube*2'}, {L:'bear,car', R:'cube*5', work:true}],
+    qs:[{L:'car', ans:3,
+      because:`The car = 3 cubes, because the bear is 2 of the 5 cubes. 3 cubes are left for the car.`,
+      hint:`Trade the bear for 2 cubes first. Then take the same thing off both sides.`}],
+    trades:{bear:'cube*2'} },
+  { name:'5', W:{bear:3, car:2},
+    clues:[{L:'car', R:'cube*2'}, {L:'bear*2,car', R:'cube*8', work:true}],
+    qs:[{L:'bear', ans:3,
+      because:`1 bear = 3 cubes, because the car is 2 of the 8 cubes. That leaves 6 cubes for 2 bears: 3 each.`,
+      hint:`Trade the car for 2 cubes. Take the same off both sides. Then share.`}],
+    trades:{car:'cube*2'} },
+  { name:'★', star:true, W:{bear:3},
+    clues:[{L:'bear*2,cube', R:'bear,cube*4', work:true}],
+    qs:[{L:'bear', ans:3,
+      because:`1 bear = 3 cubes. Take a bear off both sides, then a cube off both sides: 1 bear balances 3 cubes.`,
+      hint:`We don’t know what a bear weighs, so we can’t trade. Take the same thing off both sides.`}],
+    trades:{} },
+];
+window.__BP = {PUZ, parse, weight, tiltFor};
+
+/* ================= App state ================= */
+let tab = 'warm';
+let S;
+function freshState(){
+  return {
+    warm:{i:0, guess:null, shown:false},
+    trade:{bears:1, cubes:2, known:[]},
+    puz:{p:0, st:PUZ.map(newPuzState)},
+    make:{L:{bear:1, car:0, cube:0}, R:{bear:0, car:0, cube:3}, wb:3, wc:4, held:false},
+    talk:{q:0},
+  };
+}
+function newPuzState(P){
+  const work = P.clues.find(c => c.work);
+  return {qi:0, n:0, held:true, wrong:0, solved:[], done:false, shared:false,
+    work: work ? {L:parse(work.L), R:parse(work.R)} : null,
+    qL: parse(P.qs[0].L), busy:false};
+}
+
+const main = $('#main');
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('nav.steps button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ({warm:renderWarm, trade:renderTrade, puz:renderPuz, make:renderMake, talk:renderTalk})[t]();
+}
+document.querySelectorAll('nav.steps button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$('#resetBtn').onclick = () => { S = freshState(); setTab('warm'); };
+$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+function msg(el, kind, html){ el.className = 'msg' + (kind ? ' '+kind : ''); el.innerHTML = html; }
+
+/* ================= 1. Warm-up ================= */
+const WARM = [
+  {L:'book', R:'pencil'},
+  {L:'marker', R:'marker'},
+  {L:'bottleFull', R:'bottleEmpty'},
+];
+const WW = {book:8, pencil:1, marker:2, bottleFull:9, bottleEmpty:1};
+function renderWarm(){
+  const st = S.warm, pair = WARM[st.i];
+  main.innerHTML = `<section class="stage"><div id="sc"></div></section>
+  <aside class="panel">
+    <h2>Heavier, lighter, or the same?</h2>
+    <p class="small">Pair ${st.i+1} of ${WARM.length}. Guess first. Then let go!</p>
+    <div class="btns" id="guesses">
+      <button class="chipbtn" data-g="L">${ic(pair.L)} goes down</button>
+      <button class="chipbtn" data-g="S">Same</button>
+      <button class="chipbtn" data-g="R">${ic(pair.R)} goes down</button>
+    </div>
+    <div class="btns"><button class="btn go" id="go">Let go!</button><button class="btn alt" id="next">${st.i<WARM.length-1?'Next pair':'Back to pair 1'}</button></div>
+    <div class="msg" id="m" aria-live="polite"></div>
+    <p class="small">How could the balance tell us? The heavier side goes down. Level means the same weight.</p>
+  </aside>`;
+  const sc = Scale($('#sc'), {label:`${NAME[pair.L]} and ${NAME[pair.R]} on a balance`});
+  sc.set([mk(pair.L)], [mk(pair.R)], WW, !st.shown);
+  const m = $('#m');
+  const paint = () => document.querySelectorAll('#guesses button').forEach(b => b.setAttribute('aria-pressed', b.dataset.g===st.guess));
+  paint();
+  document.querySelectorAll('#guesses button').forEach(b => b.onclick = () => { st.guess = b.dataset.g; paint(); });
+  const reveal = () => {
+    const d = weight(sc.L, WW) - weight(sc.R, WW);
+    const truth = d>0 ? 'L' : d<0 ? 'R' : 'S';
+    const what = truth==='S' ? `<b>Level!</b> The two ${NAME[pair.L]}s weigh the same.` :
+      `<b>The ${NAME[truth==='L'?pair.L:pair.R]} went down.</b> It is heavier than the ${NAME[truth==='L'?pair.R:pair.L]}.`;
+    const g = st.guess==null ? '' : st.guess===truth ? ' You guessed it!' : ' Good guess. The balance tells us for sure.';
+    msg(m, 'good', what + g);
+  };
+  if(st.shown) reveal();
+  $('#go').onclick = () => { st.shown = true; sc.held = false; sc.render(); reveal(); };
+  $('#next').onclick = () => { st.i = (st.i+1) % WARM.length; st.guess = null; st.shown = false; renderWarm(); };
+}
+
+/* ================= 2. Trade (launch) ================= */
+function renderTrade(){
+  const st = S.trade;
+  main.innerHTML = `<section class="stage"><div id="sc"></div></section>
+  <aside class="panel">
+    <h2>If one bear balances two cubes, what else do we know?</h2>
+    <div class="grid2">
+      <div class="stepper sm"><span class="lbl">${ic('bear')}</span><button id="bm" aria-label="One less bear">−</button><output id="bn"></output><button id="bp" aria-label="One more bear">+</button></div>
+      <div class="stepper sm"><span class="lbl">${ic('cube')}</span><button id="cm" aria-label="One less cube">−</button><output id="cn"></output><button id="cp" aria-label="One more cube">+</button></div>
+    </div>
+    <div class="msg" id="m" aria-live="polite"></div>
+    <div class="sidebox"><h3>What we know</h3><ul class="known" id="known"></ul></div>
+    <p class="small">If I know one trade, what else can I figure out?</p>
+  </aside>`;
+  const W = {bear:2};
+  const sc = Scale($('#sc'), {label:'Bears and cubes on a balance'});
+  const m = $('#m');
+  function update(fresh){
+    const L = Array.from({length:st.bears}, () => mk('bear'));
+    const R = Array.from({length:st.cubes}, () => mk('cube'));
+    if(fresh==='b' && L.length) L[L.length-1].fresh = true;
+    if(fresh==='c' && R.length) R[R.length-1].fresh = true;
+    sc.set(L, R, W, false);
+    $('#bn').value = $('#bn').textContent = st.bears; $('#cn').textContent = st.cubes;
+    const d = sc.diff();
+    if(d===0){
+      msg(m, 'good', `<b>Balanced!</b> ${plural(st.bears,'bear')} = ${plural(st.cubes,'cube')}.`);
+      if(!st.known.includes(st.bears)){ st.known.push(st.bears); st.known.sort((a,b)=>a-b); }
+    } else if(d>0) msg(m, 'try', `<b>The bears go down.</b> The bears are heavier. Add cubes?`);
+    else msg(m, 'try', `<b>The cubes go down.</b> Too many cubes for ${plural(st.bears,'bear')}.`);
+    $('#known').innerHTML = st.known.map(b => `<li><div class="eq">${eqHTML('bear*'+b)}<span class="op">=</span>${eqHTML('cube*'+(2*b))}</div></li>`).join('');
+    $('#bm').disabled = st.bears<=1; $('#bp').disabled = st.bears>=5; $('#cm').disabled = st.cubes<=0; $('#cp').disabled = st.cubes>=10;
+  }
+  $('#bp').onclick = () => { st.bears++; update('b'); };
+  $('#bm').onclick = () => { st.bears--; update(); };
+  $('#cp').onclick = () => { st.cubes++; update('c'); };
+  $('#cm').onclick = () => { st.cubes--; update(); };
+  update();
+}
+
+/* ================= 3. Puzzles ================= */
+function knownTrade(P, ps, t){
+  if(!P.trades[t]) return false;
+  if(P.unlock && P.unlock[t] != null) return ps.qi >= P.unlock[t];
+  return true;
+}
+let groupNext = 1;
+function doTrade(side, i, spec){
+  const it = side[i]; const parts = parse(spec);
+  const g = groupNext; groupNext = groupNext % 3 + 1;
+  parts.forEach(p => { p.fresh = true; if(p.t==='cube') p.g = g; });
+  side.splice(i, 1, ...parts);
+  return it;
+}
+function removeBoth(work, t){
+  const li = work.L.map(x=>x.t).lastIndexOf(t), ri = work.R.map(x=>x.t).lastIndexOf(t);
+  if(li<0 || ri<0) return false;
+  work.L.splice(li,1); work.R.splice(ri,1); return true;
+}
+function canShare(work){
+  const L = work.L, R = work.R;
+  if(L.length<2 || !R.length) return false;
+  if(!L.every(x => x.t===L[0].t && x.t!=='cube')) return false;
+  if(!R.every(x => x.t==='cube')) return false;
+  return R.length % L.length === 0;
+}
+function share(work){
+  const k = work.L.length, each = work.R.length / k;
+  work.R = Array.from({length:work.R.length}, (_,j) => { const c = mk('cube', 1 + Math.floor(j/each) % 3); c.fresh = true; return c; });
+  return each;
+}
+function commonTypes(work){ return ['bear','car','cube'].filter(t => count(work.L,t) && count(work.R,t)); }
+
+function renderPuz(){
+  const ps = S.puz, P = PUZ[ps.p], st = ps.st[ps.p], q = P.qs[st.qi];
+  const clueList = P.clues.filter(c => !c.work);
+  main.innerHTML = `<section class="stage">
+    ${clueList.length ? `<div class="clues">${clueList.map((c,i) => `<div class="clue"><div id="clue${i}"></div><div class="eq">${eqHTML(c.L)}<span class="op">=</span>${eqHTML(c.R)}</div></div>`).join('')}</div>` : ''}
+    <div class="row2">
+      ${st.work ? `<div class="clue"><div id="work"></div><div class="btns" id="workBtns"></div></div>` : ''}
+      <div id="qs"></div>
+    </div>
+  </section>
+  <aside class="panel">
+    <div class="pnav" id="pnav">${PUZ.map((p,i) => `<button class="${p.star?'star':''} ${ps.st[i].done?'solved':''}" aria-pressed="${i===ps.p}" data-p="${i}" aria-label="${p.star?'Challenge puzzle':'Puzzle '+p.name}">${p.star?'★ Challenge':p.name}</button>`).join('')}</div>
+    <p class="small">${P.star ? 'Challenge: you can only solve this one by taking the same thing off both sides.' : 'Each balance is level: both sides weigh the same.'}${P.qs.length>1 ? ` Question ${st.qi+1} of ${P.qs.length}.` : ''}</p>
+    <div class="eq">${eqHTML(q.L)}<span class="op">=</span><span class="q">?</span>${ic('cube')}</div>
+    <div class="stepper"><button id="nm" aria-label="One less cube">−</button><output id="nv">0</output><button id="np" aria-label="One more cube">+</button><span class="lbl">${ic('cube')} cubes</span></div>
+    <div class="btns"><button class="btn go" id="go">Let go!</button><button class="btn alt" id="show" hidden>Show me</button><button class="btn alt" id="next" hidden></button></div>
+    <div class="msg" id="m" aria-live="polite"></div>
+    <p class="small" id="tip"></p>
+  </aside>`;
+  const m = $('#m');
+  clueList.forEach((c,i) => Scale($('#clue'+i), {small:true, label:'Clue balance'}).set(parse(c.L), parse(c.R), P.W, false));
+
+  let work = null;
+  const tapMsg = t => msg(m, 'try', `<b>We don’t know what a ${NAME[t]} weighs yet.</b> ${P.unlock && P.unlock[t]!=null ? 'Find out first!' : 'Look at the clues.'}`);
+  const onTrade = (sideArr, i) => {
+    const t = sideArr[i].t;
+    if(!knownTrade(P, st, t)){ tapMsg(t); return false; }
+    doTrade(sideArr, i, P.trades[t]);
+    msg(m, '', `Traded! 1 ${ic(t)} = ${eqHTML(P.trades[t])}. The balance stays level.`);
+    return true;
+  };
+  if(st.work){
+    work = Scale($('#work'), {tag:'Work it out', label:'Work balance', onTap:(side,i) => { if(st.busy) return; if(onTrade(side==='L'?st.work.L:st.work.R, i)){ work.render(); workButtons(); afterWork(); } }, tappable:t => t!=='cube'});
+    work.set(st.work.L, st.work.R, P.W, false);
+  }
+  const qsc = Scale($('#qs'), {tag:'Question', label:'Question balance', tapSide:'L', onTap:(side,i) => { if(st.busy) return; if(onTrade(st.qL, i)){ st.held = true; drawQ(); } }, tappable:t => t!=='cube'});
+
+  function drawQ(){
+    const R = Array.from({length:st.n}, () => mk('cube'));
+    if(st._freshN && R.length) R[R.length-1].fresh = true; st._freshN = false;
+    qsc.set(st.qL, R, P.W, st.held);
+    $('#nv').textContent = st.n;
+    $('#nm').disabled = st.n<=0 || st.solved[st.qi]; $('#np').disabled = st.n>=12 || st.solved[st.qi];
+    $('#go').disabled = !!st.solved[st.qi];
+  }
+  function workButtons(){
+    if(!st.work) return;
+    const box = $('#workBtns'); let h = '';
+    for(const t of commonTypes(st.work)) h += `<button class="chipbtn" data-rm="${t}">Take ${ic(t)} off both sides</button>`;
+    if(canShare(st.work) && !st.shared) h += `<button class="chipbtn" data-share="1">Share the cubes</button>`;
+    h += `<button class="chipbtn" data-back="1">Put it back</button>`;
+    box.innerHTML = h;
+    box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { if(st.busy) return; const t = b.dataset.rm; removeBoth(st.work, t); work.render(); workButtons(); msg(m, '', `Took 1 ${NAME[t]} off <b>both</b> sides. Still level!`); afterWork(); });
+    box.querySelectorAll('[data-share]').forEach(b => b.onclick = () => { if(st.busy) return; const k = st.work.L.length, each = share(st.work); st.shared = true; work.render(); workButtons(); msg(m, '', `${k} ${NAME[st.work.L[0].t]}s share ${k*each} cubes. Each color is one share. Count one share.`); });
+    box.querySelectorAll('[data-back]').forEach(b => b.onclick = () => { if(st.busy) return; const c = P.clues.find(c => c.work); st.work = {L:parse(c.L), R:parse(c.R)}; st.shared = false; work.set(st.work.L, st.work.R, P.W, false); workButtons(); msg(m, '', ''); });
+  }
+  function afterWork(){
+    const L = st.work.L, R = st.work.R;
+    if(R.every(x=>x.t==='cube') && L.length===1 && L[0].t!=='cube') msg(m, 'good', `Look! Now 1 ${NAME[L[0].t]} is on one side and only cubes are on the other. Count the cubes.`);
+  }
+  workButtons();
+  $('#tip').textContent = st.work ? (P.trades && Object.keys(P.trades).length ? 'Tap a bear or car you know to trade it for cubes.' : 'Use the buttons under the work balance.') : 'Tap a bear or car to trade it for what it weighs.';
+
+  $('#np').onclick = () => { st.n++; st.held = true; st._freshN = true; msg(m,'',''); drawQ(); };
+  $('#nm').onclick = () => { st.n--; st.held = true; msg(m,'',''); drawQ(); };
+  $('#go').onclick = () => {
+    if(st.n===0){ msg(m, 'try', `<b>Add some cubes first.</b> Use the + button.`); return; }
+    st.held = false; drawQ();
+    const w = weight(st.qL, P.W);
+    if(st.n === w){
+      st.solved[st.qi] = true;
+      if(st.qi === P.qs.length-1) st.done = true;
+      msg(m, 'good', `<b>Balanced!</b> ${q.because}`);
+      $('#pnav').querySelectorAll('button')[ps.p].classList.toggle('solved', st.done);
+      const nb = $('#next'); nb.hidden = false; $('#show').hidden = true;
+      if(st.qi < P.qs.length-1){ nb.textContent = 'Next question'; nb.onclick = () => { st.qi++; st.n = 0; st.held = true; st.wrong = 0; st.qL = parse(P.qs[st.qi].L); renderPuz(); }; }
+      else if(ps.p < PUZ.length-1){ nb.textContent = PUZ[ps.p+1].star ? 'Try the challenge' : 'Next puzzle'; nb.onclick = () => { ps.p++; renderPuz(); }; }
+      else nb.hidden = true;
+      drawQ();
+    } else {
+      st.wrong++;
+      const tooMany = st.n > w;
+      msg(m, 'try', `<b>${tooMany ? 'The cubes went down.' : 'The cubes went up.'}</b> ${st.n} ${st.n===1?'cube is':'cubes are'} ${tooMany ? 'too heavy. Try fewer.' : 'too light. Try more.'}<span class="hint">${q.hint}</span>`);
+      if(st.wrong >= 2) $('#show').hidden = false;
+    }
+  };
+  $('#show').onclick = async () => {
+    if(st.busy) return; st.busy = true; $('#show').disabled = true;
+    // Work balance: trade known items, take common things off both sides, then share.
+    if(st.work){
+      for(let guard=0; guard<20; guard++){
+        let did = false;
+        for(const sideArr of [st.work.L, st.work.R]){ const i = sideArr.findIndex(x => x.t!=='cube' && knownTrade(P, st, x.t) && !(sideArr===st.work.L && sideArr.length===1 && st.work.R.every(r=>r.t==='cube'))); if(i>=0){ doTrade(sideArr, i, P.trades[sideArr[i].t]); did = true; break; } }
+        if(!did){ const ct = commonTypes(st.work).sort((a,b) => (a==='cube') - (b==='cube')); if(ct.length){ removeBoth(st.work, ct[0]); did = true; } }
+        if(!did && canShare(st.work) && !st.shared){ share(st.work); st.shared = true; did = true; }
+        if(!did) break;
+        work.render(); workButtons(); await wait(800);
+        if(!document.body.contains(work && $('#work'))) { st.busy = false; return; }
+      }
+    }
+    // Question balance: trade every item we know.
+    for(let guard=0; guard<10; guard++){
+      const i = st.qL.findIndex(x => x.t!=='cube' && knownTrade(P, st, x.t));
+      if(i<0) break;
+      doTrade(st.qL, i, P.trades[st.qL[i].t]); st.held = true; drawQ(); await wait(800);
+    }
+    st.busy = false; $('#show').disabled = false;
+    msg(m, '', `Look at the balances. <b>Count the cubes</b>, then set your number and let go.`);
+  };
+  $('#pnav').querySelectorAll('button').forEach(b => b.onclick = () => { ps.p = +b.dataset.p; renderPuz(); });
+  drawQ();
+  if(st.solved[st.qi]){ st.held = false; drawQ(); msg(m, 'good', `<b>Balanced!</b> ${q.because}`); }
+}
+
+/* ================= 4. Make one ================= */
+function renderMake(){
+  const st = S.make;
+  const side = (k, label) => `<div class="sidebox"><h3>${label}</h3>${['bear','car','cube'].map(t => `<div class="stepper sm"><span class="lbl">${ic(t)}</span><button data-s="${k}" data-t="${t}" data-d="-1" aria-label="One less ${NAME[t]} on the ${label.toLowerCase()}">−</button><output id="o${k}${t}"></output><button data-s="${k}" data-t="${t}" data-d="1" aria-label="One more ${NAME[t]} on the ${label.toLowerCase()}">+</button></div>`).join('')}</div>`;
+  main.innerHTML = `<section class="stage"><div id="sc"></div>
+    <div class="grid2">${side('L','Left side')}${side('R','Right side')}</div></section>
+  <aside class="panel">
+    <h2>Make a balance puzzle for a partner</h2>
+    <p class="lead">Pick the secret weights. Build both sides. Hold the balance and ask your partner!</p>
+    <div class="sidebox">
+      <div class="secret">1 ${ic('bear')} = ${[2,3,4].map(v => `<button data-wb="${v}">${v}</button>`).join('')} ${ic('cube')}</div>
+      <div class="secret">1 ${ic('car')} = ${[2,3,4,5,6].map(v => `<button data-wc="${v}">${v}</button>`).join('')} ${ic('cube')}</div>
+    </div>
+    <div class="btns"><button class="btn alt" id="hold"></button></div>
+    <div class="msg" id="m" aria-live="polite"></div>
+    <p class="small">★ Harder: make a puzzle you can only solve by taking the same thing off both sides.</p>
+  </aside>`;
+  const sc = Scale($('#sc'), {label:'Your puzzle balance'});
+  const m = $('#m'), MAX = {bear:3, car:2, cube:12};
+  function update(fresh){
+    const build = (o, k) => ['bear','car','cube'].flatMap(t => Array.from({length:o[t]}, (_,j) => { const x = mk(t); if(fresh && fresh.s===k && fresh.t===t && j===o[t]-1) x.fresh = true; return x; }));
+    const W = {bear:st.wb, car:st.wc};
+    sc.set(build(st.L,'L'), build(st.R,'R'), W, st.held);
+    for(const k of ['L','R']) for(const t of ['bear','car','cube']) $('#o'+k+t).textContent = st[k][t];
+    document.querySelectorAll('[data-s]').forEach(b => { const v = st[b.dataset.s][b.dataset.t]; b.disabled = +b.dataset.d<0 ? v<=0 : v>=MAX[b.dataset.t]; });
+    document.querySelectorAll('[data-wb]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.wb===st.wb));
+    document.querySelectorAll('[data-wc]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.wc===st.wc));
+    $('#hold').textContent = st.held ? 'Let go!' : 'Hold the balance';
+    $('#hold').className = st.held ? 'btn go' : 'btn alt';
+    if(st.held){ msg(m, '', `The balance is held. Ask: <b>which side will go down? Or will it be level?</b>`); return; }
+    const d = sc.diff();
+    msg(m, d===0 ? 'good' : '', d===0 ? `<b>Level!</b> Both sides weigh ${weight(sc.L,W)} cubes. That is a fair puzzle.` : `<b>The ${d>0?'left':'right'} side goes down.</b> It is ${Math.abs(d)} ${Math.abs(d)===1?'cube':'cubes'} heavier. Change something to make it level.`);
+  }
+  document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const k=b.dataset.s, t=b.dataset.t, d=+b.dataset.d; st[k][t] = Math.max(0, Math.min(MAX[t], st[k][t]+d)); update(d>0 ? {s:k,t} : null); });
+  document.querySelectorAll('[data-wb]').forEach(b => b.onclick = () => { st.wb = +b.dataset.wb; update(); });
+  document.querySelectorAll('[data-wc]').forEach(b => b.onclick = () => { st.wc = +b.dataset.wc; update(); });
+  $('#hold').onclick = () => { st.held = !st.held; update(); };
+  update();
+}
+
+/* ================= 5. Talk about it ================= */
+const TALK = [
+  { nav:'1', title:'Puzzle 4, two ways', text:`${eqHTML('bear,car')}<span class="op">=</span>${eqHTML('cube*5')}`, sub:`We know 1 bear = 2 cubes. Both ways are fair. Why?`,
+    W:{bear:2, car:3}, start:{L:'bear,car', R:'cube*5'},
+    acts:[
+      {label:'Way 1: Trade the bear', run: async (sc, say) => {
+        sc.set(parse('bear,car'), parse('cube*5'), null, false); await wait(500);
+        const L = sc.L; const i = L.findIndex(x=>x.t==='bear'); const parts = parse('cube*2'); parts.forEach(p=>{p.fresh=true; p.g=1;}); L.splice(i,1,...parts); sc.render();
+        say('good', `<b>Trade the bear for 2 cubes.</b> Now the car and 2 cubes balance 5 cubes. Count on from 2: 3, 4, 5. That is 3 more. <b>The car is 3 cubes.</b>`);
+      }},
+      {label:'Way 2: Take the same off both sides', run: async (sc, say) => {
+        sc.set(parse('bear,car'), parse('cube*5'), null, false); await wait(500);
+        sc.L = sc.L.filter(x => x.t!=='bear'); sc.R = sc.R.slice(2); sc.render();
+        say('good', `<b>A bear weighs the same as 2 cubes.</b> Take the bear off one side and 2 cubes off the other side. Still level! <b>The car is 3 cubes.</b>`);
+      }},
+    ]},
+  { nav:'2', title:'Why does taking the same thing off both sides keep it balanced?', text:`${eqHTML('bear,cube*2')}<span class="op">=</span>${eqHTML('cube*4')}`, sub:`1 bear = 2 cubes. Try it both ways.`,
+    W:{bear:2}, start:{L:'bear,cube*2', R:'cube*4'},
+    acts:[
+      {label:'Take 1 cube off both sides', run: async (sc, say) => {
+        if(count(sc.L,'cube')<1 || count(sc.R,'cube')<1 || sc.diff()!==0){ sc.set(parse('bear,cube*2'), parse('cube*4'), null, false); await wait(400); }
+        removeBoth(sc, 'cube'); sc.render();
+        say('good', `<b>Still level.</b> Both sides got 1 cube lighter, so they still weigh the same. Do the same to both sides.`);
+      }},
+      {label:'Take 1 cube off one side', run: async (sc, say) => {
+        sc.set(parse('bear,cube*2'), parse('cube*4'), null, false); await wait(400);
+        sc.R.pop(); sc.render();
+        say('try', `<b>It tipped!</b> Only one side got lighter, so the other side goes down. That is not fair to the balance.`);
+      }},
+      {label:'Start again', run: async (sc, say) => { sc.set(parse('bear,cube*2'), parse('cube*4'), null, false); say('', ''); }},
+    ]},
+  { nav:'3', title:'“3 cubes beat 2 bears, because 3 is more than 2.” Is that right?', text:`${eqHTML('bear*2')}<span class="op">?</span>${eqHTML('cube*3')}`, sub:`1 bear = 2 cubes. What does the balance say?`,
+    W:{bear:2}, start:{L:'bear*2', R:'cube*3'}, held:true,
+    acts:[
+      {label:'Let the balance decide', run: async (sc, say) => {
+        sc.set(parse('bear*2'), parse('cube*3'), null, false);
+        say('try', `<b>The bears went down.</b> More things does not mean more weight. Which side went down?`);
+      }},
+      {label:'Trade the bears', run: async (sc, say) => {
+        sc.set(parse('bear*2'), parse('cube*3'), null, false); await wait(500);
+        const c = parse('cube*4'); c.forEach((x,j) => { x.fresh = true; x.g = j<2?1:2; }); sc.L = c; sc.render();
+        say('good', `<b>2 bears = 4 cubes.</b> 4 cubes are heavier than 3 cubes. So 2 bears beat 3 cubes!`);
+      }},
+    ]},
+  { nav:'★ Journal', title:'Explain puzzle 4 to a friend who was absent.', text:`${eqHTML('bear,car')}<span class="op">=</span>${eqHTML('cube*5')}`, sub:`Use the word “because.”`,
+    W:{bear:2, car:3}, start:{L:'bear,car', R:'cube*5'}, journal:true,
+    acts:[] },
+];
+function renderTalk(){
+  const st = S.talk, T = TALK[st.q];
+  main.innerHTML = `<section class="stage"><div id="sc"></div></section>
+  <aside class="panel">
+    <div class="pnav" id="tnav">${TALK.map((t,i) => `<button class="${t.nav.length>1?'star':''}" aria-pressed="${i===st.q}" data-q="${i}" aria-label="${t.nav.length>1?'Journal':'Question '+t.nav}">${t.nav}</button>`).join('')}</div>
+    <h2>${T.title}</h2>
+    <div class="eq">${T.text}</div>
+    <p class="lead">${T.sub}</p>
+    ${T.journal ? `<div class="frame">The bear weighs ____ cubes, because ____.</div><div class="frame">So the car is ____ cubes, because ____.</div>` : ''}
+    <div class="btns" id="acts">${T.acts.map((a,i) => `<button class="btn ${i===0?'go':'alt'}" data-a="${i}">${a.label}</button>`).join('')}</div>
+    <div class="msg" id="m" aria-live="polite"></div>
+    <p class="small">Talk it over first. Then press a button to show the evidence.</p>
+  </aside>`;
+  const sc = Scale($('#sc'), {label:'Discussion balance'});
+  sc.set(parse(T.start.L), parse(T.start.R), T.W, !!T.held);
+  const m = $('#m'); const say = (k,h) => msg(m, k, h);
+  let busy = false;
+  document.querySelectorAll('#acts button').forEach(b => b.onclick = async () => { if(busy) return; busy = true; try{ await T.acts[+b.dataset.a].run(sc, say); } finally { busy = false; } });
+  document.querySelectorAll('#tnav button').forEach(b => b.onclick = () => { st.q = +b.dataset.q; renderTalk(); });
+}
+
+S = freshState();
+setTab('warm');
+})();
+</script>
+
+</body></html>

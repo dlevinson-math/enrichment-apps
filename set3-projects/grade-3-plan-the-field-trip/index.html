@@ -1,0 +1,686 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Plan the Field Trip</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Red+Hat+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a route line of five stops (class periods) above a working "trip ticket" area; times in mono like a bus timetable. */
+:root{
+  --paper:#EDF1F4; --card:#FFFFFF; --ink:#16213A; --muted:#58637A; --line:#CCD4DE;
+  --bus:#F2B705; --bus-ink:#1D1A0E; --bus-soft:#FFF4CC;
+  --route:#0E7A84; --route-soft:#DDF1F2; --jump2:#C0462F;
+  --good:#1F8A4C; --good-soft:#E2F4E8; --warn:#B4231C; --warn-soft:#FBE6E3;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"Red Hat Mono",ui-monospace,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0E131B; --card:#172030; --ink:#E7ECF3; --muted:#9DA8BA; --line:#2E3A4E;
+  --bus:#F5C230; --bus-ink:#1D1A0E; --bus-soft:#3A3014;
+  --route:#43C3CC; --route-soft:#143238; --jump2:#F08A72;
+  --good:#4FCB83; --good-soft:#15301F; --warn:#FF7C70; --warn-soft:#3A1C1A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0E131B; --card:#172030; --ink:#E7ECF3; --muted:#9DA8BA; --line:#2E3A4E;
+  --bus:#F5C230; --bus-ink:#1D1A0E; --bus-soft:#3A3014;
+  --route:#43C3CC; --route-soft:#143238; --jump2:#F08A72;
+  --good:#4FCB83; --good-soft:#15301F; --warn:#FF7C70; --warn-soft:#3A1C1A; color-scheme:dark }
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.25vw,20px); line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:0 32px}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--route); outline-offset:2px}
+.wrap{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-top:18px}
+.brand{display:flex; flex-direction:column; gap:2px; min-width:0}
+.eyebrow{font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.6vw,52px); line-height:1; margin:0; letter-spacing:-.02em; text-wrap:balance}
+h1 .tag{display:inline-block; background:var(--bus); color:var(--bus-ink); padding:.04em .3em; border-radius:.18em; transform:rotate(-1.5deg)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+/* route tabs */
+.route{overflow-x:auto; padding:6px 2px 4px}
+.route ol{list-style:none; margin:0; padding:0; display:flex; min-width:max-content; position:relative}
+.route li{position:relative; flex:1}
+.route li:not(:last-child)::after{content:""; position:absolute; top:24px; left:50%; width:100%; height:6px; background:var(--line); z-index:0}
+.route button{position:relative; z-index:1; background:none; border:0; display:flex; flex-direction:column; align-items:center; gap:6px; padding:4px 14px; min-width:150px; width:100%}
+.route .dot{width:42px; height:42px; border-radius:50%; background:var(--card); border:5px solid var(--line); display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:15px}
+.route .lab{font-weight:700; font-size:16px; color:var(--muted); white-space:nowrap}
+.route .sub{font-size:13px; color:var(--muted); margin-top:-6px; white-space:nowrap}
+.route button[aria-selected="true"] .dot{background:var(--bus); border-color:var(--ink); color:var(--bus-ink)}
+.route button[aria-selected="true"] .lab{color:var(--ink)}
+/* ticket strip */
+.ticket{display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; background:var(--card); border:2px dashed var(--line); border-radius:14px; padding:10px 18px}
+.ticket .k{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; display:block}
+.ticket .v{font-family:var(--mono); font-weight:700; font-size:clamp(17px,1.4vw,22px)}
+.ticket .team{font-family:var(--display); font-weight:800; font-size:22px}
+.view{display:flex; flex-direction:column; gap:18px}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:4px; gap:4px; align-self:flex-start}
+.seg button{border:0; background:none; padding:10px 18px; border-radius:10px; font-weight:700; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.grid2{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:20px; align-items:start}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px 20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel h2{font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px); margin:0; line-height:1.1; text-wrap:balance}
+.panel h3{font-family:var(--display); font-weight:600; font-size:20px; margin:0}
+.lead{margin:0; max-width:46em}
+.hint{margin:0; color:var(--muted); font-size:.9em}
+.mono{font-family:var(--mono); font-weight:700; font-variant-numeric:tabular-nums}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--bus); color:var(--bus-ink); font-weight:700; padding:12px 22px; border-radius:12px; min-height:50px; box-shadow:0 3px 0 var(--ink)}
+.primary:active{transform:translateY(2px); box-shadow:0 1px 0 var(--ink)}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; padding:10px 18px; border-radius:12px; min-height:50px}
+.small{min-height:40px; padding:6px 12px; font-size:.9em}
+input.ans{font-family:var(--mono); font-weight:700; font-size:1.1em; width:5.6em; min-height:50px; padding:6px 10px; border:2px solid var(--line); border-radius:10px; background:var(--paper); text-align:center}
+input.ans.wide{width:7em}
+input.ans.ok{border-color:var(--good); background:var(--good-soft)}
+input.ans.bad{border-color:var(--warn); background:var(--warn-soft)}
+input.text{min-height:48px; padding:6px 12px; border:2px solid var(--line); border-radius:10px; background:var(--paper); font-weight:700; width:12em; max-width:100%}
+.fb{margin:0; padding:12px 16px; border-radius:12px; background:var(--route-soft); max-width:46em}
+.fb.ok{background:var(--good-soft)} .fb.bad{background:var(--warn-soft)}
+.fb:empty{display:none}
+.fb b{font-family:var(--mono)}
+/* menu cards */
+.dests{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px}
+.dest{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px 14px; text-align:left; display:flex; flex-direction:column; gap:4px}
+.dest[aria-pressed="true"]{border-color:var(--ink); background:var(--bus-soft); box-shadow:0 0 0 2px var(--bus) inset}
+.dest .nm{font-family:var(--display); font-weight:800; font-size:21px}
+.dest .meta{font-family:var(--mono); font-size:15px; color:var(--muted)}
+.dest .acts{font-size:15px}
+.pick{display:flex; flex-wrap:wrap; gap:8px}
+.pick button{border:2px solid var(--line); border-radius:999px; background:var(--card); padding:8px 16px; font-weight:700; min-height:46px}
+.pick button[aria-pressed="true"]{background:var(--route); border-color:var(--route); color:var(--card)}
+/* itinerary table */
+.tablewrap{overflow-x:auto}
+table.itin{border-collapse:separate; border-spacing:0; width:100%; min-width:520px}
+table.itin th{font-size:13px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:2px solid var(--line)}
+table.itin td{padding:8px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.itin tr.cur td{background:var(--bus-soft)}
+table.itin td.t{font-family:var(--mono); font-weight:700; font-size:1.1em; white-space:nowrap}
+table.itin .note{display:block; font-size:13px; color:var(--muted)}
+.okmark{color:var(--good); font-weight:700}
+.nl{width:100%; height:auto; display:block}
+.nl text{font-family:var(--mono); font-weight:700}
+.clocks{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px}
+.clockcard{display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; min-width:0}
+.clockcard svg{width:100%; max-width:230px; height:auto; touch-action:none}
+.clockcard .cap{font-family:var(--display); font-weight:800; font-size:20px}
+.dig{font-family:var(--mono); font-weight:700; font-size:28px}
+.qcards{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px}
+.qcard{border:2px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; background:var(--card); min-width:0}
+.qcard p{margin:0}
+/* money */
+.tray{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.bill{min-height:54px; min-width:92px; border-radius:8px; border:2px solid #2D6B3F; background:#CFE8C9; color:#173A22; font-family:var(--mono); font-weight:700; font-size:18px}
+.coin{width:62px; height:62px; border-radius:50%; border:2px solid #7D7F86; background:#DCDDE2; color:#2A2C33; font-family:var(--mono); font-weight:700; font-size:15px}
+.coin.p{background:#D9A57A; border-color:#8A5730; color:#3B200C}
+.pile{display:flex; flex-wrap:wrap; gap:8px; min-height:70px; padding:10px; border:2px dashed var(--line); border-radius:12px; align-items:center}
+.pile:empty::before{content:"Tap bills and coins to put them here."; color:var(--muted); font-size:.9em}
+.pile .bill,.pile .coin{transform:scale(.9)}
+/* bars */
+.bars{display:flex; flex-direction:column; gap:8px}
+.bar{display:grid; grid-template-columns:minmax(0,15em) minmax(0,1fr) 6.5em; gap:10px; align-items:center}
+.bar .track{height:26px; background:var(--paper); border-radius:6px; overflow:hidden}
+.bar .fill{height:100%; background:var(--route); border-radius:6px}
+.bar.best .fill{background:var(--bus)}
+.bar .lbl{font-size:.9em; min-width:0}
+.meter{height:30px; background:var(--paper); border-radius:8px; position:relative; overflow:hidden; border:2px solid var(--line)}
+.meter .fill{height:100%; background:var(--route)}
+.meter.over .fill{background:var(--warn)}
+.meter .mark{position:absolute; top:-2px; bottom:-2px; width:3px; background:var(--ink)}
+.stats{display:flex; flex-wrap:wrap; gap:14px 30px}
+.stat b{display:block; font-family:var(--mono); font-size:clamp(26px,2.4vw,38px); line-height:1.05}
+.stat span{font-size:14px; color:var(--muted)}
+/* poster */
+.poster{background:var(--card); border:3px solid var(--ink); border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:18px}
+.poster .ptitle{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.4vw,48px); line-height:1}
+.tl{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; position:relative}
+.tl::before{content:""; position:absolute; left:12%; right:12%; top:62px; height:6px; background:var(--bus); border-radius:3px}
+.tl .m{display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; text-align:center}
+.tl svg{width:min(130px,100%); height:auto}
+.qnav{display:flex; flex-wrap:wrap; gap:8px}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.1vw,30px); line-height:1.2; margin:0; max-width:34em; text-wrap:balance}
+.stepper{display:inline-flex; align-items:center; gap:6px}
+.stepper button{width:46px; height:46px; border-radius:10px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px}
+.stepper output{min-width:3.2em; text-align:center}
+.check{display:inline-flex; gap:8px; align-items:center; font-weight:700}
+.check input{width:24px; height:24px; accent-color:var(--route)}
+@media (max-width:900px){ .grid2{grid-template-columns:minmax(0,1fr)} .tl{grid-template-columns:repeat(2,minmax(0,1fr))} .tl::before{display:none} .bar{grid-template-columns:minmax(0,1fr) 5.5em} .bar .track{grid-column:1/-1; order:3} }
+@media (prefers-reduced-motion:no-preference){ .fb{animation:pop .25s ease-out} @keyframes pop{from{transform:translateY(4px);opacity:.75}to{transform:none;opacity:1}} }
+</style>
+<div class="wrap">
+<header>
+  <div class="brand">
+    <span class="eyebrow">Grade 3 · Set 3 project · 3 class periods</span>
+    <h1>Plan the <span class="tag">Field Trip</span></h1>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="route" aria-label="Project stops"><ol id="route"></ol></nav>
+<div class="ticket" id="ticket" aria-live="polite"></div>
+<main id="main"></main>
+</div>
+<script>
+/*LOGIC-START*/
+const MENU = {
+  sci:{name:'Science center', ride:25, adm:700, acts:[{id:'exh',name:'Exhibit hall',len:50,extra:0},{id:'show',name:'Planetarium show',len:35,extra:300}]},
+  zoo:{name:'Zoo', ride:30, adm:800, acts:[{id:'walk',name:'Animal walk',len:60,extra:0},{id:'feed',name:'Feeding demo',len:20,extra:0}]},
+  con:{name:'Conservatory', ride:20, adm:600, acts:[{id:'tour',name:'Garden tour',len:40,extra:0},{id:'fly',name:'Butterfly room',len:25,extra:200}]},
+  his:{name:'History museum', ride:15, adm:500, acts:[{id:'main',name:'Main exhibit',len:45,extra:0},{id:'sport',name:'Sports gallery',len:30,extra:200}]}
+};
+const STUDENTS=24, BUS=25000, BUDGET=50000, LEAVE=9*60+5, LOAD=10, LUNCH=30;
+const act = (dest,id) => MENU[dest].acts.find(a=>a.id===id);
+function fmt(m){ m=((m%1440)+1440)%1440; let h=Math.floor(m/60)%12; if(h===0) h=12; return h+':'+String(m%60).padStart(2,'0'); }
+function hm(d){ const h=Math.floor(d/60), m=d%60; return h ? `${h} h ${m} min` : `${m} min`; }
+function money(c){ const neg=c<0; c=Math.abs(c); const s = c%100===0 ? '$'+(c/100) : '$'+(c/100).toFixed(2); return (neg?'−':'')+s; }
+function parseTime(str){
+  const s=String(str||'').trim(); if(!s) return {err:'empty'};
+  let h,m; const mt=s.match(/^(\d{1,2})\s*[:.\s]\s*(\d{1,2})$/);
+  if(mt){ h=+mt[1]; m=+mt[2]; if(mt[2].length===1) return {err:'Write the minutes with two digits, like 9:05.'}; }
+  else if(/^\d{3,4}$/.test(s)){ h=+s.slice(0,-2); m=+s.slice(-2); }
+  else return {err:'Write the time like 9:30.'};
+  if(h<1||h>12) return {err:`${h} isn't an hour on the clock. Use 1 to 12.`};
+  if(m>=60){ const real=(h*60+m); return {err:`A clock never shows :${String(m).padStart(2,'0')}. 60 minutes make an hour, so ${h}:${String(m).padStart(2,'0')} is really ${fmt(real)}.`}; }
+  let H = h; if(h<7) H=h+12; if(h===12) H=12;   // school day: 7:00 to 6:59
+  return {v:H*60+m};
+}
+function parseNum(str){ const s=String(str||'').replace(/[$,¢\s]/g,'').replace(/min(utes)?$/,''); if(s===''||isNaN(+s)) return null; return +s; }
+function parseMoney(str){ const n=parseNum(str); return n===null?null:Math.round(n*100); }
+function perStudent(plan){ return MENU[plan.dest].adm + plan.acts.reduce((t,id)=>t+act(plan.dest,id).extra,0); }
+function cost(plan,n=STUDENTS){ return n*perStudent(plan)+BUS; }
+function actMinutes(plan){ return plan.acts.reduce((t,id)=>t+act(plan.dest,id).len,0); }
+function itinerary(plan, late=0){
+  const d=MENU[plan.dest]; const r=[]; let t=LEAVE+late;
+  const add=(key,label,len,note)=>{ r.push({key,label,start:t,len,end:t+len,note}); t+=len; };
+  add('ride','Leave school, ride the bus',d.ride);
+  add('unload','Unload, enter',LOAD);
+  plan.acts.forEach((id,i)=>{ const a=act(plan.dest,id); add('a'+(i+1),`Activity ${i+1}: ${a.name}`,a.len); });
+  add('lunch','Lunch',LUNCH);
+  add('back','Load the bus, ride back',LOAD+d.ride,`${LOAD} load + ${d.ride} ride`);
+  return r;
+}
+function moments(plan, late=0){
+  const r=itinerary(plan,late);
+  return {leave:r[0].start, arrive:r[0].end, lunch:r.find(x=>x.key==='lunch').start, back:r[r.length-1].end};
+}
+function jumps(a,b){ // open number line: jump to next hour, whole hours, then the rest
+  const out=[]; if(b<=a) return out;
+  let t=a; const nh=Math.ceil(a/60)*60;
+  if(nh>a && nh<=b){ out.push([a,nh]); t=nh; }
+  while(t+60<=b && t%60===0){ out.push([t,t+60]); t+=60; }
+  if(t<b) out.push([t,b]);
+  return out;
+}
+function fives(a,b){ const out=[]; let t=a; const n5=Math.ceil(a/5)*5; if(n5>a&&n5<=b){out.push([a,n5]);t=n5;} while(t+5<=b){out.push([t,t+5]);t+=5;} if(t<b) out.push([t,b]); return out; }
+function allPlans(){
+  const out=[]; for(const k in MENU){ const [x,y]=MENU[k].acts; for(const acts of [[x.id],[y.id],[x.id,y.id]]) out.push({dest:k,acts}); } return out;
+}
+function per100(plan){ return actMinutes(plan)*10000/cost(plan); } // activity minutes for every $100
+const COINS=[2000,1000,500,100,25,10,5,1];
+function fewest(c){ const out=[]; for(const v of COINS){ while(c>=v){ out.push(v); c-=v; } } return out; }
+/*LOGIC-END*/
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TABS=[
+  {id:'c1',n:'1',lab:'Class 1',sub:'To the Minute'},
+  {id:'c2',n:'2',lab:'Class 2',sub:'Budget'},
+  {id:'c3',n:'3',lab:'Class 3',sub:'Pitch to the Committee'},
+  {id:'dq',n:'?',lab:'Detective',sub:'Questions'},
+  {id:'ch',n:'★',lab:'Challenge',sub:'Two-stop day'}];
+let S;
+function fresh(){
+  return {tab:'c1', sub:{c1:'warm',c2:'change',c3:'poster'}, plan:{dest:'sci',acts:['exh','show']}, team:'Team 1',
+    itin:{}, cur:'ride', clocks:{}, tc:{}, warm:{}, chg:{}, bud:{}, lab:null, saved:[], cq:null, q:1, qout:'',
+    ch:{s1:'zoo',s2:'his',mid:15,a1:['walk'],a2:['main'],lunch:2,ans:{}}};
+}
+S=fresh();
+const plan=()=>S.plan;
+
+/* ---------- drawing helpers ---------- */
+function clockSVG(m, o={}){
+  const mm=((m%720)+720)%720, h=Math.floor(mm/60), mi=mm%60;
+  const ma=mi*6, ha=(h%12)*30+mi*0.5;
+  let ticks='';
+  for(let i=0;i<60;i++){ const a=i*6*Math.PI/180, r1=i%5?86:80, r2=92;
+    ticks+=`<line x1="${100+r1*Math.sin(a)}" y1="${100-r1*Math.cos(a)}" x2="${100+r2*Math.sin(a)}" y2="${100-r2*Math.cos(a)}" stroke="var(--ink)" stroke-width="${i%5?1.5:3.5}"/>`; }
+  let nums=''; for(let i=1;i<=12;i++){ const a=i*30*Math.PI/180; nums+=`<text x="${100+68*Math.sin(a)}" y="${100-68*Math.cos(a)+7}" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)" font-family="var(--body)">${i}</text>`; }
+  const hand=(ang,len,w,c)=>`<line x1="100" y1="100" x2="${100+len*Math.sin(ang*Math.PI/180)}" y2="${100-len*Math.cos(ang*Math.PI/180)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+  return `<svg viewBox="0 0 200 200" ${o.id?`id="${o.id}"`:''} role="img" aria-label="Clock showing ${fmt(m)}"><circle cx="100" cy="100" r="96" fill="var(--card)" stroke="var(--ink)" stroke-width="5"/>${ticks}${nums}${hand(ha,46,9,'var(--ink)')}${hand(ma,74,5,o.drag?'var(--route)':'var(--ink)')}${o.drag?`<circle cx="${100+74*Math.sin(ma*Math.PI/180)}" cy="${100-74*Math.cos(ma*Math.PI/180)}" r="11" fill="var(--route)" opacity=".85"/>`:''}<circle cx="100" cy="100" r="6" fill="var(--bus)" stroke="var(--ink)" stroke-width="2"/></svg>`;
+}
+// open number line. js: [[a,b]...]; hideEnd: label last point "?"
+function numberLine(js, o={}){
+  if(!js.length) return '';
+  const a=js[0][0], b=js[js.length-1][1], W=640, padL=40, padR=40, y=120;
+  const sc=t=>padL+(t-a)/(b-a)*(W-padL-padR);
+  let s=`<svg class="nl" viewBox="0 0 ${W} 170" role="img" aria-label="Number line from ${fmt(a)} to ${o.hideEnd?'?':fmt(b)}"><line x1="20" y1="${y}" x2="${W-20}" y2="${y}" stroke="var(--ink)" stroke-width="4"/>`;
+  const pts=[a,...js.map(j=>j[1])];
+  js.forEach(([p,q],i)=>{ const x1=sc(p), x2=sc(q), mx=(x1+x2)/2, hgt=Math.min(70,30+(x2-x1)*0.25);
+    const last=i===js.length-1, col=(o.back? 'var(--jump2)': (i%2?'var(--jump2)':'var(--route)'));
+    const lab=(o.hideLast&&last)?'+ ?':(o.back?'−':'+')+(q-p);
+    s+=`<path d="M${x1} ${y} Q ${mx} ${y-hgt*2} ${x2} ${y}" fill="none" stroke="${col}" stroke-width="4"/>`;
+    s+=`<text x="${mx}" y="${y-hgt-6}" text-anchor="middle" font-size="${js.length>6?18:24}" fill="${col}">${lab}</text>`; });
+  const showAll=js.length<=8;
+  pts.forEach((t,i)=>{ const x=sc(t); const last=i===pts.length-1;
+    if(!showAll && !(i===0||last||t%60===0)) return;
+    s+=`<line x1="${x}" y1="${y-12}" x2="${x}" y2="${y+12}" stroke="var(--ink)" stroke-width="4"/>`;
+    s+=`<text x="${x}" y="${y+42}" text-anchor="middle" font-size="${js.length>4?17:22}" fill="var(--ink)">${(last&&o.hideEnd)?'?':fmt(t)}</text>`; });
+  return s+'</svg>';
+}
+function sumText(js){ const parts=js.map(j=>j[1]-j[0]); const tot=parts.reduce((x,y)=>x+y,0); return parts.length>1? `${parts.join(' + ')} = ${tot} minutes${tot>=60?` (${hm(tot)})`:''}` : `${tot} minutes`; }
+
+/* ---------- header bits ---------- */
+function renderRoute(){
+  $('#route').innerHTML=TABS.map(t=>`<li><button role="tab" data-tab="${t.id}" aria-selected="${S.tab===t.id}"><span class="dot">${t.n}</span><span class="lab">${t.lab}</span><span class="sub">${t.sub}</span></button></li>`).join('');
+  $('#route').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab; render();});
+}
+function renderTicket(){
+  const p=plan(), m=moments(p), d=MENU[p.dest];
+  $('#ticket').innerHTML=`<div><span class="k">Team</span><span class="team">${esc(S.team)}</span></div>
+  <div><span class="k">Destination</span><span class="v">${d.name}</span></div>
+  <div><span class="k">Activities</span><span class="v">${p.acts.map(id=>act(p.dest,id).name).join(' + ')}</span></div>
+  <div><span class="k">Leave school</span><span class="v">${fmt(LEAVE)}</span></div>
+  <div><span class="k">Budget</span><span class="v">${money(BUDGET)} · ${STUDENTS} students</span></div>`;
+}
+function seg(key, opts){
+  return `<div class="seg" role="group">${opts.map(([v,l])=>`<button data-seg="${key}" data-v="${v}" aria-pressed="${S.sub[key]===v}">${l}</button>`).join('')}</div>`;
+}
+function wireSeg(){ document.querySelectorAll('[data-seg]').forEach(b=>b.onclick=()=>{ S.sub[b.dataset.seg]=b.dataset.v; render(); }); }
+function setPlan(p){ S.plan=p; S.itin={}; S.clocks={}; S.bud={}; S.cur='ride'; S.cq=null; }
+
+/* ---------- generic answer checking ---------- */
+// time answer: returns {ok, msg}
+function checkTime(str, start, len, label){
+  const p=parseTime(str); const target=start+len;
+  if(p.err) return {ok:false, msg:p.err==='empty'?'Type a time first, like 9:30.':p.err};
+  if(p.v===target) return {ok:true, msg:`Yes: ${fmt(start)} + ${len} min = <b>${fmt(target)}</b>.`};
+  const d=p.v-start;
+  if(d<=0) return {ok:false, msg:`${fmt(p.v)} comes before ${fmt(start)}. The ${label||'event'} ends <i>after</i> it starts. Jump forward ${len} minutes.`};
+  return {ok:false, msg:`From ${fmt(start)} to ${fmt(p.v)} is ${d} minute${d===1?'':'s'}, but ${label||'it'} lasts ${len}. How could you check? Jump to the next hour first, then add the rest.`};
+}
+function checkMinutes(str, a, b){
+  const n=parseNum(str); const t=b-a;
+  if(n===null) return {ok:false,msg:'Type a number of minutes.'};
+  if(n===t) return {ok:true,msg:`Yes: ${fmt(a)} to ${fmt(b)} is <b>${t} minutes</b>.`};
+  const digits=(Math.floor(b/60)%12||12)*100+b%60-((Math.floor(a/60)%12||12)*100+a%60);
+  if(n===digits) return {ok:false,msg:`Careful: subtracting the digits gives ${digits}, but an hour has 60 minutes, not 100. Start at ${fmt(a)} and jump to the next hour.`};
+  return {ok:false,msg:`${fmt(a)} + ${n} minutes would be ${fmt(a+n)}, not ${fmt(b)}. Jump from ${fmt(a)} to the next hour, then count the rest.`};
+}
+
+/* ================= CLASS 1 ================= */
+function viewC1(){
+  return `${seg('c1',[['warm','Warm-up'],['plan','Plan the day'],['clocks','Three moments'],['checks','Time checks']])}<div id="c1body"></div>`;
+}
+function c1body(){
+  const k=S.sub.c1, el=$('#c1body');
+  if(k==='warm') el.innerHTML=c1warm();
+  if(k==='plan') el.innerHTML=c1plan();
+  if(k==='clocks') el.innerHTML=c1clocks();
+  if(k==='checks') el.innerHTML=c1checks();
+  wireC1();
+}
+const WARM=[{t:8*60+47,to:9*60,q:'The bus leaves at 9:00. How long do we have?'},{t:10*60+23,to:11*60,q:'Lunch is at 11:00. How long until lunch?'}];
+function c1warm(){
+  return `<div class="panel"><h2>A trip lives or dies by minutes</h2><p class="lead">Read each clock to the minute. Then find how long until the next event. Count by fives to a friendly time, then by ones.</p></div>
+  <div class="qcards">${WARM.map((w,i)=>{ const st=S.warm[i]||{};
+    return `<div class="qcard" style="align-items:center;text-align:center"><div style="width:min(240px,100%)">${clockSVG(w.t)}</div>
+    <p><b>What time does the clock show?</b></p>
+    <div class="row" style="justify-content:center"><input class="ans ${st.rOk?'ok':st.rMsg?'bad':''}" id="w${i}r" inputmode="numeric" placeholder="_:__" value="${esc(st.r||'')}" aria-label="Time on clock ${i+1}"><button class="secondary small" data-wr="${i}">Check</button></div>
+    ${st.rMsg?`<p class="fb ${st.rOk?'ok':'bad'}">${st.rMsg}</p>`:''}
+    ${st.rOk?`<p><b>${w.q}</b></p><div class="row" style="justify-content:center"><input class="ans ${st.mOk?'ok':st.mMsg?'bad':''}" id="w${i}m" inputmode="numeric" placeholder="min" value="${esc(st.m||'')}" aria-label="Minutes"><button class="secondary small" data-wm="${i}">Check</button></div>`:''}
+    ${st.mMsg?`<p class="fb ${st.mOk?'ok':'bad'}">${st.mMsg}</p>`:''}
+    ${st.mOk?numberLine(fives(w.t,w.to))+`<p class="hint">${sumText(fives(w.t,w.to))}</p>`:''}</div>`; }).join('')}</div>`;
+}
+function c1plan(){
+  const p=plan(), d=MENU[p.dest], rows=itinerary(p);
+  const dests=Object.entries(MENU).map(([k,v])=>`<button class="dest" data-dest="${k}" aria-pressed="${p.dest===k}"><span class="nm">${v.name}</span><span class="meta">Bus ${v.ride} min · ${money(v.adm)} each</span><span class="acts">${v.acts.map(a=>`${a.name} ${a.len} min${a.extra?` (+${money(a.extra)})`:''}`).join(' · ')} · Lunch 30 min</span></button>`).join('');
+  const acts=d.acts.map(a=>`<button data-act="${a.id}" aria-pressed="${p.acts.includes(a.id)}">${a.name} · ${a.len} min</button>`).join('');
+  let prevOk=true, body='';
+  rows.forEach((r,i)=>{ const st=S.itin[r.key]||{}; const known=prevOk;
+    body+=`<tr class="${S.cur===r.key?'cur':''}"><td>${esc(r.label)}${r.note?`<span class="note">${r.note}</span>`:''}</td>
+      <td class="t">${known?fmt(r.start):'—'}</td><td class="t">${r.len} min</td>
+      <td>${known?`<div class="row"><input class="ans ${st.ok?'ok':st.msg?'bad':''}" id="it_${r.key}" data-row="${r.key}" inputmode="numeric" placeholder="_:__" value="${esc(st.v||'')}" aria-label="End time for ${esc(r.label)}" ${st.ok?'readonly':''}>${st.ok?'<span class="okmark">✓</span>':`<button class="secondary small" data-chk="${r.key}">Check</button>`}</div>`:'<span class="hint">finish the row above</span>'}</td></tr>`;
+    prevOk = prevOk && !!st.ok; });
+  const last=rows[rows.length-1];
+  body+=`<tr><td><b>Arrive at school</b></td><td class="t">${prevOk?fmt(last.end):'—'}</td><td></td><td>${prevOk?'<span class="okmark">Plan complete</span>':''}</td></tr>`;
+  const cur=rows.find(r=>r.key===S.cur)||rows[0], cst=S.itin[cur.key]||{};
+  const js=jumps(cur.start,cur.end);
+  const visual = cst.ok ? `${numberLine(js)}<p class="fb ok">${fmt(cur.start)} → ${fmt(cur.end)}: ${sumText(js)}.</p>`
+     : cst.msg ? `${numberLine(js,{hideEnd:true,hideLast:true})}<p class="fb bad">${cst.msg}</p>${cst.tries>1?`<button class="secondary small" data-reveal="${cur.key}">Show the jumps</button>`:''}`
+     : `<p class="lead">Pick a row and type its end time. Its number line appears here: jump to the next hour, then add the rest.</p>`;
+  return `<div class="panel"><h2>Destination menu</h2><p class="hint">Project prices and times, not real ones. Same bus both ways: allow 10 minutes to load and unload at each stop.</p><div class="dests">${dests}</div>
+    <div class="row"><b>Activities:</b><div class="pick">${acts}</div></div><p class="hint">Changing the plan clears the itinerary.</p></div>
+  <div class="grid2"><div class="panel"><h2>Our itinerary</h2><div class="tablewrap"><table class="itin"><thead><tr><th>Event</th><th>Start</th><th>How long</th><th>End</th></tr></thead><tbody>${body}</tbody></table></div>
+     <div class="row"><button class="ghost small" id="fillItin">Fill in the answers (teacher)</button></div></div>
+   <div class="panel"><h2>Number line: ${esc(cur.label.replace(/^Activity \d: /,''))}</h2>${visual}</div></div>`;
+}
+const MOMENTS=[['arrive','We arrive'],['lunch','Lunch starts'],['back','Back at school']];
+function c1clocks(){
+  const m=moments(plan());
+  return `<div class="panel"><h2>Three moments on the clock</h2><p class="lead">Drag the long hand (or use the buttons) to show each moment from your itinerary. Watch the short hand creep forward as the minutes pass.</p></div>
+  <div class="clocks">${MOMENTS.map(([k,l])=>{ const st=S.clocks[k]||(S.clocks[k]={m:9*60,ok:null});
+    return `<div class="panel clockcard"><span class="cap">${l}</span>${clockSVG(st.m,{drag:true,id:'clk_'+k})}<span class="dig">${fmt(st.m)}</span>
+    <div class="row" style="justify-content:center">${[['-60','−1 h'],['-5','−5'],['-1','−1'],['1','+1'],['5','+5'],['60','+1 h']].map(([d,t])=>`<button class="secondary small" data-nudge="${k}" data-d="${d}">${t}</button>`).join('')}</div>
+    <button class="primary" data-cclk="${k}">Check</button>${st.msg?`<p class="fb ${st.ok?'ok':'bad'}">${st.msg}</p>`:''}</div>`; }).join('')}</div>`;
+}
+const TC=[
+  {id:'a',kind:'time',q:'The bus leaves at 9:05. The ride is 25 minutes. Arrive at:',a:9*60+5,len:25},
+  {id:'b',kind:'time',q:'The exhibit hall opens at 10:40. You stay 50 minutes. Leave at:',a:10*60+40,len:50},
+  {id:'c',kind:'min',q:'Lunch runs from 11:30 to 12:05. How long?',a:11*60+30,b:12*60+5},
+  {id:'d',kind:'min',q:'You leave the site at 1:20 and reach school at 1:48. How long is the ride?',a:13*60+20,b:13*60+48},
+  {id:'e',kind:'time',q:'Share: a 45-minute ride starts at 9:35. When does it end?',a:9*60+35,len:45},
+  {id:'f',kind:'hm',q:'Total time away from school: from 9:05 to 1:48 is',a:9*60+5,b:13*60+48}];
+function c1checks(){
+  return `<div class="panel"><h2>Time checks</h2><p class="lead">Solve each one. The number line shows up when you check. Try one on paper first: jump to the next hour, then add the rest.</p></div>
+  <div class="qcards">${TC.map(t=>{ const st=S.tc[t.id]||{}; const cls=st.ok?'ok':st.msg?'bad':'';
+    const inp = t.kind==='hm' ? `<input class="ans ${cls}" id="tc_${t.id}_h" inputmode="numeric" placeholder="h" value="${esc(st.h||'')}" aria-label="hours"> hours <input class="ans ${cls}" id="tc_${t.id}_m" inputmode="numeric" placeholder="min" value="${esc(st.m||'')}" aria-label="minutes"> minutes`
+      : `<input class="ans ${cls}" id="tc_${t.id}" inputmode="numeric" placeholder="${t.kind==='time'?'_:__':'min'}" value="${esc(st.v||'')}" aria-label="answer">${t.kind==='min'?' min':''}`;
+    const end=t.kind==='time'?t.a+t.len:t.b;
+    return `<div class="qcard"><p><b>${t.q}</b></p><div class="row">${inp}<button class="secondary small" data-tc="${t.id}">Check</button></div>
+    ${st.msg?`<p class="fb ${st.ok?'ok':'bad'}">${st.msg}</p>`:''}${st.ok?numberLine(jumps(t.a,end))+`<p class="hint">${sumText(jumps(t.a,end))}</p>`:''}</div>`; }).join('')}</div>`;
+}
+function wireC1(){
+  document.querySelectorAll('[data-wr]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.wr, w=WARM[i], st=S.warm[i]=S.warm[i]||{}; st.r=$('#w'+i+'r').value; const p=parseTime(st.r);
+    if(p.err){ st.rOk=false; st.rMsg=p.err==='empty'?'Type the time, like 8:15.':p.err; }
+    else if(p.v===w.t){ st.rOk=true; st.rMsg=`Yes, <b>${fmt(w.t)}</b>. The short hand is past ${Math.floor(w.t/60)%12||12}, and the long hand is ${w.t%60} minutes past the 12.`; }
+    else { st.rOk=false; const mm=p.v%60, hh=Math.floor(p.v/60)%12||12;
+      st.rMsg = mm!==w.t%60 ? `Look at the long hand again. Count by fives along the numbers (5, 10, 15…), then by ones on the little marks.` : `The minutes are right. The short hand has passed ${Math.floor(w.t/60)%12||12} but not ${(Math.floor(w.t/60)%12)+1}, so the hour is ${Math.floor(w.t/60)%12||12}, not ${hh}.`; }
+    c1body(); });
+  document.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.wm, w=WARM[i], st=S.warm[i]; st.m=$('#w'+i+'m').value; const r=checkMinutes(st.m,w.t,w.to); st.mOk=r.ok; st.mMsg=r.msg; c1body(); });
+  document.querySelectorAll('[data-dest]').forEach(b=>b.onclick=()=>{ const k=b.dataset.dest; if(k===plan().dest) return; setPlan({dest:k,acts:MENU[k].acts.map(a=>a.id)}); render(); });
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ const p=plan(), id=b.dataset.act; let acts=p.acts.includes(id)?p.acts.filter(x=>x!==id):[...p.acts,id];
+    if(!acts.length) return; acts=MENU[p.dest].acts.map(a=>a.id).filter(x=>acts.includes(x)); setPlan({dest:p.dest,acts}); render(); });
+  const doChk=key=>{ const r=itinerary(plan()).find(x=>x.key===key); const st=S.itin[key]=S.itin[key]||{}; st.v=$('#it_'+key).value; const res=checkTime(st.v,r.start,r.len,'this part');
+    st.ok=res.ok; st.msg=res.msg; st.tries=(st.tries||0)+(res.ok?0:1); S.cur=key;
+    c1body(); };
+  document.querySelectorAll('[data-chk]').forEach(b=>b.onclick=()=>doChk(b.dataset.chk));
+  document.querySelectorAll('[data-row]').forEach(inp=>{ inp.onfocus=()=>{ if(S.cur!==inp.dataset.row){ S.cur=inp.dataset.row; const v=inp.value; c1body(); const e=$('#it_'+S.cur); if(e){ e.value=v; e.focus({preventScroll:true}); } } };
+    inp.onkeydown=e=>{ if(e.key==='Enter') doChk(inp.dataset.row); }; inp.oninput=()=>{ (S.itin[inp.dataset.row]=S.itin[inp.dataset.row]||{}).v=inp.value; }; });
+  document.querySelectorAll('[data-reveal]').forEach(b=>b.onclick=()=>{ const r=itinerary(plan()).find(x=>x.key===b.dataset.reveal); const st=S.itin[r.key]; st.msg=`Jump to the next hour, then the rest: ${sumText(jumps(r.start,r.end))}. Land on the end, type it in, and check.`; st.tries=0; c1body(); });
+  const fill=$('#fillItin'); if(fill) fill.onclick=()=>{ itinerary(plan()).forEach(r=>S.itin[r.key]={v:fmt(r.end),ok:true,msg:''}); c1body(); };
+  // clocks
+  document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{ const st=S.clocks[b.dataset.nudge]; st.m=Math.max(7*60,Math.min(18*60+59,st.m+ +b.dataset.d)); st.msg=''; c1body(); });
+  document.querySelectorAll('[data-cclk]').forEach(b=>b.onclick=()=>{ const k=b.dataset.cclk, st=S.clocks[k], target=moments(plan())[k], label=MOMENTS.find(x=>x[0]===k)[1];
+    if(st.m===target){ st.ok=true; st.msg=`Yes. ${label}: <b>${fmt(target)}</b>.`; }
+    else { st.ok=false; const mOk=st.m%60===target%60;
+      st.msg = mOk ? `The long hand is right. Check the short hand: at ${fmt(target)} it sits just past the ${Math.floor(target/60)%12||12}.` : `Your clock says ${fmt(st.m)}. Find "${label}" in your itinerary, then move the long hand to the minutes.${S.itin.back&&S.itin.back.ok?'':' (Finish the itinerary first if you need it.)'}`; }
+    c1body(); });
+  MOMENTS.forEach(([k])=>{ const svg=$('#clk_'+k); if(!svg) return; let drag=false;
+    const ang=e=>{ const r=document.getElementById('clk_'+k).getBoundingClientRect(); const x=e.clientX-r.left-r.width/2, y=e.clientY-r.top-r.height/2; let a=Math.atan2(x,-y)*180/Math.PI; if(a<0)a+=360; return Math.round(a/6)%60; };
+    const move=e=>{ const st=S.clocks[k]; const nm=ang(e), om=st.m%60; let h=Math.floor(st.m/60);
+      if(om>=45&&nm<15) h++; else if(om<15&&nm>=45) h--; st.m=Math.max(7*60,Math.min(18*60+59,h*60+nm)); st.msg='';
+      const el=document.getElementById('clk_'+k), card=el.parentElement; el.outerHTML=clockSVG(st.m,{drag:true,id:'clk_'+k}); card.querySelector('.dig').textContent=fmt(st.m); const fb=card.querySelector('.fb'); if(fb) fb.remove(); };
+    svg.addEventListener('pointerdown',e=>{ drag=true; e.preventDefault(); move(e); 
+      const mv=ev=>{ if(drag){ move(ev); } }, up=()=>{ drag=false; window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); c1body(); };
+      window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); });
+  });
+  // time checks
+  document.querySelectorAll('[data-tc]').forEach(b=>b.onclick=()=>{ const t=TC.find(x=>x.id===b.dataset.tc), st=S.tc[t.id]=S.tc[t.id]||{}; let r;
+    if(t.kind==='time'){ st.v=$('#tc_'+t.id).value; r=checkTime(st.v,t.a,t.len); }
+    else if(t.kind==='min'){ st.v=$('#tc_'+t.id).value; r=checkMinutes(st.v,t.a,t.b); }
+    else { st.h=$('#tc_'+t.id+'_h').value; st.m=$('#tc_'+t.id+'_m').value; const h=parseNum(st.h), m=parseNum(st.m), tot=t.b-t.a;
+      if(h===null||m===null) r={ok:false,msg:'Fill in both hours and minutes.'};
+      else if(m>=60) r={ok:false,msg:`${m} minutes is more than an hour. Trade 60 minutes for 1 hour.`};
+      else if(h*60+m===tot) r={ok:true,msg:`Yes: <b>${hm(tot)}</b>.`};
+      else r={ok:false,msg:`${fmt(t.a)} + ${h} h ${m} min would be ${fmt(t.a+h*60+m)}, not ${fmt(t.b)}. Jump to 10:00 first, then count whole hours, then the rest.`}; }
+    st.ok=r.ok; st.msg=r.msg; c1body(); });
+}
+
+/* ================= CLASS 2 ================= */
+function viewC2(){ return `${seg('c2',[['change','Warm-up: make change'],['cost','Cost the day'],['trade','Trade-offs']])}<div id="c2body"></div>`; }
+function c2body(){ const k=S.sub.c2, el=$('#c2body');
+  if(k==='change') el.innerHTML=c2change(); if(k==='cost') el.innerHTML=c2cost(); if(k==='trade') el.innerHTML=c2trade(); wireC2(); }
+const CHG=[{id:'A',q:'A ticket costs $7.50. You pay with a $10 bill.',price:750,paid:1000,steps:[{lab:'$7.50 → $8.00 is',unit:'¢',a:50},{lab:'$8.00 → $10.00 is',unit:'$',a:200}]},
+           {id:'B',q:"Two students' admission costs $14. A parent pays with a $20 bill.",price:1400,paid:2000,steps:[{lab:'$14 → $15 is',unit:'$',a:100},{lab:'$15 → $20 is',unit:'$',a:500}]}];
+const MONEY=[[2000,'$20','bill'],[1000,'$10','bill'],[500,'$5','bill'],[100,'$1','bill'],[25,'25¢','coin'],[10,'10¢','coin'],[5,'5¢','coin'],[1,'1¢','coin p']];
+const mName=v=>MONEY.find(x=>x[0]===v)[1];
+function moneyBtn(v,attr){ const [_,l,c]=MONEY.find(x=>x[0]===v); return `<button class="${c}" ${attr}>${l}</button>`; }
+function c2change(){
+  return `<div class="panel"><h2>Count up to make change</h2><p class="lead">Cashiers don't subtract. They count up from the price: first to the next dollar, then to what was paid.</p></div>
+  <div class="grid2">${CHG.map(c=>{ const st=S.chg[c.id]=S.chg[c.id]||{s:[],pile:[]}; const ch=c.paid-c.price; const pileSum=st.pile.reduce((a,b)=>a+b,0);
+    return `<div class="panel"><h3>${c.q}</h3>
+    ${c.steps.map((s,i)=>`<div class="row"><span>Count up: <b class="mono">${s.lab}</b></span>${s.unit==='$'?'$':''}<input class="ans ${st.s[i]&&st.s[i].ok?'ok':st.s[i]&&st.s[i].msg?'bad':''}" id="cg${c.id}${i}" inputmode="decimal" value="${esc(st.s[i]?st.s[i].v:'')}" aria-label="${s.lab}">${s.unit==='¢'?'¢':''}</div>`).join('')}
+    <div class="row"><span><b>Change:</b> $</span><input class="ans ${st.tOk?'ok':st.tMsg?'bad':''}" id="cg${c.id}t" inputmode="decimal" value="${esc(st.t||'')}" aria-label="Change"><button class="secondary small" data-cg="${c.id}">Check</button></div>
+    ${st.tMsg?`<p class="fb ${st.tOk?'ok':'bad'}">${st.tMsg}</p>`:''}
+    <h3>Draw the bills and coins</h3><div class="tray">${MONEY.filter(m=>m[0]<c.paid).map(m=>moneyBtn(m[0],`data-add="${c.id}" data-v="${m[0]}" aria-label="Add ${m[1]}"`)).join('')}</div>
+    <div class="pile" aria-label="Change pile">${st.pile.map((v,i)=>moneyBtn(v,`data-rm="${c.id}" data-i="${i}" aria-label="Remove ${mName(v)}"`)).join('')}</div>
+    <div class="row"><span>In the pile: <b class="mono">${money(pileSum)}</b></span><button class="secondary small" data-pc="${c.id}">Check my change</button><button class="ghost small" data-pclr="${c.id}">Clear</button></div>
+    ${st.pMsg?`<p class="fb ${st.pOk?'ok':'bad'}">${st.pMsg}</p>`:''}</div>`; }).join('')}</div>`;
+}
+function areaModel(adm){ // 24 x adm/100 unit squares split 20 | 4
+  const n=adm/100, u=Math.min(26,560/24), W=24*u+80, H=n*u+70;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto" role="img" aria-label="Area model 24 by ${n}">`;
+  for(let c=0;c<24;c++) for(let r=0;r<n;r++) s+=`<rect x="${40+c*u+(c>=20?10:0)}" y="${30+r*u}" width="${u-2}" height="${u-2}" rx="2" fill="${c<20?'var(--route-soft)':'var(--bus-soft)'}" stroke="${c<20?'var(--route)':'var(--bus)'}" stroke-width="1.2"/>`;
+  s+=`<text x="${40+10*u}" y="20" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="18" fill="var(--ink)">20</text><text x="${40+22*u+10}" y="20" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="18" fill="var(--ink)">4</text>`;
+  s+=`<text x="22" y="${30+n*u/2+6}" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="18" fill="var(--ink)">${n}</text>`;
+  s+=`<text x="${40+10*u}" y="${30+n*u+30}" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="18" fill="var(--route)">20 × ${n} = ${20*n}</text><text x="${40+22*u+10}" y="${30+n*u+30}" text-anchor="middle" font-family="var(--mono)" font-weight="700" font-size="18" fill="var(--ink)">4 × ${n} = ${4*n}</text>`;
+  return s+'</svg>';
+}
+function c2cost(){
+  const p=plan(), d=MENU[p.dest], extra=perStudent(p)-d.adm, B=S.bud;
+  const exNames=p.acts.map(id=>act(p.dest,id)).filter(a=>a.extra).map(a=>a.name).join(', ')||'none';
+  const fld=(k,lab)=>{ const st=B[k]||{}; return `<input class="ans wide ${st.ok?'ok':st.msg?'bad':''}" id="bd_${k}" inputmode="decimal" value="${esc(st.v||'')}" aria-label="${lab}">`; };
+  const msgs=['adm','ex','tot','diff','per'].map(k=>B[k]&&B[k].msg?`<p class="fb ${B[k].ok?'ok':'bad'}">${B[k].msg}</p>`:'').join('');
+  const tot=cost(p), diff=BUDGET-tot;
+  return `<div class="grid2"><div class="panel"><h2>Budget: ${d.name}</h2><p class="hint">Plan: ${p.acts.map(id=>act(p.dest,id).name).join(' + ')} (change it in Class 1). ${STUDENTS} students.</p>
+    <div class="tablewrap"><table class="itin"><thead><tr><th>Item</th><th>Per student</th><th>How many</th><th>Total</th></tr></thead><tbody>
+    <tr><td>Admission</td><td class="t">${money(d.adm)}</td><td class="t">× ${STUDENTS}</td><td>$ ${fld('adm','Admission total')}</td></tr>
+    <tr><td>Extra show or room<span class="note">${exNames}</span></td><td class="t">${money(extra)}</td><td class="t">× ${STUDENTS}</td><td>$ ${fld('ex','Extra total')}</td></tr>
+    <tr><td>Bus charter</td><td></td><td class="t">flat</td><td class="t">${money(BUS)}</td></tr>
+    <tr><td><b>Trip total</b></td><td></td><td></td><td>$ ${fld('tot','Trip total')}</td></tr></tbody></table></div>
+    <div class="row">Budget ${money(BUDGET)}. We are <div class="pick"><button data-uo="under" aria-pressed="${B.uo==='under'}">under</button><button data-uo="over" aria-pressed="${B.uo==='over'}">over</button></div> by $ ${fld('diff','Under or over by')}</div>
+    <div class="row">Cost per student if families split everything: about $ ${fld('per','Cost per student')}</div>
+    <div class="row"><button class="primary" id="bdChk">Check the budget</button><button class="ghost small" id="bdFill">Fill in the answers (teacher)</button></div>${msgs}</div>
+    <div class="panel"><h2>${STUDENTS} × ${money(d.adm)}, two ways</h2><p class="lead mono">20 × ${d.adm/100} + 4 × ${d.adm/100} = ${20*d.adm/100} + ${4*d.adm/100} = ${24*d.adm/100}</p>${areaModel(d.adm)}<p class="hint">Each square is $1 for one student. Splitting 24 into 20 and 4 makes the multiplying friendly.</p>
+    ${B.tot&&B.tot.ok?`<div class="stats"><div class="stat"><b>${money(tot)}</b><span>trip total</span></div><div class="stat"><b style="color:${diff>=0?'var(--good)':'var(--warn)'}">${money(Math.abs(diff))}</b><span>${diff>=0?'under':'over'} budget</span></div></div>`:''}</div></div>`;
+}
+function c2trade(){
+  const L=S.lab||(S.lab={dest:plan().dest,acts:[...plan().acts],n:STUDENTS,prev:null});
+  const p={dest:L.dest,acts:L.acts}, d=MENU[L.dest], tot=cost(p,L.n), m=moments(p), mins=actMinutes(p);
+  const pct=Math.min(100,tot/60000*100), mark=BUDGET/60000*100;
+  let story='';
+  if(L.prev){ const q=L.prev; const dc=cost(q.p,q.n)-tot, dm=actMinutes(q.p)-mins;
+    const dropped=q.p.dest===p.dest?q.p.acts.filter(a=>!p.acts.includes(a)):[], added=q.p.dest===p.dest?p.acts.filter(a=>!q.p.acts.includes(a)):[];
+    if(q.n===L.n && dropped.length===1 && !added.length){ const a=act(p.dest,dropped[0]); story=`Dropping the ${a.name} saves ${a.extra?`${money(a.extra)} × ${L.n} = <b>${money(a.extra*L.n)}</b>`:'<b>$0</b> (it has no extra cost)'} and frees <b>${a.len} minutes</b> we could give to another activity.`; }
+    else if(q.n===L.n && added.length===1 && !dropped.length){ const a=act(p.dest,added[0]); story=`Adding the ${a.name} costs ${a.extra?`${money(a.extra)} × ${L.n} = <b>${money(a.extra*L.n)}</b>`:'<b>$0</b> extra'} and uses <b>${a.len} more minutes</b>.`; }
+    else if(q.n!==L.n){ const dn=L.n-q.n; story=`${Math.abs(dn)} ${dn>0?'more':'fewer'} student${Math.abs(dn)===1?'':'s'} × ${money(perStudent(p))} each changes the total by <b>${money(Math.abs(dn)*perStudent(p))}</b>. The bus stays ${money(BUS)}.`; }
+    else story=`The total changed by <b>${money(Math.abs(dc))}</b> and activity time by <b>${Math.abs(dm)} minutes</b>.`; }
+  return `<div class="grid2"><div class="panel"><h2>Trade-off lab</h2><p class="lead">Change one thing at a time. Watch the cost and the minutes move together.</p>
+    <div class="pick">${Object.entries(MENU).map(([k,v])=>`<button data-ld="${k}" aria-pressed="${L.dest===k}">${v.name}</button>`).join('')}</div>
+    <div class="row"><b>Activities:</b>${d.acts.map(a=>`<label class="check"><input type="checkbox" data-la="${a.id}" ${L.acts.includes(a.id)?'checked':''}> ${a.name} (${a.len} min${a.extra?`, +${money(a.extra)}`:''})</label>`).join('')}</div>
+    <div class="row"><b>Students:</b><span class="stepper"><button data-ln="-1" aria-label="One fewer student">−</button><output class="mono">${L.n}</output><button data-ln="1" aria-label="One more student">+</button></span><span class="hint">The sheet says 24. Try 26.</span></div>
+    ${story?`<p class="fb">${story}</p>`:''}
+    <div class="row"><button class="secondary" id="labUse">Make this our plan</button><button class="ghost small" id="labReset">Back to our plan</button></div></div>
+   <div class="panel"><h2>${money(tot)} <span class="hint" style="font-size:.5em">of ${money(BUDGET)}</span></h2>
+    <div class="meter ${tot>BUDGET?'over':''}"><div class="fill" style="width:${pct}%"></div><div class="mark" style="left:${mark}%" title="Budget"></div></div>
+    <p class="fb ${tot>BUDGET?'bad':'ok'}">${tot>BUDGET?`Over by <b>${money(tot-BUDGET)}</b>. Cut something and recompute both the cost and the minutes.`:`Under by <b>${money(BUDGET-tot)}</b>.`}</p>
+    <p class="mono">${L.n} × ${money(perStudent(p))} + ${money(BUS)} bus = ${money(tot)}</p>
+    <div class="stats"><div class="stat"><b>${mins}</b><span>activity minutes</span></div><div class="stat"><b>${fmt(m.back)}</b><span>back at school</span></div><div class="stat"><b>${hm(m.back-m.leave)}</b><span>time away</span></div></div></div></div>`;
+}
+function wireC2(){
+  document.querySelectorAll('[data-cg]').forEach(b=>b.onclick=()=>{ const c=CHG.find(x=>x.id===b.dataset.cg), st=S.chg[c.id]; const ch=c.paid-c.price;
+    c.steps.forEach((s,i)=>{ const v=$('#cg'+c.id+i).value; const n=parseNum(v); const cents=n===null?null:(s.unit==='¢'?Math.round(n<1&&n>0?n*100:n):Math.round(n*100)); st.s[i]={v,ok:cents===s.a,msg:v?'x':''}; });
+    st.t=$('#cg'+c.id+'t').value; const t=parseMoney(st.t);
+    const stepsOk=st.s.every(x=>x.ok);
+    if(t===ch){ st.tOk=true; st.tMsg=`Yes: ${c.steps.map(s=>money(s.a)).join(' + ')} = <b>${money(ch)}</b>. Check: ${money(c.price)} + ${money(ch)} = ${money(c.paid)}.${stepsOk?'':' Now fill the count-up blanks to match.'}`; }
+    else { st.tOk=false; st.tMsg = t===null ? 'Type the change in dollars, like 2.50.' : `Check it: ${money(c.price)} + ${money(t)} = ${money(c.price+t)}, not ${money(c.paid)}. Count up from ${money(c.price)} to the next dollar first.`; }
+    c2body(); });
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ const st=S.chg[b.dataset.add]; if(st.pile.length<30) st.pile.push(+b.dataset.v); st.pile.sort((a,b)=>b-a); st.pMsg=''; c2body(); });
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ const st=S.chg[b.dataset.rm]; st.pile.splice(+b.dataset.i,1); st.pMsg=''; c2body(); });
+  document.querySelectorAll('[data-pclr]').forEach(b=>b.onclick=()=>{ const st=S.chg[b.dataset.pclr]; st.pile=[]; st.pMsg=''; c2body(); });
+  document.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{ const c=CHG.find(x=>x.id===b.dataset.pc), st=S.chg[c.id]; const ch=c.paid-c.price, sum=st.pile.reduce((a,b)=>a+b,0);
+    const few=fewest(ch);
+    if(sum===ch){ st.pOk=true; st.pMsg = st.pile.length===few.length ? `That's <b>${money(ch)}</b> with the fewest pieces: ${few.map(mName).join(', ')}.` : `That's <b>${money(ch)}</b>. Can you do it with fewer pieces? It takes only ${few.length}.`; }
+    else { st.pOk=false; st.pMsg = sum<ch ? `The pile has ${money(sum)}. You still owe ${money(ch-sum)}. Count up from ${money(c.price+sum)} to ${money(c.paid)}.` : `The pile has ${money(sum)}, which is ${money(sum-ch)} too much. Take something back.`; }
+    c2body(); });
+  // budget
+  document.querySelectorAll('[data-uo]').forEach(b=>b.onclick=()=>{ S.bud.uo=b.dataset.uo; ['adm','ex','tot','diff','per'].forEach(k=>{ const e=$('#bd_'+k); if(e) (S.bud[k]=S.bud[k]||{}).v=e.value; }); c2body(); });
+  const bc=$('#bdChk'); if(bc) bc.onclick=()=>{ const p=plan(), d=MENU[p.dest], ex=perStudent(p)-d.adm, tot=cost(p), diff=BUDGET-tot, B=S.bud;
+    const g=k=>{ B[k]=B[k]||{}; B[k].v=$('#bd_'+k).value; return parseMoney(B[k].v); };
+    const set=(k,ok,msg)=>{ B[k].ok=ok; B[k].msg=ok?'':msg; };
+    let v=g('adm'); set('adm',v===STUDENTS*d.adm, v===null?'Admission: multiply the price by 24.':`Admission: ${money(v)} ÷ 24 isn't ${money(d.adm)}. Try 20 × ${d.adm/100} + 4 × ${d.adm/100}.`);
+    v=g('ex'); set('ex',v===STUDENTS*ex, v===null?`Extras: ${ex?`${money(ex)} × 24.`:'there are no extras in this plan, so write 0.'}`:`Extras: ${money(ex)} × 24 = 20 × ${ex/100} + 4 × ${ex/100}. Try again.`);
+    v=g('tot'); set('tot',v===tot, v===null?'Total: add admission, extras and the $250 bus.':`Total: add all three rows: admission + extras + $250 bus. You have ${money(v)}.`);
+    v=g('diff'); const uoOk = diff>=0 ? B.uo==='under' : B.uo==='over'; set('diff', uoOk && v===Math.abs(diff), !B.uo?'Pick under or over first.':!uoOk?`Compare ${money(tot)} with ${money(BUDGET)}: which is bigger?`:`Count up from ${money(Math.min(tot,BUDGET))} to ${money(Math.max(tot,BUDGET))}.`);
+    v=g('per'); const lo=Math.floor(tot/24/100)*100, hi=Math.ceil(tot/24/100)*100; set('per', v!==null && v>=lo && v<=hi, `Per student: ${money(tot)} ÷ 24. Think: 24 × ${lo/100} = ${24*lo/100} and 24 × ${hi/100} = ${24*hi/100}. Which two whole dollars is it between?`);
+    if(B.per.ok) B.per.msg=`Per student: ${money(tot)} ÷ 24 is between ${money(lo)} and ${money(hi)} (about ${money(Math.round(tot/24))}).`;
+    if(['adm','ex','tot','diff','per'].every(k=>B[k].ok)) B.per.msg=`Every line checks. `+B.per.msg+(diff>=0?` We're <b>${money(diff)} under</b>.`:` We're <b>${money(-diff)} over</b>: time for a trade-off.`);
+    c2body(); };
+  const bf=$('#bdFill'); if(bf) bf.onclick=()=>{ const p=plan(), d=MENU[p.dest], ex=perStudent(p)-d.adm, tot=cost(p), diff=BUDGET-tot;
+    S.bud={adm:{v:String(24*d.adm/100),ok:true},ex:{v:String(24*ex/100),ok:true},tot:{v:String(tot/100),ok:true},diff:{v:String(Math.abs(diff)/100),ok:true},per:{v:(tot/2400).toFixed(2),ok:true},uo:diff>=0?'under':'over'}; c2body(); };
+  // lab
+  const L=S.lab; if(!L) return;
+  const snap=()=>({p:{dest:L.dest,acts:[...L.acts]},n:L.n});
+  document.querySelectorAll('[data-ld]').forEach(b=>b.onclick=()=>{ L.prev=snap(); L.dest=b.dataset.ld; L.acts=MENU[L.dest].acts.map(a=>a.id); c2body(); });
+  document.querySelectorAll('[data-la]').forEach(b=>b.onchange=()=>{ const id=b.dataset.la; let a=b.checked?[...L.acts,id]:L.acts.filter(x=>x!==id); if(!a.length){ b.checked=true; return; } L.prev=snap(); L.acts=MENU[L.dest].acts.map(x=>x.id).filter(x=>a.includes(x)); c2body(); });
+  document.querySelectorAll('[data-ln]').forEach(b=>b.onclick=()=>{ L.prev=snap(); L.n=Math.max(10,Math.min(40,L.n+ +b.dataset.ln)); c2body(); });
+  $('#labUse').onclick=()=>{ setPlan({dest:L.dest,acts:[...L.acts]}); S.lab={dest:L.dest,acts:[...L.acts],n:L.n,prev:null}; render(); };
+  $('#labReset').onclick=()=>{ S.lab=null; c2body(); };
+}
+
+/* ================= CLASS 3 ================= */
+function viewC3(){ return `${seg('c3',[['poster','Final poster'],['committee','Committee questions'],['vote','Vote']])}<div id="c3body"></div>`; }
+function c3body(){ const k=S.sub.c3, el=$('#c3body'); if(k==='poster') el.innerHTML=c3poster(); if(k==='committee') el.innerHTML=c3committee(); if(k==='vote') el.innerHTML=c3vote(); wireC3(); }
+function c3poster(){
+  const p=plan(), m=moments(p), tot=cost(p), d=MENU[p.dest];
+  const mo=[['Leave school',m.leave],['We arrive',m.arrive],['Lunch starts',m.lunch],['Back at school',m.back]];
+  return `<div class="row"><label for="teamName"><b>Team name</b></label><input class="text" id="teamName" value="${esc(S.team)}" maxlength="24"><button class="secondary" id="saveTeam">Add our plan to the vote</button><span class="hint" id="saveMsg"></span></div>
+  <div class="poster"><div><span class="eyebrow">${esc(S.team)} presents</span><div class="ptitle">A day at the ${d.name.toLowerCase()}</div><p class="hint" style="margin-top:6px">${p.acts.map(id=>act(p.dest,id).name).join(' + ')} + lunch</p></div>
+   <div class="tl">${mo.map(([l,t])=>`<div class="m">${clockSVG(t)}<span class="dig" style="font-size:24px">${fmt(t)}</span><b>${l}</b></div>`).join('')}</div>
+   <div class="stats"><div class="stat"><b>${hm(m.back-m.leave)}</b><span>away from school (${fmt(m.leave)} to ${fmt(m.back)})</span></div><div class="stat"><b>${money(tot)}</b><span>total cost (${money(BUDGET-tot)} under budget)</span></div><div class="stat"><b>about ${money(Math.round(tot/24))}</b><span>per student if families split everything</span></div><div class="stat"><b>${actMinutes(p)}</b><span>activity minutes</span></div></div></div>`;
+}
+function newCQ(kind){
+  const p=plan(), m=moments(p), per=perStudent(p);
+  if(kind==='time'){ const late=[5,8,12,15,20,25][Math.floor(Math.random()*6)]; return {kind,late,q:`If the bus leaves ${late} minutes late, when are we back?`,a:m.back,len:late}; }
+  const opts=[{n:2,paid:2000,pay:'a $20 bill'},{n:3,paid:4000,pay:'two $20 bills'},{n:2,paid:5000,pay:'a $50 bill'}].filter(o=>o.n*per<=o.paid);
+  const o=opts[Math.floor(Math.random()*opts.length)]; return {kind,n:o.n,paid:o.paid,q:`A family pays for ${o.n} students' admission${per>MENU[p.dest].adm?' and extras':''} with ${o.pay}. What is their change?`,cost:o.n*per};
+}
+function c3committee(){
+  const c=S.cq; const p=plan();
+  let body='';
+  if(c){ body=`<p class="qtext">${c.q}</p><div class="row">${c.kind==='money'?'$':''}<input class="ans wide ${c.ok?'ok':c.msg?'bad':''}" id="cqA" inputmode="decimal" placeholder="${c.kind==='time'?'_:__':''}" value="${esc(c.v||'')}" aria-label="Answer"><button class="primary" id="cqChk">Check</button></div>${c.msg?`<p class="fb ${c.ok?'ok':'bad'}">${c.msg}</p>`:''}${c.ok&&c.kind==='time'?numberLine(jumps(c.a,c.a+c.len)):''}`; }
+  else body=`<p class="lead">Each team answers one time question and one money question about its own plan. Tap a button for a fresh question.</p>`;
+  return `<div class="panel"><h2>The committee asks…</h2><p class="hint">Plan: ${MENU[p.dest].name}, back at ${fmt(moments(p).back)}, ${money(perStudent(p))} per student for admission${perStudent(p)>MENU[p.dest].adm?' and extras':''}.</p>
+  <div class="row"><button class="secondary" data-cq="time">Time question</button><button class="secondary" data-cq="money">Money question</button></div>${body}</div>`;
+}
+function c3vote(){
+  const list=S.saved;
+  const best=list.length?Math.max(...list.map(x=>per100(x.p))):0, maxv=best||1;
+  const bars=list.map(x=>{ const v=per100(x.p); return `<div class="bar ${v===best?'best':''}"><span class="lbl"><b>${esc(x.name)}</b><br><span class="hint">${MENU[x.p.dest].name}: ${x.p.acts.map(id=>act(x.p.dest,id).name).join(' + ')}</span></span><div class="track"><div class="fill" style="width:${v/maxv*100}%"></div></div><span class="mono">${actMinutes(x.p)} min<br>${money(cost(x.p))}</span></div>`; }).join('');
+  return `<div class="panel"><h2>Which plan buys the most activity minutes per dollar?</h2>
+  <p class="lead">Bars show activity minutes for every $100 spent (lunch and bus time not counted). Longer bar = more minutes per dollar.</p>
+  <div class="row"><button class="secondary" id="addAll">Add every possible plan</button><button class="ghost small" id="clrVote">Clear the vote</button></div>
+  ${list.length?`<div class="bars">${bars}</div><p class="fb">Winner: <b>${list.filter(x=>per100(x.p)===best).map(x=>esc(x.name)).join(', ')}</b>, about ${(Math.round(best*10)/10)} activity minutes for every $100. Close races need careful arithmetic: compare minutes ÷ dollars, not just minutes or just dollars.</p>`:'<p class="hint">No plans yet. Each team adds its plan from the Final poster, or tap "Add every possible plan".</p>'}</div>`;
+}
+function wireC3(){
+  const tn=$('#teamName'); if(tn){ tn.oninput=()=>{ S.team=tn.value||'Our team'; renderTicket(); document.querySelector('.poster .eyebrow').textContent=S.team+' presents'; }; }
+  const sv=$('#saveTeam'); if(sv) sv.onclick=()=>{ const name=S.team.trim()||'Our team'; const i=S.saved.findIndex(x=>x.name===name); const e={name,p:{dest:plan().dest,acts:[...plan().acts]}}; if(i>=0) S.saved[i]=e; else S.saved.push(e); $('#saveMsg').textContent=`Saved "${name}" to the vote (${S.saved.length} plan${S.saved.length===1?'':'s'}).`; };
+  document.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>{ S.cq=newCQ(b.dataset.cq); c3body(); const e=$('#cqA'); e&&e.focus(); });
+  const ck=$('#cqChk'); if(ck){ const go=()=>{ const c=S.cq; c.v=$('#cqA').value;
+    if(c.kind==='time'){ const r=checkTime(c.v,c.a,c.len,'the delay'); c.ok=r.ok; c.msg=r.ok?`Yes. Everything slides ${c.len} minutes later: ${fmt(c.a)} + ${c.len} = <b>${fmt(c.a+c.len)}</b>.`:`Without the delay we're back at ${fmt(c.a)}. ${r.msg}`; }
+    else { const ch=c.paid-c.cost, v=parseMoney(c.v); c.ok=v===ch; c.msg=c.ok?`Yes: ${c.n} × ${money(c.cost/c.n)} = ${money(c.cost)}. Count up to ${money(c.paid)}: <b>${money(ch)}</b> change.${ch===0?' No change at all!':''}`: v===null?'Type the change in dollars.':`First find the cost: ${c.n} × ${money(c.cost/c.n)}. Then count up to ${money(c.paid)}. Check: does cost + your change make ${money(c.paid)}?`; }
+    c3body(); }; ck.onclick=go; $('#cqA').onkeydown=e=>{ if(e.key==='Enter') go(); }; }
+  const aa=$('#addAll'); if(aa) aa.onclick=()=>{ for(const p of allPlans()){ const name=`${MENU[p.dest].name}: ${p.acts.map(id=>act(p.dest,id).name).join(' + ')}`; if(!S.saved.some(x=>x.name===name)) S.saved.push({name,p}); } c3body(); };
+  const cv=$('#clrVote'); if(cv) cv.onclick=()=>{ S.saved=[]; c3body(); };
+}
+
+/* ================= DETECTIVE ================= */
+const DQ=[
+  {q:'A student says 10:15 − 9:50 = 65 minutes. What really happened, and how long is it?',acts:[
+    ['Subtract the digits',()=>`1015 − 950 = <b>65</b>. But that treats an hour like 100 minutes. An hour has only 60.`],
+    ['Jump on a number line',()=>numberLine(jumps(9*60+50,10*60+15))+`<p>9:50 → 10:00 is 10, then 10:00 → 10:15 is 15. <b>10 + 15 = 25 minutes.</b> 65 − 25 = 40, the 40 "missing" minutes that a 100-minute hour would have.</p>`]]},
+  {q:'Every time in our plans ends in 0 or 5. Why?',acts:[
+    ['List every length',()=>{ const L=[]; for(const k in MENU){ L.push(MENU[k].ride); MENU[k].acts.forEach(a=>L.push(a.len)); } L.push(10,30); const u=[...new Set(L)].sort((a,b)=>a-b); return `Every length on the menu: <b class="mono">${u.join(', ')}</b> minutes. Every one is a multiple of 5. The day starts at 9:05, which is 5 minutes past.`; }],
+    ['Check every possible plan',()=>{ let n=0,b=0; for(const p of allPlans()) for(const r of itinerary(p)){ n++; if(r.end%5) b++; } return `${allPlans().length} possible plans, ${n} end times. Times ending in something other than 0 or 5: <b>${b}</b>. Adding a multiple of 5 to a multiple of 5 always lands on a multiple of 5.`; }],
+    ['What if the bus left at 9:07?',()=>{ const r=itinerary(plan(),2); return `Then every time ends in 2 or 7: ${r.map(x=>fmt(x.end)).join(', ')}. The pattern comes from the start time <i>and</i> the lengths.`; }]]},
+  {q:'What if 26 students go to the science center? Is dropping the planetarium show a good trade?',acts:[
+    ['Science center, 26 students',()=>{ const p={dest:'sci',acts:['exh','show']}, q={dest:'sci',acts:['exh']}; return `With the show: 26 × $10 + $250 = <b>${money(cost(p,26))}</b>, over by ${money(cost(p,26)-BUDGET)}. Without it: 26 × $7 + $250 = <b>${money(cost(q,26))}</b>. For 24 students, dropping the show saves $3 × 24 = <b>$72</b> and frees <b>35 minutes</b> for the exhibit hall.`; }]]},
+  {q:'Which plan buys the most activity minutes per dollar?',acts:[
+    ['Rank every plan',()=>{ const ps=allPlans().sort((a,b)=>per100(b)-per100(a)).slice(0,4); return `<table class="itin" style="min-width:0"><thead><tr><th>Plan</th><th>Activity min</th><th>Cost</th><th>Min per $100</th></tr></thead><tbody>${ps.map(p=>`<tr><td>${MENU[p.dest].name}: ${p.acts.map(id=>act(p.dest,id).name).join(' + ')}</td><td class="t">${actMinutes(p)}</td><td class="t">${money(cost(p))}</td><td class="t">${per100(p).toFixed(1)}</td></tr>`).join('')}</tbody></table><p>The top four of ${allPlans().length}. The zoo wins by a hair: both its activities are free once you're in.</p>`; }]]},
+  {q:'Why do cashiers count up instead of subtracting?',acts:[
+    ['Count up $7.50 to $10',()=>`$7.50 → $8.00 is <b>50¢</b> (two quarters). $8.00 → $10.00 is <b>$2</b> (two $1 bills). Change: <b>$2.50</b>. Each step lands on a friendly number, and the coins you hand over match the steps.`],
+    ['Same idea with clocks',()=>`8:47 → 9:00 is like $7.50 → $8.00: jump to the friendly number first. ${sumText(fives(8*60+47,9*60))}.`]]}];
+function viewDQ(){
+  const q=DQ[S.q-1];
+  return `<div class="panel"><div class="qnav">${DQ.map((_,i)=>`<button data-q="${i+1}" aria-pressed="${S.q===i+1}">${i+1}</button>`).join('')}</div>
+  <p class="qtext">${q.q}</p><div class="row">${q.acts.map((a,i)=>`<button class="${i?'secondary':'primary'}" data-qa="${i}">${a[0]}</button>`).join('')}</div>
+  <div class="fb" id="qout" aria-live="polite">${S.qout}</div><p class="hint">Talk it over first, then tap a button to put evidence on the screen.</p></div>`;
+}
+function wireDQ(){
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ S.q=+b.dataset.q; S.qout=''; render(); });
+  document.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>{ S.qout=DQ[S.q-1].acts[+b.dataset.qa][1](); $('#qout').innerHTML=S.qout; });
+}
+
+/* ================= CHALLENGE ================= */
+const END=14*60+45;
+function chDay(c){
+  const r=[]; let t=LEAVE; const add=(label,len)=>{ r.push({label,start:t,len,end:t+len}); t+=len; };
+  const s1=MENU[c.s1], s2=MENU[c.s2];
+  add(`Ride to the ${s1.name.toLowerCase()}`,s1.ride); add('Unload',LOAD);
+  c.a1.forEach(id=>add(act(c.s1,id).name,act(c.s1,id).len)); if(c.lunch===1) add('Lunch',LUNCH);
+  add('Load the bus',LOAD); add(`Ride to the ${s2.name.toLowerCase()}`,c.mid); add('Unload',LOAD);
+  c.a2.forEach(id=>add(act(c.s2,id).name,act(c.s2,id).len)); if(c.lunch===2) add('Lunch',LUNCH);
+  add('Load the bus',LOAD); add('Ride back to school',s2.ride);
+  return r;
+}
+function viewCH(){
+  const c=S.ch, s2=MENU[c.s2], leave2=END-s2.ride, load2=leave2-LOAD, A=c.ans;
+  const day=chDay(c), back=day[day.length-1].end;
+  const destPick=(k)=>`<div class="pick">${Object.entries(MENU).map(([d,v])=>`<button data-chs="${k}" data-v="${d}" aria-pressed="${c[k]===d}" ${c[k==='s1'?'s2':'s1']===d?'disabled style="opacity:.4"':''}>${v.name}</button>`).join('')}</div>`;
+  const actPick=(k,s)=>MENU[c[s]].acts.map(a=>`<label class="check"><input type="checkbox" data-cha="${k}" data-id="${a.id}" ${c[k].includes(a.id)?'checked':''}> ${a.name} (${a.len} min)</label>`).join(' ');
+  const q=(id,lab,target)=>{ const st=A[id]||{}; return `<div class="row"><span>${lab}</span><input class="ans ${st.ok?'ok':st.msg?'bad':''}" id="ch_${id}" placeholder="_:__" inputmode="numeric" value="${esc(st.v||'')}"><button class="secondary small" data-chq="${id}" data-t="${target}">Check</button></div>${st.msg?`<p class="fb ${st.ok?'ok':'bad'}">${st.msg}</p>`:''}`; };
+  return `<div class="panel"><h2>★ Challenge: a two-stop day, back by 2:45</h2><p class="lead">Two stops, 30 minutes for lunch, and a bus ride between stops. We must be back at school by <b class="mono">2:45</b>. Work backward from 2:45 first.</p>
+   <div class="row"><b>Stop 1:</b>${destPick('s1')}</div><div class="row"><b>Stop 2:</b>${destPick('s2')}</div>
+   <div class="row"><b>Ride between stops:</b><span class="stepper"><button data-chm="-5" aria-label="5 minutes less">−</button><output class="mono">${c.mid} min</output><button data-chm="5" aria-label="5 minutes more">+</button></span><span class="hint">The menu doesn't list this ride. Your teacher picks it.</span></div></div>
+  <div class="grid2"><div class="panel"><h3>Part 1 · Work backward from 2:45</h3><p class="hint">Stop 2 is the ${s2.name.toLowerCase()}: the ride home is ${s2.ride} minutes, and loading takes ${LOAD}.</p>
+   ${q('leave','Latest time the bus can pull away from stop 2:',leave2)}
+   ${A.leave&&A.leave.ok?q('load','Latest time to start loading at stop 2:',load2):''}
+   ${A.load&&A.load.ok?numberLine([[load2,leave2],[leave2,END]])+`<p class="hint">Backward: 2:45 − ${s2.ride} = ${fmt(leave2)}, then − ${LOAD} = ${fmt(load2)}.</p>`:''}</div>
+   <div class="panel"><h3>Part 2 · Build the day forward</h3>
+    <div class="row"><b>At stop 1:</b>${actPick('a1','s1')}</div><div class="row"><b>At stop 2:</b>${actPick('a2','s2')}</div>
+    <div class="row"><b>Lunch at:</b><div class="pick"><button data-chl="1" aria-pressed="${c.lunch===1}">Stop 1</button><button data-chl="2" aria-pressed="${c.lunch===2}">Stop 2</button></div></div>
+    <button class="secondary" id="chShow">${c.show?'Hide':'Show'} the timetable</button>
+    ${c.show?`<div class="tablewrap"><table class="itin"><thead><tr><th>Event</th><th>Start</th><th>How long</th><th>End</th></tr></thead><tbody>${day.map(r=>`<tr><td>${r.label}</td><td class="t">${fmt(r.start)}</td><td class="t">${r.len} min</td><td class="t">${fmt(r.end)}</td></tr>`).join('')}</tbody></table></div>
+    <p class="fb ${back<=END?'ok':'bad'}">Back at school at <b>${fmt(back)}</b>: ${back<=END?`${END-back} minutes to spare before 2:45.`:`${back-END} minutes too late. Drop an activity or shorten the plan.`}</p>`:`<p class="hint">Predict first: will this day get back by 2:45?</p>`}</div></div>`;
+}
+function wireCH(){
+  const c=S.ch;
+  document.querySelectorAll('[data-chs]').forEach(b=>b.onclick=()=>{ const k=b.dataset.chs; c[k]=b.dataset.v; const ak=k==='s1'?'a1':'a2'; c[ak]=[MENU[c[k]].acts[0].id]; c.ans={}; render(); });
+  document.querySelectorAll('[data-cha]').forEach(b=>b.onchange=()=>{ const k=b.dataset.cha, id=b.dataset.id; const s=k==='a1'?'s1':'s2'; let a=b.checked?[...c[k],id]:c[k].filter(x=>x!==id); c[k]=MENU[c[s]].acts.map(x=>x.id).filter(x=>a.includes(x)); render(); });
+  document.querySelectorAll('[data-chm]').forEach(b=>b.onclick=()=>{ c.mid=Math.max(5,Math.min(60,c.mid+ +b.dataset.chm)); render(); });
+  document.querySelectorAll('[data-chl]').forEach(b=>b.onclick=()=>{ c.lunch=+b.dataset.chl; render(); });
+  $('#chShow').onclick=()=>{ c.show=!c.show; render(); };
+  document.querySelectorAll('[data-chq]').forEach(b=>b.onclick=()=>{ const id=b.dataset.chq, t=+b.dataset.t, st=c.ans[id]=c.ans[id]||{}; st.v=$('#ch_'+id).value; const p=parseTime(st.v);
+    const from = id==='leave'?END:(END-MENU[c.s2].ride), sub = id==='leave'?MENU[c.s2].ride:LOAD;
+    if(p.err){ st.ok=false; st.msg=p.err==='empty'?'Type a time, like 2:05.':p.err; }
+    else if(p.v===t){ st.ok=true; st.msg=`Yes: ${fmt(from)} − ${sub} min = <b>${fmt(t)}</b>. Check forward: ${fmt(t)} + ${sub} = ${fmt(from)}.`; }
+    else { st.ok=false; st.msg=`Check forward: ${fmt(p.v)} + ${sub} min = ${fmt(p.v+sub)}, ${p.v+sub>from?'too late':'earlier than we need'}. We need to land exactly on ${fmt(from)}. Jump back to the hour first.`; }
+    render(); });
+}
+
+/* ================= main render ================= */
+function render(){
+  renderRoute(); renderTicket();
+  const m=$('#main');
+  if(S.tab==='c1'){ m.innerHTML=`<section class="view">${viewC1()}</section>`; wireSeg(); c1body(); }
+  if(S.tab==='c2'){ m.innerHTML=`<section class="view">${viewC2()}</section>`; wireSeg(); c2body(); }
+  if(S.tab==='c3'){ m.innerHTML=`<section class="view">${viewC3()}</section>`; wireSeg(); c3body(); }
+  if(S.tab==='dq'){ m.innerHTML=`<section class="view">${viewDQ()}</section>`; wireDQ(); }
+  if(S.tab==='ch'){ m.innerHTML=`<section class="view">${viewCH()}</section>`; wireCH(); }
+}
+$('#resetBtn').onclick=()=>{ S=fresh(); render(); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+render();
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,745 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tangram Fractions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a working table. The tangram square sits on the left like a puzzle on a desk; the step's task card sits on the right. Stacks on narrow screens. */
+:root{
+  --paper:#EDF0F3; --card:#FFFFFF; --ink:#18202B; --muted:#5A6573; --line:#D3D9E0; --soft:#F5F7F9;
+  --accent:#1F5FBF; --accent-soft:#E3ECFA; --good:#18804F; --good-soft:#E2F4EA; --warn:#B4521A; --warn-soft:#FCEBDD;
+  --pL1:#E4572E; --pL2:#EFA00B; --pM:#2E86AB; --pQ:#2A9D62; --pP:#8E5BD0; --ps1:#DB3F7A; --ps2:#0F9E9E;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Lexend", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12161C; --card:#1B2129; --ink:#E9EDF2; --muted:#9AA6B4; --line:#323B47; --soft:#232A34;
+    --accent:#7FA9F0; --accent-soft:#1E2B42; --good:#5CCB8F; --good-soft:#163326; --warn:#F09A62; --warn-soft:#3A2618;
+    --pL1:#F2734E; --pL2:#F5B73A; --pM:#4FA6CC; --pQ:#45BE7F; --pP:#A97DE6; --ps1:#EC6697; --ps2:#33BDBD;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12161C; --card:#1B2129; --ink:#E9EDF2; --muted:#9AA6B4; --line:#323B47; --soft:#232A34;
+  --accent:#7FA9F0; --accent-soft:#1E2B42; --good:#5CCB8F; --good-soft:#163326; --warn:#F09A62; --warn-soft:#3A2618;
+  --pL1:#F2734E; --pL2:#F5B73A; --pM:#4FA6CC; --pQ:#45BE7F; --pP:#A97DE6; --ps1:#EC6697; --ps2:#33BDBD;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 28px;
+  -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; padding-block:16px 10px; max-width:1400px; margin:0 auto}
+.brand h1{font-family:var(--display); font-weight:800; font-size:clamp(28px,3.2vw,44px); line-height:1; margin:0; letter-spacing:-.01em}
+.brand p{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:500; min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{max-width:1400px; margin:0 auto 14px; display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+nav button{flex:none; border:1.5px solid var(--line); background:var(--card); border-radius:999px; padding:10px 18px 10px 10px; font-weight:500; font-size:16px; display:flex; align-items:center; gap:8px; min-height:48px; color:var(--muted)}
+nav button .n{width:28px; height:28px; border-radius:50%; background:var(--soft); display:grid; place-items:center; font-size:14px; font-weight:600}
+nav button[aria-selected="true"]{border-color:var(--ink); color:var(--ink); background:var(--card); box-shadow:0 0 0 1.5px var(--ink) inset}
+nav button[aria-selected="true"] .n{background:var(--ink); color:var(--card)}
+nav button.done .n{background:var(--good); color:#fff}
+
+main{max-width:1400px; margin:0 auto}
+.stage{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:24px; align-items:start}
+.stage.wide{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.boardwrap{background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.boardwrap svg{width:100%; height:auto; display:block; touch-action:none; max-height:72vh}
+.panel{display:flex; flex-direction:column; gap:16px; min-width:0}
+.eyebrow{font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); font-weight:600}
+h2{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.4vw,34px); line-height:1.12; margin:0; text-wrap:balance}
+h3{font-family:var(--display); font-weight:600; font-size:clamp(19px,1.7vw,24px); margin:0}
+.lead{font-size:clamp(18px,1.5vw,22px); margin:0; max-width:36em}
+.say{font-size:clamp(17px,1.35vw,20px); margin:0; max-width:36em}
+.muted{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:600; font-size:18px; padding:12px 22px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:17px; padding:10px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.45; cursor:default}
+.choice{border:2px solid var(--line); background:var(--card); border-radius:16px; min-width:84px; min-height:72px; padding:8px 16px; font-size:22px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; gap:8px}
+.choice[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.choice.right{border-color:var(--good); background:var(--good-soft)}
+.card{background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:12px}
+.fb{border-radius:14px; padding:12px 16px; font-size:18px; margin:0; max-width:38em}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft); color:var(--ink); box-shadow:inset 4px 0 0 var(--good)}
+.fb.try{background:var(--warn-soft); color:var(--ink); box-shadow:inset 4px 0 0 var(--warn)}
+.fb.info{background:var(--accent-soft); color:var(--ink); box-shadow:inset 4px 0 0 var(--accent)}
+.dq{font-family:var(--display); font-weight:800; font-size:clamp(26px,2.8vw,40px); line-height:1.1; margin:0; text-wrap:balance}
+
+/* stacked fractions */
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; line-height:1; font-variant-numeric:tabular-nums; font-weight:600; margin:0 .08em}
+.fr>span:first-child{border-bottom:.09em solid currentColor; padding:0 .15em .07em}
+.fr>span:last-child{padding:.07em .15em 0}
+.eq{font-size:22px; line-height:2.2}
+
+/* pieces */
+.pc{stroke:var(--card); stroke-width:.05; stroke-linejoin:round; transition:opacity .2s, filter .2s}
+.tap .pc{cursor:pointer}
+.dim .pc:not(.on){opacity:.18}
+.pc.sel{stroke:var(--ink); stroke-width:.08}
+.outline{fill:none; stroke:var(--ink); stroke-width:.05; stroke-dasharray:.14 .1}
+.ghostslot{fill:none; stroke:var(--muted); stroke-width:.03; stroke-dasharray:.08 .08}
+.cov{fill:rgba(255,255,255,.22); stroke:var(--ink); stroke-width:.035; stroke-dasharray:.09 .06}
+.covn{font-family:var(--body); font-weight:600; font-size:.34px; fill:var(--ink); text-anchor:middle; dominant-baseline:central; paint-order:stroke; stroke:var(--card); stroke-width:.08}
+.lbl{font-family:var(--body); font-weight:600; font-size:.36px; fill:#fff; text-anchor:middle; dominant-baseline:central; pointer-events:none}
+.drag .pc{cursor:grab}
+.drag .pc.placed{cursor:default}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{opacity:0; transform:scale(.6)} to{opacity:1; transform:scale(1)}}
+.cov,.covn{transform-box:fill-box; transform-origin:center}
+
+/* table */
+.tbl{width:100%; border-collapse:collapse; font-size:17px}
+.tbl th{font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); text-align:left; font-weight:600; padding:6px 8px; border-bottom:1.5px solid var(--line)}
+.tbl td{padding:8px; border-bottom:1px solid var(--line); vertical-align:middle}
+.tbl tr.cur td{background:var(--accent-soft)}
+.tbl tr.ok td:first-child{box-shadow:inset 4px 0 0 var(--good)}
+.tblwrap{overflow-x:auto}
+.sw{display:inline-block; width:18px; height:18px; border-radius:5px; background:var(--c); vertical-align:-3px; margin-right:8px}
+.fin{display:inline-flex; flex-direction:column; align-items:center; gap:3px}
+.fin input{width:62px; height:42px; text-align:center; font-size:22px; font-weight:600; border:1.5px solid var(--line); border-radius:10px; background:var(--soft); font-variant-numeric:tabular-nums}
+.fin i{display:block; width:62px; height:3px; background:var(--ink); border-radius:2px}
+.mini{border:1.5px solid var(--line); background:var(--card); border-radius:10px; padding:8px 12px; font-size:15px; font-weight:600; min-height:44px}
+.mini.go{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.know{font-size:15px; color:var(--muted); min-width:9em}
+.know b{color:var(--ink)}
+.tick{color:var(--good); font-weight:700}
+
+/* sixteenths bar */
+.bar16{display:grid; grid-template-columns:repeat(16,1fr); gap:3px}
+.bar16 span{height:34px; border-radius:5px; background:var(--soft); border:1.5px solid var(--line)}
+.bar16 span.f{border-color:transparent}
+.bar16 span.half{box-shadow:inset 0 -4px 0 var(--ink)}
+.bars{display:flex; flex-direction:column; gap:8px}
+.barrow{display:grid; grid-template-columns:9.5em minmax(0,1fr) 3em; gap:10px; align-items:center; font-size:15px}
+.barrow .bar16 span{height:24px}
+.found{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+.found li{background:var(--soft); border-radius:12px; padding:8px 12px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; font-size:18px}
+.found li .chip{display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:500; padding:2px 8px 2px 4px; background:var(--card); border-radius:999px}
+.found li .chip i{width:14px; height:14px; border-radius:4px; background:var(--c)}
+.big{font-family:var(--display); font-weight:800; font-size:clamp(34px,4vw,56px); line-height:1}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:600; font-size:18px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.price input{width:84px; height:44px; font-size:20px; text-align:right; border:1.5px solid var(--line); border-radius:10px; background:var(--soft); padding-right:8px; font-weight:600}
+.toggle{display:inline-flex; align-items:center; gap:10px; font-size:16px; cursor:pointer}
+.toggle input{width:22px; height:22px; accent-color:var(--accent)}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:14px; color:var(--muted)}
+
+@media (max-width: 880px){
+  .stage,.stage.wide{grid-template-columns:minmax(0,1fr)}
+  .boardwrap svg{max-height:none}
+  .barrow{grid-template-columns:7.5em minmax(0,1fr) 2.6em}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<header>
+  <div class="brand">
+    <h1>Tangram Fractions</h1>
+    <p>Grade 4 · Math in Focus Ch 3 · Lesson 4.3-A</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav id="nav" role="tablist" aria-label="Lesson steps"></nav>
+<main id="main"></main>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+
+/* ---------- Geometry (the whole square is 4 × 4; small triangle area = 1) ---------- */
+const PIECES = [
+  {id:'L1', type:'L', name:'Large triangle A', short:'Large', pts:[[2,2],[0,0],[4,0]]},
+  {id:'L2', type:'L', name:'Large triangle B', short:'Large', pts:[[2,2],[0,4],[0,0]]},
+  {id:'M',  type:'M', name:'Medium triangle',  short:'Medium', pts:[[4,4],[2,4],[4,2]]},
+  {id:'Q',  type:'Q', name:'Square',           short:'Square', pts:[[3,1],[4,2],[3,3],[2,2]]},
+  {id:'P',  type:'P', name:'Parallelogram',    short:'Parallelogram', pts:[[1,3],[3,3],[2,4],[0,4]]},
+  {id:'s1', type:'s', name:'Small triangle A', short:'Small', pts:[[3,1],[4,0],[4,2]]},
+  {id:'s2', type:'s', name:'Small triangle B', short:'Small', pts:[[2,2],[3,3],[1,3]]},
+];
+const BY = Object.fromEntries(PIECES.map(p => [p.id, p]));
+const COLOR = id => `var(--p${id})`;
+const area = pts => Math.abs(pts.reduce((s,p,i) => { const q = pts[(i+1)%pts.length]; return s + p[0]*q[1] - q[0]*p[1]; }, 0)) / 2;
+const cen = pts => [pts.reduce((s,p)=>s+p[0],0)/pts.length, pts.reduce((s,p)=>s+p[1],0)/pts.length];
+const mid = (a,b) => [(a[0]+b[0])/2, (a[1]+b[1])/2];
+// split a right isosceles triangle [R, P, Q] (right angle at R) into two halves, right angle at the hypotenuse midpoint
+const split = ([R,P,Q]) => { const M = mid(P,Q); return [[M,P,R],[M,R,Q]]; };
+function smallCover(id){
+  const p = BY[id];
+  if(p.type==='s') return [p.pts];
+  if(p.type==='M') return split(p.pts);
+  if(p.type==='L') return split(p.pts).flatMap(split);
+  const v = p.pts;
+  if(p.type==='Q') return [[v[1],v[0],v[2]],[v[3],v[2],v[0]]];
+  return [[v[2],v[0],v[1]],[v[0],v[2],v[3]]]; // parallelogram, cut along (1,3)–(2,4)
+}
+PIECES.forEach(p => { p.u = area(p.pts); });
+const WHOLE = PIECES.reduce((s,p)=>s+p.u,0);
+// Self-check: whole = 16 units, every cover triangle is exactly one unit, covers match piece areas
+console.assert(WHOLE===16, 'square should be 16 small triangles');
+PIECES.forEach(p => { const c = smallCover(p.id); console.assert(c.length===p.u && c.every(t => Math.abs(area(t)-1)<1e-9), 'cover '+p.id); });
+
+const gcd = (a,b) => b ? gcd(b, a%b) : Math.abs(a);
+const simp = (n,d) => { const g = gcd(n,d)||1; return [n/g, d/g]; };
+const fr = (n,d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const frU = u => { const [n,d] = simp(u,16); return d===1 ? String(n) : fr(n,d); };
+const plural = (n, w) => `${n} ${w}${n===1?'':'s'}`;
+const article = id => { const n = BY[id].name; return n.charAt(0).toLowerCase() + n.slice(1); };
+const covers = u => `${plural(u,'small triangle')} ${u===1?'covers':'cover'}`;
+
+/* ---------- SVG helpers ---------- */
+function el(tag, attrs={}, parent){ const e = document.createElementNS(NS, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+const ptsStr = (pts, off=[0,0]) => pts.map(p => `${(p[0]+off[0]).toFixed(3)},${(p[1]+off[1]).toFixed(3)}`).join(' ');
+function shrink(tri, k){ const c = cen(tri); return tri.map(p => [c[0]+(p[0]-c[0])*k, c[1]+(p[1]-c[1])*k]); }
+
+/* A static board of the assembled square. Returns {svg, poly, cover(ids), clear(), setOn(ids)} */
+function makeBoard({tap, labels=false}={}){
+  const svg = el('svg', {viewBox:'-0.12 -0.12 4.24 4.24', role:'img', 'aria-label':'Tangram square'});
+  if(tap) svg.classList.add('tap');
+  const g = el('g', {}, svg), cg = el('g', {}, svg);
+  const poly = {};
+  PIECES.forEach(p => {
+    const e = el('polygon', {points:ptsStr(p.pts), class:'pc', fill:COLOR(p.id), 'data-id':p.id, tabindex: tap ? 0 : -1, role: tap?'button':'img', 'aria-label':p.name}, g);
+    poly[p.id] = e;
+    if(tap){ e.addEventListener('click', () => tap(p.id)); e.addEventListener('keydown', ev => { if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); tap(p.id); } }); }
+  });
+  el('rect', {x:0, y:0, width:4, height:4, fill:'none', stroke:'var(--ink)', 'stroke-width':.04, 'pointer-events':'none'}, svg);
+  let token = 0;
+  const api = {
+    svg, poly,
+    clear(){ token++; cg.innerHTML=''; },
+    async cover(ids, {numberFrom=1, delay=170}={}){
+      const my = ++token; cg.innerHTML=''; let n = numberFrom - 1;
+      for(const id of ids){
+        for(const t of smallCover(id)){
+          if(my!==token) return n;
+          n++;
+          const pg = el('polygon', {points:ptsStr(shrink(t,.86)), class:'cov' + (reduced?'':' pop')}, cg);
+          const c = cen(t); const tx = el('text', {x:c[0], y:c[1], class:'covn' + (reduced?'':' pop')}, cg); tx.textContent = n;
+          await sleep(delay);
+        }
+      }
+      return n;
+    },
+    setOn(ids){ const on = new Set(ids||[]); svg.classList.toggle('dim', !!ids); PIECES.forEach(p => poly[p.id].classList.toggle('on', on.has(p.id))); },
+    select(id){ PIECES.forEach(p => poly[p.id].classList.toggle('sel', p.id===id)); }
+  };
+  return api;
+}
+
+/* ---------- State ---------- */
+const STEPS = [
+  {k:'warm', t:'Warm-up'}, {k:'launch', t:'Launch'}, {k:'inv', t:'Investigate'},
+  {k:'half', t:'Make one half'}, {k:'det', t:'Detective questions'}, {k:'ch', t:'Challenge'}
+];
+let S;
+function fresh(){
+  return { step:'warm', done:{},
+    warm:{ pos:null, placed:{}, outlines:false, biggest:null, layout:null },
+    launch:{ large:null, small:null },
+    inv:{ cur:'L1', ans:{}, floor:false, sumShown:false },
+    half:{ sel:[], found:[] },
+    ch:{ sel:[], found:[], prices:{}, priceFb:{} },
+    det:{ q:1 } };
+}
+
+/* ---------- Nav ---------- */
+function renderNav(){
+  const nav = $('#nav'); nav.innerHTML='';
+  STEPS.forEach((s,i) => {
+    const b = document.createElement('button');
+    b.setAttribute('role','tab'); b.setAttribute('aria-selected', S.step===s.k);
+    if(S.done[s.k]) b.classList.add('done');
+    b.innerHTML = `<span class="n">${S.done[s.k]?'✓':i+1}</span>${s.t}`;
+    b.onclick = () => go(s.k);
+    nav.appendChild(b);
+  });
+}
+function go(k){ S.step = k; renderNav(); render(); window.scrollTo({top:0, behavior: reduced?'auto':'smooth'}); }
+function nextBtn(label, k){ return `<button class="secondary" data-go="${k}">${label} →</button>`; }
+function wireGo(root){ root.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go)); }
+
+function render(){
+  const m = $('#main'); m.innerHTML='';
+  ({warm:rWarm, launch:rLaunch, inv:rInv, half:rHalf, det:rDet, ch:rCh})[S.step](m);
+  wireGo(m);
+}
+
+/* ---------- 1. Warm-up: build the square ---------- */
+const SCATTER = {
+  rots:{L1:1, L2:3, M:2, Q:1, P:1, s1:2, s2:1},
+  wide:{vb:'0 0 12.55 5', pos:{L1:[10.34,2.55], L2:[8.36,3.85], P:[5.83,2.09], M:[9.5,1.12], Q:[7.31,1.3], s1:[11.53,2.31], s2:[6.82,2.87]}},
+  tall:{vb:'0 0 5 11.45', pos:{L1:[2.88,7.52], L2:[2.49,10.46], P:[4.21,9.48], M:[1.27,6.78], Q:[1.28,8.82], s1:[4.08,6.57], s2:[0.62,10.07]}}
+};
+const OFF = [.5,.5];
+const rot90 = v => [-v[1], v[0]];
+function shapeAt(id, st){ // piece vertices for state {x,y,r}
+  const p = BY[id], c = cen(p.pts);
+  return p.pts.map(q => { let v = [q[0]-c[0], q[1]-c[1]]; for(let i=0;i<st.r%4;i++) v = rot90(v); return [v[0]+st.x, v[1]+st.y]; });
+}
+const homeOf = id => { const c = cen(BY[id].pts); return [c[0]+OFF[0], c[1]+OFF[1]]; };
+function sameShape(a, b){ // vertex sets equal
+  return a.length===b.length && a.every(p => b.some(q => Math.hypot(p[0]-q[0], p[1]-q[1]) < .06));
+}
+function rWarm(m){
+  const W = S.warm;
+  m.innerHTML = `<div class="stage wide">
+    <div class="boardwrap"><div id="wb"></div>
+      <div class="row"><label class="toggle"><input type="checkbox" id="wOut" ${W.outlines?'checked':''}> Show where pieces go</label>
+      <button class="mini" id="wSolve">Show me the square</button></div></div>
+    <div class="panel">
+      <div class="eyebrow">Warm-up · 5 min</div>
+      <h2>Put the seven pieces back into the square.</h2>
+      <p class="say"><b>Drag</b> a piece to move it. <b>Tap</b> a piece to turn it a quarter turn. It clicks in when it fits.</p>
+      <p class="fb info" id="wMsg"></p>
+      <div class="card">
+        <h3>Which piece is biggest?</h3>
+        <div class="row" id="wBig"></div>
+        <p class="fb" id="wBigFb"></p>
+      </div>
+      <div class="row">${nextBtn('Launch','launch')}</div>
+    </div></div>`;
+  const wrap = $('#wb', m);
+  const layout = () => (wrap.clientWidth || 600) < 560 ? 'tall' : 'wide';
+  function initPos(L){
+    W.layout = L; W.pos = W.pos || {};
+    PIECES.forEach(p => { if(!W.placed[p.id]) { const q = SCATTER[L].pos[p.id]; W.pos[p.id] = {x:q[0], y:q[1], r: W.pos[p.id] ? W.pos[p.id].r : SCATTER.rots[p.id]}; } });
+  }
+  let svg, polys = {};
+  function draw(){
+    const L = layout(); if(!W.pos || W.layout!==L) initPos(L);
+    wrap.innerHTML='';
+    svg = el('svg', {viewBox:SCATTER[L].vb, class:'drag', role:'application', 'aria-label':'Tangram puzzle: drag pieces into the square'});
+    el('rect', {x:OFF[0], y:OFF[1], width:4, height:4, class:'outline', fill:'var(--soft)'}, svg);
+    if(W.outlines) PIECES.forEach(p => el('polygon', {points:ptsStr(p.pts, OFF), class:'ghostslot'}, svg));
+    polys = {};
+    // placed pieces first so loose pieces sit on top
+    const order = [...PIECES].sort((a,b) => (W.placed[b.id]?1:0) - (W.placed[a.id]?1:0));
+    order.forEach(p => {
+      const e = el('polygon', {points:ptsStr(shapeAt(p.id, W.pos[p.id])), class:'pc' + (W.placed[p.id]?' placed':''), fill:COLOR(p.id), 'aria-label':p.name}, svg);
+      polys[p.id] = e; attachDrag(e, p.id);
+    });
+    wrap.appendChild(svg);
+    status();
+  }
+  function toSvg(ev){ const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const r = pt.matrixTransform(svg.getScreenCTM().inverse()); return [r.x, r.y]; }
+  function attachDrag(e, id){
+    let start=null, orig=null, moved=false;
+    e.addEventListener('pointerdown', ev => {
+      if(W.placed[id]) return;
+      ev.preventDefault(); e.setPointerCapture(ev.pointerId);
+      start = toSvg(ev); orig = {...W.pos[id]}; moved = false;
+      svg.appendChild(e); // bring to front
+    });
+    e.addEventListener('pointermove', ev => {
+      if(!start) return;
+      const p = toSvg(ev); const dx = p[0]-start[0], dy = p[1]-start[1];
+      if(!moved && Math.hypot(dx,dy) < .12) return;
+      moved = true;
+      W.pos[id].x = orig.x + dx; W.pos[id].y = orig.y + dy;
+      e.setAttribute('points', ptsStr(shapeAt(id, W.pos[id])));
+    });
+    const up = () => {
+      if(!start) return; start = null;
+      if(!moved){ W.pos[id].r = (W.pos[id].r + 1) % 4; e.setAttribute('points', ptsStr(shapeAt(id, W.pos[id]))); trySnap(id, true); return; }
+      trySnap(id, false);
+    };
+    e.addEventListener('pointerup', up); e.addEventListener('pointercancel', up);
+  }
+  function trySnap(id, quiet){
+    const st = W.pos[id], me = shapeAt(id, st); const type = BY[id].type;
+    let near = null;
+    for(const slot of PIECES){
+      if(slot.type!==type || Object.values(W.placed).includes(slot.id)) continue;
+      const h = homeOf(slot.id);
+      if(Math.hypot(st.x-h[0], st.y-h[1]) > .55) continue;
+      const moved = me.map(p => [p[0]-st.x+h[0], p[1]-st.y+h[1]]);
+      if(sameShape(moved, slot.pts.map(p => [p[0]+OFF[0], p[1]+OFF[1]]))){
+        W.placed[id] = slot.id; W.pos[id] = {x:h[0], y:h[1], r:st.r}; draw(); return;
+      }
+      near = slot;
+    }
+    if(near && !quiet) say('#wMsg', 'Close! That spot fits this piece. Tap it to turn it, then drag it back in.', 'info');
+  }
+  function status(){
+    const n = Object.keys(W.placed).length;
+    if(n===7){ S.done.warm = true; renderNav(); say('#wMsg', 'You rebuilt the square from all seven pieces. Now look closely: are the pieces the same size?', 'good'); }
+    else say('#wMsg', n ? `${n} of 7 pieces are in. Keep going.` : 'Start with the two large triangles. Where could they go?', 'info');
+  }
+  $('#wOut', m).onchange = e => { W.outlines = e.target.checked; draw(); };
+  $('#wSolve', m).onclick = () => { PIECES.forEach(p => { W.placed[p.id] = p.id; const h = homeOf(p.id); W.pos[p.id] = {x:h[0], y:h[1], r:0}; }); draw(); };
+  // biggest piece question
+  const big = $('#wBig', m);
+  [['L','Large triangle'],['M','Medium triangle'],['Q','Square'],['P','Parallelogram'],['s','Small triangle']].forEach(([t,label]) => {
+    const b = document.createElement('button'); b.className='choice'; b.style.fontSize='17px';
+    const id = PIECES.find(p=>p.type===t).id;
+    b.innerHTML = `<span class="sw" style="--c:${COLOR(id)}"></span>${label}`;
+    b.setAttribute('aria-pressed', W.biggest===t);
+    b.onclick = () => { W.biggest = t; [...big.children].forEach(x => x.setAttribute('aria-pressed', x===b)); bigFb(); };
+    big.appendChild(b);
+  });
+  function bigFb(){
+    const t = W.biggest; if(!t) return;
+    if(t==='L') say('#wBigFb', 'Yes. The two large triangles are the biggest, and they are the same size. What fraction of the square do you think one of them is? Hold that guess for the Launch.', 'good');
+    else say('#wBigFb', `Lay the ${PIECES.find(p=>p.type===t).name.toLowerCase()} on top of a large triangle. Which one covers more of the square?`, 'try');
+  }
+  bigFb();
+  draw();
+  let lastL = layout();
+  const ro = new ResizeObserver(() => { const L = layout(); if(L!==lastL){ lastL = L; draw(); } });
+  ro.observe(wrap);
+}
+function say(sel, html, kind){ const e = $(sel); if(!e) return; e.className = 'fb ' + (kind||'info'); e.innerHTML = html; }
+
+/* ---------- 2. Launch ---------- */
+function rLaunch(m){
+  const Ls = S.launch;
+  m.innerHTML = `<div class="stage">
+    <div class="boardwrap"><div id="lb"></div><div class="legend" id="lLeg"></div></div>
+    <div class="panel">
+      <div class="eyebrow">Launch · 5 min · Driving question</div>
+      <p class="dq">What fraction of the whole square is each tangram piece?</p>
+      <div class="card">
+        <h3>The two big triangles make half the square. So one of them is what fraction?</h3>
+        <div class="row" id="lLarge"></div>
+        <p class="fb" id="lLargeFb"></p>
+      </div>
+      <div class="card">
+        <h3>Predict: what fraction is a small triangle? There is no ruler, only the pieces.</h3>
+        <div class="row" id="lSmall"></div>
+        <p class="fb" id="lSmallFb"></p>
+      </div>
+      <div class="row">${nextBtn('Investigate','inv')}</div>
+    </div></div>`;
+  const B = makeBoard(); $('#lb', m).appendChild(B.svg);
+  B.setOn(['L1','L2']);
+  $('#lLeg', m).textContent = 'Lit up: the two large triangles. Together they fill half the square.';
+  const opts = [[1,2],[1,3],[1,4],[1,8]];
+  const lg = $('#lLarge', m);
+  opts.forEach(([n,d]) => {
+    const b = document.createElement('button'); b.className='choice'; b.innerHTML = fr(n,d);
+    b.setAttribute('aria-pressed', Ls.large===d);
+    b.onclick = () => { Ls.large = d; [...lg.children].forEach(x => x.setAttribute('aria-pressed', x===b)); largeFb(); };
+    lg.appendChild(b);
+  });
+  function largeFb(){
+    const d = Ls.large; if(!d) return;
+    if(d===4){ say('#lLargeFb', `Yes, ${fr(1,4)}. Two large triangles make ${fr(1,2)}, so four of them would fill the whole square. Each one is ${fr(1,4)}.`, 'good'); B.setOn(['L1']); }
+    else if(d===2) say('#lLargeFb', `Both large triangles together make ${fr(1,2)}. Is one of them the whole half, or only part of it?`, 'try');
+    else say('#lLargeFb', `If one large triangle were ${fr(1,d)}, it would take ${d} of them to fill the square. Two of them make one half. How many would fill the whole square?`, 'try');
+  }
+  largeFb();
+  const sm = $('#lSmall', m);
+  [[1,7],[1,8],[1,12],[1,16]].forEach(([n,d]) => {
+    const b = document.createElement('button'); b.className='choice'; b.innerHTML = fr(n,d);
+    b.setAttribute('aria-pressed', Ls.small===d);
+    b.onclick = () => { Ls.small = d; [...sm.children].forEach(x => x.setAttribute('aria-pressed', x===b)); smallFb(); };
+    sm.appendChild(b);
+  });
+  function smallFb(){
+    const d = Ls.small; if(!d) return;
+    S.done.launch = true; renderNav();
+    if(d===7) say('#lSmallFb', `There are seven pieces. But are the seven pieces equal in size? Look at the board. Keep your prediction and test it next.`, 'try');
+    else say('#lSmallFb', `Prediction saved: ${fr(1,d)}. You'll test it by covering pieces in Investigate.`, 'info');
+  }
+  smallFb();
+}
+
+/* ---------- 3. Investigate ---------- */
+function rInv(m){
+  const I = S.inv;
+  m.innerHTML = `<div class="stage">
+    <div class="boardwrap"><div id="ib"></div>
+      <div class="row"><button class="mini" id="iCover">Cover the selected piece</button><button class="mini" id="iAll">Cover the whole square</button><button class="mini" id="iClear">Clear</button></div>
+      <p class="say muted" id="iBoardNote">Tap a piece to pick it.</p></div>
+    <div class="panel">
+      <div class="eyebrow">Investigate · 25 min · with a partner</div>
+      <h2>Find the fraction for every piece. Prove it by covering.</h2>
+      <label class="toggle"><input type="checkbox" id="iFloor" ${I.floor?'checked':''}> Easier start: triangles only</label>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>Piece</th><th>Fraction of the square</th><th></th><th>How I know</th></tr></thead><tbody id="iRows"></tbody></table></div>
+      <p class="fb" id="iFb"></p>
+      <div class="card">
+        <h3>Add all the pieces</h3>
+        <div id="iSum" class="eq muted">Find the fractions first, then add them up.</div>
+        <div class="row"><button class="primary" id="iSumBtn">Add them up</button></div>
+      </div>
+      <div class="row">${nextBtn('Make one half','half')}</div>
+    </div></div>`;
+  const B = makeBoard({tap: id => pick(id)}); $('#ib', m).appendChild(B.svg);
+  const rows = $('#iRows', m);
+  const list = () => PIECES.filter(p => !I.floor || ['L','M','s'].includes(p.type));
+  function drawRows(){
+    rows.innerHTML='';
+    list().forEach(p => {
+      const a = I.ans[p.id] || {};
+      const tr = document.createElement('tr'); tr.dataset.id = p.id;
+      if(p.id===I.cur) tr.classList.add('cur'); if(a.ok) tr.classList.add('ok');
+      tr.innerHTML = `<td><span class="sw" style="--c:${COLOR(p.id)}"></span>${p.name}</td>
+        <td><span class="fin"><input id="n_${p.id}" inputmode="numeric" aria-label="${p.name} numerator" value="${a.n??''}"><i></i><input id="d_${p.id}" inputmode="numeric" aria-label="${p.name} denominator" value="${a.d??''}"></span></td>
+        <td><button class="mini go" data-check="${p.id}">Check</button></td>
+        <td class="know">${a.ok ? `<span class="tick">✓</span> <b>${p.u}</b> small ${p.u===1?'triangle covers':'triangles cover'} it. 16 cover the square.` : (a.covered ? `<b>${p.u}</b> small ${p.u===1?'triangle covers':'triangles cover'} it.` : '')}</td>`;
+      tr.addEventListener('click', ev => { if(ev.target.closest('input,button')) return; pick(p.id); });
+      tr.querySelectorAll('input').forEach(inp => { inp.addEventListener('focus', () => pick(p.id, true)); inp.addEventListener('keydown', ev => { if(ev.key==='Enter') check(p.id); }); });
+      rows.appendChild(tr);
+    });
+    rows.querySelectorAll('[data-check]').forEach(b => b.onclick = () => check(b.dataset.check));
+    B.select(I.cur);
+  }
+  function pick(id, keepRows){
+    if(I.floor && !['L','M','s'].includes(BY[id].type)){ say('#iFb', `Triangles only for now. Untick "Easier start" to work on the ${article(id)}.`, 'info'); return; }
+    I.cur = id; B.select(id); B.clear();
+    rows.querySelectorAll('tr').forEach(tr => tr.classList.toggle('cur', tr.dataset.id===id));
+    $('#iBoardNote', m).textContent = `Picked: ${BY[id].name}.`;
+    if(!keepRows){ const inp = $('#n_'+id, m); if(inp && matchMedia('(pointer:fine)').matches) inp.focus(); }
+  }
+  async function cover(id){
+    pick(id, true);
+    const a = I.ans[id] = I.ans[id] || {}; a.covered = true; saveInputs(); drawRows();
+    const n = await B.cover([id]);
+    $('#iBoardNote', m).innerHTML = `${covers(n)} the ${article(id)}. The whole square takes 16.`;
+  }
+  function saveInputs(){ list().forEach(p => { const a = I.ans[p.id] = I.ans[p.id] || {}; const n = $('#n_'+p.id, m), d = $('#d_'+p.id, m); if(n){ a.n = n.value.trim(); a.d = d.value.trim(); } }); }
+  function check(id){
+    saveInputs(); pick(id, true);
+    const p = BY[id], a = I.ans[id];
+    const n = Number(a.n), d = Number(a.d);
+    if(a.n==='' || a.d===''){ say('#iFb', `Type a fraction for the ${article(id)}: top number and bottom number.`, 'info'); return; }
+    if(!Number.isInteger(n) || !Number.isInteger(d) || n<0 || d<0){ say('#iFb', 'Use whole numbers on the top and the bottom.', 'try'); return; }
+    if(d===0){ say('#iFb', 'The bottom number tells how many equal parts make the whole. It can’t be 0.', 'try'); return; }
+    if(n*16 === p.u*d){
+      a.ok = true; drawRows();
+      const [sn,sd] = simp(n,d);
+      const extra = (sn!==n) ? ` That's the same as ${fr(sn,sd)}.` : (sd!==16 ? ` In sixteenths that's ${fr(p.u,16)}.` : '');
+      let pred = '';
+      if(p.type==='s' && S.launch.small) pred = S.launch.small===16 ? ' Your class prediction was right!' : ` Your class predicted ${fr(1,S.launch.small)}.`;
+      say('#iFb', `Yes! The ${article(id)} is ${fr(n,d)} of the square.${extra} ${covers(p.u)} it, and 16 cover the square.${pred}`, 'good');
+      B.cover([id]);
+      if(list().every(q => I.ans[q.id] && I.ans[q.id].ok)){ S.done.inv = true; renderNav(); }
+      return;
+    }
+    a.ok = false; drawRows();
+    if(d===7){ say('#iFb', `Are the seven pieces equal in size? Sevenths would mean seven equal parts. Tap <b>Cover the whole square</b> and compare the pieces.`, 'try'); return; }
+    if(n > d){ say('#iFb', `${fr(n,d)} is more than the whole square. One piece has to be smaller than the square.`, 'try'); return; }
+    if(p.type==='P'){ say('#iFb', `How many small triangles cover it? Tap <b>Cover the selected piece</b> and count, out of 16 for the whole square.`, 'try'); return; }
+    const x = n*16/d;
+    if(Number.isInteger(x)) say('#iFb', `${fr(n,d)} of the square would be ${plural(x,'small triangle')}. Cover the ${article(id)} and count. Does it match ${x}?`, 'try');
+    else say('#iFb', `${fr(n,d)} doesn't line up with the small triangles. The square splits into 16 small triangles. How many of them cover the ${article(id)}?`, 'try');
+  }
+  function sum(){
+    saveInputs();
+    const L = list(); const tot = L.reduce((s,p)=>s+p.u,0);
+    const terms = L.map(p => frU(p.u)).join(' + ');
+    const six = L.map(p => fr(p.u,16)).join(' + ');
+    let html = `${terms}<br>= ${six}<br>= ${fr(tot,16)}${tot===16 ? ' = <b>1 whole square</b>' : ' = ' + frU(tot)}`;
+    if(tot===16) html += `<br><span class="say">Grouped by size: ${fr(2,4)} + ${fr(3,8)} + ${fr(2,16)} = ${fr(8,16)} + ${fr(6,16)} + ${fr(2,16)} = ${fr(16,16)} = 1.</span>`;
+    else html += `<br><span class="say">The triangles make ${frU(tot)}. The square and the parallelogram make the other ${frU(16-tot)}.</span>`;
+    $('#iSum', m).innerHTML = html; $('#iSum', m).classList.remove('muted');
+    B.cover(L.map(p=>p.id), {delay:70});
+  }
+  $('#iFloor', m).onchange = e => { saveInputs(); I.floor = e.target.checked; if(I.floor && !['L','M','s'].includes(BY[I.cur].type)) I.cur = 'L1'; drawRows(); };
+  $('#iCover', m).onclick = () => cover(I.cur);
+  $('#iAll', m).onclick = async () => { B.select(null); const n = await B.cover(PIECES.map(p=>p.id), {delay:90}); $('#iBoardNote', m).innerHTML = `${n} small triangles cover the whole square. So one small triangle is ${fr(1,16)}.`; };
+  $('#iClear', m).onclick = () => { B.clear(); $('#iBoardNote', m).textContent = 'Tap a piece to pick it.'; };
+  $('#iSumBtn', m).onclick = sum;
+  drawRows();
+}
+
+/* ---------- Builder (make a target fraction from pieces) ---------- */
+function waysFor(target){
+  const ids = PIECES.map(p=>p.id), out = new Map();
+  for(let mask=1; mask<(1<<ids.length); mask++){
+    const sel = ids.filter((_,i) => mask & (1<<i));
+    if(sel.reduce((s,id)=>s+BY[id].u,0)===target){ const key = sel.map(id=>BY[id].type).sort().join(''); if(!out.has(key)) out.set(key, sel); }
+  }
+  return [...out.values()];
+}
+const keyOf = sel => sel.map(id=>BY[id].type).sort().join('');
+const TYPEORDER = {L:0, M:1, Q:2, P:3, s:4};
+const sortSel = sel => [...sel].sort((a,b) => TYPEORDER[BY[a].type]-TYPEORDER[BY[b].type] || a.localeCompare(b));
+function sentence(sel, target){
+  const s = sortSel(sel);
+  return `${s.map(id=>frU(BY[id].u)).join(' + ')} = ${s.map(id=>fr(BY[id].u,16)).join(' + ')} = ${fr(target,16)} = ${frU(target)}`;
+}
+function chipList(sel){ return sortSel(sel).map(id => `<span class="chip"><i style="--c:${COLOR(id)}"></i>${BY[id].short}</span>`).join(''); }
+
+function builder(m, st, target, onAllFound){
+  const all = waysFor(target);
+  m.querySelector('[data-b="board"]').innerHTML='';
+  const B = makeBoard({tap: id => toggle(id)});
+  m.querySelector('[data-b="board"]').appendChild(B.svg);
+  const bar = m.querySelector('[data-b="bar"]'), tot = m.querySelector('[data-b="tot"]'), fb = m.querySelector('[data-b="fb"]'), found = m.querySelector('[data-b="found"]'), cnt = m.querySelector('[data-b="count"]');
+  function toggle(id){ const i = st.sel.indexOf(id); if(i>=0) st.sel.splice(i,1); else st.sel.push(id); update(true); }
+  function update(fromTap){
+    B.setOn(st.sel.length ? st.sel : null);
+    const u = st.sel.reduce((s,id)=>s+BY[id].u,0);
+    // sixteenths bar
+    bar.innerHTML=''; let k=0;
+    sortSel(st.sel).forEach(id => { for(let j=0;j<BY[id].u;j++){ const c = document.createElement('span'); c.className='f'; c.style.background = COLOR(id); bar.appendChild(c); k++; } });
+    for(;k<16;k++){ const c = document.createElement('span'); bar.appendChild(c); }
+    [...bar.children].forEach((c,i) => { if(i===target-1) c.classList.add('half'); });
+    tot.innerHTML = st.sel.length ? `${sortSel(st.sel).map(id=>frU(BY[id].u)).join(' + ')} = ${fr(u,16)}${u!==0 && simp(u,16)[1]!==16 ? ' = '+frU(u) : ''}` : '<span class="muted">Tap pieces on the square.</span>';
+    fb.className = 'fb';
+    if(!st.sel.length){ fb.innerHTML=''; }
+    else if(u===target){
+      const key = keyOf(st.sel);
+      if(!st.found.some(f => keyOf(f)===key)){ st.found.push([...st.sel]); fb.className='fb good'; fb.innerHTML = `That makes exactly ${frU(target)}. New way found!`; if(st.found.length===all.length && onAllFound) onAllFound(); }
+      else { fb.className='fb info'; fb.innerHTML = `That makes ${frU(target)}, but you already found a way with these same kinds of pieces. Try different kinds.`; }
+    } else if(u>target){ fb.className='fb try'; fb.innerHTML = `That's ${fr(u,16)}. You need ${fr(target,16)}, so you're ${plural(u-target,'small triangle')} over. Which piece could you take away or swap for a smaller one?`; }
+    else if(fromTap){ fb.className='fb info'; fb.innerHTML = `${fr(u,16)} so far. You need ${fr(target-u,16)} more.`; }
+    found.innerHTML = st.found.map(f => `<li>${chipList(f)}<span>${sentence(f,target)}</span></li>`).join('') || '<li class="muted">No ways yet.</li>';
+    cnt.textContent = `${st.found.length} of ${all.length} ways found`;
+  }
+  m.querySelector('[data-b="clear"]').onclick = () => { st.sel.length = 0; update(); };
+  m.querySelector('[data-b="hint"]').onclick = () => {
+    const miss = all.find(w => !st.found.some(f => keyOf(f)===keyOf(w)));
+    if(!miss){ fb.className='fb good'; fb.innerHTML = `You found all ${all.length} ways.`; return; }
+    st.sel.length = 0; st.sel.push(miss[0]); update();
+    fb.className='fb info'; fb.innerHTML = `Here's a start: the ${article(miss[0])} (${frU(BY[miss[0]].u)}). What can you add to make ${frU(target)}?`;
+  };
+  update();
+  return {all};
+}
+function builderHTML(target){
+  return `<div class="stage">
+    <div class="boardwrap"><div data-b="board"></div><p class="say muted">Tap pieces to choose them. Tap again to put one back.</p></div>
+    <div class="panel" data-b="panel">
+      <div data-b="head"></div>
+      <div class="card">
+        <div class="eq" data-b="tot"></div>
+        <div class="bar16" data-b="bar" aria-label="Sixteenths of the square"></div>
+        <p class="muted" style="margin:0;font-size:14px">Each box is one small triangle, ${fr(1,16)} of the square. The dark line marks ${fr(target,16)}.</p>
+        <p class="fb" data-b="fb"></p>
+        <div class="row"><button class="mini" data-b="clear">Clear my pieces</button><button class="mini" data-b="hint">Give me a start</button></div>
+      </div>
+      <div class="card"><div class="row" style="justify-content:space-between"><h3>Addition sentences</h3><span class="muted" data-b="count"></span></div><ul class="found" data-b="found"></ul></div>
+      <div data-b="foot"></div>
+    </div></div>`;
+}
+
+/* ---------- 4. Make one half ---------- */
+function rHalf(m){
+  m.innerHTML = builderHTML(8);
+  m.querySelector('[data-b="head"]').innerHTML = `<div class="eyebrow">Investigate, part 2</div><h2>Build ${fr(1,2)} in as many ways as you can.</h2><p class="say">Write each way as an addition sentence. Two ways count as different when they use different kinds of pieces.</p>`;
+  m.querySelector('[data-b="foot"]').innerHTML = `<div class="row">${nextBtn('Detective questions','det')}</div>`;
+  builder(m, S.half, 8, () => { S.done.half = true; renderNav(); });
+}
+
+/* ---------- 5. Detective questions ---------- */
+function rDet(m){
+  const D = S.det;
+  m.innerHTML = `<div class="stage">
+    <div class="boardwrap"><div id="db"></div><div id="dBars"></div></div>
+    <div class="panel">
+      <div class="eyebrow">Share and reflect · 10 min</div>
+      <div class="qnav" id="dNav"></div>
+      <p class="dq" id="dQ"></p>
+      <div class="row" id="dAct"></div>
+      <div class="fb info" id="dOut"></div>
+      <p class="muted" style="margin:0">Talk it over first. Then tap a button to put evidence on the board.</p>
+    </div></div>`;
+  const B = makeBoard(); $('#db', m).appendChild(B.svg);
+  const half = waysFor(8);
+  let cyc = 0;
+  const Q = {
+    1:{ q:'The square, the medium triangle, and the parallelogram look different. Why are they the same fraction?', a:[
+        ['Cover all three', async () => { B.setOn(['M','Q','P']); bars(['M','Q','P']); await B.cover(['M','Q','P']); out(`Each one is covered by exactly 2 small triangles. 2 out of 16 is ${fr(2,16)} = ${fr(1,8)}. Different shapes, same amount of the square.`); }],
+        ['Rearrange the halves', () => { B.setOn(['M','Q','P']); B.cover(['M','Q','P'],{delay:0}); out(`Cut along a dashed line and each piece becomes two small triangles. Slide those two triangles around and you can make a square, a medium triangle, or a parallelogram. The amount of space never changes.`); }]]},
+    2:{ q:'A classmate says each piece is ' + fr(1,7) + ' because there are 7 pieces. What would you ask them?', a:[
+        ['Compare the sizes', () => { B.setOn(null); B.clear(); bars(PIECES.map(p=>p.id)); out(`Are the seven pieces equal in size? No. The bars show 4, 4, 2, 2, 2, 1 and 1 small triangles. Sevenths would need seven <b>equal</b> parts.`); }]]},
+    3:{ q:'Share your ways to make one half. Which way uses the most pieces?', a:[
+        ['Show every way', () => { B.setOn(null); B.clear(); bars([]); out(`There are ${half.length} different ways:<ul class="found" style="margin-top:8px">${half.map(w => `<li>${chipList(w)}<span>${sentence(w,8)}</span></li>`).join('')}</ul>`); }],
+        ['Most pieces', () => { const w = half.reduce((a,b) => b.length>a.length ? b : a); B.setOn(w); bars(w); B.clear(); out(`${plural(w.length,'piece')}: ${sentence(w,8)}. It uses every piece except the two large triangles.`); }]]},
+    4:{ q:'Journal: show one way to make ' + fr(1,2) + ' that uses four pieces.', a:[
+        ['Show a four-piece way', () => { const four = half.filter(w => w.length===4); const w = four[cyc++ % four.length]; B.setOn(w); bars(w); B.clear(); out(`One way (of ${four.length}): ${sentence(w,8)}. Tap again for another.`); }]]},
+    5:{ q:'Which piece is the best unit for measuring every piece, and why?', a:[
+        ['Cover the whole square', async () => { B.setOn(null); bars([]); const n = await B.cover(PIECES.map(p=>p.id), {delay:80}); out(`The small triangle. ${n} of them cover the square, and every piece is a whole number of them. That's why sixteenths can name every piece.`); }]]}
+  };
+  function out(h){ $('#dOut', m).innerHTML = h; }
+  function bars(ids){
+    const box = $('#dBars', m);
+    if(!ids.length){ box.innerHTML=''; return; }
+    box.innerHTML = `<div class="bars">${ids.map(id => `<div class="barrow"><span><span class="sw" style="--c:${COLOR(id)}"></span>${BY[id].short}</span><div class="bar16">${Array.from({length:16},(_,i)=>`<span class="${i<BY[id].u?'f':''}" style="${i<BY[id].u?'background:'+COLOR(id):''}"></span>`).join('')}</div><span>${frU(BY[id].u)}</span></div>`).join('')}</div>`;
+  }
+  function show(){
+    const nav = $('#dNav', m);
+    nav.innerHTML = [1,2,3,4,5].map(i => `<button aria-pressed="${D.q===i}" data-q="${i}" aria-label="Question ${i}">${i}</button>`).join('');
+    nav.querySelectorAll('button').forEach(b => b.onclick = () => { D.q = +b.dataset.q; cyc = 0; B.clear(); B.setOn(null); bars([]); out(''); show(); });
+    $('#dQ', m).innerHTML = Q[D.q].q;
+    const act = $('#dAct', m); act.innerHTML='';
+    Q[D.q].a.forEach(([label, fn], i) => { const b = document.createElement('button'); b.className = i ? 'secondary' : 'primary'; b.textContent = label; b.onclick = () => { S.done.det = true; renderNav(); fn(); }; act.appendChild(b); });
+  }
+  out(''); show();
+}
+
+/* ---------- 6. Challenge ---------- */
+const PRICE_ROWS = [['s1','Small triangle'],['Q','Square'],['M','Medium triangle'],['P','Parallelogram'],['L1','Large triangle']];
+function rCh(m){
+  const C = S.ch;
+  m.innerHTML = `<div class="eyebrow" style="margin-bottom:8px">Raise the ceiling</div>
+    <div class="stage" style="margin-bottom:24px">
+      <div class="boardwrap"><div id="cb"></div><p class="say muted" style="text-align:center">Whole square: <b>$1.60</b> = 160¢</p></div>
+      <div class="panel">
+        <h2>The whole square costs $1.60. What is each piece worth?</h2>
+        <div class="tblwrap"><table class="tbl"><thead><tr><th>Piece</th><th>Price</th><th></th></tr></thead><tbody id="cRows"></tbody></table></div>
+        <p class="fb" id="cFb"></p>
+      </div>
+    </div>
+    <div id="c38"></div>`;
+  const B = makeBoard(); $('#cb', m).appendChild(B.svg);
+  const rows = $('#cRows', m);
+  rows.innerHTML = PRICE_ROWS.map(([id,label]) => `<tr id="cr_${id}"><td><span class="sw" style="--c:${COLOR(id)}"></span>${label}</td><td class="price"><input id="pr_${id}" inputmode="decimal" aria-label="${label} price in cents" value="${C.prices[id]??''}"> ¢</td><td><button class="mini go" data-pc="${id}">Check</button> <span class="tick" id="pt_${id}">${C.priceFb[id]?'✓':''}</span></td></tr>`).join('');
+  rows.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => checkPrice(b.dataset.pc));
+  rows.querySelectorAll('input').forEach(inp => inp.addEventListener('keydown', e => { if(e.key==='Enter') checkPrice(inp.id.slice(3)); }));
+  function checkPrice(id){
+    const raw = $('#pr_'+id, m).value.trim().replace(/[¢$\s]/g,''); C.prices[id] = $('#pr_'+id, m).value;
+    const p = BY[id], ans = p.u * 10; const label = PRICE_ROWS.find(r=>r[0]===id)[1].toLowerCase();
+    B.setOn([id]);
+    if(raw===''){ say('#cFb', `Type a price in cents for the ${label}.`, 'info'); return; }
+    const v = Number(raw);
+    if(!isFinite(v)){ say('#cFb', 'Type a number of cents, like 25.', 'try'); return; }
+    if(Math.abs(v-ans) < 1e-9 || Math.abs(v*100-ans) < 1e-6){
+      C.priceFb[id] = true; $('#pt_'+id, m).textContent='✓';
+      const note = Math.abs(v-ans) < 1e-9 ? '' : ` ($${v.toFixed(2)} is ${ans}¢.)`;
+      say('#cFb', `Yes! The ${label} is ${frU(p.u)} of the square, and ${frU(p.u)} of 160¢ is <b>${ans}¢</b>.${note} ${p.u>1 ? `That's ${p.u} small triangles at 10¢ each.` : `160 ÷ 16 = 10.`}`, 'good');
+      if(PRICE_ROWS.every(r => C.priceFb[r[0]])){ S.done.ch = true; renderNav(); }
+      return;
+    }
+    if(p.type==='s') say('#cFb', `The small triangle is ${fr(1,16)} of the square. What is 160¢ split into 16 equal parts?`, 'try');
+    else say('#cFb', `The ${label} is ${frU(p.u)} of the square, which is ${plural(p.u,'small triangle')}. If one small triangle costs 160¢ ÷ 16, what do ${p.u} of them cost?`, 'try');
+  }
+  // make 3/8
+  const box = $('#c38', m);
+  box.innerHTML = builderHTML(6);
+  box.querySelector('[data-b="head"]').innerHTML = `<h2>Make a shape worth exactly ${fr(3,8)}.</h2><p class="say">${fr(3,8)} = ${fr(6,16)}, so you need pieces worth 6 small triangles. What would your shape cost?</p>`;
+  builder(box, C, 6);
+}
+
+/* ---------- Wiring ---------- */
+$('#resetBtn').onclick = () => { S = fresh(); renderNav(); render(); };
+$('#fsBtn').onclick = () => { try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => { $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; });
+S = fresh(); renderNav(); render();
+window.__TANGRAM_TEST__ = {PIECES, smallCover, waysFor, area, WHOLE};
+})();
+</script>
+
+</body></html>

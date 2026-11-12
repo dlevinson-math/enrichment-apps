@@ -1,0 +1,630 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sharing Brownies</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a bakery work table. Tabs follow the lesson (warm-up, lab, pattern, detective, challenge); the lab is a steel tray of brownies beside a row of plates. */
+:root{
+  --paper:#EEF1F3; --card:#FFFFFF; --ink:#211C1A; --muted:#5E6468; --line:#D3D8DC;
+  --tray:#DCE2E7; --tray-edge:#B9C2CA;
+  --brownie:#6E4127; --brownie-hi:#8D5838; --brownie-edge:#3F2312; --crumb:#F4E6D8;
+  --accent:#0E7479; --accent-soft:#DDF0EF; --warn:#B8432F; --warn-soft:#FBE9E4; --good:#2D7A3A; --good-soft:#E3F3E4;
+  --c0:#0E7479; --c1:#C0245C; --c2:#B56A00; --c3:#4A4FC4; --c4:#2D7A3A; --c5:#8A3FA8;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#15181B; --card:#1F2327; --ink:#EEEAE6; --muted:#A5ACB2; --line:#363C42;
+    --tray:#2A3036; --tray-edge:#424A52;
+    --brownie:#8A5534; --brownie-hi:#A46A45; --brownie-edge:#2A170C; --crumb:#3A2A20;
+    --accent:#4FC0C4; --accent-soft:#183839; --warn:#FF8A73; --warn-soft:#3A221D; --good:#6CD07C; --good-soft:#1B3220;
+    --c0:#4FC0C4; --c1:#FF6FA0; --c2:#F2A43A; --c3:#8F94FF; --c4:#6CD07C; --c5:#D08AF0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#15181B; --card:#1F2327; --ink:#EEEAE6; --muted:#A5ACB2; --line:#363C42;
+    --tray:#2A3036; --tray-edge:#424A52;
+    --brownie:#8A5534; --brownie-hi:#A46A45; --brownie-edge:#2A170C; --crumb:#3A2A20;
+    --accent:#4FC0C4; --accent-soft:#183839; --warn:#FF8A73; --warn-soft:#3A221D; --good:#6CD07C; --good-soft:#1B3220;
+    --c0:#4FC0C4; --c1:#FF6FA0; --c2:#F2A43A; --c3:#8F94FF; --c4:#6CD07C; --c5:#D08AF0;
+    color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 32px;
+  -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1400px; margin:0 auto}
+
+header{display:flex; align-items:flex-end; gap:16px 24px; flex-wrap:wrap; padding-block:18px 10px}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,4vw,52px); line-height:1; margin:0; letter-spacing:-.02em; text-wrap:balance}
+.sub{margin:6px 0 0; color:var(--muted); font-size:clamp(14px,1.3vw,17px); letter-spacing:.04em; text-transform:uppercase; font-weight:700}
+.htools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+.ghost:disabled{opacity:.4; cursor:default}
+
+.tabs{display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line); margin-bottom:18px}
+.tabs button{border:0; background:none; padding:12px 14px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.6vw,22px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:52px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+[hidden],.view[hidden]{display:none!important}
+
+.lead{font-size:clamp(19px,1.9vw,26px); line-height:1.35; margin:0 0 14px; max-width:40em; text-wrap:pretty}
+.lead b{font-family:var(--display); font-weight:800}
+.note{color:var(--muted); font-size:16px; margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:700; font-size:clamp(17px,1.5vw,21px); padding:12px 24px; border-radius:14px; min-height:54px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:52px}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:10px; font-weight:700; font-size:17px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 16px; font-weight:700; font-size:17px; min-height:48px; display:inline-flex; align-items:center; gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.chip .tick{color:var(--good); font-weight:800}
+
+/* Fractions */
+.fr{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; line-height:1; font-weight:700; margin:0 .12em; font-variant-numeric:tabular-nums}
+.fr>span:first-child{border-bottom:.08em solid currentColor; padding:0 .15em .06em}
+.fr>span:last-child{padding:.06em .15em 0}
+.fr{font-size:.82em}
+.whole{font-weight:700; font-variant-numeric:tabular-nums}
+
+/* Brownies */
+.brownies{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:14px}
+.brownie{position:relative; aspect-ratio:3/2; max-width:100%; border-radius:6px; background:var(--tray-edge); box-shadow:inset 0 0 0 1px var(--tray-edge)}
+.piece{position:absolute; top:0; bottom:0; border:0; padding:0; border-radius:5px;
+  background:linear-gradient(180deg,var(--brownie-hi),var(--brownie) 38%); box-shadow:inset 0 0 0 2px var(--brownie-edge), inset 0 -6px 0 rgba(0,0,0,.18);
+  color:var(--crumb); display:flex; align-items:center; justify-content:center; font-size:clamp(14px,1.4vw,19px); transition:transform .12s}
+.piece.tint{background:color-mix(in srgb, var(--pc) 62%, var(--brownie)); box-shadow:inset 0 0 0 2px var(--brownie-edge)}
+.piece.dim{opacity:.22}
+button.piece:hover{transform:translateY(-2px)}
+.piece.slot{background:transparent; box-shadow:none; border:3px dashed var(--pc); color:var(--pc); font-weight:700}
+.piece.slot:hover{transform:none; background:color-mix(in srgb, var(--pc) 10%, transparent)}
+.pop{animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.85)}to{transform:scale(1)}}
+
+/* Warm-up */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px}
+.card{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.card h3{font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,30px); margin:0; line-height:1.1}
+.people{display:flex; gap:6px; flex-wrap:wrap}
+.person{width:34px; height:34px; border-radius:50%; background:var(--pc); color:var(--card); display:grid; place-items:center; font-weight:800; font-size:16px}
+.answer{font-size:clamp(22px,2.3vw,30px); font-family:var(--display); font-weight:800; min-height:1.3em}
+.mini .brownies{grid-template-columns:repeat(auto-fill,minmax(70px,1fr)); gap:8px}
+.launch{background:var(--card); border:2px solid var(--accent); border-radius:18px; padding:20px; margin-top:18px; display:flex; flex-direction:column; gap:14px}
+.launch h3{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.6vw,36px); margin:0}
+.vote{display:flex; flex-direction:column; align-items:center; gap:4px; border:2px solid var(--line); background:var(--paper); border-radius:14px; padding:10px 16px; min-width:120px; font-weight:700}
+.vote b{font-family:var(--display); font-size:30px}
+
+/* Kitchen */
+.kbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px}
+.kcase{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-bottom:12px}
+.kcase h2{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.8vw,38px); margin:0; line-height:1.1}
+.stepper{display:inline-flex; align-items:center; gap:6px; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:4px 8px; font-weight:700}
+.stepper button{width:40px; height:40px; border-radius:10px; border:0; background:var(--paper); font-size:22px; font-weight:800}
+.stepper output{min-width:1.6em; text-align:center; font-size:22px; font-family:var(--display); font-weight:800}
+.khint{font-size:clamp(17px,1.6vw,21px); margin:0 0 12px; min-height:1.5em; max-width:46em}
+.kgrid{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; align-items:start}
+.traywrap{background:var(--tray); border:3px solid var(--tray-edge); border-radius:16px; padding:14px; min-width:0}
+.traywrap .label,.plates .label{font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 10px}
+.plates{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr)); gap:12px; min-width:0}
+.plates .label{grid-column:1/-1; margin:0}
+.plate{background:var(--card); border:3px solid var(--line); border-radius:18px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.plate.on{border-color:var(--pc); box-shadow:0 0 0 3px color-mix(in srgb, var(--pc) 25%, transparent)}
+.plate-head{display:flex; align-items:center; gap:8px; border:0; background:none; padding:0; font-weight:800; font-size:19px; text-align:left; min-height:40px}
+.plate-head .person{width:30px; height:30px}
+.plate-head small{margin-left:auto; font-weight:700; font-size:13px; color:var(--pc); text-transform:uppercase; letter-spacing:.06em}
+.plate svg{width:100%; height:auto; display:block}
+.plate svg g[data-id]{cursor:pointer}
+.ptotal{font-size:20px; min-height:1.2em}
+.ptotal.ok{color:var(--good)} .ptotal.bad{color:var(--warn)}
+.kfoot{display:flex; gap:12px 18px; flex-wrap:wrap; align-items:center; margin-top:16px}
+.counter{font-weight:700; color:var(--muted); font-size:17px}
+.counter b{font-family:var(--display); font-size:26px; color:var(--ink)}
+.msg{margin-top:12px; padding:14px 18px; border-radius:14px; font-size:clamp(17px,1.6vw,21px); line-height:1.4; max-width:48em; background:var(--accent-soft)}
+.msg:empty{display:none}
+.msg.warn{background:var(--warn-soft)} .msg.good{background:var(--good-soft)}
+.namebox{margin-top:14px; background:var(--card); border:2px solid var(--good); border-radius:18px; padding:16px 18px; display:flex; flex-direction:column; gap:14px}
+.namebox h3{font-family:var(--display); font-size:24px; margin:0}
+.way{display:flex; gap:10px 14px; align-items:center; flex-wrap:wrap; font-size:19px}
+.way .lbl{font-weight:700; min-width:11em}
+.fin{display:inline-flex; flex-direction:column; align-items:center; gap:3px}
+.fin input{width:3.2em; height:48px; text-align:center; font-size:22px; font-weight:700; border:2px solid var(--line); border-radius:10px; background:var(--paper)}
+.fin hr{width:3.4em; border:0; border-top:3px solid var(--ink); margin:0}
+.mixin{display:inline-flex; align-items:center; gap:8px}
+.mixin>input{width:3.2em; height:58px; text-align:center; font-size:24px; font-weight:700; border:2px solid var(--line); border-radius:10px; background:var(--paper)}
+.fb{font-size:18px; flex-basis:100%; margin:0}
+.fb.good{color:var(--good)} .fb.warn{color:var(--warn)}
+
+/* Pattern table */
+table.pat{border-collapse:collapse; font-size:clamp(19px,2vw,26px); font-variant-numeric:tabular-nums; background:var(--card); border-radius:14px; overflow:hidden}
+.pat th,.pat td{padding:10px 22px; text-align:center; border-bottom:2px solid var(--line)}
+.pat th{font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+.pat td.q{color:var(--muted)}
+.hlB{color:var(--c1); font-weight:800} .hlP{color:var(--c3); font-weight:800}
+.show .fr>span:first-child{color:var(--c1)} .show .fr>span:last-child{color:var(--c3)}
+.scroll{overflow-x:auto; max-width:100%}
+.predict{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:16px; margin-top:20px}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font-weight:800; font-size:20px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.stage{margin-top:16px; display:flex; flex-direction:column; gap:14px}
+.stage:empty{display:none}
+.bars{display:flex; flex-direction:column; gap:10px; max-width:720px}
+.barrow{display:grid; grid-template-columns:8em minmax(0,1fr); gap:10px; align-items:center; font-weight:700}
+.barrow svg{width:100%; height:auto}
+.legend{display:flex; gap:12px; flex-wrap:wrap; font-weight:700}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:18px; height:18px; border-radius:5px; background:color-mix(in srgb, var(--pc) 62%, var(--brownie))}
+details.teacher{margin-top:22px; background:var(--card); border:2px dashed var(--line); border-radius:14px; padding:12px 16px; max-width:52em}
+details.teacher summary{font-weight:700; cursor:pointer; min-height:36px}
+@media (max-width:860px){ .kgrid{grid-template-columns:1fr} body{font-size:17px} .way .lbl{min-width:0; flex-basis:100%} }
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Sharing Brownies</h1>
+    <p class="sub">Grade 3 · Week 8 · Lesson 3.8</p>
+  </div>
+  <div class="htools">
+    <button class="ghost" id="resetAll">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true">Warm-up</button>
+  <button role="tab" data-tab="lab" aria-selected="false">Brownie Lab</button>
+  <button role="tab" data-tab="pat" aria-selected="false">The pattern</button>
+  <button role="tab" data-tab="det" aria-selected="false">Detective questions</button>
+  <button role="tab" data-tab="ch" aria-selected="false">★ Fewest cuts</button>
+</nav>
+
+<section class="view" id="v-warm">
+  <p class="lead">Quick! How much does each person get? Talk about it, sketch it, then tap <b>Show</b>.</p>
+  <div class="cards" id="warmCards"></div>
+  <div class="launch">
+    <h3>4 brownies, 3 people</h3>
+    <p class="lead" style="margin:0">Everyone gets the same amount and nothing is wasted. How much does each person get? Tap to count the class's guesses. Don't settle it yet!</p>
+    <div class="row" id="votes"></div>
+    <div class="row"><button class="primary" id="goLab">Find out in the Brownie Lab</button></div>
+  </div>
+</section>
+
+<section class="view" id="v-lab" hidden>
+  <div id="lab"></div>
+</section>
+
+<section class="view" id="v-pat" hidden>
+  <p class="lead">Here are the shares you found in the lab. Look across each row. <b>What do the brownies, the people and the share have to do with each other?</b></p>
+  <div class="scroll"><table class="pat" id="patTable"></table></div>
+  <div class="row" style="margin-top:14px">
+    <button class="primary" id="patShow">Color the pattern</button>
+    <button class="secondary" id="patFill">Fill in the handout rows</button>
+  </div>
+  <div class="msg" id="patMsg" aria-live="polite"></div>
+  <div class="predict" id="predict"></div>
+</section>
+
+<section class="view" id="v-det" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="lead" id="qtext"></p>
+  <div class="row" id="qacts"></div>
+  <div class="stage" id="qstage" aria-live="polite"></div>
+  <p class="note" style="margin-top:14px">Talk it over first, then tap a button to put evidence on the board.</p>
+</section>
+
+<section class="view" id="v-ch" hidden>
+  <p class="lead"><b>Challenge.</b> Share fairly with the <b>fewest cuts</b>. One cut slices one piece into two. Pick a size, then tap a piece to cut that much off it.</p>
+  <div id="chal"></div>
+  <details class="teacher">
+    <summary>Teacher note on 7 brownies for 4 people</summary>
+    <p>The lesson notes give 4 cuts for 7 brownies and 4 people (a whole each, then 3 brownies among 4). Three cuts is possible: cut 3 brownies into <span class="fr"><span>3</span><span>4</span></span> and <span class="fr"><span>1</span><span>4</span></span>. Three people get a whole and a <span class="fr"><span>3</span><span>4</span></span> piece; the fourth gets a whole and the three <span class="fr"><span>1</span><span>4</span></span> pieces. Two cuts can't work (the app explains why). In general, the fewest cuts for b brownies among p people is p minus the greatest common factor of b and p. This app's answers were checked by computer search.</p>
+  </details>
+</section>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ---------- Fractions ---------- */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const F=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}};
+const add=(a,b)=>F(a.n*b.d+b.n*a.d,a.d*b.d);
+const sub=(a,b)=>F(a.n*b.d-b.n*a.d,a.d*b.d);
+const mul=(a,b)=>F(a.n*b.n,a.d*b.d);
+const cmp=(a,b)=>a.n*b.d-b.n*a.d;
+const eq=(a,b)=>cmp(a,b)===0;
+const sumF=arr=>arr.reduce(add,F(0));
+const frH=f=>f.d===1?`<span class="whole">${f.n}</span>`:`<span class="fr" role="img" aria-label="${f.n} over ${f.d}"><span>${f.n}</span><span>${f.d}</span></span>`;
+const mixH=f=>{const w=Math.floor(f.n/f.d),r=f.n%f.d;if(!r||!w)return frH(f);return `<span class="whole">${w}</span>&nbsp;${frH(F(r,f.d))}`};
+const bothH=f=>{const w=Math.floor(f.n/f.d),r=f.n%f.d;return (r&&w)?`${frH(f)} = ${mixH(f)}`:frH(f)};
+const rawFr=(a,b)=>`<span class="fr" role="img" aria-label="${a} over ${b}"><span>${a}</span><span>${b}</span></span>`;
+const NAMES=['Ava','Ben','Cleo','Dev','Eli','Fran'];
+const PC=i=>`var(--c${i})`;
+const plural=(k,w,ws)=>`${k} ${k===1?w:(ws||w+'s')}`;
+
+/* ---------- Drawing helpers ---------- */
+// brownie row: m brownies each cut into k equal pieces; owner(b,j) -> person index or null; dim(b,j)
+function brownieRow(m,k,owner,dim){
+  let h='<div class="brownies">';
+  for(let b=0;b<m;b++){
+    const kk=typeof k==='function'?k(b):k;
+    h+='<div class="brownie">';
+    for(let j=0;j<kk;j++){
+      const o=owner?owner(b,j):null;
+      const d=dim&&dim(b,j);
+      h+=`<div class="piece${o!=null?' tint':''}${d?' dim':''}" style="left:${j/kk*100}%;width:${100/kk}%;${o!=null?`--pc:${PC(o)}`:''}">${kk>1?frH(F(1,kk)):''}</div>`;
+    }
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+// a plate stack: sizes (fractions) laid end to end in whole-brownie outlines
+function stackSVG(sizes,color,opts={}){
+  const total=sumF(sizes); const slots=Math.max(opts.slots||0,Math.max(1,Math.ceil(total.n/total.d)));
+  const W=90,H=56,G=10,P=4; const width=slots*W+(slots-1)*G+2*P, height=H+2*P;
+  let s=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${opts.label||'plate'}">`;
+  for(let i=0;i<slots;i++) s+=`<rect x="${P+i*(W+G)}" y="${P}" width="${W}" height="${H}" rx="5" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  let pos=F(0);
+  const xOf=f=>{const w=Math.floor(f.n/f.d);const r=sub(f,F(w));return P+w*(W+G)+r.n/r.d*W};
+  sizes.forEach((sz,idx)=>{
+    const a=pos,b=add(pos,sz); pos=b;
+    let g=`<g ${opts.ids?`data-id="${opts.ids[idx]}"`:''}>`;
+    let cur=a;
+    while(cmp(cur,b)<0){
+      const nextWhole=F(Math.floor(cur.n/cur.d)+1); const end=cmp(nextWhole,b)<0?nextWhole:b;
+      const x0=xOf(cur); let x1; // end at whole boundary -> right edge of slot
+      if(eq(end,nextWhole)&&cmp(end,b)<=0){ const w=Math.floor(cur.n/cur.d); x1=P+w*(W+G)+W; } else x1=xOf(end);
+      const fill=opts.tint!=null?`color-mix(in srgb, ${PC(opts.tint)} 62%, var(--brownie))`:'var(--brownie)';
+      g+=`<rect x="${x0+1}" y="${P+1}" width="${Math.max(2,x1-x0-2)}" height="${H-2}" rx="4" fill="${fill}" stroke="var(--brownie-edge)" stroke-width="2"/>`;
+      cur=end;
+    }
+    if(sz.d>1 && sz.n/sz.d>=0.25 && sz.n<sz.d){
+      const sa=Math.floor(a.n/a.d), sb=b.d===1?b.n-1:Math.floor(b.n/b.d);
+      if(sa===sb){ const xr=b.d===1?P+(b.n-1)*(W+G)+W:xOf(b); const xm=(xOf(a)+xr)/2;
+        g+=`<text x="${xm}" y="${P+H/2+5}" text-anchor="middle" font-size="15" font-weight="700" fill="var(--crumb)">${sz.n}/${sz.d}</text>`; } }
+    s+=g+'</g>';
+  });
+  return s+'</svg>';
+}
+
+/* ---------- Kitchen (lab + challenge) ---------- */
+function makeKitchen(root,kind){
+  const K={m:4,n:3,pieces:[],mode:'cut',k:3,cutoff:F(1,2),active:0,hist:[],cuts:0,nid:1,solved:false,named:{},cases:null};
+  const isCh=kind==='ch';
+  const LAB_CASES=[[4,3,'handout'],[2,4,'handout'],[5,4,'handout'],[3,4,'handout'],[7,4,''],[6,4,'challah']];
+  const CH_CASES=[[6,4],[7,4],[4,3],[5,4],[3,4],[5,3]];
+  const CUTOFFS=[F(1,4),F(1,3),F(1,2),F(2,3),F(3,4)];
+  const done={}; // lab: key -> true when named; ch: key -> best cuts
+  root.innerHTML=`
+    <div class="kcase"><h2 class="ktitle"></h2><div class="chips kcases" role="group" aria-label="Choose a sharing problem"></div>
+      ${isCh?'':`<span class="stepper"><button data-st="m-" aria-label="Fewer brownies">−</button><output class="om"></output> brownies<button data-st="m+" aria-label="More brownies">+</button></span>
+      <span class="stepper"><button data-st="n-" aria-label="Fewer people">−</button><output class="on"></output> people<button data-st="n+" aria-label="More people">+</button></span>`}
+    </div>
+    <div class="kbar">
+      <div class="seg" role="group" aria-label="What a tap does"><button data-mode="cut">Cut</button><button data-mode="give">Hand out</button></div>
+      <div class="chips ktools" role="group" aria-label="Cut size"></div>
+      <button class="ghost" data-act="undo">Undo</button>
+      <button class="ghost" data-act="again">Put it all back</button>
+    </div>
+    <p class="khint" aria-live="polite"></p>
+    <div class="kgrid">
+      <div class="traywrap"><p class="label">Tray</p><div class="brownies ktray"></div></div>
+      <div class="plates"></div>
+    </div>
+    <div class="kfoot"><button class="primary" data-act="check">Check the shares</button><span class="counter">Cuts: <b class="kcuts">0</b></span></div>
+    <div class="msg kmsg" aria-live="polite"></div>
+    <div class="namebox" hidden></div>`;
+  const q=s=>root.querySelector(s);
+  const key=()=>`${K.m}/${K.n}`;
+  const share=()=>F(K.m,K.n);
+  function load(m,n){
+    K.m=m;K.n=n;K.pieces=[];K.hist=[];K.cuts=0;K.active=0;K.solved=false;
+    for(let b=0;b<m;b++)K.pieces.push({id:K.nid++,b,x0:F(0),s:F(1),owner:null});
+    if(!isCh){ K.k=n<=6?(n===5?2:n):2; if(![2,3,4,6].includes(K.k))K.k=2; }
+    K.mode='cut'; render(); setMsg(''); hideName();
+  }
+  function snap(){K.hist.push(JSON.stringify({p:K.pieces,c:K.cuts}));if(K.hist.length>60)K.hist.shift()}
+  function changed(){K.solved=false; setMsg(''); hideName(); render();}
+  function setMsg(h,cls=''){const e=q('.kmsg');e.innerHTML=h;e.className='msg kmsg '+cls}
+  function hideName(){q('.namebox').hidden=true}
+  function hint(){
+    if(K.mode==='cut') return isCh?`Pick a size, then tap a brownie or piece on the tray to cut that much off it.`:`Pick how many pieces, then tap a brownie or piece on the tray to cut it.`;
+    return `Handing out to <b style="color:${PC(K.active)}">${NAMES[K.active]}</b>. Tap pieces on the tray. Tap a plate to switch. Tap a piece on a plate to put it back.`;
+  }
+  function render(){
+    q('.ktitle').innerHTML=`${plural(K.m,'brownie')} · ${plural(K.n,'person','people')}`;
+    if(!isCh){q('.om').textContent=K.m;q('.on').textContent=K.n;}
+    const cases=isCh?CH_CASES:LAB_CASES;
+    q('.kcases').innerHTML=cases.map(([m,n,t])=>{const k=`${m}/${n}`;const d=done[k];
+      return `<button class="chip" data-case="${m},${n}" aria-pressed="${K.m===m&&K.n===n}">${m} for ${n}${t==='challah'?' (challah)':''}${d!=null?' <span class="tick">✓</span>':''}</button>`}).join('');
+    root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===K.mode));
+    q('.ktools').hidden=K.mode!=='cut';
+    q('.ktools').innerHTML=isCh
+      ? '<span class="note">Cut off:</span>'+CUTOFFS.map((c,i)=>`<button class="chip" data-co="${i}" aria-pressed="${eq(c,K.cutoff)}" aria-label="cut off ${c.n} over ${c.d}">${frH(c)}</button>`).join('')
+      : [2,3,4,6].map(k=>`<button class="chip" data-k="${k}" aria-pressed="${K.k===k}">${['','','halves','thirds','fourths','','sixths'][k]}</button>`).join('');
+    q('.khint').innerHTML=hint();
+    q('[data-act="undo"]').disabled=!K.hist.length;
+    q('.kcuts').textContent=K.cuts;
+    // tray
+    let h='';
+    for(let b=0;b<K.m;b++){
+      h+='<div class="brownie">';
+      K.pieces.filter(p=>p.b===b).forEach(p=>{
+        const left=p.x0.n/p.x0.d*100,w=p.s.n/p.s.d*100;
+        const lab=(p.s.d>1)?frH(p.s):'';
+        if(p.owner==null) h+=`<button class="piece" data-pid="${p.id}" style="left:${left}%;width:${w}%" aria-label="piece, ${p.s.n} over ${p.s.d} of a brownie, on the tray">${w>=20?lab:''}</button>`;
+        else h+=`<button class="piece slot" data-pid="${p.id}" style="left:${left}%;width:${w}%;--pc:${PC(p.owner)}" aria-label="given to ${NAMES[p.owner]}; tap to put back">${w>=20?NAMES[p.owner][0]:''}</button>`;
+      });
+      h+='</div>';
+    }
+    q('.ktray').innerHTML=h;
+    // plates
+    let ph='<p class="label">Plates</p>';
+    for(let i=0;i<K.n;i++){
+      const mine=K.pieces.filter(p=>p.owner===i).sort((a,b)=>cmp(b.s,a.s));
+      ph+=`<div class="plate${K.mode==='give'&&K.active===i?' on':''}" data-plate="${i}" style="--pc:${PC(i)}">
+        <button class="plate-head" data-plate="${i}"><span class="person">${NAMES[i][0]}</span>${NAMES[i]}${K.mode==='give'&&K.active===i?'<small>handing out</small>':''}</button>
+        ${stackSVG(mine.map(p=>p.s),null,{ids:mine.map(p=>p.id),slots:Math.ceil(K.m/K.n),label:`${NAMES[i]}'s plate, ${mine.length} pieces`})}
+        <div class="ptotal" data-total="${i}"></div></div>`;
+    }
+    q('.plates').innerHTML=ph;
+  }
+  root.addEventListener('click',e=>{
+    const t=e.target.closest('button,g[data-id]'); if(!t)return;
+    if(t.dataset.case){const [m,n]=t.dataset.case.split(',').map(Number);load(m,n);return}
+    if(t.dataset.st){const s=t.dataset.st;let m=K.m,n=K.n;if(s==='m-')m=Math.max(1,m-1);if(s==='m+')m=Math.min(9,m+1);if(s==='n-')n=Math.max(2,n-1);if(s==='n+')n=Math.min(6,n+1);load(m,n);return}
+    if(t.dataset.mode){K.mode=t.dataset.mode;render();return}
+    if(t.dataset.k){K.k=+t.dataset.k;render();return}
+    if(t.dataset.co){K.cutoff=CUTOFFS[+t.dataset.co];render();return}
+    if(t.dataset.plate!=null){K.active=+t.dataset.plate; if(K.mode!=='give'){K.mode='give';} render();return}
+    if(t.dataset.act==='undo'){const s=K.hist.pop();if(s){const o=JSON.parse(s);K.pieces=o.p;K.cuts=o.c;changed()}return}
+    if(t.dataset.act==='again'){load(K.m,K.n);return}
+    if(t.dataset.act==='check'){check();return}
+    if(t.dataset.id){const p=K.pieces.find(x=>x.id==t.dataset.id);if(p){snap();p.owner=null;changed()}return}
+    if(t.dataset.pid){
+      const p=K.pieces.find(x=>x.id==t.dataset.pid);if(!p)return;
+      if(p.owner!=null){snap();p.owner=null;changed();return}
+      if(K.mode==='give'){snap();p.owner=K.active;changed();return}
+      // cut
+      if(isCh){
+        if(cmp(K.cutoff,p.s)>=0){setMsg(`That piece is only ${frH(p.s)} of a brownie, so you can't cut ${frH(K.cutoff)} off it. Pick a smaller size.`,'warn');return}
+        snap(); const i=K.pieces.indexOf(p);
+        K.pieces.splice(i,1,{id:K.nid++,b:p.b,x0:p.x0,s:K.cutoff,owner:null},{id:K.nid++,b:p.b,x0:add(p.x0,K.cutoff),s:sub(p.s,K.cutoff),owner:null});
+        K.cuts+=1; changed();
+      } else {
+        const ns=mul(p.s,F(1,K.k));
+        if(ns.n/ns.d<1/12-1e-9){setMsg(`A piece that small (${frH(ns)} of a brownie) would crumble. Try fewer, bigger pieces.`,'warn');return}
+        snap(); const i=K.pieces.indexOf(p); const parts=[];
+        for(let j=0;j<K.k;j++)parts.push({id:K.nid++,b:p.b,x0:add(p.x0,mul(ns,F(j))),s:ns,owner:null});
+        K.pieces.splice(i,1,...parts); K.cuts+=K.k-1; changed();
+      }
+    }
+  });
+  function totals(){const t=[];for(let i=0;i<K.n;i++)t.push(sumF(K.pieces.filter(p=>p.owner===i).map(p=>p.s)));return t}
+  function showTotals(t,ok){t.forEach((v,i)=>{const e=q(`[data-total="${i}"]`);e.innerHTML=bothH(v);e.className='ptotal '+(ok?'ok':'bad')})}
+  function check(){
+    hideName();
+    const tray=K.pieces.filter(p=>p.owner==null), t=totals();
+    if(tray.length===K.pieces.length){setMsg(`The plates are empty. ${K.mode==='cut'?'Cut some brownies, then switch to <b>Hand out</b>.':'Tap pieces on the tray to give them out.'}`);return}
+    if(tray.length){
+      const sizes={};tray.forEach(p=>{const k=`${p.s.n}/${p.s.d}`;sizes[k]=(sizes[k]||0)+1});
+      const ks=Object.keys(sizes);
+      let extra='';
+      if(ks.length===1&&sizes[ks[0]]%K.n!==0){const [a,b]=ks[0].split('/').map(Number);const c=sizes[ks[0]];
+        extra=` There ${c===1?'is':'are'} ${c} ${c===1?'piece':'pieces'} of size ${frH(F(a,b))} left for ${K.n} people. ${c} can't be shared ${K.n} ways with none left over. <b>How many pieces could be shared ${K.n} ways?</b> Try cutting ${c===1?'it':'them'} differently.`}
+      setMsg(`Nothing gets wasted: ${plural(tray.length,'piece')} ${tray.length===1?'is':'are'} still on the tray.${extra}`,'warn');
+      return;
+    }
+    const allEq=t.every(v=>eq(v,t[0]));
+    if(!allEq){
+      showTotals(t,false);
+      const mx=t.reduce((a,b)=>cmp(b,a)>0?b:a),mn=t.reduce((a,b)=>cmp(b,a)<0?b:a);
+      const big=t.map((v,i)=>eq(v,mx)?NAMES[i]:null).filter(Boolean), small=t.map((v,i)=>eq(v,mn)?NAMES[i]:null).filter(Boolean);
+      setMsg(`Not fair yet. Look at the stacks: ${big.join(' and ')} ${big.length>1?'have':'has'} ${bothH(mx)}, but ${small.join(' and ')} ${small.length>1?'have':'has'} only ${bothH(mn)}. Move a piece from a full plate, or cut a piece smaller so it can be split.`,'warn');
+      return;
+    }
+    showTotals(t,true); K.solved=true;
+    if(isCh) return chResult();
+    setMsg(`Fair shares! Every plate holds the same amount and the tray is empty. Now name each person's share two ways.`,'good');
+    showName();
+  }
+  /* ----- naming the share (lab) ----- */
+  function showName(){
+    const s=share(), w=Math.floor(s.n/s.d), r=s.n%s.d;
+    const box=q('.namebox'); box.hidden=false;
+    const way2 = r===0 ? `<div class="way" id="w2"><span class="lbl">Way 2: whole brownies</span><span class="mixin"><input id="w2w" inputmode="numeric" aria-label="whole brownies"></span><button class="secondary" data-chk="2">Check</button><p class="fb" id="fb2"></p></div>`
+      : w>0 ? `<div class="way" id="w2"><span class="lbl">Way 2: as a mixed number</span><span class="mixin"><input id="w2w" inputmode="numeric" aria-label="whole brownies"><span class="fin"><input id="w2a" inputmode="numeric" aria-label="top"><hr><input id="w2b" inputmode="numeric" aria-label="bottom"></span></span><button class="secondary" data-chk="2">Check</button><p class="fb" id="fb2"></p></div>`
+      : `<div class="way" id="w2"><span class="lbl">Way 2: an equal fraction with a different bottom number</span><span class="fin"><input id="w2a" inputmode="numeric" aria-label="top"><hr><input id="w2b" inputmode="numeric" aria-label="bottom"></span><button class="secondary" data-chk="2">Check</button><p class="fb" id="fb2"></p></div>`;
+    box.innerHTML=`<h3>Each person gets…</h3>
+      <div class="way"><span class="lbl">Way 1: as a fraction of a brownie</span><span class="fin"><input id="w1a" inputmode="numeric" aria-label="top"><hr><input id="w1b" inputmode="numeric" aria-label="bottom"></span><button class="secondary" data-chk="1">Check</button><p class="fb" id="fb1"></p></div>
+      ${way2}`;
+    box.dataset.ok='';
+    box.querySelectorAll('[data-chk]').forEach(b=>b.onclick=()=>b.dataset.chk==='1'?chk1():chk2());
+  }
+  const num=id=>{const v=(q('#'+id)||{}).value;if(v==null||v.trim()==='')return null;const x=Number(v.trim());return Number.isInteger(x)&&x>=0?x:NaN};
+  function fb(i,h,cls){const e=q('#fb'+i);e.innerHTML=h;e.className='fb '+cls}
+  function plateWords(){const s=share(),w=Math.floor(s.n/s.d);return w?`Stack one plate: it fills ${plural(w,'whole brownie')}${s.n%s.d?' and part of another':''}.`:`Stack one plate: it fills less than one whole brownie.`}
+  function chk1(){
+    const s=share(),a=num('w1a'),b=num('w1b');
+    const pcs=K.pieces.filter(p=>p.owner===0).length;
+    if(a==null){fb(1,'Type the top number first.','warn');return}
+    if(Number.isNaN(a)||Number.isNaN(b)){fb(1,'Use whole numbers in the boxes.','warn');return}
+    if((b==null||b===1)&&a===pcs&&!eq(F(a),s)){fb(1,`${a} pieces of what size? What fraction of a brownie is one piece? Put that on the bottom.`,'warn');return}
+    if(b==null){fb(1,'Fill in the bottom number too.','warn');return}
+    if(b===0){fb(1,'The bottom number tells how many equal parts make one brownie. It can\'t be 0.','warn');return}
+    const v=F(a,b);
+    if(eq(v,s)){ mark(1); fb(1,(a===s.n&&b===s.d)?`Yes! Each person gets ${frH(s)} of a brownie.`:`Yes, ${rawFr(a,b)} is the same amount. A simpler name is ${frH(s)}.`,'good');return}
+    if(eq(v,F(K.n,K.m))){fb(1,`That's people over brownies. Is each share more or less than one whole brownie? Look at a plate.`,'warn');return}
+    fb(1,`${rawFr(a,b)} is ${cmp(v,s)>0?'more':'less'} than what's on one plate. ${plateWords()} Count the pieces of one size and try again.`,'warn');
+  }
+  function chk2(){
+    const s=share(),w=Math.floor(s.n/s.d),r=s.n%s.d;
+    if(r===0){const x=num('w2w');if(x==null||Number.isNaN(x)){fb(2,'Type a whole number.','warn');return}
+      if(x===w){mark(2);fb(2,`Yes! ${w} whole ${w===1?'brownie':'brownies'} each.`,'good')}else fb(2,`${x} is ${x>w?'more':'less'} than one plate holds. ${plateWords()}`,'warn');return}
+    if(w>0){
+      const x=num('w2w'),a=num('w2a'),b=num('w2b');
+      if([x,a,b].some(v=>v==null||Number.isNaN(v))){fb(2,'Fill in all three boxes with whole numbers.','warn');return}
+      if(b===0){fb(2,'The bottom number can\'t be 0.','warn');return}
+      if(a>=b){fb(2,`${rawFr(a,b)} is a whole brownie or more. Stack those pieces into wholes and move them to the big number.`,'warn');return}
+      const v=add(F(x),F(a,b));
+      if(eq(v,s)){mark(2);fb(2,`Yes! ${mixH(s)} is the same as ${frH(s)}. Stack ${s.d} pieces of ${frH(F(1,s.d))} and they make 1 whole.`,'good');return}
+      fb(2,`That's ${cmp(v,s)>0?'more':'less'} than one plate holds. ${plateWords()} How much is left over after the wholes?`,'warn');return;
+    }
+    const a=num('w2a'),b=num('w2b');
+    if([a,b].some(v=>v==null||Number.isNaN(v))){fb(2,'Fill in both boxes with whole numbers.','warn');return}
+    if(b===0){fb(2,'The bottom number can\'t be 0.','warn');return}
+    const v=F(a,b);
+    if(eq(v,s)&&b===s.d){fb(2,`That's the same name as Way 1. Try cutting each piece in half in your head: what bottom number would that give?`,'warn');return}
+    if(eq(v,s)){mark(2);fb(2,`Yes! <span class="fr"><span>${a}</span><span>${b}</span></span> covers exactly as much brownie as ${frH(s)}.`,'good');return}
+    fb(2,`<span class="fr"><span>${a}</span><span>${b}</span></span> is ${cmp(v,s)>0?'more':'less'} than ${frH(s)}. If you cut every piece into 2, how many pieces would a plate have, and what size?`,'warn');
+  }
+  function mark(i){const box=q('.namebox');const set=new Set((box.dataset.ok||'').split(',').filter(Boolean));set.add(String(i));box.dataset.ok=[...set].join(',');
+    if(set.size===2){done[key()]=true; render(); showTotals(totals(),true); api.onSolved&&api.onSolved(K.m,K.n);
+      setMsg(`Solved: ${plural(K.m,'brownie')} for ${plural(K.n,'person','people')} gives each person ${bothH(share())}. It's in <b>The pattern</b> table now. Pick another problem above.`,'good');}}
+  /* ----- challenge result ----- */
+  function chResult(){
+    const min=K.n-gcd(K.m,K.n);
+    const prev=done[key()]; done[key()]=prev==null?K.cuts:Math.min(prev,K.cuts); render(); showTotals(totals(),true);
+    if(K.cuts>min) setMsg(`Fair shares in <b>${plural(K.cuts,'cut')}</b>! Each person gets ${bothH(share())}. Can you do it with fewer cuts? Tap <b>Put it all back</b> and try.`,'good');
+    else setMsg(`Fair shares in <b>${plural(K.cuts,'cut')}</b>. That's the fewest possible! <button class="secondary" id="whyBtn" style="margin-left:8px">Why can't it be fewer?</button><div id="whyBox"></div>`,'good');
+    const wb=q('#whyBtn'); if(wb) wb.onclick=()=>{q('#whyBox').innerHTML=`<p style="margin:12px 0 0">${whyFewest(K.m,K.n)}</p>`;wb.remove()};
+  }
+  const api={load,root,get state(){return K},done,onSolved:null};
+  return api;
+}
+function whyFewest(m,n){
+  const s=F(m,n),min=n-gcd(m,n),k=min-1,f=F(m%n,n),w=Math.floor(m/n);
+  if(min===0) return `No cuts needed: ${frH(s)} is a whole number.`;
+  const needs=`Each share is ${mixH(s)}, which is not a whole number of brownies, so <b>every person needs at least one piece that isn't a whole brownie</b>. That's at least ${n} pieces.`;
+  if(2*k<n) return `${needs} Each cut makes at most 2 pieces that aren't whole brownies. With only ${plural(k,'cut')} you get at most ${2*k} non-whole pieces, not enough for ${n} people.`;
+  return `${needs} With ${plural(k,'cut')}, the only way to get ${n} non-whole pieces is to cut ${k} different brownies once each. Then each person gets exactly one non-whole piece, so it would have to be ${frH(f)}${w?` (${mixH(s)} = ${w} whole + ${frH(f)})`:''}. But the two pieces from one brownie add up to 1 whole, and ${frH(f)} + ${frH(f)} = ${frH(add(f,f))}, not 1. So ${plural(k,'cut')} can't work.`;
+}
+
+/* ---------- Warm-up ---------- */
+const WARM=[[3,3],[6,3],[1,2],[1,4]];
+function warmCard(m,n,i){
+  return `<div class="card mini"><h3>${plural(m,'brownie')}, ${plural(n,'person','people')}</h3>
+    <div class="people">${Array.from({length:n},(_,j)=>`<span class="person" style="--pc:${PC(j)}">${NAMES[j][0]}</span>`).join('')}</div>
+    <div class="wpic" id="wpic${i}">${brownieRow(m,1,null)}</div>
+    <div class="row"><button class="secondary" data-warm="${i}">Show</button><span class="answer" id="wans${i}"></span></div></div>`;
+}
+function warmShow(i){
+  const [m,n]=WARM[i]; let html;
+  if(m>=n){ html=brownieRow(m,1,(b)=>b%n); }
+  else { html=brownieRow(m,n/m,(b,j)=>b*(n/m)+j); }
+  $('#wpic'+i).innerHTML=html; const s=F(m,n);
+  $('#wans'+i).innerHTML=`Each gets ${frH(s)} ${s.n/s.d>=1?(s.n/s.d===1?'brownie':'brownies'):'of a brownie'}`;
+}
+const votes=[["one and a bit",0],["1 and 1/3",0],["4/3",0],["something else",0]];
+function renderVotes(){
+  const lab=v=>v==='1 and 1/3'?`1&nbsp;${frH(F(1,3))}`:v==='4/3'?frH(F(4,3)):v;
+  $('#votes').innerHTML=votes.map((v,i)=>`<button class="vote" data-vote="${i}"><span>${lab(v[0])}</span><b>${v[1]}</b></button>`).join('');
+}
+function buildWarm(){ $('#warmCards').innerHTML=WARM.map((w,i)=>warmCard(w[0],w[1],i)).join(''); votes.forEach(v=>v[1]=0); renderVotes(); }
+$('#warmCards').addEventListener('click',e=>{const b=e.target.closest('[data-warm]');if(b){warmShow(+b.dataset.warm);b.remove()}});
+$('#votes').addEventListener('click',e=>{const b=e.target.closest('[data-vote]');if(b){votes[+b.dataset.vote][1]++;renderVotes()}});
+
+/* ---------- Pattern ---------- */
+const HANDOUT=[[4,3],[2,4],[5,4],[3,4]];
+let patRows=[]; let patColored=false;
+function solvedRow(m,n){ if(!patRows.some(r=>r[0]===m&&r[1]===n)) patRows.push([m,n]); renderPat(); }
+function renderPat(){
+  const rows=[...HANDOUT.filter(h=>!patRows.some(r=>r[0]===h[0]&&r[1]===h[1])).map(h=>[h[0],h[1],false]),...patRows.map(r=>[r[0],r[1],true])];
+  rows.sort((a,b)=>(b[2]-a[2]));
+  $('#patTable').className='pat'+(patColored?' show':'');
+  $('#patTable').innerHTML=`<tr><th>Brownies</th><th>People</th><th>Each person gets</th></tr>`+
+    rows.map(([m,n,ok])=>`<tr><td class="${patColored?'hlB':''}">${m}</td><td class="${patColored?'hlP':''}">${n}</td>${ok?`<td>${frH(F(m,n)).replace(/class="fr"/,'class="fr"')}${(m%n&&m>n)?` = ${mixH(F(m,n))}`:''}${F(m,n).d!==n?` <span class="note">(${m}/${n})</span>`:''}</td>`:`<td class="q">? <span class="note">solve it in the lab</span></td>`}</tr>`).join('');
+  // show unreduced brownies/people fraction so the pattern is visible
+  $('#patTable').querySelectorAll('tr').forEach((tr,i)=>{if(!i)return;const r=rows[i-1];if(!r[2])return;const [m,n]=r;const f=F(m,n);
+    const raw=`<span class="fr" role="img" aria-label="${m} over ${n}"><span>${m}</span><span>${n}</span></span>`;
+    let cell=raw; if(f.d!==n) cell+=` = ${frH(f)}`; if(m%n&&m>n) cell+=` = ${mixH(f)}`; if(m%n===0) cell+=` = ${m/n}`;
+    tr.lastElementChild.innerHTML=cell;});
+}
+$('#patShow').onclick=()=>{patColored=true;renderPat();
+  $('#patMsg').innerHTML=patRows.length?`The <span class="hlB">brownies</span> go on top and the <span class="hlP">people</span> go on the bottom. <b>The share is always brownies over people.</b> Why? Cut every brownie into as many pieces as there are people. Each person gets one piece from every brownie.`:'Solve some problems in the Brownie Lab first, or fill in the handout rows.';
+  $('#patMsg').className='msg';};
+$('#patFill').onclick=()=>{HANDOUT.forEach(([m,n])=>{if(!patRows.some(r=>r[0]===m&&r[1]===n))patRows.push([m,n])});renderPat()};
+const PRED=[[7,4],[9,2]];
+function renderPredict(){
+  $('#predict').innerHTML=PRED.map(([m,n],i)=>`<div class="card"><h3>Without cutting: ${m} brownies, ${n} people</h3>
+    <div class="way"><span class="fin"><input id="pa${i}" inputmode="numeric" aria-label="top"><hr><input id="pb${i}" inputmode="numeric" aria-label="bottom"></span>
+    <span>of a brownie each</span><button class="secondary" data-pred="${i}">Check</button></div>
+    <p class="fb" id="pfb${i}"></p><div class="row"><button class="ghost" data-test="${m},${n}">Test it in the lab</button></div></div>`).join('');
+}
+$('#predict').addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.test){const [m,n]=t.dataset.test.split(',').map(Number);selectTab('lab');lab.load(m,n);return}
+  if(t.dataset.pred!=null){const i=+t.dataset.pred,[m,n]=PRED[i];const a=Number($('#pa'+i).value),b=Number($('#pb'+i).value),fbE=$('#pfb'+i);
+    if(!$('#pa'+i).value||!$('#pb'+i).value||!Number.isInteger(a)||!Number.isInteger(b)||b<=0){fbE.innerHTML='Fill in both boxes with whole numbers.';fbE.className='fb warn';return}
+    const v=F(a,b),s=F(m,n);
+    if(eq(v,s)){fbE.innerHTML=`Yes! ${rawFr(m,n)} = ${mixH(s)} each. Test it in the lab to be sure.`;fbE.className='fb good'}
+    else if(eq(v,F(n,m))){fbE.innerHTML='That\'s people over brownies. With more brownies than people, should each person get more or less than 1 whole?';fbE.className='fb warn'}
+    else {fbE.innerHTML=`Hmm, ${rawFr(a,b)} is ${cmp(v,s)>0?'more':'less'} than each person gets. Look at the pattern table: what goes on top, and what goes on the bottom?`;fbE.className='fb warn'}}
+});
+
+/* ---------- Detective questions ---------- */
+const third=F(1,3),fourth=F(1,4);
+const legend=n=>`<div class="legend">${Array.from({length:n},(_,i)=>`<span style="--pc:${PC(i)}"><i></i>${NAMES[i]}</span>`).join('')}</div>`;
+const barRow=(label,sizes,tint,slots)=>`<div class="barrow"><span>${label}</span>${stackSVG(sizes,null,{tint,slots,label})}</div>`;
+const rep=(f,k)=>Array.from({length:k},()=>f);
+const Q=[
+ {t:`<b>Same amount?</b> Pair A cut every brownie into thirds and gave each person 4 pieces. Pair B gave each person a whole brownie and cut the last one into thirds. Did their people get the same amount?`,
+  a:[['Show Pair A',()=>`${brownieRow(4,3,(b,j)=>j)}${legend(3)}<p class="note">Every brownie in thirds: Ava gets one third from each brownie, 4 pieces of ${frH(third)}.</p>`],
+     ['Show Pair B',()=>`${brownieRow(4,b=>b<3?1:3,(b,j)=>b<3?b:j)}${legend(3)}<p class="note">A whole brownie each, then the last brownie in thirds: 1 whole and ${frH(third)} each.</p>`],
+     ['Stack them side by side',()=>`<div class="bars">${barRow('Pair A',rep(third,4),0,2)}${barRow('Pair B',[F(1),third],0,2)}</div><p>The stacks are the same length. ${frH(F(4,3))} = ${mixH(F(4,3))}: three of the thirds make 1 whole, and one third is left over.</p>`]]},
+ {t:`<b>Why does 5 brownies for 4 people give ${frH(F(5,4))}?</b>`,
+  a:[['Cut every brownie into fourths',()=>`${brownieRow(5,4,(b,j)=>j)}${legend(4)}<p>5 brownies, each in 4 pieces. Each person takes one piece from every brownie.</p>`],
+     ["Follow Ava's pieces",()=>`${brownieRow(5,4,(b,j)=>j,(b,j)=>j!==0)}<p>Ava gets one ${frH(fourth)} from each of the 5 brownies: <b>5 fourths</b>, which is ${frH(F(5,4))}.</p>`],
+     ['Stack the fourths',()=>`<div class="bars">${barRow("Ava's plate",rep(fourth,5),0,2)}</div><p>Four fourths fill one whole brownie. One fourth is left: ${frH(F(5,4))} = ${mixH(F(5,4))}.</p>`]]},
+ {t:`A student shared 4 brownies among 3 people and says, <b>"I got 4!"</b> What would you ask?`,
+  a:[['4 pieces of what size?',()=>`<div class="bars">${barRow('4 thirds',rep(third,4),1,4)}${barRow('4 wholes',rep(F(1),4),1,4)}</div><p>"4" counts pieces, not brownies. Each piece is ${frH(third)} of a brownie, so 4 pieces is ${frH(F(4,3))}, much less than 4 whole brownies.</p>`]]},
+ {t:`Someone cut all 4 brownies in half. Now they have 8 halves for 3 people and they're stuck. What could they do?`,
+  a:[['Deal out the halves',()=>`${brownieRow(4,2,(b,j)=>{const x=b*2+j;return x<6?x%3:null})}${legend(3)}<p>6 halves go out, 2 each. 2 halves are left, and 2 can't be shared 3 ways evenly.</p>`],
+     ['How many pieces share 3 ways?',()=>`<p>Counts that share 3 ways with none left: 3, 6, 9, <b>12</b>… Cut each brownie into thirds and you get 12 pieces, 4 each.</p>${brownieRow(4,3,(b,j)=>j)}${legend(3)}<p>Or keep the 6 halves you dealt and cut the last brownie into thirds: ${frH(F(1,2))} + ${frH(F(1,2))} + ${frH(third)} = ${mixH(F(4,3))} each.</p>`]]},
+ {t:`<b>Exit ticket:</b> Why does 4 brownies shared by 3 people give each person ${frH(F(4,3))}?`,
+  a:[['Show the evidence',()=>`${brownieRow(4,3,(b,j)=>j,(b,j)=>j!==0)}<p>Cut each of the 4 brownies into 3 equal pieces, one for each person. Ava gets one ${frH(third)} from each brownie: 4 thirds, or ${frH(F(4,3))}. Brownies on top, people on the bottom.</p>`]]},
+ {t:`<b>Shabbat table (optional):</b> 6 challah rolls for 4 people. How much does each person get?`,
+  a:[['Show it',()=>`${brownieRow(6,b=>b<4?1:2,(b,j)=>b<4?b:(b-4)*2+j)}${legend(4)}<p>A whole roll each, then the last 2 rolls in halves: 1 and ${frH(F(1,2))} each. Check with the rule: ${frH(F(6,4))} = ${frH(F(3,2))} = ${mixH(F(3,2))}.</p>`]]}
+];
+let qi=0;
+function renderQ(){
+  $('#qnav').innerHTML=Q.map((_,i)=>`<button data-q="${i}" aria-pressed="${i===qi}">${i+1}</button>`).join('');
+  $('#qtext').innerHTML=Q[qi].t; $('#qstage').innerHTML='';
+  $('#qacts').innerHTML=Q[qi].a.map((a,i)=>`<button class="${i?'secondary':'primary'}" data-qa="${i}">${a[0]}</button>`).join('');
+}
+$('#qnav').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b){qi=+b.dataset.q;renderQ()}});
+$('#qacts').addEventListener('click',e=>{const b=e.target.closest('[data-qa]');if(b){$('#qstage').innerHTML=Q[qi].a[+b.dataset.qa][1]();}});
+
+/* ---------- Tabs, reset, fullscreen ---------- */
+function selectTab(t){document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['warm','lab','pat','det','ch'].forEach(v=>$('#v-'+v).hidden=v!==t);}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+$('#goLab').onclick=()=>{selectTab('lab');lab.load(4,3)};
+const lab=makeKitchen($('#lab'),'lab'); lab.onSolved=(m,n)=>solvedRow(m,n);
+const chal=makeKitchen($('#chal'),'ch');
+function resetAll(){buildWarm();lab.load(4,3);chal.load(6,4);Object.keys(lab.done).forEach(k=>delete lab.done[k]);Object.keys(chal.done).forEach(k=>delete chal.done[k]);
+  lab.load(4,3);chal.load(6,4);patRows=[];patColored=false;renderPat();$('#patMsg').innerHTML='';renderPredict();qi=0;renderQ();selectTab('warm');}
+$('#resetAll').onclick=resetAll;
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+document.addEventListener('fullscreenchange',()=>$('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

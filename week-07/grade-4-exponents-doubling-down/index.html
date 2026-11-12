@@ -1,0 +1,711 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Exponents: Doubling Down</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a five-stop lesson strip (warm-up → deal → base & exponent → powers of 10 → detective) over one big work surface per stop; copper-penny theme. */
+:root{
+  --bg:#F2F5F4; --card:#FFFFFF; --ink:#132F2D; --muted:#566B68; --line:#D3DDDA;
+  --copper:#B4561F; --copper-soft:#FBE9DD; --teal:#16756E; --teal-soft:#DDF1EE;
+  --gold:#C98E1C; --ok:#1F7A3A; --ok-soft:#E1F3E5; --try:#9A5B00; --try-soft:#FFF1D6;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1918; --card:#162322; --ink:#E6EEEC; --muted:#9DB0AD; --line:#2C3D3B;
+    --copper:#EE8E52; --copper-soft:#3A2416; --teal:#4CC2B7; --teal-soft:#14332F;
+    --gold:#E9B44C; --ok:#5FCF7F; --ok-soft:#163222; --try:#F2B547; --try-soft:#36290F; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1918; --card:#162322; --ink:#E6EEEC; --muted:#9DB0AD; --line:#2C3D3B;
+  --copper:#EE8E52; --copper-soft:#3A2416; --teal:#4CC2B7; --teal-soft:#14332F;
+  --gold:#E9B44C; --ok:#5FCF7F; --ok-soft:#163222; --try:#F2B547; --try-soft:#36290F; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.25vw,21px); line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:12px 32px;
+  -webkit-tap-highlight-color:transparent; font-variant-numeric:tabular-nums}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--copper); outline-offset:2px}
+sup{font-size:.62em; line-height:0; position:relative; top:-.05em; vertical-align:super}
+.wrap{max-width:1320px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px}
+.brand{min-width:0}
+.brand .sub{font-size:.8em; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:700}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,52px); line-height:1; margin:2px 0 0; letter-spacing:-.02em; text-wrap:balance}
+h1 .pow{color:var(--copper)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.stops{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+nav.stops button{flex:none; display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; font-weight:700; min-height:52px}
+nav.stops button b{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-family:var(--display); font-size:.95em}
+nav.stops button[aria-selected="true"]{border-color:var(--copper); background:var(--copper-soft)}
+nav.stops button[aria-selected="true"] b{background:var(--copper); color:var(--card)}
+
+.stage{display:grid; gap:20px; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); align-items:start}
+.stage[hidden]{display:none}
+.card{background:var(--card); border:2px solid var(--line); border-radius:20px; padding:20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.card.wide{grid-column:1/-1}
+h2{font-family:var(--display); font-weight:800; font-size:clamp(24px,2.1vw,34px); margin:0; line-height:1.1; text-wrap:balance}
+h3{font-family:var(--display); font-weight:600; font-size:clamp(19px,1.5vw,25px); margin:0; line-height:1.15}
+.lead{font-size:1.1em; margin:0; max-width:36em}
+.muted{color:var(--muted)}
+.label{font-size:.75em; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--muted)}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.btn{border:0; background:var(--copper); color:#fff; font-weight:700; border-radius:14px; padding:12px 22px; min-height:52px; font-size:1.02em}
+.btn.alt{background:var(--teal)}
+.btn.line{background:var(--card); color:var(--ink); border:2px solid var(--ink)}
+.btn:disabled{opacity:.4; cursor:default}
+.btn.small{min-height:44px; padding:8px 16px; font-size:.95em}
+input.num{width:5.2em; min-height:48px; border:2px solid var(--line); border-radius:12px; background:var(--bg); padding:6px 10px; text-align:center; font-weight:700}
+input.num.exp{width:2.6em; min-height:40px; padding:2px 4px; vertical-align:.75em; margin-left:2px}
+[hidden]{display:none!important}
+input.num.ok{border-color:var(--ok); background:var(--ok-soft)}
+input.num.no{border-color:var(--try); background:var(--try-soft)}
+.fb{margin:0; padding:12px 16px; border-radius:14px; background:var(--teal-soft); max-width:40em}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft)}
+.fb.no{background:var(--try-soft)}
+.fb b{font-weight:700}
+
+/* Warm-up paper */
+.paperbox{display:flex; flex-direction:column; align-items:center; gap:12px}
+#paper{width:100%; max-width:520px; height:auto; aspect-ratio:1.414/1}
+.bigcount{font-family:var(--display); font-weight:800; font-size:clamp(40px,5vw,72px); line-height:1}
+.bigcount small{font-size:.4em; font-weight:600; color:var(--muted)}
+.foldlog{width:100%; border-collapse:collapse}
+.foldlog td,.foldlog th{padding:8px 10px; border-bottom:1.5px solid var(--line); text-align:left}
+.foldlog th{font-size:.75em; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.foldlog td:nth-child(2){font-weight:700; font-family:var(--display); font-size:1.2em}
+
+/* Deal table */
+.tablewrap{overflow-x:auto}
+table.deal{border-collapse:collapse; width:100%; min-width:520px}
+table.deal th{font-size:.72em; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:2px solid var(--line)}
+table.deal td{padding:6px 8px; border-bottom:1.5px solid var(--line); vertical-align:middle}
+table.deal td.day{font-family:var(--display); font-weight:800; font-size:1.15em; width:3em}
+table.deal td.mult{color:var(--muted); font-size:.9em}
+table.deal tr.given td{color:var(--muted)}
+table.deal tr.pick{background:var(--copper-soft)}
+.expform{display:inline-flex; align-items:flex-start; font-weight:700; font-size:1.2em}
+.rowmsg{font-size:.85em; color:var(--try); margin-top:4px}
+.daypick{display:flex; flex-wrap:wrap; gap:6px}
+.daypick button{width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-family:var(--display); font-size:1.05em}
+.daypick button.ok{background:var(--ok); color:var(--card); border-color:var(--ok)}
+.daypick button.no{background:var(--try-soft); border-color:var(--try)}
+.guesses{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px}
+.guesses button{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px; font-weight:700; min-height:56px}
+.guesses button[aria-pressed="true"]{border-color:var(--copper); background:var(--copper-soft)}
+.payday{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px}
+.payday .d{font-family:var(--display); font-weight:800; font-size:clamp(26px,2.6vw,40px)}
+.payday .c{font-family:var(--display); font-weight:800; font-size:clamp(34px,4.2vw,64px); color:var(--copper); line-height:1}
+.payday .usd{font-size:1.2em; font-weight:700}
+#chart{width:100%; height:auto; display:block}
+.legend{display:flex; gap:18px; flex-wrap:wrap; font-size:.85em; color:var(--muted)}
+.legend i{display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px}
+
+/* Lab */
+.stepper{display:flex; align-items:center; gap:8px}
+.stepper button{width:52px; height:52px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-size:1.4em; font-weight:700}
+.stepper output{min-width:2ch; text-align:center; font-family:var(--display); font-weight:800; font-size:1.8em}
+.powbig{font-family:var(--display); font-weight:800; font-size:clamp(64px,8vw,120px); line-height:1; display:flex; align-items:flex-start}
+.powbig .b{color:var(--teal)} .powbig .e{color:var(--copper); font-size:.5em; margin-left:.04em}
+.expand{font-size:1.25em; font-weight:700; overflow-wrap:anywhere}
+.expand .f{color:var(--teal)}
+.chain{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.chain span{background:var(--bg); border-radius:10px; padding:4px 10px; font-weight:700}
+.chain i{color:var(--muted); font-style:normal}
+.notline{color:var(--muted); font-size:.95em}
+.dots{display:grid; gap:4px; justify-content:start}
+.dots i{width:var(--s,16px); height:var(--s,16px); border-radius:50%; background:var(--c,var(--teal)); display:block}
+.layers{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end}
+.cards{display:flex; flex-wrap:wrap; gap:10px}
+.cards button{min-width:110px; min-height:64px; border-radius:16px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:1.25em; padding:8px 14px}
+.cards button.ok{border-color:var(--ok); background:var(--ok-soft)}
+.cards button.no{border-color:var(--try); background:var(--try-soft)}
+.duel{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.duel button.side{border:2px solid var(--line); background:var(--card); border-radius:18px; padding:14px; display:flex; flex-direction:column; align-items:center; gap:8px; min-height:120px; min-width:0}
+.duel button.side[aria-pressed="true"]{border-color:var(--copper); background:var(--copper-soft)}
+.duel button.side.win{border-color:var(--ok)}
+.duel .pw{font-family:var(--display); font-weight:800; font-size:2.6em; line-height:1}
+.duel .val{font-weight:700; font-size:1.1em; min-height:1.4em}
+.duelpick{display:flex; gap:8px; flex-wrap:wrap}
+.duelpick button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 16px; font-weight:700; min-height:48px}
+.duelpick button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.task{display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:1.15em; font-weight:700}
+
+/* Powers of ten */
+.pv{display:flex; gap:4px; flex-wrap:nowrap; overflow-x:auto; padding:4px 0}
+.pv div{flex:none; width:clamp(40px,5.5vw,70px); display:flex; flex-direction:column; align-items:center; gap:4px}
+.pv span{width:100%; aspect-ratio:3/4; border:2px solid var(--line); border-radius:10px; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,44px)}
+.pv span.on{border-color:var(--copper); background:var(--copper-soft)}
+.pv span.zero{border-color:var(--teal); background:var(--teal-soft)}
+.pv small{font-size:.62em; color:var(--muted); text-align:center; line-height:1.1}
+table.tens{border-collapse:collapse}
+table.tens td,table.tens th{border:2px solid var(--line); padding:8px 12px; text-align:center}
+table.tens th{font-family:var(--display); font-size:1.4em}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:1.05em; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-size:clamp(21px,1.9vw,30px); font-family:var(--display); font-weight:600; line-height:1.25; margin:0; max-width:30em; text-wrap:balance}
+.evidence{background:var(--copper-soft); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; overflow-x:auto}
+.evidence:empty{display:none}
+.evidence table{border-collapse:collapse}
+.evidence td,.evidence th{padding:5px 14px 5px 0; text-align:left; white-space:nowrap}
+.evidence th{font-size:.75em; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.evidence .big{font-family:var(--display); font-weight:800; font-size:1.5em}
+.hint{font-size:.85em; color:var(--muted); margin:0}
+
+@media (max-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+}
+@media (max-width:480px){
+  .card{padding:14px; border-radius:16px}
+  .duel .pw{font-size:2em}
+  nav.stops button span{display:none}
+  nav.stops button{padding:8px}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.85); opacity:.3}to{transform:scale(1); opacity:1}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="sub">Grade 4 · Week 7 · Lesson 4.7</div>
+    <h1>Exponents: <span class="pow">Doubling</span> Down</h1>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="stops" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-stage="warm" aria-selected="true"><b>1</b><span>Fold the paper</span></button>
+  <button role="tab" data-stage="deal" aria-selected="false"><b>2</b><span>The 2¢ deal</span></button>
+  <button role="tab" data-stage="lab" aria-selected="false"><b>3</b><span>Base &amp; exponent</span></button>
+  <button role="tab" data-stage="tens" aria-selected="false"><b>4</b><span>Powers of 10</span></button>
+  <button role="tab" data-stage="det" aria-selected="false"><b>5</b><span>Detective questions</span></button>
+</nav>
+
+<!-- 1 WARM-UP -->
+<section class="stage" id="stage-warm">
+  <div class="card">
+    <span class="label">Warm-up</span>
+    <h2>Fold a sheet of paper in half. How many layers?</h2>
+    <div class="paperbox">
+      <svg id="paper" viewBox="0 0 424 300" role="img" aria-label="Sheet of paper showing fold lines"></svg>
+      <div class="bigcount" id="layerCount" aria-live="polite">1 <small>layer</small></div>
+      <div class="expand" id="foldMult">&nbsp;</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="foldBtn">Fold in half</button>
+      <button class="btn line" id="unfoldBtn">Unfold all</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Our fold record</h3>
+    <table class="foldlog"><thead><tr><th>Folds</th><th>Layers</th><th>What happened</th></tr></thead><tbody id="foldLog"></tbody></table>
+    <div id="predictBox" hidden>
+      <p class="lead"><b>Predict:</b> how many layers after 4 folds?</p>
+      <div class="row"><input class="num" id="predictIn" type="number" inputmode="numeric" min="0" aria-label="Predicted layers after 4 folds"><button class="btn alt small" id="predictBtn">Lock in my prediction</button></div>
+    </div>
+    <p class="fb" id="foldFb" aria-live="polite"></p>
+    <p class="hint">Ask: what did we do to the number each time?</p>
+  </div>
+</section>
+
+<!-- 2 THE DEAL -->
+<section class="stage" id="stage-deal" hidden>
+  <div class="card">
+    <span class="label">Launch</span>
+    <h2>Day 1: you get 2¢. Every day you get double the day before, for 20 days.</h2>
+    <p class="lead">Is Day 20 worth more than $1? $100? $10,000? Pick a class guess and keep it.</p>
+    <div class="guesses" id="guesses">
+      <button data-g="0" aria-pressed="false">Less than $1</button>
+      <button data-g="1" aria-pressed="false">$1 to $100</button>
+      <button data-g="2" aria-pressed="false">$100 to $10,000</button>
+      <button data-g="3" aria-pressed="false">More than $10,000</button>
+    </div>
+    <p class="fb">Writing 2 × 2 × 2 × 2 × 2 gets long. Mathematicians use a shortcut: 2 × 2 × 2 is <b>2<sup>3</sup></b>. The small 3 tells how many 2s are multiplied.</p>
+    <span class="label">Part A · fill in Days 4 to 10</span>
+    <div class="tablewrap">
+      <table class="deal"><thead><tr><th>Day</th><th>Multiply it out</th><th>Exponent form</th><th>Cents</th></tr></thead><tbody id="dealBody"></tbody></table>
+    </div>
+    <div class="row"><button class="btn" id="checkTable">Check my table</button><button class="btn line small" id="fillTable">Fill it in for us</button></div>
+    <p class="fb" id="tableFb" aria-live="polite"></p>
+  </div>
+  <div class="card">
+    <h3>What is the first day worth $1 (100¢) or more?</h3>
+    <div class="daypick" id="pick100"></div>
+    <p class="fb" id="fb100" aria-live="polite"></p>
+    <h3>What is the first day worth $10 (1,000¢) or more?</h3>
+    <div class="daypick" id="pick1000"></div>
+    <p class="fb" id="fb1000" aria-live="polite"></p>
+    <span class="label">Share · finish the deal together</span>
+    <div class="payday" aria-live="polite"><span class="d" id="payDay">Day 10</span><span class="c" id="payC">1,024¢</span><span class="usd" id="payUsd">$10.24</span></div>
+    <svg id="chart" viewBox="0 0 560 260" role="img" aria-label="Bar chart of cents paid each day"></svg>
+    <div class="legend"><span><i style="background:var(--copper)"></i>Doubling</span><span><i style="background:var(--teal)"></i>2¢ more each day</span></div>
+    <div class="row">
+      <button class="btn" id="nextDay">Double it: next day</button>
+      <button class="btn line small" id="toDay20">Jump to Day 20</button>
+      <button class="btn alt small" id="addBtn">Compare: add 2¢ a day</button>
+    </div>
+    <p class="fb" id="dealFb" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 3 LAB -->
+<section class="stage" id="stage-lab" hidden>
+  <div class="card">
+    <span class="label">Part B · power builder</span>
+    <h2>The <span style="color:var(--teal)">base</span> is the number you multiply. The <span style="color:var(--copper)">exponent</span> says how many of them.</h2>
+    <div class="row" style="gap:24px">
+      <div><div class="label">Base</div><div class="stepper"><button id="bMinus" aria-label="Smaller base">−</button><output id="bOut">2</output><button id="bPlus" aria-label="Bigger base">+</button></div></div>
+      <div><div class="label">Exponent</div><div class="stepper"><button id="eMinus" aria-label="Smaller exponent">−</button><output id="eOut">3</output><button id="ePlus" aria-label="Bigger exponent">+</button></div></div>
+    </div>
+    <div class="row" style="gap:24px; align-items:center">
+      <div class="powbig" id="powBig" aria-live="polite"></div>
+      <div style="display:flex; flex-direction:column; gap:8px; min-width:0">
+        <div class="expand" id="labExpand"></div>
+        <div class="chain" id="labChain"></div>
+        <div class="notline" id="labNot"></div>
+      </div>
+    </div>
+    <div id="labPic"></div>
+  </div>
+  <div class="card">
+    <span class="label">Handout Part 2</span>
+    <div class="task">3 × 3 × 3 × 3 = 3<input class="num exp" id="t1e" type="number" inputmode="numeric" aria-label="Exponent for 3 times 3 times 3 times 3"> = <input class="num" id="t1v" type="number" inputmode="numeric" aria-label="Value of 3 times 3 times 3 times 3"></div>
+    <div class="task">5<sup>2</sup> = <input class="num" id="t2a" type="number" inputmode="numeric" aria-label="First factor" style="width:3.4em"> × <input class="num" id="t2b" type="number" inputmode="numeric" aria-label="Second factor" style="width:3.4em"> = <input class="num" id="t2v" type="number" inputmode="numeric" aria-label="Value of 5 squared"></div>
+    <div class="row"><button class="btn small" id="checkTasks">Check</button></div>
+    <p class="fb" id="taskFb" aria-live="polite"></p>
+    <h3>Tap every one that equals 2<sup>3</sup>.</h3>
+    <div class="cards" id="eqCards"></div>
+    <p class="fb" id="eqFb" aria-live="polite"></p>
+    <button class="btn alt small" id="whyBtn" style="align-self:flex-start">Why is 2<sup>3</sup> not 6?</button>
+    <div id="whyBox"></div>
+  </div>
+  <div class="card wide">
+    <span class="label">Handout Part 3 · which is bigger?</span>
+    <div class="duelpick" id="duelPick">
+      <button data-d="0" aria-pressed="true">2<sup>5</sup> or 5<sup>2</sup></button>
+      <button data-d="1" aria-pressed="false">3<sup>4</sup> or 4<sup>3</sup></button>
+      <button data-d="2" aria-pressed="false">Make your own</button>
+    </div>
+    <div class="row" id="ownBox" hidden>
+      <div><div class="label">First number</div><div class="stepper"><button id="aMinus" aria-label="Smaller first number">−</button><output id="aOut">2</output><button id="aPlus" aria-label="Bigger first number">+</button></div></div>
+      <div><div class="label">Second number</div><div class="stepper"><button id="cMinus" aria-label="Smaller second number">−</button><output id="cOut">6</output><button id="cPlus" aria-label="Bigger second number">+</button></div></div>
+    </div>
+    <p class="lead">Tap your guess first. Then work both out.</p>
+    <div class="duel" id="duel"></div>
+    <div class="row"><button class="btn" id="duelGo">Work them both out</button></div>
+    <p class="fb" id="duelFb" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 4 POWERS OF TEN -->
+<section class="stage" id="stage-tens" hidden>
+  <div class="card">
+    <span class="label">Part C · one multiplication at a time</span>
+    <h2>Multiply by 10 again and again. Watch the zeros.</h2>
+    <div class="powbig" id="tenBig"></div>
+    <div class="expand" id="tenExpand"></div>
+    <div class="pv" id="pv" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="times10">× 10</button><button class="btn line small" id="tenBack">Back one</button></div>
+  </div>
+  <div class="card">
+    <h3>Fill in the handout table.</h3>
+    <div class="tablewrap"><table class="tens"><tr><th>10<sup>1</sup></th><th>10<sup>2</sup></th><th>10<sup>3</sup></th><th>10<sup>4</sup></th></tr>
+      <tr><td><b>10</b></td><td><input class="num" id="p2" type="number" inputmode="numeric" aria-label="10 squared"></td><td><input class="num" id="p3" type="number" inputmode="numeric" aria-label="10 cubed"></td><td><input class="num" id="p4" type="number" inputmode="numeric" aria-label="10 to the fourth"></td></tr></table></div>
+    <div class="row"><button class="btn small" id="checkTens">Check</button><button class="btn alt small" id="zerosBtn">What do you notice about the zeros?</button></div>
+    <p class="fb" id="tensFb" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- 5 DETECTIVE -->
+<section class="stage" id="stage-det" hidden>
+  <div class="card wide">
+    <span class="label">Share &amp; reflect</span>
+    <div class="qnav" id="qnav"></div>
+    <p class="qtext" id="qtext"></p>
+    <div class="row" id="qacts"></div>
+    <div class="evidence" id="evidence" aria-live="polite"></div>
+    <p class="hint">Talk it over first. Then tap a button to put evidence on the board.</p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => n.toLocaleString('en-US');
+const pow = (b,e) => { let r=1; for(let i=0;i<e;i++) r*=b; return r; };
+const P = (b,e) => `${b}<sup>${e}</sup>`;
+const usd = c => { const d=Math.floor(c/100), r=c%100; return '$'+fmt(d)+'.'+String(r).padStart(2,'0'); };
+const times = (b,e) => Array(e).fill(b).join(' × ');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pop = el => { if(reduced||!el) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); };
+const fb = (el, html, kind) => { el.innerHTML = html; el.className = 'fb' + (kind ? ' '+kind : ''); };
+const val = id => { const v = $(id).value.trim(); return v==='' ? null : Number(v); };
+const mark = (id, ok) => { $(id).classList.toggle('ok', ok===true); $(id).classList.toggle('no', ok===false); };
+
+/* ---------- Stages ---------- */
+function showStage(k){
+  $$('nav.stops button').forEach(b => b.setAttribute('aria-selected', b.dataset.stage===k));
+  $$('.stage').forEach(s => s.hidden = s.id !== 'stage-'+k);
+}
+$$('nav.stops button').forEach(b => b.onclick = () => showStage(b.dataset.stage));
+
+/* ---------- 1. Warm-up ---------- */
+const W = {folds:0, prediction:null};
+const MAXF = 6;
+function drawPaper(){
+  const f = W.folds, svg = $('#paper');
+  const cols = pow(2, Math.ceil(f/2)), rows = pow(2, Math.floor(f/2));
+  const x0=12,y0=12,w=400,h=276;
+  let s = `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/>`;
+  for(let i=1;i<cols;i++){ const x=x0+w*i/cols; s += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0+h}" stroke="var(--copper)" stroke-width="${i===cols/2?3:2}" stroke-dasharray="8 6"/>`; }
+  for(let j=1;j<rows;j++){ const y=y0+h*j/rows; s += `<line x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}" stroke="var(--teal)" stroke-width="${j===rows/2?3:2}" stroke-dasharray="8 6"/>`; }
+  if(f<=4){ let k=1; for(let j=0;j<rows;j++) for(let i=0;i<cols;i++){ s += `<text x="${x0+w*(i+.5)/cols}" y="${y0+h*(j+.5)/rows+9}" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="${f<=2?30:22}" fill="var(--muted)">${k++}</text>`; } }
+  svg.innerHTML = s;
+  svg.setAttribute('aria-label', `Unfolded sheet showing ${cols*rows} sections after ${f} folds`);
+}
+function renderWarm(){
+  drawPaper();
+  const n = pow(2,W.folds);
+  $('#layerCount').innerHTML = `${n} <small>layer${n===1?'':'s'}</small>`; pop($('#layerCount'));
+  $('#foldMult').innerHTML = W.folds===0 ? '&nbsp;' : (W.folds===1 ? '2' : `${times(2,W.folds)} = ${n}`);
+  let rows = '';
+  for(let i=1;i<=W.folds;i++) rows += `<tr><td>${i}</td><td>${pow(2,i)}</td><td>${i===1?'1 layer became 2':`${pow(2,i-1)} × 2 = ${pow(2,i)}`}</td></tr>`;
+  $('#foldLog').innerHTML = rows || '<tr><td colspan="3" class="muted">Fold once to start the record.</td></tr>';
+  $('#predictBox').hidden = !(W.folds===3 && W.prediction===null);
+  $('#foldBtn').disabled = W.folds>=MAXF || (W.folds===3 && W.prediction===null);
+  $('#foldBtn').textContent = W.folds===3 && W.prediction!==null ? 'Fold and check' : 'Fold in half';
+}
+$('#foldBtn').onclick = () => {
+  if(W.folds>=MAXF) return;
+  W.folds++; renderWarm();
+  const n = pow(2,W.folds), el = $('#foldFb');
+  if(W.folds===4 && W.prediction!==null){
+    if(W.prediction===16) fb(el, `You predicted <b>16</b>, and 4 folds make <b>16 layers</b>. Each fold doubled the layers: 8 × 2 = 16.`, 'ok');
+    else fb(el, `You predicted ${fmt(W.prediction)}. Four folds make <b>16 layers</b>. ${W.prediction===12?'Adding 4 more gives 12, but a fold doubles every layer: 8 × 2 = 16.':'Each fold doubles every layer: 8 × 2 = 16.'} Look at the record: what happens each time?`, 'no');
+  } else if(W.folds===3) fb(el, `<b>8 layers</b>. Write it beside the 8: 2 × 2 × 2.`);
+  else if(W.folds===MAXF) fb(el, `<b>64 layers</b> after 6 folds. Real paper gets too thick to fold much more. Can you see why?`);
+  else if(W.folds>4) fb(el, `${pow(2,W.folds-1)} layers doubled to <b>${n}</b>.`);
+  else fb(el, '');
+};
+$('#unfoldBtn').onclick = () => { W.folds=0; W.prediction=null; $('#predictIn').value=''; fb($('#foldFb'),''); renderWarm(); };
+$('#predictBtn').onclick = () => {
+  const v = val('#predictIn');
+  if(v===null || v<0 || !Number.isInteger(v)){ fb($('#foldFb'), 'Type a whole number of layers first.', 'no'); return; }
+  W.prediction = v; fb($('#foldFb'), `Prediction locked: <b>${fmt(v)}</b>. Now fold and check.`); renderWarm();
+};
+
+/* ---------- 2. The deal ---------- */
+const D = {guess:null, shown:10, adding:false, solved100:false, solved1000:false};
+const GUESS = ['Less than $1','$1 to $100','$100 to $10,000','More than $10,000'];
+function buildTable(){
+  let h='';
+  for(let d=1; d<=10; d++){
+    const given = d<=3;
+    h += `<tr class="${given?'given':''}" id="row${d}"><td class="day">${d}</td><td class="mult">${times(2,d)}</td>`;
+    if(given) h += `<td><span class="expform">2<sup>${d}</sup></span></td><td><b>${pow(2,d)}</b></td></tr>`;
+    else h += `<td><span class="expform">2<input class="num exp" id="e${d}" type="number" inputmode="numeric" aria-label="Exponent for day ${d}"></span></td><td><input class="num" id="c${d}" type="number" inputmode="numeric" aria-label="Cents on day ${d}"><div class="rowmsg" id="m${d}"></div></td></tr>`;
+  }
+  $('#dealBody').innerHTML = h;
+}
+function checkTable(){
+  let wrong=0, blank=0, firstMsg='';
+  for(let d=4; d<=10; d++){
+    const e = val('#e'+d), c = val('#c'+d), prev = pow(2,d-1), want = pow(2,d);
+    let msg='';
+    if(e===null) { blank++; mark('#e'+d,null); }
+    else if(e===d) mark('#e'+d,true);
+    else { wrong++; mark('#e'+d,false); msg = `Count the 2s in “${times(2,d)}”. There are ${d}.`; }
+    if(c===null) { blank++; mark('#c'+d,null); }
+    else if(c===want) mark('#c'+d,true);
+    else {
+      wrong++; mark('#c'+d,false);
+      // check using the student's own entry above where possible
+      const above = d===4 ? 8 : val('#c'+(d-1));
+      let m;
+      if(c===prev+2) m = `That adds 2. Doubling means 2 times the day above: ${fmt(prev)} × 2.`;
+      else if(c===2*d) m = `That is 2 × ${d}. Day ${d} is ${d} twos multiplied, not 2 times ${d}.`;
+      else if(above!==null && above!==prev) m = `Check the day above first. Is each number exactly 2 times the one above it?`;
+      else m = `Is it exactly 2 times ${fmt(prev)}? Check ${fmt(prev)} + ${fmt(prev)}.`;
+      msg = msg ? msg+' '+m : m;
+    }
+    $('#m'+d).textContent = msg;
+    if(msg && !firstMsg) firstMsg = `Day ${d}: ${msg}`;
+  }
+  const el = $('#tableFb');
+  if(!wrong && !blank) fb(el, `Every row checks out. Day 10 pays <b>2<sup>10</sup> = 1,024¢</b>. Each day is exactly double the day before.`, 'ok');
+  else if(!wrong) fb(el, `Everything so far is right. ${blank} box${blank===1?' is':'es are'} still empty.`);
+  else fb(el, `${wrong} box${wrong===1?' needs':'es need'} another look (they're shaded). ${firstMsg}`, 'no');
+}
+function fillTable(){
+  for(let d=4; d<=10; d++){ $('#e'+d).value=d; $('#c'+d).value=pow(2,d); $('#m'+d).textContent=''; }
+  checkTable();
+}
+function buildPick(id, target, fbId){
+  const box = $(id); box.innerHTML='';
+  for(let d=1; d<=10; d++){
+    const b = document.createElement('button'); b.textContent=d; b.setAttribute('aria-label','Day '+d);
+    b.onclick = () => {
+      const c = pow(2,d), el = $(fbId);
+      box.querySelectorAll('button').forEach(x => x.classList.remove('no'));
+      const tgtTxt = target===100 ? '$1 (100¢)' : '$10 (1,000¢)';
+      if(c < target){ b.classList.add('no'); fb(el, `Day ${d} pays ${fmt(c)}¢. That is less than ${tgtTxt}. Keep going down the table.`, 'no'); }
+      else if(pow(2,d-1) >= target){ b.classList.add('no'); fb(el, `Day ${d} pays ${fmt(c)}¢, which is enough. But Day ${d-1} already paid ${fmt(pow(2,d-1))}¢. Is there an earlier day?`, 'no'); }
+      else { b.classList.add('ok'); fb(el, `<b>Day ${d}</b> pays ${fmt(c)}¢ = ${usd(c)}. The day before paid only ${fmt(pow(2,d-1))}¢ = ${usd(pow(2,d-1))}.`, 'ok'); }
+    };
+    box.appendChild(b);
+  }
+}
+function drawChart(){
+  const N = D.shown, svg = $('#chart');
+  const W0=560,H0=260, L=96, R=10, T=16, B=34, w=W0-L-R, h=H0-T-B;
+  const max = pow(2,N);
+  const bw = w/20;
+  let s='';
+  // grid: 0, half, max
+  [0,.5,1].forEach(f => { const y=T+h-h*f; s += `<line x1="${L}" x2="${W0-R}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1.5"/><text x="${L-8}" y="${y+5}" text-anchor="end" font-size="13" fill="var(--muted)">${fmt(Math.round(max*f))}¢</text>`; });
+  for(let d=1; d<=20; d++){
+    const x = L + bw*(d-1);
+    if(d<=N){ const v=pow(2,d), bh = Math.max(h*v/max, v>0?1.5:0); s += `<rect x="${x+bw*.12}" y="${T+h-bh}" width="${bw*.76}" height="${bh}" rx="2" fill="var(--copper)"><title>Day ${d}: ${fmt(v)}¢</title></rect>`; }
+    if(D.adding && d<=N){ const v=2*d, bh=Math.max(h*v/max,1.5); s += `<circle cx="${x+bw/2}" cy="${T+h-bh}" r="4" fill="var(--teal)"><title>Adding: day ${d}: ${v}¢</title></circle>`; }
+    if(d===1||d%5===0) s += `<text x="${x+bw/2}" y="${H0-12}" text-anchor="middle" font-size="13" fill="var(--muted)">${d}</text>`;
+  }
+  s += `<text x="${L+w/2}" y="${H0}" text-anchor="middle" font-size="12" fill="var(--muted)">Day</text>`;
+  svg.innerHTML = s;
+}
+function renderDeal(){
+  const c = pow(2,D.shown);
+  $('#payDay').textContent = 'Day '+D.shown;
+  $('#payC').textContent = fmt(c)+'¢'; pop($('#payC'));
+  $('#payUsd').textContent = usd(c);
+  $('#nextDay').disabled = D.shown>=20; $('#toDay20').disabled = D.shown>=20;
+  drawChart();
+}
+function dealNote(){
+  const el = $('#dealFb'), c = pow(2,D.shown);
+  if(D.shown<20){ fb(el, `Day ${D.shown} = ${fmt(pow(2,D.shown-1))} × 2 = <b>${fmt(c)}¢</b>, which is 2<sup>${D.shown}</sup>.`); return; }
+  const g = D.guess===null ? '' : ` Your guess was <b>${GUESS[D.guess]}</b>${D.guess===3?', and you were right.':'. Day 20 blew right past it.'}`;
+  fb(el, `<b>Day 20 = 2<sup>20</sup> = 1,048,576¢ = $10,485.76.</b>${g} Look at Days 1 to 10 on the chart now: they are almost too small to see.`, 'ok');
+}
+$('#nextDay').onclick = () => { if(D.shown<20){ D.shown++; renderDeal(); dealNote(); } };
+$('#toDay20').onclick = () => { D.shown=20; renderDeal(); dealNote(); };
+$('#addBtn').onclick = () => {
+  D.adding = true; drawChart();
+  fb($('#dealFb'), `Adding 2¢ more each day: 2¢, 4¢, 6¢, … Day ${D.shown} pays only <b>${2*D.shown}¢</b> (2 × ${D.shown}). Doubling pays <b>${fmt(pow(2,D.shown))}¢</b>. The teal dots hug the bottom of the chart. Doubling grows faster than adding.`);
+};
+$$('#guesses button').forEach(b => b.onclick = () => { D.guess=+b.dataset.g; $$('#guesses button').forEach(x => x.setAttribute('aria-pressed', x===b)); if(D.shown===20) dealNote(); });
+
+/* ---------- 3. Lab ---------- */
+const L = {b:2, e:3, duel:0, a:2, c:6, guess:null, revealed:false};
+function dotGrid(n, cols, color, size){
+  return `<div class="dots" style="grid-template-columns:repeat(${cols},var(--s));--s:${size}px;--c:${color}">${'<i></i>'.repeat(n)}</div>`;
+}
+function renderLab(){
+  const {b,e} = L, v = pow(b,e);
+  $('#bOut').textContent=b; $('#eOut').textContent=e;
+  $('#powBig').innerHTML = `<span class="b">${b}</span><span class="e">${e}</span>`;
+  $('#labExpand').innerHTML = `${e===1 ? `<span class="f">${b}</span>` : Array(e).fill(`<span class="f">${b}</span>`).join(' × ')} = ${fmt(v)}`;
+  let ch = '', run = 1;
+  for(let i=1;i<=e;i++){ run*=b; ch += (i>1?'<i>→</i>':'')+`<span>${fmt(run)}</span>`; }
+  $('#labChain').innerHTML = e>1 ? `<span class="muted" style="background:none;padding:0">Multiply one at a time:</span> ${ch}` : '';
+  $('#labNot').innerHTML = e===1 ? `One ${b} by itself is just ${b}.` : (b*e===v ? `Here ${b} × ${e} is also ${b*e}. That only happens for a few pairs. Try another.` : `Not ${b} × ${e} = ${b*e}.`);
+  let pic='';
+  if(e===2 && b<=10) pic = `<div class="label">${b}<sup>2</sup> as a ${b}-by-${b} square</div>`+dotGrid(v,b,'var(--teal)', b<=5?26:16);
+  else if(e===3 && b<=6) pic = `<div class="label">${b}<sup>3</sup> as ${b} layers of ${b} × ${b}</div><div class="layers">`+Array(b).fill(dotGrid(b*b,b,'var(--copper)', b<=3?22:b<=4?14:10)).join('')+`</div>`;
+  else if(e===1 && b<=10) pic = dotGrid(b,b,'var(--teal)',26);
+  else if(v<=128) pic = `<div class="label">${fmt(v)} dots</div>`+dotGrid(v, Math.min(16, v), 'var(--teal)', 12);
+  $('#labPic').innerHTML = pic;
+  $('#bMinus').disabled=b<=1; $('#bPlus').disabled=b>=10; $('#eMinus').disabled=e<=1; $('#ePlus').disabled=e>=6;
+}
+$('#bMinus').onclick=()=>{L.b=Math.max(1,L.b-1);renderLab();}; $('#bPlus').onclick=()=>{L.b=Math.min(10,L.b+1);renderLab();};
+$('#eMinus').onclick=()=>{L.e=Math.max(1,L.e-1);renderLab();}; $('#ePlus').onclick=()=>{L.e=Math.min(6,L.e+1);renderLab();};
+
+$('#checkTasks').onclick = () => {
+  const e=val('#t1e'), v=val('#t1v'), a=val('#t2a'), b=val('#t2b'), w=val('#t2v');
+  const msgs=[]; let ok=0;
+  if(e===4){mark('#t1e',true);ok++;} else if(e!==null){mark('#t1e',false); msgs.push('Count the 3s: how many are multiplied?');} else mark('#t1e',null);
+  if(v===81){mark('#t1v',true);ok++;} else if(v!==null){mark('#t1v',false); msgs.push(v===12?'3 × 4 = 12 multiplies by the exponent. Multiply the 3s instead: 3 × 3 = 9, 9 × 3 = 27, 27 × 3 = …':'Multiply one at a time: 3 × 3 = 9, then 9 × 3 = 27, then 27 × 3 = …');} else mark('#t1v',null);
+  if(a===5){mark('#t2a',true);ok++;} else if(a!==null){mark('#t2a',false); msgs.push('In 5², which number gets multiplied? That is the base.');} else mark('#t2a',null);
+  if(b===5){mark('#t2b',true);ok++;} else if(b!==null){mark('#t2b',false); msgs.push('The exponent 2 means two 5s: 5 × 5.');} else mark('#t2b',null);
+  if(w===25){mark('#t2v',true);ok++;} else if(w!==null){mark('#t2v',false); msgs.push(w===10?'5 × 2 = 10 reads the 2 as a multiplier. Build a 5-by-5 square in the power builder and count.':'Build 5² in the power builder: a 5-by-5 square. How many dots?');} else mark('#t2v',null);
+  if(ok===5) fb($('#taskFb'), '3 × 3 × 3 × 3 = 3<sup>4</sup> = 81, and 5<sup>2</sup> = 5 × 5 = 25. All correct.', 'ok');
+  else if(!msgs.length) fb($('#taskFb'), `${ok} of 5 right so far. Fill in the empty boxes.`);
+  else fb($('#taskFb'), msgs.join(' '), 'no');
+};
+
+const EQ = [
+  {t:'2 × 3', ok:false, why:'2 × 3 = 6. That multiplies 2 by the exponent. 2<sup>3</sup> is three 2s multiplied.'},
+  {t:'2 × 2 × 2', ok:true, why:'Yes. Three 2s multiplied: that is exactly what 2<sup>3</sup> means.'},
+  {t:'8', ok:true, why:'Yes. 2 × 2 = 4, and 4 × 2 = 8.'},
+  {t:'6', ok:false, why:'6 is 2 × 3 (or 2 + 2 + 2). 2<sup>3</sup> = 2 × 2 × 2 = 8.'},
+  {t:'3<sup>2</sup>', ok:false, why:'3<sup>2</sup> = 3 × 3 = 9. Swapping the base and exponent changes the number.'}
+];
+function buildEq(){
+  const box=$('#eqCards'); box.innerHTML='';
+  EQ.forEach(q => { const b=document.createElement('button'); b.innerHTML=q.t; b.onclick=()=>{ b.classList.remove('ok','no'); b.classList.add(q.ok?'ok':'no'); const found = $$('#eqCards button.ok').length; fb($('#eqFb'), q.why + (q.ok && found===2 ? ' You found both.' : ''), q.ok?'ok':'no'); }; box.appendChild(b); });
+}
+$('#whyBtn').onclick = () => {
+  $('#whyBox').innerHTML = `<div class="row" style="gap:28px; align-items:flex-start">
+    <div><div class="label">2 × 3: three groups of 2</div>${dotGrid(6,2,'var(--teal)',22)}<div class="expand">2 + 2 + 2 = 6</div></div>
+    <div><div class="label">2<sup>3</sup>: double, double, double</div><div class="layers">${dotGrid(4,2,'var(--copper)',22)}${dotGrid(4,2,'var(--copper)',22)}</div><div class="expand">2 × 2 × 2 = 8</div></div></div>
+    <p class="fb">The 3 in 2<sup>3</sup> counts how many 2s are multiplied. It is not what you multiply by.</p>`;
+};
+
+function duelPair(){ return L.duel===0 ? [[2,5],[5,2]] : L.duel===1 ? [[3,4],[4,3]] : [[L.a,L.c],[L.c,L.a]]; }
+function renderDuel(){
+  const [[b1,e1],[b2,e2]] = duelPair();
+  $('#aOut').textContent=L.a; $('#cOut').textContent=L.c;
+  $('#ownBox').hidden = L.duel!==2;
+  const v1=pow(b1,e1), v2=pow(b2,e2);
+  const side = (i,b,e,v) => `<button class="side ${L.revealed && v===Math.max(v1,v2) && v1!==v2 ? 'win':''}" data-i="${i}" aria-pressed="${L.guess===i}"><span class="pw">${P(b,e)}</span><span class="val">${L.revealed ? `${times(b,e)} = <b>${fmt(v)}</b>` : (L.guess===i ? 'My guess' : 'Tap to guess')}</span>${L.revealed && v<=256 ? dotGrid(v, Math.min(16, b===10?10:Math.max(b, Math.ceil(Math.sqrt(v)))), i===0?'var(--copper)':'var(--teal)', v>100?8:12) : ''}</button>`;
+  $('#duel').innerHTML = side(0,b1,e1,v1) + side(1,b2,e2,v2);
+  $$('#duel button.side').forEach(b => b.onclick = () => { L.guess=+b.dataset.i; L.revealed=false; fb($('#duelFb'),''); renderDuel(); });
+}
+$('#duelGo').onclick = () => {
+  const [[b1,e1],[b2,e2]] = duelPair(), v1=pow(b1,e1), v2=pow(b2,e2);
+  if(L.guess===null){ fb($('#duelFb'), 'Make a guess first: tap the one you think is bigger.'); return; }
+  L.revealed=true; renderDuel();
+  const el=$('#duelFb');
+  if(v1===v2){ fb(el, `It's a tie: ${P(b1,e1)} = ${P(b2,e2)} = ${fmt(v1)}. Neither one is bigger.`, 'ok'); return; }
+  const win = v1>v2 ? 0 : 1, [wb,we] = win===0?[b1,e1]:[b2,e2], [lb,le] = win===0?[b2,e2]:[b1,e1];
+  const bigBaseWon = wb > lb;
+  const WORD=['zero','one','two','three','four','five','six'];
+  const note = bigBaseWon ? `This time the bigger base won.` : `The bigger base did not win this time: ${WORD[we]} ${wb}s multiplied beat ${WORD[le]} ${lb}s.`;
+  if(L.guess===win) fb(el, `Your guess holds up. ${P(wb,we)} = ${fmt(Math.max(v1,v2))} and ${P(lb,le)} = ${fmt(Math.min(v1,v2))}. ${note}`, 'ok');
+  else fb(el, `${P(wb,we)} = ${fmt(Math.max(v1,v2))} beats ${P(lb,le)} = ${fmt(Math.min(v1,v2))}. ${note} Try the other pair, or make your own.`, 'no');
+};
+$$('#duelPick button').forEach(b => b.onclick = () => { L.duel=+b.dataset.d; L.guess=null; L.revealed=false; fb($('#duelFb'),''); $$('#duelPick button').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderDuel(); });
+const own = (k,d) => () => { L[k]=Math.min(6,Math.max(1,L[k]+d)); L.guess=null; L.revealed=false; fb($('#duelFb'),''); renderDuel(); };
+$('#aMinus').onclick=own('a',-1); $('#aPlus').onclick=own('a',1); $('#cMinus').onclick=own('c',-1); $('#cPlus').onclick=own('c',1);
+
+/* ---------- 4. Powers of ten ---------- */
+const T = {e:1};
+function renderTens(){
+  const e=T.e, v=pow(10,e);
+  $('#tenBig').innerHTML = `<span class="b">10</span><span class="e">${e}</span>`;
+  $('#tenExpand').innerHTML = (e===1 ? '10' : times(10,e)) + ` = <b>${fmt(v)}</b>`;
+  const names = ['ones','tens','hundreds','thousands','ten thousands','hundred thousands','millions'];
+  let h='';
+  for(let p=e; p>=0; p--) h += `<div><span class="${p===e?'on':'zero'}">${p===e?1:0}</span><small>${names[p]}</small></div>`;
+  $('#pv').innerHTML = h; pop($('#pv'));
+  $('#times10').disabled = e>=6; $('#tenBack').disabled = e<=1;
+}
+$('#times10').onclick = () => { if(T.e<6){ T.e++; renderTens(); } };
+$('#tenBack').onclick = () => { if(T.e>1){ T.e--; renderTens(); } };
+$('#checkTens').onclick = () => {
+  const msgs=[]; let ok=0, filled=0;
+  [2,3,4].forEach(e => { const v=val('#p'+e), want=pow(10,e);
+    if(v===null){ mark('#p'+e,null); return; } filled++;
+    if(v===want){ mark('#p'+e,true); ok++; }
+    else { mark('#p'+e,false);
+      if(v===10*e) msgs.push(`10<sup>${e}</sup> is not 10 × ${e} = ${10*e}. Write ${times(10,e)} and multiply two at a time.`);
+      else msgs.push(`For 10<sup>${e}</sup>, write ${times(10,e)} and multiply two at a time. Use the × 10 button to check.`);
+    } });
+  if(ok===3) fb($('#tensFb'), '10<sup>2</sup> = 100, 10<sup>3</sup> = 1,000, 10<sup>4</sup> = 10,000. All correct.', 'ok');
+  else if(!msgs.length) fb($('#tensFb'), filled ? 'Right so far. Fill in the rest.' : 'Type a value in each box, then check.');
+  else fb($('#tensFb'), msgs.join(' '), 'no');
+};
+$('#zerosBtn').onclick = () => {
+  const rows = [1,2,3,4,5,6].map(e => `<tr><td>10<sup>${e}</sup></td><td><b>${fmt(pow(10,e))}</b></td><td>${e} zero${e===1?'':'s'}</td></tr>`).join('');
+  fb($('#tensFb'), `<table class="tens" style="margin-bottom:8px"><tr><td>Power</td><td>Value</td><td>Zeros</td></tr>${rows}</table>The exponent tells how many zeros come after the 1. Each × 10 adds one more zero.`);
+};
+
+/* ---------- 5. Detective ---------- */
+const ev = html => { $('#evidence').innerHTML = html; pop($('#evidence')); };
+const dayRows = (a,b,extra) => { let r=''; for(let d=a; d<=b; d++){ const c=pow(2,d); r+=`<tr><td>Day ${d}</td><td>2<sup>${d}</sup></td><td><b>${fmt(c)}¢</b></td><td>${usd(c)}</td>${extra?extra(d):''}</tr>`; } return r; };
+const Q = [
+  { q:()=>`In 2<sup>3</sup>, what does the 3 tell you? Is 2<sup>3</sup> the same as 2 × 3? As 3<sup>2</sup>?`,
+    a:[
+      {l:'Write 2³ using only 2s', r:()=>ev(`<div class="big">2<sup>3</sup> = 2 × 2 × 2 = 8</div><p style="margin:0">Count the 2s you wrote. There are 3. The exponent counts how many times the base is multiplied by itself.</p>`)},
+      {l:'Compare 2³, 2 × 3 and 3²', r:()=>ev(`<table><tr><th>Expression</th><th>Means</th><th>Value</th></tr><tr><td class="big">2<sup>3</sup></td><td>2 × 2 × 2</td><td class="big">8</td></tr><tr><td class="big">2 × 3</td><td>2 + 2 + 2</td><td class="big">6</td></tr><tr><td class="big">3<sup>2</sup></td><td>3 × 3</td><td class="big">9</td></tr></table><p style="margin:0">Three different numbers. 2<sup>3</sup> is not 2 × 3, and it is not 3<sup>2</sup>.</p>`)}
+    ]},
+  { q:()=>`Does the bigger base always win?`,
+    a:[
+      {l:'5² vs 2⁵', r:()=>ev(`<div class="big">5<sup>2</sup> = 25 · 2<sup>5</sup> = 32</div><p style="margin:0">The bigger base lost. Five 2s multiplied beat two 5s.</p>`)},
+      {l:'4³ vs 3⁴', r:()=>ev(`<div class="big">4<sup>3</sup> = 64 · 3<sup>4</sup> = 81</div><p style="margin:0">The bigger base lost again.</p>`)},
+      {l:'Show a whole table', r:()=>{ let r=''; for(const [a,b] of [[2,3],[2,4],[2,5],[2,6],[3,4],[3,5],[4,5]]){ const x=pow(b,a), y=pow(a,b); r+=`<tr><td>${P(b,a)} = ${fmt(x)}</td><td>${P(a,b)} = ${fmt(y)}</td><td><b>${x>y?`${P(b,a)} (bigger base)`:x<y?`${P(a,b)} (smaller base)`:'tie'}</b></td></tr>`; } ev(`<table><tr><th>Bigger base</th><th>Smaller base</th><th>Winner</th></tr>${r}</table><p style="margin:0">Sometimes the bigger base wins (3<sup>2</sup> = 9 beats 2<sup>3</sup> = 8), sometimes it loses, and 4<sup>2</sup> = 2<sup>4</sup> = 16 is a tie. Work out both before you decide.</p>`); }}
+    ]},
+  { q:()=>`If you got 2¢ <em>more</em> each day instead of double, what would Day 20 pay? Why is doubling so much bigger?`,
+    a:[
+      {l:'Side by side, Days 1 to 20', r:()=>{ let r=''; for(let d=1; d<=20; d++) r+=`<tr><td>Day ${d}</td><td>${2*d}¢</td><td><b>${fmt(pow(2,d))}¢</b></td></tr>`; ev(`<table><tr><th>Day</th><th>Add 2¢</th><th>Double</th></tr>${r}</table><p style="margin:0">Adding: Day 20 pays <b>40¢</b>. Doubling: Day 20 pays <b>1,048,576¢ = $10,485.76</b>. Adding grows by 2 each day. Doubling grows by the whole amount so far, so each jump is bigger than the last.</p>`); }}
+    ]},
+  { q:()=>`★ Challenge: Day 10 is 2<sup>10</sup> = 1,024¢. How could you use that to find Day 20 without doubling ten more times?`,
+    a:[
+      {l:'Show the shortcut', r:()=>ev(`<div class="big">2<sup>20</sup> = 2<sup>10</sup> × 2<sup>10</sup></div><p style="margin:0">Twenty 2s is ten 2s times ten more 2s. So Day 20 = 1,024 × 1,024.</p>`)},
+      {l:'Multiply 1,024 × 1,024', r:()=>ev(`<table><tr><td>1,024 × 1,000</td><td>=</td><td><b>1,024,000</b></td></tr><tr><td>1,024 × 24</td><td>=</td><td><b>24,576</b></td></tr><tr><td>Total</td><td>=</td><td class="big">1,048,576¢</td></tr></table><p style="margin:0">That is $10,485.76, the same answer as doubling all the way.</p>`)}
+    ]},
+  { q:()=>`★ Challenge: on what day does the deal first pay more than $1,000,000?`,
+    a:[
+      {l:'Keep doubling past Day 20', r:()=>ev(`<table><tr><th>Day</th><th>Power</th><th>Cents</th><th>Dollars</th></tr>${dayRows(20,27)}</table><p style="margin:0">$1,000,000 is 100,000,000¢. Day 26 pays $671,088.64. <b>Day 27</b> pays $1,342,177.28, the first day over a million dollars.</p>`)}
+    ]},
+  { q:()=>`★ Challenge: is 2<sup>3</sup> × 2<sup>2</sup> equal to 2<sup>5</sup>? Try another pair and state a rule.`,
+    a:[
+      {l:'Test 2³ × 2²', r:()=>ev(`<div class="big">2<sup>3</sup> × 2<sup>2</sup> = 8 × 4 = 32 = 2<sup>5</sup></div><p style="margin:0">(2 × 2 × 2) × (2 × 2) is five 2s multiplied.</p>`)},
+      {l:'Try another pair', r:()=>{ const a=1+Math.floor(Math.random()*5), b=1+Math.floor(Math.random()*5); ev(`<div class="big">2<sup>${a}</sup> × 2<sup>${b}</sup> = ${fmt(pow(2,a))} × ${fmt(pow(2,b))} = ${fmt(pow(2,a)*pow(2,b))}</div><p style="margin:0">(${times(2,a)}) × (${times(2,b)}) is ${a+b} twos, and 2<sup>${a+b}</sup> = ${fmt(pow(2,a+b))}. Tap again for a new pair.</p>`); }},
+      {l:'State the rule', r:()=>ev(`<div class="big">Same base: the exponents add.</div><p style="margin:0">2<sup>3</sup> × 2<sup>2</sup> = 2<sup>3 + 2</sup> = 2<sup>5</sup>, because you are just counting all the 2s.</p>`)}
+    ]},
+  { q:()=>`Exit ticket: in 2<sup>4</sup>, what does the 4 tell you? What does the 2 tell you? Write 2<sup>4</sup> out and find its value.`,
+    a:[
+      {l:'Show the answer', r:()=>ev(`<div class="big">2<sup>4</sup> = 2 × 2 × 2 × 2 = 16</div><p style="margin:0">The 2 is the base: the number being multiplied. The 4 is the exponent: how many 2s are multiplied.</p>`)}
+    ]},
+  { q:()=>`L'dor vador, from generation to generation. You teach 2 new people. Each of them teaches 2 more, and so on. How many new learners join in round 10?`,
+    a:[
+      {l:'Show the rounds', r:()=>{ let r='', tot=0; for(let k=1;k<=10;k++){ tot+=pow(2,k); r+=`<tr><td>Round ${k}</td><td>2<sup>${k}</sup></td><td><b>${fmt(pow(2,k))}</b></td></tr>`; } ev(`<table><tr><th>Round</th><th>Power</th><th>New learners</th></tr>${r}</table><p style="margin:0">Round 10 brings <b>2<sup>10</sup> = 1,024</b> new learners. Add up every round and ${fmt(tot)} people have learned, plus you.</p>`); }}
+    ]}
+];
+const QLAB = ['1','2','3','★ A','★ B','★ C','Exit','L’dor vador'];
+let qi = 0;
+function renderQ(){
+  $('#qnav').innerHTML = QLAB.map((t,i) => `<button data-q="${i}" aria-pressed="${i===qi}" aria-label="Question ${t}">${t}</button>`).join('');
+  $$('#qnav button').forEach(b => b.onclick = () => { qi=+b.dataset.q; $('#evidence').innerHTML=''; renderQ(); });
+  $('#qtext').innerHTML = Q[qi].q();
+  const box = $('#qacts'); box.innerHTML='';
+  Q[qi].a.forEach((a,i) => { const b=document.createElement('button'); b.className='btn'+(i===0?'':' alt'); b.textContent=a.l; b.onclick=a.r; box.appendChild(b); });
+}
+
+/* ---------- Reset / full screen ---------- */
+function resetAll(){
+  W.folds=0; W.prediction=null; $('#predictIn').value=''; fb($('#foldFb'),''); renderWarm();
+  D.guess=null; D.shown=10; D.adding=false; $$('#guesses button').forEach(x=>x.setAttribute('aria-pressed','false'));
+  buildTable(); buildPick('#pick100',100,'#fb100'); buildPick('#pick1000',1000,'#fb1000');
+  ['#tableFb','#fb100','#fb1000','#dealFb','#taskFb','#eqFb','#duelFb','#tensFb'].forEach(id => fb($(id),''));
+  renderDeal();
+  L.b=2; L.e=3; L.duel=0; L.a=2; L.c=6; L.guess=null; L.revealed=false; renderLab(); buildEq(); $('#whyBox').innerHTML='';
+  $$('#duelPick button').forEach(x=>x.setAttribute('aria-pressed', x.dataset.d==='0')); renderDuel();
+  ['#t1e','#t1v','#t2a','#t2b','#t2v','#p2','#p3','#p4'].forEach(id => { $(id).value=''; mark(id,null); });
+  T.e=1; renderTens();
+  qi=0; $('#evidence').innerHTML=''; renderQ();
+}
+$('#resetBtn').onclick = () => { resetAll(); showStage('warm'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+$$('#checkTable').forEach(b => b.onclick = checkTable);
+$('#fillTable').onclick = fillTable;
+
+resetAll();
+})();
+</script>
+
+</body></html>

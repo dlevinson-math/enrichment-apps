@@ -1,0 +1,822 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Station Masters</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&family=Overpass+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a station concourse. Enamel sign header, one platform tab per class, one working panel per Part; a split-flap departure board for the showcase. */
+:root{
+  --bg:#E9EDF2; --surface:#FFFFFF; --sunk:#F3F5F8; --ink:#14213D; --muted:#55627A; --line:#CCD4DF;
+  --signal:#E9A21A; --signal-soft:#FCF0D6; --on-signal:#1B1404; --minute:#2563C9;
+  --ok:#17804F; --ok-soft:#E1F3EA; --try:#B0501A; --try-soft:#FBEADF;
+  --board:#0E1729; --board-ink:#FFC53D; --board-dim:#8090AE; --board-line:#22304D;
+  --l-red:#D3263A; --l-blue:#1F68CF; --l-green:#18925A; --l-orange:#DB6A0C; --l-purple:#7A4CC7;
+  --display:"Overpass","Segoe UI",system-ui,sans-serif;
+  --mono:"Overpass Mono",ui-monospace,Menlo,Consolas,monospace;
+  --lc:var(--l-blue);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1220; --surface:#151E33; --sunk:#10182A; --ink:#E8EDF6; --muted:#9AA7BE; --line:#2A3757;
+    --signal:#F2B33A; --signal-soft:#3A2D12; --minute:#6EA2F5;
+    --ok:#4CC88D; --ok-soft:#13301F; --try:#F29A62; --try-soft:#3A2214;
+    --board:#060B16; --board-line:#1A2640; --board-dim:#6C7A96;
+    --l-red:#F0566A; --l-blue:#5B9BF2; --l-green:#3FC584; --l-orange:#F7943F; --l-purple:#A57CF0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1220; --surface:#151E33; --sunk:#10182A; --ink:#E8EDF6; --muted:#9AA7BE; --line:#2A3757;
+  --signal:#F2B33A; --signal-soft:#3A2D12; --minute:#6EA2F5;
+  --ok:#4CC88D; --ok-soft:#13301F; --try:#F29A62; --try-soft:#3A2214;
+  --board:#060B16; --board-line:#1A2640; --board-dim:#6C7A96;
+  --l-red:#F0566A; --l-blue:#5B9BF2; --l-green:#3FC584; --l-orange:#F7943F; --l-purple:#A57CF0;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%}
+body{background:var(--bg); color:var(--ink); font-family:var(--display); font-size:18px; line-height:1.45; -webkit-tap-highlight-color:transparent;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0 40px}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px}
+.wrap{max-width:1240px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+
+/* Header: enamel station sign */
+header{display:flex; flex-wrap:wrap; align-items:center; gap:14px 24px; padding-block:18px 4px}
+.sign{display:flex; align-items:center; gap:16px; min-width:0}
+.roundel{flex:none; width:58px; height:58px; border-radius:50%; border:7px solid var(--lc); display:grid; place-items:center; background:var(--surface)}
+.roundel i{display:block; width:46px; height:12px; background:var(--ink); border-radius:2px}
+.sign h1{margin:0; font-size:clamp(30px,4vw,48px); font-weight:900; letter-spacing:-.01em; line-height:1; text-wrap:balance}
+.sign .sub{margin:4px 0 0; font-size:15px; color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase}
+.sign .tag{margin:2px 0 0; font-size:17px; color:var(--muted)}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.btn{min-height:52px; padding:10px 20px; border-radius:12px; font-weight:800; font-size:18px; border:2px solid transparent; display:inline-flex; align-items:center; justify-content:center; gap:8px}
+.btn.primary{background:var(--ink); color:var(--surface)}
+.btn.go{background:var(--signal); color:var(--on-signal)}
+.btn.ghost{background:var(--surface); border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.warn{background:var(--try-soft); border-color:var(--try); color:var(--ink)}
+.btn:disabled{opacity:.45; cursor:default}
+.btn.small{min-height:44px; padding:6px 14px; font-size:16px}
+
+/* Class tabs: platform signs */
+.classes{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+.classes button{display:flex; align-items:center; gap:12px; text-align:left; padding:12px 14px; min-height:68px; border-radius:14px; border:2px solid var(--line); background:var(--surface)}
+.classes .num{flex:none; width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:900; font-size:22px; background:var(--sunk); border:2px solid var(--line)}
+.classes b{display:block; font-size:18px; line-height:1.1}
+.classes small{display:block; font-size:14px; color:var(--muted); line-height:1.2}
+.classes button[aria-selected="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.classes button[aria-selected="true"] small{color:inherit; opacity:.8}
+.classes button[aria-selected="true"] .num{background:var(--signal); color:var(--on-signal); border-color:var(--signal)}
+.parts{display:flex; gap:8px; flex-wrap:wrap}
+.parts button{min-height:48px; padding:8px 18px; border-radius:999px; border:2px solid var(--line); background:var(--surface); font-weight:700; font-size:17px}
+.parts button span{color:var(--muted); font-weight:600; margin-right:6px}
+.parts button[aria-pressed="true"]{border-color:var(--signal); background:var(--signal-soft)}
+.parts button[aria-pressed="true"] span{color:inherit}
+.part{display:flex; flex-direction:column; gap:18px}
+.lead{margin:0; font-size:clamp(19px,1.8vw,24px); max-width:44em}
+.lead b{font-weight:800}
+h3{margin:0; font-size:22px; font-weight:800}
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:18px}
+.card{background:var(--surface); border:2px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.cardhead{display:flex; align-items:center; gap:12px}
+.cardhead svg{flex:none}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.center{justify-content:center}
+
+/* Clock */
+.clockwrap{display:flex; justify-content:center}
+.clock{width:min(100%, clamp(220px, 28vw, 320px)); height:auto; display:block; overflow:visible}
+.clock.mini{width:84px}
+.clock.big{width:min(100%, 340px)}
+.clock .face{fill:var(--surface); stroke:var(--ink); stroke-width:7}
+.clock .tk{stroke:var(--muted); stroke-width:1.5}
+.clock .tk5{stroke:var(--ink); stroke-width:3.5}
+.clock .nm{fill:var(--ink); font:800 21px var(--display); text-anchor:middle; dominant-baseline:central}
+.clock .hh{stroke:var(--ink); stroke-width:10; stroke-linecap:round}
+.clock .mh{stroke:var(--minute); stroke-width:6; stroke-linecap:round}
+.clock .pin{fill:var(--signal)}
+.clock .five{fill:var(--minute); font:800 15px var(--mono); text-anchor:middle; dominant-baseline:central}
+.clock .fivedot{fill:var(--minute); opacity:.18}
+.clock.drag{touch-action:none; cursor:grab}
+.clock.drag .sel{filter:drop-shadow(0 0 4px var(--signal))}
+.clock .ghostmark{fill:none; stroke:var(--signal); stroke-width:4}
+.clock.mini .face{stroke-width:9}
+.clock.mini .nm,.clock.mini .tk{display:none}
+.nudges{display:grid; grid-template-columns:auto 1fr 1fr; gap:8px; align-items:center; font-size:15px; color:var(--muted); font-weight:600}
+.nudges .btn{min-height:44px; padding:4px 10px}
+
+/* Time entry */
+.timeentry{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap}
+.tbox{width:2.6em; height:62px; text-align:center; font:700 32px var(--mono); border:2px solid var(--line); border-radius:12px; background:var(--sunk); font-variant-numeric:tabular-nums}
+.tbox.wide{width:4.2em}
+.tbox:focus{border-color:var(--signal); outline:none}
+.colon{font:700 32px var(--mono)}
+.seg{display:inline-flex; border:2px solid var(--line); border-radius:12px; padding:3px; background:var(--surface)}
+.seg button{border:0; background:none; min-height:48px; padding:6px 16px; border-radius:9px; font-weight:800; font-size:18px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+
+/* Feedback */
+.fb{margin:0; padding:12px 16px; border-radius:12px; font-size:18px; border-left:6px solid transparent; background:var(--sunk)}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft); border-left-color:var(--ok)}
+.fb.try{background:var(--try-soft); border-left-color:var(--try)}
+.sentence{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:19px; font-weight:600}
+.choice{min-width:58px; min-height:52px; border-radius:12px; border:2px solid var(--line); background:var(--surface); font:800 22px var(--mono)}
+.choice.yes{background:var(--ok-soft); border-color:var(--ok)}
+
+/* Detective card */
+.detective{background:var(--signal-soft); border:2px dashed var(--signal); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px}
+.detective .eyebrow{margin:0; font-size:14px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.detective .q{margin:0; font-size:clamp(19px,1.7vw,23px); font-weight:700; max-width:40em}
+.detective .hint{margin:0; font-size:15px; color:var(--muted)}
+.evidence{display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start}
+.evidence:empty{display:none}
+.evi{display:flex; flex-direction:column; align-items:center; gap:4px; font-weight:800}
+.evi .clock{width:150px}
+
+/* Tables */
+.tablewrap{overflow-x:auto}
+table.tt{border-collapse:collapse; width:100%; font-size:19px; font-variant-numeric:tabular-nums}
+.tt th{font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-align:left; padding:8px 10px; border-bottom:2px solid var(--line)}
+.tt td{padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:middle}
+.tt td.time{font:700 22px var(--mono); white-space:nowrap}
+.tt tr.sel td{background:var(--signal-soft)}
+.tt tr.click{cursor:pointer}
+.mark{font-weight:800; font-size:16px; white-space:nowrap}
+.mark.ok{color:var(--ok)} .mark.try{color:var(--try)}
+.num-in{width:3.4em; height:52px; text-align:center; font:700 24px var(--mono); border:2px solid var(--line); border-radius:10px; background:var(--sunk)}
+.num-in:focus{border-color:var(--signal); outline:none}
+.num-in.okb{border-color:var(--ok)} .num-in.tryb{border-color:var(--try)}
+
+/* Hops */
+.hops{overflow-x:auto; padding:6px 2px 4px}
+.hopline{display:flex; align-items:flex-end; gap:0; width:max-content}
+.hopstop{display:flex; flex-direction:column; align-items:center; gap:4px}
+.hopstop span{font:700 17px var(--mono); padding:6px 8px; border-radius:8px; background:var(--sunk); border:2px solid var(--line); white-space:nowrap}
+.hopstop.hour span{background:var(--signal); color:var(--on-signal); border-color:var(--signal)}
+.hopstop.end span{border-color:var(--ink)}
+.hoparc{width:46px; height:26px; border:3px solid var(--minute); border-bottom:0; border-radius:26px 26px 0 0; margin:0 -4px 22px; position:relative}
+.hoparc.big{border-color:var(--signal)}
+.hoparc em{position:absolute; top:-22px; left:50%; transform:translateX(-50%); font:700 13px var(--mono); color:var(--minute); font-style:normal}
+.hopnote{font-size:16px; color:var(--muted); margin:0}
+
+/* Timetable track */
+.colors{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.colors button{min-height:48px; padding:6px 16px 6px 8px; border-radius:999px; border:2px solid var(--line); background:var(--surface); font-weight:800; display:inline-flex; gap:8px; align-items:center}
+.colors button i{width:30px; height:30px; border-radius:50%; background:var(--c)}
+.colors button[aria-pressed="true"]{border-color:var(--ink); box-shadow:inset 0 0 0 2px var(--ink)}
+.trackwrap{overflow-x:auto; padding-bottom:6px}
+.track{position:relative; display:grid; grid-template-columns:repeat(13, minmax(64px,1fr)); min-width:840px; padding-top:54px}
+.track::before{content:""; position:absolute; left:32px; right:32px; top:66px; height:10px; border-radius:5px; background:var(--lc)}
+.stop{position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; background:none; border:0; padding:0 0 4px; min-height:84px}
+.stop .dot{width:34px; height:34px; border-radius:50%; background:var(--surface); border:5px solid var(--lc); position:relative; z-index:1}
+.stop .lbl{font:700 16px var(--mono); color:var(--muted)}
+.stop .lbl.hr{color:var(--ink)}
+.stop .trn{position:absolute; top:-50px; width:52px; height:40px; display:none}
+.stop.on .trn{display:block}
+.stop.on .dot{background:var(--lc)}
+.stop.on .lbl{color:var(--ink)}
+.stop.gapbad .dot{border-style:dashed; border-color:var(--try); background:var(--try-soft)}
+.stop:hover .dot{transform:scale(1.08)}
+.counter{font-weight:800; font-size:18px}
+select.sel{height:52px; font:700 21px var(--mono); border:2px solid var(--line); border-radius:10px; background:var(--sunk); padding:0 8px}
+
+/* Tickets */
+.tickets{display:flex; gap:14px; flex-wrap:wrap}
+.ticket{position:relative; display:flex; flex-direction:column; justify-content:center; width:150px; height:96px; padding:10px 18px; border-radius:10px; background:var(--signal-soft); border:2px solid var(--signal)}
+.ticket::before,.ticket::after{content:""; position:absolute; top:50%; width:18px; height:18px; margin-top:-9px; border-radius:50%; background:var(--surface)}
+.ticket::before{left:-10px} .ticket::after{right:-10px}
+.ticket small{font-size:14px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.ticket b{font:700 36px var(--mono)}
+.party{display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap}
+.person{display:flex; flex-direction:column; align-items:center; gap:4px; font-weight:800}
+.person .price{font:700 20px var(--mono); color:var(--muted); min-height:1.4em}
+.coins{display:flex; gap:8px; flex-wrap:wrap; align-items:center; font:700 18px var(--mono)}
+.coin{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; background:var(--signal); color:var(--on-signal)}
+.bill{padding:12px 16px; border-radius:8px; background:var(--ok-soft); border:2px solid var(--ok); font:700 22px var(--mono)}
+
+/* Tally + graph */
+.tally{display:flex; gap:10px; flex-wrap:wrap; align-items:center; min-height:44px}
+.tally svg{width:44px; height:40px}
+.tally svg line{stroke:var(--ink); stroke-width:3.5; stroke-linecap:round}
+.tbtns{display:flex; gap:6px}
+.tbtns .btn{min-width:52px; font-size:22px; padding:4px 10px}
+.graph{display:grid; grid-template-columns:44px 1fr; gap:8px; max-width:760px}
+.yaxis{position:relative; height:340px}
+.yaxis span{position:absolute; right:4px; transform:translateY(50%); font:700 14px var(--mono); color:var(--muted)}
+.plot{position:relative; height:340px; border-left:3px solid var(--ink); border-bottom:3px solid var(--ink); display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:0 12px}
+.gl{position:absolute; left:0; right:0; height:0; border-top:1px dashed var(--line)}
+.col{position:relative; z-index:1; display:flex; align-items:flex-end; justify-content:center; cursor:pointer; background:none; border:0; padding:0; height:100%}
+.col:hover{background:color-mix(in srgb, var(--lc) 7%, transparent)}
+.bar{width:72%; background:var(--lc); border-radius:6px 6px 0 0; transition:height .2s}
+.bar.bad{background:repeating-linear-gradient(45deg, var(--lc) 0 10px, var(--try) 10px 16px)}
+.bar b{display:block; text-align:center; font:700 15px var(--mono); color:var(--surface); padding-top:2px}
+.xlabels{grid-column:2; display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:0 12px}
+.xl{display:flex; flex-direction:column; align-items:center; gap:4px}
+.xl span{font:700 15px var(--mono)}
+.xl .tbtns .btn{min-width:44px; min-height:40px; font-size:18px}
+@media (prefers-reduced-motion: reduce){ .bar{transition:none} }
+
+/* Express */
+.exlist{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font:700 22px var(--mono)}
+.exlist .fixed{padding:10px 12px; background:var(--sunk); border-radius:10px; border:2px solid var(--line)}
+.exlist .num-in{width:4.4em}
+
+/* Showcase board */
+.board{background:var(--board); border-radius:20px; padding:20px clamp(14px,2.4vw,28px); color:#F2F4F8; display:flex; flex-direction:column; gap:14px}
+.boardhead{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.boardhead .roundel{width:48px; height:48px; border-width:6px}
+.boardhead h3{font-size:clamp(24px,3vw,36px); font-weight:900; color:#F2F4F8}
+.boardhead .clk{margin-left:auto; font:700 clamp(24px,3vw,36px) var(--mono); color:var(--board-ink)}
+.depart{width:100%; border-collapse:separate; border-spacing:0 6px; font-variant-numeric:tabular-nums}
+.depart th{font:800 13px var(--display); letter-spacing:.12em; text-transform:uppercase; color:var(--board-dim); text-align:left; padding:0 10px}
+.depart td{background:#152038; padding:8px 10px; font:700 clamp(20px,2.4vw,30px) var(--mono); color:var(--board-ink)}
+.depart td:first-child{border-radius:8px 0 0 8px} .depart td:last-child{border-radius:0 8px 8px 0}
+.depart td.dim{color:var(--board-dim); font-size:clamp(16px,1.8vw,22px)}
+.depart tr.now td{background:#2A3A1A; color:#C8F27A}
+.depart .flap{display:inline-block; animation:flap .35s ease-out}
+@keyframes flap{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+@media (prefers-reduced-motion: reduce){.depart .flap{animation:none}}
+.showgrid{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; align-items:start}
+.prompts{display:flex; flex-direction:column; gap:12px}
+.prompt{background:var(--surface); border:2px solid var(--line); border-radius:16px; padding:14px 16px}
+.prompt p{margin:0}
+.prompt .pq{font-weight:800; font-size:19px}
+.prompt .pa{margin-top:6px; color:var(--muted); font-size:17px}
+.example{font-size:15px; color:var(--board-dim); margin:0}
+input.text{height:52px; border:2px solid var(--line); border-radius:10px; background:var(--sunk); padding:0 12px; font-size:19px; font-weight:700; min-width:0; width:min(100%,320px)}
+
+@media (max-width: 900px){
+  .classes{grid-template-columns:repeat(2,1fr)}
+  .showgrid{grid-template-columns:1fr}
+}
+@media (max-width: 520px){
+  body{font-size:17px}
+  .classes small{display:none}
+  .tools{margin-left:0}
+  .yaxis,.plot{height:260px}
+  .plot,.xlabels{gap:6px; padding:0 4px}
+  .bar{width:86%}
+  .tt td{padding:6px 6px}
+  .tt td.time{font-size:18px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="sign">
+    <div class="roundel" aria-hidden="true"><i></i></div>
+    <div>
+      <p class="sub">Grade 2 · Set 4 project · 3 class periods</p>
+      <h1>Station Masters</h1>
+      <p class="tag">Read the station clock. Build the timetable. Get every passenger on the right train.</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="btn ghost" id="fsBtn">Full screen</button>
+    <button class="btn ghost" id="resetBtn">Start over</button>
+  </div>
+</header>
+<nav class="classes" role="tablist" id="classTabs" aria-label="Class periods"></nav>
+<main id="views"></main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pad=n=>String(n).padStart(2,'0');
+const NS='http://www.w3.org/2000/svg';
+const T=(h,m,pm)=>((h%12)+(pm?12:0))*60+m;           // minutes since midnight
+const norm=t=>((t%1440)+1440)%1440;
+const fmt=t=>{t=norm(t); return `${(Math.floor(t/60)%12)||12}:${pad(t%60)}`;};
+const ap=t=>norm(t)<720?'a.m.':'p.m.';
+const angDiff=(a,b)=>((a-b)%360+540)%360-180;         // signed a−b in [−180,180)
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LINES={red:'Red',blue:'Blue',green:'Green',orange:'Orange',purple:'Purple'};
+
+const ICON={
+ sun:`<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="9" fill="var(--signal)"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="22" y1="5" x2="22" y2="10" stroke="var(--signal)" stroke-width="3.5" stroke-linecap="round" transform="rotate(${a} 22 22)"/>`).join('')}</svg>`,
+ moon:`<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><path d="M28 7a15 15 0 1 0 9 26A13 13 0 0 1 28 7z" fill="var(--minute)"/></svg>`,
+ train:c=>`<svg viewBox="0 0 52 40" class="trn" aria-hidden="true"><rect x="3" y="2" width="46" height="30" rx="9" fill="${c}"/><rect x="9" y="8" width="14" height="10" rx="2" fill="var(--surface)"/><rect x="29" y="8" width="14" height="10" rx="2" fill="var(--surface)"/><circle cx="15" cy="36" r="3.5" fill="var(--ink)"/><circle cx="37" cy="36" r="3.5" fill="var(--ink)"/></svg>`
+};
+const personSVG=(adult)=>{const s=adult?1:.72;return `<svg width="${Math.round(56*s)}" height="${Math.round(100*s)}" viewBox="0 0 56 100" aria-hidden="true"><circle cx="28" cy="16" r="13" fill="var(--ink)"/><path d="M8 100V52a20 20 0 0 1 40 0v48z" fill="${adult?'var(--lc)':'var(--signal)'}"/></svg>`;};
+
+/* ---------------- Clock ---------------- */
+function Clock(o={}){
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','-132 -132 264 264'); svg.setAttribute('role','img'); svg.setAttribute('aria-label',o.label||'Clock');
+  svg.classList.add('clock'); if(o.cls) svg.classList.add(o.cls);
+  let s=`<circle class="face" r="104"/>`;
+  for(let i=0;i<60;i++) s+=`<line class="${i%5?'tk':'tk5'}" x1="0" y1="-96" x2="0" y2="${i%5?-91:-85}" transform="rotate(${i*6})"/>`;
+  for(let i=1;i<=12;i++){const a=i*Math.PI/6; s+=`<text class="nm" x="${(Math.sin(a)*66).toFixed(1)}" y="${(-Math.cos(a)*66).toFixed(1)}">${i}</text>`;}
+  s+=`<g class="extra"></g><g class="fives"></g><g class="hg"><line class="hh" x1="0" y1="10" x2="0" y2="-50"/></g><g class="mg"><line class="mh" x1="0" y1="14" x2="0" y2="-84"/></g><circle class="pin" r="7"/>`;
+  svg.innerHTML=s;
+  const hg=$('.hg',svg), mg=$('.mg',svg), fives=$('.fives',svg), extra=$('.extra',svg);
+  const C={el:svg,minA:0,hourA:0,sel:null,onchange:null,gen:0};
+  C.setAngles=(m,h)=>{C.minA=norm(Math.round(m*1000)/1000)%360; C.hourA=((h%360)+360)%360; mg.setAttribute('transform',`rotate(${C.minA})`); hg.setAttribute('transform',`rotate(${C.hourA})`);};
+  C.setT=t=>{t=norm(t); C.setAngles((t%60)*6,((t%720))*.5);};
+  C.setTime=(h,m)=>C.setT(T(h,m,false));
+  C.animate=async(from,to,ms=1600)=>{
+    const g=++C.gen; if(reduced||Math.abs(to-from)>180){C.setT(to);return;}
+    const st=performance.now();
+    while(true){ if(g!==C.gen)return; const k=Math.min(1,(performance.now()-st)/ms); const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; const t=from+(to-from)*e;
+      mg.setAttribute('transform',`rotate(${(t%60)*6})`); hg.setAttribute('transform',`rotate(${(t%720)*.5})`); if(k>=1)break; await new Promise(r=>requestAnimationFrame(r)); }
+    C.setT(to);
+  };
+  C.showFives=async(m)=>{
+    const g=++C.gen; fives.innerHTML=''; const n=m/5;
+    for(let k=1;k<=n;k++){ if(g!==C.gen)return; const a=k*Math.PI/6;
+      fives.insertAdjacentHTML('beforeend',`<circle class="fivedot" cx="${(Math.sin(a)*66).toFixed(1)}" cy="${(-Math.cos(a)*66).toFixed(1)}" r="16"/><text class="five" x="${(Math.sin(a)*119).toFixed(1)}" y="${(-Math.cos(a)*119).toFixed(1)}">${k*5}</text>`);
+      if(!reduced) await sleep(420); }
+  };
+  C.clearFives=()=>{fives.innerHTML='';};
+  C.extra=extra;
+  if(o.drag){
+    svg.classList.add('drag');
+    const pt=e=>{const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; const q=p.matrixTransform(svg.getScreenCTM().inverse()); return {a:(Math.atan2(q.x,-q.y)*180/Math.PI+360)%360, r:Math.hypot(q.x,q.y)};};
+    const mark=()=>{hg.classList.toggle('sel',C.sel==='h'); mg.classList.toggle('sel',C.sel==='m');};
+    const move=p=>{ if(C.sel==='m') C.setAngles(Math.round(p.a/30)*30%360,C.hourA); else C.setAngles(C.minA,Math.round(p.a/2.5)*2.5%360); C.onchange&&C.onchange(); };
+    svg.addEventListener('pointerdown',e=>{ const p=pt(e); const dm=Math.abs(angDiff(p.a,C.minA)), dh=Math.abs(angDiff(p.a,C.hourA));
+      if(dm<22&&dh<22) C.sel=p.r<62?'h':'m'; else C.sel=dm<=dh?'m':'h';
+      mark(); svg.setPointerCapture(e.pointerId); move(p); e.preventDefault(); });
+    svg.addEventListener('pointermove',e=>{ if(!svg.hasPointerCapture(e.pointerId))return; move(pt(e)); });
+    svg.addEventListener('pointerup',e=>{ try{svg.releasePointerCapture(e.pointerId);}catch(_){} });
+    C.nudge=(hand,dir)=>{ C.sel=hand; mark(); if(hand==='m') C.setAngles(norm(C.minA+dir*30)%360,C.hourA); else C.setAngles(C.minA,(C.hourA+dir*2.5+360)%360); C.onchange&&C.onchange(); };
+  }
+  return C;
+}
+function nudgeBar(clk){
+  const d=document.createElement('div'); d.className='nudges';
+  d.innerHTML=`<span>Long hand</span><button class="btn ghost small" data-h="m" data-d="-1" aria-label="Long hand back 5 minutes">◀ 5 min</button><button class="btn ghost small" data-h="m" data-d="1" aria-label="Long hand forward 5 minutes">5 min ▶</button>
+  <span>Short hand</span><button class="btn ghost small" data-h="h" data-d="-1" aria-label="Short hand back a little">◀ a bit</button><button class="btn ghost small" data-h="h" data-d="1" aria-label="Short hand forward a little">a bit ▶</button>`;
+  $$('button',d).forEach(b=>b.onclick=()=>clk.nudge(b.dataset.h,+b.dataset.d));
+  return d;
+}
+const frac=m=>({5:'just a tiny bit',10:'a little',15:'a quarter of the way',30:'halfway',45:'three quarters of the way'})[m]||`${m} of 60 minutes`;
+function drawCheck(h,m,clk){
+  const tm=(m*6)%360, th=((h%12)*60+m)*.5, next=h%12+1, tips=[];
+  if(Math.abs(angDiff(clk.minA,tm))>0.01) tips.push(`The long hand shows the minutes. Count by fives to ${m||60}. The long hand belongs on the ${m/5||12}.`);
+  const diff=angDiff(clk.hourA,th);
+  const onMark=Math.abs(angDiff(clk.hourA,Math.round(clk.hourA/30)*30))<0.01;
+  if(Math.abs(diff)>5){
+    if(diff<0) tips.push(`Slide the short hand forward. At ${h}:${pad(m)} it has moved ${frac(m)} from ${h} toward ${next}.`);
+    else tips.push(`The short hand went too far. It is not ${next} o'clock yet, so it has not reached ${next}.`);
+  } else if(m>=10&&onMark){ tips.push(`So close! The short hand points right at the ${Math.round(clk.hourA/30)%12||12}. That is where it sits at ${Math.round(clk.hourA/30)%12||12}:00. ${m} minutes have passed, so nudge it a little toward ${next}.`); }
+  return tips;
+}
+function fb(el,ok,msg){ el.className='fb '+(ok?'ok':'try'); el.innerHTML=msg; }
+function detective(q,hint){
+  const d=document.createElement('div'); d.className='detective';
+  d.innerHTML=`<p class="eyebrow">Station detective</p><p class="q">${q}</p><div class="row acts"></div><div class="evidence"></div><p class="fb" aria-live="polite"></p><p class="hint">${hint||'Talk it over first, then tap a button to put evidence on screen.'}</p>`;
+  return d;
+}
+function addAct(d,label,fn,primary){ const b=document.createElement('button'); b.className='btn '+(primary?'go':'ghost'); b.textContent=label; b.onclick=fn; $('.acts',d).append(b); return b; }
+function numVal(inp){ const v=inp.value.trim(); return v===''?null:(/^\d+$/.test(v)?+v:NaN); }
+function parseTime(s){ const m=String(s).trim().match(/^(\d{1,2})\s*[:.]?\s*(\d{2})$/); if(!m)return null; const h=+m[1], mi=+m[2]; if(h<1||h>12||mi>59)return null; return {h,m:mi}; }
+
+/* ---------------- State ---------------- */
+let S;
+function freshState(){ return {tab:'c1', part:{c1:'p1',c2:'p3',c3:'p6'}, color:'blue', morning:[], mornMins:{}, evening:[{h:'',m:''},{h:'',m:''},{h:'',m:''}], eveMins:{}, riders:null, team:'', busy:null, show:-1}; }
+function setLine(c){ S.color=c; document.documentElement.style.setProperty('--lc',`var(--l-${c})`); }
+
+/* ---------------- Shell ---------------- */
+const CLASSES=[
+ {id:'c1',n:'1',name:'Class 1',title:'Read the station clock',parts:[['p1','Part 1','Read the Station Clock'],['p2','Part 2','Draw the Hands']]},
+ {id:'c2',n:'2',name:'Class 2',title:'Build the timetable',parts:[['p3','Part 3','Minutes Between Trains'],['p4','Part 4',"Our Line's Timetable"],['p5','Part 5','Ticket Desk']]},
+ {id:'c3',n:'3',name:'Class 3',title:'Station day riders',parts:[['p6','Part 6','Station Day Riders'],['px','★','Express Line Challenge']]},
+ {id:'show',n:'★',name:'Showcase',title:'Present your line',parts:[]}
+];
+function buildShell(){
+  $('#classTabs').innerHTML=CLASSES.map(c=>`<button role="tab" data-tab="${c.id}" aria-selected="${S.tab===c.id}"><span class="num">${c.n}</span><span><b>${c.name}</b><small>${c.title}</small></span></button>`).join('');
+  $('#views').innerHTML=CLASSES.map(c=>`<section class="classview" id="v-${c.id}" ${S.tab===c.id?'':'hidden'} style="display:flex;flex-direction:column;gap:18px">
+    ${c.parts.length?`<div class="parts" role="group" aria-label="${c.name} parts">${c.parts.map(p=>`<button data-part="${p[0]}" data-cls="${c.id}" aria-pressed="${S.part[c.id]===p[0]}"><span>${p[1]}</span>${p[2]}</button>`).join('')}</div>`:''}
+    ${c.parts.map(p=>`<div class="part" id="${p[0]}" ${S.part[c.id]===p[0]?'':'hidden'}></div>`).join('')}
+    ${c.id==='show'?'<div class="part" id="pshow"></div>':''}
+  </section>`).join('');
+  $$('#classTabs button').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+  $$('.parts button').forEach(b=>b.onclick=()=>selectPart(b.dataset.cls,b.dataset.part));
+}
+function selectTab(id){
+  S.tab=id; $$('#classTabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
+  CLASSES.forEach(c=>$('#v-'+c.id).hidden=c.id!==id);
+  if(id==='c3') refreshP6();
+  if(id==='show') buildShow();
+}
+function selectPart(cls,p){
+  S.part[cls]=p; $$(`.parts button[data-cls="${cls}"]`).forEach(b=>b.setAttribute('aria-pressed',b.dataset.part===p));
+  CLASSES.find(c=>c.id===cls).parts.forEach(x=>$('#'+x[0]).hidden=x[0]!==p);
+  if(p==='p4') renderP4();
+  if(p==='p6') refreshP6();
+}
+
+/* ---------------- Part 1 ---------------- */
+function buildP1(){
+  const host=$('#p1');
+  host.innerHTML=`<p class="lead"><b>Read the station clock.</b> Count by fives. Write the time, then pick a.m. or p.m.</p><div class="grid2" id="p1cards"></div>`;
+  const cards=[{k:'am',title:'Morning train',icon:'sun',h:8,m:35,ap:'a.m.'},{k:'pm',title:'Evening train',icon:'moon',h:6,m:55,ap:'p.m.'}];
+  const clocks={};
+  cards.forEach(c=>{
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="cardhead">${ICON[c.icon]}<h3>${c.title}</h3></div><div class="clockwrap"></div>
+      <div class="timeentry"><input class="tbox" id="p1h-${c.k}" inputmode="numeric" maxlength="2" aria-label="Hour" placeholder="__"><span class="colon">:</span><input class="tbox" id="p1m-${c.k}" inputmode="numeric" maxlength="2" aria-label="Minutes" placeholder="__">
+      <div class="seg" role="group" aria-label="a.m. or p.m."><button data-ap="a.m." aria-pressed="false">a.m.</button><button data-ap="p.m." aria-pressed="false">p.m.</button></div></div>
+      <div class="row center"><button class="btn primary chk">Check</button><button class="btn ghost fv">Count by fives</button></div><p class="fb" aria-live="polite"></p>`;
+    const clk=Clock({label:`${c.title} station clock`}); clk.setTime(c.h,c.m); $('.clockwrap',card).append(clk.el); clocks[c.k]=clk;
+    let pick=null;
+    $$('.seg button',card).forEach(b=>b.onclick=()=>{pick=b.dataset.ap; $$('.seg button',card).forEach(x=>x.setAttribute('aria-pressed',x===b));});
+    $('.fv',card).onclick=()=>clk.showFives(c.m);
+    $('.chk',card).onclick=()=>{
+      const H=numVal($('#p1h-'+c.k,card)), M=numVal($('#p1m-'+c.k,card)), out=$('.fb',card), tips=[];
+      if(H===null||M===null){ fb(out,false,'Write the hour and the minutes first. Then check.'); return; }
+      if(M!==c.m){ if(M===c.m/5) tips.push(`The long hand points at the ${c.m/5}, but minutes count by fives. Count 5, 10, 15… until you reach the ${c.m/5}.`); else tips.push('Look again at the minutes. Count by fives from the 12 to the long hand. Tap “Count by fives” to see it.'); }
+      if(H!==c.h){ if(H===c.h%12+1) tips.push(`The short hand is close to ${c.h%12+1}, but it has not reached it yet. The hour is the number it passed last.`); else tips.push('Look again at the hour. Which number did the short hand pass last?'); }
+      if(!pick) tips.push('Pick a.m. or p.m. too.');
+      else if(pick!==c.ap) tips.push(c.ap==='a.m.'?'This train runs in the morning. Morning times, from midnight to noon, are a.m.':'This train runs in the evening. Times from noon to midnight are p.m.');
+      if(!tips.length){ fb(out,true,`<b>Yes! ${c.h}:${pad(c.m)} ${c.ap}</b> The long hand on the ${c.m/5} means ${c.m} minutes.`); clk.showFives(c.m); }
+      else fb(out,false,tips.join(' ')+' Try again.');
+    };
+    $('#p1cards',host).append(card);
+  });
+  const d=detective('At 8:35 the short hand is more than halfway to 9. So why do we still say 8, not 9?');
+  const evi=$('.evidence',d), out=$('.fb',d);
+  addAct(d,'Watch 8:00 to 8:35',async()=>{ out.className='fb'; out.textContent=''; clocks.am.clearFives(); clocks.am.setT(T(8,0)); await sleep(300); await clocks.am.animate(T(8,0),T(8,35),2600);
+    fb(out,true,'At 8:00 the short hand is right on the 8. As the minutes go by, it creeps toward 9. At 8:35 it still has not arrived, so the hour is still 8.'); },true);
+  addAct(d,'Finish the hour',async()=>{ clocks.am.clearFives(); await clocks.am.animate(T(8,35),T(9,0),1500); fb(out,true,'At 9:00 the long hand is back on 12, and the short hand finally reaches 9. Now it is 9 o\'clock.'); });
+  addAct(d,'Back to 8:35',()=>{ clocks.am.gen++; clocks.am.setT(T(8,35)); out.className='fb'; out.textContent=''; });
+  host.append(d);
+}
+
+/* ---------------- Part 2 ---------------- */
+function buildP2(){
+  const host=$('#p2');
+  host.innerHTML=`<p class="lead"><b>Draw the hands.</b> Drag a hand, or use the buttons. Watch the short hand. Is it closer to one number than the other?</p><div class="grid2" id="p2cards"></div>`;
+  const D=[
+    {k:'a',h:2,m:45,ap:'p.m.',q:'The short hand is closest to',choices:[2,3],ans:3,why:{2:'45 minutes have gone by since 2:00. That is three quarters of the way to the next number. Which number is it closer to now?'},yes:'Three quarters of the hour is gone, so the short hand sits just before 3.'},
+    {k:'b',h:11,m:10,ap:'a.m.',q:'The short hand is just past',choices:[10,11,12],ans:11,why:{10:'The short hand passed 10 at 10:00, more than an hour ago. Which number did it pass at 11:00?',12:'The short hand reaches 12 at 12:00. That is still 50 minutes away. Which number has it only just left?'},yes:'It left 11 only 10 minutes ago, so it is just a little past 11.'}
+  ];
+  D.forEach(c=>{
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="cardhead">${ICON[c.ap==='a.m.'?'sun':'moon']}<h3 style="font:700 30px var(--mono)">${c.h}:${pad(c.m)} ${c.ap}</h3></div><div class="clockwrap"></div><div class="nb"></div>
+      <div class="row center"><button class="btn primary chk">Check my clock</button><button class="btn ghost show">Show me</button></div><p class="fb" aria-live="polite"></p>
+      <div class="sentence"><span>${c.q}</span>${c.choices.map(n=>`<button class="choice" data-n="${n}">${n}</button>`).join('')}</div><p class="fb sfb" aria-live="polite"></p>`;
+    const clk=Clock({drag:true,label:`Clock to set to ${c.h}:${pad(c.m)}`}); clk.setAngles(0,0); $('.clockwrap',card).append(clk.el); $('.nb',card).append(nudgeBar(clk));
+    const out=$('.fb',card);
+    clk.onchange=()=>{ if(out.classList.contains('ok')){out.className='fb'; out.textContent='';} };
+    $('.chk',card).onclick=()=>{ const tips=drawCheck(c.h,c.m,clk); if(!tips.length) fb(out,true,`<b>Your clock says ${c.h}:${pad(c.m)}.</b> Long hand on the ${c.m/5}, short hand ${c.k==='a'?'just before 3':'just past 11'}.`); else fb(out,false,tips.join(' ')); };
+    $('.show',card).onclick=async()=>{ const tm=T(c.h,c.m); await clk.animate(tm-30,tm,1200); fb(out,true,`Here is ${c.h}:${pad(c.m)}. Look where the short hand stopped.`); };
+    $$('.choice',card).forEach(b=>b.onclick=()=>{ const n=+b.dataset.n, sf=$('.sfb',card);
+      $$('.choice',card).forEach(x=>x.classList.remove('yes'));
+      if(n===c.ans){ b.classList.add('yes'); fb(sf,true,`<b>${c.ans}.</b> ${c.yes}`); } else fb(sf,false,c.why[n]); });
+    $('#p2cards',host).append(card);
+  });
+  const d=detective('The short hand never jumps. It slides a little every minute. Where is it at 2:15? At 2:30? At 2:45?');
+  const evi=$('.evidence',d), out=$('.fb',d);
+  addAct(d,'Show 2:15, 2:30, 2:45',()=>{ evi.innerHTML=''; [[2,15,'a quarter of the way'],[2,30,'halfway'],[2,45,'three quarters']].forEach(([h,m,w])=>{ const k=Clock({label:`${h}:${m}`}); k.setTime(h,m); const e=document.createElement('div'); e.className='evi'; e.append(k.el); e.insertAdjacentHTML('beforeend',`<span style="font:700 20px var(--mono)">${h}:${pad(m)}</span><span style="font-size:15px;color:var(--muted)">${w} to 3</span>`); evi.append(e); });
+    fb(out,true,'The more minutes go by, the farther the short hand slides from 2 toward 3. At 2:15 it is still close to 2. At 2:45 it is close to 3.'); },true);
+  host.append(d);
+}
+
+/* ---------------- Part 3 ---------------- */
+const P3=[[T(8,0),T(8,10)],[T(8,10),T(8,25)],[T(8,25),T(8,30)],[T(8,30),T(8,50)],[T(3,50,1),T(4,5,1)]];
+function hopsHTML(a,b){
+  let h='<div class="hopline">';
+  for(let t=a;t<=b;t+=5){ h+=`<div class="hopstop ${t%60===0?'hour':''} ${t===a||t===b?'end':''}"><span>${fmt(t)}</span></div>`; if(t<b) h+=`<div class="hoparc"></div>`; }
+  return h+'</div>';
+}
+function buildP3(){
+  const host=$('#p3');
+  host.innerHTML=`<p class="lead"><b>Minutes between trains.</b> Count up by fives, or count up to the hour first. Tap a row to see the hops.</p>
+  <div class="card"><div class="tablewrap"><table class="tt" id="p3t"><thead><tr><th>Train leaves</th><th>Next train</th><th>Minutes between</th><th></th></tr></thead><tbody>
+  ${P3.map((r,i)=>`<tr class="click" data-i="${i}"><td class="time">${fmt(r[0])} ${ap(r[0])}</td><td class="time">${fmt(r[1])} ${ap(r[1])}</td><td><input class="num-in" id="p3-${i}" inputmode="numeric" maxlength="3" aria-label="Minutes from ${fmt(r[0])} to ${fmt(r[1])}"></td><td class="mark" id="p3m-${i}"></td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="row"><button class="btn primary" id="p3chk">Check the table</button></div><p class="fb" id="p3fb" aria-live="polite"></p>
+  <div class="hops" id="p3hops"></div><p class="hopnote" id="p3note"></p></div>
+  <div class="card"><h3>Show how you found 3:50 to 4:05</h3>
+   <div class="sentence"><span>3:50 → 4:00 is</span><input class="num-in" id="p3b1" inputmode="numeric" aria-label="Minutes from 3:50 to 4:00"><span>minutes, 4:00 → 4:05 is</span><input class="num-in" id="p3b2" inputmode="numeric" aria-label="Minutes from 4:00 to 4:05"><span>minutes, total</span><input class="num-in" id="p3b3" inputmode="numeric" aria-label="Total minutes"></div>
+   <div class="row"><button class="btn primary" id="p3bchk">Check</button><button class="btn ghost" id="p3bshow">Count to the hour first</button></div>
+   <div class="hops" id="p3bh"></div><p class="fb" id="p3bfb" aria-live="polite"></p></div>`;
+  const showHops=i=>{ $$('#p3t tbody tr').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.i===i)); const [a,b]=P3[i]; $('#p3hops').innerHTML=hopsHTML(a,b);
+    $('#p3note').textContent=`Each arc is one hop of 5 minutes, from ${fmt(a)} to ${fmt(b)}. Count by fives as you go.${(b%60)<(a%60)?' The yellow stop is the new hour.':''}`; };
+  $$('#p3t tbody tr').forEach(tr=>tr.onclick=e=>{ if(e.target.tagName!=='INPUT') showHops(+tr.dataset.i); });
+  $$('#p3t input').forEach(inp=>inp.addEventListener('focus',()=>showHops(+inp.id.split('-')[1])));
+  $('#p3chk').onclick=()=>{
+    let wrong=-1, blank=0;
+    P3.forEach((r,i)=>{ const v=numVal($('#p3-'+i)), ans=r[1]-r[0], mk=$('#p3m-'+i), inp=$('#p3-'+i);
+      inp.classList.remove('okb','tryb'); mk.className='mark'; mk.textContent='';
+      if(v===null){blank++;return;}
+      if(v===ans){inp.classList.add('okb'); mk.classList.add('ok'); mk.textContent='✓ Right';}
+      else{inp.classList.add('tryb'); mk.classList.add('try'); mk.textContent='Look again'; if(wrong<0)wrong=i;} });
+    if(wrong>=0){ showHops(wrong); const [a,b]=P3[wrong]; fb($('#p3fb'),false,`Count up from ${fmt(a)} to ${fmt(b)} by fives. The hops are shown below. How many minutes is that?${(b%60)<(a%60)?' Tip: count up to '+fmt(Math.ceil(a/60)*60)+' first, then the rest.':''}`); }
+    else if(blank) fb($('#p3fb'),true,`Everything you filled in is right. ${blank} row${blank>1?'s are':' is'} still empty.`);
+    else fb($('#p3fb'),true,'<b>All five are right!</b> Which wait is the longest? Which is the shortest?');
+  };
+  $('#p3bshow').onclick=()=>{ $('#p3bh').innerHTML=`<div class="hopline"><div class="hopstop end"><span>3:50</span></div><div class="hoparc big" style="width:120px"><em style="color:var(--muted)">to the hour</em></div><div class="hopstop hour"><span>4:00</span></div><div class="hoparc" style="width:70px"></div><div class="hopstop end"><span>4:05</span></div></div>`; };
+  $('#p3bchk').onclick=()=>{
+    const a=numVal($('#p3b1')), b=numVal($('#p3b2')), c=numVal($('#p3b3')), tips=[];
+    if(a===null||b===null||c===null){ fb($('#p3bfb'),false,'Fill in all three boxes first.'); return; }
+    if(a!==10) tips.push('3:50 to 4:00: count by fives. 3:55 is one hop, 4:00 is the next.');
+    if(b!==5) tips.push('4:00 to 4:05: how many fives is that?');
+    if(c!==a+b) tips.push(`Your total should be your two parts added together: ${a} + ${b}.`);
+    else if(c!==15) tips.push('Check your two parts, then add them again.');
+    if(!tips.length) fb($('#p3bfb'),true,'<b>10 + 5 = 15 minutes.</b> Counting to the hour first makes it easy.');
+    else fb($('#p3bfb'),false,tips.join(' '));
+  };
+  showHops(0);
+}
+
+/* ---------------- Part 4 ---------------- */
+const STOPS=Array.from({length:13},(_,i)=>T(8,0)+5*i);
+function buildP4(){
+  const host=$('#p4');
+  host.innerHTML=`<p class="lead"><b>Our line's timetable.</b> Six morning trains between 8:00 and 9:00. Every time on a five-minute mark. Trains at least 5 and at most 20 minutes apart.</p>
+  <div class="card"><div class="row"><h3>Line color</h3><div class="colors" id="p4col">${Object.keys(LINES).map(c=>`<button data-c="${c}" style="--c:var(--l-${c})" aria-pressed="${S.color===c}"><i></i>${LINES[c]}</button>`).join('')}</div></div>
+   <div class="row"><span class="counter" id="p4count"></span><span style="color:var(--muted);font-size:16px">Tap a stop to put a train there. Tap it again to take the train away.</span></div>
+   <div class="trackwrap"><div class="track" id="p4track"></div></div></div>
+  <div class="card"><h3>Morning trains (a.m.)</h3><div class="tablewrap"><table class="tt" id="p4t"></table></div>
+   <div class="row"><button class="btn primary" id="p4chk">Check my timetable</button></div><p class="fb" id="p4fb" aria-live="polite"></p></div>
+  <div class="card"><h3>Evening trains (p.m.)</h3><p style="margin:0;color:var(--muted)">Pick three evening times on five-minute marks, in order. Then find the minutes to the next train.</p>
+   <div class="tablewrap"><table class="tt" id="p4e"></table></div>
+   <div class="row"><button class="btn primary" id="p4echk">Check evening trains</button></div><p class="fb" id="p4efb" aria-live="polite"></p></div>`;
+  $$('#p4col button').forEach(b=>b.onclick=()=>{ setLine(b.dataset.c); $$('#p4col button').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderP4(); });
+  $('#p4chk').onclick=checkP4; $('#p4echk').onclick=checkP4e;
+  renderP4(); renderP4e();
+}
+function renderP4(){
+  const tr=$('#p4track'); if(!tr) return;
+  const m=S.morning.slice().sort((a,b)=>a-b);
+  tr.innerHTML=STOPS.map(t=>`<button class="stop ${m.includes(t)?'on':''}" data-t="${t}" aria-pressed="${m.includes(t)}" aria-label="${fmt(t)} a.m."> ${ICON.train('var(--lc)')}<span class="dot"></span><span class="lbl ${t%60===0?'hr':''}">${fmt(t)}</span></button>`).join('');
+  $$('.stop',tr).forEach(b=>b.onclick=()=>{ const t=+b.dataset.t, i=S.morning.indexOf(t);
+    if(i>=0) S.morning.splice(i,1);
+    else { if(S.morning.length>=6){ fb($('#p4fb'),false,'Your line runs six morning trains. Tap a train to take it away before you add a new one.'); return; } S.morning.push(t); }
+    renderP4(); });
+  const left=6-m.length; $('#p4count').textContent=left>0?`${m.length} of 6 trains placed. ${left} to go.`:'6 of 6 trains placed.';
+  let h=`<thead><tr><th>#</th><th>Departs (a.m.)</th><th>Clock</th><th>Minutes to next train</th><th></th></tr></thead><tbody>`;
+  for(let i=0;i<6;i++){
+    const t=m[i], nx=m[i+1];
+    h+=`<tr><td style="font-weight:800">${i+1}</td><td class="time">${t!=null?fmt(t):'<span style="color:var(--muted)">—</span>'}</td><td class="ck" data-t="${t??''}"></td><td>${t!=null&&nx!=null?`<input class="num-in" data-k="${t}-${nx}" inputmode="numeric" maxlength="3" aria-label="Minutes from ${fmt(t)} to ${fmt(nx)}" value="${S.mornMins[t+'-'+nx]??''}">`:(t!=null&&i===m.length-1&&m.length===6?'<span style="color:var(--muted)">Last morning train</span>':'')}</td><td class="mark"></td></tr>`;
+  }
+  $('#p4t').innerHTML=h+'</tbody>';
+  $$('#p4t td.ck').forEach(td=>{ if(td.dataset.t==='')return; const k=Clock({cls:'mini',label:fmt(+td.dataset.t)}); k.setT(+td.dataset.t); td.append(k.el); });
+  $$('#p4t input').forEach(inp=>inp.oninput=()=>{S.mornMins[inp.dataset.k]=inp.value;});
+}
+function checkP4(){
+  const m=S.morning.slice().sort((a,b)=>a-b), out=$('#p4fb');
+  $$('#p4track .stop').forEach(s=>s.classList.remove('gapbad'));
+  if(m.length<6){ fb(out,false,`Your line has ${m.length} train${m.length===1?'':'s'}. It needs six morning trains. Tap ${6-m.length} more stop${6-m.length===1?'':'s'} on the track.`); return; }
+  const big=[]; for(let i=0;i<5;i++) if(m[i+1]-m[i]>20) big.push([m[i],m[i+1]]);
+  if(big.length){
+    big.forEach(([a,b])=>$$('#p4track .stop').forEach(s=>{const t=+s.dataset.t; if(t>a&&t<b) s.classList.add('gapbad');}));
+    const [a,b]=big[0]; fb(out,false,`From ${fmt(a)} to ${fmt(b)} riders wait ${b-a} minutes. Trains can be at most 20 minutes apart. Move a train into the dashed stops.`); return;
+  }
+  let wrong=null, blank=0;
+  $$('#p4t tbody tr').forEach(tr=>{ const inp=$('input',tr), mk=$('.mark',tr); if(!inp)return; const [a,b]=inp.dataset.k.split('-').map(Number), v=numVal(inp);
+    inp.classList.remove('okb','tryb'); mk.className='mark'; mk.textContent='';
+    if(v===null){blank++;return;}
+    if(v===b-a){inp.classList.add('okb'); mk.classList.add('ok'); mk.textContent='✓';}
+    else{inp.classList.add('tryb'); mk.classList.add('try'); mk.textContent='Look again'; if(!wrong) wrong=[a,b];} });
+  if(wrong){ const [a,b]=wrong, steps=[]; for(let t=a+5;t<=b;t+=5) steps.push(fmt(t)); fb(out,false,`Count up from ${fmt(wrong[0])} by fives: ${steps.join(', ')}. How many hops of 5 is that?`); return; }
+  if(blank){ fb(out,false,`Your trains follow the rules. Now fill in the minutes to the next train. ${blank} box${blank>1?'es are':' is'} empty.`); return; }
+  fb(out,true,`<b>Your ${LINES[S.color]} Line timetable works!</b> Six trains, every one on a five-minute mark, every gap between 5 and 20 minutes.`);
+}
+function eveT(e){ if(e.h===''||e.m==='') return null; return T(+e.h,+e.m,true); }
+function renderP4e(){
+  const hOpts=[12,1,2,3,4,5,6,7,8,9,10,11], mOpts=Array.from({length:12},(_,i)=>i*5);
+  let h=`<thead><tr><th>#</th><th>Departs (p.m.)</th><th>Minutes to next train</th><th></th></tr></thead><tbody>`;
+  S.evening.forEach((e,i)=>{
+    h+=`<tr><td style="font-weight:800">${i+7}</td><td><div class="row" style="gap:6px;flex-wrap:nowrap"><select class="sel" data-i="${i}" data-f="h" aria-label="Train ${i+7} hour"><option value="">--</option>${hOpts.map(x=>`<option value="${x}" ${String(e.h)===String(x)?'selected':''}>${x}</option>`).join('')}</select><span class="colon" style="font-size:24px">:</span><select class="sel" data-i="${i}" data-f="m" aria-label="Train ${i+7} minutes"><option value="">--</option>${mOpts.map(x=>`<option value="${x}" ${String(e.m)===String(x)?'selected':''}>${pad(x)}</option>`).join('')}</select><span style="font-weight:800">p.m.</span></div></td>
+    <td>${i<2?`<input class="num-in" id="p4e-${i}" inputmode="numeric" maxlength="3" aria-label="Minutes from train ${i+7} to train ${i+8}" value="${S.eveMins[i]??''}">`:'<span style="color:var(--muted)">Last train of the day</span>'}</td><td class="mark" id="p4em-${i}"></td></tr>`;
+  });
+  $('#p4e').innerHTML=h+'</tbody>';
+  $$('#p4e select').forEach(s=>s.onchange=()=>{ S.evening[+s.dataset.i][s.dataset.f]=s.value; });
+  $$('#p4e input').forEach(inp=>inp.oninput=()=>{S.eveMins[+inp.id.split('-')[1]]=inp.value;});
+}
+function checkP4e(){
+  const out=$('#p4efb'), ts=S.evening.map(eveT);
+  [0,1,2].forEach(i=>{ const mk=$('#p4em-'+i); mk.className='mark'; mk.textContent=''; });
+  if(ts.some(t=>t===null)){ fb(out,false,'Pick an hour and minutes for all three evening trains.'); return; }
+  for(let i=0;i<2;i++) if(ts[i+1]<=ts[i]){ fb(out,false,`Train ${i+8} at ${fmt(ts[i+1])} p.m. does not leave after train ${i+7} at ${fmt(ts[i])} p.m. Put the evening trains in order, earliest first.`); return; }
+  let wrong=null, blank=0;
+  for(let i=0;i<2;i++){ const inp=$('#p4e-'+i), v=numVal(inp), ans=ts[i+1]-ts[i], mk=$('#p4em-'+i); inp.classList.remove('okb','tryb');
+    if(v===null){blank++;continue;}
+    if(v===ans){inp.classList.add('okb'); mk.classList.add('ok'); mk.textContent='✓';} else {inp.classList.add('tryb'); mk.classList.add('try'); mk.textContent='Look again'; if(wrong===null) wrong=i;} }
+  if(wrong!==null){ const a=ts[wrong], b=ts[wrong+1]; const hr=Math.ceil((a+1)/60)*60; fb(out,false,b-a>15&&hr<b?`Count up to the hour first: ${fmt(a)} to ${fmt(hr)} is one part. Then count on from ${fmt(hr)} to ${fmt(b)}. Add the parts.`:`Count up from ${fmt(a)} to ${fmt(b)} by fives. How many minutes?`); return; }
+  if(blank){ fb(out,false,'The trains are in order. Now fill in the minutes to the next train.'); return; }
+  fb(out,true,'<b>Evening board done!</b> Your riders can catch a train home.');
+}
+
+/* ---------------- Part 5 ---------------- */
+function buildP5(){
+  const host=$('#p5');
+  host.innerHTML=`<p class="lead"><b>Ticket desk.</b> Solve in your head. Write only the answer.</p>
+  <div class="grid2">
+   <div class="card"><h3>Prices</h3><div class="tickets"><div class="ticket"><small>Adult</small><b>$6</b></div><div class="ticket"><small>Child</small><b>$4</b></div></div>
+    <h3>At the window</h3><div class="party" id="p5party">
+     <div class="person">${personSVG(true)}<span>Adult</span><span class="price"></span></div>
+     <div class="person">${personSVG(true)}<span>Adult</span><span class="price"></span></div>
+     <div class="person">${personSVG(false)}<span>Child</span><span class="price"></span></div></div></div>
+   <div class="card">
+    <div class="sentence"><span>Two adults and one child cost $</span><input class="num-in" id="p5a" inputmode="numeric" maxlength="3" aria-label="Total cost in dollars"></div>
+    <div class="row"><button class="btn primary" id="p5achk">Check</button><button class="btn ghost" id="p5ashow">Show the tickets</button></div><p class="fb" id="p5afb" aria-live="polite"></p>
+    <div class="sentence"><span>They pay with a $20 bill. Their change is $</span><input class="num-in" id="p5b" inputmode="numeric" maxlength="3" aria-label="Change in dollars"></div>
+    <div class="row"><button class="btn primary" id="p5bchk">Check</button><button class="btn ghost" id="p5bshow">Count up the change</button></div><div class="coins" id="p5coins"></div><p class="fb" id="p5bfb" aria-live="polite"></p>
+   </div></div>`;
+  const prices=[6,6,4];
+  $('#p5ashow').onclick=async()=>{ const ps=$$('#p5party .price'); ps.forEach(p=>p.textContent=''); let sum=0; for(let i=0;i<3;i++){ sum+=prices[i]; ps[i].textContent=`$${prices[i]}`; if(!reduced) await sleep(450);} fb($('#p5afb'),true,'Each rider needs a ticket. Add them up: $6 + $6 + $4.'); };
+  $('#p5achk').onclick=()=>{ const v=numVal($('#p5a')), out=$('#p5afb');
+    if(v===null){fb(out,false,'Write the total first.');return;}
+    const msg={16:'<b>$16.</b> $6 + $6 = $12, and $12 + $4 = $16.',10:'$10 pays for one adult and one child. There are two adults at the window.',12:'$12 pays for the two adults. The child needs a ticket too.',14:'$14 is one adult and two children. Look again: who is at the window?',6:'That is one adult ticket. Add a ticket for every rider.',4:'That is one child ticket. Add a ticket for every rider.'}[v];
+    fb(out,v===16,msg||'Add a ticket for each rider: two adult tickets and one child ticket. Tap “Show the tickets” if you want to see them.'); };
+  $('#p5bshow').onclick=async()=>{ const c=$('#p5coins'); c.innerHTML='<span>$16</span>'; for(const n of [17,18,19,20]){ if(!reduced) await sleep(420); c.insertAdjacentHTML('beforeend',`<span class="coin">$1</span><span>${n===20?'<span class="bill">$20</span>':'$'+n}</span>`);} fb($('#p5bfb'),true,'Count up from the cost to the $20 they paid. How many $1 coins did you add?'); };
+  $('#p5bchk').onclick=()=>{ const v=numVal($('#p5b')), a=numVal($('#p5a')), out=$('#p5bfb');
+    if(v===null){fb(out,false,'Write the change first.');return;}
+    if(v===4){fb(out,true,'<b>$4 change.</b> $16 + $4 = $20. You can check by adding back.');return;}
+    if(v>=20) fb(out,false,'Change is the money they get back, so it is less than the $20 they paid. Count up from $16 to $20.');
+    else if(a!==null&&a!==16&&v===20-a) fb(out,false,`Your subtraction works for $${a}, but check the ticket total first. Then count up to $20.`);
+    else fb(out,false,'Count up from $16 to $20: 17, 18, 19, 20. How many steps?'); };
+}
+
+/* ---------------- Part 6 ---------------- */
+const P6DEFAULT=[T(8,0),T(8,10),T(8,25),T(8,30),T(8,50)];
+function trainOptions(){
+  const m=S.morning.slice().sort((a,b)=>a-b), e=S.evening.map(eveT).filter(t=>t!==null);
+  const base=m.length?m:STOPS;
+  return [...new Set([...base,...e])].sort((a,b)=>a-b);
+}
+function tallySVG(n){
+  let h=''; for(let g=0;g<Math.ceil(n/5);g++){ const k=Math.min(5,n-g*5); let s='<svg viewBox="0 0 44 40" aria-hidden="true">'; for(let i=0;i<Math.min(4,k);i++) s+=`<line x1="${6+i*9}" y1="5" x2="${6+i*9}" y2="35"/>`; if(k===5) s+='<line x1="1" y1="30" x2="40" y2="10"/>'; h+=s+'</svg>'; }
+  return h||'<span style="color:var(--muted);font-size:15px">no riders yet</span>';
+}
+function buildP6(){
+  const host=$('#p6');
+  host.innerHTML=`<p class="lead"><b>Station day riders.</b> Conductors: tally riders on each train. Then make a bar graph.</p>
+  <div class="card"><div class="row"><h3 style="margin-right:auto">Rider tally</h3><button class="btn ghost small" id="p6sim">Simulate a station day</button><button class="btn ghost small" id="p6clear">Clear tallies</button></div>
+   <div class="tablewrap"><table class="tt" id="p6t"></table></div>
+   <div class="row"><button class="btn primary" id="p6chk">Check my counts</button></div><p class="fb" id="p6fb" aria-live="polite"></p></div>
+  <div class="card"><div class="row"><h3 style="margin-right:auto">Riders per Train</h3><span style="font-weight:700;color:var(--muted)">Number the side by</span><div class="seg" id="p6scale"><button data-s="1" aria-pressed="true">ones</button><button data-s="2" aria-pressed="false">twos</button></div></div>
+   <p style="margin:0;color:var(--muted);font-size:16px">Tap inside a column to set the bar's height, or use ▲ ▼. Each bar is labeled with its train time.</p>
+   <div class="graph" id="p6g"></div>
+   <div class="row"><button class="btn primary" id="p6gchk">Check my graph</button></div><p class="fb" id="p6gfb" aria-live="polite"></p></div>
+  <div class="card"><h3>Read your graph</h3>
+   <div class="sentence"><span>The busiest train left at</span><select class="sel" id="p6busy" aria-label="Busiest train"></select><span>. It had</span><input class="num-in" id="p6diff" inputmode="numeric" aria-label="How many more riders"><span>more riders than the emptiest train.</span></div>
+   <div class="row"><button class="btn primary" id="p6qchk">Check</button></div><p class="fb" id="p6qfb" aria-live="polite"></p></div>`;
+  const d=detective('Why does the board need a.m. and p.m.?','Talk it over first. Then tap the button to see the evidence.');
+  addAct(d,'Show the evidence',()=>{ const evi=$('.evidence',d); evi.innerHTML='';
+    [['a.m.','sun','Morning train'],['p.m.','moon','Evening train']].forEach(([a,ic,w])=>{ const k=Clock({label:`8:35 ${a}`}); k.setTime(8,35); const e=document.createElement('div'); e.className='evi'; e.innerHTML=ICON[ic]; e.append(k.el); e.insertAdjacentHTML('beforeend',`<span style="font:700 22px var(--mono)">8:35 ${a}</span><span style="font-size:15px;color:var(--muted)">${w}</span>`); evi.append(e); });
+    fb($('.fb',d),true,'The two clocks look exactly the same. The hands go around twice every day. Without a.m. or p.m., a rider could not tell the morning 8:35 train from the evening 8:35 train.'); },true);
+  host.append(d);
+  S.riders=P6DEFAULT.map(t=>({t,tally:0,count:'',bar:0}));
+  S.scale=1;
+  $('#p6sim').onclick=()=>{ S.riders.forEach(r=>{r.tally=3+Math.floor(Math.random()*16);}); renderP6(); fb($('#p6fb'),true,'Simulated riders are tallied. Count each train\'s tally marks and write the number.'); };
+  $('#p6clear').onclick=()=>{ S.riders.forEach(r=>{r.tally=0;r.count='';r.bar=0;}); renderP6(); };
+  $$('#p6scale button').forEach(b=>b.onclick=()=>{ S.scale=+b.dataset.s; $$('#p6scale button').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderGraph(); });
+  $('#p6chk').onclick=()=>{ const out=$('#p6fb'); let wrong=null, blank=0;
+    S.riders.forEach((r,i)=>{ const inp=$('#p6c-'+i), v=numVal(inp); inp.classList.remove('okb','tryb'); if(v===null){blank++;return;} if(v===r.tally) inp.classList.add('okb'); else {inp.classList.add('tryb'); if(wrong===null) wrong=i;} });
+    if(S.riders.every(r=>r.tally===0)){ fb(out,false,'Tally some riders first. Tap + for each rider who gets on.'); return; }
+    if(wrong!==null){ const r=S.riders[wrong]; fb(out,false,`Count the ${fmt(r.t)} tally again. Count each bundle by fives${r.tally%5?', then count on the single marks':''}.`); return; }
+    if(blank) fb(out,true,`Your counts match the tallies so far. ${blank} still to write.`); else fb(out,true,'<b>Every count matches its tally.</b> Now build the bar graph.'); };
+  $('#p6gchk').onclick=()=>{ const out=$('#p6gfb'); if(S.riders.every(r=>r.tally===0)){fb(out,false,'Tally some riders first.');return;}
+    const bad=S.riders.map((r,i)=>[r,i]).filter(([r])=>r.bar!==r.tally); renderGraph(bad.map(x=>x[1]));
+    if(!bad.length){ fb(out,true,'<b>Your graph matches the tallies.</b> Every bar is the right height.'); return; }
+    const [r]=bad[0]; fb(out,false,`The ${fmt(r.t)} bar reaches ${r.bar}, but the tally shows ${r.tally} riders. Make it ${r.bar<r.tally?'taller':'shorter'} by ${Math.abs(r.tally-r.bar)}.${bad.length>1?` ${bad.length-1} more bar${bad.length>2?'s need':' needs'} a look too (striped).`:''}`); };
+  $('#p6qchk').onclick=()=>{ const out=$('#p6qfb'); if(S.riders.every(r=>r.tally===0)){fb(out,false,'Tally some riders first.');return;}
+    const vals=S.riders.map(r=>r.tally), mx=Math.max(...vals), mn=Math.min(...vals), sel=$('#p6busy').value, v=numVal($('#p6diff')), tips=[];
+    const busyRows=S.riders.filter(r=>r.tally===mx).map(r=>String(r.t));
+    if(!busyRows.includes(sel)) tips.push('Look for the tallest bar. Which train time is under it?');
+    if(v===null) tips.push('Write how many more riders.');
+    else if(v!==mx-mn) tips.push(`Find the tallest bar and the shortest bar. Count up from the shortest to the tallest.`);
+    if(!tips.length){ S.busy=+sel; fb(out,true,`<b>Yes!</b> The ${fmt(+sel)} train was busiest with ${mx} riders. ${mx} − ${mn} = ${mx-mn}.${busyRows.length>1?' Two or more trains tied for busiest, so either answer works.':''}`); }
+    else fb(out,false,tips.join(' ')); };
+  renderP6();
+}
+function refreshP6(){ if(!S.riders) return; const opts=trainOptions(); const m=S.morning.slice().sort((a,b)=>a-b);
+  if(m.length>=5 && S.riders.every((r,i)=>r.t===P6DEFAULT[i]) && S.riders.every(r=>r.tally===0)) S.riders.forEach((r,i)=>r.t=m[i]);
+  S.riders.forEach(r=>{ if(!opts.includes(r.t)) opts.push(r.t); }); renderP6(); }
+function renderP6(){
+  if(!S.riders) return;
+  const opts=[...new Set([...trainOptions(),...S.riders.map(r=>r.t)])].sort((a,b)=>a-b);
+  let h='<thead><tr><th>Train (time)</th><th>Tally</th><th>Riders</th></tr></thead><tbody>';
+  S.riders.forEach((r,i)=>{ h+=`<tr><td><select class="sel" data-i="${i}" aria-label="Train time">${opts.map(t=>`<option value="${t}" ${t===r.t?'selected':''}>${fmt(t)} ${ap(t)}</option>`).join('')}</select></td>
+    <td><div class="row" style="gap:12px;flex-wrap:nowrap"><div class="tbtns"><button class="btn ghost" data-i="${i}" data-d="-1" aria-label="Remove a rider">−</button><button class="btn go" data-i="${i}" data-d="1" aria-label="Add a rider">+</button></div><div class="tally">${tallySVG(r.tally)}</div></div></td>
+    <td><input class="num-in" id="p6c-${i}" inputmode="numeric" maxlength="3" aria-label="Riders on train ${i+1}" value="${r.count}"></td></tr>`; });
+  $('#p6t').innerHTML=h+'</tbody>';
+  $$('#p6t select').forEach(s=>s.onchange=()=>{ S.riders[+s.dataset.i].t=+s.value; renderGraph(); fillBusy(); });
+  $$('#p6t .tbtns button').forEach(b=>b.onclick=()=>{ const r=S.riders[+b.dataset.i]; r.tally=Math.max(0,r.tally+ +b.dataset.d); renderP6(); });
+  $$('#p6t input').forEach(inp=>inp.oninput=()=>{ S.riders[+inp.id.split('-')[1]].count=inp.value; });
+  renderGraph(); fillBusy();
+}
+function fillBusy(){ const s=$('#p6busy'); const cur=s.value; s.innerHTML='<option value="">pick a train</option>'+S.riders.map(r=>`<option value="${r.t}">${fmt(r.t)} ${ap(r.t)}</option>`).join(''); if([...s.options].some(o=>o.value===cur)) s.value=cur; }
+function renderGraph(bad=[]){
+  const g=$('#p6g'); if(!g) return; const sc=S.scale;
+  const mxv=Math.max(...S.riders.map(r=>Math.max(r.tally,r.bar)));
+  let top=sc===1?Math.max(10,mxv):Math.max(20,mxv); if(top%sc) top+=sc-top%sc;
+  let y='', gl='';
+  for(let v=0; v<=top; v+=sc){ const p=v/top*100; if(sc===1&&top>20&&v%2) { gl+=`<div class="gl" style="bottom:${p}%"></div>`; continue; } y+=`<span style="bottom:${p}%">${v}</span>`; if(v) gl+=`<div class="gl" style="bottom:${p}%"></div>`; }
+  g.innerHTML=`<div class="yaxis">${y}</div><div class="plot">${gl}${S.riders.map((r,i)=>`<button class="col" data-i="${i}" aria-label="Bar for ${fmt(r.t)}, ${r.bar} riders"><div class="bar ${bad.includes(i)?'bad':''}" style="height:${r.bar/top*100}%">${r.bar?`<b>${r.bar}</b>`:''}</div></button>`).join('')}</div>
+   <div class="xlabels">${S.riders.map((r,i)=>`<div class="xl"><span>${fmt(r.t)}</span><div class="tbtns"><button class="btn ghost" data-i="${i}" data-d="-1" aria-label="Lower ${fmt(r.t)} bar">▼</button><button class="btn ghost" data-i="${i}" data-d="1" aria-label="Raise ${fmt(r.t)} bar">▲</button></div></div>`).join('')}</div>`;
+  $$('.col',g).forEach(c=>c.onclick=e=>{ const rc=c.getBoundingClientRect(); const v=Math.round((rc.bottom-e.clientY)/rc.height*top/sc)*sc; S.riders[+c.dataset.i].bar=Math.max(0,Math.min(top,v)); renderGraph(); });
+  $$('.xl button',g).forEach(b=>b.onclick=()=>{ const r=S.riders[+b.dataset.i]; r.bar=Math.max(0,r.bar+ +b.dataset.d); renderGraph(); });
+}
+
+/* ---------------- Express challenge ---------------- */
+const EXP=Array.from({length:8},(_,k)=>T(8,5)+15*k);
+function buildPX(){
+  const host=$('#px');
+  host.innerHTML=`<p class="lead"><b>Express Line Challenge.</b></p>
+  <div class="card"><h3>1. The express leaves every 15 minutes, starting at 8:05. List the first eight departures.</h3>
+   <div class="exlist"><span class="fixed">8:05</span>${EXP.slice(1).map((t,i)=>`<input class="num-in" id="ex-${i+1}" aria-label="Departure ${i+2}" placeholder="_:__">`).join('')}</div>
+   <div class="row"><button class="btn primary" id="exchk">Check my list</button></div><p class="fb" id="exfb" aria-live="polite"></p></div>`;
+  const d=detective('What pattern do the minutes make?');
+  addAct(d,'Show the pattern',()=>{ const evi=$('.evidence',d); evi.innerHTML='';
+    const k=Clock({label:'Where the long hand points for each express'}); k.el.style.width='240px';
+    const pts=[1,4,7,10].map(n=>{const a=n*Math.PI/6; return [Math.sin(a)*84, -Math.cos(a)*84];});
+    k.extra.innerHTML=`<polygon points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--signal)" stroke-width="5" stroke-linejoin="round"/>${pts.map(([x,y],i)=>`<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="var(--minute)" stroke-width="5" stroke-linecap="round" opacity=".85"/><circle cx="${x}" cy="${y}" r="9" fill="var(--signal)"/>`).join('')}`;
+    $('.hg',k.el).style.display='none'; $('.mg',k.el).style.display='none';
+    const e=document.createElement('div'); e.className='evi'; e.append(k.el); evi.append(e);
+    const list=document.createElement('div'); list.className='exlist'; list.style.alignSelf='center';
+    list.innerHTML=EXP.map(t=>`<span class="fixed">${Math.floor(norm(t)/60)%12||12}:<b style="color:var(--minute)">${pad(t%60)}</b></span>`).join('');
+    evi.append(list);
+    fb($('.fb',d),true,'The minutes go :05, :20, :35, :50, then start over at :05. Four expresses leave every hour. The long hand visits the 1, 4, 7 and 10, the corners of a square.'); },true);
+  host.append(d);
+  const c2=document.createElement('div'); c2.className='card';
+  c2.innerHTML=`<h3>2. A train leaves at 12:55 p.m. The next one comes 10 minutes later. Write its time and draw it.</h3>
+   <div class="grid2" style="align-items:center"><div class="clockwrap"></div><div style="display:flex;flex-direction:column;gap:12px">
+    <div class="timeentry"><input class="tbox" id="ex2h" inputmode="numeric" maxlength="2" aria-label="Hour" placeholder="__"><span class="colon">:</span><input class="tbox" id="ex2m" inputmode="numeric" maxlength="2" aria-label="Minutes" placeholder="__"><span class="colon" style="font-size:26px">p.m.</span></div>
+    <div class="nb"></div><div class="row center"><button class="btn primary" id="ex2chk">Check</button><button class="btn ghost" id="ex2hint">Count it on the clock</button></div><p class="fb" id="ex2fb" aria-live="polite"></p></div></div>`;
+  host.append(c2);
+  const clk=Clock({drag:true,label:'Clock to draw the next train'}); clk.setAngles(0,0); $('.clockwrap',c2).append(clk.el); $('.nb',c2).append(nudgeBar(clk));
+  $('#ex2hint').onclick=async()=>{ fb($('#ex2fb'),true,'Start at 12:55 and watch 10 minutes go by. Where do the hands land?'); clk.setT(T(12,55)); await sleep(400); await clk.animate(T(12,55),T(12,55)+10,2400); };
+  $('#ex2chk').onclick=()=>{ const H=numVal($('#ex2h')), M=numVal($('#ex2m')), tips=[], out=$('#ex2fb');
+    if(H===null||M===null){ fb(out,false,'Write the hour and minutes first.'); return; }
+    if(H===13) tips.push('Station clocks only go up to 12. After 12:59 the hour starts again at 1.');
+    else if(H===12) tips.push('Count on from 12:55: 1 o\'clock comes 5 minutes later. Did the hour change?');
+    else if(H!==1) tips.push('Look again at the hour. Count on 10 minutes from 12:55.');
+    if(M!==5){ if(M===65) tips.push('There are only 60 minutes in an hour. At 60 the clock starts a new hour at :00.'); else tips.push('12:55 + 5 minutes reaches the hour. Then 5 more minutes. What are the minutes now?'); }
+    tips.push(...drawCheck(1,5,clk).map(t=>'On the clock: '+t));
+    if(!tips.length) fb(out,true,'<b>1:05 p.m.</b> 5 minutes to reach 1:00, then 5 more. Long hand on the 1, short hand just past 1.');
+    else fb(out,false,tips.join(' '));
+  };
+  $('#exchk').onclick=()=>{ const out=$('#exfb'); let first=null, blank=0;
+    EXP.slice(1).forEach((t,i)=>{ const inp=$('#ex-'+(i+1)); inp.classList.remove('okb','tryb'); const v=inp.value.trim(); if(!v){blank++;return;} const p=parseTime(v); const ok=p&&T(p.h,p.m,false)%720===t%720; inp.classList.add(ok?'okb':'tryb'); if(!ok&&first===null) first=i+1; });
+    if(first!==null){ const prev=EXP[first-1]; const hr=Math.ceil((prev+1)/60)*60; fb(out,false,`Look at box ${first}. Add 15 minutes to ${fmt(prev)}.${EXP[first]>=hr?` Count to ${fmt(hr)} first (${hr-prev} minutes), then the rest.`:''} Write times like 8:20.`); return; }
+    if(blank) fb(out,true,`So far so good. ${blank} box${blank>1?'es':''} to go.`); else fb(out,true,'<b>All eight are right!</b> 8:05, 8:20, 8:35, 8:50, 9:05, 9:20, 9:35, 9:50.'); };
+}
+
+/* ---------------- Showcase ---------------- */
+const EXAMPLE=[T(8,0),T(8,10),T(8,25),T(8,40),T(8,50),T(9,0)];
+function buildShow(){
+  const host=$('#pshow');
+  const m=S.morning.length===6?S.morning.slice().sort((a,b)=>a-b):null;
+  const morn=m||EXAMPLE, eve=S.evening.map(eveT).filter(t=>t!==null);
+  const trains=[...morn,...eve];
+  const ridersAt=t=>{ const r=S.riders&&S.riders.find(x=>x.t===t&&x.tally>0); return r?r.tally:null; };
+  const anyR=trains.some(t=>ridersAt(t)!==null);
+  host.innerHTML=`<div class="row"><label for="team" style="font-weight:800">Team name</label><input class="text" id="team" value="${S.team.replace(/"/g,'&quot;')}" placeholder="Our team"></div>
+  <div class="showgrid"><div class="board">
+    <div class="boardhead"><div class="roundel" aria-hidden="true"><i></i></div><h3 id="bname">${S.team?S.team+' · ':''}${LINES[S.color]} Line</h3><span class="clk" id="bclk">--:--</span></div>
+    ${m?'':'<p class="example">Example timetable shown. Build your own six trains in Class 2, Part 4, and it appears here.</p>'}
+    <div class="tablewrap"><table class="depart"><thead><tr><th>Train</th><th>Departs</th><th></th><th>Next in</th>${anyR?'<th>Riders</th>':''}</tr></thead><tbody>
+    ${trains.map((t,i)=>`<tr data-i="${i}"><td class="dim">${i+1}</td><td><span class="flap">${fmt(t)}</span></td><td class="dim">${ap(t)}</td><td class="dim">${trains[i+1]!=null&&trains[i+1]-t<=60?trains[i+1]-t+' min':'—'}</td>${anyR?`<td>${ridersAt(t)??'—'}</td>`:''}</tr>`).join('')}
+    </tbody></table></div>
+    <div class="row"><button class="btn go" id="bnext">Next departure</button><button class="btn ghost" id="bstart" style="background:transparent;color:#F2F4F8;border-color:#3A4A6A">Back to first train</button></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center"><div class="clockwrap" id="sclock"></div><p class="lead" id="snote" style="text-align:center;font-weight:700">Tap “Next departure” to run your line.</p></div></div>
+  <div class="prompts"><h3>Talk about your line</h3>
+   <div class="prompt"><p class="pq">Read your board aloud. Use a.m. and p.m.</p></div>
+   <div class="prompt"><p class="pq">Which train was busiest? How many more riders did it have than the emptiest train?</p><p class="pa">${S.busy!=null?`Your answer: the ${fmt(S.busy)} ${ap(S.busy)} train.`:'Answer this in Class 3, Part 6.'}</p></div>
+   <div class="prompt"><p class="pq">Why does the board need a.m. and p.m.?</p></div>
+   <div class="prompt"><p class="pq">The express leaves every 15 minutes from 8:05. What pattern do the minutes make?</p></div>
+  </div>`;
+  const clk=Clock({label:'Station clock'}); clk.el.classList.add('big'); $('#sclock').append(clk.el); clk.setT(trains[0]);
+  let idx=-1; const rows=$$('.depart tbody tr',host);
+  const go=async i=>{ const prev=idx>=0?trains[idx]:trains[0]; idx=i; rows.forEach((r,j)=>r.classList.toggle('now',j===i)); const t=trains[i];
+    $('#bclk').textContent=`${fmt(t)} ${ap(t)}`;
+    const gap=i>0?t-trains[i-1]:null;
+    $('#snote').textContent=i===0?`Train 1 departs at ${fmt(t)} ${ap(t)}`:(gap<=60?`Train ${i+1} departs at ${fmt(t)} ${ap(t)} That is ${gap} minutes after train ${i}.`:`Train ${i+1} departs at ${fmt(t)} ${ap(t)} The morning rush is over. Now the evening trains run.`);
+    await clk.animate(prev,t,1400); };
+  $('#bnext').onclick=()=>go((idx+1)%trains.length);
+  $('#bstart').onclick=()=>{ idx=-1; go(0); };
+  $('#team').oninput=e=>{ S.team=e.target.value; $('#bname').textContent=`${S.team?S.team+' · ':''}${LINES[S.color]} Line`; };
+}
+
+/* ---------------- Boot / reset ---------------- */
+function boot(){
+  S=freshState(); setLine('blue'); buildShell();
+  buildP1(); buildP2(); buildP3(); buildP4(); buildP5(); buildP6(); buildPX(); buildShow();
+}
+let armed=null;
+$('#resetBtn').onclick=()=>{ const b=$('#resetBtn');
+  if(!armed){ b.textContent='Tap again to clear everything'; b.classList.add('warn'); armed=setTimeout(()=>{armed=null; b.textContent='Start over'; b.classList.remove('warn');},3500); return; }
+  clearTimeout(armed); armed=null; b.textContent='Start over'; b.classList.remove('warn'); boot(); window.scrollTo(0,0); };
+$('#fsBtn').onclick=()=>{ try{ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange',()=>{ $('#fsBtn').textContent=document.fullscreenElement?'Exit full screen':'Full screen'; });
+boot();
+})();
+</script>
+
+</body></html>

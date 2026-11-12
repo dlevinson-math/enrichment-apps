@@ -1,0 +1,673 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Best Buy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a grocery aisle. Products sit on a shelf; each gets a store shelf tag whose unit-price box the students fill in. */
+:root{
+  --floor:#EEF1EC; --shelf:#2E3B36; --shelf-edge:#4E5F58; --tag:#FFFFFF; --ink:#18201D; --muted:#56635D; --line:#CDD5CF;
+  --unit:#F2B630; --unit-ink:#2A1E00; --accent:#1F7A5A; --accent-ink:#FFFFFF; --accent-soft:#DDEFE6;
+  --warn:#B4441C; --warn-soft:#FBE7DE; --good:#1F7A5A; --good-soft:#DDEFE6;
+  --pk1:#3F6FB5; --pk2:#C0553A; --pk-ink:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --floor:#141A18; --shelf:#0B100E; --shelf-edge:#3A4A43; --tag:#1F2724; --ink:#ECF0ED; --muted:#A4B0AA; --line:#36433E;
+    --unit:#E9B13A; --unit-ink:#1E1500; --accent:#4CC08F; --accent-ink:#06150F; --accent-soft:#183428;
+    --warn:#FF8A62; --warn-soft:#3A2017; --good:#4CC08F; --good-soft:#183428;
+    --pk1:#5F8FD6; --pk2:#DA7258; --pk-ink:#0C1210; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --floor:#141A18; --shelf:#0B100E; --shelf-edge:#3A4A43; --tag:#1F2724; --ink:#ECF0ED; --muted:#A4B0AA; --line:#36433E;
+  --unit:#E9B13A; --unit-ink:#1E1500; --accent:#4CC08F; --accent-ink:#06150F; --accent-soft:#183428;
+  --warn:#FF8A62; --warn-soft:#3A2017; --good:#4CC08F; --good-soft:#183428;
+  --pk1:#5F8FD6; --pk2:#DA7258; --pk-ink:#0C1210; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+.b-p0{order:1}.b-p1{order:2}.shelfboard{order:3}.b-t0{order:4}.b-t1{order:5}
+html,body{min-height:100%}
+body{background:var(--floor); color:var(--ink); font-family:var(--body); font-size:clamp(17px,1.35vw,21px); line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px)); padding-block:0 32px; -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--unit); outline-offset:2px}
+.wrap{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-top:16px}
+.brand{min-width:0}
+.eyebrow{font-family:var(--display); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:15px; color:var(--muted)}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(40px,5vw,68px); line-height:.95; margin:2px 0 0; letter-spacing:-.01em}
+.dq{margin:6px 0 0; color:var(--muted); font-style:italic}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--tag); border-radius:10px; padding:10px 16px; font-weight:700; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:6px; overflow-x:auto; border-bottom:3px solid var(--shelf); padding-bottom:0}
+nav.tabs button{flex:none; border:0; background:transparent; padding:10px 16px; font-family:var(--display); font-weight:700; font-size:clamp(19px,1.6vw,24px); color:var(--muted); border-radius:10px 10px 0 0; min-height:52px}
+nav.tabs button span{display:inline-grid; place-items:center; width:1.4em; height:1.4em; border-radius:50%; background:var(--line); color:var(--ink); font-size:.8em; margin-right:6px}
+nav.tabs button[aria-selected="true"]{background:var(--shelf); color:#fff}
+nav.tabs button[aria-selected="true"] span{background:var(--unit); color:var(--unit-ink)}
+
+section.view{display:flex; flex-direction:column; gap:18px}
+.lead{font-size:clamp(20px,1.7vw,26px); margin:0; max-width:40em}
+.lead b{font-family:var(--display); font-size:1.15em; letter-spacing:.01em}
+.note{color:var(--muted); font-size:.9em; margin:0}
+
+/* Shelf */
+.aisle{display:grid; grid-template-columns:1fr 1fr; gap:0; position:relative}
+.bay{display:flex; flex-direction:column; align-items:center; gap:0; padding:0 10px; min-width:0}
+.goods{height:clamp(150px,20vw,230px); display:flex; align-items:flex-end; justify-content:center; gap:4px; flex-wrap:wrap-reverse; align-content:flex-start; width:100%}
+.shelfboard{grid-column:1/-1; height:14px; background:var(--shelf); border-bottom:6px solid var(--shelf-edge); border-radius:2px}
+.pack{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; border-radius:8px 8px 3px 3px; color:var(--pk-ink); font-family:var(--display); font-weight:700; line-height:1; padding:6px; box-shadow:inset 0 -8px 0 rgba(0,0,0,.14)}
+.pack.o1{background:var(--pk1)} .pack.o2{background:var(--pk2)}
+.pack small{font-weight:600; font-size:.6em; opacity:.9; margin-top:3px; text-transform:uppercase; letter-spacing:.05em}
+.pack.big .amt{font-size:clamp(22px,2.4vw,34px)}
+button.pack{border:0}
+.pick .pack{cursor:pointer; outline:4px solid transparent; transition:transform .15s}
+.pick .pack:hover{transform:translateY(-4px)}
+.pack.chosen{outline:4px solid var(--unit)!important; outline-offset:3px}
+
+/* Shelf tag */
+.tag{background:var(--tag); border:2px solid var(--line); border-top:0; border-radius:0 0 10px 10px; width:min(100%,330px); display:grid; grid-template-columns:1fr auto; overflow:hidden; box-shadow:0 6px 14px rgba(0,0,0,.08)}
+.tag .desc{padding:10px 12px; min-width:0}
+.tag .desc b{font-family:var(--display); font-size:1.25em; display:block; line-height:1.05}
+.tag .desc .price{font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); line-height:1; font-variant-numeric:tabular-nums}
+.tag .up{background:var(--unit); color:var(--unit-ink); padding:8px 10px; display:flex; flex-direction:column; justify-content:center; gap:4px; min-width:128px}
+.tag .up label{font-family:var(--display); font-weight:700; text-transform:uppercase; letter-spacing:.06em; font-size:13px}
+.tag .up .field{display:flex; align-items:center; gap:4px; font-family:var(--display); font-weight:700; font-size:20px}
+.tag .up input{width:5.2em; min-height:46px; border:2px solid var(--unit-ink); border-radius:8px; padding:4px 8px; font-family:var(--display); font-weight:700; font-size:24px; background:#FFFDF4; color:#1A1400; font-variant-numeric:tabular-nums}
+.tag .up input.ok{border-color:var(--good); background:#E8F7EF}
+.tag .up input.bad{border-color:var(--warn); background:#FFF0EA}
+.tag .up .val{font-family:var(--display); font-weight:800; font-size:28px; font-variant-numeric:tabular-nums}
+
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:700; padding:14px 24px; border-radius:12px; min-height:54px; font-size:1.02em}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--tag); font-weight:700; padding:12px 20px; border-radius:12px; min-height:54px}
+.seg{display:inline-flex; background:var(--tag); border:2px solid var(--line); border-radius:12px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:10px 16px; border-radius:9px; font-weight:700; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--shelf); color:#fff}
+
+.fb{margin:0; padding:14px 18px; border-radius:12px; background:var(--accent-soft); max-width:46em; border-left:6px solid var(--good)}
+.fb.try{background:var(--warn-soft); border-left-color:var(--warn)}
+.fb:empty{display:none}
+.fb b{font-family:var(--display); font-size:1.12em}
+
+/* Picker of comparisons */
+.picker{display:flex; gap:8px; flex-wrap:wrap}
+.picker button{min-width:56px; min-height:56px; border-radius:12px; border:2px solid var(--line); background:var(--tag); font-family:var(--display); font-weight:700; font-size:20px; padding:4px 14px; position:relative}
+.picker button[aria-pressed="true"]{background:var(--shelf); color:#fff; border-color:var(--shelf)}
+.picker button.done::after{content:"✓"; position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%; background:var(--good); color:var(--accent-ink); font-size:14px; display:grid; place-items:center}
+
+.steps{display:flex; gap:8px; flex-wrap:wrap; list-style:none; margin:0; padding:0}
+.steps li{padding:6px 14px; border-radius:20px; border:2px solid var(--line); color:var(--muted); font-weight:700; font-size:.85em; background:var(--tag)}
+.steps li.now{border-color:var(--accent); color:var(--ink)}
+.steps li.done{background:var(--accent-soft); color:var(--ink); border-color:transparent}
+
+/* Compare bars */
+.bars{display:flex; flex-direction:column; gap:10px; background:var(--tag); border:2px solid var(--line); border-radius:12px; padding:14px 16px; max-width:760px}
+.bars h3{margin:0; font-family:var(--display); font-size:1.15em}
+.bar{display:grid; grid-template-columns:7.5em 1fr; gap:10px; align-items:center}
+.bar .lab{font-weight:700; font-size:.9em}
+.bar .track{height:38px; background:var(--floor); border-radius:8px; position:relative; overflow:hidden}
+.bar .fill{position:absolute; inset:0 auto 0 0; border-radius:8px; display:flex; align-items:center; justify-content:flex-end; padding-right:10px; color:var(--pk-ink); font-family:var(--display); font-weight:700; font-size:20px; white-space:nowrap; transition:width .5s}
+.bar .fill.o1{background:var(--pk1)} .bar .fill.o2{background:var(--pk2)}
+.crown{font-family:var(--display); font-weight:800; color:var(--good)}
+
+.common{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.common .side{background:var(--tag); border:2px solid var(--line); border-radius:12px; padding:12px; min-width:0}
+.common .side h4{margin:0 0 6px; font-family:var(--display); font-size:1.1em}
+.mini{display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px}
+.mini i{display:block; width:26px; height:32px; border-radius:5px 5px 2px 2px}
+.mini i.o1{background:var(--pk1)} .mini i.o2{background:var(--pk2)}
+.total{font-family:var(--display); font-weight:800; font-size:clamp(28px,2.6vw,38px); font-variant-numeric:tabular-nums}
+
+.checks{display:flex; flex-wrap:wrap; gap:8px}
+.checks label{display:flex; gap:8px; align-items:center; border:2px solid var(--line); background:var(--tag); padding:10px 14px; border-radius:12px; font-weight:700; min-height:52px; cursor:pointer}
+.checks input{width:22px; height:22px; accent-color:var(--accent)}
+
+/* Eggs */
+.carton{display:grid; gap:6px; background:var(--shelf-edge); padding:10px; border-radius:14px; width:max-content; max-width:100%}
+.egg{width:clamp(34px,4vw,52px); aspect-ratio:4/5; border-radius:50% 50% 46% 46%/60% 60% 40% 40%; background:#F7EEDD; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:clamp(12px,1.1vw,16px); color:#3B2A12; max-width:100%}
+.eggs-row{display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start}
+.eggs-row > div{display:flex; flex-direction:column; gap:10px; min-width:0}
+
+/* Vote */
+.vote{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.vote .card{background:var(--tag); border:2px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; align-items:flex-start; min-width:0}
+.count{font-family:var(--display); font-weight:800; font-size:clamp(44px,5vw,72px); line-height:1; font-variant-numeric:tabular-nums}
+.stepper{display:flex; gap:8px}
+.stepper button{width:56px; height:56px; border-radius:12px; border:2px solid var(--ink); background:var(--tag); font-size:26px; font-weight:700}
+.burst{font-family:var(--display); font-weight:800; background:var(--warn); color:#fff; padding:2px 10px; border-radius:6px; transform:rotate(-4deg); display:inline-block}
+
+/* Deals */
+.deal{background:var(--tag); border:2px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:14px}
+.deal h3{margin:0; font-family:var(--display); font-size:1.5em; line-height:1.1}
+.vs{display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center}
+.sign{background:var(--floor); border:2px dashed var(--line); border-radius:12px; padding:12px; text-align:center; font-family:var(--display); font-weight:800; font-size:clamp(22px,2.2vw,32px); line-height:1.05; min-width:0}
+.sign.chosen{border:3px solid var(--unit); background:var(--tag)}
+button.sign{cursor:pointer; color:var(--ink)}
+.vs .or{font-family:var(--display); font-weight:700; color:var(--muted)}
+.items{display:flex; gap:6px; flex-wrap:wrap}
+.item{width:clamp(64px,7vw,92px); height:clamp(80px,8.5vw,112px); border-radius:10px; background:var(--pk1); position:relative; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; color:var(--pk-ink); font-family:var(--display); font-weight:700; padding-bottom:6px; font-size:18px}
+.item .off{position:absolute; inset:0 0 auto 0; background:repeating-linear-gradient(45deg,var(--unit) 0 8px, transparent 8px 14px); opacity:.9; display:grid; place-items:center; color:var(--unit-ink); font-weight:800; font-size:20px}
+.grid100{display:grid; grid-template-columns:repeat(10,1fr); gap:3px; width:min(100%,330px)}
+.grid100 i{aspect-ratio:1; background:var(--pk1); border-radius:3px; transition:background .3s}
+.grid100 i.a{background:var(--unit)} .grid100 i.b{background:var(--warn)}
+.grids{display:flex; flex-wrap:wrap; gap:22px}
+.grids > div{display:flex; flex-direction:column; gap:8px; min-width:0; flex:1 1 260px}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:.85em; color:var(--muted)}
+.legend span::before{content:""; display:inline-block; width:14px; height:14px; border-radius:3px; background:var(--c); margin-right:6px; vertical-align:-2px}
+table.sum{border-collapse:collapse; font-variant-numeric:tabular-nums}
+table.sum td,table.sum th{padding:6px 14px 6px 0; text-align:left}
+table.sum th{font-family:var(--display); color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spacing:.05em}
+.scroll{overflow-x:auto}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:56px; height:56px; border-radius:28px; border:2px solid var(--line); background:var(--tag); font-family:var(--display); font-weight:700; font-size:21px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--shelf); color:#fff; border-color:var(--shelf)}
+.qtext{font-size:clamp(22px,2vw,30px); line-height:1.3; margin:0; max-width:32em; font-family:var(--body); font-weight:700}
+.evidence{display:flex; flex-direction:column; gap:12px}
+.evidence:empty{display:none}
+.ideas{margin:0; padding-left:1.2em; display:flex; flex-direction:column; gap:6px}
+
+@media (max-width:720px){
+  .aisle{grid-template-columns:1fr; gap:10px}
+  .aisle .shelfboard{display:none}
+  .b-p0,.b-p1{border-bottom:12px solid var(--shelf)}
+  .b-t0{order:2}.b-p1{order:3}
+  .vote,.common{grid-template-columns:1fr}
+  .vs{grid-template-columns:1fr}
+  .vs .or{text-align:center}
+  .bar{grid-template-columns:1fr}
+  .tag .up{min-width:112px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="eyebrow">Grade 5 · Week 8 · Lesson 5.8</div>
+    <h1>Best Buy</h1>
+    <p class="dq">Is the bigger box always the better deal?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-tab="warm" aria-selected="true"><span>1</span>Egg warm-up</button>
+  <button role="tab" data-tab="vote" aria-selected="false"><span>2</span>Family Size?</button>
+  <button role="tab" data-tab="shelf" aria-selected="false"><span>3</span>Shelf comparisons</button>
+  <button role="tab" data-tab="deals" aria-selected="false"><span>4</span>Store deals</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span>5</span>Detective questions</button>
+</nav>
+
+<!-- 1. Warm-up -->
+<section class="view" id="v-warm">
+  <p class="lead"><b>A dozen eggs costs $3.60.</b> What does one egg cost? Then: <b>six eggs for $2.40.</b> Which is the better deal per egg?</p>
+  <div class="eggs-row">
+    <div>
+      <div class="carton" id="carton12" style="grid-template-columns:repeat(6,auto)"></div>
+      <div class="tag" style="border-top:2px solid var(--line); border-radius:10px">
+        <div class="desc"><b>Dozen eggs</b><span class="price">$3.60</span></div>
+        <div class="up"><label for="egg12">Per egg</label><div class="field"><input id="egg12" inputmode="decimal" autocomplete="off" aria-label="Cost of one egg from the dozen, in cents">¢</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="carton" id="carton6" style="grid-template-columns:repeat(3,auto)"></div>
+      <div class="tag" style="border-top:2px solid var(--line); border-radius:10px">
+        <div class="desc"><b>Six eggs</b><span class="price">$2.40</span></div>
+        <div class="up"><label for="egg6">Per egg</label><div class="field"><input id="egg6" inputmode="decimal" autocomplete="off" aria-label="Cost of one egg from the six-pack, in cents">¢</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="primary" id="eggCheck">Check per-egg prices</button>
+    <button class="secondary" id="eggShare">Share the price out egg by egg</button>
+  </div>
+  <p class="fb" id="eggFb" aria-live="polite"></p>
+</section>
+
+<!-- 2. Launch vote -->
+<section class="view" id="v-vote" hidden>
+  <p class="lead">Cereal: <b>12 ounces for $3.00</b> or <b>18 ounces for $4.80</b>. The big box says <b>Family Size Value</b>. Is it? Vote before anyone computes.</p>
+  <div class="vote">
+    <div class="card">
+      <div class="pack o1 big" style="width:110px;height:120px"><span class="amt">12 oz</span><small>$3.00</small></div>
+      <b>The small box is the better deal</b>
+      <div class="count" id="vA">0</div>
+      <div class="stepper"><button data-v="A" data-d="1" aria-label="Add a vote for the small box">+</button><button data-v="A" data-d="-1" aria-label="Remove a vote for the small box">−</button></div>
+    </div>
+    <div class="card">
+      <div class="pack o2 big" style="width:130px;height:160px"><span class="burst" style="font-size:14px;margin-bottom:6px">FAMILY SIZE VALUE</span><span class="amt">18 oz</span><small>$4.80</small></div>
+      <b>The Family Size box is the better deal</b>
+      <div class="count" id="vB">0</div>
+      <div class="stepper"><button data-v="B" data-d="1" aria-label="Add a vote for the Family Size box">+</button><button data-v="B" data-d="-1" aria-label="Remove a vote for the Family Size box">−</button></div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="primary" id="howBtn">How could we find out?</button>
+    <button class="secondary" id="toCereal">Go test it on the shelf</button>
+  </div>
+  <div class="fb" id="voteFb" aria-live="polite"></div>
+</section>
+
+<!-- 3. Shelf comparisons -->
+<section class="view" id="v-shelf" hidden>
+  <div class="picker" id="picker" role="group" aria-label="Comparison"></div>
+  <ol class="steps" id="steps"></ol>
+  <p class="lead" id="shelfPrompt"></p>
+  <div class="aisle" id="aisle"></div>
+  <div class="row" id="shelfActions"></div>
+  <div class="fb" id="shelfFb" aria-live="polite"></div>
+  <div id="shelfEvidence" class="evidence"></div>
+  <div class="deal" id="notBigger" hidden>
+    <h3>In which rows is the bigger package NOT the better deal?</h3>
+    <div class="checks" id="nbChecks"></div>
+    <div class="row"><button class="primary" id="nbCheck">Check</button></div>
+    <div class="fb" id="nbFb" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 4. Deals -->
+<section class="view" id="v-deals" hidden>
+  <div class="picker" id="dealPicker" role="group" aria-label="Deal"></div>
+  <div id="dealBox" class="deal"></div>
+</section>
+
+<!-- 5. Detective -->
+<section class="view" id="v-det" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="qtext" id="qtext"></p>
+  <div class="row" id="qactions"></div>
+  <div class="evidence" id="qev" aria-live="polite"></div>
+  <p class="note">Talk it over first. Then tap a button to put evidence on the screen.</p>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- Exact math: prices in whole cents, amounts in whole units ---------- */
+const gcd = (a,b) => b ? gcd(b, a%b) : a;
+const lcm = (a,b) => a / gcd(a,b) * b;
+const money = c => '$' + (c/100).toFixed(2);               // c is whole cents
+const terminates2 = (num, den) => (num*100) % den === 0;    // num/den has at most 2 decimals
+function fmtNum(num, den){                                  // exact num/den, 2 decimals, "≈" if it keeps going
+  const v = num/den;
+  if (num % den === 0) return String(num/den);
+  if (terminates2(num,den)) return (Math.round(v*100)/100).toString();
+  return '≈' + (Math.round(v*100)/100).toFixed(2);
+}
+
+/* Handout 5.8 Part A. unit: 'c' = cents per unit, 'd' = dollars per unit */
+const ROWS = [
+  {n:1, item:'Juice',         unitWord:'oz',     each:'ounce', unit:'c', o:[{a:64,p:320,label:'64 oz'},{a:96,p:456,label:'96 oz'}]},
+  {n:2, item:'Cereal',        unitWord:'oz',     each:'ounce', unit:'c', o:[{a:12,p:300,label:'12 oz'},{a:18,p:480,label:'18 oz'}]},
+  {n:3, item:'Pencils',       unitWord:'pencils',each:'pencil',unit:'c', o:[{a:10,p:250,label:'10 pencils'},{a:24,p:552,label:'24 pencils'}]},
+  {n:4, item:'Granola bars',  unitWord:'bars',   each:'bar',   unit:'c', o:[{a:6,p:390,label:'6 bars'},{a:8,p:560,label:'8 bars'}]},
+  {n:5, item:'Rice',          unitWord:'lb',     each:'pound', unit:'d', o:[{a:2,p:298,label:'2 lb'},{a:5,p:695,label:'5 lb'}]},
+  {n:6, item:'Yogurt',        unitWord:'cups',   each:'cup',   unit:'c', o:[{a:4,p:280,label:'4-pack'},{a:1,p:75,label:'1 cup'}]}
+];
+/* unit price in the row's display unit as an exact fraction [num, den] */
+const unitFrac = (r,o) => r.unit==='c' ? [o.p, o.a] : [o.p, o.a*100];
+const unitVal = (r,o) => { const [n,d] = unitFrac(r,o); return n/d; };
+const unitStr = (r,o) => { const [n,d]=unitFrac(r,o); const s = fmtNum(n,d); return r.unit==='c' ? s+'¢' : '$'+(n%d===0? (n/d).toFixed(2) : (n/d).toFixed(2)); };
+const unitLabel = r => r.unit==='c' ? `¢ per ${r.each}` : `$ per ${r.each}`;
+/* better offer: lower cost per unit, compared exactly by cross-multiplying */
+const betterIdx = r => (r.o[0].p * r.o[1].a < r.o[1].p * r.o[0].a) ? 0 : 1;
+const biggerIdx = r => r.o[0].a > r.o[1].a ? 0 : 1;
+
+/* Judge a typed unit price. Returns {ok, msg} */
+function judge(r, o, raw){
+  const txt = String(raw).trim().replace(/[$¢,\s]/g,'');
+  if (txt==='') return {ok:false, empty:true, msg:''};
+  const e = Number(txt);
+  if (!isFinite(e)) return {ok:false, msg:`“${esc(raw)}” isn’t a number yet. Type just the digits, like 4.5.`};
+  const [num, den] = unitFrac(r,o); const t = num/den;
+  const exact = terminates2(num,den);
+  const close = (x,y,tol) => Math.abs(x-y) <= tol;
+  const rounds = [0,1,2,3].map(dp => Math.round(t*10**dp)/10**dp).concat([1,2].map(dp => Math.floor(t*10**dp)/10**dp));
+  if (exact ? close(e,t,0.0005) : rounds.some(x => close(e,x,0.0005))) return {ok:true, msg: exact ? '' : `It keeps going: ${t.toFixed(3)}… ${Number.isInteger(e) ? `Rounding to ${e} works here, but when two prices are close, keep more digits.` : `Rounding to ${t.toFixed(1)} or ${t.toFixed(2)} is fine.`}`};
+  const priceTxt = r.unit==='c' ? `${o.p}¢` : money(o.p);
+  const sum = r.unit==='c' ? `${o.p} ÷ ${o.a}` : `${(o.p/100).toFixed(2)} ÷ ${o.a}`;
+  // dollars vs cents mix-up
+  if (r.unit==='c' && close(e*100, t, exact?0.05:0.15)) return {ok:false, msg:`${e} looks like dollars. $${e} is ${+(e*100).toFixed(2)}¢. This tag is in cents, so type it in cents.`};
+  if (r.unit==='d' && close(e/100, t, 0.006)) return {ok:false, msg:`${e} looks like cents. ${e}¢ is $${(e/100).toFixed(2)}. This tag is in dollars.`};
+  // divided the wrong way: units per dollar or per cent
+  const perDollar = o.a / (o.p/100);
+  if (close(e, perDollar, 0.06) || close(e, o.a/o.p, 0.0006)) return {ok:false, msg:`You divided ${o.a} by the price. That tells how many ${r.unitWord} you get for $1 (${+perDollar.toFixed(2)}), not what one ${r.each} costs. Does one ${r.each} really cost ${+perDollar.toFixed(2)}${r.unit==='c'?'¢':' dollars'}? Flip it: ${sum}.`};
+  // total price
+  if (close(e, r.unit==='c'? o.p : o.p/100, 0.001) || close(e, o.p/100, 0.001)) return {ok:false, msg:`That’s the price of the whole package. Share ${priceTxt} out among ${o.a} ${r.unitWord}: ${sum}.`};
+  // generic, with an estimate
+  const est = r.unit==='c' ? `${Math.round(t)}¢` : `$${(Math.round(t*10)/10).toFixed(2)}`;
+  const dir = e > t ? 'too high' : 'too low';
+  return {ok:false, msg:`Not yet. Check it: ${o.a} × ${e} should make ${priceTxt}, but it makes ${r.unit==='c' ? +(o.a*e).toFixed(2)+'¢' : money(Math.round(o.a*e*100))}, which is ${dir}. Try ${sum} again.${Math.abs(e-t) < 0.5 ? ' You are close. Keep the exact cents this time.' : ` (It should be about ${est}.)`}`};
+}
+
+/* ---------- Tabs ---------- */
+let tab = 'warm';
+function selectTab(t){
+  tab = t;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','vote','shelf','deals','det'].forEach(k => $('#v-'+k).hidden = k!==t);
+  if (t==='det') renderQ();
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------- 1. Eggs ---------- */
+function drawEggs(labels){
+  const fill = (id, n, each) => { $(id).innerHTML = Array.from({length:n}, () => `<div class="egg">${labels? each+'¢':''}</div>`).join(''); };
+  fill('#carton12', 12, 30); fill('#carton6', 6, 40);
+}
+function eggCheck(){
+  const parse = v => { const t=v.trim().replace(/[$¢\s]/g,''); return t===''? null : Number(t); };
+  const a = parse($('#egg12').value), b = parse($('#egg6').value);
+  const msgs = []; let good = 0;
+  const one = (val, total, n, target, el) => {
+    el.classList.remove('ok','bad');
+    if (val===null || isNaN(val)) { msgs.push(`Fill in the tag for ${n} eggs.`); return; }
+    if (Math.abs(val-target)<0.001){ el.classList.add('ok'); good++; return; }
+    el.classList.add('bad');
+    if (Math.abs(val*100-target)<0.01) msgs.push(`${n} eggs: $${val} is ${target}¢. Type it in cents.`);
+    else msgs.push(`${n} eggs: check it with multiplication. ${n} × ${val}¢ = ${+(n*val).toFixed(2)}¢, but the carton costs ${total}¢. Share ${total}¢ out among ${n} eggs.`);
+  };
+  one(a, 360, 12, 30, $('#egg12')); one(b, 240, 6, 40, $('#egg6'));
+  const fb = $('#eggFb');
+  if (good===2){ drawEggs(true); fb.className='fb'; fb.innerHTML = `<b>Dozen: 30¢ an egg. Six-pack: 40¢ an egg.</b> The dozen is the better deal per egg, by 10¢. Check: 12 × 30¢ = $3.60 and 6 × 40¢ = $2.40. Here the bigger carton wins. Will that always happen?`; }
+  else { fb.className='fb try'; fb.innerHTML = msgs.join('<br>'); }
+}
+$('#eggCheck').onclick = eggCheck;
+$('#eggShare').onclick = () => { drawEggs(true); $('#egg12').value='30'; $('#egg6').value='40'; eggCheck(); };
+$$('#egg12,#egg6').forEach(i => i.addEventListener('keydown', e => { if(e.key==='Enter') eggCheck(); }));
+
+/* ---------- 2. Vote ---------- */
+const votes = {A:0,B:0};
+$$('.stepper button').forEach(b => b.onclick = () => { const k=b.dataset.v; votes[k]=Math.max(0, votes[k]+ +b.dataset.d); $('#v'+k).textContent=votes[k]; });
+$('#howBtn').onclick = () => {
+  const fb=$('#voteFb'); fb.className='fb';
+  fb.innerHTML = `<b>Two ways to find out.</b><br>1. <b>Unit price:</b> what does ONE ounce cost in each box?<br>2. <b>Common amount:</b> buy enough of each box to get the same number of ounces, then compare the totals. Try both in Shelf comparison 2.`;
+};
+$('#toCereal').onclick = () => { cur = 1; selectTab('shelf'); renderShelf(); };
+
+/* ---------- 3. Shelf ---------- */
+let cur = 0;
+const st = ROWS.map(() => ({pred:null, vals:['',''], verified:[false,false], pick:null, solved:false}));
+function packSize(r, i){
+  const max = Math.max(r.o[0].a, r.o[1].a);
+  const f = 0.45 + 0.55 * Math.sqrt(r.o[i].a / max);
+  return {w: Math.round(150*f), h: Math.round(190*f)};
+}
+function stepIdx(s){ return s.solved ? 3 : (s.verified[0]&&s.verified[1]) ? 2 : s.pred!==null ? 1 : 0; }
+function renderShelf(){
+  $('#picker').innerHTML = ROWS.map((r,i) => `<button aria-pressed="${i===cur}" class="${st[i].solved?'done':''}" data-i="${i}">${r.n}. ${r.item}</button>`).join('');
+  $$('#picker button').forEach(b => b.onclick = () => { cur=+b.dataset.i; renderShelf(); });
+  const r = ROWS[cur], s = st[cur], k = stepIdx(s);
+  $('#steps').innerHTML = ['Predict','Find unit prices','Pick the better buy','Prove it'].map((t,i)=>`<li class="${i<k?'done':i===k?'now':''}">${i+1}. ${t}</li>`).join('');
+  const prompts = [
+    `<b>Predict.</b> Which ${r.item.toLowerCase()} is the better buy? Tap a package. Go with your gut.`,
+    `<b>Find the unit price</b> (${unitLabel(r)}) for each offer and type it on its shelf tag.`,
+    `<b>Now pick the better buy.</b> Tap the package that costs less per ${r.each}.`,
+    `<b>Solved.</b> Show the proof two ways, then try another row.`
+  ];
+  $('#shelfPrompt').innerHTML = prompts[k];
+  const pickable = k===0 || k===2;
+  $('#aisle').innerHTML = r.o.map((o,i) => {
+    const z = packSize(r,i), chosen = (k===0||k===1) ? s.pred===i : s.pick===i;
+    const inner = `<span class="amt">${esc(o.label)}</span><small>${r.item}</small>`;
+    const pack = pickable
+      ? `<button class="pack big o${i+1} ${chosen?'chosen':''}" style="width:${z.w}px;height:${z.h}px" data-i="${i}" aria-label="Offer ${i+1}: ${esc(o.label)} for ${money(o.p)}">${inner}</button>`
+      : `<div class="pack big o${i+1} ${chosen?'chosen':''}" style="width:${z.w}px;height:${z.h}px">${inner}</div>`;
+    const up = s.verified[i]
+      ? `<span class="val">${unitStr(r,o)}</span>`
+      : `<div class="field">${r.unit==='d'?'$':''}<input id="up${i}" inputmode="decimal" autocomplete="off" value="${esc(s.vals[i])}" aria-label="Unit price for offer ${i+1}, ${unitLabel(r)}" ${k===0?'disabled':''}>${r.unit==='c'?'¢':''}</div>`;
+    return `<div class="bay b-p${i} ${pickable?'pick':''}"><div class="goods">${pack}</div></div>`;
+  }).join('') + `<div class="shelfboard"></div>` + r.o.map((o,i)=>{
+    const up = s.verified[i]
+      ? `<span class="val">${unitStr(r,o)}</span>`
+      : `<div class="field">${r.unit==='d'?'$':''}<input id="up${i}" inputmode="decimal" autocomplete="off" value="${esc(s.vals[i])}" aria-label="Unit price for offer ${i+1}, ${unitLabel(r)}" ${k===0?'disabled':''}>${r.unit==='c'?'¢':''}</div>`;
+    return `<div class="bay b-t${i}"><div class="tag"><div class="desc"><b>Offer ${i+1}: ${esc(o.label)}</b><span class="price">${money(o.p)}</span></div><div class="up"><label for="up${i}">Unit price<br>${unitLabel(r).replace(/^[¢$] /,'')}</label>${up}</div></div></div>`;
+  }).join('');
+  $$('#aisle button.pack').forEach(b => b.onclick = () => onPack(+b.dataset.i));
+  $$('#aisle input').forEach(inp => {
+    inp.addEventListener('input', () => { s.vals[+inp.id.slice(2)] = inp.value; });
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') checkUnits(); });
+  });
+  const acts = $('#shelfActions'); acts.innerHTML='';
+  const btn = (label, cls, fn) => { const b=document.createElement('button'); b.className=cls; b.textContent=label; b.onclick=fn; acts.appendChild(b); };
+  if (k===1){ btn('Check my unit prices','primary',checkUnits); btn('Show me how to start','secondary',() => hint()); }
+  if (k===3){ btn('Proof 1: compare unit prices','primary',() => proofBars()); btn('Proof 2: scale to a common amount','secondary',() => proofCommon()); }
+  if (k===3 || s.pred!==null){ btn('Reset this row','secondary',() => { st[cur]={pred:null, vals:['',''], verified:[false,false], pick:null, solved:false}; $('#shelfFb').innerHTML=''; $('#shelfEvidence').innerHTML=''; renderShelf(); }); }
+  $('#notBigger').hidden = !st.every(x=>x.solved) && st.filter(x=>x.solved).length < 3;
+}
+function setFb(html, ok){ const fb=$('#shelfFb'); fb.className = ok? 'fb':'fb try'; fb.innerHTML = html; }
+function onPack(i){
+  const r=ROWS[cur], s=st[cur], k=stepIdx(s);
+  if (k===0){ s.pred=i; setFb(`Prediction saved: <b>Offer ${i+1}</b>. Now prove it. Totals alone can’t decide it, because the packages hold different amounts.`, true); $('#shelfEvidence').innerHTML=''; renderShelf(); setTimeout(()=>{ const f=$('#up0'); if(f) f.focus(); }, 30); return; }
+  if (k===2){
+    const b = betterIdx(r), o = r.o;
+    if (i===b){
+      s.pick=i; s.solved=true;
+      const big = biggerIdx(r);
+      const predNote = s.pred===b ? 'Your prediction was right.' : 'Your prediction picked the other one. The unit prices changed your mind.';
+      setFb(`<b>Yes. Offer ${b+1} costs ${unitStr(r,o[b])} per ${r.each}; Offer ${1-b+1} costs ${unitStr(r,o[1-b])}.</b> ${b===big ? 'Here the bigger package IS the better deal.' : 'Surprise: the bigger package is NOT the better deal.'} ${predNote}`, true);
+      renderShelf(); proofBars();
+    } else {
+      setFb(`Look at the tags again. Offer ${i+1} costs ${unitStr(r,o[i])} per ${r.each} and Offer ${1-i+1} costs ${unitStr(r,o[1-i])}. Which one charges you less for each ${r.each}? Tap that one.`, false);
+    }
+  }
+}
+function checkUnits(){
+  const r=ROWS[cur], s=st[cur]; const msgs=[]; let notes=[];
+  r.o.forEach((o,i) => {
+    if (s.verified[i]) return;
+    const inp=$('#up'+i); const v = inp ? inp.value : s.vals[i];
+    const j = judge(r,o,v);
+    inp && inp.classList.remove('ok','bad');
+    if (j.empty){ msgs.push(`Offer ${i+1}: type a unit price on its tag.`); return; }
+    if (j.ok){ s.verified[i]=true; if (j.msg) notes.push(`Offer ${i+1}: ${j.msg}`); }
+    else { inp && inp.classList.add('bad'); msgs.push(`<b>Offer ${i+1}.</b> ${j.msg}`); }
+  });
+  if (s.verified[0] && s.verified[1]){ renderShelf(); setFb(`<b>Both unit prices check out.</b> ${notes.join(' ')} Now tap the better buy.`, true); }
+  else { renderShelf(); setFb(msgs.concat(notes).join('<br>'), false); }
+}
+function hint(){
+  const r=ROWS[cur];
+  const lines = r.o.map((o,i)=>`Offer ${i+1}: ${r.unit==='c' ? `${o.p}¢` : money(o.p)} for ${o.a} ${r.unitWord} → ${r.unit==='c'?`${o.p} ÷ ${o.a}`:`${(o.p/100).toFixed(2)} ÷ ${o.a}`}`);
+  setFb(`<b>Share the price out over the amount.</b> Price ÷ amount = cost of one ${r.each}.<br>${lines.join('<br>')}<br>Estimate first so you know what size of answer to expect.`, true);
+}
+function proofBars(){
+  const r=ROWS[cur]; const vals = r.o.map(o=>unitVal(r,o)); const max = Math.max(...vals)*1.12; const b=betterIdx(r);
+  $('#shelfEvidence').innerHTML = `<div class="bars"><h3>Cost of one ${r.each}</h3>${r.o.map((o,i)=>`<div class="bar"><span class="lab">Offer ${i+1}: ${esc(o.label)} ${i===b?'<span class="crown">· better buy</span>':''}</span><div class="track"><div class="fill o${i+1}" style="width:${(vals[i]/max*100).toFixed(1)}%">${unitStr(r,o)}</div></div></div>`).join('')}<p class="note">Shorter bar = you pay less for each ${r.each}. Difference: ${r.unit==='c' ? fmtNum(Math.abs(r.o[0].p*r.o[1].a - r.o[1].p*r.o[0].a), r.o[0].a*r.o[1].a)+'¢' : '$'+(Math.abs(vals[0]-vals[1])).toFixed(2)} per ${r.each}.</p></div>`;
+}
+function proofCommon(){
+  const r=ROWS[cur]; const L = lcm(r.o[0].a, r.o[1].a); const b=betterIdx(r);
+  const sides = r.o.map((o,i)=>{ const n=L/o.a; return `<div class="side"><h4>${n} × Offer ${i+1} (${esc(o.label)})</h4><div class="mini">${Array.from({length:n},()=>`<i class="o${i+1}"></i>`).join('')}</div><div>${n} × ${money(o.p)} =</div><div class="total">${money(n*o.p)} ${i===b?'<span class="crown" style="font-size:.6em">cheaper</span>':''}</div></div>`; }).join('');
+  $('#shelfEvidence').innerHTML = `<div class="bars"><h3>Same amount: ${L} ${r.unitWord} each way</h3><div class="common">${sides}</div><p class="note">${L} is the smallest amount both packages can make exactly. Same ${r.unitWord}, so now the totals ARE fair to compare. No dividing needed.</p></div>`;
+}
+/* Not-bigger question */
+$('#nbChecks').innerHTML = ROWS.map(r=>`<label><input type="checkbox" id="nb${r.n}" value="${r.n}"> ${r.n}. ${r.item}</label>`).join('');
+$('#nbCheck').onclick = () => {
+  const chosen = new Set($$('#nbChecks input:checked').map(x=>+x.value));
+  const truth = new Set(ROWS.filter(r=>betterIdx(r)!==biggerIdx(r)).map(r=>r.n));
+  const missed = [...truth].filter(n=>!chosen.has(n)), extra = [...chosen].filter(n=>!truth.has(n));
+  const fb=$('#nbFb');
+  const why = n => { const r=ROWS[n-1], bg=biggerIdx(r); return `${n}. ${r.item}: bigger (${r.o[bg].label}) costs ${unitStr(r,r.o[bg])} per ${r.each} vs ${unitStr(r,r.o[1-bg])}.`; };
+  if (!missed.length && !extra.length){ fb.className='fb'; fb.innerHTML = `<b>Rows ${[...truth].join(' and ')}.</b> ${[...truth].map(why).join(' ')} Bigger is cheaper per unit in the other four rows, but not always.`; }
+  else { fb.className='fb try'; fb.innerHTML = (extra.length? `Look again at ${extra.map(why).join(' ')} There the bigger package costs less per unit, so it IS the better deal.<br>`:'') + (missed.length? `${missed.length===1?'One row is':'Some rows are'} still missing. Find a row where the bigger package has the higher unit price.`:''); }
+};
+
+/* ---------- 4. Deals ---------- */
+let dealCur = 0;
+const dealState = [{guess:null, q:3, price:150}, {guess:null}, {guess:null, step:0, price:10000}];
+const DEALS = [
+  {name:'Buy 2, get 1 free', a:'Buy 2, get 1 free', b:'30% off every item'},
+  {name:'3 for $5.00', a:'3 for $5.00', b:'$1.75 each'},
+  {name:'Two discounts', a:'20% off, then 10% off the new price', b:'30% off'}
+];
+function renderDeals(){
+  $('#dealPicker').innerHTML = DEALS.map((d,i)=>`<button aria-pressed="${i===dealCur}" data-i="${i}">${i+1}. ${d.name}</button>`).join('');
+  $$('#dealPicker button').forEach(b=>b.onclick=()=>{ dealCur=+b.dataset.i; renderDeals(); });
+  const d=DEALS[dealCur], s=dealState[dealCur];
+  const signs = `<div class="vs"><button class="sign ${s.guess===0?'chosen':''}" data-g="0">Deal A<br>${d.a}</button><span class="or">or</span><button class="sign ${s.guess===1?'chosen':''}" data-g="1">Deal B<br>${d.b}</button></div>`;
+  let body='';
+  if (dealCur===0) body = deal1(s);
+  if (dealCur===1) body = deal2(s);
+  if (dealCur===2) body = deal3(s);
+  $('#dealBox').innerHTML = `<h3>Which is better? Tap the deal you think wins.</h3>${signs}${s.guess===null?'<p class="note">Pick one to open the model.</p>':body}`;
+  $$('#dealBox .sign').forEach(b=>b.onclick=()=>{ s.guess=+b.dataset.g; renderDeals(); });
+  wireDeal(s);
+}
+/* Deal 1: price p cents (multiple of 50 so 70% is whole cents), quantity q */
+const d1A = (q,p) => (q - Math.floor(q/3)) * p;          // pay for all but every third
+const d1B = (q,p) => q * p * 7 / 10;                     // 30% off each
+function deal1(s){
+  const q=s.q, p=s.price, A=d1A(q,p), B=d1B(q,p);
+  const items = Array.from({length:q},(_,i)=>`<div class="item">${(i+1)%3===0?'<div class="off" style="height:100%">FREE</div>':''}${money(p)}</div>`).join('');
+  const itemsB = Array.from({length:q},()=>`<div class="item" style="background:var(--pk2)"><div class="off" style="height:30%">30%</div>${money(p)}</div>`).join('');
+  const win = A<B ? 'Deal A' : B<A ? 'Deal B' : 'Neither (a tie)';
+  const verdict = q===3
+    ? `<b>Buying 3: Deal A takes 1 of 3 items off, which is one third, about 33.3% off. Deal B takes 30% off.</b> One third is more than 30%, so ${s.guess===0?'you were right: ':''}Deal A wins if you want three.`
+    : `With ${q} item${q>1?'s':''}: ${win} is cheaper. Change the number. When does the free item stop helping?`;
+  return `<div class="row"><span>Items in the cart:</span><div class="stepper"><button data-q="-1" aria-label="One fewer item">−</button><b class="count" style="font-size:44px;min-width:1.2em;text-align:center">${q}</b><button data-q="1" aria-label="One more item">+</button></div><span>Price each:</span><div class="seg">${[100,150,200,300].map(c=>`<button data-p="${c}" aria-pressed="${c===p}">${money(c)}</button>`).join('')}</div></div>
+  <div class="grids"><div><b>Deal A: buy 2, get 1 free</b><div class="items">${items}</div><div>You pay for ${q-Math.floor(q/3)} of ${q}: <span class="total">${money(A)}</span></div></div>
+  <div><b>Deal B: 30% off every item</b><div class="items">${itemsB}</div><div>You pay 70% of ${money(q*p)}: <span class="total">${money(B)}</span></div></div></div>
+  <div class="fb">${verdict}</div>`;
+}
+/* Deal 2 */
+function deal2(s){
+  const chk = s.checked;
+  return `<p>In Deal A you pay $5.00 for 3. How much is that for ONE item?</p>
+  <div class="row"><div class="tag" style="border-top:2px solid var(--line);border-radius:10px"><div class="desc"><b>3 for $5.00</b><span class="price">$5.00</span></div><div class="up"><label for="d2in">One item</label><div class="field">$<input id="d2in" inputmode="decimal" autocomplete="off" value="${esc(s.val||'')}"></div></div></div>
+  <button class="primary" id="d2check">Check</button></div>
+  <div class="fb ${s.msgOk===false?'try':''}" id="d2fb">${s.msg||''}</div>
+  ${chk?`<div class="grids"><div><b>Deal A: 3 for $5.00</b><div class="items">${[0,1,2].map(()=>`<div class="item">$1.67</div>`).join('')}</div><div>3 items: <span class="total">$5.00</span></div></div><div><b>Deal B: $1.75 each</b><div class="items">${[0,1,2].map(()=>`<div class="item" style="background:var(--pk2)">$1.75</div>`).join('')}</div><div>3 items: <span class="total">$5.25</span></div></div></div><p class="note">Exactly: $5.00 ÷ 3 = $1.666…, so about $1.67 each. That is 8¢ less than $1.75 per item, and 25¢ less for all three.</p>`:''}`;
+}
+function d2check(s){
+  const v = $('#d2in').value; s.val=v; const e = Number(v.replace(/[$\s]/g,''));
+  if (v.trim()===''||!isFinite(e)){ s.msg='Type a price, like 1.50.'; s.msgOk=false; }
+  else if (Math.abs(e - 5/3) <= 0.0051 || Math.abs(e-1.66)<0.0001){ s.checked=true; s.msgOk=true; s.msg=`<b>$5.00 ÷ 3 = $1.666…, about $1.67 each.</b> That is less than $1.75, so ${s.guess===0?'you were right: ':''}Deal A (3 for $5) is the better deal.`; }
+  else if (Math.abs(e-15)<0.001){ s.msgOk=false; s.msg='$15 would be 3 × $5. In this deal, all 3 together cost $5. Share $5.00 among 3.'; }
+  else if (Math.abs(e*100 - 500/3) < 1){ s.msgOk=false; s.msg='That looks like cents. Type it in dollars, like 1.50.'; }
+  else { s.msgOk=false; s.msg=`Check it: 3 × $${e.toFixed(2)} = $${(3*e).toFixed(2)}, not $5.00. Try $5.00 ÷ 3. (It will keep going, so round to the nearest cent.)`; }
+  renderDeals();
+}
+/* Deal 3: on a 100-square grid, 1 square = 1% of the price */
+function deal3(s){
+  const step=s.step;
+  const g1 = Array.from({length:100},(_,i)=>`<i class="${step>=1 && i<20?'a':step>=2 && i<28?'b':''}"></i>`).join('');
+  const g2 = Array.from({length:100},(_,i)=>`<i class="${step>=3 && i<30?'a':''}"></i>`).join('');
+  const msgs = [
+    'Each grid is the whole price, cut into 100 equal squares. Each square is 1%. Take the discounts one at a time.',
+    '<b>20% off:</b> 20 of 100 squares gone. 80 squares are left. Now take 10% off the NEW price.',
+    '<b>10% of the 80 squares left is 8 squares</b>, not 10. Total off so far: 20 + 8 = 28 squares, which is 28%. Now show Deal B.',
+    `<b>Deal A takes 28% off. Deal B takes 30% off.</b> ${s.guess===1?'You were right: ':''}Deal B is the better deal. The second 10% is a smaller piece, because it is 10% of a smaller price.`
+  ];
+  const labels = ['Take 20% off','Take 10% off the new price','Show Deal B: 30% off','Start this grid over'];
+  const P = s.price;
+  return `<div class="grids"><div><b>Deal A: 20% off, then 10% off</b><div class="grid100" aria-label="Deal A grid">${g1}</div><div class="legend"><span style="--c:var(--unit)">first 20%</span><span style="--c:var(--warn)">then 10% of what’s left</span></div></div>
+  <div><b>Deal B: 30% off</b><div class="grid100" aria-label="Deal B grid">${g2}</div><div class="legend"><span style="--c:var(--unit)">30%</span></div></div></div>
+  <div class="row"><button class="primary" id="d3step">${labels[step]}</button></div>
+  <div class="fb">${msgs[step]}</div>
+  ${step>=3?`<div class="row"><span>Try it on a real price:</span><div class="seg">${[5000,8000,10000,12500].map(c=>`<button data-pp="${c}" aria-pressed="${c===P}">${money(c)}</button>`).join('')}</div></div>
+  <div class="scroll"><table class="sum"><tr><th>Price</th><th>After 20% off</th><th>Then 10% off</th><th>30% off</th></tr><tr><td>${money(P)}</td><td>${money(P*8/10)}</td><td><b>${money(P*8/10*9/10)}</b></td><td><b>${money(P*7/10)}</b></td></tr></table></div><p class="note">Any price: 80% of the price, then 90% of that, leaves 72%. So you always save 28%, never 30%.</p>`:''}`;
+}
+function wireDeal(s){
+  $$('#dealBox [data-q]').forEach(b=>b.onclick=()=>{ s.q=Math.min(9,Math.max(1,s.q+ +b.dataset.q)); renderDeals(); });
+  $$('#dealBox [data-p]').forEach(b=>b.onclick=()=>{ s.price=+b.dataset.p; renderDeals(); });
+  $$('#dealBox [data-pp]').forEach(b=>b.onclick=()=>{ s.price=+b.dataset.pp; renderDeals(); });
+  const c=$('#d2check'); if(c){ c.onclick=()=>d2check(s); $('#d2in').addEventListener('keydown',e=>{ if(e.key==='Enter') d2check(s); }); }
+  const t=$('#d3step'); if(t) t.onclick=()=>{ s.step = s.step>=3 ? 0 : s.step+1; renderDeals(); };
+}
+
+/* ---------- 5. Detective questions ---------- */
+let q = 1;
+const cereal = ROWS[1];
+const Q = {
+  1:{ text:'What unit are you comparing: dollars per ounce, or ounces per dollar?',
+      acts:[
+        {label:'Cereal: cost of 1 ounce', run:()=>ev(`<div class="bars"><h3>Cents per ounce (smaller is better)</h3>${barRows([[ '12 oz box', 25, '25¢'],['18 oz box', 480/18, '≈26.7¢']], 30)}<p class="note">$3.00 ÷ 12 = 25¢ an ounce. $4.80 ÷ 18 = 26.666…¢ an ounce.</p></div>`)},
+        {label:'Cereal: ounces for $1', run:()=>ev(`<div class="bars"><h3>Ounces you get for $1 (bigger is better)</h3>${barRows([[ '12 oz box', 4, '4 oz'],['18 oz box', 3.75, '3.75 oz']], 4.5)}<p class="note">12 ÷ 3.00 = 4 ounces per dollar. 18 ÷ 4.80 = 3.75 ounces per dollar. Same winner, but now the BIGGER number wins. Someone who reads “4” as “$4 an ounce” has mixed up the two units. Does one ounce of cereal cost $4?</p></div>`)}
+      ]},
+  2:{ text:'Could you compare 12 ounces and 18 ounces without dividing, by scaling both to 36?',
+      acts:[{label:'Scale both boxes to 36 ounces', run:()=>ev(`<div class="common"><div class="side"><h4>3 small boxes = 36 oz</h4><div class="mini"><i class="o1"></i><i class="o1"></i><i class="o1"></i></div>3 × $3.00 = <div class="total">$9.00</div></div><div class="side"><h4>2 Family Size boxes = 36 oz</h4><div class="mini"><i class="o2"></i><i class="o2"></i></div>2 × $4.80 = <div class="total">$9.60</div></div></div><p class="note">Same 36 ounces. The small boxes cost 60¢ less. The cereal surprise: the big box costs more per ounce.</p>`)}]},
+  3:{ text:'Is the bigger box always the better deal? Use all six shelf rows as evidence.',
+      acts:[{label:'Show every row', run:()=>{
+        ev(`<div class="scroll"><table class="sum"><tr><th>Row</th><th>Bigger package</th><th>Its unit price</th><th>Smaller package</th><th>Its unit price</th><th>Better buy</th></tr>${ROWS.map(r=>{ const bg=biggerIdx(r), b=betterIdx(r); return `<tr><td>${r.n}. ${r.item}</td><td>${esc(r.o[bg].label)}</td><td>${unitStr(r,r.o[bg])}</td><td>${esc(r.o[1-bg].label)}</td><td>${unitStr(r,r.o[1-bg])}</td><td><b style="color:${b===bg?'var(--good)':'var(--warn)'}">${b===bg?'Bigger':'Smaller'}</b></td></tr>`; }).join('')}</table></div><p class="note">Bigger wins in 4 rows. Smaller wins in rows 2 and 4. So the answer is no: you have to check.</p>`); }}]},
+  4:{ text:'Why do we need more digits sometimes? Estimate the cereal first: both boxes are about 25¢ an ounce.',
+      acts:[{label:'Round to whole dimes', run:()=>ev(`<p class="fb try">Rounded to the nearest 10¢: 25¢ → 30¢ and 26.7¢ → 30¢. <b>It looks like a tie</b>, so rounding this early can hide the winner.</p>`)},
+            {label:'Keep cents', run:()=>ev(`<p class="fb">To the nearest cent: <b>25¢ vs 27¢</b>. Now the small box clearly wins. When the estimates are close, keep more digits.</p>`)}]},
+  5:{ text:'When is a bigger box still a bad idea, even if it is cheaper per ounce?',
+      acts:[{label:'Ideas to argue about', run:()=>ev(`<ul class="ideas"><li>The food goes bad before you finish it.</li><li>You only needed one (yogurt: 4-pack is 70¢ a cup, but $2.80 is more than $0.75 if you want one cup).</li><li>You don’t have $6.95 today, but you have $2.98.</li><li>There’s no room in the cupboard.</li></ul><p class="note">The unit price tells you the cost of each ounce. It doesn’t tell you how much you need.</p>`)}]},
+  6:{ text:'Challenge. The 12-oz box costs 25¢ an ounce. What should the 18-oz box cost to match? To be 10% cheaper per ounce?', challenge:true,
+      acts:[]},
+  7:{ text:'What would you tell a shopper who always buys the biggest box?',
+      acts:[{label:'Show our evidence', run:()=>ev(`<p class="fb">Rows 2 and 4 on the shelf: the bigger package cost MORE per unit. And deals can fool you too: 20% off then 10% off is only 28% off. <b>Check the unit price, or scale to the same amount, before you trust the label.</b></p>`)}]},
+  8:{ text:'Bonus: “You shall have honest scales and honest weights” (Leviticus 19:36). A unit price is how a buyer checks. Which challah is the better buy: 2 for $7.00, or 1 for $3.75?',
+      acts:[{label:'Find the price of one challah', run:()=>ev(`<p class="fb"><b>2 for $7.00 is $3.50 a challah.</b> That is 25¢ less than $3.75, so the 2-pack is the better buy, if you need two.</p>`)}]}
+};
+function barRows(list, max){ return list.map(([lab,v,txt],i)=>`<div class="bar"><span class="lab">${lab}</span><div class="track"><div class="fill o${i+1}" style="width:${(v/max*100).toFixed(1)}%">${txt}</div></div></div>`).join(''); }
+function ev(html){ $('#qev').innerHTML = html; }
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4,5,6,7,8].map(i=>`<button data-q="${i}" aria-pressed="${q===i}" aria-label="Question ${i}">${i===6?'★ Challenge':i===8?'Bonus':i}</button>`).join('');
+  $$('#qnav button').forEach(b=>b.onclick=()=>{ q=+b.dataset.q; ev(''); renderQ(); });
+  const Qi=Q[q]; $('#qtext').textContent = Qi.text;
+  const box=$('#qactions'); box.innerHTML='';
+  if (Qi.challenge){
+    box.innerHTML = `<div class="tag" style="border-top:2px solid var(--line);border-radius:10px"><div class="desc"><b>18 oz to MATCH 25¢ an oz</b></div><div class="up"><label for="ch1">Box price</label><div class="field">$<input id="ch1" inputmode="decimal" autocomplete="off"></div></div></div>
+    <div class="tag" style="border-top:2px solid var(--line);border-radius:10px"><div class="desc"><b>18 oz, 10% cheaper per oz</b></div><div class="up"><label for="ch2">Box price</label><div class="field">$<input id="ch2" inputmode="decimal" autocomplete="off"></div></div></div>
+    <button class="primary" id="chBtn">Check</button>`;
+    $('#chBtn').onclick = checkChallenge;
+    return;
+  }
+  Qi.acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=a.run; box.appendChild(b); });
+}
+function checkChallenge(){
+  const read = id => { const t=$(id).value.replace(/[$\s]/g,''); return t===''? null : Number(t); };
+  const a=read('#ch1'), b=read('#ch2'); const out=[];
+  // exact targets in cents: 18 × 25 = 450; 10% cheaper per ounce = 22.5¢ × 18 = 405
+  if (a===null) out.push('Fill in the first box.');
+  else if (Math.abs(a-4.5)<0.001) out.push('<b>Match: $4.50.</b> 18 × 25¢ = 450¢.');
+  else out.push(`Match: check it. $${a.toFixed(2)} ÷ 18 = ${(a*100/18).toFixed(2)}¢ an ounce, not 25¢. What do 18 ounces cost at 25¢ each?`);
+  if (b===null) out.push('Fill in the second box.');
+  else if (Math.abs(b-4.05)<0.001) out.push('<b>10% cheaper: $4.05.</b> 10% of 25¢ is 2.5¢, so 22.5¢ an ounce. 18 × 22.5¢ = 405¢. (Or: 10% off $4.50 is $4.50 − $0.45.)');
+  else if (Math.abs(b-4.32)<0.001) out.push('10% cheaper: $4.32 is 10% off the real $4.80 price. The question asks for 10% cheaper than 25¢ an ounce. Start from the matching price.');
+  else out.push(`10% cheaper: check it. $${b.toFixed(2)} ÷ 18 = ${(b*100/18).toFixed(2)}¢ an ounce. We want 10% less than 25¢. What is 10% of 25¢?`);
+  const ok = a!==null && b!==null && Math.abs(a-4.5)<0.001 && Math.abs(b-4.05)<0.001;
+  ev(`<p class="fb ${ok?'':'try'}">${out.join('<br>')}${ok?' The real box costs $4.80, so “Family Size Value” would need to drop 30¢ just to tie.':''}</p>`);
+}
+
+/* ---------- Reset / fullscreen ---------- */
+function resetAll(){
+  $('#egg12').value=''; $('#egg6').value=''; $$('#egg12,#egg6').forEach(i=>i.classList.remove('ok','bad')); $('#eggFb').innerHTML=''; drawEggs(false);
+  votes.A=0; votes.B=0; $('#vA').textContent='0'; $('#vB').textContent='0'; $('#voteFb').innerHTML='';
+  cur=0; ROWS.forEach((r,i)=>st[i]={pred:null, vals:['',''], verified:[false,false], pick:null, solved:false});
+  $('#shelfFb').innerHTML=''; $('#shelfEvidence').innerHTML=''; $$('#nbChecks input').forEach(x=>x.checked=false); $('#nbFb').innerHTML='';
+  dealCur=0; dealState[0]={guess:null,q:3,price:150}; dealState[1]={guess:null}; dealState[2]={guess:null,step:0,price:10000};
+  q=1; ev('');
+  renderShelf(); renderDeals(); selectTab('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+drawEggs(false); renderShelf(); renderDeals(); renderQ();
+window.__bestbuy = {ROWS, judge, betterIdx, biggerIdx, unitStr, d1A, d1B, lcm};
+})();
+</script>
+
+</body></html>

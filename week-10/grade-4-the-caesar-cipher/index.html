@@ -1,0 +1,728 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Caesar Cipher</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a brass-and-ink cipher wheel (the lesson's 26-hour clock) on the left, the lesson's steps in tabs on the right */
+:root{
+  --paper:#ECEEF3; --card:#FFFFFF; --ink:#1A1F31; --muted:#596079; --line:#D2D6E1;
+  --brass:#A86F08; --brass-soft:#F6EBD3; --cipher:#B0233C; --cipher-soft:#F8E1E5;
+  --ok:#1D8250; --ok-soft:#DFF2E7; --disk:#1F2540; --disk-ink:#F1EDE2; --disk-line:#3A4163;
+  --display:"Cinzel", "Trajan Pro", Georgia, serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11131B; --card:#1A1E2B; --ink:#E8E9EF; --muted:#A1A8BC; --line:#343A4E;
+    --brass:#E3AD48; --brass-soft:#3A2E17; --cipher:#FF7389; --cipher-soft:#3B1E26;
+    --ok:#4CCB8A; --ok-soft:#173226; --disk:#E2CC93; --disk-ink:#1A1E2B; --disk-line:#BBA56E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11131B; --card:#1A1E2B; --ink:#E8E9EF; --muted:#A1A8BC; --line:#343A4E;
+  --brass:#E3AD48; --brass-soft:#3A2E17; --cipher:#FF7389; --cipher-soft:#3B1E26;
+  --ok:#4CCB8A; --ok-soft:#173226; --disk:#E2CC93; --disk-ink:#1A1E2B; --disk-line:#BBA56E;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brass); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px 24px; padding-block:14px 8px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(24px,2.6vw,38px); letter-spacing:.04em; line-height:1.05}
+.title p{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.1vw,17px)}
+.title p b{color:var(--ink); font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:15px; min-height:44px}
+.ghost:hover{border-color:var(--ink)}
+
+main{flex:1; min-height:0; display:flex; gap:28px; padding-block:6px 18px}
+.wheel-col{flex:none; display:flex; flex-direction:column; gap:10px; align-items:center}
+.wheel{width:min(calc(100dvh - 260px), 46vw); aspect-ratio:1; max-width:100%; touch-action:manipulation}
+.wheel svg{width:100%; height:100%; display:block; overflow:visible}
+.wl{font-family:var(--display); font-weight:700; text-anchor:middle; dominant-baseline:central; user-select:none}
+.outer-l{font-size:30px; fill:var(--ink)}
+.outer-n{font-family:var(--mono); font-size:13px; fill:var(--muted); text-anchor:middle; dominant-baseline:central}
+.inner-l{font-size:27px; fill:var(--disk-ink)}
+.slot{cursor:pointer}
+.slot:hover .slotbg{fill:var(--brass-soft)}
+#innerRing{transition:transform var(--spin,0.8s) cubic-bezier(.45,.05,.3,1)}
+#walker{transition:transform .05s linear}
+.center-big{font-family:var(--mono); font-weight:700; font-size:54px; fill:var(--disk-ink); text-anchor:middle; dominant-baseline:central}
+.center-small{font-family:var(--body); font-size:17px; fill:var(--disk-ink); text-anchor:middle; dominant-baseline:central; opacity:.85}
+.wheel-key{display:flex; gap:16px; flex-wrap:wrap; justify-content:center; font-size:14px; color:var(--muted)}
+.wheel-key span{display:inline-flex; align-items:center; gap:6px}
+.wheel-key i{width:14px; height:14px; border-radius:4px; display:inline-block}
+.info{font-size:clamp(16px,1.35vw,20px); min-height:2.8em; text-align:center; max-width:28em; line-height:1.4}
+.info .eq{font-family:var(--mono); font-weight:700; white-space:nowrap}
+
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:14px; overflow:auto; padding-right:2px; padding-bottom:12px}
+.tabs{display:flex; gap:4px; border-bottom:2px solid var(--line); overflow-x:auto; flex:none; scrollbar-width:thin}
+.tabs button{border:0; background:none; padding:10px 10px 9px; font-size:clamp(15px,1.15vw,18px); font-weight:700; color:var(--muted); border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; min-height:44px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--brass)}
+.tabs button small{font-family:var(--mono); font-size:.8em; margin-right:4px; color:var(--brass)}
+.view{display:flex; flex-direction:column; gap:18px}
+.lead{font-size:clamp(18px,1.6vw,24px); line-height:1.4; margin:0; max-width:36em}
+.lead b{color:var(--brass)}
+h2{font-family:var(--display); font-size:clamp(18px,1.5vw,22px); letter-spacing:.03em; margin:0; font-weight:700}
+.task{background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:16px 18px; display:flex; flex-direction:column; gap:12px}
+.task .q{font-size:clamp(17px,1.4vw,21px); line-height:1.4; margin:0}
+.q .num{font-family:var(--mono); font-weight:700; color:var(--brass); margin-right:6px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:clamp(16px,1.25vw,19px); padding:12px 22px; border-radius:12px; min-height:48px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(15px,1.15vw,17px); padding:10px 18px; border-radius:12px; min-height:48px}
+.quiet{border:1.5px solid var(--line); background:transparent; color:var(--muted); font-weight:700; font-size:15px; padding:10px 14px; border-radius:12px; min-height:44px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.numin{width:4.2em; font-family:var(--mono); font-weight:700; font-size:24px; text-align:center; padding:8px 4px; border:2px solid var(--line); border-radius:10px; background:var(--paper)}
+.numin.good{border-color:var(--ok); background:var(--ok-soft)}
+.numin.bad{border-color:var(--cipher); background:var(--cipher-soft)}
+.fb{margin:0; font-size:clamp(16px,1.3vw,19px); line-height:1.45; padding:12px 16px; border-radius:12px; background:var(--brass-soft); max-width:38em}
+.fb.good{background:var(--ok-soft)}
+.fb.try{background:var(--cipher-soft)}
+.fb:empty{display:none}
+.fb b{font-family:var(--mono)}
+
+/* letter tiles */
+.msg{display:flex; flex-wrap:wrap; gap:14px 22px}
+.word{display:flex; gap:6px}
+.tile{display:flex; flex-direction:column; align-items:center; gap:3px}
+.tile .src{font-family:var(--mono); font-weight:700; font-size:clamp(24px,2.1vw,32px); line-height:1; cursor:pointer; padding:2px 4px; border-radius:6px}
+.tile .src:hover{background:var(--brass-soft)}
+.tile .n{font-family:var(--mono); font-size:12px; color:var(--muted)}
+.tile input{width:clamp(38px,3vw,48px); height:clamp(46px,3.6vw,56px); text-align:center; font-family:var(--mono); font-weight:700; font-size:clamp(22px,1.9vw,30px); text-transform:uppercase;
+  border:2px solid var(--line); border-radius:10px; background:var(--paper); color:var(--cipher); padding:0}
+.tile.plain input{color:var(--ink)}
+.tile input.good{border-color:var(--ok); background:var(--ok-soft)}
+.tile input.bad{border-color:var(--cipher); background:var(--cipher-soft)}
+.src.cipher{color:var(--cipher)}
+
+.choices{display:flex; flex-wrap:wrap; gap:8px}
+.choices button{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; min-height:48px; font-size:16px}
+.choices button.good{border-color:var(--ok); background:var(--ok-soft)}
+.choices button.bad{border-color:var(--cipher); background:var(--cipher-soft)}
+
+.strip{overflow-x:auto}
+.strip table{border-collapse:collapse; font-family:var(--mono); font-size:15px}
+.strip td{border:1px solid var(--line); text-align:center; padding:4px 0; width:2.1em; background:var(--card)}
+.strip tr.n td{color:var(--muted); font-size:12px}
+.strip tr.l td{font-weight:700; font-size:18px}
+
+.secret{font-family:var(--mono); font-weight:700; font-size:clamp(26px,2.6vw,40px); letter-spacing:.06em; color:var(--cipher); display:flex; flex-wrap:wrap; gap:4px 26px}
+.secret span{display:inline-flex; gap:2px}
+.secret i{font-style:normal; padding:0 3px; border-radius:6px; cursor:pointer}
+.secret i.on{background:var(--brass); color:var(--card)}
+.secret i.counted{text-decoration:underline 3px var(--brass); text-underline-offset:6px}
+.bars{display:grid; grid-template-columns:repeat(26, minmax(0,1fr)); gap:3px; align-items:end; height:150px; padding-top:20px}
+.bar{display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:3px; cursor:pointer; border:0; background:none; padding:0; min-width:0}
+.bar .b{width:100%; background:var(--cipher); border-radius:4px 4px 0 0; transition:height .25s; min-height:0}
+.bar .c{font-family:var(--mono); font-size:12px; font-weight:700; color:var(--ink); min-height:1em}
+.bar .k{font-family:var(--mono); font-size:13px; font-weight:700; color:var(--muted)}
+.bar.pick .b{background:var(--brass)}
+.bar.pick .k{color:var(--brass)}
+.brute{font-family:var(--mono); font-size:15px; display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:4px 14px}
+.brute div{padding:3px 8px; border-radius:6px}
+.brute div.hit{background:var(--ok-soft); font-weight:700}
+.big-lab{font-family:var(--mono); font-weight:700; font-size:clamp(20px,1.8vw,28px); word-break:break-all; padding:10px 14px; border-radius:12px; background:var(--paper); min-height:2em}
+.textin{font-family:var(--mono); font-size:20px; padding:10px 12px; border:2px solid var(--line); border-radius:10px; background:var(--paper); width:100%; text-transform:uppercase}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:18px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.maptab{overflow-x:auto}
+.maptab table{border-collapse:collapse; font-family:var(--mono); font-size:14px}
+.maptab td,.maptab th{border:1px solid var(--line); padding:4px 0; width:2em; text-align:center}
+.maptab th{color:var(--muted); font-weight:500; text-align:left; padding:4px 8px; white-space:nowrap; width:auto}
+.maptab td.dup{background:var(--cipher-soft); color:var(--cipher); font-weight:700}
+.hint{font-size:14px; color:var(--muted); margin:0}
+
+@media (max-width: 960px), (orientation: portrait){
+  main{flex-direction:column; overflow:auto}
+  .wheel{width:min(100%, 62dvh)}
+  .panel{overflow:visible}
+}
+@media (prefers-reduced-motion: reduce){
+  #innerRing,#walker,.bar .b{transition:none !important}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>The Caesar Cipher</h1>
+    <p>Grade 4 · Week 10 · Lesson 4.10 · <b>What happens when you shift past Z?</b></p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<main>
+  <div class="wheel-col">
+    <div class="wheel" id="wheel"></div>
+    <div class="wheel-key">
+      <span><i style="background:var(--card);border:1.5px solid var(--line)"></i>Plain letter (outside)</span>
+      <span><i style="background:var(--disk)"></i>Secret letter (inside)</span>
+    </div>
+    <div class="row" id="wheelCtl" style="justify-content:center">
+      <button class="quiet" id="wMinus" aria-label="Turn the shift down one">− 1</button>
+      <button class="quiet" id="wPlus" aria-label="Turn the shift up one">+ 1</button>
+    </div>
+    <div class="info" id="info" aria-live="polite">Tap any letter on the wheel to see its number and where it goes.</div>
+  </div>
+
+  <section class="panel">
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="views"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+/* ================= Core math (every answer and every feedback line comes from here) ================= */
+const mod = (a,m) => ((a % m) + m) % m;
+const num = c => c.charCodeAt(0) - 65;
+const let_ = n => String.fromCharCode(65 + mod(n,26));
+const shiftText = (t,s) => t.toUpperCase().replace(/[A-Z]/g, c => let_(num(c) + s));
+const mulText = (t,k) => t.toUpperCase().replace(/[A-Z]/g, c => let_(num(c) * k));
+const atbash = t => t.toUpperCase().replace(/[A-Z]/g, c => let_(25 - num(c)));
+const countLetters = t => { const c = {}; for(const ch of t.toUpperCase()) if(/[A-Z]/.test(ch)) c[ch] = (c[ch]||0) + 1; return c; };
+const topLetter = t => { const c = countLetters(t); let best=null; for(const k in c) if(best===null || c[k] > c[best]) best = k; return best; };
+const $ = s => document.querySelector(s);
+const el = (tag, attrs={}, html='') => { const e = document.createElement(tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(html) e.innerHTML = html; return e; };
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+
+/* Explain one letter move in words, with the wrap shown */
+function explainMove(c, s){
+  const n = num(c), raw = n + s, out = let_(raw);
+  if(s >= 0){
+    if(raw <= 25) return `<span class="eq">${c} = ${n}</span> → <span class="eq">${n} + ${s} = ${raw}</span> → <b>${out}</b>`;
+    const laps = Math.floor(raw/26);
+    return `<span class="eq">${c} = ${n}</span> → <span class="eq">${n} + ${s} = ${raw}</span>. That’s past 25, so wrap: <span class="eq">${raw} − ${26*laps} = ${mod(raw,26)}</span> → <b>${out}</b>`;
+  }
+  const back = -s;
+  if(raw >= 0) return `<span class="eq">${c} = ${n}</span> → <span class="eq">${n} − ${back} = ${raw}</span> → <b>${out}</b>`;
+  return `<span class="eq">${c} = ${n}</span> → <span class="eq">${n} − ${back} = ${raw}</span>. That’s below 0, so wrap: <span class="eq">${raw} + 26 = ${mod(raw,26)}</span> → <b>${out}</b>`;
+}
+
+/* ================= The wheel ================= */
+const TH = 360/26, C = 300;
+const S = { total:0, sel:null, walking:0, tab:'warm' };
+function pol(r, deg){ const a = (deg - 90) * Math.PI/180; return [C + r*Math.cos(a), C + r*Math.sin(a)]; }
+function wedge(r1, r2, a1, a2){
+  const [x1,y1]=pol(r2,a1),[x2,y2]=pol(r2,a2),[x3,y3]=pol(r1,a2),[x4,y4]=pol(r1,a1);
+  return `M${x1},${y1} A${r2},${r2} 0 0 1 ${x2},${y2} L${x3},${y3} A${r1},${r1} 0 0 0 ${x4},${y4} Z`;
+}
+function buildWheel(){
+  let s = `<svg viewBox="-6 -6 612 612" role="img" aria-label="Cipher wheel: plain letters outside, secret letters inside">`;
+  s += `<circle cx="300" cy="300" r="298" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/>`;
+  s += `<g id="outerRing">`;
+  for(let i=0;i<26;i++){
+    const [lx,ly]=pol(258,i*TH), [nx,ny]=pol(222,i*TH);
+    s += `<g class="slot" data-i="${i}" role="button" tabindex="0" aria-label="${let_(i)}, number ${i}">
+      <path class="slotbg" d="${wedge(208,296,i*TH-TH/2,i*TH+TH/2)}" fill="transparent" stroke="var(--line)" stroke-width="1"/>
+      <text class="wl outer-l" x="${lx}" y="${ly}" transform="rotate(${i*TH} ${lx} ${ly})">${let_(i)}</text>
+      <text class="outer-n" x="${nx}" y="${ny}">${i}</text></g>`;
+  }
+  s += `</g>`;
+  s += `<g id="walkerG"><g id="walker"><circle cx="300" cy="6" r="11" fill="var(--brass)"/></g></g>`;
+  s += `<g id="innerRing" style="transform-origin:300px 300px">`;
+  s += `<circle cx="300" cy="300" r="206" fill="var(--disk)"/>`;
+  for(let i=0;i<26;i++){
+    const [lx,ly]=pol(180,i*TH); const [a,b]=pol(206,i*TH-TH/2), [c2,d]=pol(150,i*TH-TH/2);
+    s += `<line x1="${a}" y1="${b}" x2="${c2}" y2="${d}" stroke="var(--disk-line)" stroke-width="1.5"/>`;
+    s += `<text class="wl inner-l" data-j="${i}" x="${lx}" y="${ly}" transform="rotate(${i*TH} ${lx} ${ly})">${let_(i)}</text>`;
+  }
+  s += `<circle cx="300" cy="300" r="150" fill="none" stroke="var(--disk-line)" stroke-width="1.5"/>`;
+  s += `<path d="M300,96 l-9,-14 h18 z" fill="var(--brass)"/>`;
+  s += `</g>`;
+  s += `<g id="selWedge" style="display:none"><path d="${wedge(140,296,-TH/2,TH/2)}" fill="var(--brass)" opacity=".3" stroke="var(--brass)" stroke-width="3" style="pointer-events:none"/></g>`;
+  s += `<text class="center-big" id="cBig" x="300" y="285">+0</text>`;
+  s += `<text class="center-small" id="cSmall" x="300" y="335">shift</text>`;
+  s += `</svg>`;
+  $('#wheel').innerHTML = s;
+  $('#walkerG').style.display = 'none';
+  document.querySelectorAll('.slot').forEach(g => {
+    const go = () => tapSlot(+g.dataset.i);
+    g.addEventListener('click', go);
+    g.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+  });
+}
+function shiftNow(){ return mod(S.total, 26); }
+function renderCenter(label){
+  const s = shiftNow();
+  $('#cBig').textContent = '+' + s;
+  $('#cSmall').textContent = label || (s===0 ? 'no change' : `A → ${let_(s)}`);
+}
+function applyAngle(steps){
+  const ring = $('#innerRing');
+  const dur = reduced ? 0 : Math.min(3.2, Math.max(.35, Math.abs(steps) * .07));
+  ring.style.setProperty('--spin', dur + 's');
+  ring.style.transform = `rotate(${-S.total*TH}deg)`;
+  return dur * 1000;
+}
+/* turn the shortest way to shift s */
+function setShift(s, label){
+  let d = mod(s - S.total, 26); if(d > 13) d -= 26;
+  S.total += d; const ms = applyAngle(d); renderCenter(label); if(S.sel!==null) showSel(S.sel, true); return ms;
+}
+/* spin a real number of steps (more than a lap shows as laps) */
+function spinFromZero(steps, label){
+  const ring = $('#innerRing');
+  ring.style.setProperty('--spin','0s'); S.total = 0; ring.style.transform = 'rotate(0deg)';
+  void ring.getBoundingClientRect();
+  S.total = steps; const ms = applyAngle(steps); renderCenter(label); return ms;
+}
+function spinBy(steps, label){ S.total += steps; const ms = applyAngle(steps); renderCenter(label); return ms; }
+function lapLabel(n){ const q=Math.floor(n/26), r=n%26; return q ? `${n} = ${q} lap${q>1?'s':''} + ${r}` : `${n} steps`; }
+function showSel(i, quiet){
+  S.sel = i;
+  const w = $('#selWedge'); w.style.display = ''; w.setAttribute('transform', `rotate(${i*TH} 300 300)`);
+  if(!quiet){ const s = shiftNow(); $('#info').innerHTML = explainMove(let_(i), s); }
+}
+function clearSel(){ S.sel = null; $('#selWedge').style.display = 'none'; }
+function tapSlot(i){ showSel(i); }
+function info(html){ $('#info').innerHTML = html; }
+
+/* walk a brass marker n steps around the outside, starting at A */
+async function walk(n){
+  const id = ++S.walking; const g = $('#walkerG'), w = $('#walker');
+  g.style.display = ''; clearSel();
+  const speed = n > 60 ? 38 : 70;
+  for(let k=0;k<=n;k++){
+    if(id !== S.walking) return false;
+    w.setAttribute('transform', `rotate(${k*TH} 300 300)`);
+    $('#cBig').textContent = k; $('#cSmall').textContent = k>=26 ? lapLabel(k) : 'steps';
+    if(!reduced) await sleep(speed);
+  }
+  showSel(n % 26, true);
+  info(`${n} steps from A: <span class="eq">${lapLabel(n)}</span>. You land on <b>${let_(n)}</b> (${n%26}).`);
+  return true;
+}
+function stopWalk(){ S.walking++; $('#walkerG').style.display = 'none'; }
+
+/* ================= Reusable pieces ================= */
+function fb(box, html, kind){ box.className = 'fb' + (kind ? ' ' + kind : ''); box.innerHTML = html; }
+
+/* A letter-by-letter exercise. src = text shown, ans = expected, shift = signed shift used */
+function letterTask(opts){
+  const { src, ans, shift, encode, wheelShift } = opts;
+  const wrap = el('div', {class:'msg'});
+  const inputs = [];
+  src.split(' ').forEach((word, wi) => {
+    const w = el('div', {class:'word'});
+    [...word].forEach(ch => {
+      const idx = inputs.length;
+      const t = el('div', {class:'tile' + (encode ? '' : ' plain')});
+      const sp = el('span', {class:'src' + (encode ? '' : ' cipher')}, ch);
+      const n = el('span', {class:'n'}, num(ch));
+      const inp = el('input', {maxlength:'1', inputmode:'text', autocomplete:'off', autocapitalize:'characters', 'aria-label':`Letter for ${ch}`, id:`${opts.id}-${idx}`});
+      sp.onclick = () => { setShift(wheelShift); pointAt(ch); };
+      inp.addEventListener('focus', () => { setShift(wheelShift); pointAt(ch, true); });
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^a-z]/gi,'').toUpperCase().slice(-1);
+        inp.classList.remove('good','bad');
+        if(inp.value && inputs[idx+1]) inputs[idx+1].inp.focus();
+      });
+      inp.addEventListener('keydown', e => { if(e.key==='Backspace' && !inp.value && inputs[idx-1]) inputs[idx-1].inp.focus(); });
+      t.append(sp, n, inp); w.appendChild(t); inputs.push({inp, ch, want: ans.replace(/ /g,'')[idx]});
+    });
+    wrap.appendChild(w);
+  });
+  function pointAt(ch, quiet){
+    // highlight the slot where this letter's move starts (encode: plain on outside; decode: secret on inside)
+    const i = encode ? num(ch) : mod(num(ch) - wheelShift, 26);
+    showSel(i, true);
+    if(!quiet) info(explainMove(ch, shift));
+    else info(encode ? `Find <b>${ch}</b> on the outside. Read the secret letter just inside it.` : `Find <b>${ch}</b> on the inside ring. Read the plain letter just outside it.`);
+  }
+  function check(box){
+    let blank=0, wrong=[];
+    inputs.forEach(o => {
+      o.inp.classList.remove('good','bad');
+      if(!o.inp.value){ blank++; return; }
+      if(o.inp.value === o.want) o.inp.classList.add('good'); else { o.inp.classList.add('bad'); wrong.push(o); }
+    });
+    if(!wrong.length && !blank){ fb(box, opts.done, 'good'); return true; }
+    if(!wrong.length){ fb(box, `Everything so far is right. ${blank} letter${blank===1?' is':'s are'} still empty.`); return false; }
+    const o = wrong[0], moved = mod(num(o.inp.value) - num(o.ch), 26), need = mod(shift, 26);
+    const dir = encode ? 'forward' : 'backward', k = Math.abs(shift);
+    let why;
+    if(mod(-moved,26) === need && need !== 0) why = `You went the wrong way. ${encode ? 'Encoding goes forward' : 'Decoding goes backward'} ${k} places.`;
+    else {
+      const went = encode ? moved : mod(-moved, 26);
+      why = `${o.ch} is ${num(o.ch)} and ${o.inp.value} is ${num(o.inp.value)}, so you moved ${went} place${went===1?'':'s'} ${dir}. The shift is ${k}.`;
+      const raw = num(o.ch) + shift;
+      if(raw > 25 || raw < 0) why += ` This one wraps ${raw > 25 ? 'past Z back to A' : 'past A back to Z'}.`;
+    }
+    fb(box, `${wrong.length} letter${wrong.length===1?' needs':'s need'} another look (marked red). First one, under <b>${o.ch}</b>: ${why} Count again on the wheel.`, 'try');
+    return false;
+  }
+  function reveal(box){ inputs.forEach(o => { o.inp.value = o.want; o.inp.classList.remove('bad'); o.inp.classList.add('good'); }); fb(box, opts.done, 'good'); }
+  function clear(){ inputs.forEach(o => { o.inp.value=''; o.inp.classList.remove('good','bad'); }); }
+  return { node: wrap, check, reveal, clear };
+}
+
+function numberCheck(input, box, want, ok, wrongFn){
+  const v = input.value.trim();
+  input.classList.remove('good','bad');
+  if(v === ''){ fb(box, 'Type a number first.'); return; }
+  const n = Number(v);
+  if(n === want){ input.classList.add('good'); fb(box, ok, 'good'); }
+  else { input.classList.add('bad'); fb(box, wrongFn(n), 'try'); }
+}
+
+/* ================= Tabs ================= */
+const TABS = [
+  {id:'warm', label:'Warm-up'},
+  {id:'launch', label:'Launch'},
+  {id:'a', label:'Encode & decode', k:'A'},
+  {id:'b', label:'Big shifts', k:'B'},
+  {id:'c', label:'Crack it', k:'C'},
+  {id:'q', label:'Detective questions'},
+  {id:'lab', label:'Code lab'}
+];
+const builders = {};
+function buildTabs(){
+  const t = $('#tabs'); t.innerHTML = '';
+  TABS.forEach(x => {
+    const b = el('button', {role:'tab', 'aria-selected': String(x.id===S.tab), id:'tab-'+x.id}, (x.k?`<small>${x.k}</small>`:'') + x.label);
+    b.onclick = () => selectTab(x.id);
+    t.appendChild(b);
+  });
+}
+function selectTab(id){
+  S.tab = id; stopWalk(); clearSel();
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', String(b.id==='tab-'+id)));
+  const v = $('#views'); v.innerHTML = '';
+  const box = el('div', {class:'view'}); v.appendChild(box);
+  builders[id](box);
+}
+
+/* ---------- Warm-up ---------- */
+builders.warm = box => {
+  setShift(0); info('The wheel is a clock with 26 hours: A is 0, Z is 25. After 25 comes 0 again.');
+  box.appendChild(el('p', {class:'lead'}, 'Before the secret codes: <b>division with remainders</b>. How many full trips around a 26-hour clock, and how many steps are left over?'));
+  [[30,1,4],[52,2,0],[100,3,22]].forEach(([n,q,r], k) => {
+    const t = el('div', {class:'task'});
+    t.innerHTML = `<p class="q"><span class="num">${k+1}</span>${n} ÷ 26 = <input class="numin" id="wq${n}" inputmode="numeric" aria-label="quotient"> r <input class="numin" id="wr${n}" inputmode="numeric" aria-label="remainder"></p>
+      <div class="row"><button class="primary">Check</button><button class="secondary">Walk ${n} steps on the wheel</button></div><p class="fb"></p>`;
+    const [chk, wk] = t.querySelectorAll('button'), f = t.querySelector('.fb');
+    const qi = t.querySelector('#wq'+n), ri = t.querySelector('#wr'+n);
+    chk.onclick = () => {
+      qi.classList.remove('good','bad'); ri.classList.remove('good','bad');
+      const qv = qi.value.trim(), rv = ri.value.trim();
+      if(qv===''||rv===''){ fb(f, 'Fill in both boxes: the quotient and the remainder.'); return; }
+      const Q = Number(qv), R = Number(rv);
+      if(Q===q && R===r){ qi.classList.add('good'); ri.classList.add('good');
+        fb(f, `Yes. <b>26 × ${q} = ${26*q}</b>${r?`, and <b>${n} − ${26*q} = ${r}</b>`:', with nothing left over'}. So ${n} ÷ 26 = ${q} r ${r}. On the wheel: ${q} full lap${q>1?'s':''}${r?`, then ${r} more steps`:' and back to A'}.`, 'good'); return; }
+      let msg;
+      if(26*Q > n){ qi.classList.add('bad'); msg = `26 × ${Q} = ${26*Q}, which is more than ${n}. That many full laps don’t fit. Try one fewer.`; }
+      else if(n - 26*Q >= 26){ qi.classList.add('bad'); msg = `26 × ${Q} = ${26*Q}, which leaves ${n-26*Q}. That is 26 or more, so another full lap fits.`; }
+      else { qi.classList.add('good'); ri.classList.add('bad'); msg = `${Q} full lap${Q===1?'':'s'} is right: 26 × ${Q} = ${26*Q}. How far is it from ${26*Q} up to ${n}? That gap is the remainder.`; }
+      fb(f, msg, 'try');
+    };
+    wk.onclick = () => walk(n);
+    box.appendChild(t);
+  });
+  box.appendChild(el('p', {class:'hint'}, 'Keep these answers. Part B uses them.'));
+};
+
+/* ---------- Launch ---------- */
+builders.launch = box => {
+  setShift(3, 'A → D');
+  info('Caesar’s shift: every letter moves 3 places. Tap a letter on the outside to follow it.');
+  box.appendChild(el('p', {class:'lead'}, 'Julius Caesar sent orders with every letter shifted <b>3 places</b>: A becomes D, B becomes E.'));
+  const strip = el('div', {class:'strip'});
+  let h = '<table aria-label="Numbered alphabet strip">';
+  for(const half of [0,13]){
+    h += '<tr class="n">' + Array.from({length:13},(_,i)=>`<td>${half+i}</td>`).join('') + '</tr>';
+    h += '<tr class="l">' + Array.from({length:13},(_,i)=>`<td>${let_(half+i)}</td>`).join('') + '</tr>';
+  }
+  strip.innerHTML = h + '</table>';
+  box.appendChild(strip);
+  box.appendChild(el('p', {class:'hint'}, 'The strip from your handout. A is 0, not 1. Z is 25.'));
+
+  const t1 = el('div', {class:'task'});
+  t1.innerHTML = `<p class="q"><span class="num">1</span>With a shift of 3, what does <b>X</b> become?</p><div class="choices"></div><p class="fb"></p>`;
+  const ch = t1.querySelector('.choices'), f1 = t1.querySelector('.fb');
+  [['AA','AA'],['A','A'],['[','?'],['Z','Z'],['U','U']].forEach(([v,lab]) => {
+    const b = el('button', {}, lab); ch.appendChild(b);
+    b.onclick = () => {
+      ch.querySelectorAll('button').forEach(x => x.classList.remove('good','bad'));
+      showSel(23, true);
+      if(v==='A'){ b.classList.add('good'); fb(f1, `Yes. ${explainMove('X',3)}. The strip wraps: after Z comes A again.`, 'good'); info(explainMove('X',3)); return; }
+      b.classList.add('bad');
+      const msg = { AA:'A shift changes one letter into one letter, so X can’t become two. Count on the wheel from X: Y (1), Z (2), then what comes after Z?',
+        '[':'There is no letter after Z on the strip. Look at the wheel: what sits right after Z?',
+        Z:'From X, one step is Y and two steps is Z. The shift is 3, so take one more step. Where does the wheel go after Z?',
+        U:'U is 3 places <i>before</i> X. Encoding moves forward. Count Y, Z, then one more.' }[v];
+      fb(f1, msg, 'try');
+    };
+  });
+  box.appendChild(t1);
+
+  const t2 = el('div', {class:'task'});
+  t2.innerHTML = `<p class="q"><span class="num">2</span>Decode Caesar’s message. Go <b>backward</b> 3.</p>`;
+  const lt = letterTask({id:'pdwk', src:'PDWK', ans:'MATH', shift:-3, encode:false, wheelShift:3, done:`<b>MATH</b>. Every letter moved back 3. ${explainMove('D',-3)}: right at the start of the strip.`});
+  t2.appendChild(lt.node);
+  const r2 = el('div', {class:'row'}), f2 = el('p', {class:'fb'});
+  const c2 = el('button', {class:'primary'}, 'Check'), v2 = el('button', {class:'quiet'}, 'Show answer');
+  r2.append(c2, v2); t2.append(r2, f2);
+  c2.onclick = () => lt.check(f2); v2.onclick = () => lt.reveal(f2);
+  box.appendChild(t2);
+};
+
+/* ---------- Part A ---------- */
+builders.a = box => {
+  setShift(5); info('Tap a letter, or click into a box. The wheel turns to the shift you need.');
+  box.appendChild(el('p', {class:'lead'}, 'Add the shift to each letter’s number. If you pass 25, <b>wrap around</b>: subtract 26.'));
+  const mk = (title, cfg) => {
+    const t = el('div', {class:'task'});
+    t.innerHTML = `<p class="q">${title}</p>`;
+    const lt = letterTask(cfg); t.appendChild(lt.node);
+    const r = el('div', {class:'row'}), f = el('p', {class:'fb'});
+    const c = el('button', {class:'primary'}, 'Check'), v = el('button', {class:'quiet'}, 'Show answer'), x = el('button', {class:'quiet'}, 'Clear');
+    r.append(c, v, x); t.append(r, f);
+    c.onclick = () => lt.check(f); v.onclick = () => lt.reveal(f); x.onclick = () => { lt.clear(); fb(f,''); };
+    box.appendChild(t);
+  };
+  mk('<span class="num">1</span>Encode with a shift of <b>5</b>.', {id:'pa1', src:'MATH IS FUN', ans:shiftText('MATH IS FUN',5), shift:5, encode:true, wheelShift:5,
+    done:`<b>${shiftText('MATH IS FUN',5)}</b>. Check one: ${explainMove('U',5)}. That one wrapped.`});
+  mk('<span class="num">2</span>Decode with a shift of <b>7</b> (go backward 7).', {id:'pa2', src:'LUYPJOTLUA', ans:shiftText('LUYPJOTLUA',-7), shift:-7, encode:false, wheelShift:7,
+    done:`<b>${shiftText('LUYPJOTLUA',-7)}</b>. The last letter wrapped: ${explainMove('A',-7)}. Going forward, T + 7 wraps to A.`});
+};
+
+/* ---------- Part B ---------- */
+builders.b = box => {
+  spinFromZero(0); info('Spin the wheel by any amount. Watch how many full laps it makes.');
+  box.appendChild(el('p', {class:'lead'}, 'What does a <b>huge</b> shift do? Spin the wheel and watch where it stops.'));
+  const sp = el('div', {class:'task'});
+  sp.innerHTML = `<p class="q">Spin by <input class="numin" id="spinN" inputmode="numeric" value="30" aria-label="Shift to spin"> places</p>
+    <div class="row"><button class="primary" id="spinGo">Spin from A</button><button class="secondary" data-s="26">Spin 26</button><button class="secondary" data-s="52">Spin 52</button><button class="secondary" data-s="29">Spin 29</button></div><p class="fb" id="spinFb"></p>`;
+  box.appendChild(sp);
+  const doSpin = n => {
+    n = Math.max(0, Math.min(200, Math.floor(n)));
+    const q = Math.floor(n/26), r = n%26;
+    spinFromZero(n, lapLabel(n)); showSel(0, true);
+    fb($('#spinFb'), `Shift ${n}: ${q ? `${q} full lap${q>1?'s':''} (${26*q}) and ${r} more.` : `less than one lap.`} A lands on <b>${let_(n)}</b>, so it works just like a shift of <b>${r}</b>.${r===0?' Every letter is back where it started.':''}`);
+    info(`${n} ÷ 26 = ${q} r ${r}. A → <b>${let_(n)}</b>`);
+  };
+  sp.querySelector('#spinGo').onclick = () => { const v = Number(sp.querySelector('#spinN').value); if(!Number.isFinite(v) || v < 0){ fb($('#spinFb'),'Type a whole number from 0 to 200.'); return; } doSpin(v); };
+  sp.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { sp.querySelector('#spinN').value = b.dataset.s; doSpin(+b.dataset.s); });
+
+  const qs = [
+    {q:'A shift of 30 is the same as a shift of', want:4, ok:'Yes, 4. 30 ÷ 26 = 1 r 4: one full lap changes nothing, then 4 more.',
+      wrong:n => n===30 ? 'True, but find a smaller shift that lands on the same letter. One full lap is 26 places.' : 'Spin 30 and look at where A lands. 30 ÷ 26 = 1 r ? The remainder is the shift that matters.'},
+    {q:'Shift by 3, then shift again by 5. That is one shift of', want:8, ok:'Yes, 8. The two moves add: 3 + 5 = 8. Try it: H → K → P, and H + 8 = P.',
+      wrong:n => n===2 ? '3 and 5 go the same way, forward, so they don’t cancel. What do they add up to?' : n===15 ? 'You multiplied. Moving 3 places and then 5 more places is one move of how many?' : 'Press “Show me” to watch the wheel move 3, then 5 more. How far did it go in all?', act:'Show me'},
+    {q:'Shift by 29 is the same as shift by', want:3, ok:'Yes, 3. 29 = 26 + 3. The 26 is one full lap, which changes nothing, so only the 3 matters.',
+      wrong:n => `Spin 29 and see where A lands. 29 ÷ 26 = 1 r ? The remainder is the shift that matters.`}
+  ];
+  const t26 = el('div', {class:'task'});
+  t26.innerHTML = `<p class="q"><span class="num">1</span>A shift of 26 does what? A shift of 52?</p><div class="choices"></div><p class="fb"></p>`;
+  const ch = t26.querySelector('.choices'), f26 = t26.querySelector('.fb');
+  [['n','Nothing changes'],['z','Every letter becomes Z'],['r','The message is written backward'],['d','Letters move twice as far']].forEach(([k,lab]) => {
+    const b = el('button', {}, lab); ch.appendChild(b);
+    b.onclick = () => {
+      ch.querySelectorAll('button').forEach(x => x.classList.remove('good','bad'));
+      if(k==='n'){ b.classList.add('good'); doSpin(52); fb(f26, 'Yes. 26 is exactly one full lap, so every letter lands on itself. 52 is two full laps (52 ÷ 26 = 2 r 0): still nothing. That’s why a shift of 26 is useless for secrets.', 'good'); return; }
+      b.classList.add('bad'); doSpin(26);
+      fb(f26, 'Watch the spin of 26. Where does A land? Where does B land? Tap a few letters to check.', 'try');
+    };
+  });
+  box.appendChild(t26);
+
+  qs.forEach((o, i) => {
+    const t = el('div', {class:'task'});
+    t.innerHTML = `<p class="q"><span class="num">${i+2}</span>${o.q} <input class="numin" id="pb${i}" inputmode="numeric" aria-label="answer">?</p><div class="row"><button class="primary">Check</button>${o.act?`<button class="secondary">${o.act}</button>`:''}</div><p class="fb"></p>`;
+    const inp = t.querySelector('input'), f = t.querySelector('.fb'), [c, a] = t.querySelectorAll('button');
+    c.onclick = () => numberCheck(inp, f, o.want, o.ok, o.wrong);
+    if(a) a.onclick = async () => {
+      spinFromZero(0); showSel(7, true);
+      await sleep(300); const ms = spinBy(3, 'first +3'); await sleep(ms + 400);
+      const ms2 = spinBy(5, 'then +5'); await sleep(ms2 + 200);
+      renderCenter('3 + 5 = 8'); info(`H → K → <b>P</b>. One shift of 8 does the same: ${explainMove('H',8)}`);
+    };
+    box.appendChild(t);
+  });
+};
+
+/* ---------- Part C ---------- */
+const SECRET = 'WKH VHFUHW LV ILIWHHQ';
+builders.c = box => {
+  setShift(0); info('The shift is unknown. Count the letters, then turn the wheel to test your guess.');
+  box.appendChild(el('p', {class:'lead'}, 'The shift is <b>unknown</b>. The most common letter in English is E. The most common letter in a secret message is probably E in disguise.'));
+  const msg = el('div', {class:'secret', 'aria-label':'Secret message'});
+  const letters = [];
+  SECRET.split(' ').forEach(w => { const s = el('span'); [...w].forEach(c => { const i = el('i', {}, c); letters.push(i); s.appendChild(i); }); msg.appendChild(s); });
+  box.appendChild(msg);
+
+  const t1 = el('div', {class:'task'});
+  t1.innerHTML = `<p class="q"><span class="num">1</span>Count the letters. Tap each letter in the message, or let the app count.</p><div class="bars" id="bars"></div>
+    <div class="row"><button class="primary" id="countAll">Count them all</button><button class="quiet" id="countClear">Clear the count</button></div>`;
+  box.appendChild(t1);
+  const bars = t1.querySelector('#bars'), tally = {};
+  const barEls = {};
+  for(let i=0;i<26;i++){
+    const L = let_(i), b = el('button', {class:'bar', 'aria-label':`${L}: 0`}, `<span class="c"></span><span class="b" style="height:0"></span><span class="k">${L}</span>`);
+    b.onclick = () => pickTop(L); barEls[L] = b; bars.appendChild(b);
+  }
+  const renderBars = () => {
+    const max = Math.max(5, ...Object.values(tally));
+    for(let i=0;i<26;i++){ const L = let_(i), n = tally[L]||0, b = barEls[L];
+      b.querySelector('.b').style.height = (n/max*100) + '%'; b.querySelector('.c').textContent = n || ''; b.setAttribute('aria-label', `${L}: ${n}`); }
+  };
+  letters.forEach(i => i.onclick = () => { if(i.classList.contains('counted')) return; i.classList.add('counted'); tally[i.textContent] = (tally[i.textContent]||0)+1; renderBars(); });
+  t1.querySelector('#countAll').onclick = async () => {
+    for(const i of letters){ if(!i.classList.contains('counted')){ i.classList.add('counted'); tally[i.textContent]=(tally[i.textContent]||0)+1; renderBars(); await sleep(70); } }
+  };
+  t1.querySelector('#countClear').onclick = () => { letters.forEach(i => i.classList.remove('counted','on')); for(const k in tally) delete tally[k]; renderBars(); };
+
+  const t2 = el('div', {class:'task'});
+  t2.innerHTML = `<p class="q"><span class="num">2</span>Which letter shows up most? Tap its bar.</p><p class="fb" id="topFb"></p>`;
+  box.appendChild(t2);
+  const counts = countLetters(SECRET), top = topLetter(SECRET);
+  function pickTop(L){
+    Object.values(barEls).forEach(b => b.classList.remove('pick')); barEls[L].classList.add('pick');
+    letters.forEach(i => i.classList.toggle('on', i.textContent===L));
+    const n = counts[L]||0;
+    if(L===top) fb($('#topFb'), `Yes: <b>${L}</b> appears ${n} times, more than any other letter (W is next with ${counts.W}). So ${L} is probably hiding E.`, 'good');
+    else if(!n) fb($('#topFb'), `${L} isn’t in the message at all. Count first, then look for the tallest bar.`, 'try');
+    else fb($('#topFb'), `${L} appears ${n} time${n===1?'':'s'}. Look for a letter that shows up more often. Count first if you haven’t.`, 'try');
+  }
+
+  const t3 = el('div', {class:'task'});
+  t3.innerHTML = `<p class="q"><span class="num">3</span>If <b>H</b> is really <b>E</b>, the shift is <input class="numin" id="pcShift" inputmode="numeric" aria-label="shift"></p>
+    <div class="row"><button class="primary">Check</button><button class="secondary">Line up E with H</button></div><p class="fb"></p>`;
+  const [c3, l3] = t3.querySelectorAll('button'), f3 = t3.querySelector('.fb'), in3 = t3.querySelector('input');
+  c3.onclick = () => numberCheck(in3, f3, 3, 'Yes, 3. E is 4 and H is 7: 7 − 4 = 3. Now test it on one word before you trust it.',
+    n => n===7 ? '7 is H’s number. The shift is how far E moved to become H. E is 4.' : n===4 ? '4 is E’s number. How far is it from E (4) to H (7)?' : n===23 ? 'That’s the distance going backward from E to H. Going forward from E to H, how many steps?' : 'E is 4 and H is 7. How many steps from E to H?');
+  l3.onclick = () => { setShift(3); showSel(4, true); info(`Under E (4) the inside ring shows <b>H</b> (7). <span class="eq">7 − 4 = 3</span>`); };
+  box.appendChild(t3);
+
+  const t4 = el('div', {class:'task'});
+  t4.innerHTML = `<p class="q"><span class="num">4</span>Test the shift on the first word. Decode <b>WKH</b>, then the rest.</p>`;
+  const lt = letterTask({id:'pc', src:SECRET, ans:shiftText(SECRET,-3), shift:-3, encode:false, wheelShift:3, done:`<b>${shiftText(SECRET,-3)}</b>. The guess worked: E really was hiding as H.`});
+  t4.appendChild(lt.node);
+  const r4 = el('div', {class:'row'}), f4 = el('p', {class:'fb'});
+  const c4 = el('button', {class:'primary'}, 'Check'), v4 = el('button', {class:'quiet'}, 'Show answer');
+  r4.append(c4, v4); t4.append(r4, f4); c4.onclick = () => lt.check(f4); v4.onclick = () => lt.reveal(f4);
+  box.appendChild(t4);
+
+  const t5 = el('div', {class:'task'});
+  t5.innerHTML = `<p class="q"><span class="num">5</span>The slow way: try all 25 shifts on WKH. Which one makes a real word?</p><div class="row"><button class="secondary">Try every shift</button></div><div class="brute" hidden></div>`;
+  const br = t5.querySelector('.brute');
+  t5.querySelector('button').onclick = () => {
+    br.hidden = false;
+    br.innerHTML = Array.from({length:25},(_,k)=>k+1).map(s => { const w = shiftText('WKH',-s); return `<div class="${w==='THE'?'hit':''}">back ${s}: ${w}</div>`; }).join('');
+  };
+  box.appendChild(t5);
+  box.appendChild(el('p', {class:'hint'}, 'Trying all 25 works, but it’s slow. Counting letters gets there in one guess.'));
+  renderBars();
+};
+
+/* ---------- Detective questions ---------- */
+builders.q = box => {
+  setShift(0); info('Talk it over first, then tap a button to put evidence on the wheel.');
+  const nav = el('div', {class:'qnav'}), qt = el('p', {class:'lead'}), acts = el('div', {class:'row'}), res = el('div', {class:'fb'});
+  box.append(nav, qt, acts, res, el('p', {class:'hint'}, 'Each button shows evidence. It doesn’t replace the explaining.'));
+  const say = (h, k) => fb(res, h, k);
+  const maptable = k => {
+    const outs = Array.from({length:26}, (_,i) => mod(i*k,26)), seen = {};
+    outs.forEach(o => seen[o] = (seen[o]||0)+1);
+    return `<div class="maptab"><table><tr><th>Letter</th>${outs.map((_,i)=>`<td>${let_(i)}</td>`).join('')}</tr><tr><th>× ${k}</th>${outs.map(o=>`<td class="${seen[o]>1?'dup':''}">${let_(o)}</td>`).join('')}</tr></table></div>`;
+  };
+  const Q = [
+    {k:'1', t:'Draw a clock with 26 hours. Shifting is moving around the clock. <b>Where does a shift of 30 land you?</b>',
+      a:[{l:'Walk 30 from A', r: async () => { say('Watch the marker count…'); if(await walk(30)) say('30 steps: one full lap (26) brings you back to A, then 4 more steps land on <b>E</b>. 30 ÷ 26 = 1 r 4, so shift 30 = shift 4.'); }}]},
+    {k:'2', t:'<b>Why is a shift of 26 useless?</b> What about a shift of 52?',
+      a:[{l:'Spin 26', r: () => { stopWalk(); spinFromZero(26, lapLabel(26)); showSel(0,true); say(`After 26 places the inside ring lines up exactly as it started. HELLO with shift 26 is <b>${shiftText('HELLO',26)}</b>. Nothing is hidden.`); }},
+         {l:'Spin 52', r: () => { stopWalk(); spinFromZero(52, lapLabel(52)); showSel(0,true); say(`52 ÷ 26 = 2 r 0. Two full laps, still no change: HELLO stays <b>${shiftText('HELLO',52)}</b>. Any multiple of 26 does nothing.`); }}]},
+    {k:'3', t:'Shift by 3, and then by 5. <b>Same as one shift of what?</b>',
+      a:[{l:'Shift 3, then 5', r: async () => { stopWalk(); spinFromZero(0); showSel(0,true); await sleep(250); const m = spinBy(3,'+3'); await sleep(m+350); const m2 = spinBy(5,'+3 then +5'); await sleep(m2+100);
+          say(`A → D → <b>I</b>. One shift of 8 sends A straight to I. Shifts add: 3 + 5 = 8. HELLO → ${shiftText('HELLO',3)} → <b>${shiftText(shiftText('HELLO',3),5)}</b>, and HELLO with 8 is also <b>${shiftText('HELLO',8)}</b>.`); }},
+         {l:'Now 20, then 10', r: async () => { stopWalk(); spinFromZero(0); showSel(0,true); await sleep(250); const m = spinBy(20,'+20'); await sleep(m+350); const m2 = spinBy(10,'+20 then +10'); await sleep(m2+100);
+          say(`20 + 10 = 30, which is more than a lap. 30 ÷ 26 = 1 r 4, so it’s the same as one shift of <b>4</b>. A lands on <b>${let_(30)}</b>.`); }}]},
+    {k:'4', t:'Exit ticket: <b>Why is shifting by 29 the same as shifting by 3?</b>',
+      a:[{l:'Encode HELLO both ways', r: () => { stopWalk(); setShift(3); say(`Shift 3: <b>${shiftText('HELLO',3)}</b>. Shift 29: <b>${shiftText('HELLO',29)}</b>. The same! Use remainders to explain why.`); }},
+         {l:'Show the remainder', r: () => { stopWalk(); spinFromZero(29, lapLabel(29)); showSel(0,true); say('29 ÷ 26 = 1 r 3. The full lap (26) puts every letter back where it was, so only the remainder, 3, moves anything.'); }}]},
+    {k:'5', t:'The most common letter in English is E. <b>If the most common letter in a secret message is H, what is the shift?</b>',
+      a:[{l:'Line up E and H', r: () => { stopWalk(); setShift(3); showSel(4,true); say('E is 4. H is 7. 7 − 4 = <b>3</b>. Set the wheel to 3: E sits right over H.'); }},
+         {l:'What if it were K?', r: () => { stopWalk(); setShift(6); showSel(4,true); say(`K is 10. 10 − 4 = <b>6</b>. With shift 6, E becomes ${let_(10)}.`); }},
+         {l:'What if it were B?', r: () => { stopWalk(); setShift(23); showSel(4,true); say(`B is 1, which is <i>less</i> than E (4). 1 − 4 = −3, so wrap: −3 + 26 = <b>23</b>. Check: ${explainMove('E',23)}.`); }}]},
+    {k:'★ Challenge', t:'A <b>multiplying cipher</b>: multiply each letter’s number by 3, then take the remainder after dividing by 26. Encode HELLO. Now try × 2. What goes wrong?',
+      a:[{l:'HELLO × 3', r: () => { stopWalk(); say(`${[...'HELO'].map(c=>`${c} = ${num(c)} → ${num(c)} × 3 = ${num(c)*3} → r ${mod(num(c)*3,26)} → <b>${let_(num(c)*3)}</b>`).join('<br>')}<br>HELLO → <b>${mulText('HELLO',3)}</b>`); }},
+         {l:'HELLO × 2', r: () => { stopWalk(); say(`${[...'HELO'].map(c=>`${c} = ${num(c)} → ${num(c)} × 2 = ${num(c)*2} → r ${mod(num(c)*2,26)} → <b>${let_(num(c)*2)}</b>`).join('<br>')}<br>HELLO → <b>${mulText('HELLO',2)}</b>. It encodes… but can you decode it?`); }},
+         {l:'Compare all 26 letters', r: () => { stopWalk();
+            const d3 = new Set(Array.from({length:26},(_,i)=>mod(i*3,26))).size, d2 = new Set(Array.from({length:26},(_,i)=>mod(i*2,26))).size;
+            say(`${maptable(3)}<p style="margin:8px 0">× 3 gives ${d3} different letters: every letter has its own code, so it decodes.</p>${maptable(2)}<p style="margin:8px 0 0">× 2 gives only ${d2} different letters (red = used twice). A (0) and N (13) both become <b>A</b>: 13 × 2 = 26, remainder 0. If you get an A, you can’t tell which letter it was. 2 and 26 share a factor; 3 and 26 don’t.</p>`); }}]},
+    {k:'Atbash', t:'Optional: the Hebrew <b>atbash</b> cipher swaps the first letter with the last (alef with tav), the second with the second to last, and so on. Jeremiah 25:26 writes Babylon as “Sheshach” this way. Try it in English: A ↔ Z, B ↔ Y.',
+      a:[{l:'Show the English atbash', r: () => { stopWalk();
+            say(`<div class="maptab"><table><tr><th>Letter</th>${Array.from({length:26},(_,i)=>`<td>${let_(i)}</td>`).join('')}</tr><tr><th>Atbash</th>${Array.from({length:26},(_,i)=>`<td>${let_(25-i)}</td>`).join('')}</tr></table></div><p style="margin:8px 0 0">Each letter’s number n becomes 25 − n. Do it twice and you’re back: atbash undoes itself. Encode your name below.</p><input class="textin" id="atIn" placeholder="Your name" aria-label="Name to encode with atbash" maxlength="24"><div class="big-lab" id="atOut" style="margin-top:8px"></div>`);
+            const i = $('#atIn'), o = $('#atOut'); i.oninput = () => o.textContent = atbash(i.value.replace(/[^a-z ]/gi,'')); }}]}
+  ];
+  let cur = 0;
+  const render = () => {
+    nav.innerHTML = '';
+    Q.forEach((q,i) => { const b = el('button', {'aria-pressed': String(i===cur)}, q.k); b.onclick = () => { cur = i; stopWalk(); fb(res,''); render(); }; nav.appendChild(b); });
+    qt.innerHTML = Q[cur].t; acts.innerHTML = '';
+    Q[cur].a.forEach((a,i) => { const b = el('button', {class: i===0 ? 'primary' : 'secondary'}, a.l); b.onclick = a.r; acts.appendChild(b); });
+  };
+  render();
+};
+
+/* ---------- Code lab ---------- */
+builders.lab = box => {
+  setShift(3); info('Make your own secret. Trade with a partner and crack theirs.');
+  box.appendChild(el('p', {class:'lead'}, 'Write a secret message for a partner. Any shift works, even a giant one.'));
+  const t = el('div', {class:'task'});
+  t.innerHTML = `<input class="textin" id="labIn" maxlength="80" value="MEET AT THE LIBRARY" aria-label="Message">
+    <div class="row"><span>Shift</span><input class="numin" id="labS" inputmode="numeric" value="3" aria-label="Shift"><button class="primary" id="labEnc">Encode</button><button class="secondary" id="labDec">Decode</button></div>
+    <div class="big-lab" id="labOut" aria-live="polite"></div><p class="fb" id="labFb"></p>`;
+  box.appendChild(t);
+  const go = dir => {
+    const raw = t.querySelector('#labS').value.trim(), s = Number(raw);
+    if(raw==='' || !Number.isInteger(s) || s < 0 || s > 999){ fb(t.querySelector('#labFb'), 'Type a whole-number shift from 0 to 999.', 'try'); return; }
+    const txt = t.querySelector('#labIn').value.toUpperCase().replace(/[^A-Z .,!?']/g,'');
+    t.querySelector('#labOut').textContent = shiftText(txt, dir * s);
+    setShift(mod(s,26));
+    fb(t.querySelector('#labFb'), s >= 26 ? `Shift ${s} = ${Math.floor(s/26)} lap${s>=52?'s':''} + ${s%26}. It does exactly what shift ${s%26} does.` : `${dir>0?'Each letter moved forward':'Each letter moved back'} ${s}.`);
+  };
+  t.querySelector('#labEnc').onclick = () => go(1);
+  t.querySelector('#labDec').onclick = () => go(-1);
+
+  const k = el('div', {class:'task'});
+  k.innerHTML = `<p class="q">Crack a partner’s message: paste or type it, and the app counts its letters.</p><input class="textin" id="crIn" maxlength="200" aria-label="Secret message to crack"><div class="row"><button class="primary" id="crGo">Count and guess</button></div><p class="fb" id="crFb"></p>`;
+  box.appendChild(k);
+  k.querySelector('#crGo').onclick = () => {
+    const v = k.querySelector('#crIn').value.toUpperCase(), c = countLetters(v), top = topLetter(v), f = k.querySelector('#crFb');
+    if(!top){ fb(f, 'Type a secret message with some letters in it first.'); return; }
+    const total = Object.values(c).reduce((a,b)=>a+b,0), s = mod(num(top) - 4, 26);
+    const list = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([L,n])=>`${L} ×${n}`).join(', ');
+    setShift(s);
+    fb(f, `Most common: ${list}. If <b>${top}</b> hides E, the shift is ${num(top)} − 4 → <b>${s}</b>. Decoded: <b>${shiftText(v, -s)}</b>${total < 15 ? '<br>Short messages can fool you. If it’s nonsense, try the next most common letter.' : ''}`);
+  };
+};
+
+/* ================= Wire up ================= */
+function startOver(){ stopWalk(); S.total = 0; const r = $('#innerRing'); r.style.setProperty('--spin','0s'); r.style.transform='rotate(0deg)'; renderCenter(); clearSel(); selectTab('warm'); }
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+$('#wPlus').onclick = () => { stopWalk(); spinBy(1); if(S.sel!==null) showSel(S.sel); };
+$('#wMinus').onclick = () => { stopWalk(); spinBy(-1); if(S.sel!==null) showSel(S.sel); };
+buildWheel(); buildTabs(); renderCenter(); selectTab('warm');
+window.__core = { shiftText, mulText, atbash, countLetters, topLetter, explainMove, mod };
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,752 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Shape Riddles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a sorting table — the shape tray on the left, a riddle card and clue chips on the right. */
+:root{
+  --table:#E9EEF2; --tray:#F7F9FB; --card:#FFFFFF; --ink:#18222C; --muted:#56636F; --line:#CCD5DD;
+  --accent:#2448B8; --accent-soft:#E2E8FA; --good:#1C7D45; --good-soft:#DDF1E4; --no:#B83A22; --no-soft:#FBE5DF;
+  --on-accent:#FFFFFF; --edge:#18222C; --riddle:#FFF8D9; --riddle-ink:#3A2E05;
+  --tri:#3C9A3A; --sqr:#F0891C; --rec:#1B9A98; --rho:#2F63C8; --tra:#D63A33; --pen:#8A4FC7; --hex:#F2C21B; --cir:#E0559A;
+  --cub:#E08A3A; --pri:#4C8FD6; --sph:#E0559A; --con:#F2B21B; --cyl:#2FA383; --pyr:#C9604A;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#12181E; --tray:#19212A; --card:#202A35; --ink:#ECF0F3; --muted:#A5B1BC; --line:#34424F;
+    --accent:#7F9BFF; --accent-soft:#25305A; --good:#5BD08B; --good-soft:#163826; --no:#FF8A70; --no-soft:#41221B;
+    --on-accent:#0E1530; --edge:#0A0E12; --riddle:#3A3313; --riddle-ink:#FFF3C4; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --table:#12181E; --tray:#19212A; --card:#202A35; --ink:#ECF0F3; --muted:#A5B1BC; --line:#34424F;
+  --accent:#7F9BFF; --accent-soft:#25305A; --good:#5BD08B; --good-soft:#163826; --no:#FF8A70; --no-soft:#41221B;
+  --on-accent:#0E1530; --edge:#0A0E12; --riddle:#3A3313; --riddle-ink:#FFF3C4; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--table); color:var(--ink); font-family:var(--body); font-size:18px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+header{display:flex; align-items:center; gap:12px 24px; padding-block:14px 8px; flex-wrap:wrap}
+h1{font-family:var(--display); font-weight:600; font-size:clamp(28px,3vw,44px); margin:0; line-height:1; letter-spacing:-.01em}
+.sub{margin:4px 0 0; color:var(--muted); font-size:clamp(14px,1.15vw,17px)}
+.sub b{color:var(--ink); font-weight:700}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+.ghost[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:20px; padding-block:6px 18px}
+.stage{min-width:0; display:flex; flex-direction:column; gap:10px; overflow:auto}
+.shelf{background:var(--tray); border:2px solid var(--line); border-radius:18px; padding:10px 12px 12px}
+.shelf h2{font-family:var(--display); font-weight:500; font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px}
+.shape{position:relative; border:2px solid transparent; background:var(--card); border-radius:14px; padding:6px 6px 8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-height:128px; transition:border-color .2s, background-color .2s}
+.shape svg{width:100%; max-width:130px; height:auto; aspect-ratio:120/100; overflow:visible; transition:opacity .25s}
+.shape .nm{font-family:var(--display); font-weight:500; font-size:17px; line-height:1.1; text-align:center}
+.shape .why{font-size:13.5px; line-height:1.2; color:var(--no); text-align:center; display:none}
+.shape.out svg{opacity:.22}
+.shape.out .nm{color:var(--muted)}
+.shape.out .why{display:block}
+.shape.fit{border-color:var(--good); background:var(--good-soft)}
+.shape.hl{border-color:var(--accent); background:var(--accent-soft)}
+.shape.pick{border-color:var(--ink)}
+.shape.wrongpick{border-color:var(--no); background:var(--no-soft)}
+.badge{position:absolute; top:6px; right:6px; min-width:30px; height:30px; padding:0 8px; border-radius:15px; background:var(--accent); color:var(--on-accent); font-weight:700; font-size:16px; display:none; align-items:center; justify-content:center}
+.badge.on{display:flex}
+.badge.good{background:var(--good); color:var(--on-accent)}
+.badge.no{background:var(--no); color:var(--on-accent)}
+svg .body{stroke:var(--edge); stroke-width:2.5; stroke-linejoin:round}
+svg .hid{fill:none; stroke:var(--edge); stroke-width:1.8; stroke-dasharray:4 4; opacity:.55}
+svg .mk{display:none}
+.marks svg .mk{display:inline}
+svg .tick{stroke:var(--edge); stroke-width:2.6; stroke-linecap:round}
+svg .ra{fill:none; stroke:var(--edge); stroke-width:2.2}
+svg .dot{fill:var(--card); stroke:var(--edge); stroke-width:2}
+.spin{transform-box:view-box; transform-origin:60px 50px; transition:transform .8s ease}
+.info{font-size:clamp(16px,1.3vw,20px); line-height:1.4; min-height:1.5em; padding:2px 4px}
+/* WODB */
+.wodb{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+.wodb .shape{min-height:0; padding:14px}
+.wodb .shape svg{max-width:240px}
+.wodb .shape .nm{font-size:22px}
+/* Panel */
+.panel{min-width:0; display:flex; flex-direction:column; gap:14px; overflow:auto; padding-right:2px}
+.tabs{display:flex; gap:4px; flex-wrap:wrap; border-bottom:2px solid var(--line)}
+.tabs button{border:0; background:none; padding:10px 10px 8px; font-family:var(--display); font-weight:500; font-size:clamp(16px,1.35vw,20px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; min-height:48px}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+.view{display:flex; flex-direction:column; gap:14px}
+.lead{font-size:clamp(18px,1.5vw,23px); line-height:1.4; margin:0; max-width:34em}
+.lead b{font-weight:700}
+.rcard{background:var(--riddle); color:var(--riddle-ink); border-radius:6px 18px 18px 6px; padding:18px 22px; border-left:10px solid var(--hex); box-shadow:0 2px 0 var(--line)}
+.rcard .rn{font-family:var(--display); font-weight:600; font-size:16px; letter-spacing:.06em; text-transform:uppercase; opacity:.75}
+.rcard p{font-family:var(--display); font-weight:500; font-size:clamp(24px,2.3vw,34px); line-height:1.25; margin:4px 0 0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--on-accent); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:52px}
+.nav{display:flex; gap:8px; flex-wrap:wrap}
+.nav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:22px}
+.nav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.nav button.done{border-color:var(--good); box-shadow:inset 0 0 0 3px var(--good-soft)}
+.nav button.star{width:auto; padding:0 18px; border-radius:27px; font-size:18px}
+.fb{font-size:clamp(17px,1.4vw,21px); line-height:1.45; margin:0; padding:14px 18px; border-radius:14px; background:var(--accent-soft)}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft)}
+.fb.no{background:var(--no-soft)}
+.fb ul{list-style:none; margin:8px 0 0; padding:0; display:flex; flex-direction:column; gap:4px}
+.fb li{display:flex; gap:10px; align-items:baseline}
+.fb li i{font-style:normal; font-weight:700; width:1.2em; flex:none}
+.fb li.y i{color:var(--good)} .fb li.n i{color:var(--no)}
+.fb li span small{display:block; color:var(--no); font-size:.9em}
+.chips{display:flex; flex-direction:column; gap:10px}
+.cg h3{margin:0 0 6px; font-size:14px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:700}
+.cg div{display:flex; gap:6px; flex-wrap:wrap}
+.chip{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-size:16px; min-height:44px; text-align:left}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.chip.look{border-style:dashed}
+.picked{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
+.picked li{display:flex; align-items:center; gap:10px; background:var(--riddle); color:var(--riddle-ink); border-radius:12px; padding:6px 6px 6px 14px; font-family:var(--display); font-weight:500; font-size:clamp(19px,1.6vw,24px)}
+.picked li.look{opacity:.8; font-style:italic}
+.picked li button{margin-left:auto; border:0; background:transparent; width:44px; height:44px; border-radius:10px; font-size:22px; color:inherit}
+.picked li button:hover{background:rgba(0,0,0,.08)}
+.verdict{display:flex; gap:16px; align-items:center; padding:12px 16px; border-radius:16px; background:var(--card); border:2px solid var(--line)}
+.verdict b{font-family:var(--display); font-weight:600; font-size:clamp(40px,4vw,60px); line-height:1; min-width:1.2em; text-align:center}
+.verdict span{font-size:clamp(17px,1.4vw,21px); line-height:1.35}
+.verdict.one{border-color:var(--good); background:var(--good-soft)}
+.verdict.zero{border-color:var(--no); background:var(--no-soft)}
+.steps{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+.steps li{font-family:var(--display); font-weight:500; font-size:clamp(20px,1.8vw,26px); padding:8px 14px; border-radius:12px; background:var(--card); border:2px solid var(--line); display:flex; justify-content:space-between; gap:12px; align-items:center}
+.steps li em{font-style:normal; font-family:var(--body); font-size:16px; color:var(--muted); white-space:nowrap}
+.steps li.cur{border-color:var(--accent)}
+.steps li.todo{opacity:.35}
+.hint{font-size:15px; color:var(--muted); margin:0}
+table.fw{border-collapse:collapse; font-size:16px; width:100%}
+table.fw th, table.fw td{text-align:left; padding:5px 10px 5px 0; vertical-align:top; border-bottom:1px solid var(--line)}
+table.fw th{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+table.fw td:nth-child(2){font-weight:700; font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+@media (max-width: 900px), (orientation: portrait){
+  main{grid-template-columns:minmax(0,1fr); overflow:visible}
+  .stage,.panel{overflow:visible}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .shape{min-height:110px}
+}
+@media (max-width: 480px){
+  .wodb .shape .nm{font-size:18px}
+  .tools .ghost{padding:8px 12px; font-size:15px}
+}
+</style>
+<header>
+  <div>
+    <h1>Shape Riddles</h1>
+    <p class="sub">Grade 2 · Week 10 · Lesson 2.10 &nbsp;·&nbsp; <b>What is the fewest clues that pin down one shape?</b></p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="marksBtn" aria-pressed="false">Show side &amp; corner marks</button>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<main>
+  <section class="stage" id="stage" aria-label="Shape table">
+    <div id="boardWrap">
+      <div class="shelf"><h2>Flat shapes</h2><div class="grid" id="gFlat"></div></div>
+      <div class="shelf" style="margin-top:10px"><h2>Solid shapes</h2><div class="grid" id="gSolid"></div></div>
+    </div>
+    <div class="wodb" id="wodb" hidden></div>
+    <div class="info" id="info" aria-live="polite"></div>
+  </section>
+
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="warm" aria-selected="true">Warm-up</button>
+      <button role="tab" data-tab="cards" aria-selected="false">Shape flashcards</button>
+      <button role="tab" data-tab="riddles" aria-selected="false">Riddles 1–8</button>
+      <button role="tab" data-tab="maker" aria-selected="false">Riddle maker</button>
+      <button role="tab" data-tab="detect" aria-selected="false">Detective questions</button>
+    </div>
+
+    <div class="view" id="v-warm">
+      <p class="lead"><b>Which one doesn’t belong?</b> Pick a shape and say why. Every shape has a true reason.</p>
+      <p class="lead" style="font-size:17px">Tap a shape to see a reason. Tap it again for another.</p>
+      <div class="fb" id="warmFb" aria-live="polite"></div>
+      <div class="row"><button class="secondary" id="warmSame">What do all four share?</button></div>
+    </div>
+
+    <div class="view" id="v-cards" hidden>
+      <p class="lead"><b>Shape flashcards.</b> Read the card. Tap the shape on the table, or flip the card to check.</p>
+      <p class="hint" id="fcProg"></p>
+      <div class="rcard fcard" id="fcCard"><div class="rn" id="fcRn"></div><p id="fcText"></p></div>
+      <div class="fb" id="fcFb" aria-live="polite"></div>
+      <div class="row">
+        <button class="primary" id="fcFlip">Flip card</button>
+        <button class="primary" id="fcNext" hidden>Next card</button>
+        <button class="primary" id="fcAgain" hidden>Shuffle and play again</button>
+        <button class="secondary" id="fcMissed" hidden>Practice missed cards</button>
+      </div>
+    </div>
+
+    <div class="view" id="v-riddles" hidden>
+      <div class="nav" id="rNav"></div>
+      <div class="rcard"><div class="rn" id="rNum">Riddle 1</div><p id="rText"></p></div>
+      <p class="hint" style="font-size:16px">Which shape am I? Tap your answer on the shape table. One riddle has two answers. Find it!</p>
+      <div class="fb" id="rFb" aria-live="polite"></div>
+      <div class="row">
+        <button class="secondary" id="rCheck">Check every shape</button>
+        <button class="secondary" id="rClear">Clear the table</button>
+      </div>
+      <div class="view" id="rFix" hidden>
+        <p class="lead"><b>Add one clue to fix it.</b> Which clue leaves just one answer?</p>
+        <div class="row" id="rFixChips"></div>
+        <div class="fb" id="rFixFb" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="view" id="v-maker" hidden>
+      <p class="lead">Write a riddle. Tap clues to add them. The table shows <b>every shape that fits</b>.</p>
+      <ul class="picked" id="mPicked"></ul>
+      <div class="verdict" id="mVerdict"><b id="mCount">14</b><span id="mSay"></span></div>
+      <div class="row">
+        <button class="secondary" id="mClear">Clear my riddle</button>
+        <button class="secondary" id="mSolid">Start a solid-shape riddle</button>
+      </div>
+      <div class="fb" id="mNote" aria-live="polite"></div>
+      <div class="chips" id="mBank"></div>
+    </div>
+
+    <div class="view" id="v-detect" hidden>
+      <div class="nav" id="qNav"></div>
+      <p class="lead" id="qText"></p>
+      <div class="row" id="qActs"></div>
+      <div class="fb" id="qFb" aria-live="polite"></div>
+      <p class="hint">Talk it over first. Then tap a button to put evidence on the table.</p>
+    </div>
+  </section>
+</main>
+<script>
+/*ENGINE-START*/
+const FLAT_PTS = {
+  triangle:[[25,85],[95,85],[60,24.378]],
+  square:[[28,18],[92,18],[92,82],[28,82]],
+  rectangle:[[15,26],[105,26],[105,74],[15,74]],
+  rhombus:[[20,75],[76,75],[104,26.503],[48,26.503]],
+  trapezoid:[[20,80],[100,80],[80,45.359],[40,45.359]],
+  pentagon:[0,1,2,3,4].map(i=>{const a=-Math.PI/2+i*2*Math.PI/5;return [60+38*Math.cos(a),54+38*Math.sin(a)];}),
+  hexagon:[0,1,2,3,4,5].map(i=>{const a=i*Math.PI/3;return [60+40*Math.cos(a),50+40*Math.sin(a)];})
+};
+const SHAPES = [
+  {id:'triangle', name:'Triangle', kind:'flat', sides:3, corners:3, sq:0, eq:true, c:'--tri'},
+  {id:'square', name:'Square', kind:'flat', sides:4, corners:4, sq:4, eq:true, c:'--sqr'},
+  {id:'rectangle', name:'Rectangle', kind:'flat', sides:4, corners:4, sq:4, eq:false, ls:true, c:'--rec'},
+  {id:'rhombus', name:'Rhombus', kind:'flat', sides:4, corners:4, sq:0, eq:true, c:'--rho'},
+  {id:'trapezoid', name:'Trapezoid', kind:'flat', sides:4, corners:4, sq:0, eq:false, c:'--tra'},
+  {id:'pentagon', name:'Pentagon', kind:'flat', sides:5, corners:5, sq:0, eq:true, c:'--pen'},
+  {id:'hexagon', name:'Hexagon', kind:'flat', sides:6, corners:6, sq:0, eq:true, c:'--hex'},
+  {id:'circle', name:'Circle', kind:'flat', sides:0, corners:0, sq:0, eq:null, curve:true, c:'--cir'},
+  {id:'cube', name:'Cube', kind:'solid', faces:6, corners:8, allsq:true, rolls:false, curve:false, c:'--cub'},
+  {id:'prism', name:'Rectangular prism', kind:'solid', faces:6, corners:8, allsq:false, sqWhy:'Some of my faces are rectangles, not squares.', rolls:false, curve:false, c:'--pri'},
+  {id:'sphere', name:'Sphere', kind:'solid', faces:0, corners:0, allsq:false, sqWhy:'I have no flat faces.', rolls:true, curve:true, c:'--sph'},
+  {id:'cone', name:'Cone', kind:'solid', faces:1, corners:1, allsq:false, sqWhy:'My flat face is a circle.', rolls:true, curve:true, c:'--con'},
+  {id:'cylinder', name:'Cylinder', kind:'solid', faces:2, corners:0, allsq:false, sqWhy:'My flat faces are circles.', rolls:true, curve:true, c:'--cyl'},
+  {id:'pyramid', name:'Pyramid', kind:'solid', faces:5, corners:5, allsq:false, sqWhy:'4 of my faces are triangles.', rolls:false, curve:false, c:'--pyr'}
+];
+const SH = Object.fromEntries(SHAPES.map(s=>[s.id,s]));
+const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+const CLUES = [
+  {id:'flat', g:'Flat or solid', t:'I am flat.', scope:'any'},
+  {id:'solid', g:'Flat or solid', t:'I am solid.', scope:'any'},
+  {id:'s0', g:'Sides', t:'I have no sides.', scope:'flat', n:0},
+  {id:'s3', g:'Sides', t:'I have 3 sides.', scope:'flat', n:3},
+  {id:'s4', g:'Sides', t:'I have 4 sides.', scope:'flat', n:4},
+  {id:'s5', g:'Sides', t:'I have 5 sides.', scope:'flat', n:5},
+  {id:'s6', g:'Sides', t:'I have 6 sides.', scope:'flat', n:6},
+  {id:'eq', g:'Sides', t:'All my sides are the same length.', scope:'flat'},
+  {id:'neq', g:'Sides', t:'My sides are not all the same length.', scope:'flat'},
+  {id:'ls', g:'Sides', t:'Two of my sides are long and two are short.', scope:'flat'},
+  {id:'c0', g:'Corners', t:'I have no corners.', scope:'any', n:0},
+  {id:'c1', g:'Corners', t:'I have 1 corner (a point).', scope:'any', n:1},
+  {id:'c3', g:'Corners', t:'I have 3 corners.', scope:'any', n:3},
+  {id:'c4', g:'Corners', t:'I have 4 corners.', scope:'any', n:4},
+  {id:'c5', g:'Corners', t:'I have 5 corners.', scope:'any', n:5},
+  {id:'c6', g:'Corners', t:'I have 6 corners.', scope:'any', n:6},
+  {id:'c8', g:'Corners', t:'I have 8 corners.', scope:'any', n:8},
+  {id:'sq4', g:'Corners', t:'I have 4 square corners.', scope:'flat'},
+  {id:'nosq', g:'Corners', t:'None of my corners are square corners.', scope:'flat'},
+  {id:'f0', g:'Faces', t:'I have no flat faces.', scope:'solid', n:0},
+  {id:'f1', g:'Faces', t:'I have 1 flat face.', scope:'solid', n:1},
+  {id:'f2', g:'Faces', t:'I have 2 flat faces.', scope:'solid', n:2},
+  {id:'f5', g:'Faces', t:'I have 5 flat faces.', scope:'solid', n:5},
+  {id:'f6', g:'Faces', t:'I have 6 flat faces.', scope:'solid', n:6},
+  {id:'allsq', g:'Faces', t:'Every face is a square.', scope:'solid'},
+  {id:'notsq', g:'Faces', t:'Not all my faces are squares.', scope:'solid'},
+  {id:'roll', g:'Rolling and curves', t:'I can roll.', scope:'solid'},
+  {id:'curve', g:'Rolling and curves', t:'Part of me is curved.', scope:'any'},
+  {id:'blue', g:'How it is drawn', t:'I am blue.', look:true},
+  {id:'big', g:'How it is drawn', t:'I am big.', look:true},
+  {id:'tilt', g:'How it is drawn', t:'I am tilted.', look:true}
+];
+const CL = Object.fromEntries(CLUES.map(c=>[c.id,c]));
+const REAL = CLUES.filter(c=>!c.look);
+function fit(cid, s){
+  const c = CL[cid], R = (ok,why='') => ({ok,why});
+  if(c.look) return R(true,'');
+  if(cid==='flat') return s.kind==='flat' ? R(true) : R(false,'I’m a solid, not flat.');
+  if(cid==='solid') return s.kind==='solid' ? R(true) : R(false,'I’m flat, not a solid.');
+  if(c.scope==='flat' && s.kind==='solid') return R(false, cid[0]==='s'||cid==='eq'||cid==='neq'||cid==='ls' ? 'I’m a solid. Solids have faces, not sides.' : 'I’m a solid. This clue is for flat shapes.');
+  if(c.scope==='solid' && s.kind==='flat') return R(false, cid==='roll' ? 'I’m flat. I lie flat on the table.' : 'I’m flat. Faces are a clue for solids.');
+  if(/^s\d$/.test(cid)) return s.sides===c.n ? R(true) : R(false, s.sides===0 ? 'I have no sides. I’m round.' : `I have ${s.sides} sides.`);
+  if(/^c\d$/.test(cid)) return s.corners===c.n ? R(true) : R(false, s.corners===0 ? 'I have no corners.' : s.corners===1 ? 'I have just 1 corner, my point.' : `I have ${s.corners} corners.`);
+  const sideWhy = () => s.sides===0 ? 'I have no sides.' : s.id==='trapezoid' ? 'I have 1 long side and 3 short sides.' : s.id==='rectangle' ? 'I have 2 long sides and 2 short sides.' : s.sides===4 ? 'All 4 of my sides are the same length.' : `I have ${s.sides} sides, all the same length.`;
+  if(cid==='eq') return s.eq===true ? R(true) : R(false, sideWhy());
+  if(cid==='neq') return s.eq===false ? R(true) : R(false, s.sides===0 ? 'I have no sides.' : 'All my sides are the same length.');
+  if(cid==='ls') return s.ls ? R(true) : R(false, sideWhy());
+  if(cid==='sq4') return s.sq===4 ? R(true) : R(false, s.corners===0 ? 'I have no corners at all.' : 'My corners are not square corners.');
+  if(cid==='nosq') return (s.corners>0 && s.sq===0) ? R(true) : R(false, s.corners===0 ? 'I have no corners at all.' : 'All 4 of my corners are square corners.');
+  if(/^f\d$/.test(cid)) return s.faces===c.n ? R(true) : R(false, s.faces===0 ? 'I have no flat faces. I’m curved all over.' : `I have ${plural(s.faces,'flat face')}.`);
+  if(cid==='allsq') return s.allsq ? R(true) : R(false, s.sqWhy);
+  if(cid==='notsq') return (s.faces>0 && !s.allsq) ? R(true) : R(false, s.faces===0 ? 'I have no flat faces.' : 'Every one of my faces is a square.');
+  if(cid==='roll') return s.rolls ? R(true) : R(false, 'I can’t roll. My faces are all flat.');
+  if(cid==='curve') return s.curve ? R(true) : R(false, s.kind==='flat' ? 'All my sides are straight.' : 'All my faces are flat.');
+  throw new Error('unknown clue '+cid);
+}
+const fitsAll = (ids, s) => ids.every(id => fit(id,s).ok);
+const answers = ids => SHAPES.filter(s => fitsAll(ids,s));
+const RIDDLES = [
+  {n:1, text:'I am flat. I have 3 sides and 3 corners.', clues:['flat','s3','c3']},
+  {n:2, text:'I am flat. I have 4 sides, all the same length, and 4 square corners.', clues:['flat','s4','eq','sq4']},
+  {n:3, text:'I am flat. I have 4 sides, all the same length.', clues:['flat','s4','eq']},
+  {n:4, text:'I am flat. I have 6 sides and 6 corners.', clues:['flat','s6','c6']},
+  {n:5, text:'I am flat. I have 4 square corners. Two of my sides are long and two are short.', clues:['flat','sq4','ls']},
+  {n:6, text:'I am solid. I have 6 faces. Every face is a square.', clues:['solid','f6','allsq']},
+  {n:7, text:'I am solid. I can roll. I have 2 flat faces and no corners.', clues:['solid','roll','f2','c0']},
+  {n:8, text:'I am solid. I can roll. I have 1 flat face and 1 point.', clues:['solid','roll','f1','c1']}
+];
+function combos(arr,k,start=0,pre=[],out=[]){ if(pre.length===k){out.push(pre.slice());return out;} for(let i=start;i<arr.length;i++){pre.push(arr[i]);combos(arr,k,i+1,pre,out);pre.pop();} return out; }
+function fewest(){
+  const res = {};
+  for(const s of SHAPES){
+    for(let k=1;k<=4 && !res[s.id];k++){
+      const ways = combos(REAL.map(c=>c.id),k).filter(ids => { const a=answers(ids); return a.length===1 && a[0].id===s.id; });
+      if(ways.length) res[s.id] = {k, ways};
+    }
+  }
+  return res;
+}
+function twoClueUnique(){
+  return combos(REAL.map(c=>c.id),2).filter(ids => answers(ids).length===1 && ids.every(id => answers([id]).length>=2));
+}
+function noAnswerPairs(){
+  return combos(REAL.map(c=>c.id),2).filter(ids => {
+    if(ids.includes('flat')||ids.includes('solid')) return false;
+    const sc = ids.map(id=>CL[id].scope);
+    if(sc.includes('flat') && sc.includes('solid')) return false;
+    if(/^s\d$/.test(ids[0])&&/^s\d$/.test(ids[1])) return false;
+    if(/^c\d$/.test(ids[0])&&/^c\d$/.test(ids[1])) return false;
+    if(/^f\d$/.test(ids[0])&&/^f\d$/.test(ids[1])) return false;
+    return answers(ids).length===0 && ids.every(id=>answers([id]).length>=1);
+  });
+}
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const listText = a => a.length<=1 ? a.join('') : a.length===2 ? a[0]+' and '+a[1] : a.slice(0,-1).join(', ')+', and '+a[a.length-1];
+const lc = s => s.name.toLowerCase();
+const theName = s => 'the ' + lc(s);
+
+/* ---------- Drawing ---------- */
+const P = p => p.map(q => q.map(v => +v.toFixed(2)).join(',')).join(' ');
+function flatMarks(pts){
+  const n=pts.length, L=[], out=[];
+  for(let i=0;i<n;i++){ const a=pts[i], b=pts[(i+1)%n]; L.push(Math.hypot(b[0]-a[0], b[1]-a[1])); }
+  const groups={}; L.forEach((l,i)=>{ const k=l.toFixed(1); (groups[k]=groups[k]||[]).push(i); });
+  const order = Object.values(groups).filter(g=>g.length>=2).sort((a,b)=>b.length-a.length);
+  order.forEach((g,gi) => g.forEach(i => {
+    const a=pts[i], b=pts[(i+1)%n], m=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    const ux=(b[0]-a[0])/L[i], uy=(b[1]-a[1])/L[i], nx=-uy, ny=ux;
+    const cnt=gi+1;
+    for(let t=0;t<cnt;t++){ const off=(t-(cnt-1)/2)*5; const cx=m[0]+ux*off, cy=m[1]+uy*off;
+      out.push(`<line class="tick" x1="${(cx-nx*6).toFixed(1)}" y1="${(cy-ny*6).toFixed(1)}" x2="${(cx+nx*6).toFixed(1)}" y2="${(cy+ny*6).toFixed(1)}"/>`); }
+  }));
+  for(let i=0;i<n;i++){
+    const v=pts[i], a=pts[(i-1+n)%n], b=pts[(i+1)%n];
+    const u=[a[0]-v[0],a[1]-v[1]], w=[b[0]-v[0],b[1]-v[1]], lu=Math.hypot(...u), lw=Math.hypot(...w);
+    const cos=(u[0]*w[0]+u[1]*w[1])/lu/lw;
+    if(Math.abs(cos)<0.01){ const s=9, p1=[v[0]+u[0]/lu*s, v[1]+u[1]/lu*s], p3=[v[0]+w[0]/lw*s, v[1]+w[1]/lw*s], p2=[p1[0]+w[0]/lw*s, p1[1]+w[1]/lw*s];
+      out.push(`<polyline class="ra" points="${P([p1,p2,p3])}"/>`); }
+  }
+  pts.forEach(p => out.push(`<circle class="dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.6"/>`));
+  return out.join('');
+}
+const dots = pts => pts.map(p => `<circle class="dot" cx="${p[0]}" cy="${p[1]}" r="3.6"/>`).join('');
+function shapeSVG(s){
+  const c = `var(${s.c})`, top = `color-mix(in srgb, ${c} 62%, white)`, side = `color-mix(in srgb, ${c} 72%, black)`;
+  let g = '', mk = '';
+  if(FLAT_PTS[s.id]){ g = `<polygon class="body" points="${P(FLAT_PTS[s.id])}" fill="${c}"/>`; mk = flatMarks(FLAT_PTS[s.id]); }
+  else if(s.id==='circle'){ g = `<circle class="body" cx="60" cy="50" r="38" fill="${c}"/>`; }
+  else if(s.id==='cube'){
+    g = `<polygon class="body" points="22,38 46,18 94,18 70,38" fill="${top}"/><polygon class="body" points="70,38 94,18 94,66 70,86" fill="${side}"/><polygon class="body" points="22,38 70,38 70,86 22,86" fill="${c}"/>`;
+    mk = `<path class="hid" d="M46 66 L22 86 M46 66 L94 66 M46 66 L46 18"/>` + dots([[22,38],[70,38],[94,18],[46,18],[22,86],[70,86],[94,66],[46,66]]);
+  } else if(s.id==='prism'){
+    g = `<polygon class="body" points="10,48 36,28 108,28 82,48" fill="${top}"/><polygon class="body" points="82,48 108,28 108,64 82,84" fill="${side}"/><polygon class="body" points="10,48 82,48 82,84 10,84" fill="${c}"/>`;
+    mk = `<path class="hid" d="M36 64 L10 84 M36 64 L108 64 M36 64 L36 28"/>` + dots([[10,48],[82,48],[108,28],[36,28],[10,84],[82,84],[108,64],[36,64]]);
+  } else if(s.id==='sphere'){
+    g = `<circle class="body" cx="60" cy="50" r="40" fill="${c}"/><path d="M20 50 A40 11 0 0 0 100 50" fill="none" stroke="var(--edge)" stroke-width="1.8" opacity=".6"/><path class="hid" d="M20 50 A40 11 0 0 1 100 50"/><ellipse cx="46" cy="34" rx="10" ry="6" fill="${top}" opacity=".7"/>`;
+  } else if(s.id==='cone'){
+    g = `<path class="body" d="M26 82 L60 10 L94 82 A34 10 0 0 1 26 82 Z" fill="${c}"/><path class="hid" d="M26 82 A34 10 0 0 1 94 82"/>`;
+    mk = dots([[60,10]]);
+  } else if(s.id==='cylinder'){
+    g = `<path class="body" d="M28 22 V78 A32 10 0 0 0 92 78 V22 Z" fill="${c}"/><path class="hid" d="M28 78 A32 10 0 0 1 92 78"/><ellipse class="body" cx="60" cy="22" rx="32" ry="10" fill="${top}"/>`;
+  } else if(s.id==='pyramid'){
+    g = `<polygon class="body" points="20,84 78,84 58,12" fill="${c}"/><polygon class="body" points="78,84 102,64 58,12" fill="${side}"/>`;
+    mk = `<path class="hid" d="M20 84 L44 64 L102 64 M44 64 L58 12"/>` + dots([[20,84],[78,84],[102,64],[44,64],[58,12]]);
+  }
+  return `<svg viewBox="0 0 120 100" aria-hidden="true"><g class="spin">${g}<g class="mk">${mk}</g></g></svg>`;
+}
+function describe(s){
+  if(s.kind==='flat'){
+    if(s.sides===0) return 'Circle: flat, no sides, no corners, and curved all the way around.';
+    const bits=[`flat`, `${s.sides} sides`, `${s.corners} corners`];
+    if(s.sq) bits.push('4 square corners'); else bits.push('no square corners');
+    bits.push(s.eq ? 'all sides the same length' : s.ls ? '2 long sides and 2 short sides' : '1 long side and 3 short sides');
+    return `${s.name}: ${listText(bits)}.`;
+  }
+  const bits=['solid', s.faces===0 ? 'no flat faces' : plural(s.faces,'flat face'), s.corners===0 ? 'no corners' : s.corners===1 ? '1 corner (a point)' : `${s.corners} corners`, s.rolls ? 'it can roll' : 'it can’t roll'];
+  return `${s.name}: ${listText(bits)}.`;
+}
+
+/* ---------- Board ---------- */
+const S = {tab:'warm', marks:false, r:1, found:{}, wrong:null, maker:[], q:1, wodbIdx:{}, ch2:0, ch0:0, painted:false, tilt:false};
+const cards = {};
+function buildBoard(){
+  for(const s of SHAPES){
+    const b = document.createElement('button');
+    b.className='shape'; b.dataset.id=s.id;
+    b.innerHTML = shapeSVG(s) + `<span class="nm">${s.name}</span><span class="why"></span><span class="badge"></span>`;
+    b.onclick = () => onShape(s);
+    (s.kind==='flat' ? $('#gFlat') : $('#gSolid')).appendChild(b);
+    cards[s.id]=b;
+  }
+}
+function clearBoard(){
+  for(const s of SHAPES){ const b=cards[s.id]; b.className='shape'; b.querySelector('.why').textContent=''; const bd=b.querySelector('.badge'); bd.className='badge'; bd.textContent=''; b.setAttribute('aria-label', s.name); }
+}
+function filterBy(ids, markFits){
+  clearBoard();
+  const real = ids.filter(id => !CL[id].look);
+  for(const s of SHAPES){
+    const b=cards[s.id]; const fail = real.map(id=>fit(id,s)).find(r=>!r.ok);
+    if(fail){ b.classList.add('out'); b.querySelector('.why').textContent = fail.why; b.setAttribute('aria-label', `${s.name}, ruled out: ${fail.why}`); }
+    else if(markFits && real.length){ b.classList.add('fit'); b.setAttribute('aria-label', `${s.name}, fits`); }
+  }
+}
+function badge(id, text, cls){ const bd=cards[id].querySelector('.badge'); bd.textContent=text; bd.className='badge on'+(cls?' '+cls:''); }
+function hl(ids){ ids.forEach(id => cards[id].classList.add('hl')); }
+function checklist(ids, s){
+  return '<ul>' + ids.map(id => { const c=CL[id]; if(c.look) return `<li class="y"><i>~</i><span>${c.t} <small style="color:var(--muted)">That’s about the drawing, not the shape.</small></span></li>`;
+    const r=fit(id,s); return `<li class="${r.ok?'y':'n'}"><i>${r.ok?'✓':'✗'}</i><span>${c.t}${r.ok?'':` <small>${r.why}</small>`}</span></li>`; }).join('') + '</ul>';
+}
+function activeClues(){
+  if(S.tab==='maker') return S.maker;
+  return [];
+}
+function onShape(s){
+  if(S.tab==='riddles') return guess(s);
+  if(S.tab==='cards') return fcGuess(s);
+  const ids = activeClues();
+  $('#info').innerHTML = ids.length ? `<b>${s.name}</b> ${checklist(ids,s).replace('<ul>','<ul style="list-style:none;padding:0;margin:4px 0 0">')}` : describe(s);
+}
+
+/* ---------- Warm-up: Which one doesn't belong? ---------- */
+const WODB = [
+  {id:'square', reasons:['It’s the only one with all sides the same length <b>and</b> 4 square corners.','Turn it a quarter turn and it looks exactly the same. Every side and every corner matches.']},
+  {id:'rectangle', reasons:['It’s the only one with 2 long sides and 2 short sides.','It has square corners, but its sides are not all the same length. No other shape here is like that.']},
+  {id:'rhombus', reasons:['All its sides are the same length, but it has no square corners. No other shape here is like that.','It’s the only one that has equal sides and pointy corners that are not square.']},
+  {id:'trapezoid', reasons:['It’s the only one with 1 long side and 3 short sides.','It’s the only one whose top and bottom are different lengths.']}
+];
+function buildWodb(){
+  const w=$('#wodb'); w.innerHTML='';
+  for(const x of WODB){
+    const s=SH[x.id]; const b=document.createElement('button'); b.className='shape'; b.dataset.id=x.id;
+    b.innerHTML = shapeSVG(s) + `<span class="nm">${s.name}</span>`;
+    b.onclick = () => {
+      const i = S.wodbIdx[x.id] = ((S.wodbIdx[x.id] ?? -1) + 1) % x.reasons.length;
+      w.querySelectorAll('.shape').forEach(e=>e.classList.toggle('hl', e===b));
+      setMarks(true);
+      $('#warmFb').className='fb'; $('#warmFb').innerHTML = `<b>The ${lc(s)} doesn’t belong.</b> ${x.reasons[i]} <br><span style="font-size:.9em">Check the marks: little ticks show sides that are the same length, and boxes show square corners.</span>`;
+    };
+    w.appendChild(b);
+  }
+}
+
+/* ---------- Shape flashcards ---------- */
+const CARDS = [
+  {id:'triangle', clues:['flat','s3','c3'], say:'I am flat. I have 3 sides and 3 corners.'},
+  {id:'square', clues:['flat','eq','sq4'], say:'I am flat. All my sides are the same length. I have 4 square corners.'},
+  {id:'rectangle', clues:['flat','sq4','ls'], say:'I am flat. I have 4 square corners. Two of my sides are long and two are short.'},
+  {id:'rhombus', clues:['flat','s4','eq','nosq'], say:'I am flat. I have 4 sides, all the same length. None of my corners are square corners.'},
+  {id:'trapezoid', clues:['flat','neq','nosq'], say:'I am flat. My sides are not all the same length. None of my corners are square corners.'},
+  {id:'pentagon', clues:['flat','s5'], say:'I am flat. I have 5 sides and 5 corners.'},
+  {id:'hexagon', clues:['flat','s6','c6'], say:'I am flat. I have 6 sides and 6 corners.'},
+  {id:'circle', clues:['flat','s0','c0'], say:'I am flat. I have no sides and no corners. I am round.'},
+  {id:'cube', clues:['solid','f6','allsq'], say:'I am solid. I have 6 faces. Every face is a square.'},
+  {id:'prism', clues:['solid','f6','notsq'], say:'I am solid. I have 6 flat faces. Not all my faces are squares.'},
+  {id:'sphere', clues:['solid','roll','f0'], say:'I am solid. I can roll. I have no flat faces.'},
+  {id:'cone', clues:['solid','roll','f1','c1'], say:'I am solid. I can roll. I have 1 flat face and 1 point.'},
+  {id:'cylinder', clues:['solid','roll','f2','c0'], say:'I am solid. I can roll. I have 2 flat faces and no corners.'},
+  {id:'pyramid', clues:['solid','f5'], say:'I am solid. I have 5 flat faces. 4 of them are triangles.'}
+];
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const FC = {deck:[], i:0, flipped:false, miss:false, right:0, missed:[], done:false};
+const fcCard = () => CARDS.find(c => c.id===FC.deck[FC.i]);
+function fcStart(ids){
+  FC.deck = shuffle(ids || CARDS.map(c=>c.id));
+  Object.assign(FC, {i:0, flipped:false, miss:false, right:0, missed:[], done:false});
+  renderCards();
+}
+function renderCards(){
+  clearBoard();
+  const total=FC.deck.length, fb=$('#fcFb'), show=(id,v)=>{ $(id).hidden=!v; };
+  fb.className='fb'; fb.innerHTML='';
+  if(FC.done){
+    $('#fcRn').textContent='All done';
+    $('#fcText').textContent=`You named ${FC.right} of ${total} shapes on the first try.`;
+    $('#fcProg').textContent='';
+    if(FC.missed.length){ fb.innerHTML=`Shapes to practice: ${listText(FC.missed.map(id=>lc(SH[id])))}.`; FC.missed.forEach(id=>badge(id,'?','no')); }
+    else { fb.className='fb good'; fb.innerHTML='<b>Perfect round!</b> Every shape named on the first try.'; }
+    show('#fcFlip',false); show('#fcNext',false); show('#fcAgain',true); show('#fcMissed',FC.missed.length>0);
+    $('#fcMissed').textContent=`Practice missed cards (${FC.missed.length})`;
+    $('#info').textContent='';
+    return;
+  }
+  const c=fcCard(), s=SH[c.id];
+  $('#fcRn').textContent=`Card ${FC.i+1} of ${total}`;
+  $('#fcProg').textContent=`${FC.right} right on the first try so far`;
+  show('#fcAgain',false); show('#fcMissed',false);
+  if(!FC.flipped){
+    $('#fcText').textContent=c.say;
+    show('#fcFlip',true); show('#fcNext',false);
+    $('#info').textContent='Which shape am I? Tap it on the table, or flip the card.';
+  } else {
+    $('#fcText').textContent=`I am the ${lc(s)}!`;
+    cards[s.id].classList.add('fit'); badge(s.id,'✓','good');
+    fb.className='fb good'; fb.innerHTML=describe(s);
+    show('#fcFlip',false); show('#fcNext',true);
+    $('#fcNext').textContent = FC.i>=total-1 ? 'See my score' : 'Next card';
+    $('#info').textContent='';
+  }
+}
+function fcReveal(){
+  if(FC.flipped) return;
+  const c=fcCard();
+  FC.flipped=true;
+  if(FC.miss) FC.missed.push(c.id); else FC.right++;
+  renderCards();
+  $('#fcProg').textContent=`${FC.right} right on the first try so far`;
+}
+function fcGuess(s){
+  if(FC.done) return;
+  if(FC.flipped){ $('#info').textContent=describe(s); return; }
+  const c=fcCard();
+  if(s.id===c.id){ fcReveal(); return; }
+  FC.miss=true;
+  clearBoard();
+  cards[s.id].classList.add('wrongpick'); badge(s.id,'?','no');
+  const fb=$('#fcFb'); fb.className='fb no';
+  fb.innerHTML=`<b>Not ${theName(s)}.</b> Check the card against it:${checklist(c.clues,s)}Try another shape, or flip the card.`;
+}
+function fcNext(){
+  if(FC.i>=FC.deck.length-1) FC.done=true; else { FC.i++; FC.flipped=false; FC.miss=false; }
+  renderCards();
+}
+
+/* ---------- Riddles ---------- */
+function renderRiddleNav(){
+  $('#rNav').innerHTML = RIDDLES.map(r => { const need=answers(r.clues).length, got=(S.found[r.n]||[]).length; return `<button data-r="${r.n}" aria-pressed="${S.r===r.n}" class="${got>=need?'done':''}" aria-label="Riddle ${r.n}">${r.n}</button>`; }).join('');
+  $$('#rNav button').forEach(b => b.onclick = () => { S.r=+b.dataset.r; renderRiddle(); });
+}
+function renderRiddle(){
+  const r = RIDDLES[S.r-1];
+  $('#rNum').textContent = `Riddle ${r.n}`; $('#rText').textContent = r.text;
+  $('#rFb').innerHTML=''; $('#rFb').className='fb'; S.wrong=null;
+  clearBoard(); markFound(); renderRiddleNav(); renderFix();
+  $('#info').textContent = 'Tap the shape you think it is.';
+}
+function markFound(){ (S.found[S.r]||[]).forEach(id => { cards[id].classList.add('fit'); badge(id,'✓','good'); }); }
+function guess(s){
+  const r = RIDDLES[S.r-1], ans = answers(r.clues), fb=$('#rFb');
+  clearBoard(); markFound();
+  if(fitsAll(r.clues, s)){
+    const f = S.found[r.n] = S.found[r.n] || [];
+    if(!f.includes(s.id)) f.push(s.id);
+    cards[s.id].classList.add('fit'); badge(s.id,'✓','good');
+    fb.className='fb good';
+    if(ans.length>1 && f.length<ans.length) fb.innerHTML = `<b>Yes, ${theName(s)} fits every clue.</b>${checklist(r.clues,s)}Is it the only shape that fits? Check the others carefully.`;
+    else if(ans.length>1) fb.innerHTML = `<b>Two answers!</b> ${listText(ans.map(theName))} both fit every clue. This is the riddle with two answers. Can you add one clue to fix it?`;
+    else fb.innerHTML = `<b>Yes, ${theName(s)} fits every clue.</b>${checklist(r.clues,s)}Is it the only one? Tap “Check every shape” to be sure.`;
+  } else {
+    cards[s.id].classList.add('wrongpick'); badge(s.id,'?','no');
+    fb.className='fb no';
+    fb.innerHTML = `<b>Not ${theName(s)}.</b> Check each clue:${checklist(r.clues,s)}Try another shape.`;
+  }
+  renderRiddleNav(); renderFix();
+  $('#info').textContent = describe(s);
+}
+function checkEvery(){
+  const r = RIDDLES[S.r-1], ans = answers(r.clues);
+  filterBy(r.clues, true); ans.forEach(s => badge(s.id,'✓','good'));
+  const fb=$('#rFb'); fb.className='fb';
+  fb.innerHTML = `Every clue checked against every shape. ${ans.length===1 ? `<b>Only ${theName(ans[0])}</b> fits.` : `<b>${ans.length} shapes fit:</b> ${listText(ans.map(theName))}. This riddle has two answers!`} Faded shapes show the clue that rules them out.`;
+  if(ans.length>1){ S.found[r.n] = ans.map(s=>s.id); renderRiddleNav(); renderFix(); }
+}
+const FIX_TRY = ['sq4','nosq','c4','blue','curve'];
+function renderFix(){
+  const r = RIDDLES[S.r-1], ans = answers(r.clues), got = (S.found[r.n]||[]).length;
+  const show = ans.length>1 && got>=ans.length;
+  $('#rFix').hidden = !show; if(!show) return;
+  $('#rFixChips').innerHTML = FIX_TRY.map(id => `<button class="chip${CL[id].look?' look':''}" data-c="${id}">+ ${CL[id].t}</button>`).join('');
+  $('#rFixFb').innerHTML='';
+  $$('#rFixChips .chip').forEach(b => b.onclick = () => {
+    $$('#rFixChips .chip').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    const ids = r.clues.concat(b.dataset.c), a = answers(ids), c=CL[b.dataset.c];
+    filterBy(ids, true);
+    const fb=$('#rFixFb');
+    if(c.look){ fb.className='fb no'; fb.innerHTML = `Still ${a.length} answers. “${c.t}” is about how it’s drawn. If I colored the square blue, it would still be a square.`; }
+    else if(a.length===1){ fb.className='fb good'; fb.innerHTML = `<b>Fixed!</b> Now only ${theName(a[0])} fits. ${a.length===1 && b.dataset.c==='sq4' ? 'The rhombus has no square corners, so it is ruled out.' : 'The square has 4 square corners, so it is ruled out.'}`; }
+    else { fb.className='fb no'; fb.innerHTML = a.length ? `Still ${a.length} answers: ${listText(a.map(theName))}. Both have ${b.dataset.c==='c4'?'4 corners':'that'}, so this clue doesn’t tell them apart. Try another.` : `Now <b>no</b> shape fits. That clue rules out both. Try another.`; }
+  });
+}
+
+/* ---------- Riddle maker ---------- */
+function buildBank(){
+  const groups = [...new Set(CLUES.map(c=>c.g))];
+  $('#mBank').innerHTML = groups.map(g => `<div class="cg"><h3>${g}</h3><div>${CLUES.filter(c=>c.g===g).map(c=>`<button class="chip${c.look?' look':''}" data-c="${c.id}" aria-pressed="false">${c.t}</button>`).join('')}</div></div>`).join('');
+  $$('#mBank .chip').forEach(b => b.onclick = () => toggleClue(b.dataset.c));
+}
+function toggleClue(id){
+  const i = S.maker.indexOf(id);
+  if(i>=0) S.maker.splice(i,1); else S.maker.push(id);
+  renderMaker(id, i<0);
+}
+function renderMaker(lastId, added){
+  $$('#mBank .chip').forEach(b => b.setAttribute('aria-pressed', S.maker.includes(b.dataset.c)));
+  $('#mPicked').innerHTML = S.maker.map(id => `<li class="${CL[id].look?'look':''}">${CL[id].t}<button data-x="${id}" aria-label="Remove clue">×</button></li>`).join('') || '<li style="opacity:.6">No clues yet. Tap a clue below.</li>';
+  $$('#mPicked button').forEach(b => b.onclick = () => toggleClue(b.dataset.x));
+  filterBy(S.maker, true);
+  const a = answers(S.maker), real = S.maker.filter(id=>!CL[id].look);
+  const v=$('#mVerdict'); v.className='verdict'+(real.length && a.length===1?' one':'')+(a.length===0?' zero':'');
+  $('#mCount').textContent = a.length;
+  let say;
+  if(!real.length) say = 'No shape clues yet, so all 14 shapes fit.';
+  else if(a.length===1) say = `<b>Just one!</b> Your riddle pins down ${theName(a[0])} with ${plural(real.length,'clue')}. Could fewer clues do it?`;
+  else if(a.length===0) say = '<b>No answer.</b> No shape fits every clue. Tap a faded shape to see which clue rules it out.';
+  else say = `${a.length} shapes fit: ${listText(a.map(lc))}. Add a clue that rules some out.`;
+  $('#mSay').innerHTML = say;
+  const note=$('#mNote'); note.className='fb'; note.innerHTML='';
+  if(lastId && added && CL[lastId].look){ note.className='fb no'; note.innerHTML = `“${CL[lastId].t}” is about how the shape is drawn, not about the shape. If I drew it bigger and blue, would it still be the same shape? This clue rules nothing out.`; }
+  else if(lastId && added){
+    const before = answers(S.maker.filter(x=>x!==lastId)), out = before.filter(s=>!fit(lastId,s).ok);
+    note.innerHTML = out.length ? `“${CL[lastId].t}” ruled out ${plural(out.length,'shape')}: ${listText(out.map(lc))}.` : `“${CL[lastId].t}” didn’t rule anything out. Every shape that was left already fit it.`;
+  }
+  $('#info').textContent = S.maker.length ? 'Tap any shape to check it against your clues. Does your clue rule out the rectangle?' : 'Tap any shape to hear its attributes.';
+}
+
+/* ---------- Detective questions ---------- */
+const FW = () => fewest();
+let FEWEST=null, TWO=null, NONE=null;
+const NONE_PICK = [['f6','roll'],['c3','roll'],['eq','curve'],['ls','nosq'],['s4','curve'],['c1','f2']];
+const say = (h, cls='') => { const f=$('#qFb'); f.className='fb'+(cls?' '+cls:''); f.innerHTML=h; };
+function resetLook(){
+  S.painted=false; S.tilt=false;
+  for(const s of SHAPES){ const svg=cards[s.id].querySelector('svg'); svg.style.removeProperty('transform'); svg.querySelectorAll('[fill]').forEach(e=>{ if(e.dataset.f){ e.setAttribute('fill', e.dataset.f); delete e.dataset.f; } }); cards[s.id].querySelector('.spin').style.removeProperty('transform'); }
+}
+const Q = {
+  1:{text:'Which riddle has two answers? What one clue would fix it?', acts:[
+    {l:'Show the riddle with two answers', run(){ const r=RIDDLES.find(r=>answers(r.clues).length>1), a=answers(r.clues); filterBy(r.clues,true); a.forEach(s=>badge(s.id,'✓','good'));
+      say(`<b>Riddle ${r.n}:</b> “${r.text}” ${listText(a.map(theName))} both fit. Faded shapes show why the others don’t.`); }},
+    {l:'Add “4 square corners”', run(){ const ids=RIDDLES[2].clues.concat('sq4'), a=answers(ids); filterBy(ids,true); say(`Now only ${theName(a[0])} fits. The rhombus is ruled out: its corners are not square corners.`,'good'); }},
+    {l:'Add “no square corners”', run(){ const ids=RIDDLES[2].clues.concat('nosq'), a=answers(ids); filterBy(ids,true); say(`This fixes it too! Now only ${theName(a[0])} fits. There can be more than one good fix.`,'good'); }}]},
+  2:{text:'Why isn’t “I have four sides” enough?', acts:[
+    {l:'Show every shape with 4 sides', run(){ const a=answers(['s4']); filterBy(['s4'],true); a.forEach((s,i)=>badge(s.id,i+1));
+      say(`<b>${a.length} shapes</b> have 4 sides: ${listText(a.map(lc))}. One clue can’t tell them apart. Turn on the marks: how are their sides and corners different?`); setMarks(true); }}]},
+  3:{text:'Is a tilted square still a square?', acts:[
+    {l:'Turn the square', run(){ clearBoard(); hl(['square']); setMarks(true); S.tilt=!S.tilt; cards.square.querySelector('.spin').style.transform = S.tilt ? 'rotate(45deg)' : '';
+      say(S.tilt ? 'Now it looks like a “diamond.” Count again: 4 sides, all the same length (the ticks), and 4 square corners (the boxes). Turning it didn’t change any side or corner. It is still a square.' : 'Back again. Same 4 equal sides, same 4 square corners.'); }}]},
+  4:{text:'Is a square a rectangle?', acts:[
+    {l:'Test the square with rectangle clues', run(){ clearBoard(); hl(['square','rectangle']); setMarks(true);
+      say(`A rectangle is flat, with 4 sides and 4 square corners. Test the square:${checklist(['flat','s4','sq4'],SH.square)}<b>Yes, a square is a special kind of rectangle</b>, one whose sides are all the same length. That’s why Riddle 5 needed “two long and two short” to leave out the square.`,'good'); }}]},
+  5:{text:'If I drew it bigger and blue, would it still be the same shape?', acts:[
+    {l:'Make every shape blue and change sizes', run(){ resetLook(); clearBoard(); S.painted=true;
+      SHAPES.forEach((s,i) => { const svg=cards[s.id].querySelector('svg'); svg.style.transform=`scale(${[1,.62,.8,.7,1,.66,.9][i%7]})`;
+        svg.querySelectorAll('[fill]').forEach(e=>{ const f=e.getAttribute('fill'); if(f==='none'||f==='var(--card)') return; e.dataset.f=f; e.setAttribute('fill','var(--rho)'); }); });
+      const counts = RIDDLES.map(r=>answers(r.clues).length);
+      say(`Every shape is blue now, and the sizes changed. Each riddle still has the same answers (${counts.join(', ')} for riddles 1 to 8). Color and size are about the drawing, not the shape.`); }},
+    {l:'Back to normal', run(){ resetLook(); clearBoard(); say('Colors and sizes are back. The shapes never changed.'); }}]},
+  6:{text:'What is the fewest clues that pin down one shape?', acts:[
+    {l:'Show the fewest clues for each shape', run(){ FEWEST=FEWEST||fewest(); clearBoard(); SHAPES.forEach(s=>badge(s.id, FEWEST[s.id].k, FEWEST[s.id].k===1?'good':''));
+      const rows = SHAPES.map(s=>`<tr><td>${s.name}</td><td>${FEWEST[s.id].k}</td><td>${FEWEST[s.id].ways[0].map(id=>CL[id].t).join(' + ')}</td></tr>`).join('');
+      say(`Using the ${REAL.length} clues in our clue bank (badges show the number):<div class="tw"><table class="fw"><tr><th>Shape</th><th>Clues</th><th>One way</th></tr>${rows}</table></div>Many shapes need just 1 clue. The rhombus needs 3. Why is it the hardest?`); }}]},
+  7:{star:true, text:'Challenge: Write a riddle with only 2 clues that has exactly one answer. Then write a riddle that has NO answer, and say why.', acts:[
+    {l:'Show a 2-clue riddle', run(){ TWO=TWO||twoClueUnique(); const ids=TWO[S.ch2++ % TWO.length], a=answers(ids)[0]; filterBy(ids,true); badge(a.id,'✓','good');
+      say(`“${CL[ids[0]].t} ${CL[ids[1]].t}” → only ${theName(a)}. Neither clue works alone: “${CL[ids[0]].t}” fits ${answers([ids[0]]).length} shapes and “${CL[ids[1]].t}” fits ${answers([ids[1]]).length}. (${(S.ch2-1)%TWO.length+1} of ${TWO.length} like this. Tap again for another.)`,'good'); }},
+    {l:'Show a riddle with no answer', run(){ NONE=NONE||noAnswerPairs(); const pool=NONE_PICK.filter(p=>NONE.some(q=>q.join()===p.slice().sort((x,y)=>REAL.findIndex(c=>c.id===x)-REAL.findIndex(c=>c.id===y)).join())); const ids=pool[S.ch0++ % pool.length];
+      filterBy(ids,false); const a=answers([ids[0]]), b=answers([ids[1]]);
+      say(`“${CL[ids[0]].t} ${CL[ids[1]].t}” has <b>no answer</b>. The first clue fits ${listText(a.map(lc))}. The second fits ${listText(b.map(lc))}. No shape is on both lists.`,'no'); }},
+    {l:'Try one in the Riddle maker', run(){ S.maker=[]; selectTab('maker'); }}]}
+};
+function renderQ(){
+  $('#qNav').innerHTML = Object.keys(Q).map(k => `<button data-q="${k}" aria-pressed="${S.q===+k}" class="${Q[k].star?'star':''}" aria-label="Question ${k}">${Q[k].star?'★ Challenge':k}</button>`).join('');
+  $$('#qNav button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; resetLook(); clearBoard(); say(''); $('#qFb').innerHTML=''; renderQ(); });
+  const q=Q[S.q]; $('#qText').textContent=q.text;
+  $('#qActs').innerHTML='';
+  q.acts.forEach((a,i) => { const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.l; b.onclick=()=>a.run(); $('#qActs').appendChild(b); });
+  $('#info').textContent = 'Tap any shape to hear its attributes.';
+}
+
+/* ---------- Tabs, marks, reset ---------- */
+function setMarks(on){ S.marks=on; document.body.classList.toggle('marks',on); $('#marksBtn').setAttribute('aria-pressed',on); }
+function selectTab(t){
+  S.tab=t; $$('.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','cards','riddles','maker','detect'].forEach(v => $('#v-'+v).hidden = v!==t);
+  $('#wodb').hidden = t!=='warm'; $('#boardWrap').hidden = t==='warm';
+  resetLook(); clearBoard(); $('#info').textContent='';
+  if(t==='warm'){ $('#info').textContent=''; }
+  if(t==='cards'){ if(FC.deck.length) renderCards(); else fcStart(); }
+  if(t==='riddles') renderRiddle();
+  if(t==='maker') renderMaker();
+  if(t==='detect'){ $('#qFb').innerHTML=''; renderQ(); }
+}
+function resetAll(){
+  FC.deck=[]; Object.assign(S,{r:1, found:{}, maker:[], q:1, wodbIdx:{}, ch2:0, ch0:0});
+  setMarks(false); $('#warmFb').innerHTML=''; $$('#wodb .shape').forEach(e=>e.classList.remove('hl'));
+  selectTab(S.tab);
+}
+buildBoard(); buildWodb(); buildBank();
+$$('.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+$('#marksBtn').onclick = () => setMarks(!S.marks);
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+$('#warmSame').onclick = () => { setMarks(true); $('#warmFb').className='fb'; $('#warmFb').innerHTML='All four are flat, with 4 sides and 4 corners. So which one doesn’t belong depends on which clue you look at. Every answer can be right if the reason is true.'; };
+$('#fcFlip').onclick = () => { FC.miss = true; fcReveal(); };
+$('#fcNext').onclick = fcNext;
+$('#fcAgain').onclick = () => fcStart();
+$('#fcMissed').onclick = () => fcStart(FC.missed.slice());
+$('#rCheck').onclick = checkEvery;
+$('#rClear').onclick = () => { S.found[S.r]=[]; renderRiddle(); };
+$('#mClear').onclick = () => { S.maker=[]; renderMaker(); };
+$('#mSolid').onclick = () => { S.maker=['solid']; renderMaker('solid', true); };
+selectTab('warm');
+
+</script>
+
+</body></html>

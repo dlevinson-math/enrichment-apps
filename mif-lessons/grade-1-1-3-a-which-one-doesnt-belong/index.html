@@ -1,0 +1,673 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Which One Doesn't Belong?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a 2-by-2 "frame" of shape cards (like the worksheet) beside a reason panel; stacks on phones. */
+:root{
+  --paper:#EEF3F1; --card:#FFFFFF; --ink:#1E2A2E; --muted:#56656A; --line:#C9D6D3;
+  --fill:#E8833A; --fill-b:#3B82C4; --fill-c:#3E9B5F; --fill-dk:#B85E1F;
+  --accent:#2F6FB3; --accent-soft:#DCE9F7; --star:#F2B705; --good:#1F8A4C; --good-soft:#DDF2E5;
+  --try:#B7590E; --try-soft:#FCEBDB; --dot:#D3DEDB;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131A1C; --card:#1D2629; --ink:#EAF0EE; --muted:#9FB0B3; --line:#33423F;
+    --fill:#F09A55; --fill-b:#6AA8E6; --fill-c:#5FC283; --fill-dk:#F7B07A;
+    --accent:#7DB2EC; --accent-soft:#21344A; --star:#FFCB2E; --good:#5FD08F; --good-soft:#18352A;
+    --try:#F4A15E; --try-soft:#3A2817; --dot:#26312F; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131A1C; --card:#1D2629; --ink:#EAF0EE; --muted:#9FB0B3; --line:#33423F;
+  --fill:#F09A55; --fill-b:#6AA8E6; --fill-c:#5FC283; --fill-dk:#F7B07A;
+  --accent:#7DB2EC; --accent-soft:#21344A; --star:#FFCB2E; --good:#5FD08F; --good-soft:#18352A;
+  --try:#F4A15E; --try-soft:#3A2817; --dot:#26312F; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px); background-size:28px 28px;
+  color:var(--ink); font-family:var(--body); font-size:18px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:10px 16px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:4px solid var(--accent); outline-offset:3px}
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding-bottom:8px}
+.ttl h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(26px,3vw,42px); line-height:1.05; text-wrap:balance}
+.ttl p{margin:2px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:500; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+nav{display:flex; gap:8px; flex-wrap:wrap; padding:4px 0 12px}
+nav button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 18px; min-height:52px; font-family:var(--display); font-weight:600; font-size:clamp(17px,1.5vw,21px); display:flex; align-items:center; gap:8px}
+nav button[aria-current="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+nav .stars{font-size:.8em; color:var(--star); letter-spacing:1px}
+nav button[aria-current="true"] .stars{color:var(--star)}
+main{flex:1; min-height:0; display:flex; gap:24px; align-items:flex-start}
+.stagecol{flex:none; display:flex; flex-direction:column; gap:10px}
+.frame{--s:min(calc(100dvh - 220px), 52vw, 640px); width:var(--s); height:var(--s); display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+  border:4px solid var(--ink); border-radius:18px; overflow:hidden; background:var(--ink); gap:4px}
+.frame.two{grid-template-rows:1fr; height:calc(var(--s) * .55)}
+.cardx{position:relative; background:var(--card); border:0; padding:0; display:flex; align-items:center; justify-content:center}
+.cardx svg{width:88%; height:88%; overflow:visible}
+.cardx.sel{background:var(--accent-soft); box-shadow:inset 0 0 0 6px var(--accent)}
+.cardx.other{animation:pulse 1.1s ease-in-out 2}
+.cardx.other::after{content:""; position:absolute; inset:0; box-shadow:inset 0 0 0 6px var(--try); pointer-events:none}
+.cardx .badge{position:absolute; top:8px; right:10px; font-size:clamp(26px,3vw,40px); line-height:1; color:var(--star); text-shadow:0 1px 0 rgba(0,0,0,.15)}
+.cardx .badge.half{color:transparent; -webkit-text-stroke:2px var(--star)}
+.cardx .why{position:absolute; left:8px; right:8px; bottom:8px; font-size:clamp(13px,1.15vw,16px); font-weight:500; text-align:center; color:var(--ink); background:var(--good-soft); border-radius:10px; padding:4px 6px; line-height:1.25}
+.cardx .why.look{background:var(--try-soft)}
+.cardx .slotno{position:absolute; top:8px; left:12px; font-family:var(--display); font-weight:600; color:var(--muted); font-size:18px}
+@keyframes pulse{50%{transform:scale(.96)}}
+.shape-body{transition:transform .9s cubic-bezier(.4,.1,.2,1); transform-origin:100px 100px}
+.lbl{font-family:var(--display); font-weight:700; font-size:22px; fill:var(--card); paint-order:stroke; stroke:var(--ink); stroke-width:5px}
+.lblc{fill:var(--accent)}
+.hint{font-size:15px; color:var(--muted); margin:0}
+.panel{flex:1; min-width:0; display:flex; flex-direction:column; gap:14px}
+.box{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; gap:10px}
+.box h2{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(22px,2vw,30px); line-height:1.15; text-wrap:balance}
+.box h3{margin:0; font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.chips{display:flex; flex-wrap:wrap; gap:10px}
+.chip{border:2.5px solid var(--line); background:var(--card); border-radius:16px; padding:10px 14px; min-height:56px; font-weight:500; font-size:clamp(17px,1.45vw,21px); display:flex; align-items:center; gap:10px; text-align:left}
+.chip svg{width:30px; height:30px; flex:none}
+.chip:hover{border-color:var(--ink)}
+.chip.got{border-color:var(--good); background:var(--good-soft)}
+.say{display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:18px; background:var(--accent-soft); min-height:72px}
+.say.good{background:var(--good-soft)} .say.try{background:var(--try-soft)}
+.say .face{flex:none; width:46px; height:46px}
+.say p{margin:0; font-size:clamp(19px,1.7vw,25px); line-height:1.35; font-weight:500}
+.say p small{display:block; font-size:.72em; font-weight:400; color:var(--muted); margin-top:4px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:600; font-size:clamp(17px,1.4vw,21px); padding:12px 22px; min-height:54px; border-radius:16px}
+.secondary{border:2.5px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; min-height:54px; border-radius:16px}
+.seg{display:inline-flex; background:var(--paper); border:2px solid var(--line); border-radius:16px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:10px 16px; min-height:48px; border-radius:12px; font-weight:500; font-size:17px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.vote{display:flex; gap:10px; flex-wrap:wrap}
+.vote button{min-width:76px; min-height:76px; border-radius:18px; border:2.5px solid var(--line); background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-family:var(--display); font-weight:700; font-size:30px}
+.vote button span{font-family:var(--body); font-size:14px; font-weight:500; color:var(--muted)}
+.palette{display:grid; grid-template-columns:repeat(6, 1fr); gap:8px}
+.palette button{aspect-ratio:1; border:2.5px solid var(--line); border-radius:14px; background:var(--card); padding:6px; max-width:100%}
+.palette button svg{width:100%; height:100%}
+.palette button[aria-pressed="true"]{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.wordchart{display:flex; flex-wrap:wrap; gap:8px}
+.wordchart span{background:var(--accent-soft); border-radius:12px; padding:8px 12px; font-weight:600; font-size:clamp(17px,1.5vw,22px)}
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:56px; height:56px; border-radius:50%; border:2.5px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:22px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.facts{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; position:absolute; left:6px; right:6px; bottom:6px}
+.facts span{font-size:clamp(12px,1vw,15px); background:var(--accent-soft); border-radius:8px; padding:3px 7px; font-weight:500}
+.goal{font-size:16px; color:var(--muted); display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+@media (max-width: 900px), (orientation: portrait){
+  main{flex-direction:column; align-items:stretch}
+  .stagecol{align-items:center}
+  .frame{--s:min(calc(100vw - 40px), 62dvh)}
+}
+@media (max-width: 480px){
+  body{font-size:16px}
+  .palette{grid-template-columns:repeat(3, 1fr)}
+  .cardx .why{font-size:12px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<header>
+  <div class="ttl">
+    <h1>Which One Doesn't Belong?</h1>
+    <p>Grade 1 · Math in Focus Ch 3 · Lesson 1.3-A</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav id="nav" aria-label="Lesson parts"></nav>
+<main>
+  <div class="stagecol">
+    <div class="frame" id="frame" aria-label="Shapes"></div>
+    <p class="hint" id="hint"></p>
+  </div>
+  <section class="panel" id="panel"></section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ================= Geometry (all reasons for flat shapes are computed from the drawing) ================= */
+const C = [100,100];
+function rotPt(p, deg){ const a = deg*Math.PI/180, x=p[0]-C[0], y=p[1]-C[1]; return [C[0]+x*Math.cos(a)-y*Math.sin(a), C[1]+x*Math.sin(a)+y*Math.cos(a)]; }
+function scalePt(p, k){ return [C[0]+(p[0]-C[0])*k, C[1]+(p[1]-C[1])*k]; }
+const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1]);
+function angleAt(prev, p, next){
+  const u=[prev[0]-p[0], prev[1]-p[1]], v=[next[0]-p[0], next[1]-p[1]];
+  const c=(u[0]*v[0]+u[1]*v[1])/(Math.hypot(...u)*Math.hypot(...v));
+  return Math.acos(Math.max(-1,Math.min(1,c)))*180/Math.PI;
+}
+function pointsOf(s){ return s.pts.map(p => rotPt(scalePt(p, s.k||1), s.rot||0)); }
+function geo(s){
+  if(s.circle){ const r=(s.r||75)*(s.k||1); return {circle:true, closed:true, nSides:0, nCorners:0, segs:[], allSame:null, sqCorner:false, height:2*r, onCorner:null, twoLongSame:false, longShort:false}; }
+  const P = pointsOf(s), n=P.length, closed = s.closed!==false;
+  const segs=[]; for(let i=0;i<(closed?n:n-1);i++) segs.push(dist(P[i], P[(i+1)%n]));
+  const cornerIdx = closed ? P.map((_,i)=>i) : P.map((_,i)=>i).slice(1,-1);
+  const angles = cornerIdx.map(i => angleAt(P[(i-1+n)%n], P[i], P[(i+1)%n]));
+  const same = (a,b) => Math.abs(a-b) <= 0.01*Math.max(a,b);
+  const allSame = segs.every(l => same(l, segs[0]));
+  const ys = P.map(p=>p[1]), maxY=Math.max(...ys), minY=Math.min(...ys);
+  const bottom = P.filter(p => Math.abs(p[1]-maxY) < 0.5).length;
+  const sorted=[...segs].sort((a,b)=>a-b);
+  // triangle with exactly two equal sides that are longer than the third
+  const twoLongSame = closed && n===3 && same(sorted[1],sorted[2]) && !same(sorted[0],sorted[1]);
+  // four sides: two equal long, two equal short
+  const longShort = closed && n===4 && same(sorted[0],sorted[1]) && same(sorted[2],sorted[3]) && !same(sorted[1],sorted[2]);
+  return {circle:false, closed, nSides:segs.length, nCorners:cornerIdx.length, segs, angles, cornerIdx, P,
+    allSame, sqCorner: angles.some(a => Math.abs(a-90) < 1), height:maxY-minY, onCorner: closed ? bottom===1 : null, twoLongSame, longShort};
+}
+
+/* ================= Shapes ================= */
+const SQ = [[40,40],[160,40],[160,160],[40,160]];
+const RECT = [[20,55],[180,55],[180,145],[20,145]];
+const TRI = [[30,160],[170,160],[100,160-70*Math.sqrt(3)]];
+const RIGHT = [[30,160],[170,160],[30,55]];
+const THIN = [[75,182],[125,182],[100,22]];
+const OPEN = [[40,165],[165,150],[95,35],[95+0.75*(40-95), 35+0.75*(165-35)]];
+const HEX = [0,60,120,180,240,300].map(a => [100+80*Math.cos(a*Math.PI/180), 100+80*Math.sin(a*Math.PI/180)]);
+
+const SETS = {
+  A:{ label:'Set A', kind:'flat', color:'--fill', shapes:[
+      {id:'a1', pts:SQ, shaded:true},
+      {id:'a2', pts:SQ, shaded:false, rot:45, turnable:true},
+      {id:'a3', pts:RECT, shaded:true},
+      {id:'a4', pts:TRI, shaded:true} ]},
+  B:{ label:'Set B', kind:'solid', color:'--fill-b', shapes:[
+      {id:'cube', name:'cube', f:{flat:6, curved:false, tip:false, allSq:true, diffFaces:false, rolls:false, stacks:true, circles:0, corners:8, biggest:false}},
+      {id:'box', name:'box', f:{flat:6, curved:false, tip:false, allSq:false, diffFaces:true, rolls:false, stacks:true, circles:0, corners:8, biggest:true}},
+      {id:'cyl', name:'cylinder', f:{flat:2, curved:true, tip:false, allSq:false, diffFaces:false, rolls:true, stacks:true, circles:2, corners:0, biggest:false}},
+      {id:'cone', name:'cone', f:{flat:1, curved:true, tip:true, allSq:false, diffFaces:false, rolls:true, stacks:false, circles:1, corners:0, biggest:false}} ]},
+  C:{ label:'Set C', kind:'flat', color:'--fill-c', shapes:[
+      {id:'c1', pts:TRI, shaded:true},
+      {id:'c2', pts:THIN, shaded:true},
+      {id:'c3', pts:RIGHT, shaded:true},
+      {id:'c4', pts:OPEN, shaded:false, closed:false} ]}
+};
+const FACTS = {
+  cube:['6 flat faces','all faces the same square','8 corners','stacks','does not roll'],
+  box:['6 flat faces','faces not all the same','8 corners','stacks','does not roll','biggest'],
+  cyl:['2 flat faces','2 circle faces','curved','rolls','stacks'],
+  cone:['1 flat face','1 circle face','a pointy tip','curved','rolls','cannot stack on it']
+};
+
+/* Reason cards. type: geo = sides/corners/faces, pos = how it sits, look = color or size.
+   test(shape, geo, allShapes) -> true if the card describes this shape. */
+const CHIPS = {
+  A:[
+    {id:'s4', text:'4 sides', type:'geo', icon:'sq', test:(s,g)=>g.nSides===4, no:'does not have 4 sides', ev:'count'},
+    {id:'s3', text:'3 sides', type:'geo', icon:'tri', test:(s,g)=>g.nSides===3, no:'does not have 3 sides', ev:'count'},
+    {id:'sqc', text:'square corners', type:'geo', icon:'corner', test:(s,g)=>g.sqCorner, no:'has no square corner', ev:'corner'},
+    {id:'nosq', text:'no square corners', type:'geo', icon:'nocorner', test:(s,g)=>!g.sqCorner, no:'has square corners', ev:'corner'},
+    {id:'same4', text:'4 sides all the same', type:'geo', icon:'sq', test:(s,g)=>g.nSides===4 && g.allSame, no:'does not have 4 sides all the same', ev:'count'},
+    {id:'ls', text:'2 long sides, 2 short sides', type:'geo', icon:'rect', test:(s,g)=>g.longShort, no:'does not have 2 long and 2 short sides', ev:'count'},
+    {id:'notall', text:'sides not all the same', type:'geo', icon:'rect', test:(s,g)=>!g.allSame, no:'has sides that are all the same', ev:'count'},
+    {id:'onc', text:'standing on a corner', type:'pos', icon:'diamond', test:(s,g)=>g.onCorner===true, no:'is not standing on a corner'},
+    {id:'nosh', text:'not shaded', type:'look', icon:'open', test:s=>!s.shaded, no:'is shaded'},
+    {id:'shsame', text:'shaded and 4 sides all the same', type:'geo', icon:'sqfill', test:(s,g)=>s.shaded && g.nSides===4 && g.allSame, no:'is not a shaded shape with 4 sides all the same', ev:'count'}
+  ],
+  B:[
+    {id:'tip', text:'a pointy tip', type:'geo', icon:'cone', test:s=>s.f.tip, no:'has no pointy tip'},
+    {id:'f1', text:'only 1 flat face', type:'geo', icon:'face', test:s=>s.f.flat===1, no:'does not have just 1 flat face'},
+    {id:'c2', text:'2 circle faces', type:'geo', icon:'circ', test:s=>s.f.circles===2, no:'does not have 2 circle faces'},
+    {id:'rs', text:'rolls and stacks', type:'geo', icon:'roll', test:s=>s.f.rolls && s.f.stacks, no:'cannot both roll and stack'},
+    {id:'allsq', text:'all faces the same square', type:'geo', icon:'sq', test:s=>s.f.allSq, no:'does not have all faces the same square'},
+    {id:'diff', text:'flat faces not all the same', type:'geo', icon:'rect', test:s=>s.f.diffFaces, no:'does not have flat faces of different sizes'},
+    {id:'rolls', text:'rolls', type:'geo', icon:'roll', test:s=>s.f.rolls, no:'does not roll'},
+    {id:'stacks', text:'stacks', type:'geo', icon:'stack', test:s=>s.f.stacks, no:'does not stack'},
+    {id:'crn', text:'has corners', type:'geo', icon:'corner', test:s=>s.f.corners>0, no:'has no corners'},
+    {id:'big', text:'biggest', type:'look', icon:'big', test:s=>s.f.biggest, no:'is not the biggest'}
+  ],
+  C:[
+    {id:'s3', text:'3 sides', type:'geo', icon:'tri', test:(s,g)=>g.nSides===3, no:'does not have 3 sides', ev:'count'},
+    {id:'cl', text:'closed, no gap', type:'geo', icon:'tri', test:(s,g)=>g.closed, no:'is not closed. It has a gap', ev:'count'},
+    {id:'gap', text:'not closed, a gap', type:'geo', icon:'gap', test:(s,g)=>!g.closed, no:'is closed. It has no gap', ev:'count'},
+    {id:'k2', text:'only 2 corners', type:'geo', icon:'gap', test:(s,g)=>g.nCorners===2, no:'does not have just 2 corners', ev:'corner'},
+    {id:'k3', text:'3 corners', type:'geo', icon:'tri', test:(s,g)=>g.nCorners===3, no:'does not have 3 corners', ev:'corner'},
+    {id:'sqc', text:'a square corner', type:'geo', icon:'corner', test:(s,g)=>g.sqCorner, no:'has no square corner', ev:'corner'},
+    {id:'same3', text:'3 sides all the same', type:'geo', icon:'tri', test:(s,g)=>g.closed && g.nSides===3 && g.allSame, no:'does not have 3 sides all the same', ev:'count'},
+    {id:'tl', text:'2 long sides the same, 1 short side', type:'geo', icon:'thin', test:(s,g)=>g.twoLongSame, no:'does not have 2 long sides the same and 1 short', ev:'count'},
+    {id:'tall', text:'tallest', type:'look', icon:'big', test:(s,g,all)=>g.height >= Math.max(...all.map(t=>geo(t).height)) - 0.5, no:'is not the tallest'}
+  ]
+};
+
+/* ================= State ================= */
+const PAGES = [
+  {id:'warm', label:'Warm-up'},
+  {id:'A', label:'Set A'},
+  {id:'B', label:'Set B'},
+  {id:'C', label:'Set C'},
+  {id:'mine', label:'My set'},
+  {id:'talk', label:'Talk'}
+];
+let S;
+function fresh(){
+  return { page:'warm', sel:null, chip:null, found:{A:{},B:{},C:{}}, words:new Set(), votes:[0,0,0,0], goal:4,
+    a2rot:45, overlay:null, factsOn:false, warmMark:null, warmCount:null,
+    mine:[{kind:'tri',shaded:true,big:true,turn:false},{kind:'sq',shaded:true,big:true,turn:false},{kind:'rect',shaded:true,big:true,turn:false},{kind:'circ',shaded:true,big:true,turn:false}],
+    mineSel:0, mineShow:false, q:1, nudgedOne:{} };
+}
+
+/* ================= Drawing ================= */
+function flatSVG(s, colorVar, opts={}){
+  const k = s.k||1;
+  const fill = s.shaded ? `var(${colorVar})` : 'var(--card)';
+  let body;
+  if(s.circle){ body = `<circle cx="100" cy="100" r="${(s.r||75)*k}" fill="${fill}" stroke="var(--ink)" stroke-width="5"/>`; }
+  else {
+    const pts = s.pts.map(p => scalePt(p,k).map(v=>v.toFixed(2)).join(',')).join(' ');
+    body = s.closed===false
+      ? `<polyline points="${pts}" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>`
+      : `<polygon points="${pts}" fill="${fill}" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/>`;
+  }
+  const rot = opts.rot!=null ? opts.rot : (s.rot||0);
+  return `<svg viewBox="0 0 200 200" aria-hidden="true"><g class="shape-body" style="transform:rotate(${rot}deg)">${body}</g>${opts.overlay||''}</svg>`;
+}
+function overlaySVG(s, mode){
+  const g = geo(s); if(g.circle) return '';
+  let out='';
+  if(mode==='count'){
+    g.segs.forEach((_,i) => { const a=g.P[i], b=g.P[(i+1)%g.P.length];
+      const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+      // push label outward from the shape's center
+      const cx=g.P.reduce((t,p)=>t+p[0],0)/g.P.length, cy=g.P.reduce((t,p)=>t+p[1],0)/g.P.length;
+      const dx=m[0]-cx, dy=m[1]-cy, L=Math.hypot(dx,dy)||1;
+      out += `<text class="lbl" x="${(m[0]+dx/L*24).toFixed(1)}" y="${(m[1]+dy/L*24+8).toFixed(1)}" text-anchor="middle">${i+1}</text>`;
+    });
+  } else if(mode==='corner'){
+    g.cornerIdx.forEach((ci,j) => {
+      const p=g.P[ci], n=g.P.length, a=g.P[(ci-1+n)%n], b=g.P[(ci+1)%n];
+      const ok = Math.abs(g.angles[j]-90) < 1;
+      const ua=[(a[0]-p[0])/dist(a,p),(a[1]-p[1])/dist(a,p)], ub=[(b[0]-p[0])/dist(b,p),(b[1]-p[1])/dist(b,p)];
+      if(ok){ const d=18; out += `<path d="M${p[0]+ua[0]*d},${p[1]+ua[1]*d} L${p[0]+ua[0]*d+ub[0]*d},${p[1]+ua[1]*d+ub[1]*d} L${p[0]+ub[0]*d},${p[1]+ub[1]*d}" fill="none" stroke="var(--good)" stroke-width="5"/>`; }
+      out += `<circle cx="${p[0]}" cy="${p[1]}" r="9" fill="${ok?'var(--good)':'var(--ink)'}" stroke="var(--card)" stroke-width="3"/>`;
+    });
+  }
+  return out;
+}
+function solidSVG(id, colorVar){
+  const c=`var(${colorVar})`, st='stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"';
+  const light = `color-mix(in srgb, ${c} 60%, var(--card))`, dark = `color-mix(in srgb, ${c} 75%, var(--ink))`;
+  let b='';
+  if(id==='cube') b = `<polygon points="45,75 75,45 165,45 135,75" fill="${light}" ${st}/><polygon points="135,75 165,45 165,135 135,165" fill="${dark}" ${st}/><rect x="45" y="75" width="90" height="90" fill="${c}" ${st}/>`;
+  if(id==='box') b = `<polygon points="8,92 48,58 192,58 152,92" fill="${light}" ${st}/><polygon points="152,92 192,58 192,138 152,172" fill="${dark}" ${st}/><rect x="8" y="92" width="144" height="80" fill="${c}" ${st}/>`;
+  if(id==='cyl') b = `<path d="M55,52 L55,158 A45,15 0 0 0 145,158 L145,52 Z" fill="${c}" ${st}/><ellipse cx="100" cy="52" rx="45" ry="15" fill="${light}" ${st}/>`;
+  if(id==='cone') b = `<path d="M48,160 L100,32 L152,160 A52,16 0 0 1 48,160 Z" fill="${c}" ${st}/><path d="M48,160 A52,16 0 0 1 152,160" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="6 6"/>`;
+  return `<svg viewBox="0 0 200 200" aria-hidden="true">${b}</svg>`;
+}
+function icon(name){
+  const st='fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+  const m = {
+    sq:`<rect x="5" y="5" width="20" height="20" ${st}/>`,
+    sqfill:`<rect x="5" y="5" width="20" height="20" fill="currentColor" stroke="currentColor" stroke-width="3"/>`,
+    rect:`<rect x="2" y="9" width="26" height="13" ${st}/>`,
+    tri:`<path d="M3 26 L27 26 L15 5 Z" ${st}/>`,
+    thin:`<path d="M11 28 L19 28 L15 2 Z" ${st}/>`,
+    gap:`<path d="M5 25 L27 22 L15 4 L10 14" ${st}/>`,
+    corner:`<path d="M6 4 L6 24 L26 24" ${st}/><path d="M6 17 L13 17 L13 24" ${st}/>`,
+    nocorner:`<path d="M4 24 L26 24 L10 6" ${st}/>`,
+    diamond:`<path d="M15 2 L28 15 L15 28 L2 15 Z" ${st}/>`,
+    open:`<rect x="5" y="5" width="20" height="20" ${st} stroke-dasharray="3 3"/>`,
+    cone:`<path d="M5 25 L15 3 L25 25" ${st}/><ellipse cx="15" cy="25" rx="10" ry="3" ${st}/>`,
+    face:`<ellipse cx="15" cy="15" rx="12" ry="5" fill="currentColor"/>`,
+    circ:`<circle cx="9" cy="15" r="6" ${st}/><circle cx="22" cy="15" r="6" ${st}/>`,
+    roll:`<circle cx="15" cy="13" r="9" ${st}/><path d="M2 27 L28 27" ${st}/>`,
+    stack:`<rect x="7" y="3" width="16" height="10" ${st}/><rect x="7" y="16" width="16" height="10" ${st}/>`,
+    big:`<rect x="2" y="8" width="20" height="20" ${st}/><rect x="22" y="20" width="6" height="8" ${st}/>`
+  };
+  return `<svg viewBox="0 0 30 30" aria-hidden="true">${m[name]||''}</svg>`;
+}
+const FACE = mood => `<svg class="face" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/><circle cx="16" cy="19" r="3" fill="var(--ink)"/><circle cx="30" cy="19" r="3" fill="var(--ink)"/>${
+  mood==='good' ? '<path d="M14 28 Q23 37 32 28" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>' :
+  mood==='try' ? '<path d="M15 31 Q23 27 31 31" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>' :
+  '<path d="M16 30 L30 30" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>'}</svg>`;
+
+/* ================= Reason checking (sets A, B, C) ================= */
+function setShapes(key){
+  return SETS[key].shapes.map(s => key==='A' && s.id==='a2' ? Object.assign({}, s, {rot:S.a2rot}) : s);
+}
+function holds(chip, s, all){ return !!chip.test(s, SETS_KIND(s)==='flat' ? geo(s) : null, all); }
+function SETS_KIND(s){ return s.f ? 'solid' : 'flat'; }
+function evaluate(key, shapeId, chipId){
+  const all = setShapes(key), s = all.find(x=>x.id===shapeId), chip = CHIPS[key].find(c=>c.id===chipId);
+  const yes = holds(chip, s, all);
+  const others = all.filter(t => t.id!==s.id && holds(chip, t, all)).map(t=>t.id);
+  return {chip, s, yes, others, unique: yes && others.length===0};
+}
+
+/* ================= Rendering ================= */
+function renderNav(){
+  $('#nav').innerHTML = PAGES.map(p => {
+    let stars='';
+    if(SETS[p.id]){ const n = Object.values(S.found[p.id]).filter(v=>v==='geo'||v==='pos').length; stars = n ? `<span class="stars" aria-label="${n} found">${'★'.repeat(n)}</span>` : ''; }
+    return `<button data-p="${p.id}" aria-current="${S.page===p.id}">${p.label}${stars}</button>`;
+  }).join('');
+  $('#nav').querySelectorAll('button').forEach(b => b.onclick = () => go(b.dataset.p));
+}
+function go(p){ S.page=p; S.sel=null; S.chip=null; S.overlay=null; S.factsOn=false; render(); }
+function say(text, mood, sub){ const el=$('#say'); if(!el) return; el.className='say '+(mood||''); el.innerHTML = FACE(mood)+`<p>${text}${sub?`<small>${sub}</small>`:''}</p>`; }
+function render(){
+  renderNav();
+  const p = S.page;
+  $('#frame').classList.toggle('two', p==='warm');
+  if(p==='warm') renderWarm();
+  else if(SETS[p]) renderSet(p);
+  else if(p==='mine') renderMine();
+  else renderTalk();
+}
+
+/* ---------- Warm-up ---------- */
+const WARM = [{id:'w1', pts:SQ, shaded:true}, {id:'w2', pts:RECT, shaded:true}];
+const WARM_WORDS = [
+  {id:'4s', text:'4 sides', icon:'sq', t:g=>g.nSides===4},
+  {id:'4c', text:'4 corners', icon:'corner', t:g=>g.nCorners===4},
+  {id:'sqc', text:'square corners', icon:'corner', t:g=>g.angles.every(a=>Math.abs(a-90)<1)},
+  {id:'same', text:'all sides the same', icon:'sq', t:g=>g.allSame},
+  {id:'ls', text:'2 long sides, 2 short sides', icon:'rect', t:g=>g.longShort}
+];
+function renderWarm(){
+  $('#frame').innerHTML = WARM.map((s,i) => {
+    const w = S.warmMark ? WARM_WORDS.find(x=>x.id===S.warmMark) : null;
+    const mark = w ? (w.t(geo(s)) ? `<span class="why">Yes ✓</span>` : `<span class="why look">No</span>`) : '';
+    const ov = S.warmCount===i ? overlaySVG(s,'count')+overlaySVG(s,'corner') : '';
+    return `<button class="cardx" data-i="${i}" aria-label="${i?'rectangle':'square'}">${flatSVG(s,'--fill',{overlay:ov})}${mark}</button>`;
+  }).join('');
+  $('#frame').querySelectorAll('.cardx').forEach(b => b.onclick = () => {
+    const i=+b.dataset.i; S.warmCount = S.warmCount===i ? null : i; renderWarm();
+    const g=geo(WARM[i]); say(`${g.nSides} sides. ${g.nCorners} corners.`, 'good', 'The numbers count the sides. The dots are corners.');
+  });
+  $('#hint').textContent = 'Tap a shape to count its sides and corners.';
+  if(!$('#warmPanel')){
+    $('#panel').innerHTML = `<div class="box" id="warmPanel"><h2>What is the same? What is different?</h2>
+      <h3>Tap a word</h3><div class="chips" id="warmChips"></div></div>
+      <div class="say" id="say"></div>
+      <div class="row"><button class="primary" id="toA">Next: Set A</button></div>`;
+    $('#toA').onclick = () => go('A');
+    say('Look at the two shapes. Tap a word to test it.', '');
+  }
+  $('#warmChips').innerHTML = WARM_WORDS.map(w => `<button class="chip${S.warmMark===w.id?' got':''}" data-w="${w.id}">${icon(w.icon)}${w.text}</button>`).join('');
+  $('#warmChips').querySelectorAll('.chip').forEach(b => b.onclick = () => {
+    S.warmMark = b.dataset.w; const w = WARM_WORDS.find(x=>x.id===S.warmMark);
+    const a = w.t(geo(WARM[0])), r = w.t(geo(WARM[1]));
+    renderWarm();
+    if(a && r) say(`Same! Both have ${w.text}.`, 'good');
+    else say(`Different! Only the ${a?'square':'rectangle'} has ${w.text}.`, 'good', w.id==='same' ? 'Count the sides. Are they all the same length?' : '');
+  });
+}
+
+/* ---------- Sets A, B, C ---------- */
+function renderSet(key){
+  const set = SETS[key], all = setShapes(key);
+  $('#frame').innerHTML = all.map(s => {
+    const f = S.found[key][s.id];
+    const svg = set.kind==='flat'
+      ? flatSVG(s, set.color, {overlay: S.overlay ? overlaySVG(s, S.overlay) : ''})
+      : solidSVG(s.id, set.color);
+    const badge = f ? `<span class="badge${f==='look'?' half':''}" aria-hidden="true">★</span>` : '';
+    const why = (S.factsOn && s.f) ? `<span class="facts">${FACTS[s.id].map(t=>`<span>${t}</span>`).join('')}</span>` :
+      (S.found[key]['_t_'+s.id] ? `<span class="why${f==='look'?' look':''}">${esc(S.found[key]['_t_'+s.id])}</span>` : '');
+    return `<button class="cardx${S.sel===s.id?' sel':''}" data-id="${s.id}" aria-label="${s.name||'shape'}${f?', reason found':''}">${svg}${badge}${why}</button>`;
+  }).join('');
+  $('#frame').querySelectorAll('.cardx').forEach(b => b.onclick = () => pickShape(key, b.dataset.id));
+  $('#hint').textContent = 'Tap a shape. Then tap a reason. (Or the reason first.)';
+
+  if(!$('#setPanel') || $('#setPanel').dataset.k!==key){
+    const isA = key==='A';
+    $('#panel').innerHTML = `
+      ${isA ? `<div class="box" id="voteBox"><h3>Vote first</h3><h2>How many shapes could be the odd one out?</h2><div class="vote" id="vote"></div></div>` : ''}
+      <div class="box" id="setPanel" data-k="${key}">
+        <h2>Which one doesn't belong? Why?</h2>
+        <div class="chips" id="chips"></div>
+        <div class="row">
+          ${set.kind==='flat' ? `<button class="secondary" id="cntBtn">Count sides</button><button class="secondary" id="cornBtn">Check corners</button>` : `<button class="secondary" id="factBtn">Show facts</button>`}
+          ${isA ? `<button class="secondary" id="turnBtn">Turn the white square</button>` : ''}
+        </div>
+        <div class="goal"><span>Goal:</span><div class="seg" role="group" aria-label="Goal">
+          <button data-goal="1" aria-pressed="${S.goal===1}">A reason for 1 shape</button>
+          <button data-goal="4" aria-pressed="${S.goal===4}">A reason for all 4</button></div></div>
+      </div>
+      <div class="say" id="say"></div>`;
+    if(isA) renderVote();
+    if(set.kind==='flat'){
+      $('#cntBtn').onclick = () => { S.overlay = S.overlay==='count'?null:'count'; renderSet(key); say('The numbers count the sides.', ''); };
+      $('#cornBtn').onclick = () => { S.overlay = S.overlay==='corner'?null:'corner'; renderSet(key); say('Each dot is a corner. Green marks a square corner.', ''); };
+    } else $('#factBtn').onclick = () => { S.factsOn=!S.factsOn; renderSet(key); say(S.factsOn?'Here are the facts. Which fact belongs to only one shape?':'Facts hidden.', ''); };
+    if(isA) $('#turnBtn').onclick = turnA;
+    $('#setPanel').querySelectorAll('[data-goal]').forEach(b => b.onclick = () => { S.goal=+b.dataset.goal; $('#setPanel').querySelectorAll('[data-goal]').forEach(x=>x.setAttribute('aria-pressed', x===b)); });
+    const intro = {A:'Can every shape be the odd one out? Pick one and tell why.', B:'Now solid shapes. Find a reason for each one.', C:'Four shapes with 3 sides. Find a reason for each one.'}[key];
+    say(intro, '');
+  }
+  $('#chips').innerHTML = CHIPS[key].map(c => `<button class="chip${S.chip===c.id?' got':''}" data-c="${c.id}">${icon(c.icon)}${esc(c.text)}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => pickChip(key, b.dataset.c));
+}
+function renderVote(){
+  const labels=['1','2','3','4'];
+  $('#vote').innerHTML = labels.map((l,i) => `<button data-v="${i}" aria-label="Vote ${l}">${l}<span>${S.votes[i]} vote${S.votes[i]===1?'':'s'}</span></button>`).join('');
+  $('#vote').querySelectorAll('button').forEach(b => b.onclick = () => { S.votes[+b.dataset.v]++; renderVote(); });
+}
+function pickShape(key, id){
+  S.sel = id;
+  if(S.chip){ check(key, id, S.chip); return; }
+  renderSet(key); say('Now tap a reason.', '');
+}
+function pickChip(key, cid){
+  S.chip = cid;
+  if(S.sel){ check(key, S.sel, cid); return; }
+  renderSet(key); say('Now tap the shape it fits.', '');
+}
+function check(key, id, cid){
+  const r = evaluate(key, id, cid);
+  S.chip = null;
+  S.overlay = null;
+  if(!r.yes){
+    if(SETS[key].kind==='flat' && r.chip.ev) S.overlay = r.chip.ev;
+    S.sel = id; renderSet(key);
+    say(`Look again. This shape ${r.chip.no}.`, 'try', SETS[key].kind==='flat' ? (r.chip.ev==='count' ? 'The numbers count its sides.' : r.chip.ev==='corner' ? 'Green marks a square corner.' : 'Try another reason.') : 'Tap “Show facts” to check.');
+    return;
+  }
+  if(!r.unique){
+    S.sel = id; renderSet(key);
+    r.others.forEach(o => { const el=document.querySelector(`.cardx[data-id="${o}"]`); if(el) el.classList.add('other'); });
+    say(`True! But ${r.others.length===1?'this shape has':'these shapes have'} it too.`, 'try', 'Find something only one shape has.');
+    return;
+  }
+  // unique reason
+  const prev = S.found[key][id];
+  const firstEver = Object.keys(S.found[key]).filter(k=>!k.startsWith('_t_')).length===0;
+  if(r.chip.type==='look'){
+    if(!prev){ S.found[key][id]='look'; S.found[key]['_t_'+id]=r.chip.text; }
+    S.sel=null; renderSet(key);
+    say('True. Now a reason about its sides or corners?', 'try', key==='B' ? '(For solids: its faces, corners, or how it rolls.)' : 'Size and color are fine, but shape reasons are stronger.');
+    return;
+  }
+  S.found[key][id] = r.chip.type; S.found[key]['_t_'+id] = r.chip.text;
+  S.words.add(r.chip.text);
+  S.sel = null; renderSet(key);
+  const n = Object.entries(S.found[key]).filter(([k,v])=>!k.startsWith('_t_') && v!=='look').length;
+  if(r.chip.type==='pos'){
+    say('Yes, it is the only one standing on a corner!', 'good', 'Tap “Turn the white square.” Did the shape change, or only how it sits?');
+  } else if(n>=4){
+    say(`All 4 have a reason! Every shape can be the odd one out.`, 'good', key==='C' ? 'Challenge: go to “My set” and build your own.' : 'Which one was hardest? Tell a partner why.');
+  } else if(S.goal===1 && n===1){
+    say(`Yes! The only one with ${r.chip.text}.`, 'good', 'Goal met! Want more? Convince me another shape doesn’t belong.');
+  } else if(firstEver || n===1){
+    say(`Yes! The only one with ${r.chip.text}.`, 'good', 'Is that the only answer? Convince me another shape doesn’t belong.');
+  } else {
+    say(`Yes! The only one with ${r.chip.text}. That’s ${n} of 4.`, 'good');
+  }
+}
+function turnA(){
+  if(S.page!=='A') return;
+  S.a2rot = S.a2rot===45 ? 0 : 45;
+  const el = document.querySelector('.cardx[data-id="a2"] .shape-body');
+  if(el) el.style.transform = `rotate(${S.a2rot}deg)`;
+  setTimeout(() => renderSet('A'), reduced ? 0 : 950);
+  say(S.a2rot===0 ? 'Did the shape change, or only how it sits?' : 'Back on its corner. Same 4 sides, same 4 square corners.', '',
+      S.a2rot===0 ? 'It is still a square: 4 sides all the same and 4 square corners.' : '');
+}
+
+/* ---------- My set ---------- */
+const KINDS = {
+  sq:{pts:SQ, turn:45, name:'square'}, rect:{pts:RECT, turn:45, name:'rectangle'}, tri:{pts:TRI, turn:180, name:'triangle'},
+  right:{pts:RIGHT, turn:180, name:'square-corner triangle'}, hex:{pts:HEX, turn:30, name:'hexagon'}, circ:{circle:true, name:'circle'}
+};
+function mineShape(m){
+  const K=KINDS[m.kind];
+  return K.circle ? {circle:true, r:75, k:m.big?1:0.6, shaded:m.shaded} : {pts:K.pts, k:m.big?1:0.6, rot:m.turn?K.turn:0, shaded:m.shaded};
+}
+const PRED = [
+  {k:'sides', type:'geo', val:(m,g)=>g.nSides, say:v=> v===0 ? 'round, with no sides' : `${v} sides`},
+  {k:'same', type:'geo', val:(m,g)=>g.allSame, say:v=> v ? 'all sides the same' : 'sides not all the same'},
+  {k:'sq', type:'geo', val:(m,g)=>g.sqCorner, say:v=> v ? 'a square corner' : 'no square corners'},
+  {k:'turn', type:'pos', val:(m,g)=>g.onCorner, say:v=> v ? 'standing on a corner' : 'sitting flat'},
+  {k:'shade', type:'look', val:m=>m.shaded, say:v=> v ? 'shaded' : 'not shaded'},
+  {k:'size', type:'look', val:m=>m.big, say:v=> v ? 'big' : 'small'}
+];
+function reasonsFor(set){
+  const G = set.map(m => geo(mineShape(m)));
+  const V = set.map((m,i) => PRED.map(p => { const v=p.val(m,G[i]); return v==null ? null : v; }));
+  return set.map((m,i) => {
+    const uniq = idxs => {
+      if(idxs.some(j => V[i][j]===null)) return false;
+      return set.every((_,t) => t===i || idxs.some(j => V[t][j]!==V[i][j]));
+    };
+    const singles = PRED.map((p,j)=>j).filter(j => uniq([j]));
+    const geoS = singles.filter(j => PRED[j].type!=='look');
+    if(geoS.length) return {level:'easy', words:[PRED[geoS[0]].say(V[i][geoS[0]])], all:geoS.map(j=>PRED[j].say(V[i][j]))};
+    const pairs=[]; for(let a=0;a<PRED.length;a++) for(let b=a+1;b<PRED.length;b++) if(uniq([a,b])) pairs.push([a,b]);
+    const geoP = pairs.filter(([a,b]) => PRED[a].type!=='look' && PRED[b].type!=='look');
+    if(geoP.length){ const [a,b]=geoP[0]; return {level:'tricky', words:[PRED[a].say(V[i][a]), PRED[b].say(V[i][b])]}; }
+    const tris=[]; for(let a=0;a<PRED.length;a++) for(let b=a+1;b<PRED.length;b++) for(let c=b+1;c<PRED.length;c++) if(uniq([a,b,c])) tris.push([a,b,c]);
+    const geoT = tris.filter(t => t.filter(j => PRED[j].type==='look').length<=1);
+    if(!singles.length && geoT.length){ const t=geoT[0]; return {level:'tricky', words:t.map(j=>PRED[j].say(V[i][j]))}; }
+    const lookS = singles.filter(j => PRED[j].type==='look');
+    if(lookS.length) return {level:'look', words:[PRED[lookS[0]].say(V[i][lookS[0]])]};
+    if(pairs.length){ const [a,b]=pairs[0]; return {level:'tricky-look', words:[PRED[a].say(V[i][a]), PRED[b].say(V[i][b])]}; }
+    return {level:'none', words:[]};
+  });
+}
+function renderMine(){
+  const R = reasonsFor(S.mine);
+  $('#frame').innerHTML = S.mine.map((m,i) => {
+    const r = R[i]; let extra='';
+    if(S.mineShow){
+      if(r.level==='easy') extra = `<span class="badge">★</span><span class="why">${esc(r.words[0])}</span>`;
+      else if(r.level==='tricky' || r.level==='tricky-look') extra = `<span class="badge">✶</span><span class="why">${esc(r.words.join(' + '))}</span>`;
+      else if(r.level==='look') extra = `<span class="badge half">★</span><span class="why look">${esc(r.words[0])}</span>`;
+      else extra = `<span class="why look">No reason yet</span>`;
+    }
+    return `<button class="cardx${S.mineSel===i?' sel':''}" data-i="${i}" aria-label="Slot ${i+1}: ${KINDS[m.kind].name}"><span class="slotno">${i+1}</span>${flatSVG(mineShape(m), '--fill')}${extra}</button>`;
+  }).join('');
+  $('#frame').querySelectorAll('.cardx').forEach(b => b.onclick = () => { S.mineSel=+b.dataset.i; renderMine(); });
+  $('#hint').textContent = 'Tap a box. Then pick a shape for it.';
+  if(!$('#minePanel')){
+    $('#panel').innerHTML = `<div class="box" id="minePanel"><h2>Build a set where every shape has a reason.</h2>
+      <div class="palette" id="palette"></div>
+      <div class="row" id="opts"></div>
+      <div class="row"><button class="primary" id="showBtn"></button></div>
+      <div class="goal"><span>Challenge:</span> make one shape very hard to argue for (✶), and argue for it.</div></div>
+      <div class="say" id="say"></div>`;
+    $('#showBtn').onclick = () => { S.mineShow=!S.mineShow; renderMine(); mineSay(); };
+    say('Here is a starter set. Change any shape, then check.', '');
+  }
+  const cur = S.mine[S.mineSel];
+  $('#palette').innerHTML = Object.entries(KINDS).map(([k,K]) => `<button data-k="${k}" aria-pressed="${cur.kind===k}" aria-label="${K.name}">${flatSVG(K.circle?{circle:true,r:75,shaded:true}:{pts:K.pts,shaded:true},'--fill')}</button>`).join('');
+  $('#palette').querySelectorAll('button').forEach(b => b.onclick = () => { cur.kind=b.dataset.k; if(cur.kind==='circ') cur.turn=false; renderMine(); if(S.mineShow) mineSay(); });
+  $('#opts').innerHTML = `<div class="seg" role="group" aria-label="Shading"><button data-o="shaded" data-v="1" aria-pressed="${cur.shaded}">Shaded</button><button data-o="shaded" data-v="0" aria-pressed="${!cur.shaded}">Not shaded</button></div>
+    <div class="seg" role="group" aria-label="Size"><button data-o="big" data-v="1" aria-pressed="${cur.big}">Big</button><button data-o="big" data-v="0" aria-pressed="${!cur.big}">Small</button></div>
+    ${cur.kind!=='circ' ? `<div class="seg" role="group" aria-label="How it sits"><button data-o="turn" data-v="0" aria-pressed="${!cur.turn}">Flat</button><button data-o="turn" data-v="1" aria-pressed="${cur.turn}">On a corner</button></div>` : ''}`;
+  $('#opts').querySelectorAll('button').forEach(b => b.onclick = () => { cur[b.dataset.o] = b.dataset.v==='1'; renderMine(); if(S.mineShow) mineSay(); });
+  $('#showBtn').textContent = S.mineShow ? 'Hide reasons' : 'Check my set';
+}
+function mineSay(){
+  if(!S.mineShow){ say('Reasons hidden. Can the class find all four?', ''); return; }
+  const R = reasonsFor(S.mine);
+  const none = R.filter(r=>r.level==='none').length, look = R.filter(r=>r.level==='look').length, hard = R.filter(r=>r.level.startsWith('tricky')).length;
+  if(none) say(`${none} shape${none>1?'s have':' has'} no reason yet.`, 'try', 'Change a shape so it is the only one with something.');
+  else if(look) say('Every shape has a reason!', 'try', 'True. Now a reason about its sides or corners for the half star?');
+  else if(hard) say(`Every shape has a reason, and ${hard===1?'one is':hard+' are'} tricky! ✶`, 'good', 'A ✶ shape needs two clues together. Can you argue for it?');
+  else say('Every shape has a reason! ★★★★', 'good', 'Challenge: change one so it is very hard to argue for.');
+}
+
+/* ---------- Talk ---------- */
+const QS = {
+  1:{q:'Can every shape be the odd one out?', btn:'Show Set A reasons', run:()=>{
+      const all=setShapes('A');
+      const best = all.map(s => CHIPS.A.filter(c => c.type!=='look' && evaluate('A', s.id, c.id).unique).map(c=>c.text));
+      showMini(all.map((s,i)=>({svg:flatSVG(s,'--fill'), why:best[i][0]})));
+      say('Yes! In Set A, every shape has a reason.', 'good', 'So there is more than one right answer.'); }},
+  2:{q:'Is the white square a diamond?', btn:'Turn it', run:()=>{
+      const s=SETS.A.shapes[1];
+      showMini([{svg:flatSVG(s,'--fill',{rot:45}), why:'on its corner'},{svg:flatSVG(s,'--fill',{rot:0}), why:'turned'}], true);
+      say('Did the shape change, or only how it sits?', '', 'Same 4 sides all the same. Same 4 square corners. It is a square.'); }},
+  3:{q:'Which shape was the hardest?', btn:'Show the hard one', run:()=>{
+      const all=setShapes('A');
+      showMini(all.map(s=>({svg:flatSVG(s,'--fill'), why: s.id==='a1' ? 'shaded + 4 sides the same' : '', dim:s.id!=='a1'})));
+      say('The shaded square needs two clues together.', 'good', 'It is the only shaded shape with 4 sides all the same.'); }},
+  4:{q:'What shape words did we use?', btn:'Show our words', run:()=>{
+      const w=[...S.words];
+      $('#frame').classList.remove('two');
+      $('#frame').innerHTML = `<div class="cardx" style="grid-column:1/3;grid-row:1/3;padding:18px;align-items:flex-start"><div class="wordchart">${w.length ? w.map(x=>`<span>${esc(x)}</span>`).join('') : '<span>Find some reasons first!</span>'}</div></div>`;
+      say(w.length ? `We used ${w.length} shape word${w.length>1?'s':''}.` : 'No words yet. Play Sets A, B and C first.', w.length?'good':'try', 'Did we count sides and corners, or only talk about color?'); }},
+  5:{q:'How did our vote turn out?', btn:'Show the vote', run:()=>{
+      const tot=S.votes.reduce((a,b)=>a+b,0);
+      $('#frame').innerHTML = `<div class="cardx" style="grid-column:1/3;grid-row:1/3;padding:18px"><svg viewBox="0 0 400 300" style="width:100%;height:100%">${
+        S.votes.map((v,i)=>{ const max=Math.max(1,...S.votes); const h=v/max*200; const x=40+i*90;
+          return `<rect x="${x}" y="${240-h}" width="60" height="${h}" rx="8" fill="${i===3?'var(--good)':'var(--accent)'}"/><text x="${x+30}" y="${232-h}" text-anchor="middle" font-size="22" font-family="Lexend" fill="var(--ink)">${v}</text><text x="${x+30}" y="275" text-anchor="middle" font-size="28" font-weight="700" font-family="Fredoka" fill="var(--ink)">${i+1}</text>`; }).join('')
+      }<line x1="30" y1="240" x2="390" y2="240" stroke="var(--ink)" stroke-width="3"/></svg></div>`;
+      say(tot ? `${S.votes[3]} of ${tot} voted 4. The answer: all 4 can!` : 'No votes yet. The answer: all 4 can be the odd one out!', 'good'); }},
+  6:{q:'Journal', btn:'Show the prompt', run:()=>{
+      $('#frame').innerHTML = `<div class="cardx" style="grid-column:1/3;grid-row:1/3;padding:24px;text-align:center"><div style="font-family:var(--display);font-weight:600;font-size:clamp(26px,3vw,44px);line-height:1.25">Draw four shapes.<br>Circle one.<br>Tell why it doesn't belong.</div></div>`;
+      say('Use a word about sides or corners.', ''); }}
+};
+function showMini(items, animate){
+  $('#frame').innerHTML = items.concat(items.length===2?[{},{}]:[]).slice(0,4).map((it,i) => it.svg
+    ? `<div class="cardx" style="${it.dim?'opacity:.35':''}">${it.svg}${it.why?`<span class="why">${esc(it.why)}</span>`:''}</div>` : `<div class="cardx"></div>`).join('');
+  if(animate && !reduced){
+    const el = $('#frame').children[1].querySelector('.shape-body');
+    el.style.transform='rotate(45deg)'; requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.style.transform='rotate(0deg)'; }));
+  }
+}
+function renderTalk(){
+  $('#hint').textContent = 'Talk it over first. Then tap the button for evidence.';
+  $('#panel').innerHTML = `<div class="box"><h3>Share and reflect</h3><div class="qnav" id="qnav"></div><h2 id="qtext"></h2>
+    <div class="row"><button class="primary" id="qbtn"></button></div></div><div class="say" id="say"></div>`;
+  const draw = () => {
+    $('#qnav').innerHTML = Object.keys(QS).map(i => `<button data-q="${i}" aria-pressed="${S.q==i}" aria-label="Question ${i}">${i}</button>`).join('');
+    $('#qnav').querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; draw(); idle(); });
+    $('#qtext').textContent = QS[S.q].q; $('#qbtn').textContent = QS[S.q].btn;
+    $('#qbtn').onclick = QS[S.q].run;
+  };
+  const idle = () => {
+    $('#frame').innerHTML = setShapes('A').map(s=>`<div class="cardx">${flatSVG(s,'--fill')}</div>`).join('');
+    say('Think. Turn to a partner. Then share.', '');
+  };
+  draw(); idle();
+}
+
+/* ================= Wire up ================= */
+$('#resetBtn').onclick = () => { S = fresh(); $('#panel').innerHTML=''; render(); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+const _render = render;
+render = function(){ const p=S.page; if(!['warm'].includes(p) && $('#warmPanel')) $('#panel').innerHTML=''; if(p!=='mine' && $('#minePanel')) $('#panel').innerHTML=''; if(!SETS[p] && $('#setPanel')) $('#panel').innerHTML=''; _render(); };
+S = fresh(); render();
+window.__wodb = {geo, SETS, CHIPS, evaluate, setShapes, reasonsFor, get S(){return S;}, set S(v){S=v;}};
+})();
+</script>
+
+</body></html>

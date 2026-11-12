@@ -1,0 +1,420 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Seven Pieces, Same Size?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a puzzle table. Tabs across the top, one big working board per tab, a slim side panel for the question at hand.
+   Piece colors encode SIZE (4 / 2 / 1 small triangles), so color itself is a math clue. */
+:root{
+  --bg:#EDF1F6; --surface:#FFFFFF; --ink:#1A2433; --muted:#566377; --line:#D2DAE5;
+  --accent:#2F5BD3; --accent-ink:#FFFFFF; --accent-soft:#E2E9FB;
+  --size4:#1E8A79; --size2:#E39A2D; --size1:#DB5A4E; --plain:#C3CCD9;
+  --sil:#2A3446; --mat:#F6F8FB; --good:#21854F; --good-bg:#DFF2E7;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111821; --surface:#1A2330; --ink:#E7ECF3; --muted:#9BA7B9; --line:#2D394B;
+  --accent:#8EAEFF; --accent-ink:#0F1622; --accent-soft:#22304A;
+  --size4:#36B29E; --size2:#F0B154; --size1:#EE7F73; --plain:#5A6880;
+  --sil:#3C4A61; --mat:#151E2A; --good:#6FD39A; --good-bg:#1B3427; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111821; --surface:#1A2330; --ink:#E7ECF3; --muted:#9BA7B9; --line:#2D394B;
+  --accent:#8EAEFF; --accent-ink:#0F1622; --accent-soft:#22304A;
+  --size4:#36B29E; --size2:#F0B154; --size1:#EE7F73; --plain:#5A6880;
+  --sil:#3C4A61; --mat:#151E2A; --good:#6FD39A; --good-bg:#1B3427; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+#msvg{max-width:520px;margin:0 auto}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,42px);line-height:1;margin:0;text-wrap:balance}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:600 15px var(--body);padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:860px){.panel{grid-template-columns:minmax(0,1fr)}}
+.board{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px;min-width:0}
+.board svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.box{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.box h2{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.1;margin:0}
+.box p{margin:0}
+.muted{color:var(--muted);font-size:14px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button.b{font:600 15px var(--body);padding:8px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.b:hover{border-color:var(--accent)}
+button.b.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.b[disabled]{opacity:.45;cursor:default}
+button.b.on{background:var(--accent-soft);border-color:var(--accent)}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.legend span{display:flex;align-items:center;gap:8px}
+.sw{width:16px;height:16px;border-radius:4px;flex:none}
+.win{background:var(--good-bg);color:var(--good);font-weight:600;border-radius:10px;padding:10px 12px}
+.picks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.picks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pick{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;font:600 13px var(--body);position:relative}
+.pick svg{width:100%;height:54px}
+.pick[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pick span{font-size:11.5px;line-height:1.2;overflow-wrap:anywhere;text-align:center}
+.pick .ok{font-size:14px;position:absolute;top:4px;right:6px;color:var(--good);font-weight:800}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+td,th{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.big3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.big3 figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.big3 svg{width:100%;height:auto;max-height:260px}
+.big3 figcaption{font-family:var(--display);font-weight:800;font-size:20px}
+.count{font-family:var(--display);font-weight:800;font-size:24px;color:var(--size1)}
+.nums{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.num{font:800 20px var(--display);padding:6px 0;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;position:relative}
+.num[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.num.done{border-color:var(--good);color:var(--good);background:var(--good-bg)}
+.toast{min-height:24px;font-weight:600}
+.piece{cursor:grab}
+.piece.sel{filter:drop-shadow(0 0 0 var(--ink))}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease}@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.03)}100%{transform:scale(1)}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Grade 3 · Tangram lesson</div>
+      <h1>Seven Pieces, Same Size?</h1>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Lesson parts">
+      <button class="tab" role="tab" data-tab="question" id="tab-question">1. Big question</button>
+      <button class="tab" role="tab" data-tab="measure" id="tab-measure">2. Measure</button>
+      <button class="tab" role="tab" data-tab="puzzles" id="tab-puzzles">3. Puzzles</button>
+      <button class="tab" role="tab" data-tab="squares" id="tab-squares">4. Square Challenge</button>
+    </nav>
+  </header>
+
+  <!-- 1. Big question -->
+  <section id="v-question" class="panel" hidden>
+    <div class="board"><div class="big3" id="big3"></div></div>
+    <div class="side">
+      <div class="box">
+        <h2>Which one takes up the most space?</h2>
+        <p class="muted">Each picture is made from all 7 tangram pieces. Vote first, then find out.</p>
+        <div class="btns" id="votes"></div>
+        <div id="voteMsg" class="toast"></div>
+      </div>
+      <div class="box">
+        <h2>Check the answer</h2>
+        <p class="muted">Cut every piece into small triangles and count them.</p>
+        <div class="btns"><button class="b primary" id="reveal">Show the small triangles</button></div>
+        <div id="revealMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Measure -->
+  <section id="v-measure" class="panel" hidden>
+    <div class="board"><svg id="msvg" aria-label="The tangram square. Tap a piece to measure it."></svg></div>
+    <div class="side">
+      <div class="box" id="mAsk">
+        <h2>Tap a piece</h2>
+        <p class="muted">The small triangle is worth 1. How many small triangles cover each piece?</p>
+      </div>
+      <div class="box">
+        <table><thead><tr><th>Piece</th><th>Size</th><th id="fracHead" hidden>Fraction</th></tr></thead><tbody id="mTable"></tbody></table>
+        <div id="mTotal"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Puzzles -->
+  <section id="v-puzzles" class="panel" hidden>
+    <div class="board"><svg id="psvg" aria-label="Puzzle board. Drag pieces onto the shadow."></svg></div>
+    <div class="side">
+      <div class="box">
+        <div class="picks" id="picks"></div>
+      </div>
+      <div class="box">
+        <h2 id="pTitle"></h2>
+        <p class="muted">Drag all 7 pieces onto the shadow. Tap a chosen piece again to turn it.</p>
+        <div class="btns">
+          <button class="b" id="pTurn" title="Turn (R)">↻ Turn</button>
+          <button class="b" id="pFlip" title="Flip (F)">⇋ Flip</button>
+          <button class="b" id="pHint">Place one for me</button>
+          <button class="b" id="pReset">Start over</button>
+        </div>
+        <div id="pMsg" class="toast"></div>
+      </div>
+      <div class="box legend">
+        <label style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="colorSize" checked> Color pieces by size</label>
+        <span><i class="sw" style="background:var(--size4)"></i>4 small triangles</span>
+        <span><i class="sw" style="background:var(--size2)"></i>2 small triangles</span>
+        <span><i class="sw" style="background:var(--size1)"></i>1 small triangle</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Square Challenge -->
+  <section id="v-squares" class="panel" hidden>
+    <div class="board"><svg id="ssvg" aria-label="Square Challenge board. Build a square on the mat."></svg></div>
+    <div class="side">
+      <div class="box">
+        <h2>Make a square with exactly…</h2>
+        <div class="nums" id="nums"></div>
+        <p class="muted">Put only those pieces on the dashed mat, then check. One number is impossible.</p>
+        <div class="btns">
+          <button class="b primary" id="sCheck">Check my square</button>
+          <button class="b" id="sTurn">↻ Turn</button>
+          <button class="b" id="sFlip">⇋ Flip</button>
+          <button class="b" id="sReset">Clear the mat</button>
+        </div>
+        <div id="sMsg" class="toast"></div>
+      </div>
+      <div class="box">
+        <h2>Is one impossible?</h2>
+        <p class="muted">Decide which number can't be done before you look.</p>
+        <div class="btns"><button class="b" id="whyBtn">Show why</button></div>
+        <div id="why" hidden>
+          <p>You can't make a square with <b>6</b> pieces. Leaving out one piece leaves 15, 14 or 12 small triangles. Tangram squares only come in sizes 2, 4, 8 and 16.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const DATA = {"order":["Rectangle","Big triangle","Parallelogram","Trapezoid","House","Sailboat","Rocket","The original square"],"figs":{"Rectangle":{"outline":[[0.0,0.0],[0.0,2.0],[4.0,2.0],[4.0,0.0]],"pieces":[{"k":"L","p":[[0,2],[2,2],[0,0]]},{"k":"L","p":[[2,2],[2,0],[0,0]]},{"k":"Q","p":[[2,2],[3,2],[3,1],[2,1]]},{"k":"M","p":[[2,0],[4,0],[3,1]]},{"k":"S","p":[[2,1],[2,0],[3,1]]},{"k":"P","p":[[3,2],[3,1],[4,0],[4,1]]},{"k":"S","p":[[3,2],[4,2],[4,1]]}],"w":4,"h":2},"Big triangle":{"outline":[[0.0,4.0],[4.0,4.0],[0.0,0.0]],"pieces":[{"k":"L","p":[[0,2],[0,0],[2,2]]},{"k":"L","p":[[2,4],[4,4],[2,2]]},{"k":"Q","p":[[0,4],[1,4],[1,3],[0,3]]},{"k":"M","p":[[0,2],[2,2],[1,3]]},{"k":"S","p":[[0,3],[0,2],[1,3]]},{"k":"P","p":[[1,4],[1,3],[2,2],[2,3]]},{"k":"S","p":[[1,4],[2,4],[2,3]]}],"w":4,"h":4},"Parallelogram":{"outline":[[2.0,0.0],[0.0,2.0],[4.0,2.0],[6.0,0.0]],"pieces":[{"k":"L","p":[[0,2],[2,2],[2,0]]},{"k":"L","p":[[4,2],[6,0],[4,0]]},{"k":"Q","p":[[2,2],[3,2],[3,1],[2,1]]},{"k":"M","p":[[2,0],[4,0],[3,1]]},{"k":"S","p":[[2,1],[2,0],[3,1]]},{"k":"P","p":[[3,2],[3,1],[4,0],[4,1]]},{"k":"S","p":[[3,2],[4,2],[4,1]]}],"w":6,"h":2},"Trapezoid":{"outline":[[2.0,0.0],[0.0,2.0],[6.0,2.0],[4.0,0.0]],"pieces":[{"k":"L","p":[[0,2],[2,2],[2,0]]},{"k":"L","p":[[4,2],[6,2],[4,0]]},{"k":"Q","p":[[2,2],[3,2],[3,1],[2,1]]},{"k":"M","p":[[2,0],[4,0],[3,1]]},{"k":"S","p":[[2,1],[2,0],[3,1]]},{"k":"P","p":[[3,2],[3,1],[4,0],[4,1]]},{"k":"S","p":[[3,2],[4,2],[4,1]]}],"w":6,"h":2},"House":{"outline":[[4.0,2.0],[2.0,0.0],[0.0,2.0],[1.0,2.0],[1.0,4.0],[3.0,4.0],[3.0,2.0]],"pieces":[{"k":"L","p":[[0,2],[2,2],[2,0]]},{"k":"L","p":[[2,2],[4,2],[2,0]]},{"k":"Q","p":[[1,4],[2,4],[2,3],[1,3]]},{"k":"M","p":[[1,2],[3,2],[2,3]]},{"k":"S","p":[[1,3],[1,2],[2,3]]},{"k":"P","p":[[2,4],[2,3],[3,2],[3,3]]},{"k":"S","p":[[2,4],[3,4],[3,3]]}],"w":4,"h":4},"Sailboat":{"outline":[[2.0,3.0],[1.0,3.0],[1.0,4.0],[0.0,4.0],[1.0,5.0],[3.0,5.0],[4.0,4.0],[2.0,4.0],[4.0,2.0],[2.0,0.0]],"pieces":[{"k":"P","p":[[0,4],[1,4],[2,5],[1,5]]},{"k":"M","p":[[1,4],[3,4],[2,5]]},{"k":"S","p":[[2,5],[3,5],[3,4]]},{"k":"S","p":[[3,5],[4,4],[3,4]]},{"k":"Q","p":[[1,4],[2,4],[2,3],[1,3]]},{"k":"L","p":[[2,4],[2,2],[4,2]]},{"k":"L","p":[[2,2],[2,0],[4,2]]}],"w":4,"h":5},"Rocket":{"outline":[[-0.0,1.0],[-0.0,4.0],[0.5,4.0],[0.5,5.0],[1.5,5.0],[1.5,4.0],[2.0,4.0],[2.0,1.0],[1.0,-0.0]],"pieces":[{"k":"M","p":[[0,1],[2,1],[1,0]]},{"k":"P","p":[[0,2],[1,2],[2,1],[1,1]]},{"k":"S","p":[[0,2],[1,1],[0,1]]},{"k":"S","p":[[1,2],[2,2],[2,1]]},{"k":"L","p":[[0,4],[2,4],[0,2]]},{"k":"L","p":[[2,4],[2,2],[0,2]]},{"k":"Q","p":[[0.5,5],[1.5,5],[1.5,4],[0.5,4]]}],"w":2,"h":5},"The original square":{"outline":[[2.82843,0.0],[0.0,0.0],[0.0,2.82843],[2.82843,2.82843]],"pieces":[{"k":"L","p":[[0.0,2.82843],[2.82843,2.82843],[1.41421,1.41421]]},{"k":"L","p":[[0.0,2.82843],[1.41421,1.41421],[0.0,0.0]]},{"k":"M","p":[[1.41421,0.0],[2.82843,0.0],[2.82843,1.41421]]},{"k":"Q","p":[[1.41421,1.41421],[2.12132,2.12132],[2.82843,1.41421],[2.12132,0.70711]]},{"k":"S","p":[[2.12132,2.12132],[2.82843,2.82843],[2.82843,1.41421]]},{"k":"S","p":[[1.41421,1.41421],[2.12132,0.70711],[0.70711,0.70711]]},{"k":"P","p":[[0.0,0.0],[1.41421,0.0],[2.12132,0.70711],[0.70711,0.70711]]}],"w":2.82843,"h":2.82843}},"measure":[{"k":"L","lab":"A","p":[[0.0,2.82843],[2.82843,2.82843],[1.41421,1.41421]]},{"k":"L","lab":"B","p":[[0.0,2.82843],[1.41421,1.41421],[0.0,0.0]]},{"k":"M","lab":"C","p":[[1.41421,0.0],[2.82843,0.0],[2.82843,1.41421]]},{"k":"Q","lab":"D","p":[[1.41421,1.41421],[2.12132,2.12132],[2.82843,1.41421],[2.12132,0.70711]]},{"k":"S","lab":"E","p":[[2.12132,2.12132],[2.82843,2.82843],[2.82843,1.41421]]},{"k":"S","lab":"F","p":[[1.41421,1.41421],[2.12132,0.70711],[0.70711,0.70711]]},{"k":"P","lab":"G","p":[[0.0,0.0],[1.41421,0.0],[2.12132,0.70711],[0.70711,0.70711]]}]};
+const NS = "http://www.w3.org/2000/svg";
+const KIND = {L:{name:"large triangle",size:4,p:[[0,0],[2,0],[0,2]]},
+              M:{name:"medium triangle",size:2,p:[[0,0],[2,0],[1,1]]},
+              S:{name:"small triangle",size:1,p:[[0,0],[1,0],[0,1]]},
+              Q:{name:"square",size:2,p:[[0,0],[1,0],[1,1],[0,1]]},
+              P:{name:"parallelogram",size:2,p:[[0,0],[1,0],[2,1],[1,1]]}};
+const SET = ["L","L","M","Q","P","S","S"];
+const colorOf = k => "var(--size"+KIND[k].size+")";
+const $ = id => document.getElementById(id);
+const store = {get(k,d){try{const v=localStorage.getItem("tg7-"+k);return v?JSON.parse(v):d}catch(e){return d}},
+               set(k,v){try{localStorage.setItem("tg7-"+k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- geometry ---------- */
+const area = p => Math.abs(p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0))/2;
+const cent = p => {let x=0,y=0;p.forEach(a=>{x+=a[0];y+=a[1]});return [x/p.length,y/p.length]};
+const dist = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1]);
+const mid = (a,b) => [(a[0]+b[0])/2,(a[1]+b[1])/2];
+function inside(pt,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];
+  if(((a[1]>pt[1])!==(b[1]>pt[1]))&&(pt[0]<(b[0]-a[0])*(pt[1]-a[1])/(b[1]-a[1])+a[0]))c=!c}return c}
+function split(p){ // into small triangles (small triangle = area 0.5)
+  const A=area(p);
+  if(p.length===3){
+    if(A>1.5){const[a,b,c]=p,ab=mid(a,b),bc=mid(b,c),ca=mid(c,a);return[[a,ab,ca],[ab,b,bc],[ca,bc,c],[ab,bc,ca]]}
+    if(A>0.75){let best=0,bi=0;for(let i=0;i<3;i++){const d=dist(p[i],p[(i+1)%3]);if(d>best){best=d;bi=i}}
+      const a=p[bi],b=p[(bi+1)%3],c=p[(bi+2)%3],m=mid(a,b);return[[c,a,m],[c,m,b]]}
+    return[p]}
+  return dist(p[0],p[2])<=dist(p[1],p[3])+1e-9?[[p[0],p[1],p[2]],[p[0],p[2],p[3]]]:[[p[1],p[2],p[3]],[p[1],p[3],p[0]]];
+}
+const ptsAttr = p => p.map(a=>a[0].toFixed(4)+","+a[1].toFixed(4)).join(" ");
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function bbox(pts){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});return{x0,y0,x1,y1}}
+function figSvg(fig,{solution=false,splitIt=false,pad=0.15}={}){
+  const s=document.createElementNS(NS,"svg");s.setAttribute("viewBox",`${-pad} ${-pad} ${fig.w+2*pad} ${fig.h+2*pad}`);
+  if(!solution){el("polygon",{points:ptsAttr(fig.outline),fill:"var(--sil)"},s);return s}
+  fig.pieces.forEach(pc=>{
+    el("polygon",{points:ptsAttr(pc.p),fill:colorOf(pc.k),stroke:"var(--surface)","stroke-width":0.05,"stroke-linejoin":"round"},s);
+    if(splitIt)split(pc.p).forEach(t=>el("polygon",{points:ptsAttr(t),fill:"none",stroke:"var(--surface)","stroke-width":0.02,"stroke-dasharray":"0.06 0.05"},s));
+  });
+  return s;
+}
+
+/* ---------- tabs ---------- */
+const TABS=["question","measure","puzzles","squares"];
+function show(t){if(!TABS.includes(t))t="question";
+  TABS.forEach(x=>{$("v-"+x).hidden=x!==t;$("tab-"+x).setAttribute("aria-selected",x===t)});
+  store.set("tab",t); if(t==="puzzles")pBoard.fit(); if(t==="squares")sBoard.fit();}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{show(b.dataset.tab);try{history.replaceState(null,"","#"+b.dataset.tab)}catch(e){}});
+addEventListener("hashchange",()=>show(location.hash.slice(1)));
+
+/* ---------- 1. Big question ---------- */
+const BIG=["House","Sailboat","Rocket"];
+let revealed=false;
+function drawBig(){
+  const host=$("big3");host.innerHTML="";
+  // shared scale: every picture gets the same viewBox size so sizes compare fairly
+  const W=Math.max(...BIG.map(n=>DATA.figs[n].w)),H=Math.max(...BIG.map(n=>DATA.figs[n].h));
+  BIG.forEach(n=>{const f=DATA.figs[n],fig=document.createElement("figure");
+    const s=figSvg(f,{solution:revealed,splitIt:revealed,pad:0});
+    const ox=(W-f.w)/2,oy=H-f.h; s.setAttribute("viewBox",`${-ox-0.2} ${-oy-0.2} ${W+0.4} ${H+0.4}`);
+    fig.appendChild(s);const cap=document.createElement("figcaption");cap.textContent=n;fig.appendChild(cap);
+    if(revealed){const c=document.createElement("div");c.className="count pop";c.textContent="16 small triangles";fig.appendChild(c)}
+    host.appendChild(fig)});
+}
+const VOTES=["House","Sailboat","Rocket","All the same"];
+function drawVotes(){const v=store.get("vote",null);const host=$("votes");host.innerHTML="";
+  VOTES.forEach(o=>{const b=document.createElement("button");b.className="b"+(v===o?" on":"");b.textContent=o;b.setAttribute("aria-pressed",v===o);
+    b.onclick=()=>{store.set("vote",o);drawVotes()};host.appendChild(b)});
+  $("voteMsg").textContent=v?`Your guess: ${v}. Now measure the pieces in part 2.`:"";
+}
+$("reveal").onclick=()=>{revealed=!revealed;$("reveal").textContent=revealed?"Hide the small triangles":"Show the small triangles";
+  $("revealMsg").innerHTML=revealed?`<div class="win">They are all the same size: 16 small triangles each. Moving the pieces changes the shape, not the area.</div>`:"";drawBig()};
+
+/* ---------- 2. Measure ---------- */
+const measured=store.get("measured",{}); let mSel=null, mWrong=false, fracDone=store.get("frac",false);
+function drawMeasure(){
+  const s=$("msvg");s.innerHTML="";const side=4/Math.SQRT2;s.setAttribute("viewBox",`-0.12 -0.12 ${side+0.24} ${side+0.24}`);
+  DATA.measure.forEach((pc,i)=>{const g=el("g",{class:"piece",tabindex:0,role:"button","aria-label":"Piece "+pc.lab},s);
+    const done=measured[i];
+    el("polygon",{points:ptsAttr(pc.p),fill:done?colorOf(pc.k):"var(--plain)",stroke:i===mSel?"var(--ink)":"var(--surface)","stroke-width":i===mSel?0.05:0.035,"stroke-linejoin":"round"},g);
+    if(done)split(pc.p).forEach(t=>el("polygon",{points:ptsAttr(t),fill:"none",stroke:"var(--surface)","stroke-width":0.018,"stroke-dasharray":"0.05 0.04"},g));
+    const c=cent(pc.p);const t=el("text",{x:c[0],y:c[1]+0.09,"text-anchor":"middle","font-size":pc.k==="L"?0.32:0.22,"font-family":"Baloo 2, sans-serif","font-weight":800,fill:"var(--ink)"},g);t.textContent=pc.lab;
+    const pick=()=>{mSel=i;mWrong=false;drawMeasure();drawAsk()};g.onclick=pick;g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick()}};
+  });
+  // table
+  const rows=[["L","A and B"],["M","C"],["Q","D"],["S","E and F"],["P","G"]];
+  const all=Object.keys(measured).length===7;
+  $("fracHead").hidden=!fracDone;
+  $("mTable").innerHTML=rows.map(([k,l])=>{const idx=DATA.measure.map((p,i)=>p.k===k?i:-1).filter(i=>i>=0);const any=idx.some(i=>measured[i]);
+    const fr={4:"1/4",2:"1/8",1:"1/16"}[KIND[k].size];
+    return `<tr><td><span style="display:inline-flex;align-items:center;gap:8px"><i class="sw" style="background:${any?colorOf(k):"var(--plain)"}"></i>${l} · ${KIND[k].name}</span></td><td>${any?KIND[k].size:"?"}</td>${fracDone?`<td>${fr}</td>`:""}</tr>`}).join("");
+  $("mTotal").innerHTML=all?`<p style="margin:6px 0 0"><b>All 7 pieces: 16 small triangles.</b></p>`:`<p class="muted" style="margin:6px 0 0">${Object.keys(measured).length} of 7 pieces measured</p>`;
+}
+function drawAsk(){
+  const box=$("mAsk");const all=Object.keys(measured).length===7;
+  if(mSel===null&&!all){box.innerHTML=`<h2>Tap a piece</h2><p class="muted">The small triangle is worth 1. How many small triangles cover each piece?</p>`;return}
+  if(mSel===null||(all&&measured[mSel]&&!fracDone)){ if(all&&!fracDone){fracAsk(box);return} }
+  const pc=DATA.measure[mSel],K=KIND[pc.k];
+  if(measured[mSel]){box.innerHTML=`<h2>Piece ${pc.lab}: ${K.name}</h2><div class="win">${K.size} small triangle${K.size>1?"s":""}</div><p class="muted">${all?(fracDone?"Every piece is measured.":""):"Tap another piece."}</p>`;
+    if(all&&!fracDone){const b=document.createElement("button");b.className="b primary";b.textContent="Next: fractions";b.onclick=()=>fracAsk(box);box.appendChild(b)}return}
+  box.innerHTML=`<h2>Piece ${pc.lab}: ${K.name}</h2><p>How many small triangles cover it?</p><div class="btns">${[1,2,3,4].map(n=>`<button class="b" data-n="${n}">${n}</button>`).join("")}</div><div class="toast" id="mMsg">${mWrong?"Not quite. Try covering it with your two small triangles.":""}</div>`;
+  box.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{
+    if(+b.dataset.n===K.size){DATA.measure.forEach((p,i)=>{if(p.k===pc.k)measured[i]=true});store.set("measured",measured);drawMeasure();drawAsk()}
+    else{mWrong=true;$("mMsg").textContent=K.size===1?"This is the small triangle itself.":`Not quite. Picture it cut into small triangles. Is it ${b.dataset.n<K.size?"bigger":"smaller"} than ${b.dataset.n}?`}});
+}
+function fracAsk(box){
+  box.innerHTML=`<h2>The whole square is 16</h2><p>A large triangle is 4 small triangles. What fraction of the whole square is one large triangle?</p><div class="btns">${["1/2","1/4","1/8","1/16"].map(f=>`<button class="b" data-f="${f}">${f}</button>`).join("")}</div><div class="toast" id="fMsg"></div>`;
+  box.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.f==="1/4"){fracDone=true;store.set("frac",true);drawMeasure();
+      box.innerHTML=`<h2>Yes, 1/4</h2><div class="win">4 large triangles would cover the whole square.</div><p>The square, parallelogram and medium triangle are each 1/8. A small triangle is 1/16.</p><p class="muted">Next: build the pictures in part 3.</p>`}
+    else $("fMsg").textContent="Not quite. How many large triangles would it take to cover all 16?"});
+}
+
+/* ---------- board engine (used by Puzzles and Square Challenge) ---------- */
+function makeBoard(svg,opts){
+  const B={svg,pieces:[],sel:null,target:null,portrait:false,onDrop:opts.onDrop};
+  B.layout=()=>{B.portrait=svg.parentElement.clientWidth<560;
+    B.W=B.portrait?9:15;B.H=B.portrait?15:9;B.area=B.portrait?{x0:0,y0:0,x1:9,y1:8.6}:{x0:0,y0:0,x1:8.6,y1:9};
+    svg.setAttribute("viewBox",`0 0 ${B.W} ${B.H}`)};
+  B.trayCorners=()=>B.portrait?
+    [[0.5,9.2],[3.2,9.2],[5.9,9.4],[0.5,12.2],[3.2,12.4],[5,12.4],[6.6,12.4]]:
+    [[9.2,0.6],[12.2,0.6],[9.2,3.6],[12.2,3.6],[9.2,5.8],[11,5.8],[12.8,5.8]];
+  // piece world points
+  B.pts=pc=>{const base=KIND[pc.k].p,c=cent(base),a=pc.rot*Math.PI/4,cs=Math.cos(a),sn=Math.sin(a);
+    return base.map(([x,y])=>{let dx=x-c[0],dy=y-c[1];if(pc.flip)dx=-dx;return[pc.x+dx*cs-dy*sn,pc.y+dx*sn+dy*cs]})};
+  B.reset=()=>{B.layout();const tc=B.trayCorners();
+    B.pieces=SET.map((k,i)=>{const pc={id:i,k,rot:0,flip:false,x:0,y:0};const b=bbox(B.pts(pc));pc.x+=tc[i][0]-b.x0;pc.y+=tc[i][1]-b.y0;return pc});
+    B.sel=null;B.draw()};
+  B.fit=()=>{const was=B.portrait;B.layout();if(was!==B.portrait)B.reset();else B.draw()};
+  B.draw=()=>{svg.innerHTML="";
+    el("rect",{x:0,y:0,width:B.W,height:B.H,fill:"var(--surface)"},svg);
+    if(B.portrait)el("line",{x1:0.3,x2:8.7,y1:8.9,y2:8.9,stroke:"var(--line)","stroke-width":0.03},svg);
+    else el("line",{x1:8.9,x2:8.9,y1:0.3,y2:8.7,stroke:"var(--line)","stroke-width":0.03},svg);
+    opts.drawBack&&opts.drawBack(B);
+    const colorize=$("colorSize").checked||opts.alwaysColor;
+    const order=B.pieces.filter(p=>p!==B.sel);if(B.sel)order.push(B.sel);
+    order.forEach(pc=>{const g=el("g",{class:"piece"},svg);
+      el("polygon",{points:ptsAttr(B.pts(pc)),fill:colorize?colorOf(pc.k):"var(--size2)",stroke:pc===B.sel?"var(--ink)":"var(--surface)","stroke-width":pc===B.sel?0.07:0.04,"stroke-linejoin":"round"},g);
+      g.addEventListener("pointerdown",e=>B.down(e,pc))});
+  };
+  const toSvg=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM().inverse();const r=p.matrixTransform(m);return[r.x,r.y]};
+  let drag=null;
+  B.down=(e,pc)=>{e.preventDefault();const wasSel=B.sel===pc;B.sel=pc;const [x,y]=toSvg(e);drag={pc,dx:pc.x-x,dy:pc.y-y,sx:e.clientX,sy:e.clientY,moved:false,wasSel};
+    svg.setPointerCapture(e.pointerId);B.draw()};
+  svg.addEventListener("pointermove",e=>{if(!drag)return;const [x,y]=toSvg(e);
+    if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>4)drag.moved=true;
+    if(drag.moved){drag.pc.x=Math.min(B.W-0.3,Math.max(0.3,x+drag.dx));drag.pc.y=Math.min(B.H-0.3,Math.max(0.3,y+drag.dy));B.draw()}});
+  const up=()=>{if(!drag)return;const d=drag;drag=null;
+    if(!d.moved&&d.wasSel){B.turn();return}
+    B.snap(d.pc);B.draw();B.onDrop&&B.onDrop()};
+  svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
+  svg.addEventListener("pointerdown",e=>{if(e.target.tagName==="rect"){B.sel=null;B.draw()}});
+  B.snap=pc=>{const mine=B.pts(pc);let cands=[];
+    if(B.target)cands=cands.concat(B.target);
+    B.pieces.forEach(o=>{if(o!==pc)cands=cands.concat(B.pts(o))});
+    let best=0.32,dx=0,dy=0;
+    mine.forEach(v=>cands.forEach(c=>{const d=dist(v,c);if(d<best){best=d;dx=c[0]-v[0];dy=c[1]-v[1]}}));
+    pc.x+=dx;pc.y+=dy};
+  B.turn=()=>{if(!B.sel)return;B.sel.rot=(B.sel.rot+1)%8;B.snap(B.sel);B.draw();B.onDrop&&B.onDrop()};
+  B.flip=()=>{if(!B.sel)return;B.sel.flip=!B.sel.flip;B.snap(B.sel);B.draw();B.onDrop&&B.onDrop()};
+  svg.addEventListener("keydown",()=>{});
+  return B;
+}
+addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;const b=!$("v-puzzles").hidden?pBoard:!$("v-squares").hidden?sBoard:null;if(!b)return;
+  if(e.key==="r"||e.key==="R"){b.turn()}else if(e.key==="f"||e.key==="F"){b.flip()}});
+
+/* coverage: every sample point inside poly covered exactly once */
+function coverage(poly,piecePts){const b=bbox(poly);let tot=0,bad=0;
+  for(let x=b.x0+0.0437;x<b.x1;x+=0.097)for(let y=b.y0+0.0291;y<b.y1;y+=0.097){if(!inside([x,y],poly))continue;tot++;
+    let n=0;for(const p of piecePts)if(inside([x,y],p))n++;if(n!==1)bad++}
+  return tot?bad/tot:1}
+
+/* ---------- 3. Puzzles ---------- */
+const solved=store.get("solved",{});let cur=store.get("cur",0);let curWon=false;
+function placeFig(B){const f=DATA.figs[DATA.order[cur]];const a=B.area;const ox=(a.x0+a.x1-f.w)/2,oy=(a.y0+a.y1-f.h)/2;
+  return{f,ox,oy,outline:f.outline.map(([x,y])=>[x+ox,y+oy]),sol:f.pieces.map(pc=>({k:pc.k,p:pc.p.map(([x,y])=>[x+ox,y+oy])}))}}
+const pBoard=makeBoard($("psvg"),{
+  drawBack:B=>{const t=placeFig(B);B.target=t.outline;B.tf=t;
+    el("polygon",{points:ptsAttr(t.outline),fill:"var(--sil)","stroke-linejoin":"round"},B.svg)},
+  onDrop:()=>checkPuzzle()});
+function checkPuzzle(){const B=pBoard;if(!B.tf)return;
+  const bad=coverage(B.tf.outline,B.pieces.map(B.pts));
+  if(bad<0.004){if(!curWon){curWon=true;solved[DATA.order[cur]]=true;store.set("solved",solved);drawPicks();
+      $("pMsg").innerHTML=`<div class="win pop">Solved! All 7 pieces, so this shape is 16 small triangles too.</div>`}}
+  else{curWon=false;$("pMsg").textContent=""}}
+function loadPuzzle(i){cur=i;store.set("cur",i);curWon=false;$("pTitle").textContent=(i+1)+". "+DATA.order[i];$("pMsg").textContent="";pBoard.reset();drawPicks()}
+function drawPicks(){const host=$("picks");host.innerHTML="";DATA.order.forEach((n,i)=>{const b=document.createElement("button");b.className="pick";b.setAttribute("aria-current",i===cur);
+  b.appendChild(figSvg(DATA.figs[n]));const l=document.createElement("span");l.textContent=n.replace("The original ","Original ");b.appendChild(l);
+  if(solved[n]){const o=document.createElement("span");o.className="ok";o.textContent="✓";o.setAttribute("aria-label","solved");b.appendChild(o)}
+  b.onclick=()=>loadPuzzle(i);host.appendChild(b)})}
+function samePoly(a,b){return a.length===b.length&&a.every(p=>b.some(q=>dist(p,q)<0.02))}
+$("pHint").onclick=()=>{const B=pBoard,sol=B.tf.sol;const used=new Set();
+  // which solution slots are already filled correctly
+  B.pieces.forEach(pc=>{const pp=B.pts(pc);sol.forEach((s,j)=>{if(!used.has(j)&&s.k===pc.k&&samePoly(pp,s.p)){used.add(j);pc.ok=true}})});
+  for(const pc of B.pieces){if(B.pieces.some(()=>false))break;const pp=B.pts(pc);if(sol.some((s,j)=>used.has(j)&&s.k===pc.k&&samePoly(pp,s.p)))continue;
+    const j=sol.findIndex((s,j)=>!used.has(j)&&s.k===pc.k);if(j<0)continue;const s=sol[j],c=cent(s.p);
+    for(let f=0;f<2;f++)for(let r=0;r<8;r++){pc.flip=!!f;pc.rot=r;pc.x=c[0];pc.y=c[1];if(samePoly(B.pts(pc),s.p)){B.sel=pc;B.draw();checkPuzzle();return}}}
+  $("pMsg").textContent="Every piece is already in place."};
+$("pTurn").onclick=()=>pBoard.turn();$("pFlip").onclick=()=>pBoard.flip();$("pReset").onclick=()=>loadPuzzle(cur);
+$("colorSize").onchange=()=>pBoard.draw();
+
+/* ---------- 4. Square Challenge ---------- */
+const sDone=store.get("sdone",{});let sN=store.get("sn",3);
+const sBoard=makeBoard($("ssvg"),{alwaysColor:true,
+  drawBack:B=>{const a=B.area;B.mat={x0:a.x0+0.6,y0:a.y0+0.6,x1:a.x1-0.6,y1:a.y1-0.6};B.target=null;
+    el("rect",{x:B.mat.x0,y:B.mat.y0,width:B.mat.x1-B.mat.x0,height:B.mat.y1-B.mat.y0,rx:0.2,fill:"var(--mat)",stroke:"var(--muted)","stroke-width":0.035,"stroke-dasharray":"0.18 0.12"},B.svg);
+    const t=el("text",{x:B.mat.x0+0.2,y:B.mat.y0+0.45,"font-size":0.32,"font-family":"Lexend, sans-serif",fill:"var(--muted)"},B.svg);t.textContent="Build your square here"},
+  onDrop:()=>{$("sMsg").textContent=""}});
+function onMat(B,pc){const c=cent(B.pts(pc)),m=B.mat;return c[0]>m.x0&&c[0]<m.x1&&c[1]>m.y0&&c[1]<m.y1}
+function hull(pts){const seen=new Set();pts=pts.map(([x,y])=>[Math.round(x*1e5)/1e5,Math.round(y*1e5)/1e5]).filter(p=>{const k=p.join();if(seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
+  const lo=[],hi=[];for(const p of pts){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=1e-6)lo.pop();lo.push(p)}
+  for(const p of pts.slice().reverse()){while(hi.length>=2&&cr(hi[hi.length-2],hi[hi.length-1],p)<=1e-6)hi.pop();hi.push(p)}
+  return lo.slice(0,-1).concat(hi.slice(0,-1))}
+$("sCheck").onclick=()=>{const B=sBoard;const on=B.pieces.filter(pc=>onMat(B,pc));const msg=$("sMsg");
+  if(!on.length){msg.textContent="Put some pieces on the mat first.";return}
+  if(on.length!==sN){msg.textContent=`You have ${on.length} piece${on.length>1?"s":""} on the mat. This challenge needs exactly ${sN}.`;return}
+  const pp=on.map(B.pts),h=hull(pp.flat()),A=pp.reduce((s,p)=>s+area(p),0);
+  const sq=h.length===4&&Math.abs(area(h)-A)<0.02&&(()=>{const s=[0,1,2,3].map(i=>dist(h[i],h[(i+1)%4]));return Math.max(...s)-Math.min(...s)<0.03&&Math.abs(dist(h[0],h[2])-dist(h[1],h[3]))<0.03})()&&coverage(h,pp)<0.004;
+  if(sq){sDone[sN]=true;store.set("sdone",sDone);drawNums();msg.innerHTML=`<div class="win pop">That's a square made of ${sN} piece${sN>1?"s":""}! Its size is ${Math.round(A*2)} small triangles.</div>`}
+  else msg.textContent="Not a square yet. Check for gaps, overlaps, and four equal sides."};
+function drawNums(){const host=$("nums");host.innerHTML="";for(let n=1;n<=7;n++){const b=document.createElement("button");b.className="num"+(sDone[n]?" done":"");b.textContent=n;b.setAttribute("aria-pressed",n===sN);
+  b.onclick=()=>{sN=n;store.set("sn",n);$("sMsg").textContent="";drawNums()};host.appendChild(b)}}
+$("sTurn").onclick=()=>sBoard.turn();$("sFlip").onclick=()=>sBoard.flip();$("sReset").onclick=()=>{sBoard.reset();$("sMsg").textContent=""};
+$("whyBtn").onclick=()=>{const w=$("why");w.hidden=!w.hidden;$("whyBtn").textContent=w.hidden?"Show why":"Hide"};
+
+/* ---------- start ---------- */
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!$("v-puzzles").hidden)pBoard.fit();if(!$("v-squares").hidden)sBoard.fit()},150)});
+drawBig();drawVotes();drawMeasure();drawAsk();drawPicks();drawNums();
+show(location.hash.slice(1)||store.get("tab","question"));
+loadPuzzle(cur);sBoard.reset();
+</script>
+
+</body></html>

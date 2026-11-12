@@ -1,0 +1,779 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Odd Plus Odd</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a cube "workbench" (stage) beside a step panel; five steps across the top follow the lesson flow. */
+:root{
+  --paper:#EEF2F7; --card:#FFFFFF; --ink:#1D2433; --muted:#5A6375; --line:#D3DAE5;
+  --a:#2C6FD8; --b:#E9772B; --c:#2A9A68; --d:#B04CC8; --e:#D2405A;
+  --accent:#4B3FD1; --accent-ink:#FFFFFF; --accent-soft:#E9E7FB;
+  --extra:#F5B50C; --ok:#1E8A55; --ok-soft:#E1F4EA; --think:#B5541A; --think-soft:#FCEEDF;
+  --slot:#C3CCDA;
+  --display:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141821; --card:#1E2330; --ink:#ECEEF3; --muted:#A3ABBB; --line:#343B4C;
+    --a:#5B95F0; --b:#F39550; --c:#45C08A; --d:#CF7BE3; --e:#EE6A80;
+    --accent:#8F86F5; --accent-ink:#14121F; --accent-soft:#2A2747;
+    --extra:#FFC93C; --ok:#4FCB8C; --ok-soft:#173528; --think:#F2A066; --think-soft:#3A2717;
+    --slot:#4A5368; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141821; --card:#1E2330; --ink:#ECEEF3; --muted:#A3ABBB; --line:#343B4C;
+  --a:#5B95F0; --b:#F39550; --c:#45C08A; --d:#CF7BE3; --e:#EE6A80;
+  --accent:#8F86F5; --accent-ink:#14121F; --accent-soft:#2A2747;
+  --extra:#FFC93C; --ok:#4FCB8C; --ok-soft:#173528; --think:#F2A066; --think-soft:#3A2717;
+  --slot:#4A5368; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:1500px; margin:0 auto; display:flex; flex-direction:column; min-height:100%; padding-block:14px 24px; gap:14px}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px}
+.logo{display:grid; grid-template-columns:repeat(2,18px); gap:3px}
+.logo i{width:18px; height:18px; border-radius:4px; background:var(--a); box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.logo i:nth-child(3){background:var(--b)} .logo i:nth-child(4){background:var(--extra)}
+h1{font-family:var(--display); font-weight:600; font-size:clamp(28px,3vw,44px); line-height:1; margin:0; letter-spacing:-.01em}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:8px; flex-wrap:wrap}
+nav.steps button{display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:999px; padding:8px 18px 8px 8px; font-weight:700; font-size:17px; min-height:52px; color:var(--muted)}
+nav.steps button b{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--paper); font-family:var(--display); font-weight:600; color:var(--ink)}
+nav.steps button[aria-selected="true"]{border-color:var(--accent); color:var(--ink); background:var(--accent-soft)}
+nav.steps button[aria-selected="true"] b{background:var(--accent); color:var(--accent-ink)}
+
+.view{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr); gap:18px; align-items:start}
+.view[hidden]{display:none}
+.stage{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:20px; min-height:440px; display:flex; flex-direction:column; gap:18px; min-width:0;
+  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:32px 32px; background-position:-1px -1px; background-color:var(--card)}
+.stage > *{background:var(--card)}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel h2{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.1vw,32px); line-height:1.15; margin:0; text-wrap:balance}
+.panel p{margin:0}
+.lead{font-size:clamp(18px,1.4vw,21px)}
+.muted{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.btn{border:0; border-radius:16px; padding:14px 24px; min-height:56px; font-weight:800; font-size:clamp(17px,1.35vw,20px); background:var(--accent); color:var(--accent-ink)}
+.btn:disabled{opacity:.4; cursor:default}
+.btn2{border:2.5px solid var(--ink); border-radius:16px; padding:12px 20px; min-height:56px; font-weight:800; font-size:clamp(16px,1.25vw,19px); background:var(--card)}
+.btn2:disabled{opacity:.4; cursor:default}
+.btn2[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.choice{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.choice button{min-height:72px; border-radius:18px; border:3px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:clamp(24px,2vw,30px)}
+.choice button:disabled{cursor:default}
+.choice button.picked{border-color:var(--accent); background:var(--accent-soft)}
+.fb{border-radius:16px; padding:14px 18px; font-size:clamp(17px,1.35vw,20px); line-height:1.45}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft); border-left:6px solid var(--ok)}
+.fb.think{background:var(--think-soft); border-left:6px solid var(--think)}
+.fb.info{background:var(--accent-soft); border-left:6px solid var(--accent)}
+.fb b{font-weight:800}
+
+/* cubes */
+.group{display:flex; flex-direction:column; gap:8px}
+.glabel{font-weight:800; font-size:clamp(17px,1.4vw,22px); display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.glabel .big{font-family:var(--display); font-weight:600; font-size:1.6em; line-height:1}
+.cubes{--cube:44px; display:flex; flex-wrap:wrap; gap:calc(var(--cube)*.22); align-items:flex-end; min-height:calc(var(--cube)*2 + 6px)}
+.col{display:flex; flex-direction:column-reverse; gap:2px; position:relative}
+.cube{width:var(--cube); height:var(--cube); border-radius:calc(var(--cube)*.16); background:var(--cc); position:relative;
+  box-shadow:inset 0 calc(var(--cube)*-.12) 0 rgba(0,0,0,.2), inset 0 calc(var(--cube)*.08) 0 rgba(255,255,255,.25)}
+.cube::after{content:""; position:absolute; left:32%; right:32%; top:calc(var(--cube)*-.1); height:calc(var(--cube)*.14); border-radius:3px 3px 0 0; background:var(--cc); filter:brightness(.92)}
+.slot{width:var(--cube); height:var(--cube); border-radius:calc(var(--cube)*.16); border:2.5px dashed var(--slot)}
+.col.extra .cube{outline:calc(var(--cube)*.09) solid var(--extra); outline-offset:2px}
+.col.newpair{padding:4px; margin:-4px; border-radius:calc(var(--cube)*.25); background:color-mix(in srgb, var(--extra) 30%, transparent)}
+.col .tagx{position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:13px; font-weight:800; background:var(--extra); color:#2A2100; padding:2px 8px; border-radius:8px}
+.cubes.anim .col{animation:drop .35s ease-out both}
+@keyframes drop{from{transform:translateY(-14px); opacity:0}to{transform:none; opacity:1}}
+.cubes.anim .col.newpair{animation:snap .6s ease-out both}
+@keyframes snap{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.zero{font-family:var(--display); font-size:22px; color:var(--muted); padding:18px 0}
+.plus{font-family:var(--display); font-weight:600; font-size:34px; color:var(--muted); line-height:1}
+.eq{font-family:var(--display); font-weight:600; font-size:clamp(26px,2.4vw,38px); line-height:1.15}
+
+/* warm-up */
+.bignum{font-family:var(--display); font-weight:600; font-size:clamp(90px,12vw,170px); line-height:1; text-align:center; padding:10px 0 0}
+.defs{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.def{border:2px solid var(--line); border-radius:16px; padding:12px 14px; background:var(--card); font-size:16px}
+.def b{display:block; font-family:var(--display); font-weight:600; font-size:18px; margin-bottom:2px}
+.def.lit{border-color:var(--ok); background:var(--ok-soft)}
+.dots{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+.dots i{width:14px; height:14px; border-radius:50%; background:var(--line)}
+.dots i.now{background:var(--accent)} .dots i.done{background:var(--ok)}
+
+/* debate */
+.debate{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.bubble{border-radius:18px; padding:14px 16px; background:var(--paper); font-size:clamp(17px,1.3vw,20px); font-weight:700}
+.bubble small{display:block; font-weight:800; color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px}
+
+/* steppers */
+.pickers{display:flex; gap:14px; flex-wrap:wrap; align-items:center}
+.stepper{display:flex; align-items:center; gap:6px; border:2px solid var(--line); border-radius:18px; padding:6px; background:var(--card)}
+.stepper button{width:52px; height:52px; border-radius:14px; border:0; background:var(--paper); font-size:28px; font-weight:800; line-height:1}
+.stepper output{min-width:64px; text-align:center; font-family:var(--display); font-weight:600; font-size:36px; color:var(--cc)}
+.seg{display:flex; gap:8px; flex-wrap:wrap}
+.seg button{border:2.5px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; min-height:52px; font-weight:800; font-size:17px}
+.seg button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+
+/* record table */
+.tbl-wrap{overflow-x:auto}
+table.rec{border-collapse:collapse; width:100%; font-size:17px; font-variant-numeric:tabular-nums}
+.rec th,.rec td{border:1.5px solid var(--line); padding:8px 10px; text-align:left}
+.rec th{font-size:14px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+.rec td.k{font-weight:800; white-space:nowrap}
+.rec td.res{font-weight:800}
+.rec td.res.even{color:var(--ok)}
+
+/* general picture */
+.bag{display:inline-flex; align-items:flex-end; gap:10px; flex-wrap:wrap; max-width:100%}
+.sack{min-width:150px; min-height:104px; border-radius:22px 22px 28px 28px; border:3px solid var(--cc); background:color-mix(in srgb, var(--cc) 14%, var(--card)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 14px; text-align:center}
+.sack .q{font-family:var(--display); font-weight:600; font-size:40px; line-height:1; color:var(--cc)}
+.sack .w{font-weight:800; font-size:15px}
+.mini{display:flex; gap:3px; margin-top:6px}
+.mini span{display:flex; flex-direction:column; gap:2px}
+.mini span i{width:10px; height:10px; border-radius:2px; background:var(--cc)}
+.gen{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap}
+.slider{display:flex; flex-direction:column; gap:4px; font-weight:700}
+.slider input{width:100%; height:36px; accent-color:var(--accent)}
+
+/* questions */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2.5px solid var(--line); background:var(--card); font-weight:800; font-size:19px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.hint{font-size:15px; color:var(--muted)}
+.leftrow{display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end}
+.chip{display:flex; flex-direction:column; align-items:center; gap:4px; font-weight:800; font-size:15px}
+
+@media (max-width: 980px){
+  .view{grid-template-columns:1fr}
+  .stage{min-height:0}
+}
+@media (max-width: 520px){
+  body{font-size:17px}
+  .defs,.debate{grid-template-columns:1fr}
+  nav.steps button{font-size:15px; padding-right:12px}
+  .stage{padding:14px}
+  nav.steps{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px}
+  nav.steps button{flex:none}
+  .sack{min-width:110px; min-height:90px}
+  .sack .q{font-size:32px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important; transition:none !important}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div>
+        <h1>Odd Plus Odd</h1>
+        <p class="sub">Grade 2 · Week 8 · Lesson 2.8</p>
+      </div>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav class="steps" role="tablist" aria-label="Lesson steps">
+    <button role="tab" data-v="warm" aria-selected="true"><b>1</b>Even or odd?</button>
+    <button role="tab" data-v="launch" aria-selected="false"><b>2</b>Where did the extras go?</button>
+    <button role="tab" data-v="test" aria-selected="false"><b>3</b>Test the sums</button>
+    <button role="tab" data-v="any" aria-selected="false"><b>4</b>Any odd numbers</button>
+    <button role="tab" data-v="q" aria-selected="false"><b>5</b>Detective questions</button>
+  </nav>
+
+  <!-- 1 WARM-UP -->
+  <section class="view" id="v-warm">
+    <div class="stage">
+      <div class="bignum" id="wNum">14</div>
+      <div class="group" id="wCubes" style="align-items:center"></div>
+      <div class="dots" id="wDots"></div>
+    </div>
+    <div class="panel">
+      <h2>Is this number even or odd?</h2>
+      <div class="choice" id="wChoice">
+        <button data-p="even">Even</button>
+        <button data-p="odd">Odd</button>
+      </div>
+      <div class="row">
+        <button class="btn2" id="wBuild">Build it with cubes</button>
+        <button class="btn" id="wNext">Next number</button>
+      </div>
+      <div class="fb" id="wFb" aria-live="polite"></div>
+      <p class="muted" style="font-weight:700">Two ways to tell:</p>
+      <div class="defs">
+        <div class="def" id="d1"><b>Pairs</b>Make pairs. Even has none left over.</div>
+        <div class="def" id="d2"><b>Last digit</b>Even ends in 0, 2, 4, 6 or 8.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 LAUNCH -->
+  <section class="view" id="v-launch" hidden>
+    <div class="stage" id="lStage"></div>
+    <div class="panel">
+      <h2>Who is right?</h2>
+      <div class="debate">
+        <div class="bubble"><small>Student A</small>Odd plus odd is always even.</div>
+        <div class="bubble"><small>Student B</small>You can't know "always." You can't try every number.</div>
+      </div>
+      <p class="lead">Here is 5 and here is 7. Both are odd. Each one has an extra cube with no partner.</p>
+      <div class="row">
+        <button class="btn" id="lPush">Push them together</button>
+        <button class="btn2" id="lBack">Pull apart</button>
+      </div>
+      <div class="fb" id="lFb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- 3 TEST -->
+  <section class="view" id="v-test" hidden>
+    <div class="stage" id="tStage"></div>
+    <div class="panel">
+      <h2>Test each kind of sum</h2>
+      <div class="seg" id="tKind" role="group" aria-label="Kind of sum">
+        <button data-k="oo" aria-pressed="true">odd + odd</button>
+        <button data-k="ee" aria-pressed="false">even + even</button>
+        <button data-k="oe" aria-pressed="false">odd + even</button>
+      </div>
+      <div class="pickers">
+        <div class="stepper" style="--cc:var(--a)"><button data-s="a" data-d="-1" aria-label="First number down">−</button><output id="tA">5</output><button data-s="a" data-d="1" aria-label="First number up">+</button></div>
+        <span class="plus">+</span>
+        <div class="stepper" style="--cc:var(--b)"><button data-s="b" data-d="-1" aria-label="Second number down">−</button><output id="tB">7</output><button data-s="b" data-d="1" aria-label="Second number up">+</button></div>
+      </div>
+      <div class="row">
+        <button class="btn" id="tBuild">Build them</button>
+        <button class="btn2" id="tRand">Surprise me</button>
+      </div>
+      <p class="muted" id="tPredQ" style="font-weight:700">Predict: will the total be even or odd?</p>
+      <div class="choice" id="tPred">
+        <button data-p="even" disabled>Even</button>
+        <button data-p="odd" disabled>Odd</button>
+      </div>
+      <button class="btn" id="tPush" disabled>Push together and check</button>
+      <div class="fb" id="tFb" aria-live="polite"></div>
+      <div class="tbl-wrap">
+        <table class="rec" aria-label="Examples recorded">
+          <thead><tr><th>Kind of sum</th><th>Example 1</th><th>Example 2</th><th>Example 3</th><th>Even or odd?</th></tr></thead>
+          <tbody id="tRec"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 ANY -->
+  <section class="view" id="v-any" hidden>
+    <div class="stage" id="aStage"></div>
+    <div class="panel">
+      <h2>A picture for ANY two odd numbers</h2>
+      <p class="lead">Every odd number is a bunch of pairs, plus one. We don't need to know how many pairs.</p>
+      <div class="seg" role="group" aria-label="Picture mode">
+        <button id="aMystery" aria-pressed="true">Mystery numbers</button>
+        <button id="aReal" aria-pressed="false">Show real numbers</button>
+      </div>
+      <div id="aSliders" hidden>
+        <label class="slider" for="aP1">Blue: <span id="aP1t"></span><input type="range" id="aP1" min="0" max="60" value="2"></label>
+        <label class="slider" for="aP2">Orange: <span id="aP2t"></span><input type="range" id="aP2" min="0" max="60" value="3"></label>
+      </div>
+      <div class="row">
+        <button class="btn" id="aPush">Push together</button>
+        <button class="btn2" id="aBig">Try 101 + 57</button>
+      </div>
+      <div class="fb" id="aFb" aria-live="polite"></div>
+      <div id="aAsk" hidden>
+        <p style="font-weight:800">Does the picture work for 101 + 57?</p>
+        <div class="choice" id="aYN"><button data-p="yes">Yes</button><button data-p="no">No</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 QUESTIONS -->
+  <section class="view" id="v-q" hidden>
+    <div class="stage" id="qStage"></div>
+    <div class="panel">
+      <div class="qnav" id="qnav"></div>
+      <h2 id="qText"></h2>
+      <div id="qExtra"></div>
+      <div class="row" id="qAct"></div>
+      <div class="fb" id="qFb" aria-live="polite"></div>
+      <p class="hint">Talk it over first. Then tap a button to put evidence on the board.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+/* ===== math core (pure) ===== */
+const M = {
+  pairs: n => Math.floor(n/2),
+  left: n => n % 2,
+  isEven: n => n % 2 === 0,
+  word: n => n % 2 === 0 ? 'even' : 'odd',
+  describe(n){
+    const p = Math.floor(n/2), r = n % 2;
+    if(n === 0) return '0 is 0 pairs, 0 left over';
+    return `${n} is ${p} pair${p===1?'':'s'}` + (r ? ' + 1 left over' : ', none left over');
+  },
+  // combine addends: their own pairs stay, leftovers snap together in twos
+  combine(nums){
+    const ownPairs = nums.reduce((s,n)=>s+Math.floor(n/2),0);
+    const extras = nums.reduce((s,n)=>s+n%2,0);
+    const newPairs = Math.floor(extras/2);
+    const leftOver = extras % 2;
+    const total = nums.reduce((s,n)=>s+n,0);
+    return {ownPairs, extras, newPairs, leftOver, total, pairsTotal: ownPairs+newPairs};
+  },
+  kindOk(k,a,b){
+    if(k==='oo') return a%2===1 && b%2===1;
+    if(k==='ee') return a%2===0 && b%2===0;
+    return (a+b)%2===1;
+  }
+};
+window.__M = M;
+
+/* ===== helpers ===== */
+const $ = s => document.querySelector(s);
+const COLORS = ['var(--a)','var(--b)','var(--c)','var(--d)','var(--e)'];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rnd = (lo,hi) => lo + Math.floor(Math.random()*(hi-lo+1));
+const rndOdd = (lo,hi) => { let n; do n = rnd(lo,hi); while(n%2===0); return n; };
+const rndEven = (lo,hi) => { let n; do n = rnd(lo,hi); while(n%2===1); return n; };
+const fb = (el, kind, html) => { el.className = 'fb ' + (kind||''); el.innerHTML = html||''; };
+
+function cubeSize(nCols){
+  const w = Math.min(window.innerWidth, 1500);
+  const avail = (w < 980 ? w - 80 : w*0.56 - 60);
+  const s = Math.floor(avail / (nCols*1.24));
+  return Math.max(16, Math.min(52, s));
+}
+// columns: array of {cells:[color...], extra?, newpair?, tag?}
+function colsFor(n, color){
+  const c = [];
+  for(let i=0;i<Math.floor(n/2);i++) c.push({cells:[color,color]});
+  if(n%2) c.push({cells:[color], extra:true});
+  return c;
+}
+function drawCols(cols, opts={}){
+  const box = document.createElement('div');
+  box.className = 'cubes' + (opts.anim && !reduced ? ' anim' : '');
+  box.style.setProperty('--cube', (opts.size || cubeSize(opts.fitCols || cols.length)) + 'px');
+  cols.forEach((col,i) => {
+    const d = document.createElement('div');
+    d.className = 'col' + (col.extra ? ' extra' : '') + (col.newpair ? ' newpair' : '');
+    if(opts.anim) d.style.animationDelay = Math.min(i*35, 700) + 'ms';
+    col.cells.forEach(cc => { const q = document.createElement('div'); q.className='cube'; q.style.setProperty('--cc', cc); d.appendChild(q); });
+    if(col.cells.length===1){ const s=document.createElement('div'); s.className='slot'; s.title='no partner'; d.appendChild(s); }
+    if(col.tag){ const t=document.createElement('span'); t.className='tagx'; t.textContent=col.tag; d.appendChild(t); }
+    box.appendChild(d);
+  });
+  return box;
+}
+function groupEl(label, cols, opts){
+  const g = document.createElement('div'); g.className='group';
+  if(label){ const l=document.createElement('div'); l.className='glabel'; l.innerHTML=label; g.appendChild(l); }
+  if(cols.length) g.appendChild(drawCols(cols, opts));
+  else { const z=document.createElement('div'); z.className='zero'; z.textContent='No cubes at all: 0 pairs, 0 left over.'; g.appendChild(z); }
+  return g;
+}
+// separate rows (before pushing)
+function drawApart(stage, nums){
+  stage.innerHTML='';
+  const fit = Math.max(...nums.map(n=>Math.ceil(n/2)), 1);
+  nums.forEach((n,i) => {
+    stage.appendChild(groupEl(`<span class="big" style="color:${COLORS[i]}">${n}</span><span>${M.describe(n).replace(/^\d+ is /,'= ')}</span>`, colsFor(n, COLORS[i]), {fitCols:fit, anim:true}));
+  });
+}
+// combined (after pushing): own pairs, then the leftovers snapped into new pairs
+function combinedCols(nums){
+  const cols = [];
+  nums.forEach((n,i) => { for(let k=0;k<Math.floor(n/2);k++) cols.push({cells:[COLORS[i],COLORS[i]]}); });
+  const extras = []; nums.forEach((n,i) => { if(n%2) extras.push(COLORS[i]); });
+  for(let k=0;k+1<extras.length;k+=2) cols.push({cells:[extras[k],extras[k+1]], newpair:true, tag: k===0 ? 'new pair!' : ''});
+  if(extras.length%2) cols.push({cells:[extras[extras.length-1]], extra:true, tag:'left over'});
+  return cols;
+}
+function drawTogether(stage, nums, headline){
+  stage.innerHTML='';
+  const r = M.combine(nums);
+  const lab = `<span class="big">${nums.join(' + ')} = ${r.total}</span>`;
+  stage.appendChild(groupEl(lab, combinedCols(nums), {anim:true}));
+  if(headline){ const p=document.createElement('div'); p.className='eq'; p.innerHTML=headline; stage.appendChild(p); }
+  return r;
+}
+
+/* ===== 1 · WARM-UP ===== */
+const WARM = [14, 23, 30, 0, 9, 18, 7, 25];
+const W = {i:0, guessed:false, built:false};
+function wRender(){
+  const n = WARM[W.i];
+  $('#wNum').textContent = n;
+  $('#wCubes').innerHTML='';
+  $('#wDots').innerHTML = WARM.map((_,i)=>`<i class="${i<W.i?'done':i===W.i?'now':''}"></i>`).join('');
+  document.querySelectorAll('#wChoice button').forEach(b => { b.classList.remove('picked'); b.disabled=false; });
+  $('#d1').classList.remove('lit'); $('#d2').classList.remove('lit');
+  fb($('#wFb'),'','');
+  W.guessed=false; W.built=false;
+  $('#wNext').textContent = W.i===WARM.length-1 ? 'Back to the first number' : 'Next number';
+}
+function wBuild(){
+  const n = WARM[W.i]; W.built = true;
+  const g = $('#wCubes'); g.innerHTML='';
+  g.appendChild(groupEl('', colsFor(n,'var(--a)'), {anim:true}));
+}
+function wGuess(p){
+  const n = WARM[W.i];
+  document.querySelectorAll('#wChoice button').forEach(b => { b.classList.toggle('picked', b.dataset.p===p); });
+  wBuild();
+  const truth = M.word(n);
+  const last = n % 10;
+  const digitLine = `It ends in ${last}${n%2===0 ? ', and 0, 2, 4, 6, 8 are the even endings' : ', which is not 0, 2, 4, 6 or 8'}.`;
+  $('#d1').classList.add('lit'); $('#d2').classList.add('lit');
+  if(n===0){
+    if(p==='even') fb($('#wFb'),'ok',`<b>Yes, 0 is even.</b> How many pairs? Zero. How many left over? Zero. None left over means even. It also ends in 0.`);
+    else fb($('#wFb'),'think',`<b>Let's check.</b> 0 cubes make 0 pairs with <b>0 left over</b>. Nothing is left without a partner, so 0 is even. It also ends in 0. Try the next one.`);
+  } else if(p===truth){
+    fb($('#wFb'),'ok',`<b>Yes, ${n} is ${truth}.</b> ${M.describe(n)}. ${digitLine} Both ways agree.`);
+  } else {
+    fb($('#wFb'),'think',`<b>Look at the cubes.</b> ${M.describe(n)}. ${n%2 ? 'One cube has no partner, so it is odd.' : 'Every cube has a partner, so it is even.'} ${digitLine} Try the next one.`);
+  }
+  W.guessed = true;
+}
+document.querySelectorAll('#wChoice button').forEach(b => b.onclick = () => wGuess(b.dataset.p));
+$('#wBuild').onclick = wBuild;
+$('#wNext').onclick = () => { W.i = (W.i+1) % WARM.length; wRender(); };
+
+/* ===== 2 · LAUNCH ===== */
+function lApart(){ drawApart($('#lStage'), [5,7]); fb($('#lFb'),'',''); }
+function lPush(){
+  const r = drawTogether($('#lStage'), [5,7], `${r0(12)}`);
+  fb($('#lFb'),'info',`<b>The two extras became a new pair.</b> 5 has 2 pairs + 1. 7 has 3 pairs + 1. Together: 2 + 3 = 5 pairs, and the 2 extras make 1 more pair. That is ${r.pairsTotal} pairs with nothing left over, so 12 is even. Does this only work for 5 and 7? Step 4 finds out.`);
+}
+function r0(n){ const p=M.pairs(n); return `${p} pairs, 0 left over → <span style="color:var(--ok)">even</span>`; }
+$('#lPush').onclick = lPush;
+$('#lBack').onclick = lApart;
+
+/* ===== 3 · TEST ===== */
+const T = {k:'oo', a:5, b:7, built:false, pred:null, rec:{oo:[],ee:[],oe:[]}};
+const KIND = {oo:'odd + odd', ee:'even + even', oe:'odd + even'};
+function tShowNums(){ $('#tA').textContent=T.a; $('#tB').textContent=T.b; }
+function tUnbuild(){
+  T.built=false; T.pred=null;
+  document.querySelectorAll('#tPred button').forEach(b=>{b.disabled=true; b.classList.remove('picked');});
+  $('#tPush').disabled = true;
+  fb($('#tFb'),'','');
+  const st = $('#tStage'); st.innerHTML='';
+  const hint = document.createElement('div'); hint.className='eq'; hint.style.color='var(--muted)';
+  hint.innerHTML = `Pick two numbers for <b style="color:var(--ink)">${KIND[T.k]}</b>, then tap “Build them.”`;
+  st.appendChild(hint);
+}
+function tBuild(){
+  if(!M.kindOk(T.k,T.a,T.b)){
+    const bad = [];
+    const need = T.k==='oo' ? ['odd','odd'] : T.k==='ee' ? ['even','even'] : null;
+    let msg;
+    if(need){
+      [T.a,T.b].forEach(n => { if(M.word(n)!==need[0]) bad.push(`${M.describe(n)}, so ${n} is ${M.word(n)}`); });
+      msg = `<b>Check your numbers.</b> ${bad.join('. ')}. For ${KIND[T.k]} you need two ${need[0]} numbers. Change it and build again.`;
+    } else {
+      msg = `<b>Check your numbers.</b> ${T.a} and ${T.b} are both ${M.word(T.a)}. For odd + even, one number needs a cube left over and the other needs none.`;
+    }
+    drawApart($('#tStage'), [T.a,T.b]);
+    fb($('#tFb'),'think',msg);
+    return;
+  }
+  drawApart($('#tStage'), [T.a,T.b]);
+  T.built=true; T.pred=null;
+  document.querySelectorAll('#tPred button').forEach(b=>{b.disabled=false; b.classList.remove('picked');});
+  $('#tPush').disabled=false;
+  fb($('#tFb'),'info','Make a prediction, then push them together.');
+}
+function tPush(){
+  if(!T.built) return;
+  const r = M.combine([T.a,T.b]);
+  const tot = r.total, w = M.word(tot);
+  drawTogether($('#tStage'), [T.a,T.b], `${r.pairsTotal} pair${r.pairsTotal===1?'':'s'}, ${r.leftOver} left over → <span style="color:${w==='even'?'var(--ok)':'var(--think)'}">${w}</span>`);
+  let why;
+  if(r.extras===2) why = 'The two extras snapped into a new pair, so nothing is left over.';
+  else if(r.extras===1) why = 'Only one number had an extra cube. It has no partner, so one is left over.';
+  else why = 'Neither number had an extra cube, so nothing is left over.';
+  let head;
+  if(T.pred===null) head = `<b>${T.a} + ${T.b} = ${tot}, ${w}.</b>`;
+  else if(T.pred===w) head = `<b>Your prediction was right: ${tot} is ${w}.</b>`;
+  else head = `<b>You predicted ${T.pred}. Look again:</b> ${tot} is ${w}.`;
+  fb($('#tFb'), T.pred===null||T.pred===w ? 'ok':'think', `${head} ${why}`);
+  const list = T.rec[T.k];
+  if(!list.some(e => e.a===T.a && e.b===T.b)){ list.push({a:T.a,b:T.b,t:tot}); if(list.length>3) list.shift(); }
+  tTable();
+  T.built=false; $('#tPush').disabled=true;
+  document.querySelectorAll('#tPred button').forEach(b=>b.disabled=true);
+}
+function tTable(){
+  $('#tRec').innerHTML = ['oo','ee','oe'].map(k => {
+    const L = T.rec[k];
+    const cells = [0,1,2].map(i => L[i] ? `<td>${L[i].a} + ${L[i].b} = ${L[i].t}</td>` : '<td></td>').join('');
+    let res = '';
+    if(L.length){ const ws = [...new Set(L.map(e=>M.word(e.t)))]; res = ws.length===1 ? (L.length===3 ? `${ws[0]} every time` : `${ws[0]} so far`) : ws.join(' / '); }
+    return `<tr><td class="k">${KIND[k]}</td>${cells}<td class="res ${res.startsWith('even')?'even':''}">${res}</td></tr>`;
+  }).join('');
+  const full = ['oo','ee','oe'].every(k=>T.rec[k].length===3);
+  if(full && !T.fullSaid){ T.fullSaid=true; setTimeout(()=>fb($('#tFb'),'info',`<b>Your table is full.</b> Nine examples is good evidence. But is it proof that odd + odd is <i>always</i> even? Go to step 4.`), 2600); }
+}
+document.querySelectorAll('#tKind button').forEach(b => b.onclick = () => {
+  T.k=b.dataset.k; document.querySelectorAll('#tKind button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+  tUnbuild();
+});
+document.querySelectorAll('.stepper button').forEach(b => b.onclick = () => {
+  const s=b.dataset.s, d=+b.dataset.d; T[s] = Math.max(0, Math.min(20, T[s]+d)); tShowNums(); tUnbuild();
+});
+document.querySelectorAll('#tPred button').forEach(b => b.onclick = () => {
+  T.pred=b.dataset.p; document.querySelectorAll('#tPred button').forEach(x=>x.classList.toggle('picked', x===b));
+  fb($('#tFb'),'info',`You predicted <b>${T.pred}</b>. Now push them together.`);
+});
+$('#tRand').onclick = () => {
+  if(T.k==='oo'){ T.a=rndOdd(1,19); T.b=rndOdd(1,19); }
+  else if(T.k==='ee'){ T.a=rndEven(2,20); T.b=rndEven(2,20); }
+  else { if(Math.random()<.5){ T.a=rndOdd(1,19); T.b=rndEven(2,20);} else { T.a=rndEven(2,20); T.b=rndOdd(1,19);} }
+  tShowNums(); tUnbuild(); tBuild();
+};
+$('#tBuild').onclick = tBuild;
+$('#tPush').onclick = tPush;
+
+/* ===== 4 · ANY ODD NUMBERS ===== */
+const A = {real:false, p1:2, p2:3, pushed:false, big:false};
+function sack(color, pairs, real){
+  const mini = real && pairs<=12 ? `<div class="mini">${Array.from({length:pairs},()=>'<span><i></i><i></i></span>').join('')}</div>` : (!real ? `<div class="mini"><span><i></i><i></i></span><span><i></i><i></i></span><span style="opacity:.5"><i></i><i></i></span><span style="opacity:.25"><i></i><i></i></span></div>` : '');
+  return `<div class="sack" style="--cc:${color}"><div class="q">${real ? pairs : '?'}</div><div class="w">${real ? (pairs===1?'pair':'pairs') : 'some pairs'}</div>${mini}</div>`;
+}
+function oneCube(color, extra, tag){
+  const d = drawCols([{cells:[color], extra:extra, tag:tag||''}], {size:52});
+  d.style.minHeight='auto'; return d.outerHTML;
+}
+function aDraw(){
+  const st = $('#aStage'); st.innerHTML='';
+  const n1 = 2*A.p1+1, n2 = 2*A.p2+1;
+  $('#aP1t').textContent = `${A.p1} pair${A.p1===1?'':'s'} + 1 = ${n1}`;
+  $('#aP2t').textContent = `${A.p2} pair${A.p2===1?'':'s'} + 1 = ${n2}`;
+  const label = (n,c) => A.real ? `<span class="big" style="color:${c}">${n}</span>` : `<span class="big" style="color:${c}">odd</span>`;
+  const g = document.createElement('div'); g.className='gen';
+  if(!A.pushed){
+    g.innerHTML = `<div class="group">${label(n1,'var(--a)')}<div class="bag">${sack('var(--a)',A.p1,A.real)}<span class="plus">+</span>${oneCube('var(--a)',true)}</div></div>
+      <span class="plus" style="font-size:48px">+</span>
+      <div class="group">${label(n2,'var(--b)')}<div class="bag">${sack('var(--b)',A.p2,A.real)}<span class="plus">+</span>${oneCube('var(--b)',true)}</div></div>`;
+  } else {
+    const pair = drawCols([{cells:['var(--a)','var(--b)'], newpair:true, tag:'new pair!'}], {size:52, anim:true}); pair.style.minHeight='auto';
+    g.innerHTML = `<div class="group"><div class="glabel">${A.real ? `<span class="big">${n1} + ${n2} = ${n1+n2}</span>` : '<span class="big">odd + odd</span>'}</div>
+      <div class="bag">${sack('var(--a)',A.p1,A.real)}<span class="plus">+</span>${sack('var(--b)',A.p2,A.real)}<span class="plus">+</span>${pair.outerHTML}</div></div>`;
+  }
+  st.appendChild(g);
+  const eq = document.createElement('div'); eq.className='eq';
+  if(A.pushed){
+    eq.innerHTML = A.real
+      ? `${A.p1} pairs + ${A.p2} pairs + 1 new pair = ${A.p1+A.p2+1} pairs, 0 left over → <span style="color:var(--ok)">even</span>`
+      : `pairs + pairs + 1 new pair = all pairs, 0 left over → <span style="color:var(--ok)">even</span>`;
+  } else {
+    eq.innerHTML = `<span class="muted">Each odd number has exactly one cube with no partner.</span>`;
+  }
+  st.appendChild(eq);
+}
+function aMode(real){
+  A.real=real; A.big=false; $('#aMystery').setAttribute('aria-pressed', !real); $('#aReal').setAttribute('aria-pressed', real);
+  $('#aSliders').hidden = !real; $('#aAsk').hidden=true; aDraw();
+  fb($('#aFb'),'', '');
+}
+$('#aMystery').onclick = () => aMode(false);
+$('#aReal').onclick = () => aMode(true);
+$('#aP1').oninput = e => { A.p1=+e.target.value; A.big=false; $('#aAsk').hidden=true; aDraw(); if(A.pushed) aPushText(); };
+$('#aP2').oninput = e => { A.p2=+e.target.value; A.big=false; $('#aAsk').hidden=true; aDraw(); if(A.pushed) aPushText(); };
+function aPushText(){
+  if(A.big) return;
+  if(!A.real) fb($('#aFb'),'info',`<b>Does this picture care which odd numbers they are?</b> No. The sacks can hold any number of pairs. The two extras always make one more pair. So odd + odd is <b>always</b> even. Student A is right, and we did not have to try every number.`);
+  else fb($('#aFb'),'info',`Move the sliders. The sacks change, but there are always exactly 2 extras, and they always make a pair.`);
+}
+$('#aPush').onclick = () => { A.pushed = !A.pushed; $('#aPush').textContent = A.pushed ? 'Pull apart' : 'Push together'; aDraw(); if(A.pushed) aPushText(); else fb($('#aFb'),'',''); };
+$('#aBig').onclick = () => {
+  A.real=true; A.p1=50; A.p2=28; A.pushed=false; A.big=true;
+  $('#aP1').value=50; $('#aP2').value=28;
+  $('#aMystery').setAttribute('aria-pressed', false); $('#aReal').setAttribute('aria-pressed', true); $('#aSliders').hidden=false;
+  $('#aPush').textContent='Push together';
+  aDraw(); $('#aAsk').hidden=false;
+  document.querySelectorAll('#aYN button').forEach(b=>b.classList.remove('picked'));
+  fb($('#aFb'),'info',`101 = 50 pairs + 1. 57 = 28 pairs + 1. Would you need to build 158 cubes to know the answer?`);
+};
+document.querySelectorAll('#aYN button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#aYN button').forEach(x=>x.classList.toggle('picked', x===b));
+  A.pushed=true; $('#aPush').textContent='Pull apart'; aDraw();
+  if(b.dataset.p==='yes') fb($('#aFb'),'ok',`<b>Yes.</b> 101 and 57 are both odd, so each is pairs + 1. 50 pairs + 28 pairs + 1 new pair = 79 pairs, 0 left over. 101 + 57 = 158, and 158 is even. No need to build 158 cubes.`);
+  else fb($('#aFb'),'think',`<b>Look at the sacks.</b> 101 is 50 pairs + 1. 57 is 28 pairs + 1. They have the same shape as our picture: pairs, plus one extra each. The 2 extras make a pair: 79 pairs, 0 left over. So it works. 101 + 57 = 158, even.`);
+});
+
+/* ===== 5 · DETECTIVE QUESTIONS ===== */
+const Qs = [
+  { t:'What is odd + odd + odd?', choice:true,
+    answer:'odd',
+    nums:[3,5,7],
+    acts:[
+      {l:'Build 3 + 5 + 7', f:()=>qBuild([3,5,7])},
+      {l:'Try three new odd numbers', f:()=>{ Qs[0].nums=[rndOdd(1,13),rndOdd(1,13),rndOdd(1,13)]; qBuild(Qs[0].nums); }}
+    ],
+    explain:(r,n)=>`${n.join(' + ')} = ${r.total}. Three extras: two of them make a pair, and <b>one is still left over</b>. So odd + odd + odd is odd.`
+  },
+  { t:'Even + even and odd + even: what always happens?',
+    acts:[
+      {l:'Build 6 + 8', f:()=>qBuild([6,8], 'Even numbers have no extras. Nothing is left over, so even + even is <b>even</b>.')},
+      {l:'Build 7 + 4', f:()=>qBuild([7,4], 'Only the odd number has an extra. It has no partner, so odd + even is <b>odd</b>.')}
+    ]
+  },
+  { t:'Challenge: add ten odd numbers. Even or odd? Predict first.', choice:true, answer:'even', ten:true,
+    acts:[
+      {l:'Line up the extras', f:()=>qTen(10)},
+      {l:'Show a real example', f:()=>qTenReal()}
+    ]
+  },
+  { t:'Is an odd number times 2 always even? Why?', choice:true, answer:'even', twice:true,
+    acts:[
+      {l:'Build 7 two times', f:()=>qBuild([7,7], 'Two copies of 7. Each copy has one extra. <b>Two copies of the leftover make a pair</b>, so 7 × 2 = 14 is even. That happens for every odd number.')},
+      {l:'Try another odd number', f:()=>{ const n=rndOdd(1,15); qBuild([n,n], `Two copies of ${n}. The two leftovers make a pair, so ${n} × 2 = ${2*n} is even.`); }}
+    ]
+  },
+  { t:'Is 0 even or odd?', choice:true, answer:'even',
+    acts:[ {l:'Build 0', f:()=>{ const st=$('#qStage'); st.innerHTML=''; st.appendChild(groupEl('<span class="big">0</span>', [], {})); qSay('ok','How many pairs in 0? Zero. How many left over? <b>Zero.</b> None left over means 0 is even.'); }} ]
+  },
+  { t:'A friend tried five examples and said, “So it’s always true.” Is five examples enough?',
+    acts:[
+      {l:'Would it work for 999 + 333?', f:()=>qSack(999,333)},
+      {l:'What do all odd numbers have?', f:()=>qOddsLine()}
+    ]
+  },
+  { t:'Exit ticket: explain to a kindergartner why odd plus odd is always even.', exit:true,
+    acts:[ {l:'Show the picture', f:()=>{ showTab('any'); aMode(false); A.pushed=true; $('#aPush').textContent='Pull apart'; aDraw(); aPushText(); }} ]
+  }
+];
+let QI = 0;
+function qSay(kind, html){ fb($('#qFb'), kind, html); }
+function qBuild(nums, msg){
+  const r = M.combine(nums), w = M.word(r.total);
+  drawTogether($('#qStage'), nums, `${r.pairsTotal} pair${r.pairsTotal===1?'':'s'}, ${r.leftOver} left over → <span style="color:${w==='even'?'var(--ok)':'var(--think)'}">${w}</span>`);
+  const q = Qs[QI];
+  qSay('info', msg || (q.explain ? q.explain(r, nums) : ''));
+}
+function qTen(k){
+  const st = $('#qStage');
+  if(!st.querySelector('#qK')){
+    st.innerHTML = `<div class="glabel" id="qTenHead"></div><div id="qTenCubes"></div>
+      <label class="slider" for="qK">How many odd numbers? <b id="qKv"></b><input type="range" id="qK" min="1" max="12" value="${k}"></label>
+      <div class="eq" id="qTenEq"></div>`;
+    st.querySelector('#qK').oninput = e => qTen(+e.target.value);
+  }
+  $('#qK').value = k; $('#qKv').textContent = k;
+  $('#qTenHead').innerHTML = `<span class="big">${k} odd number${k===1?'':'s'}</span><span>: just look at their extras</span>`;
+  const cols=[];
+  for(let i=0;i+1<k;i+=2) cols.push({cells:[COLORS[i%5],COLORS[(i+1)%5]], newpair:true});
+  if(k%2) cols.push({cells:[COLORS[(k-1)%5]], extra:true, tag:'left over'});
+  const box = $('#qTenCubes'); box.innerHTML=''; box.appendChild(drawCols(cols, {size:52}));
+  const p = Math.floor(k/2);
+  $('#qTenEq').innerHTML = `${k} extra${k===1?'':'s'} → ${p} pair${p===1?'':'s'}, ${k%2} left over → <span style="color:${k%2?'var(--think)':'var(--ok)'}">${k%2?'odd':'even'}</span>`;
+  qSay('info', k===10 ? '<b>Ten extras make five pairs</b>, with none left over. So ten odd numbers add up to an even number. Slide to other counts: when is the total odd?' : `${k} extra${k===1?'':'s'} make${k===1?'s':''} ${p} pair${p===1?'':'s'}${k%2?' and one is left over':' with none left over'}. ${k%2 ? 'An odd count of odd numbers gives an odd total.' : 'An even count of odd numbers gives an even total.'}`);
+}
+function qTenReal(){
+  const nums = Array.from({length:10}, ()=>rndOdd(1,29));
+  const r = M.combine(nums);
+  const st = $('#qStage'); st.innerHTML='';
+  const eq = document.createElement('div'); eq.className='eq'; eq.style.wordBreak='break-word';
+  eq.innerHTML = `${nums.join(' + ')}<br>= ${r.total}`;
+  st.appendChild(eq);
+  const cols=[]; for(let i=0;i<5;i++) cols.push({cells:[COLORS[(2*i)%5],COLORS[(2*i+1)%5]], newpair:true});
+  st.appendChild(groupEl('The ten extras:', cols, {size:44, anim:true}));
+  qSay('ok', `${r.total} ends in ${r.total%10}, so it is <b>${M.word(r.total)}</b>. Ten extras made five pairs, just as predicted. Tap again for a new set.`);
+}
+function qSack(x,y){
+  const st=$('#qStage'); st.innerHTML='';
+  const px=M.pairs(x), py=M.pairs(y), r=M.combine([x,y]);
+  const pair = drawCols([{cells:['var(--a)','var(--b)'], newpair:true, tag:'new pair!'}], {size:52, anim:true}); pair.style.minHeight='auto';
+  const g=document.createElement('div'); g.className='group';
+  g.innerHTML = `<div class="glabel"><span class="big">${x} + ${y} = ${r.total}</span></div><div class="bag" style="flex-wrap:wrap">${sack('var(--a)',px,true)}<span class="plus">+</span>${sack('var(--b)',py,true)}<span class="plus">+</span>${pair.outerHTML}</div>`;
+  st.appendChild(g);
+  const eq=document.createElement('div'); eq.className='eq';
+  eq.innerHTML = `${px} pairs + ${py} pairs + 1 new pair = ${r.pairsTotal} pairs, 0 left over → <span style="color:var(--ok)">even</span>`;
+  st.appendChild(eq);
+  qSay('info', `Five examples cannot cover every number. The pairs picture can. ${x} is ${px} pairs + 1 and ${y} is ${py} pairs + 1. We didn't build ${r.total} cubes, but we know the 2 extras make a pair.`);
+}
+function qOddsLine(){
+  const st=$('#qStage'); st.innerHTML='';
+  const row=document.createElement('div'); row.className='leftrow';
+  [1,3,5,7,9,11].forEach((n,i)=>{ const c=document.createElement('div'); c.className='chip'; c.appendChild(drawCols(colsFor(n,COLORS[i%5]),{size:22})); const s=document.createElement('span'); s.textContent=n; c.appendChild(s); row.appendChild(c); });
+  st.appendChild(row);
+  qSay('info','Every odd number has <b>exactly one cube with no partner</b>. Every even number has none. That is the reason, and it is true for numbers we never try.');
+}
+function qRender(){
+  $('#qnav').innerHTML = Qs.map((q,i)=>`<button data-i="${i}" aria-pressed="${i===QI}">${i===2?'★ Challenge':i===6?'Exit ticket':i+1}</button>`).join('');
+  $('#qnav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ QI=+b.dataset.i; qRender(); });
+  const q = Qs[QI];
+  $('#qText').textContent = q.t;
+  const ex = $('#qExtra'); ex.innerHTML='';
+  if(q.choice){
+    ex.innerHTML = `<div class="choice"><button data-p="even">Even</button><button data-p="odd">Odd</button></div>`;
+    ex.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      ex.querySelectorAll('button').forEach(x=>x.classList.toggle('picked', x===b));
+      q.acts[0].f();
+      if(b.dataset.p!==q.answer){
+        const cur = $('#qFb').innerHTML;
+        qSay('think', `<b>You said ${b.dataset.p}. Check the cubes.</b> ${cur}`);
+      } else {
+        qSay('ok', `<b>Yes, ${q.answer}.</b> ${$('#qFb').innerHTML}`);
+      }
+    });
+  }
+  if(q.exit){
+    ex.innerHTML = `<div class="fb info">Start with: “An odd number is pairs and one extra…” Use the words <b>pairs</b> and <b>left over</b>.</div>`;
+  }
+  const act = $('#qAct'); act.innerHTML='';
+  q.acts.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'btn':'btn2'; b.textContent=a.l; b.onclick=a.f; act.appendChild(b); });
+  $('#qStage').innerHTML = `<div class="eq muted" style="padding:20px 0">${q.exit ? 'Use cubes or a drawing to explain.' : 'Make a guess. Then tap a button to see the cubes.'}</div>`;
+  qSay('','');
+}
+
+/* ===== tabs, reset, fullscreen ===== */
+function showTab(v){
+  document.querySelectorAll('nav.steps button').forEach(b=>b.setAttribute('aria-selected', b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(s=>s.hidden = s.id !== 'v-'+v);
+}
+document.querySelectorAll('nav.steps button').forEach(b=>b.onclick=()=>showTab(b.dataset.v));
+function resetAll(){
+  W.i=0; wRender();
+  lApart();
+  T.k='oo'; T.a=5; T.b=7; T.rec={oo:[],ee:[],oe:[]}; T.fullSaid=false;
+  document.querySelectorAll('#tKind button').forEach(x=>x.setAttribute('aria-pressed', x.dataset.k==='oo'));
+  tShowNums(); tUnbuild(); tTable();
+  A.p1=2; A.p2=3; A.pushed=false; A.big=false; $('#aP1').value=2; $('#aP2').value=3; $('#aPush').textContent='Push together'; aMode(false);
+  Qs[0].nums=[3,5,7]; QI=0; qRender();
+  showTab('warm');
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', ()=> $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+let rz; window.addEventListener('resize', ()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(!$('#v-launch').hidden && $('#lStage .newpair')) lPush(); },200); });
+
+resetAll();
+})();
+</script>
+
+</body></html>

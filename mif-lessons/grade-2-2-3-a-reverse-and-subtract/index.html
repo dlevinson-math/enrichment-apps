@@ -1,0 +1,769 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Reverse and Subtract</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: header + five-part lesson stepper; each part is one working board. Tens are blue, ones are orange everywhere, so a reversal visibly swaps colors. */
+:root{
+  --bg:#EEF2F7; --card:#FFFFFF; --ink:#172240; --muted:#56607A; --line:#CDD5E2; --soft:#E3E9F2;
+  --tens:#2F63D0; --tens-soft:#DCE6FB; --ones:#D9661C; --ones-soft:#FCE6D5;
+  --nine:#7446D0; --nine-soft:#ECE4FB; --good:#1C7F52; --good-soft:#DDF3E8; --warn:#BE3434; --warn-soft:#FBE3E3;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141F; --card:#1A2030; --ink:#E8ECF5; --muted:#9AA4BC; --line:#2F3952; --soft:#232B3E;
+    --tens:#7BA3FF; --tens-soft:#1F2D52; --ones:#FF9E5C; --ones-soft:#4A2C18;
+    --nine:#B29BFF; --nine-soft:#2E2552; --good:#55CF92; --good-soft:#173A2A; --warn:#FF7D7D; --warn-soft:#4A1E22;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141F; --card:#1A2030; --ink:#E8ECF5; --muted:#9AA4BC; --line:#2F3952; --soft:#232B3E;
+  --tens:#7BA3FF; --tens-soft:#1F2D52; --ones:#FF9E5C; --ones-soft:#4A2C18;
+  --nine:#B29BFF; --nine-soft:#2E2552; --good:#55CF92; --good-soft:#173A2A; --warn:#FF7D7D; --warn-soft:#4A1E22;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{height:100%}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 28px;
+  -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tens); outline-offset:2px}
+.wrap{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:16px}
+
+header{display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; padding-top:16px}
+.brand{display:flex; align-items:center; gap:14px; min-width:0}
+.logo{display:flex; gap:4px}
+.logo span{font-family:var(--display); font-weight:700; font-size:26px; width:40px; height:48px; border-radius:10px; display:grid; place-items:center; color:#fff}
+.logo .t{background:var(--tens)} .logo .o{background:var(--ones)}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(28px,3.2vw,42px); margin:0; line-height:1.05; text-wrap:balance}
+.sub{margin:2px 0 0; color:var(--muted); font-size:15px; letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:8px; flex-wrap:wrap}
+nav.steps button{flex:1 1 150px; display:flex; align-items:center; gap:10px; border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 14px; min-height:56px; text-align:left}
+nav.steps b{font-family:var(--display); font-weight:600; font-size:20px}
+nav.steps i{font-style:normal; color:var(--muted); font-size:14px; margin-left:auto}
+nav.steps .n{width:30px; height:30px; border-radius:50%; background:var(--soft); display:grid; place-items:center; font-family:var(--display); font-weight:700; flex:none}
+nav.steps button[aria-selected="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+nav.steps button[aria-selected="true"] i{color:var(--card); opacity:.75}
+nav.steps button[aria-selected="true"] .n{background:var(--card); color:var(--ink)}
+
+.view{display:flex; flex-direction:column; gap:16px}
+.lead{font-family:var(--display); font-weight:600; font-size:clamp(24px,2.6vw,34px); margin:0; line-height:1.2; text-wrap:balance}
+.note{color:var(--muted); margin:0; font-size:16px}
+.panel{background:var(--card); border:2px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.panel h2{font-family:var(--display); font-weight:600; font-size:22px; margin:0}
+.grid2{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:16px; align-items:start}
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:700; font-size:18px; padding:12px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:17px; padding:10px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--soft); border-radius:14px; padding:4px; gap:4px}
+.seg button{border:0; background:none; padding:10px 14px; border-radius:10px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--card); color:var(--ink); box-shadow:0 1px 0 var(--line)}
+input.num{width:120px; font-family:var(--display); font-weight:600; font-size:30px; text-align:center; border:3px solid var(--line); border-radius:12px; padding:6px 8px; background:var(--card); font-variant-numeric:tabular-nums}
+input.num:focus{border-color:var(--tens); outline:none}
+label.lbl{font-weight:700; font-size:16px; color:var(--muted)}
+.msg{margin:0; padding:14px 16px; border-radius:14px; background:var(--soft); font-size:19px; line-height:1.45}
+.msg:empty{display:none}
+.msg.good{background:var(--good-soft)} .msg.warn{background:var(--warn-soft)} .msg.nine{background:var(--nine-soft)}
+.msg b{font-family:var(--display); font-weight:600}
+.tn{color:var(--tens); font-weight:700} .on{color:var(--ones); font-weight:700} .nn{color:var(--nine); font-weight:700}
+
+/* warm-up */
+.nines{display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:10px}
+@media (max-width:700px){.nines{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ntile{border:2px solid var(--line); background:var(--card); border-radius:16px; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; min-height:120px; justify-content:center}
+.ntile .big{font-family:var(--display); font-weight:700; font-size:clamp(30px,3.4vw,46px); line-height:1}
+.ntile .sum{font-size:16px; color:var(--nine); font-weight:700; min-height:1.3em}
+.ntile.hidden .big{color:var(--line)}
+.ntile.hidden{border-style:dashed; cursor:default}
+
+/* number builder */
+.builder{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end}
+.pair{display:flex; gap:6px; align-items:flex-end}
+.digit{display:flex; flex-direction:column; align-items:center; gap:4px}
+.digit button.step{width:74px; height:44px; border:2px solid var(--line); background:var(--card); border-radius:10px; font-size:20px; font-weight:700}
+.card{width:74px; height:96px; border-radius:14px; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:62px; color:#fff; font-variant-numeric:tabular-nums; transition:transform .45s cubic-bezier(.4,1.4,.5,1)}
+.card.T{background:var(--tens)} .card.O{background:var(--ones)}
+.place{font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.arrow{font-family:var(--display); font-size:36px; color:var(--muted); padding-bottom:28px}
+.flip .card{animation:flip .5s ease}
+@keyframes flip{0%{transform:rotateY(90deg) scale(.9)}100%{transform:none}}
+.vert{font-family:var(--display); font-weight:600; font-size:52px; line-height:1.05; display:grid; grid-template-columns:auto auto; column-gap:10px; justify-content:start; font-variant-numeric:tabular-nums}
+.vert .op{color:var(--muted)}
+.vert .bar{grid-column:1 / span 2; border-top:4px solid var(--ink); margin:4px 0}
+.vert .r{text-align:right; letter-spacing:.04em}
+.dg{display:inline-block}
+
+/* blocks */
+.blocks{background:var(--soft); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px}
+.mat{display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; min-height:150px}
+.rods{display:flex; gap:6px; align-items:flex-end; flex-wrap:wrap}
+.rod{width:18px; height:140px; border-radius:4px; background:repeating-linear-gradient(to bottom, var(--tens) 0 12.5px, color-mix(in srgb, var(--tens) 70%, #000) 12.5px 14px); position:relative}
+.cubes{display:grid; grid-template-columns:repeat(5,18px); gap:5px; align-content:end}
+.cube{width:18px; height:18px; border-radius:4px; background:var(--ones); position:relative}
+.gone{opacity:.25}
+.gone::after{content:""; position:absolute; left:-4px; right:-4px; top:50%; height:3px; background:var(--warn); transform:rotate(-35deg)}
+.rod.gone::after{left:-6px; right:-6px; transform:rotate(-70deg)}
+.matlbl{font-family:var(--display); font-weight:600; font-size:22px}
+
+/* table */
+.tablewrap{overflow-x:auto}
+table.rec{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums}
+table.rec th{font-size:14px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:2px solid var(--line)}
+table.rec td{font-family:var(--display); font-weight:600; font-size:26px; padding:6px 8px; border-bottom:1px solid var(--line)}
+table.rec td.gap{color:var(--nine)}
+table.rec tr.empty td{color:var(--line)}
+.count{font-weight:700; color:var(--muted)}
+
+/* vote */
+.votes{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+.vote{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px; text-align:left; min-height:96px}
+.vote .t{font-weight:700; font-size:18px}
+.vote .c{font-family:var(--display); font-weight:700; font-size:30px; color:var(--tens)}
+.vote .v{font-size:16px}
+.boardlist{display:flex; flex-direction:column; gap:6px}
+.bl{font-family:var(--display); font-weight:600; font-size:26px; display:flex; gap:14px; flex-wrap:wrap; align-items:baseline; padding:6px 10px; border-radius:10px; background:var(--soft)}
+.bl .ans{color:var(--nine); font-size:30px}
+
+/* detectives */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:600; font-size:20px; padding:0 16px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.ladder{display:flex; flex-direction:column; gap:6px}
+.lrow{display:grid; grid-template-columns:80px minmax(0,1fr) 70px; gap:10px; align-items:center}
+.lrow .g{font-weight:700; color:var(--muted); font-size:16px}
+.lrow .segs{display:flex; gap:3px; flex-wrap:nowrap; min-width:0}
+.lrow .segs span{flex:0 1 52px; height:30px; border-radius:6px; background:var(--nine); color:#fff; font-family:var(--display); font-weight:600; font-size:15px; display:grid; place-items:center}
+.lrow .d{font-family:var(--display); font-weight:700; font-size:26px; text-align:right; font-variant-numeric:tabular-nums}
+.lrow.mine .g{color:var(--ink)}
+.lrow.mine .d{color:var(--nine)}
+.chart{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:4px; max-width:640px}
+.hc{position:relative; aspect-ratio:1; max-width:100%; border:2px solid var(--line); background:var(--card); border-radius:8px; font-family:var(--display); font-weight:600; font-size:clamp(14px,2vw,22px); display:grid; place-items:center; padding:0; font-variant-numeric:tabular-nums}
+.hc.pick{background:var(--nine); border-color:var(--nine); color:#fff}
+.hc.bad{box-shadow:inset 0 0 0 3px var(--warn); background:repeating-linear-gradient(45deg, var(--card) 0 6px, var(--warn-soft) 6px 12px); color:var(--ink)}
+.hc.miss{box-shadow:inset 0 0 0 3px var(--good)}
+.hc .k{position:absolute; right:3px; bottom:1px; font-size:.5em; font-weight:700; opacity:.9}
+.hc.lvl{color:var(--ink)}
+.legendrow{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:15px; color:var(--muted)}
+.legendrow span.sw{display:inline-flex; align-items:center; gap:4px}
+.legendrow span.sw i{width:18px; height:18px; border-radius:4px; display:inline-block; border:1px solid var(--line)}
+.why{display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-family:var(--display); font-weight:600; font-size:28px}
+.chip{padding:6px 12px; border-radius:10px; background:var(--soft)}
+
+/* challenge */
+.chal{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.ccard{border:2px solid var(--line); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:10px; background:var(--card)}
+.ccard.done{border-color:var(--good)}
+.ccard .prob{font-family:var(--display); font-weight:600; font-size:34px; font-variant-numeric:tabular-nums}
+.ccard .prob .mid{color:var(--nine)}
+
+@media (max-width:600px){
+  body{font-size:17px}
+  .card{width:60px; height:80px; font-size:50px}
+  .digit button.step{width:60px}
+  .vert{font-size:42px}
+  nav.steps button{flex:1 1 40%}
+  nav.steps i{display:none}
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><span class="t">7</span><span class="o">3</span></div>
+    <div>
+      <h1>Reverse and Subtract</h1>
+      <p class="sub">Grade 2 · Math in Focus Ch 3 · Lesson 2.3-A</p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="steps" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-v="warm" aria-selected="true"><span class="n">1</span><b>Warm-up</b><i>5 min</i></button>
+  <button role="tab" data-v="launch" aria-selected="false"><span class="n">2</span><b>Launch</b><i>5 min</i></button>
+  <button role="tab" data-v="inv" aria-selected="false"><span class="n">3</span><b>Investigate</b><i>25 min</i></button>
+  <button role="tab" data-v="det" aria-selected="false"><span class="n">4</span><b>Detectives</b><i>10 min</i></button>
+  <button role="tab" data-v="chal" aria-selected="false"><span class="n">5</span><b>Challenge</b><i>3 digits</i></button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm">
+  <p class="lead">Count by 9s to 81. Then add the digits of each number. What happens?</p>
+  <div class="nines" id="nines"></div>
+  <div class="row">
+    <button class="primary" id="countBtn">Count on 9</button>
+    <button class="secondary" id="sumAllBtn">Add all the digits</button>
+  </div>
+  <p class="note">Tap a number to add its digits.</p>
+  <p class="msg nine" id="warmMsg" aria-live="polite"></p>
+</section>
+
+<!-- LAUNCH -->
+<section class="view" id="v-launch" hidden>
+  <p class="lead">What do all the answers have in common?</p>
+  <div class="grid2">
+    <div class="panel">
+      <h2>The rule</h2>
+      <ol style="margin:0; padding-left:1.3em; font-size:20px; display:flex; flex-direction:column; gap:4px">
+        <li>Pick a two-digit number with <b>different</b> digits.</li>
+        <li>Reverse it.</li>
+        <li>Take the smaller from the larger.</li>
+      </ol>
+      <div class="row">
+        <label class="lbl" for="launchIn">A student’s number</label>
+        <input class="num" id="launchIn" inputmode="numeric" maxlength="2" autocomplete="off">
+        <button class="primary" id="launchAdd">Add to the board</button>
+      </div>
+      <button class="secondary" id="launchRand" style="align-self:flex-start">Add 5 random numbers</button>
+      <p class="msg" id="launchMsg" aria-live="polite"></p>
+    </div>
+    <div class="panel">
+      <h2>Class board</h2>
+      <div class="boardlist" id="boardList"></div>
+      <p class="note" id="boardEmpty">Collect five answers from the class.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Anything odd about this list? Vote.</h2>
+    <div class="votes" id="votes"></div>
+    <div class="row"><button class="primary" id="voteCheck">Test each idea on the board</button><button class="secondary" id="voteClear">Clear votes</button></div>
+    <p class="msg" id="voteMsg" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- INVESTIGATE -->
+<section class="view" id="v-inv" hidden>
+  <div class="row" style="justify-content:space-between">
+    <p class="lead" style="flex:1 1 400px">Test at least eight starts. Can you predict the difference before you subtract?</p>
+    <div class="seg" role="group" aria-label="Level">
+      <button id="lvlEasy" aria-pressed="false">Starter: 20s &amp; 30s</button>
+      <button id="lvlAll" aria-pressed="true">Any two-digit</button>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h2>1. Build a start number</h2>
+      <div class="builder">
+        <div class="pair">
+          <div class="digit"><button class="step" id="tUp" aria-label="Tens up">▲</button><div class="card T" id="tCard">7</div><button class="step" id="tDn" aria-label="Tens down">▼</button><span class="place">tens</span></div>
+          <div class="digit"><button class="step" id="oUp" aria-label="Ones up">▲</button><div class="card O" id="oCard">3</div><button class="step" id="oDn" aria-label="Ones down">▼</button><span class="place">ones</span></div>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="pair" id="revPair" aria-label="Reversed number">
+          <div class="digit"><div class="card O" id="rT">?</div><span class="place">tens</span></div>
+          <div class="digit"><div class="card T" id="rO">?</div><span class="place">ones</span></div>
+        </div>
+      </div>
+      <div class="row"><button class="primary" id="revBtn">Reverse it</button><button class="secondary" id="randBtn">Surprise me</button></div>
+      <p class="msg" id="buildMsg" aria-live="polite"></p>
+
+      <div id="subBox" hidden style="display:flex; flex-direction:column; gap:12px">
+        <h2>2. Take the smaller from the larger</h2>
+        <div class="row" style="align-items:flex-start; gap:28px">
+          <div class="vert" id="vert"></div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div class="row"><label class="lbl" for="predIn">My prediction</label><input class="num" id="predIn" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="?"></div>
+            <div class="row"><label class="lbl" for="ansIn">Difference</label><input class="num" id="ansIn" inputmode="numeric" maxlength="2" autocomplete="off"></div>
+            <div class="row"><button class="primary" id="checkBtn">Check</button><button class="secondary" id="blocksBtn">Build it with blocks</button></div>
+          </div>
+        </div>
+        <p class="msg" id="ansMsg" aria-live="polite"></p>
+        <div class="blocks" id="blocks" hidden>
+          <div class="mat" id="mat"></div>
+          <div class="row" id="blockBtns"></div>
+          <p class="msg" id="blockMsg" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between"><h2>Our results</h2><span class="count" id="recCount">0 of 8</span></div>
+      <div class="tablewrap"><table class="rec"><thead><tr><th>Start</th><th>Reverse</th><th>Difference</th><th>Digit gap</th></tr></thead><tbody id="recBody"></tbody></table></div>
+      <div class="row"><button class="secondary" id="sortBtn">Sort by gap</button><button class="secondary" id="clearRec">Clear table</button></div>
+      <p class="note">Digit gap = how far apart the two digits are. 73 has a gap of 4 (7 − 3).</p>
+    </div>
+  </div>
+</section>
+
+<!-- DETECTIVES -->
+<section class="view" id="v-det" hidden>
+  <div class="qnav" id="qnav"></div>
+  <p class="lead" id="qText"></p>
+  <div id="qBody" style="display:flex; flex-direction:column; gap:14px"></div>
+  <p class="note">Talk it over first. Then use the buttons to put evidence on the screen.</p>
+</section>
+
+<!-- CHALLENGE -->
+<section class="view" id="v-chal" hidden>
+  <p class="lead">Three digits! Reverse and subtract. What is always in the middle?</p>
+  <div class="chal" id="chal"></div>
+  <div class="panel">
+    <h2>Try your own three-digit number</h2>
+    <div class="row">
+      <label class="lbl" for="ownIn">Start</label><input class="num" id="ownIn" inputmode="numeric" maxlength="3" autocomplete="off" style="width:140px">
+      <button class="primary" id="ownAdd">Make a card</button>
+    </div>
+    <p class="msg" id="ownMsg" aria-live="polite"></p>
+  </div>
+  <div class="row"><button class="secondary" id="patBtn">Show the pattern</button></div>
+  <div id="patBox"></div>
+</section>
+</div>
+
+<script id="core">
+// ---- exact math (checked in tests) ----
+const tensOf = n => Math.floor(n/10), onesOf = n => n % 10;
+const rev2 = n => onesOf(n)*10 + tensOf(n);
+const gap2 = n => Math.abs(tensOf(n) - onesOf(n));
+const diff2 = n => Math.abs(n - rev2(n));
+const d3 = n => [Math.floor(n/100), Math.floor(n/10)%10, n%10];
+const rev3 = n => { const [a,b,c] = d3(n); return c*100 + b*10 + a; };
+const diff3 = n => Math.abs(n - rev3(n));
+const gap3 = n => { const [a,,c] = d3(n); return Math.abs(a - c); };
+const pad = (n, w) => String(n).padStart(w, '0');
+// the "smaller digit from larger in each column" mistake
+function columnMistake(top, bot, w){
+  const a = pad(top,w).split('').map(Number), b = pad(bot,w).split('').map(Number);
+  return Number(a.map((x,i) => Math.abs(x - b[i])).join(''));
+}
+const STARTS45 = Array.from({length:90}, (_,i) => i+10).filter(n => diff2(n) === 45);
+</script>
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rand = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const S = {};
+
+function freshState(){
+  Object.assign(S, {
+    view: S.view || 'warm',
+    shown: 1, sums: new Set(),
+    board: [], votes: [0,0,0,0],
+    level: 'all', t: 7, o: 3, reversed: false,
+    rec: [], sorted: false,
+    blocks: null,
+    q: 1, picks: new Set(), q2mode: 'pick',
+    chal: [742, 852, 961].map(n => ({n, done:false, msg:'', cls:''}))
+  });
+}
+
+/* ---------- tabs ---------- */
+function show(v){
+  S.view = v;
+  document.querySelectorAll('nav.steps button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === v));
+  ['warm','launch','inv','det','chal'].forEach(k => $('#v-'+k).hidden = k !== v);
+  if(v === 'det') renderQ();
+}
+document.querySelectorAll('nav.steps button').forEach(b => b.onclick = () => show(b.dataset.v));
+
+/* ---------- warm-up ---------- */
+function sumText(m){ return m < 10 ? `${m}` : `${tensOf(m)} + ${onesOf(m)} = ${tensOf(m)+onesOf(m)}`; }
+function renderWarm(){
+  const box = $('#nines'); box.innerHTML = '';
+  for(let i=1;i<=9;i++){
+    const m = 9*i, b = document.createElement('button');
+    const vis = i <= S.shown;
+    b.className = 'ntile' + (vis ? '' : ' hidden');
+    b.disabled = !vis;
+    b.innerHTML = `<span class="big">${vis ? m : '?'}</span><span class="sum">${vis && S.sums.has(m) ? sumText(m) : ''}</span>`;
+    b.setAttribute('aria-label', vis ? `${m}${S.sums.has(m) ? ', digits add to 9' : ''}` : 'not counted yet');
+    b.onclick = () => { S.sums.add(m); renderWarm(); };
+    box.appendChild(b);
+  }
+  $('#countBtn').disabled = S.shown >= 9;
+  const msg = $('#warmMsg');
+  if(S.sums.size === 9) msg.innerHTML = `<b>Every one adds to 9.</b> 1 + 8, 2 + 7, 3 + 6… The tens digit goes up by 1 and the ones digit goes down by 1. Keep this in mind. It comes back today.`;
+  else if(S.sums.size >= 3) msg.innerHTML = `${S.sums.size} checked so far. Notice anything?`;
+  else msg.innerHTML = '';
+}
+$('#countBtn').onclick = () => { S.shown = Math.min(9, S.shown+1); renderWarm(); };
+$('#sumAllBtn').onclick = () => { S.shown = 9; for(let i=1;i<=9;i++) S.sums.add(9*i); renderWarm(); };
+
+/* ---------- launch ---------- */
+const IDEAS = [
+  {t:'They are all in the 9s count', test: a => a % 9 === 0, why: a => `${a} = 9 × ${a/9}`},
+  {t:'Their digits add to 9', test: a => tensOf(a)+onesOf(a) === 9, why: a => a < 10 ? `${a}` : `${tensOf(a)} + ${onesOf(a)} = ${tensOf(a)+onesOf(a)}`},
+  {t:'They are all even', test: a => a % 2 === 0, why: a => a % 2 ? `${a} is odd` : `${a} is even`},
+  {t:'I don’t see a pattern yet', test: null}
+];
+function checkTwo(v){
+  if(!/^\d{1,2}$/.test(v) || +v < 10) return 'Pick a number from 10 to 99.';
+  const n = +v;
+  if(tensOf(n) === onesOf(n)) return `What is ${n} minus ${n}? Choose different digits.`;
+  return null;
+}
+function addBoard(n){
+  const r = rev2(n), big = Math.max(n,r), sm = Math.min(n,r);
+  S.board.push({n, r, big, sm, a: big - sm});
+}
+function renderBoard(){
+  $('#boardEmpty').hidden = S.board.length > 0;
+  $('#boardList').innerHTML = S.board.map(x => `<div class="bl"><span>${x.n} → ${pad(x.r,2)}</span><span>${x.big} − ${x.sm} =</span><span class="ans">${x.a}</span></div>`).join('');
+}
+$('#launchAdd').onclick = () => {
+  const v = $('#launchIn').value.trim(), err = checkTwo(v), m = $('#launchMsg');
+  if(err){ m.className = 'msg warn'; m.textContent = err; return; }
+  addBoard(+v); $('#launchIn').value = ''; m.className = 'msg'; m.textContent = ''; renderBoard();
+};
+$('#launchIn').addEventListener('keydown', e => { if(e.key === 'Enter') $('#launchAdd').click(); });
+$('#launchRand').onclick = () => {
+  for(let k=0;k<5;k++){ let n; do{ n = rand(10,99); } while(tensOf(n) === onesOf(n)); addBoard(n); }
+  renderBoard();
+};
+function renderVotes(){
+  $('#votes').innerHTML = IDEAS.map((x,i) => `<button class="vote" data-i="${i}"><span class="t">${x.t}</span><span class="c">${S.votes[i]}</span><span class="v" id="vr${i}"></span></button>`).join('');
+  document.querySelectorAll('.vote').forEach(b => b.onclick = () => { S.votes[+b.dataset.i]++; renderVotes(); });
+}
+$('#voteClear').onclick = () => { S.votes = [0,0,0,0]; renderVotes(); $('#voteMsg').textContent = ''; };
+$('#voteCheck').onclick = () => {
+  const m = $('#voteMsg');
+  if(S.board.length < 2){ m.className = 'msg warn'; m.textContent = 'Put at least two answers on the class board first.'; return; }
+  const ans = S.board.map(x => x.a);
+  const lines = IDEAS.slice(0,3).map(idea => {
+    const bad = ans.find(a => !idea.test(a));
+    if(bad === undefined) return `✓ <b>${idea.t}.</b> True for all ${ans.length}: ${ans.map(idea.why).join(', ')}.`;
+    return `✗ <b>${idea.t}.</b> Not this time: ${idea.why(bad)}.`;
+  });
+  m.className = 'msg nine';
+  m.innerHTML = lines.join('<br>') + `<br>Will it always work? Test more starts in <b>Investigate</b>.`;
+};
+
+/* ---------- investigate ---------- */
+const startNum = () => S.t*10 + S.o;
+function clampDigits(){
+  const lo = S.level === 'easy' ? 2 : 1, hi = S.level === 'easy' ? 3 : 9;
+  if(S.t < lo) S.t = hi; if(S.t > hi) S.t = lo;
+  if(S.o < 0) S.o = 9; if(S.o > 9) S.o = 0;
+}
+function renderBuilder(){
+  $('#tCard').textContent = S.t; $('#oCard').textContent = S.o;
+  const n = startNum();
+  if(S.reversed){
+    $('#rT').textContent = S.o; $('#rO').textContent = S.t;
+  } else { $('#rT').textContent = '?'; $('#rO').textContent = '?'; }
+  $('#subBox').hidden = !S.reversed;
+  if(S.reversed){
+    const r = rev2(n), big = Math.max(n,r), sm = Math.min(n,r);
+    $('#vert').innerHTML = `<span></span><span class="r">${digitsHTML(big)}</span><span class="op">−</span><span class="r">${digitsHTML(sm)}</span><span class="bar"></span><span></span><span class="r" style="color:var(--muted)">?</span>`;
+  }
+}
+function digitsHTML(n){ const s = pad(n,2); return `<span class="dg tn">${s[0]}</span><span class="dg on">${s[1]}</span>`; }
+function changed(){
+  S.reversed = false; S.blocks = null; $('#blocks').hidden = true;
+  $('#ansIn').value = ''; $('#predIn').value = ''; $('#ansMsg').textContent = ''; $('#buildMsg').textContent = '';
+  renderBuilder();
+}
+$('#tUp').onclick = () => { S.t++; clampDigits(); changed(); };
+$('#tDn').onclick = () => { S.t--; clampDigits(); changed(); };
+$('#oUp').onclick = () => { S.o++; clampDigits(); changed(); };
+$('#oDn').onclick = () => { S.o--; clampDigits(); changed(); };
+$('#randBtn').onclick = () => {
+  do{ S.t = S.level === 'easy' ? rand(2,3) : rand(1,9); S.o = rand(0,9); } while(S.t === S.o);
+  changed();
+};
+$('#revBtn').onclick = () => {
+  const m = $('#buildMsg');
+  if(S.t === S.o){ m.className = 'msg warn'; m.textContent = `What is ${startNum()} minus ${startNum()}? Choose different digits.`; return; }
+  S.reversed = true; renderBuilder();
+  const rp = $('#revPair'); rp.classList.remove('flip'); void rp.offsetWidth; if(!reduced) rp.classList.add('flip');
+  const n = startNum(), r = rev2(n);
+  m.className = 'msg';
+  m.innerHTML = `The <span class="tn">${S.t}</span> moved to the ones place and the <span class="on">${S.o}</span> moved to the tens place. ${n} reversed is <b>${pad(r,2)}</b>${r < 10 ? ` (that is just ${r})` : ''}.`;
+  if(S.level === 'easy') openBlocks();
+  $('#ansIn').focus({preventScroll:true});
+};
+$('#lvlEasy').onclick = () => setLevel('easy');
+$('#lvlAll').onclick = () => setLevel('all');
+function setLevel(l){
+  S.level = l; $('#lvlEasy').setAttribute('aria-pressed', l==='easy'); $('#lvlAll').setAttribute('aria-pressed', l==='all');
+  if(l === 'easy'){ S.t = 2; S.o = 5; } clampDigits(); changed();
+}
+
+$('#checkBtn').onclick = checkAnswer;
+$('#ansIn').addEventListener('keydown', e => { if(e.key === 'Enter') checkAnswer(); });
+function checkAnswer(){
+  const n = startNum(), r = rev2(n), big = Math.max(n,r), sm = Math.min(n,r), d = big - sm, g = gap2(n);
+  const v = $('#ansIn').value.trim(), m = $('#ansMsg');
+  if(!/^\d{1,2}$/.test(v)){ m.className = 'msg warn'; m.textContent = 'Type the difference in the box first.'; return; }
+  const a = +v, pv = $('#predIn').value.trim();
+  if(a === d){
+    let extra = '';
+    if(/^\d+$/.test(pv)) extra = +pv === d ? ` <b>Your prediction was spot on!</b> How did you know?` : ` You predicted ${pv}. Look at the gap: ${g}. Does the table help you predict the next one?`;
+    m.className = 'msg good';
+    m.innerHTML = `<b>Yes! ${big} − ${sm} = ${d}.</b> The digits ${S.t} and ${S.o} are ${g} apart.${extra}`;
+    $('#vert').lastElementChild.textContent = d; $('#vert').lastElementChild.style.color = 'var(--nine)';
+    if(S.rec.some(x => x.n === n)) m.innerHTML += ` ${n} is already in the table. Try a new start.`;
+    else { S.rec.push({n, r, d, g}); renderRec(); }
+    return;
+  }
+  m.className = 'msg warn';
+  if(a === columnMistake(big, sm, 2)){
+    m.innerHTML = `It looks like you took ${sm % 10} from ${big % 10} in the ones column. But the top number has only ${big % 10} ones. <b>Can you take ${sm % 10} ones from ${big % 10}?</b> Build it with blocks and find out.`;
+    openBlocks(); return;
+  }
+  m.innerHTML = `Not quite. Check it: ${a} + ${sm} = ${a + sm}, but it should make ${big}. Try again, or build it with blocks.`;
+}
+
+/* blocks */
+$('#blocksBtn').onclick = () => { if(!$('#blocks').hidden && S.blocks){ $('#blocks').hidden = true; return; } openBlocks(); };
+function openBlocks(){
+  const n = startNum(), r = rev2(n), big = Math.max(n,r), sm = Math.min(n,r);
+  S.blocks = {big, sm, tens: tensOf(big), ones: onesOf(big), traded: false, takeO: false, takeT: false};
+  $('#blocks').hidden = false; $('#blockMsg').className = 'msg';
+  $('#blockMsg').innerHTML = `Here is ${big}: ${tensOf(big)} tens and ${onesOf(big)} ones. We need to take away ${sm}: <span class="tn">${tensOf(sm)} tens</span> and <span class="on">${onesOf(sm)} ones</span>.`;
+  renderBlocks();
+}
+function renderBlocks(){
+  const B = S.blocks; if(!B) return;
+  const st = tensOf(B.sm), so = onesOf(B.sm);
+  let h = '<div class="rods">';
+  for(let i=0;i<B.tens;i++) h += `<div class="rod ${B.takeT && i >= B.tens - st ? 'gone' : ''}"></div>`;
+  h += '</div><div class="cubes">';
+  for(let i=0;i<B.ones;i++) h += `<div class="cube ${B.takeO && i >= B.ones - so ? 'gone' : ''}"></div>`;
+  h += '</div>';
+  const leftT = B.tens - (B.takeT ? st : 0), leftO = B.ones - (B.takeO ? so : 0);
+  h += `<div class="matlbl"><span class="tn">${leftT} tens</span> <span class="on">${leftO} ones</span></div>`;
+  $('#mat').innerHTML = h;
+  const btns = $('#blockBtns'); btns.innerHTML = '';
+  const mk = (txt, fn, dis) => { const b = document.createElement('button'); b.className = 'secondary'; b.textContent = txt; b.disabled = !!dis; b.onclick = fn; btns.appendChild(b); };
+  mk('Trade 1 ten for 10 ones', tradeTen, B.traded || B.tens === 0);
+  mk(`Take away ${so} ones`, takeOnes, B.takeO);
+  mk(`Take away ${st} tens`, takeTens, B.takeT);
+}
+function tradeTen(){
+  const B = S.blocks; B.tens--; B.ones += 10; B.traded = true;
+  $('#blockMsg').className = 'msg';
+  $('#blockMsg').innerHTML = `One ten became 10 ones. Now there are ${B.tens} tens and <b>${B.ones} ones</b>. It is still ${B.big}.`;
+  renderBlocks();
+}
+function takeOnes(){
+  const B = S.blocks, so = onesOf(B.sm);
+  if(B.ones < so){
+    $('#blockMsg').className = 'msg warn';
+    $('#blockMsg').innerHTML = `<b>Can you take ${so} ones from ${B.ones}?</b> There are not enough ones. Trade a ten for 10 ones first.`;
+    return;
+  }
+  B.takeO = true; $('#blockMsg').className = 'msg';
+  $('#blockMsg').innerHTML = `${B.ones} ones take away ${so} ones leaves <b>${B.ones - so} ones</b>.`;
+  finishCheck(); renderBlocks();
+}
+function takeTens(){
+  const B = S.blocks; B.takeT = true; $('#blockMsg').className = 'msg';
+  $('#blockMsg').innerHTML = `${B.tens} tens take away ${tensOf(B.sm)} tens leaves <b>${B.tens - tensOf(B.sm)} tens</b>.`;
+  finishCheck(); renderBlocks();
+}
+function finishCheck(){
+  const B = S.blocks;
+  if(B.takeO && B.takeT){
+    const lt = B.tens - tensOf(B.sm), lo = B.ones - onesOf(B.sm);
+    $('#blockMsg').className = 'msg good';
+    $('#blockMsg').innerHTML = `What’s left: ${lt} tens and ${lo} ones. <b>${B.big} − ${B.sm} = ${lt*10 + lo}.</b> Type it in the Difference box and check.`;
+  }
+}
+
+function renderRec(){
+  const rows = S.sorted ? [...S.rec].sort((a,b) => a.g - b.g || a.n - b.n) : S.rec;
+  let h = rows.map(x => `<tr><td>${x.n}</td><td>${pad(x.r,2)}</td><td>${x.d}</td><td class="gap">${x.g}</td></tr>`).join('');
+  for(let i = rows.length; i < 8; i++) h += `<tr class="empty"><td>·</td><td>·</td><td>·</td><td>·</td></tr>`;
+  $('#recBody').innerHTML = h;
+  $('#recCount').textContent = `${S.rec.length} of 8${S.rec.length >= 8 ? ' ✓' : ''}`;
+  $('#sortBtn').textContent = S.sorted ? 'Show in order tested' : 'Sort by gap';
+}
+$('#sortBtn').onclick = () => { S.sorted = !S.sorted; renderRec(); };
+$('#clearRec').onclick = () => { S.rec = []; renderRec(); };
+
+/* ---------- detectives ---------- */
+const QS = {
+  1: { text: 'Sort the results by digit gap. Gap 1 gives 9, gap 2 gives 18. What is the rule?', render: q1 },
+  2: { text: 'Which starts give 45? Tap every one you think works.', render: q2 },
+  3: { text: 'Journal: predict 85 − 58 without subtracting. Explain how you know.', render: q3 },
+  4: { text: 'Why does it work? Look at what moves.', render: q4 }
+};
+function renderQ(){
+  $('#qnav').innerHTML = [1,2,3,4].map(i => `<button data-q="${i}" aria-pressed="${S.q===i}">${i === 4 ? '★ Why?' : i}</button>`).join('');
+  document.querySelectorAll('#qnav button').forEach(b => b.onclick = () => { S.q = +b.dataset.q; renderQ(); });
+  $('#qText').textContent = QS[S.q].text;
+  const body = $('#qBody'); body.innerHTML = ''; QS[S.q].render(body);
+}
+function q1(body){
+  const mine = new Set(S.rec.map(x => x.g));
+  body.innerHTML = `<div class="row"><button class="primary" id="q1a">Show our results by gap</button><button class="secondary" id="q1b">Show every gap</button><button class="secondary" id="q1c">Reveal the rule</button></div><div class="panel" id="q1out"></div><p class="msg nine" id="q1msg"></p>`;
+  const out = $('#q1out');
+  const ladder = gaps => `<div class="ladder">` + gaps.map(g => {
+    const ex = S.rec.find(x => x.g === g);
+    const exn = ex ? ex.n : [10,21,31,40,50,60,70,80,90][g-1];
+    const big = Math.max(exn, rev2(exn)), sm = Math.min(exn, rev2(exn));
+    return `<div class="lrow ${mine.has(g) ? 'mine' : ''}"><span class="g">gap ${g}<br><span style="font-weight:400">${big} − ${sm}</span></span><span class="segs">${'<span>9</span>'.repeat(g)}</span><span class="d">${9*g}</span></div>`;
+  }).join('') + `</div>`;
+  out.innerHTML = '<p class="note">Press a button to see the evidence.</p>';
+  $('#q1a').onclick = () => {
+    if(!S.rec.length){ out.innerHTML = `<p class="note">The results table is empty. Test some starts in Investigate first, or press “Show every gap”.</p>`; return; }
+    out.innerHTML = ladder([...mine].sort((a,b) => a-b)) + `<p class="note">Each purple bar is one 9. Bold rows came from your table.</p>`;
+  };
+  $('#q1b').onclick = () => { out.innerHTML = ladder([1,2,3,4,5,6,7,8,9]) + `<p class="note">Each purple bar is one 9. Gap 9 only happens with 90 and 09.</p>`; };
+  $('#q1c').onclick = () => { $('#q1msg').innerHTML = `<b>The difference is 9 times the digit gap.</b> Gap 4 → 4 nines → 36. That is why every answer is in the 9s count, and why its digits add to 9.`; };
+}
+function q2(body){
+  body.innerHTML = `<div class="seg" role="group" aria-label="Chart mode"><button id="m1" aria-pressed="${S.q2mode==='pick'}">Pick starts</button><button id="m2" aria-pressed="${S.q2mode==='color'}">Color the chart by answer</button></div>
+    <div class="chart" id="hchart" aria-label="Numbers 10 to 99"></div><div class="legendrow" id="hleg"></div>
+    <div class="row" id="q2btns"><button class="primary" id="q2check">Check my picks</button><button class="secondary" id="q2clear">Clear picks</button></div><p class="msg" id="q2msg" aria-live="polite"></p>`;
+  $('#m1').onclick = () => { S.q2mode = 'pick'; q2(body); };
+  $('#m2').onclick = () => { S.q2mode = 'color'; q2(body); };
+  const ch = $('#hchart');
+  for(let n=10;n<=99;n++){
+    const b = document.createElement('button'); b.className = 'hc'; b.dataset.n = n; b.textContent = n;
+    if(S.q2mode === 'color'){
+      const d = diff2(n), g = gap2(n);
+      b.style.background = g === 0 ? 'var(--soft)' : `color-mix(in srgb, var(--nine) ${10 + g*9}%, var(--card))`;
+      if(g >= 5) b.style.color = '#fff';
+      b.innerHTML = `${n}<span class="k">${d}</span>`;
+      if(d === 45) b.style.boxShadow = 'inset 0 0 0 3px var(--ink)';
+      b.setAttribute('aria-label', `${n} gives ${d}`);
+      b.onclick = () => { const r = rev2(n); $('#q2msg').className = 'msg nine'; $('#q2msg').innerHTML = g === 0 ? `${n} reversed is ${n}. ${n} − ${n} = 0.` : `${Math.max(n,r)} − ${Math.min(n,r)} = ${d}. Gap ${g}, so 9 × ${g} = ${d}.`; };
+    } else {
+      if(S.picks.has(n)) b.classList.add('pick');
+      b.setAttribute('aria-pressed', S.picks.has(n));
+      b.onclick = () => { S.picks.has(n) ? S.picks.delete(n) : S.picks.add(n); b.classList.toggle('pick'); b.classList.remove('bad','miss'); b.setAttribute('aria-pressed', S.picks.has(n)); };
+    }
+    ch.appendChild(b);
+  }
+  $('#q2btns').hidden = S.q2mode === 'color';
+  $('#hleg').innerHTML = S.q2mode === 'color'
+    ? `<span>Small number = the answer.</span><span>Darker = bigger gap.</span><span class="sw"><i style="box-shadow:inset 0 0 0 3px var(--ink)"></i>gives 45</span><span>Look along the diagonals.</span>`
+    : '';
+  $('#q2msg').textContent = '';
+  if(S.q2mode === 'color'){ $('#q2msg').className = 'msg nine'; $('#q2msg').innerHTML = 'Tap any number to see its subtraction. Which numbers have a dark outline?'; }
+  const chk = $('#q2check'); if(!chk) return;
+  chk.onclick = () => {
+    const m = $('#q2msg'); ch.querySelectorAll('.hc').forEach(c => c.classList.remove('bad','miss'));
+    const picks = [...S.picks].sort((a,b) => a-b);
+    if(!picks.length){ m.className = 'msg warn'; m.textContent = 'Tap the numbers you think give 45 first.'; return; }
+    const wrong = picks.filter(n => diff2(n) !== 45);
+    const missing = STARTS45.filter(n => !S.picks.has(n));
+    if(wrong.length){
+      wrong.forEach(n => ch.querySelector(`[data-n="${n}"]`).classList.add('bad'));
+      const n = wrong[0], r = rev2(n);
+      m.className = 'msg warn';
+      m.innerHTML = `${wrong.length === 1 ? 'One pick needs' : wrong.length + ' picks need'} another look (striped). ${gap2(n) === 0 ? `${n} − ${n} = 0.` : `${Math.max(n,r)} − ${Math.min(n,r)} = ${diff2(n)}, not 45.`} What gap does 45 need? 45 = 9 × ?`;
+      return;
+    }
+    if(missing.length){
+      const lowStarts = missing.every(n => tensOf(n) < onesOf(n));
+      m.className = 'msg';
+      m.innerHTML = lowStarts
+        ? `All your picks work! You found the ones with the bigger digit in front. Now try <b>${missing[0]}</b>: reverse it to ${rev2(missing[0])}. What is ${rev2(missing[0])} − ${missing[0]}? There ${missing.length === 1 ? 'is 1 more' : 'are ' + missing.length + ' more'}.`
+        : `All your picks work! There ${missing.length === 1 ? 'is 1 more' : 'are ' + missing.length + ' more'} to find. Every one has digits 5 apart.`;
+      return;
+    }
+    m.className = 'msg good';
+    m.innerHTML = `<b>You found all ${STARTS45.length}!</b> 50, 61, 72, 83, 94 and their reverses 16, 27, 38, 49. Every one has digits 5 apart, because 9 × 5 = 45. (05 is not a two-digit number.)`;
+  };
+  $('#q2clear').onclick = () => { S.picks.clear(); q2(body); };
+}
+function q3(body){
+  body.innerHTML = `<div class="why"><span class="chip"><span class="tn">8</span><span class="on">5</span></span><span>−</span><span class="chip"><span class="tn">5</span><span class="on">8</span></span><span>=</span><input class="num" id="q3in" inputmode="numeric" maxlength="2" autocomplete="off"><button class="primary" id="q3go">Check</button></div><p class="msg" id="q3msg" aria-live="polite"></p>`;
+  const go = () => {
+    const v = $('#q3in').value.trim(), m = $('#q3msg');
+    if(!/^\d{1,2}$/.test(v)){ m.className = 'msg warn'; m.textContent = 'Type your prediction first.'; return; }
+    const a = +v;
+    if(a === diff2(85)){ m.className = 'msg good'; m.innerHTML = `<b>Yes, 27.</b> 8 and 5 are 3 apart, and 9 × 3 = 27. Check it: 27 + 58 = 85.`; return; }
+    m.className = 'msg warn';
+    if(a === columnMistake(85,58,2)) m.innerHTML = `33 comes from taking 5 from 8 in both columns. <b>Can you take 8 ones from 5?</b> Instead, find the gap between 8 and 5 and use your rule.`;
+    else m.innerHTML = `Check it: ${a} + 58 = ${a+58}, not 85. How far apart are 8 and 5? Use your rule from question 1.`;
+  };
+  $('#q3go').onclick = go; $('#q3in').addEventListener('keydown', e => { if(e.key === 'Enter') go(); });
+}
+function q4(body){
+  let n = S.rec.length ? S.rec[S.rec.length-1].n : 73;
+  let r = rev2(n), big = Math.max(n,r), sm = Math.min(n,r);
+  const a = tensOf(big), b = onesOf(big), g = a - b;
+  body.innerHTML = `<div class="panel"><div class="why"><span class="chip"><span class="tn">${a} tens</span> + <span class="on">${b} ones</span></span><span>−</span><span class="chip"><span class="tn">${b} tens</span> + <span class="on">${a} ones</span></span></div>
+    <div class="row"><button class="primary" id="q4a">Compare the tens</button><button class="secondary" id="q4b">Compare the ones</button><button class="secondary" id="q4c">Put it together</button></div>
+    <p class="msg nine" id="q4msg"></p></div><p class="note">Using ${big} − ${sm}${S.rec.length ? ' from your table' : ''}.</p>`;
+  const m = $('#q4msg');
+  $('#q4a').onclick = () => { m.innerHTML = `The top has <b>${g} more tens</b> than the bottom (${a} − ${b} = ${g}). That is ${g*10} more.`; };
+  $('#q4b').onclick = () => { m.innerHTML = `But the bottom has <b>${g} more ones</b> than the top. That takes ${g} back.`; };
+  $('#q4c').onclick = () => { m.innerHTML = `${g*10} − ${g} = <b>${g*9}</b>. Each ten is worth 9 more than a one, so ${g} extra tens and ${g} fewer ones make ${g} nines. ${big} − ${sm} = ${big - sm}.`; };
+}
+
+/* ---------- challenge ---------- */
+function renderChal(){
+  const box = $('#chal'); box.innerHTML = '';
+  S.chal.forEach((c, i) => {
+    const r = rev3(c.n), big = Math.max(c.n, r), sm = Math.min(c.n, r), d = big - sm;
+    const el = document.createElement('div'); el.className = 'ccard' + (c.done ? ' done' : '');
+    const ans = c.done ? `<span class="mid">${pad(d,3)}</span>` : '?';
+    el.innerHTML = `<div class="place">Start ${c.n} · reverse ${pad(r,3)}</div><div class="prob">${big} − ${pad(sm,3)} = ${ans}</div>
+      ${c.done ? '' : `<div class="row"><input class="num" id="c${i}" inputmode="numeric" maxlength="3" autocomplete="off" style="width:120px" aria-label="Difference for ${c.n}"><button class="primary" data-i="${i}">Check</button></div>`}
+      <p class="msg ${c.cls}">${c.msg}</p>`;
+    box.appendChild(el);
+  });
+  box.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => checkChal(+b.dataset.i));
+  box.querySelectorAll('input').forEach(inp => inp.addEventListener('keydown', e => { if(e.key === 'Enter') checkChal(+inp.id.slice(1)); }));
+}
+function checkChal(i){
+  const c = S.chal[i], v = $('#c'+i).value.trim();
+  const r = rev3(c.n), big = Math.max(c.n, r), sm = Math.min(c.n, r), d = big - sm;
+  if(!/^\d{1,3}$/.test(v)){ c.msg = 'Type the difference first.'; c.cls = 'warn'; renderChal(); return; }
+  const a = +v;
+  if(a === d){
+    c.done = true; c.cls = 'good';
+    const s = pad(d,3);
+    c.msg = `<b>Yes!</b> The middle digit is ${s[1]}. The outside digits ${s[0]} and ${s[2]} add to ${+s[0] + +s[2]}.${d < 100 ? ' (Think of 99 as 099.)' : ''}`;
+  } else if(a === columnMistake(big, sm, 3)){
+    c.cls = 'warn'; c.msg = `It looks like you took the smaller digit from the larger in each column. <b>Can you take ${onesOf(sm)} ones from ${onesOf(big)}?</b> Trade a ten first. Then check the tens: is there still enough?`;
+  } else {
+    c.cls = 'warn'; c.msg = `Check it: ${a} + ${sm} = ${a + sm}, but it should make ${big}. Try again.`;
+  }
+  renderChal();
+}
+$('#ownAdd').onclick = () => {
+  const v = $('#ownIn').value.trim(), m = $('#ownMsg');
+  if(!/^\d{3}$/.test(v) || +v < 100){ m.className = 'msg warn'; m.textContent = 'Type a three-digit number, 100 to 999.'; return; }
+  const n = +v, [a,,c] = d3(n);
+  if(a === c){ m.className = 'msg warn'; m.innerHTML = `${n} reversed is ${n} again, so the difference is 0. Pick a number whose first and last digits are different.`; return; }
+  if(S.chal.some(x => x.n === n)){ m.className = 'msg warn'; m.textContent = `${n} already has a card.`; return; }
+  S.chal.push({n, done:false, msg:'', cls:''}); m.className = 'msg'; m.textContent = ''; $('#ownIn').value = ''; renderChal();
+};
+$('#ownIn').addEventListener('keydown', e => { if(e.key === 'Enter') $('#ownAdd').click(); });
+$('#patBtn').onclick = () => {
+  const rows = [1,2,3,4,5,6,7,8,9].map(g => { const d = 99*g, s = pad(d,3); return `<div class="lrow"><span class="g">outside gap ${g}</span><span style="font-family:var(--display);font-weight:700;font-size:28px">${s[0]}<span class="nn">${s[1]}</span>${s[2]}</span><span class="d" style="font-size:18px;color:var(--muted)">${s[0]}+${s[2]}=${+s[0] + +s[2]}</span></div>`; }).join('');
+  $('#patBox').innerHTML = `<div class="panel"><h2>Every possible answer</h2><div class="ladder">${rows}</div><p class="msg nine"><b>The middle digit is always 9</b>, and the outside digits add to 9. The answer is 99 times the gap between the first and last digits. 742 − 247: 7 and 2 are 5 apart, 99 × 5 = 495.</p></div>`;
+};
+
+/* ---------- global ---------- */
+function resetAll(){
+  const v = S.view; Object.keys(S).forEach(k => delete S[k]); S.view = v; freshState();
+  $('#launchMsg').textContent = ''; $('#voteMsg').textContent = ''; $('#patBox').innerHTML = ''; $('#ownMsg').textContent = '';
+  setLevel('all'); S.t = 7; S.o = 3; changed();
+  renderWarm(); renderBoard(); renderVotes(); renderRec(); renderChal(); show(v);
+}
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+freshState(); resetAll();
+})();
+</script>
+
+</body></html>

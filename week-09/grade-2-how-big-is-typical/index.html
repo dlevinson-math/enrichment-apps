@@ -1,0 +1,872 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>How Big Is Typical?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom wall. Header + step tabs; each step = the thing you work on (ruler, line plot, pencil box) beside a question card. */
+:root{
+  --paper:#EEF3F2; --card:#FFFFFF; --ink:#1D2A33; --muted:#566874; --line:#C9D5D8; --grid:#DCE6E7;
+  --note:#FFD447; --note-edge:#E0B21C; --note-ink:#3D3000;
+  --teal:#17788A; --teal-soft:#D5ECEF; --pencil:#E2572B; --pencil-soft:#FCE3D9;
+  --good:#24804F; --good-soft:#DDF1E5; --ruler:#CFE7EE; --ruler-edge:#7FB3C2; --skin:#F6CFA8; --skin-edge:#B9825A;
+  --visitor:#8B5CC7;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11181B; --card:#1A2428; --ink:#E7EEF0; --muted:#9DB0B8; --line:#33454C; --grid:#223036;
+    --note:#E9C440; --note-edge:#B8961F; --note-ink:#2A2100;
+    --teal:#4FB8CB; --teal-soft:#183A42; --pencil:#FF7D52; --pencil-soft:#3D2219;
+    --good:#5CCB8C; --good-soft:#173527; --ruler:#24414A; --ruler-edge:#5A93A3; --skin:#D9AE86; --skin-edge:#8E6040;
+    --visitor:#B892F0; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11181B; --card:#1A2428; --ink:#E7EEF0; --muted:#9DB0B8; --line:#33454C; --grid:#223036;
+  --note:#E9C440; --note-edge:#B8961F; --note-ink:#2A2100;
+  --teal:#4FB8CB; --teal-soft:#183A42; --pencil:#FF7D52; --pencil-soft:#3D2219;
+  --good:#5CCB8C; --good-soft:#173527; --ruler:#24414A; --ruler-edge:#5A93A3; --skin:#D9AE86; --skin-edge:#8E6040;
+  --visitor:#B892F0; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:12px 28px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--teal); outline-offset:2px}
+.wrap{max-width:1500px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px}
+.ttl{min-width:0}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,4vw,52px); line-height:1; margin:0; letter-spacing:-.01em; text-wrap:balance}
+.sub{margin:4px 0 0; color:var(--muted); font-size:15px; letter-spacing:.06em; text-transform:uppercase; font-weight:700}
+.dq{margin:6px 0 0; font-size:clamp(17px,1.5vw,21px); max-width:40em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:700; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+.tabs-scroll{overflow-x:auto; margin:0 -4px; padding:4px}
+.tabs{display:flex; gap:8px; min-width:max-content}
+.tabs button{border:2px solid var(--line); background:var(--card); border-radius:999px; padding:10px 20px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.5vw,21px); min-height:52px; color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+
+.view{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:20px; align-items:start}
+.view[hidden]{display:none}
+@media (max-width:980px){ .view{grid-template-columns:minmax(0,1fr)} }
+.stage{background:var(--card); border:2px solid var(--line); border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.side{display:flex; flex-direction:column; gap:14px; min-width:0}
+.card{background:var(--card); border:2px solid var(--line); border-radius:20px; padding:16px 18px; display:flex; flex-direction:column; gap:12px; min-width:0}
+h2{font-family:var(--display); font-weight:700; font-size:clamp(22px,2vw,28px); line-height:1.15; margin:0; text-wrap:balance}
+.lbl{font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0}
+.big{font-size:clamp(18px,1.6vw,22px); margin:0}
+.muted{color:var(--muted)}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--teal); color:var(--card); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:12px 22px; border-radius:14px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:10px 18px; border-radius:14px; min-height:52px}
+.primary:disabled,.secondary:disabled{opacity:.45; cursor:default}
+.seg{display:inline-flex; flex-wrap:wrap; background:var(--paper); border:2px solid var(--line); border-radius:14px; padding:3px; gap:2px}
+.seg button{border:0; background:none; padding:9px 16px; border-radius:11px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--card); color:var(--ink); box-shadow:0 0 0 2px var(--ink) inset}
+
+.stepper{display:inline-flex; align-items:center; gap:6px}
+.stepper button{width:52px; height:52px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-size:26px; font-weight:700; line-height:1}
+.stepper output{min-width:3.2em; text-align:center; font-family:var(--display); font-weight:800; font-size:34px; font-variant-numeric:tabular-nums}
+.stepper .u{font-weight:700; color:var(--muted); font-size:18px}
+
+.fb{margin:0; padding:12px 16px; border-radius:14px; background:var(--teal-soft); font-size:clamp(17px,1.45vw,20px); line-height:1.45}
+.fb:empty{display:none}
+.fb.ok{background:var(--good-soft)}
+.fb.try{background:var(--pencil-soft)}
+.fb b{font-family:var(--display); font-weight:700}
+
+.svgbox{width:100%; overflow-x:auto}
+svg text{font-family:var(--body)}
+.plot{display:block; width:100%; height:auto; min-width:540px; touch-action:manipulation}
+.col{cursor:pointer}
+.col:hover .colhit{fill:var(--grid)}
+.col:focus-visible{outline:none}
+.col:focus-visible .colhit{fill:var(--teal-soft); stroke:var(--teal); stroke-width:2}
+
+/* Warm-up scene */
+.scene{display:block; width:100%; height:auto; touch-action:none; user-select:none}
+#rulerG{cursor:grab}
+#rulerG.drag{cursor:grabbing}
+#rulerG:focus-visible .rbody{stroke:var(--teal); stroke-width:1.2}
+
+/* Stats table */
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+.stat{border:2px solid var(--line); border-radius:16px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; background:var(--card)}
+.stat .q{font-weight:700; font-size:16px}
+.stat .a{font-family:var(--display); font-weight:800; font-size:28px; line-height:1.1; min-height:1.1em; font-variant-numeric:tabular-nums}
+.stat button{border:2px solid var(--line); background:var(--paper); border-radius:12px; padding:6px 12px; font-weight:700; font-size:15px; min-height:44px}
+
+/* Pencil box */
+.box{display:flex; flex-wrap:wrap; gap:6px 14px; padding:12px; border-radius:16px; background:var(--paper); border:2px dashed var(--line); --in:min(5.2vw, 44px)}
+@media (max-width:980px){ .box{--in:min(8vw, 44px)} }
+.pen{border:2px solid transparent; background:none; border-radius:12px; padding:8px 4px; width:calc(var(--w) * var(--in) + 12px); display:flex}
+.pen svg{width:100%; height:calc(var(--in) * .55); display:block}
+.pen[aria-pressed="true"]{border-color:var(--teal); background:var(--teal-soft)}
+.pen.placed{opacity:.35}
+.pen:disabled{cursor:default}
+
+.qlist{display:flex; flex-direction:column; gap:14px}
+.qitem{display:flex; flex-direction:column; gap:10px; padding-top:12px; border-top:2px solid var(--line)}
+.qitem:first-child{border-top:0; padding-top:0}
+.qitem .qt{font-weight:700; font-size:clamp(17px,1.45vw,20px); margin:0}
+.done-tag{color:var(--good); font-weight:700}
+
+.qnav{display:flex; flex-wrap:wrap; gap:8px}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:19px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(22px,2.1vw,30px); line-height:1.2; margin:0; text-wrap:balance}
+
+/* Line-up strip */
+.lineup{display:flex; flex-wrap:wrap; gap:4px; align-items:flex-end}
+.chipn{min-width:40px; height:40px; padding:0 4px; border-radius:6px; display:grid; place-items:center; font-weight:700; font-variant-numeric:tabular-nums; background:var(--note); color:var(--note-ink); border:2px solid var(--note-edge); font-size:17px}
+.chipn.off{background:var(--paper); color:var(--muted); border-color:var(--line)}
+.chipn.mid{box-shadow:0 0 0 3px var(--teal)}
+.fold{width:4px; height:52px; background:var(--teal); border-radius:2px; margin:0 4px}
+.balance{display:flex; gap:12px; flex-wrap:wrap; font-weight:700; font-size:18px}
+.balance span{padding:6px 12px; border-radius:10px; background:var(--paper)}
+
+.compare{border-collapse:collapse; font-size:clamp(16px,1.3vw,19px)}
+.compare th,.compare td{padding:6px 14px 6px 0; text-align:left; vertical-align:top}
+.compare th{font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-size:15px; color:var(--muted); align-items:center}
+.sw{display:inline-block; width:18px; height:18px; border-radius:4px; vertical-align:-3px; margin-right:6px; border:2px solid var(--note-edge); background:var(--note)}
+.sw.v{background:var(--visitor); border-color:var(--visitor)}
+
+@media (prefers-reduced-motion: no-preference){
+  .pop{animation:pop .28s ease-out}
+  @keyframes pop{from{transform:scale(.4); opacity:0}to{transform:scale(1); opacity:1}}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="ttl">
+    <h1>How Big Is Typical?</h1>
+    <p class="sub">Grade 2 · Week 9 · Lesson 2.9</p>
+    <p class="dq">What is a typical hand span in our class, and how do you know?</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<div class="tabs-scroll"><div class="tabs" role="tablist" id="tabs">
+  <button role="tab" data-tab="warm" aria-selected="true">1 · Measure a hand</button>
+  <button role="tab" data-tab="class" aria-selected="false">2 · Class line plot</button>
+  <button role="tab" data-tab="pencil" aria-selected="false">3 · Pencil box</button>
+  <button role="tab" data-tab="typical" aria-selected="false">4 · What is typical?</button>
+  <button role="tab" data-tab="half" aria-selected="false">★ Challenge</button>
+</div></div>
+
+<!-- 1 WARM-UP -->
+<section class="view" id="v-warm">
+  <div class="stage">
+    <p class="lbl">Thumb tip to pinky tip</p>
+    <svg class="scene" id="scene" viewBox="0 0 270 150" aria-label="A stretched hand above a centimeter ruler"></svg>
+    <p class="muted" style="margin:0;font-size:15px">Drag the ruler left or right (or tap it and use the arrow keys).</p>
+  </div>
+  <div class="side">
+    <div class="card">
+      <p class="lbl">Step 1 · Guess</p>
+      <p class="big">Stretch your hand. Thumb tip to pinky tip: about how many centimeters?</p>
+      <div class="row">
+        <div class="stepper" id="guessStep"></div>
+        <button class="secondary" id="lockGuess">Lock in my guess</button>
+      </div>
+    </div>
+    <div class="card">
+      <p class="lbl">Step 2 · Measure</p>
+      <p class="big">Slide the ruler so <b>0</b> sits right under the thumb tip. Read the mark nearest the pinky tip.</p>
+      <div class="row">
+        <div class="stepper" id="measStep"></div>
+        <button class="primary" id="checkMeas">Check</button>
+      </div>
+      <p class="fb" id="warmFb" aria-live="polite"></p>
+      <div class="row">
+        <button class="secondary" id="newHand">New hand</button>
+        <button class="secondary" id="helpLine" hidden>Help me line it up</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 CLASS LINE PLOT -->
+<section class="view" id="v-class" hidden>
+  <div class="stage">
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" role="group" aria-label="Which class data">
+        <button data-cls="practice" aria-pressed="true">Practice class</button>
+        <button data-cls="ours" aria-pressed="false">Our class</button>
+      </div>
+      <div class="seg" role="group" aria-label="Tap to">
+        <button data-add="add" aria-pressed="true">Tap to add a note</button>
+        <button data-add="remove" aria-pressed="false">Tap to remove</button>
+      </div>
+    </div>
+    <div class="svgbox"><svg class="plot" id="classPlot"></svg></div>
+    <div class="row" style="justify-content:space-between">
+      <p class="muted" id="classInfo" style="margin:0" aria-live="polite"></p>
+      <div class="row">
+        <button class="secondary" id="undoBtn">Undo</button>
+        <button class="secondary" id="clearClass">Clear this plot</button>
+      </div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h2>Read the plot</h2>
+      <p class="big" id="classIntro"></p>
+      <div class="stats" id="classStats"></div>
+      <p class="fb" id="classFb" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 PENCIL BOX -->
+<section class="view" id="v-pencil" hidden>
+  <div class="stage">
+    <p class="lbl">Part B · 14 pencils in a pencil box</p>
+    <div class="box" id="box" aria-label="Pencil box"></div>
+    <svg class="scene" id="inchRuler" viewBox="0 0 250 40" aria-label="Inch ruler"></svg>
+    <div class="svgbox"><svg class="plot" id="penPlot"></svg></div>
+    <p class="fb" id="penFb" aria-live="polite"></p>
+    <div class="row"><button class="secondary" id="placeRest">Place the rest for me</button></div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h2>Pencil detectives</h2>
+      <p class="big muted" id="penIntro">Tap a pencil. Read its length on the ruler. Then tap that number on the line plot to put an X there.</p>
+      <div class="qlist" id="penQs"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 WHAT IS TYPICAL -->
+<section class="view" id="v-typical" hidden>
+  <div class="stage">
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" role="group" aria-label="Which data">
+        <button data-ds="hands" aria-pressed="true">Hand spans</button>
+        <button data-ds="pencils" aria-pressed="false">Pencils</button>
+      </div>
+      <span class="muted" id="dsName"></span>
+    </div>
+    <div class="svgbox"><svg class="plot" id="tPlot"></svg></div>
+    <div id="tExtra"></div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <p class="fb" id="tFb" aria-live="polite"></p>
+      <p class="muted" style="margin:0;font-size:15px">Talk it over first. Then tap a button to put evidence on the plot.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHALLENGE -->
+<section class="view" id="v-half" hidden>
+  <div class="stage">
+    <div class="row" style="justify-content:space-between">
+      <div class="seg" role="group" aria-label="Which data">
+        <button data-hds="hands" aria-pressed="true">Hand spans</button>
+        <button data-hds="pencils" aria-pressed="false">Pencils</button>
+      </div>
+      <span class="muted" id="hName"></span>
+    </div>
+    <div class="svgbox"><svg class="plot" id="hPlot"></svg></div>
+    <p class="lbl">Everyone lined up, smallest to largest</p>
+    <div class="lineup" id="lineup"></div>
+    <div class="balance" id="balance"></div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h2>Half and half</h2>
+      <p class="big">Find a number so that <b>half the class</b> has a hand span <b>at or below</b> it. Tap a number on the plot or use the buttons.</p>
+      <div class="row">
+        <div class="stepper" id="halfStep"></div>
+        <button class="primary" id="halfCheck">Test it</button>
+      </div>
+      <p class="fb" id="halfFb" aria-live="polite"></p>
+      <div class="row"><button class="secondary" id="halfWay">Show a way to find it</button></div>
+      <p class="muted" style="margin:0">Then predict: what would a <b>first-grade</b> line plot of hand spans look like? Where would its pile be? Explain.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<script id="mathcore">
+/* ---------- Pure math (verified separately) ---------- */
+const PENCILS = {3:1, 4:2, 5:4, 6:3, 7:2, 8:1, 10:1}; // from Handout 2.9 Part B line plot
+const PRACTICE = {13:1, 14:3, 15:5, 16:6, 17:4, 18:2, 20:1}; // made-up practice class
+function toList(c, lo, hi){ const a=[]; for(let v=lo; v<=hi; v++) for(let i=0;i<(c[v]||0);i++) a.push(v); return a; }
+function stats(c, lo, hi){
+  const list = toList(c, lo, hi), n = list.length;
+  if(!n) return {n:0, list};
+  const min = list[0], max = list[n-1];
+  let mc = 0; for(let v=lo; v<=hi; v++) mc = Math.max(mc, c[v]||0);
+  const modes = []; for(let v=lo; v<=hi; v++) if((c[v]||0)===mc) modes.push(v);
+  const gaps = []; let run = null;
+  for(let v=min+1; v<max; v++){
+    if(!(c[v]||0)){ if(run) run[1]=v; else { run=[v,v]; gaps.push(run); } } else run=null;
+  }
+  const need = Math.ceil(0.75*n);
+  let cluster = null;
+  for(let w=0; w<=max-min && !cluster; w++){
+    let best = null;
+    for(let a=min; a+w<=max; a++){
+      let s=0; for(let v=a; v<=a+w; v++) s += c[v]||0;
+      if(s>=need && (!best || s>best.count)) best = {a, b:a+w, count:s};
+    }
+    cluster = best;
+  }
+  const le = x => list.filter(v => v<=x).length;
+  let mid;
+  if(n%2) mid = {lo:list[(n-1)/2], hi:list[(n-1)/2], idx:[(n-1)/2]};
+  else mid = {lo:list[n/2-1], hi:list[n/2], idx:[n/2-1, n/2]};
+  const exact = []; for(let x=lo; x<=hi; x++) if(le(x)*2===n) exact.push(x);
+  let halfValid, exactPossible = exact.length>0;
+  if(exactPossible) halfValid = exact;
+  else { for(let x=lo; x<=hi; x++) if(le(x)*2>=n){ halfValid=[x]; break; } }
+  return {n, list, min, max, modes, mc, gaps, cluster, mid, le, halfValid, exactPossible};
+}
+function nearestCm(L){ return Math.round(L); }
+</script>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HANDS = [14.3, 15.8, 13.6, 16.2, 17.3, 15.1, 18.4, 14.7, 16.9, 12.8];
+const PEN_ORDER = [6,4,5,10,3,5,7,6,5,8,4,6,7,5]; // the 14 pencils, shuffled; matches PENCILS
+const DS = { hands:{lo:10, hi:22, unit:'cm'}, pencils:{lo:2, hi:11, unit:'inches'} };
+const esc = s => String(s);
+const plural = (n, a, b) => n===1 ? a : b;
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+
+let S;
+function fresh(){
+  return {
+    tab:'warm',
+    warm:{hi:0, L:HANDS[0], Z:0.9, guess:15, locked:false, meas:10, tries:0},
+    cls:'practice', addMode:'add',
+    data:{practice:{...PRACTICE}, ours:{}}, undo:{practice:[], ours:[]},
+    shown:{},
+    pen:{placed:new Array(14).fill(false), sel:null, wrong:0, counts:{}, ans:{}},
+    ds:'hands', q:1, visitor:null, tHL:null,
+    hds:'hands', half:16, halfShown:false
+  };
+}
+
+/* ---------- Steppers ---------- */
+function stepper(el, min, max, get, set, unit){
+  el.innerHTML = `<button aria-label="One less">−</button><output aria-live="polite"></output><span class="u">${unit}</span><button aria-label="One more">+</button>`;
+  const [minus, plus] = el.querySelectorAll('button'); const out = el.querySelector('output');
+  const draw = () => { out.textContent = get(); };
+  minus.onclick = () => { set(Math.max(min, get()-1)); draw(); el.dispatchEvent(new Event('change')); };
+  plus.onclick = () => { set(Math.min(max, get()+1)); draw(); el.dispatchEvent(new Event('change')); };
+  return {draw, setUnit:u => el.querySelector('.u').textContent = u};
+}
+
+/* ---------- Line plot ---------- */
+function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function drawPlot(svg, o){
+  // o: {lo,hi,counts,style:'note'|'x',unit,cols:{v:color}, band:[a,b,color], badges:{v:text}, visitor:v, onCol, jump:[a,b], split:x, labelTop}
+  const W=44, PADL=34, ROWH=28;
+  const maxC = Math.max(0, ...Object.values(o.counts)) + (o.visitor!=null ? 1 : 0);
+  const rows = Math.max(6, maxC + 1) + (o.jump ? 1 : 0);
+  const ncol = o.hi - o.lo + 1, width = PADL*2 + ncol*W, axisY = 16 + rows*ROWH, height = axisY + 54;
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.innerHTML = '';
+  const x = v => PADL + (v - o.lo)*W + W/2;
+  if(o.band){ const [a,b,col] = o.band; el('rect',{x:x(a)-W/2+2, y:8, width:(b-a+1)*W-4, height:axisY-8, rx:10, fill:col, opacity:.16}, svg); el('rect',{x:x(a)-W/2+2, y:8, width:(b-a+1)*W-4, height:axisY-8, rx:10, fill:'none', stroke:col, 'stroke-width':2, 'stroke-dasharray':'6 5'}, svg); }
+  if(o.split!=null){ const sx = x(o.split)+W/2; el('rect',{x:PADL, y:8, width:sx-PADL, height:axisY-8, fill:'var(--teal)', opacity:.10}, svg); el('line',{x1:sx, x2:sx, y1:4, y2:axisY+6, stroke:'var(--teal)', 'stroke-width':3}, svg); }
+  for(let v=o.lo; v<=o.hi; v++){
+    const g = el('g', {class: o.onCol ? 'col' : '', 'data-v':v}, svg);
+    const c = o.counts[v]||0;
+    if(o.onCol){ g.setAttribute('tabindex','0'); g.setAttribute('role','button'); g.setAttribute('aria-label', `${v} ${o.unit}: ${c} ${plural(c,'mark','marks')}`);
+      g.addEventListener('click', () => o.onCol(v)); g.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); o.onCol(v); } }); }
+    el('rect', {class:'colhit', x:x(v)-W/2+1, y:4, width:W-2, height:axisY+46, rx:8, fill:'transparent'}, g);
+    const hl = o.cols && o.cols[v];
+    if(hl) el('rect',{x:x(v)-W/2+3, y:axisY-ROWH*Math.max(c,1)-10, width:W-6, height:ROWH*Math.max(c,1)+8, rx:8, fill:'none', stroke:hl, 'stroke-width':3.5}, g);
+    for(let i=0;i<c;i++){
+      const cy = axisY - 6 - ROWH*i - ROWH/2;
+      const dim = o.dim && !o.dim(v,i);
+      if(o.style==='note'){
+        el('rect',{x:x(v)-15, y:cy-12, width:30, height:24, rx:3, fill: dim ? 'var(--paper)' : 'var(--note)', stroke: dim ? 'var(--line)' : 'var(--note-edge)', 'stroke-width':1.5}, g);
+        if(o.labelNotes) { const t = el('text',{x:x(v), y:cy+5, 'text-anchor':'middle', 'font-size':13, 'font-weight':700, fill: dim?'var(--muted)':'var(--note-ink)'}, g); t.textContent = v; }
+      } else {
+        const t = el('text',{x:x(v), y:cy+9, 'text-anchor':'middle', 'font-size':26, 'font-weight':700, fill: dim ? 'var(--line)' : 'var(--pencil)'}, g); t.textContent = '×';
+      }
+    }
+    if(o.visitor===v){
+      const cy = axisY - 6 - ROWH*c - ROWH/2;
+      el('rect',{x:x(v)-15, y:cy-12, width:30, height:24, rx:3, fill:'var(--visitor)', stroke:'var(--visitor)'}, g);
+      const t = el('text',{x:x(v), y:cy+5, 'text-anchor':'middle', 'font-size':13, 'font-weight':700, fill:'var(--card)'}, g); t.textContent = 'K';
+    }
+    if(o.badges && o.badges[v]!=null){
+      const top = axisY - 6 - ROWH*(c + (o.visitor===v?1:0)) - 14;
+      const t = el('text',{x:x(v), y:top, 'text-anchor':'middle', 'font-size':16, 'font-weight':700, fill:hl||'var(--teal)'}, g); t.textContent = o.badges[v];
+    }
+    el('line',{x1:x(v), x2:x(v), y1:axisY-5, y2:axisY+7, stroke:'var(--ink)', 'stroke-width':2}, g);
+    const lab = el('text',{x:x(v), y:axisY+28, 'text-anchor':'middle', 'font-size':18, 'font-weight':700, fill:'var(--ink)'}, g); lab.textContent = v;
+  }
+  el('line',{x1:PADL-10, x2:width-PADL+10, y1:axisY, y2:axisY, stroke:'var(--ink)', 'stroke-width':2.5}, svg);
+  el('path',{d:`M${width-PADL+16} ${axisY} l-9 -6 v12 z`, fill:'var(--ink)'}, svg);
+  el('path',{d:`M${PADL-16} ${axisY} l9 -6 v12 z`, fill:'var(--ink)'}, svg);
+  const u = el('text',{x:width/2, y:axisY+50, 'text-anchor':'middle', 'font-size':15, fill:'var(--muted)'}, svg); u.textContent = o.title || o.unit;
+  if(o.jump){
+    const [a,b] = o.jump; let prev = a; const jy = axisY - ROWH*rows + 30;
+    for(let v=a+1; v<=b; v++){ el('path',{d:`M${x(prev)} ${axisY-4} Q ${(x(prev)+x(v))/2} ${axisY-46} ${x(v)} ${axisY-4}`, fill:'none', stroke:'var(--teal)', 'stroke-width':2.5}, svg); prev=v; }
+    const t = el('text',{x:(x(a)+x(b))/2, y:22, 'text-anchor':'middle', 'font-size':17, 'font-weight':700, fill:'var(--teal)'}, svg); t.textContent = `${b-a} jumps`;
+  }
+}
+
+/* ---------- 1 · Warm-up ---------- */
+let guessSt, measSt;
+function drawScene(){
+  const svg = $('#scene'); const w = S.warm, L = w.L, T = 2.5, r = 8;
+  svg.innerHTML = '';
+  // faint centimeter grid
+  for(let i=0;i<=27;i++) el('line',{x1:i*10, x2:i*10, y1:0, y2:100, stroke:'var(--grid)', 'stroke-width':.5}, svg);
+  const tx = T*10, px = (T+L)*10, pc = (tx+px)/2, sp = L*10;
+  const thumb = [[pc-0.17*sp, 80],[tx+r, 74]];
+  const pinky = [[pc+0.2*sp, 62],[px-r, 44]];
+  const fingers = [ [[pc-0.13*sp,56],[pc-0.2*sp,14]], [[pc-0.02*sp,52],[pc-0.03*sp,7]], [[pc+0.1*sp,54],[pc+0.12*sp,12]] ];
+  const caps = [thumb, pinky, ...fingers];
+  const draw = (wd, col) => {
+    caps.forEach(([a,b]) => el('line',{x1:a[0], y1:a[1], x2:b[0], y2:b[1], stroke:col, 'stroke-width':wd, 'stroke-linecap':'round'}, svg));
+    el('ellipse',{cx:pc, cy:74, rx:0.2*sp + (wd-2*r)/2, ry:21 + (wd-2*r)/2, fill:col}, svg);
+  };
+  draw(2*r+2.4, 'var(--skin-edge)'); draw(2*r, 'var(--skin)');
+  // tip guides
+  [[tx,74],[px,44]].forEach(([gx,gy]) => {
+    el('line',{x1:gx, x2:gx, y1:gy, y2:104, stroke:'var(--pencil)', 'stroke-width':1, 'stroke-dasharray':'2.5 2'}, svg);
+    el('circle',{cx:gx, cy:gy, r:2, fill:'var(--pencil)'}, svg);
+  });
+  const lt = el('text',{x:tx, y:30, 'text-anchor':'middle', 'font-size':6, 'font-weight':700, fill:'var(--muted)'}, svg); lt.textContent='thumb tip';
+  const lp = el('text',{x:Math.min(px, 255), y:30, 'text-anchor':'middle', 'font-size':6, 'font-weight':700, fill:'var(--muted)'}, svg); lp.textContent='pinky tip';
+  // ruler
+  const g = el('g',{id:'rulerG', transform:`translate(${w.Z*10} 0)`, tabindex:0, role:'slider', 'aria-label':'Centimeter ruler. Arrow keys slide it.', 'aria-valuetext': rulerText()}, svg);
+  el('rect',{class:'rbody', x:-6, y:104, width:262, height:34, rx:2.5, fill:'var(--ruler)', stroke:'var(--ruler-edge)', 'stroke-width':.8, opacity:.92}, g);
+  for(let mm=0; mm<=250; mm++){
+    const len = mm%10===0 ? 11 : mm%5===0 ? 7.5 : 4.5;
+    el('line',{x1:mm, x2:mm, y1:104, y2:104+len, stroke:'var(--ink)', 'stroke-width': mm%10===0 ? .7 : .35}, g);
+    if(mm%10===0){ const t = el('text',{x:mm, y:123, 'text-anchor':'middle', 'font-size':6.4, 'font-weight':700, fill:'var(--ink)'}, g); t.textContent = mm/10; }
+  }
+  const cmT = el('text',{x:244, y:133, 'text-anchor':'end', 'font-size':4.5, fill:'var(--muted)'}, g); cmT.textContent='cm';
+  if(w.zoom){ // highlight the two marks around the pinky tip
+    const rd = T + L - w.Z, f = Math.floor(rd);
+    [f, f+1].forEach(k => el('rect',{x:k*10-3.5, y:113.5, width:7, height:12, rx:2, fill:'none', stroke:'var(--teal)', 'stroke-width':1}, g));
+  }
+  attachDrag(svg, g);
+}
+function rulerText(){ const d = S.warm.Z - 2.5; return Math.abs(d) < 0.21 ? 'zero is under the thumb tip' : d < 0 ? 'zero is left of the thumb tip' : 'zero is right of the thumb tip'; }
+function aligned(){ return Math.abs(S.warm.Z - 2.5) < 0.21; }
+function attachDrag(svg, g){
+  let start = null;
+  const toUnits = ev => { const m = svg.getScreenCTM(); return m ? (ev.clientX - m.e)/m.a : 0; };
+  g.addEventListener('pointerdown', ev => { start = {x:toUnits(ev), Z:S.warm.Z}; g.setPointerCapture(ev.pointerId); g.classList.add('drag'); });
+  g.addEventListener('pointermove', ev => { if(!start) return; S.warm.Z = clampZ(start.Z + (toUnits(ev)-start.x)/10); g.setAttribute('transform', `translate(${S.warm.Z*10} 0)`); });
+  const up = () => { if(!start) return; start=null; g.classList.remove('drag'); if(Math.abs(S.warm.Z-2.5) < 0.3) S.warm.Z = 2.5; S.warm.zoom=false; drawScene(); };
+  g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+  g.addEventListener('keydown', e => {
+    if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return; e.preventDefault();
+    S.warm.Z = clampZ(Math.round((S.warm.Z + (e.key==='ArrowRight'?0.1:-0.1))*10)/10); S.warm.zoom=false; drawScene(); $('#rulerG').focus();
+  });
+}
+const clampZ = z => Math.max(0.6, Math.min(8, z));
+function describeTip(L){
+  const f = Math.floor(L), frac = L - f;
+  return frac < 0.5 ? `The pinky tip is a little past <b>${f}</b>. It is closer to ${f} than to ${f+1}.` : `The pinky tip is almost at <b>${f+1}</b>. It is closer to ${f+1} than to ${f}.`;
+}
+function checkMeasure(){
+  const w = S.warm, fb = $('#warmFb'), ans = w.meas, right = nearestCm(w.L);
+  fb.className = 'fb';
+  if(!aligned()){
+    w.tries++;
+    const rd = 2.5 + w.L - w.Z;
+    let extra = '';
+    if(Math.round(rd) === ans) extra = ` You read ${ans} correctly off the ruler, but the ruler was measuring from the wrong place.`;
+    fb.classList.add('try');
+    fb.innerHTML = `<b>Where is zero on your ruler?</b> It is not under the thumb tip yet. Slide the ruler until the 0 mark lines up with the dashed line at the thumb.${extra}`;
+    $('#helpLine').hidden = false; return;
+  }
+  if(ans === right){
+    fb.classList.add('ok');
+    let g = '';
+    if(w.locked){ const d = w.guess - right; g = d===0 ? ` Your guess of ${w.guess} cm was right on!` : ` Your guess was ${w.guess} cm: ${Math.abs(d)} cm too ${d<0?'low':'high'}.`; }
+    fb.innerHTML = `<b>Yes! About ${right} cm.</b> ${describeTip(w.L)}${g} Try a new hand.`;
+    w.zoom = true; drawScene(); return;
+  }
+  fb.classList.add('try');
+  w.zoom = true; drawScene();
+  fb.innerHTML = `Not quite. Look at the boxed marks on the ruler. ${describeTip(w.L)} Change your number and check again.`;
+}
+function newHand(){
+  const w = S.warm; w.hi = (w.hi+1) % HANDS.length; w.L = HANDS[w.hi]; w.Z = 0.9; w.zoom=false; w.tries=0;
+  $('#warmFb').textContent=''; $('#helpLine').hidden = true; drawScene();
+}
+
+/* ---------- 2 · Class line plot ---------- */
+function classCounts(){ return S.data[S.cls]; }
+function renderClass(hl){
+  const c = classCounts(), st = stats(c, 10, 22);
+  drawPlot($('#classPlot'), {lo:10, hi:22, counts:c, style:'note', unit:'cm', title:'Hand span (centimeters)', onCol:tapClass, ...(hl||{})});
+  $('#classInfo').textContent = st.n ? `${st.n} hand ${plural(st.n,'span','spans')} on the plot.` : 'No notes yet. Tap a number to add each person’s hand span.';
+  $('#undoBtn').disabled = !S.undo[S.cls].length;
+  $('#classIntro').innerHTML = S.cls==='practice'
+    ? 'This is a <b>made-up practice class</b>. Switch to <b>Our class</b> to build your own plot: one note per person.'
+    : 'Each person measures (partner checks!) and taps their number to add a note.';
+  const box = $('#classStats');
+  const items = [
+    {k:'n', q:'How many people?'}, {k:'mode', q:'Most common span'}, {k:'min', q:'Smallest'}, {k:'max', q:'Largest'}, {k:'gaps', q:'Any gaps?'}
+  ];
+  box.innerHTML = items.map(it => `<div class="stat"><span class="q">${it.q}</span><span class="a" id="a-${it.k}">${S.shown[it.k] && st.n ? answerFor(it.k, st) : ''}</span><button data-show="${it.k}" ${st.n?'':'disabled'}>Show me</button></div>`).join('');
+  box.querySelectorAll('[data-show]').forEach(b => b.onclick = () => showStat(b.dataset.show));
+}
+function answerFor(k, st){
+  if(k==='n') return st.n;
+  if(k==='mode') return st.modes.map(v=>v+' cm').join(' & ');
+  if(k==='min') return st.min+' cm';
+  if(k==='max') return st.max+' cm';
+  if(k==='gaps') return st.gaps.length ? st.gaps.map(g => g[0]===g[1] ? g[0] : `${g[0]}–${g[1]}`).join(', ') : 'None';
+}
+function showStat(k){
+  const st = stats(classCounts(), 10, 22); if(!st.n) return;
+  S.shown[k] = true; renderClassStatsOnly(st);
+  const fb = $('#classFb'); fb.className='fb'; let hl = {};
+  if(k==='n'){
+    let i = 0; const badges = {}; for(let v=10; v<=22; v++) if(classCounts()[v]){ i += classCounts()[v]; badges[v] = i; }
+    hl = {badges}; fb.innerHTML = `Count every note. The running totals are above each pile: <b>${st.n} people</b>.`;
+  } else if(k==='mode'){
+    const cols = {}; st.modes.forEach(v => cols[v]='var(--teal)');
+    hl = {cols, badges:Object.fromEntries(st.modes.map(v=>[v, st.mc]))};
+    fb.innerHTML = `The tallest pile is at <b>${listText(st.modes.map(v=>v+' cm'))}</b>, with ${st.mc} ${plural(st.mc,'note','notes')}${st.modes.length>1?' each':''}.`;
+  } else if(k==='min' || k==='max'){
+    const v = k==='min' ? st.min : st.max; hl = {cols:{[v]:'var(--pencil)'}};
+    fb.innerHTML = `The ${k==='min'?'smallest':'largest'} hand span is <b>${v} cm</b>. It is the note farthest to the ${k==='min'?'left':'right'}.`;
+  } else {
+    const cols = {}; st.gaps.forEach(([a,b]) => { for(let v=a; v<=b; v++) cols[v]='var(--pencil)'; });
+    hl = {cols};
+    fb.innerHTML = st.gaps.length ? `Between ${st.min} and ${st.max}, nobody is at <b>${listText(st.gaps.map(g => g[0]===g[1] ? `${g[0]} cm` : `${g[0]} to ${g[1]} cm`))}</b>. Those are gaps.` : `No gaps: every number from ${st.min} to ${st.max} has at least one note.`;
+  }
+  renderClass(hl); S.shown[k]=true; renderClassStatsOnly(st);
+}
+function renderClassStatsOnly(st){ ['n','mode','min','max','gaps'].forEach(k => { const e = $('#a-'+k); if(e) e.textContent = S.shown[k] ? answerFor(k, st) : ''; }); }
+function tapClass(v){
+  const c = classCounts();
+  if(S.addMode==='add'){ c[v] = (c[v]||0)+1; S.undo[S.cls].push(['add', v]); }
+  else { if(!(c[v]||0)){ $('#classFb').className='fb'; $('#classFb').textContent = `There are no notes at ${v} cm to remove.`; return; } c[v]--; S.undo[S.cls].push(['remove', v]); }
+  S.shown = {}; $('#classFb').textContent=''; renderClass();
+}
+function undo(){
+  const u = S.undo[S.cls].pop(); if(!u) return; const c = classCounts();
+  if(u[0]==='add') c[u[1]]--; else c[u[1]] = (c[u[1]]||0)+1;
+  S.shown = {}; $('#classFb').textContent=''; renderClass();
+}
+
+/* ---------- 3 · Pencil box ---------- */
+function penSVG(L, vb){
+  const w = L*10;
+  return `<svg viewBox="0 0 ${w} 6" preserveAspectRatio="none" aria-hidden="true">
+    <rect x="0" y="0.6" width="1.6" height="4.8" rx="0.5" fill="var(--pencil-soft)" stroke="var(--pencil)" stroke-width=".3"/>
+    <rect x="1.6" y="0.6" width="1" height="4.8" fill="var(--muted)"/>
+    <rect x="2.6" y="0.6" width="${w-6.6}" height="4.8" fill="var(--note)" stroke="var(--note-edge)" stroke-width=".3"/>
+    <path d="M${w-4} 0.6 L${w} 3 L${w-4} 5.4 Z" fill="var(--skin)" stroke="var(--skin-edge)" stroke-width=".3"/>
+    <path d="M${w-1.3} 2.2 L${w} 3 L${w-1.3} 3.8 Z" fill="var(--ink)"/></svg>`;
+}
+function renderBox(){
+  const box = $('#box'); box.innerHTML = '';
+  PEN_ORDER.forEach((L, i) => {
+    const b = document.createElement('button'); b.className = 'pen' + (S.pen.placed[i] ? ' placed' : '');
+    b.style.setProperty('--w', L); b.setAttribute('aria-pressed', S.pen.sel===i);
+    b.setAttribute('aria-label', S.pen.placed[i] ? `Pencil ${i+1}, already on the plot` : `Pencil ${i+1}`);
+    b.disabled = S.pen.placed[i];
+    b.innerHTML = penSVG(L);
+    b.onclick = () => { S.pen.sel = i; S.pen.wrong = 0; $('#penFb').className='fb'; $('#penFb').textContent = 'Read the ruler. Where does the tip reach? Tap that number on the line plot.'; renderBox(); renderRuler(); };
+    box.appendChild(b);
+  });
+}
+function renderRuler(showTip){
+  const svg = $('#inchRuler'); svg.innerHTML = ''; const U = 20, X0 = 12;
+  el('rect',{x:X0-6, y:22, width:11*U+12, height:16, rx:2, fill:'var(--ruler)', stroke:'var(--ruler-edge)', 'stroke-width':.6}, svg);
+  for(let q=0; q<=44; q++){
+    const len = q%4===0 ? 7 : q%2===0 ? 4.5 : 2.8;
+    el('line',{x1:X0+q*U/4, x2:X0+q*U/4, y1:22, y2:22+len, stroke:'var(--ink)', 'stroke-width': q%4===0 ? .6 : .3}, svg);
+    if(q%4===0){ const t = el('text',{x:X0+q*U/4, y:36, 'text-anchor':'middle', 'font-size':5.5, 'font-weight':700, fill:'var(--ink)'}, svg); t.textContent = q/4; }
+  }
+  if(S.pen.sel!=null){
+    const L = PEN_ORDER[S.pen.sel];
+    const g = el('g',{transform:`translate(${X0} 12) scale(${U/10} 1.5)`}, svg);
+    g.innerHTML = penSVG(L).replace(/<\/?svg[^>]*>/g,'');
+    if(showTip){ el('line',{x1:X0+L*U, x2:X0+L*U, y1:4, y2:38, stroke:'var(--teal)', 'stroke-width':1, 'stroke-dasharray':'2 1.5'}, svg);
+      el('circle',{cx:X0+L*U, cy:16.5, r:3.2, fill:'none', stroke:'var(--teal)', 'stroke-width':.8}, svg); }
+  } else {
+    const t = el('text',{x:125, y:12, 'text-anchor':'middle', 'font-size':6, fill:'var(--muted)'}, svg); t.textContent = 'Tap a pencil to measure it on this inch ruler.';
+  }
+}
+function renderPenPlot(hl){
+  drawPlot($('#penPlot'), {lo:2, hi:11, counts:S.pen.counts, style:'x', unit:'inches', title:'Pencil length (inches)', onCol:tapPen, ...(hl||{})});
+}
+function tapPen(v){
+  const fb = $('#penFb'); fb.className='fb';
+  if(S.pen.sel==null){ fb.textContent = S.pen.placed.every(Boolean) ? 'All 14 pencils are on the plot. Try the questions!' : 'First tap a pencil in the box to measure it.'; return; }
+  const L = PEN_ORDER[S.pen.sel];
+  if(v===L){
+    S.pen.counts[v] = (S.pen.counts[v]||0)+1; S.pen.placed[S.pen.sel] = true; S.pen.sel = null;
+    const left = S.pen.placed.filter(p=>!p).length;
+    fb.classList.add('ok'); fb.innerHTML = `<b>${L} inches.</b> X marks the spot. ${left ? `${left} ${plural(left,'pencil','pencils')} to go.` : 'All 14 pencils are on the plot!'}`;
+    renderBox(); renderRuler(); renderPenPlot(); renderPenQs(); return;
+  }
+  S.pen.wrong++; fb.classList.add('try');
+  fb.innerHTML = S.pen.wrong===1
+    ? `Hmm, ${v}? Look at the ruler again: start at 0 by the eraser and find the number under the pencil’s point.`
+    : `Follow the dashed line down from the point: it lands on <b>${L}</b>. Find ${L} on the line plot.`;
+  if(S.pen.wrong>=2) renderRuler(true);
+}
+function placeRest(){
+  PEN_ORDER.forEach((L,i) => { if(!S.pen.placed[i]){ S.pen.placed[i]=true; S.pen.counts[L]=(S.pen.counts[L]||0)+1; } });
+  S.pen.sel = null; $('#penFb').className='fb'; $('#penFb').textContent = 'All 14 pencils are on the plot.';
+  renderBox(); renderRuler(); renderPenPlot(); renderPenQs();
+}
+const PEN_Q = [
+  {id:'five', q:'How many pencils are 5 inches?', type:'num', init:0, max:14},
+  {id:'spread', q:'Longest minus shortest?', type:'num', init:0, max:12},
+  {id:'ten', q:'Is the 10-inch pencil typical?', type:'yn'},
+  {id:'typ', q:'A typical pencil in this box is about how many inches?', type:'num', init:2, max:11}
+];
+function renderPenQs(){
+  const box = $('#penQs'); const all = S.pen.placed.every(Boolean);
+  $('#penIntro').hidden = all;
+  if(!all){ box.innerHTML = `<p class="muted" style="margin:0">${S.pen.placed.filter(Boolean).length} of 14 pencils placed. The questions open when the plot is finished.</p>`; return; }
+  box.innerHTML = '';
+  PEN_Q.forEach(q => {
+    const d = document.createElement('div'); d.className='qitem';
+    const a = S.pen.ans[q.id] ?? (S.pen.ans[q.id] = {v:q.init, ok:false, msg:'', cls:''});
+    d.innerHTML = `<p class="qt">${q.q} ${a.ok?'<span class="done-tag">✓</span>':''}</p><div class="row ctl"></div><p class="fb ${a.cls}">${a.msg}</p>`;
+    const ctl = d.querySelector('.ctl');
+    if(q.type==='num'){
+      const sp = document.createElement('div'); sp.className='stepper'; ctl.appendChild(sp);
+      const s = stepper(sp, 0, q.max, () => a.v, v => a.v = v, q.id==='five' ? 'pencils' : 'in'); s.draw();
+      const btn = document.createElement('button'); btn.className='primary'; btn.textContent='Check'; btn.onclick = () => checkPen(q.id); ctl.appendChild(btn);
+    } else {
+      ['Yes','No'].forEach(t => { const b = document.createElement('button'); b.className='secondary'; b.textContent=t; b.onclick = () => { a.v=t; checkPen(q.id); }; ctl.appendChild(b); });
+    }
+    box.appendChild(d);
+  });
+}
+function checkPen(id){
+  const st = stats(PENCILS, 2, 11), a = S.pen.ans[id]; let hl = {};
+  const set = (ok, msg) => { a.ok = ok; a.msg = msg; a.cls = ok ? 'ok' : 'try'; };
+  if(id==='five'){
+    const n5 = PENCILS[5];
+    if(a.v===n5) set(true, `<b>Yes, ${n5}.</b> Four X's are stacked above 5. That is the tallest pile.`);
+    else { set(false, `Count the X's stacked above 5 (outlined on the plot). Touch each one as you count, then try again.`); }
+    const badges = {5: a.v===n5 ? n5 : '?'}; hl = {cols:{5:'var(--teal)'}, badges};
+  } else if(id==='spread'){
+    const d = st.max - st.min;
+    if(a.v===d){ set(true, `<b>${st.max} − ${st.min} = ${d} inches.</b> Count the jumps: ${d} jumps from ${st.min} to ${st.max}.`); hl = {cols:{[st.min]:'var(--teal)', [st.max]:'var(--teal)'}, jump:[st.min, st.max]}; }
+    else {
+      let why = '';
+      if(a.v===st.max) why = `${st.max} is the longest pencil. Now take away the shortest. `;
+      else if(a.v===st.min) why = `${st.min} is the shortest pencil. Start from the longest. `;
+      set(false, `${why}The shortest is ${st.min} inches and the longest is ${st.max} inches. Count the jumps on the line plot from ${st.min} to ${st.max}, then check again.`);
+      hl = {cols:{[st.min]:'var(--pencil)', [st.max]:'var(--pencil)'}, jump:[st.min, st.max]};
+    }
+  } else if(id==='ten'){
+    const c = st.cluster;
+    if(a.v==='No') set(true, `<b>Right, it is not typical.</b> Only ${PENCILS[10]} pencil is 10 inches, all alone after a gap at 9. Most pencils (${c.count} of ${st.n}) are ${c.a} to ${c.b} inches.`);
+    else set(false, `Look again: how many pencils are at 10? Just ${PENCILS[10]}, with a gap at 9. Where are most of the pencils? Try again.`);
+    hl = {cols:{10:'var(--pencil)'}, band:[c.a, c.b, 'var(--teal)'], badges:{10:PENCILS[10]}};
+  } else {
+    const c = st.cluster;
+    if(a.v===5 || a.v===6) set(true, `<b>About ${a.v} inches is a good answer.</b> The tallest piles are at 5 and 6, right in the middle of the big group from ${c.a} to ${c.b} inches.`);
+    else if(a.v>=c.a && a.v<=c.b) set(false, `${a.v} is inside the big group (${c.a} to ${c.b} inches), but near its edge. Where is the pile tallest? Try again.`);
+    else set(false, `Only ${PENCILS[a.v]||0} ${plural(PENCILS[a.v]||0,'pencil is','pencils are')} ${a.v} inches. Most pencils (${c.count} of ${st.n}) are in the shaded group from ${c.a} to ${c.b}. Pick a number where lots of pencils are.`);
+    hl = {band:[c.a, c.b, 'var(--teal)']};
+  }
+  if(id==='five' && a.v!==PENCILS[5]){ hl = {cols:{5:'var(--teal)'}}; }
+  renderPenPlot(hl); renderPenQs();
+}
+
+/* ---------- 4 · What is typical? ---------- */
+function dsCounts(which){ return which==='pencils' ? PENCILS : S.data[S.cls]; }
+function dsLabel(which){ return which==='pencils' ? 'Handout pencil box (14 pencils)' : (S.cls==='practice' ? 'Practice class (made-up)' : 'Our class'); }
+const word = which => which==='pencils' ? {one:'pencil', many:'pencils', u:'inches', thing:'pencil length'} : {one:'person', many:'people', u:'cm', thing:'hand span'};
+function renderT(hl){
+  const which = S.ds, d = DS[which], st = stats(dsCounts(which), d.lo, d.hi);
+  $('#dsName').textContent = dsLabel(which);
+  drawPlot($('#tPlot'), {lo:d.lo, hi:d.hi, counts:dsCounts(which), style: which==='pencils'?'x':'note', unit:d.unit, title: which==='pencils'?'Pencil length (inches)':'Hand span (centimeters)', onCol: S.q===5 ? placeVisitor : null, visitor:S.visitor, ...(hl||{})});
+  return st;
+}
+const TQ = {
+  1:{ text:'Where is the biggest pile? Where are the gaps?', actions:[
+      {label:'Show the biggest pile', run(st,w){ const cols={}; st.modes.forEach(v=>cols[v]='var(--teal)'); renderT({cols, badges:Object.fromEntries(st.modes.map(v=>[v,st.mc]))});
+        say(`The biggest pile is at <b>${listText(st.modes.map(v=>`${v} ${w.u}`))}</b>: ${st.mc} ${plural(st.mc,w.one,w.many)}${st.modes.length>1?' each':''}.`); }},
+      {label:'Show the gaps', run(st,w){ const cols={}; st.gaps.forEach(([a,b])=>{for(let v=a;v<=b;v++) cols[v]='var(--pencil)';}); renderT({cols});
+        say(st.gaps.length ? `Nobody is at <b>${listText(st.gaps.map(g=>g[0]===g[1]?`${g[0]}`:`${g[0]} to ${g[1]}`))}</b> ${w.u}. Notice what sits just past a gap.` : `No gaps between ${st.min} and ${st.max}.`); }} ]},
+  2:{ text: w => `Is the longest ${w.thing} typical? How many are near it?`, actions:[
+      {label:'Show the longest', run(st,w){ renderT({cols:{[st.max]:'var(--pencil)'}, badges:{[st.max]:dsCounts(S.ds)[st.max]}}); say(`The longest is <b>${st.max} ${w.u}</b>. ${dsCounts(S.ds)[st.max]} ${plural(dsCounts(S.ds)[st.max], w.one+' is', w.many+' are')} there.`); }},
+      {label:'Count who is near it', run(st,w){ const near=[st.max-1, st.max]; const c = dsCounts(S.ds); const k = (c[st.max-1]||0)+(c[st.max]||0); const pile = st.mc;
+        renderT({band:[st.max-1, st.max, 'var(--pencil)'], cols:Object.fromEntries(st.modes.map(v=>[v,'var(--teal)']))});
+        say(`Within 1 ${w.u==='cm'?'cm':'inch'} of the longest: <b>${k} ${plural(k,w.one,w.many)}</b>. The biggest pile has ${pile}. So is the longest typical?`); }} ]},
+  3:{ text:'What is typical? The most common number? The middle one? The cluster?', actions:[
+      {label:'Most common', run(st,w){ const cols={}; st.modes.forEach(v=>cols[v]='var(--teal)'); renderT({cols, badges:Object.fromEntries(st.modes.map(v=>[v,st.mc]))}); lineup(st);
+        say(`<b>Most common:</b> ${listText(st.modes.map(v=>`${v} ${w.u}`))}. It has the tallest pile.`); }},
+      {label:'The middle one', run(st,w){ renderT({cols:{[st.mid.lo]:'var(--teal)', [st.mid.hi]:'var(--teal)'}}); lineup(st, true);
+        say(`Line everyone up from smallest to largest. ${midText(st, w)}`); }},
+      {label:'The cluster', run(st,w){ const c=st.cluster; renderT({band:[c.a,c.b,'var(--teal)']}); lineup(st);
+        say(`<b>The cluster:</b> ${c.count} of ${st.n} ${w.many} (about 3 out of every 4) are between <b>${c.a} and ${c.b} ${w.u}</b>.`); }} ]},
+  4:{ text: w => S.ds==='pencils' ? 'A pencil company wants to know a typical pencil. One number, or a range?' : 'Would the glove company rather have one number or a range?', actions:[
+      {label:'One number', run(st,w){ const m = st.modes.length===1 ? st.modes[0] : null; renderT({cols:Object.fromEntries(st.modes.map(v=>[v,'var(--teal)']))});
+        const fit = st.modes.reduce((s,v)=>s+(dsCounts(S.ds)[v]||0),0);
+        say(`One number: <b>${listText(st.modes.map(v=>`${v} ${w.u}`))}</b>. Exactly that size fits ${fit} of ${st.n} ${w.many}.`); }},
+      {label:'A range', run(st,w){ const c=st.cluster; renderT({band:[c.a,c.b,'var(--teal)']});
+        say(`A range: <b>${c.a} to ${c.b} ${w.u}</b> covers ${c.count} of ${st.n} ${w.many}. Which would help the company more? Why?`); }} ]},
+  5:{ text: () => S.ds==='pencils' ? 'A tiny 2-inch pencil stub lands in the box. What changes?' : 'A kindergartner joins our class. Where would their note go? Tap the plot to place it.', actions:[
+      {label: () => S.ds==='pencils' ? 'Drop in the 2-inch stub' : 'What changed?', run(st,w){ if(S.ds==='pencils') S.visitor = 2; visitorCompare(w); }},
+      {label:'Take it away', run(){ S.visitor=null; renderT(); say(''); $('#tExtra').innerHTML=''; }} ]}
+};
+function midText(st, w){
+  if(st.n%2) return `There are ${st.n}, so the middle one is number ${(st.n+1)/2}: <b>${st.mid.lo} ${w.u}</b>.`;
+  if(st.mid.lo===st.mid.hi) return `There are ${st.n}, an even number, so there are two middle ones (numbers ${st.n/2} and ${st.n/2+1}). Both are <b>${st.mid.lo} ${w.u}</b>.`;
+  return `There are ${st.n}, so there are two middle ones: <b>${st.mid.lo} and ${st.mid.hi} ${w.u}</b>. The middle is between them.`;
+}
+function lineup(st, markMid){
+  const box = $('#tExtra');
+  box.innerHTML = `<p class="lbl" style="margin:4px 0 8px">Lined up, smallest to largest</p><div class="lineup">${st.list.map((v,i) => `<span class="chipn ${markMid && st.mid.idx.includes(i) ? 'mid':''}">${v}</span>`).join('')}</div>`;
+}
+function placeVisitor(v){
+  if(S.q!==5 || S.ds!=='hands') return;
+  S.visitor = v; visitorCompare(word('hands'));
+}
+function visitorCompare(w){
+  const d = DS[S.ds], base = dsCounts(S.ds);
+  if(S.visitor==null){ say('Tap a number on the plot to place the kindergartner’s note first.'); renderT(); return; }
+  const after = {...base}; after[S.visitor] = (after[S.visitor]||0)+1;
+  const A = stats(base, d.lo, d.hi), B = stats(after, d.lo, d.hi);
+  renderT();
+  const mid = s => s.mid.lo===s.mid.hi ? `${s.mid.lo}` : `${s.mid.lo}–${s.mid.hi}`;
+  const row = (k, a, b) => `<tr><td>${k}</td><td>${a}</td><td><b>${b}</b>${String(a)===String(b)?'':' ←'}</td></tr>`;
+  $('#tExtra').innerHTML = `<table class="compare"><tr><th></th><th>Before</th><th>After</th></tr>
+    ${row(`How many ${w.many}`, A.n, B.n)}${row('Smallest', A.min, B.min)}${row('Most common', A.modes.join(' & '), B.modes.join(' & '))}${row('Middle', mid(A), mid(B))}</table>`;
+  let msg = S.ds==='pencils' ? `The stub is a new smallest. Did the typical pencil change much?` : `The kindergartner’s note is at ${S.visitor} cm.`;
+  if(S.ds==='hands'){
+    if(A.n && S.visitor > A.mid.hi) msg += ` That is bigger than our middle. A kindergartner is younger, so their hand is probably smaller. Would it go farther left?`;
+    else msg += ` Compare before and after. Which numbers changed? Did the typical hand span move a lot, or hardly at all?`;
+  }
+  say(msg);
+}
+function say(html){ $('#tFb').innerHTML = html; }
+function renderTQ(){
+  const w = word(S.ds);
+  const nav = $('#qnav'); nav.innerHTML = [1,2,3,4,5].map(i => `<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="Question ${i}">${i}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q = +b.dataset.q; S.visitor=null; $('#tExtra').innerHTML=''; say(''); renderTQ(); });
+  const q = TQ[S.q]; $('#qtext').textContent = typeof q.text==='function' ? q.text(w) : q.text;
+  const box = $('#qactions'); box.innerHTML='';
+  const st = renderT();
+  if(!st.n){ say('This plot is empty. Add hand spans on the <b>Class line plot</b> step first, or switch to the practice class there.'); return; }
+  q.actions.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent = typeof a.label==='function' ? a.label() : a.label;
+    b.onclick = () => { const s = stats(dsCounts(S.ds), DS[S.ds].lo, DS[S.ds].hi); if(!s.n) return; a.run(s, w); }; box.appendChild(b); });
+}
+
+/* ---------- Challenge ---------- */
+let halfSt;
+function renderHalf(test){
+  const which = S.hds, d = DS[which], c = dsCounts(which), st = stats(c, d.lo, d.hi), w = word(which);
+  $('#hName').textContent = dsLabel(which);
+  halfSt && halfSt.setUnit(d.unit==='cm'?'cm':'in');
+  const x = S.half;
+  drawPlot($('#hPlot'), {lo:d.lo, hi:d.hi, counts:c, style: which==='pencils'?'x':'note', unit:d.unit, title: which==='pencils'?'Pencil length (inches)':'Hand span (centimeters)',
+    onCol: v => { S.half = v; halfSt.draw(); renderHalf(); testHalf(); }, split: x, dim: v => v<=x });
+  const lu = $('#lineup');
+  if(!st.n){ lu.innerHTML = '<span class="muted">No data yet. Add hand spans on the Class line plot step.</span>'; $('#balance').innerHTML=''; return st; }
+  const k = st.le(x);
+  lu.innerHTML = st.list.map((v,i) => (i===k && k>0 && k<st.n ? '<span class="fold" aria-hidden="true"></span>' : '') + `<span class="chipn ${v<=x?'':'off'} ${S.halfShown && st.mid.idx.includes(i)?'mid':''}">${v}</span>`).join('');
+  $('#balance').innerHTML = `<span>${k} at or below ${x}</span><span>${st.n-k} above ${x}</span><span>Half of ${st.n} is ${st.n%2? (st.n/2).toString().replace('.5','½') : st.n/2}</span>`;
+  return st;
+}
+function testHalf(){
+  const which = S.hds, d = DS[which], st = stats(dsCounts(which), d.lo, d.hi), w = word(which), fb = $('#halfFb'), x = S.half;
+  fb.className='fb'; if(!st.n){ fb.textContent=''; return; }
+  const k = st.le(x), ok = st.halfValid.includes(x);
+  if(ok){
+    fb.classList.add('ok');
+    if(st.exactPossible) fb.innerHTML = `<b>Yes!</b> ${k} of ${st.n} ${w.many} are at or below ${x} ${w.u}. That is exactly half.`;
+    else {
+      const why = st.n%2 ? `${st.n} is odd, so you can’t split it into two equal halves` : `several ${w.many} share ${x} ${w.u}, so the count jumps right past half`;
+      fb.innerHTML = `<b>${x} is the number.</b> Exactly half is not possible here because ${why}. At ${x}, ${k} of ${st.n} are at or below: the first time you reach half.`;
+    }
+  } else if(k*2 < st.n){
+    fb.classList.add('try'); fb.innerHTML = `Only ${k} of ${st.n} are at or below ${x}. That is <b>less than half</b>. Try a bigger number.`;
+  } else {
+    fb.classList.add('try'); fb.innerHTML = `${k} of ${st.n} are at or below ${x}. That is <b>more than half</b>. Can a smaller number still reach half?`;
+  }
+}
+function showHalfWay(){
+  S.halfShown = true; const which = S.hds, d = DS[which], st = stats(dsCounts(which), d.lo, d.hi), w = word(which);
+  renderHalf();
+  if(!st.n) return;
+  $('#halfFb').className='fb';
+  $('#halfFb').innerHTML = `Line everyone up from smallest to largest and find the middle (outlined). ${midText(st, w)} Now test numbers near there.`;
+}
+
+/* ---------- Tabs, reset, wiring ---------- */
+function selectTab(t){
+  S.tab = t;
+  $$('#tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','class','pencil','typical','half'].forEach(k => $('#v-'+k).hidden = k!==t);
+  if(t==='warm') drawScene();
+  if(t==='class') renderClass();
+  if(t==='pencil'){ renderBox(); renderRuler(); renderPenPlot(); renderPenQs(); }
+  if(t==='typical'){ S.visitor=null; $('#tExtra').innerHTML=''; say(''); renderTQ(); }
+  if(t==='half'){ halfSt.draw(); renderHalf(); }
+}
+function setPressed(sel, attr, val){ $$(sel).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr]===val)); }
+function resetAll(){
+  S = fresh();
+  setPressed('[data-cls]','cls',S.cls); setPressed('[data-add]','add',S.addMode); setPressed('[data-ds]','ds',S.ds); setPressed('[data-hds]','hds',S.hds);
+  ['#warmFb','#classFb','#penFb','#tFb','#halfFb'].forEach(s => { $(s).textContent=''; $(s).className='fb'; });
+  $('#helpLine').hidden = true; $('#tExtra').innerHTML='';
+  guessSt.draw(); measSt.draw(); halfSt.draw(); $('#lockGuess').disabled=false; $('#lockGuess').textContent='Lock in my guess';
+  selectTab('warm');
+}
+guessSt = stepper($('#guessStep'), 5, 25, () => S.warm.guess, v => { if(!S.warm.locked) S.warm.guess = v; }, 'cm');
+measSt = stepper($('#measStep'), 0, 25, () => S.warm.meas, v => S.warm.meas = v, 'cm');
+halfSt = stepper($('#halfStep'), 2, 22, () => S.half, v => { const d = DS[S.hds]; S.half = Math.max(d.lo, Math.min(d.hi, v)); }, 'cm');
+$('#halfStep').addEventListener('change', () => { halfSt.draw(); renderHalf(); $('#halfFb').textContent=''; });
+$('#lockGuess').onclick = () => { S.warm.locked = true; $('#lockGuess').disabled = true; $('#lockGuess').textContent = `Guess locked: ${S.warm.guess} cm`; };
+$('#checkMeas').onclick = checkMeasure;
+$('#newHand').onclick = newHand;
+$('#helpLine').onclick = () => { S.warm.Z = 2.5; S.warm.zoom=false; drawScene(); $('#warmFb').className='fb'; $('#warmFb').innerHTML = 'Now 0 is right under the thumb tip. Read the mark nearest the pinky tip.'; };
+$$('#tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+$$('[data-cls]').forEach(b => b.onclick = () => { S.cls = b.dataset.cls; S.shown={}; setPressed('[data-cls]','cls',S.cls); $('#classFb').textContent=''; renderClass(); });
+$$('[data-add]').forEach(b => b.onclick = () => { S.addMode = b.dataset.add; setPressed('[data-add]','add',S.addMode); });
+$('#undoBtn').onclick = undo;
+$('#clearClass').onclick = () => { const c = classCounts(); if(!Object.values(c).some(Boolean)) return; S.data[S.cls] = {}; S.undo[S.cls] = []; S.shown={}; $('#classFb').className='fb'; $('#classFb').textContent='Plot cleared. Tap Start over to bring back the practice class.'; renderClass(); };
+$('#placeRest').onclick = placeRest;
+$$('[data-ds]').forEach(b => b.onclick = () => { S.ds = b.dataset.ds; S.visitor=null; setPressed('[data-ds]','ds',S.ds); $('#tExtra').innerHTML=''; say(''); renderTQ(); });
+$$('[data-hds]').forEach(b => b.onclick = () => { S.hds = b.dataset.hds; S.halfShown=false; S.half = S.hds==='pencils' ? 6 : 16; setPressed('[data-hds]','hds',S.hds); halfSt.draw(); $('#halfFb').textContent=''; renderHalf(); });
+$('#halfCheck').onclick = testHalf;
+$('#halfWay').onclick = showHalfWay;
+$('#resetBtn').onclick = resetAll;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+resetAll();
+})();
+</script>
+
+</body></html>

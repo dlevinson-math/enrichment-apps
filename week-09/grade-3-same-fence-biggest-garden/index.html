@@ -1,0 +1,550 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Same Fence, Biggest Garden</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a garden plot (the stage) beside a lesson panel; the plot is the evidence board for every step. */
+:root{
+  --bg:#EEF0E6; --soil:#E6DCCB; --soil-line:#D3C6AF; --card:#FFFFFF; --ink:#232A1F; --muted:#5B6455; --line:#CFD5C4;
+  --fence:#8A5A2B; --post:#5E3B19; --walk:#E0782A; --bed:#8CC56B; --bed-dark:#5E9E45; --leaf:#2F7A3A;
+  --wall:#8E929A; --wall-line:#6B6F77;
+  --accent:#2F7A3A; --accent-soft:#DDEFD7; --warn:#B4532A; --warn-soft:#FBE7DC;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151913; --soil:#2A2620; --soil-line:#3A342B; --card:#1F241C; --ink:#ECF0E6; --muted:#A7B09F; --line:#38402F;
+    --fence:#C08A55; --post:#E0B080; --walk:#FF9A4A; --bed:#4F8F3A; --bed-dark:#6DB255; --leaf:#A9E58F;
+    --wall:#6C7078; --wall-line:#9196A0;
+    --accent:#7FD08A; --accent-soft:#1E3420; --warn:#FF9C72; --warn-soft:#3B241A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151913; --soil:#2A2620; --soil-line:#3A342B; --card:#1F241C; --ink:#ECF0E6; --muted:#A7B09F; --line:#38402F;
+  --fence:#C08A55; --post:#E0B080; --walk:#FF9A4A; --bed:#4F8F3A; --bed-dark:#6DB255; --leaf:#A9E58F;
+  --wall:#6C7078; --wall-line:#9196A0;
+  --accent:#7FD08A; --accent-soft:#1E3420; --warn:#FF9C72; --warn-soft:#3B241A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--walk); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px 24px; padding-block:14px 8px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.title p{margin:4px 0 0; color:var(--muted); font-size:15px}
+.title p b{color:var(--accent); font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:9px 16px; font-weight:700; font-size:15px; min-height:44px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:4px; border-bottom:2px solid var(--line); overflow-x:auto}
+nav.tabs button{border:0; background:none; padding:10px 14px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.6vw,22px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; white-space:nowrap; min-height:48px}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--accent)}
+nav.tabs button span{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--line); color:var(--ink); font-size:15px; margin-right:6px}
+nav.tabs button[aria-selected="true"] span{background:var(--accent); color:var(--card)}
+
+main{flex:1; min-height:0; display:flex; gap:28px; padding-block:14px 18px}
+.stage-col{flex:none; display:flex; flex-direction:column; gap:10px; width:min(58vw, calc((100dvh - 260px) * 1.714)); min-width:0}
+.stage{width:100%; aspect-ratio:24/14; background:var(--card); border-radius:16px; border:2px solid var(--line); overflow:hidden; touch-action:none}
+.stage svg{display:block; width:100%; height:100%}
+.cell{fill:var(--soil); stroke:var(--soil-line); stroke-width:1.5}
+.bed{fill:var(--bed); stroke:var(--bed-dark); stroke-width:1.5}
+.leaf{fill:var(--leaf)}
+.cellN{font:700 14px var(--body); fill:var(--ink); text-anchor:middle; dominant-baseline:central}
+.fence{fill:none; stroke:var(--fence); stroke-width:6; stroke-linecap:square}
+.post{fill:var(--post)}
+.walkSeg{stroke:var(--walk); stroke-width:9; stroke-linecap:round}
+.walkN{font:800 13px var(--body); fill:var(--walk); text-anchor:middle; dominant-baseline:central; paint-order:stroke; stroke:var(--card); stroke-width:4px}
+.wallR{fill:var(--wall)}
+.brick{stroke:var(--wall-line); stroke-width:1.5}
+.lab{font:800 22px var(--display); fill:var(--ink); text-anchor:middle; paint-order:stroke; stroke:var(--card); stroke-width:5px}
+.dim{font:700 15px var(--body); fill:var(--muted); text-anchor:middle; dominant-baseline:central}
+.hit{fill:transparent; cursor:pointer}
+.corner{fill:var(--walk); stroke:var(--card); stroke-width:3}
+
+.stats{display:flex; gap:10px 26px; flex-wrap:wrap; align-items:flex-end}
+.stat b{display:block; font-family:var(--display); font-weight:800; font-size:clamp(28px,2.8vw,42px); line-height:1; font-variant-numeric:tabular-nums}
+.stat span{font-size:14px; color:var(--muted)}
+.stat.fence b{color:var(--fence)}
+.stat.area b{color:var(--accent)}
+.info{min-height:1.5em; font-size:clamp(16px,1.35vw,19px); line-height:1.4}
+
+.panel{flex:1; min-width:0; overflow:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px}
+.view{display:flex; flex-direction:column; gap:14px}
+.lead{font-size:clamp(19px,1.7vw,25px); line-height:1.4; margin:0; max-width:32em}
+.lead strong{font-family:var(--display); font-weight:700}
+.small{font-size:15px; color:var(--muted); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--card); font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:13px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 18px; border-radius:11px; font-weight:700; font-size:17px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.stepper{display:inline-flex; align-items:center; gap:6px; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px 6px}
+.stepper button{width:44px; height:44px; border-radius:10px; border:0; background:var(--bg); font-size:24px; font-weight:800; line-height:1}
+.stepper output{min-width:3.4em; text-align:center; font-weight:700; font-variant-numeric:tabular-nums}
+.check{display:flex; align-items:center; gap:10px; font-size:16px; cursor:pointer}
+.check input{width:24px; height:24px; accent-color:var(--accent)}
+.msg{margin:0; padding:14px 18px; border-radius:14px; background:var(--warn-soft); font-size:clamp(17px,1.4vw,20px); line-height:1.45; max-width:34em}
+.msg.good{background:var(--accent-soft)}
+.msg:empty{display:none}
+.num{width:90px; font-size:22px; font-weight:700; padding:8px 10px; border:2px solid var(--line); border-radius:12px; background:var(--card); text-align:center; min-height:52px}
+.steps{display:flex; gap:8px; flex-wrap:wrap}
+.chipline{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-variant-numeric:tabular-nums; font-size:18px}
+.chipline b{background:var(--accent-soft); padding:4px 10px; border-radius:10px}
+.chipline i{font-style:normal; color:var(--warn); font-weight:700; font-size:15px}
+
+.story{font-size:clamp(18px,1.55vw,23px); line-height:1.5; margin:0; max-width:32em}
+.votes{display:flex; gap:10px; flex-wrap:wrap}
+.vote{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:18px; display:flex; gap:10px; align-items:center; min-height:56px; text-align:left}
+.vote em{font-style:normal; font-family:var(--display); font-size:26px; min-width:1.4em; text-align:center; background:var(--bg); border-radius:10px; padding:0 6px; font-variant-numeric:tabular-nums}
+
+.tablewrap{overflow-x:auto}
+table.data{border-collapse:collapse; font-size:17px; min-width:100%}
+table.data th{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); text-align:center; padding:6px 10px; border-bottom:2px solid var(--line)}
+table.data td{padding:7px 10px; border-bottom:1px solid var(--line); text-align:center; font-variant-numeric:tabular-nums; font-weight:700}
+table.data td.l{text-align:left; font-weight:400}
+table.data tr.best td{background:var(--accent-soft)}
+table.data tr.worst td{background:var(--warn-soft)}
+table.data tr{cursor:pointer}
+.summary{display:flex; gap:8px 22px; flex-wrap:wrap; font-size:17px}
+.summary b{font-family:var(--display); font-size:22px}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:27px}
+.bars{display:flex; flex-direction:column; gap:6px; margin-top:8px}
+.bar{display:grid; grid-template-columns:76px 1fr 40px 72px; gap:10px; align-items:center; font-size:16px; font-variant-numeric:tabular-nums}
+.bar div{height:22px; border-radius:6px; background:var(--bed-dark)}
+.bar.max div{background:var(--accent)}
+.bar b{text-align:right}
+.bar i{font-style:normal; color:var(--warn); font-weight:700; font-size:15px}
+.rule{font-family:var(--display); font-weight:700; font-size:clamp(20px,2vw,28px); background:var(--card); border:2px dashed var(--accent); border-radius:14px; padding:10px 16px}
+.journal{margin-top:auto; font-size:15px; color:var(--muted); border-top:1.5px solid var(--line); padding-top:10px}
+
+@media (max-width:900px), (orientation:portrait){
+  main{flex-direction:column; overflow:auto}
+  .stage-col{width:100%}
+  .panel{overflow:visible}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+</head><body>
+
+<header>
+  <div class="title">
+    <h1>Same Fence, Biggest Garden</h1>
+    <p><b>Grade 3 · Lesson 3.4</b> &nbsp;Same fence, different gardens</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><span>1</span>Warm-up</button>
+  <button role="tab" data-tab="launch" aria-selected="false"><span>2</span>The garden</button>
+  <button role="tab" data-tab="build" aria-selected="false"><span>3</span>Build gardens</button>
+  <button role="tab" data-tab="q" aria-selected="false"><span>4</span>Detective questions</button>
+</nav>
+
+<main>
+  <div class="stage-col">
+    <div class="stage" id="stage"></div>
+    <div class="stats" id="stats">
+      <div class="stat"><b id="sL">0</b><span>length (m)</span></div>
+      <div class="stat"><b id="sW">0</b><span>width (m)</span></div>
+      <div class="stat fence"><b id="sP">0</b><span id="sPL">meters of fence</span></div>
+      <div class="stat area"><b id="sA">0</b><span>square meters of garden</span></div>
+    </div>
+    <div class="info" id="info" aria-live="polite"></div>
+  </div>
+
+  <section class="panel">
+    <!-- 1 Warm-up -->
+    <div class="view" id="v-warm">
+      <p class="lead">Here are two gardens. <strong>Same or different?</strong> How?</p>
+      <div class="steps">
+        <button class="secondary" id="wArea">Count the garden squares</button>
+        <button class="secondary" id="wFence">Walk the fences</button>
+      </div>
+      <p class="msg" id="warmMsg" aria-live="polite"></p>
+      <p class="small">Talk with a partner first. Then tap to check.</p>
+    </div>
+
+    <!-- 2 Launch -->
+    <div class="view" id="v-launch" hidden>
+      <p class="story">You have <b>24 meters of fence</b> for a rectangular garden. Every side is a whole number of meters. You want the <b>most room to plant</b>.</p>
+      <p class="lead"><strong>Does the shape matter</strong>, or is 24 meters of fence always the same amount of garden?</p>
+      <div class="votes">
+        <button class="vote" data-vote="matters">The shape matters <em id="vM">0</em></button>
+        <button class="vote" data-vote="same">Always the same garden <em id="vS">0</em></button>
+        <button class="vote" data-vote="unsure">Not sure <em id="vU">0</em></button>
+      </div>
+      <div class="row"><button class="primary" id="goBuild">Go build gardens</button></div>
+    </div>
+
+    <!-- 3 Build -->
+    <div class="view" id="v-build" hidden>
+      <p class="lead">Use <strong id="tgtLead">24</strong> meters of fence. Find <strong>every</strong> rectangle garden you can. Which gives the most room to plant?</p>
+      <div class="row">
+        <span class="small">Fence:</span>
+        <div class="seg" role="group" aria-label="Meters of fence" id="pSeg">
+          <button data-p="12" aria-pressed="false">12 m</button>
+          <button data-p="24" aria-pressed="true">24 m</button>
+          <button data-p="36" aria-pressed="false">36 m</button>
+        </div>
+      </div>
+      <p class="small">Tap or drag on the plot to set the far corner. Or use the buttons.</p>
+      <div class="row">
+        <span class="stepper" aria-label="Length"><button id="lMinus" aria-label="Shorter">−</button><output id="lOut">L 1</output><button id="lPlus" aria-label="Longer">+</button></span>
+        <span class="stepper" aria-label="Width"><button id="wMinus" aria-label="Narrower">−</button><output id="wOut">W 1</output><button id="wPlus" aria-label="Wider">+</button></span>
+      </div>
+      <div class="row">
+        <button class="primary" id="recordBtn">Record this garden</button>
+        <button class="secondary" id="sortBtn">Put the table in order</button>
+        <button class="secondary" id="clearRec">Clear table</button>
+      </div>
+      <label class="check"><input type="checkbox" id="hideNums"> Hide fence and garden (count them yourself)</label>
+      <div class="row" id="countRow" hidden>
+        <label class="small" for="gFence">Fence:</label><input class="num" id="gFence" type="number" inputmode="numeric" min="0">
+        <label class="small" for="gArea">Garden:</label><input class="num" id="gArea" type="number" inputmode="numeric" min="0">
+        <button class="secondary" id="countBtn">Check my count</button>
+      </div>
+      <p class="msg" id="buildMsg" aria-live="polite"></p>
+      <div class="tablewrap">
+        <table class="data" aria-label="Gardens we found">
+          <thead><tr><th>Length</th><th>Width</th><th>Perimeter</th><th>Area</th><th>L + W</th></tr></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <!-- 4 Questions -->
+    <div class="view" id="v-q" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="lead" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div id="qextra"></div>
+      <div class="msg" id="qresult" aria-live="polite"></div>
+      <p class="small">Talk it over first. Then tap a button to put the evidence on the plot.</p>
+      <p class="journal"><b>Journal:</b> Which garden would you build? Convince the gardener.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const COLS = 24, ROWS = 14, C = 40, OX = 1, OY = 1;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const S = {};
+function freshState(){
+  Object.assign(S, {tab:'warm', gardens:[], wall:false, walk:null, numbered:false, plants:true, labels:false,
+    target:24, L:3, W:2, records:{}, hide:false, revealed:null, votes:{matters:0,same:0,unsure:0}, gen:0, q:1});
+}
+const per = g => g.wall ? g.l + 2*g.w : 2*(g.l + g.w);
+const area = g => g.l * g.w;
+
+/* ---------- Drawing ---------- */
+function perimSegs(g){ // unit fence segments, clockwise from top-left
+  const s = [], x0 = g.x, y0 = g.y, x1 = g.x + g.l, y1 = g.y + g.w;
+  if(!g.wall) for(let i=0;i<g.l;i++) s.push([x0+i,y0,x0+i+1,y0]);
+  for(let i=0;i<g.w;i++) s.push([x1,y0+i,x1,y0+i+1]);
+  for(let i=0;i<g.l;i++) s.push([x1-i,y1,x1-i-1,y1]);
+  for(let i=0;i<g.w;i++) s.push([x0,y1-i,x0,y1-i-1]);
+  return s;
+}
+function leaf(cx,cy){ return `<path class="leaf" d="M${cx} ${cy+7} q-1 -6 -7 -9 q6 -2 7 5 q1 -7 7 -5 q-6 3 -7 9z"/>`; }
+function svg(){
+  const W = COLS*C, H = ROWS*C;
+  let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${describe()}">`;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) o += `<rect class="cell" x="${c*C}" y="${r*C}" width="${C}" height="${C}"/>`;
+  if(S.wall){
+    o += `<rect class="wallR" x="0" y="${OY*C-14}" width="${W}" height="14"/>`;
+    for(let x=0;x<W;x+=28) o += `<line class="brick" x1="${x}" y1="${OY*C-14}" x2="${x}" y2="${OY*C}"/>`;
+    o += `<text class="dim" x="${W-70}" y="${OY*C-26}">wall</text>`;
+  }
+  S.gardens.forEach((g,gi) => {
+    let n = 0;
+    for(let r=0;r<g.w;r++) for(let c=0;c<g.l;c++){
+      const x=(g.x+c)*C, y=(g.y+r)*C; n++;
+      o += `<rect class="bed" x="${x}" y="${y}" width="${C}" height="${C}"/>`;
+      if(S.numbered) o += `<text class="cellN" x="${x+C/2}" y="${y+C/2}">${n}</text>`;
+      else if(S.plants) o += leaf(x+C/2, y+C/2-2);
+    }
+    const x0=g.x*C, y0=g.y*C, x1=(g.x+g.l)*C, y1=(g.y+g.w)*C;
+    o += g.wall ? `<path class="fence" d="M${x0} ${y0} V${y1} H${x1} V${y0}"/>` : `<rect class="fence" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}"/>`;
+    const segs = perimSegs(g);
+    segs.forEach(s => o += `<rect class="post" x="${s[0]*C-4}" y="${s[1]*C-4}" width="8" height="8" rx="2"/>`);
+    if(g.wall) o += `<rect class="post" x="${x1-4}" y="${y0-4}" width="8" height="8" rx="2"/>`;
+    if(S.walk && S.walk.g===gi){
+      segs.slice(0, S.walk.n).forEach((s,i) => {
+        const mx=(s[0]+s[2])/2*C, my=(s[1]+s[3])/2*C, dx=s[2]-s[0], dy=s[3]-s[1];
+        o += `<line class="walkSeg" x1="${s[0]*C}" y1="${s[1]*C}" x2="${s[2]*C}" y2="${s[3]*C}"/>`;
+        o += `<text class="walkN" x="${mx + (dy? (dy>0?14:-14):0)}" y="${my + (dx? (dx>0?-14:14):0)}">${i+1}</text>`;
+      });
+    }
+    if(S.labels || g.label){
+      const t = g.label || `${g.l} by ${g.w}`;
+      const below = y1 + 26 < H - 4;
+      const off = (S.walk && S.walk.g===gi) ? 50 : 28;
+      o += `<text class="lab" x="${(x0+x1)/2}" y="${below ? y1+off : y0-12}">${t}</text>`;
+    }
+  });
+  if(S.tab==='build' && S.gardens[0]){ const g=S.gardens[0]; o += `<circle class="corner" cx="${(g.x+g.l)*C}" cy="${(g.y+g.w)*C}" r="9"/>`; }
+  if(S.tab==='build') o += `<rect class="hit" id="hit" x="0" y="0" width="${W}" height="${H}"/>`;
+  return o + '</svg>';
+}
+function describe(){ if(!S.gardens.length) return 'Empty garden plot';
+  return S.gardens.map(g=>`Garden ${g.l} meters by ${g.w} meters, ${per(g)} meters of fence, ${area(g)} square meters`).join('; '); }
+
+function hidden(){ const g=S.gardens[0]; return S.tab==='build' && S.hide && g && S.revealed !== g.l+'x'+g.w; }
+function render(){
+  $('#stage').innerHTML = svg();
+  const g = S.gardens[S.gardens.length===1 ? 0 : -1];
+  const one = S.gardens.length===1;
+  $('#stats').style.visibility = one ? 'visible' : 'hidden';
+  if(one){
+    $('#sL').textContent = g.l; $('#sW').textContent = g.w;
+    $('#sP').textContent = hidden() ? '?' : per(g);
+    $('#sA').textContent = hidden() ? '?' : area(g);
+    $('#sPL').textContent = S.tab==='build' && !hidden() ? `of ${S.target} meters of fence` + (per(g)!==S.target ? ` (${per(g)>S.target?'too much':'some left over'})` : ' ✓') : 'meters of fence';
+  }
+  $('#lOut').textContent = 'L ' + S.L; $('#wOut').textContent = 'W ' + S.W;
+  $('#countRow').hidden = !(S.tab==='build' && S.hide);
+  renderData();
+}
+function say(t){ $('#info').innerHTML = t; }
+
+/* ---------- Walking the fence ---------- */
+async function walkFence(gi, upto, pace){
+  const g0 = S.gen, g = S.gardens[gi], total = upto || perimSegs(g).length;
+  for(let n=1;n<=total;n++){ if(g0!==S.gen) return false; S.walk={g:gi,n}; render(); await sleep(reduced?40:(pace||220)); }
+  return g0===S.gen;
+}
+
+/* ---------- Tabs ---------- */
+function selectTab(t){
+  S.tab = t; S.gen++; S.walk=null; S.numbered=false; S.wall=false; S.labels=false;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','launch','build','q'].forEach(v => $('#v-'+v).hidden = v!==t);
+  say('');
+  if(t==='warm') warmSetup();
+  if(t==='launch'){ S.gardens=[]; render(); say('24 meters of fence. What could you build?'); }
+  if(t==='build') buildSetup();
+  if(t==='q'){ renderQ(); S.gardens=[]; render(); }
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------- 1 Warm-up ---------- */
+function warmSetup(){
+  S.gardens = [{x:2,y:3,l:8,w:2,label:'2 by 8'},{x:14,y:3,l:4,w:4,label:'4 by 4'}];
+  $('#warmMsg').textContent=''; $('#warmMsg').className='msg'; render();
+}
+$('#wArea').onclick = async () => {
+  S.gen++; S.walk=null; S.numbered=true; render();
+  $('#warmMsg').className='msg good';
+  $('#warmMsg').innerHTML = 'Both gardens cover <b>16 squares</b>. Same area! 2 × 8 = 16 and 4 × 4 = 16.';
+};
+$('#wFence').onclick = async () => {
+  S.gen++; S.numbered=false; const m=$('#warmMsg'); m.className='msg'; m.textContent='Walk the 2-by-8 fence…';
+  if(!await walkFence(0,0,160)) return; await sleep(500);
+  m.textContent='Now the 4-by-4 fence…';
+  if(!await walkFence(1,0,160)) return;
+  m.className='msg good';
+  m.innerHTML = 'Same garden, different fence! The 2 by 8 needs <b>20 meters</b> of fence. The 4 by 4 needs only <b>16 meters</b>. Same area, different perimeter.<br>So today’s question flips it: <b>same fence</b>, same garden?';
+};
+
+/* ---------- 2 Launch ---------- */
+$$('[data-vote]').forEach(b => b.onclick = () => { S.votes[b.dataset.vote]++; renderVotes(); });
+function renderVotes(){ $('#vM').textContent=S.votes.matters; $('#vS').textContent=S.votes.same; $('#vU').textContent=S.votes.unsure; }
+$('#goBuild').onclick = () => selectTab('build');
+
+/* ---------- 3 Build ---------- */
+const MAXL = COLS - OX - 1, MAXW = ROWS - OY - 1;
+function buildSetup(){ setG(S.L, S.W); $('#buildMsg').textContent=''; $('#buildMsg').className='msg'; }
+function setG(l,w){
+  S.L = Math.max(1, Math.min(MAXL, l)); S.W = Math.max(1, Math.min(MAXW, w));
+  S.gardens = [{x:OX,y:OY,l:S.L,w:S.W}]; S.numbered=false; S.walk=null;
+  const g=S.gardens[0], p=per(g);
+  if(!hidden()) say(p===S.target ? `${g.l} by ${g.w} uses exactly ${S.target} meters of fence. Record it!` :
+    p<S.target ? `This garden uses ${p} meters. You still have ${S.target-p} meters of fence left.` : `This garden needs ${p} meters. That’s ${p-S.target} more than you have.`);
+  else say(`${g.l} by ${g.w}. Count the fence and the garden.`);
+  render();
+}
+$('#lMinus').onclick = () => setG(S.L-1,S.W); $('#lPlus').onclick = () => setG(S.L+1,S.W);
+$('#wMinus').onclick = () => setG(S.L,S.W-1); $('#wPlus').onclick = () => setG(S.L,S.W+1);
+let dragging = false;
+function fromEvent(e){
+  const svgEl = $('#stage svg'); const r = svgEl.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * COLS*C, y = (e.clientY - r.top) / r.height * ROWS*C;
+  return [Math.round(x/C) - OX, Math.round(y/C) - OY];
+}
+const stage = $('#stage');
+stage.addEventListener('pointerdown', e => { if(S.tab!=='build') return; dragging = true; stage.setPointerCapture(e.pointerId); const [l,w]=fromEvent(e); setG(l,w); });
+stage.addEventListener('pointermove', e => { if(!dragging) return; const [l,w]=fromEvent(e); if(l!==S.L||w!==S.W) setG(l,w); });
+const stop = () => dragging = false;
+stage.addEventListener('pointerup', stop); stage.addEventListener('pointercancel', stop);
+
+$$('#pSeg button').forEach(b => b.onclick = () => {
+  S.target = +b.dataset.p; $$('#pSeg button').forEach(x => x.setAttribute('aria-pressed', x===b));
+  $('#tgtLead').textContent = S.target; $('#buildMsg').textContent=''; setG(S.L,S.W);
+});
+$('#hideNums').onchange = e => { S.hide = e.target.checked; S.revealed=null; setG(S.L,S.W); };
+$('#countBtn').onclick = () => {
+  const g=S.gardens[0], m=$('#buildMsg'), fv=$('#gFence').value.trim(), av=$('#gArea').value.trim();
+  if(fv===''||av===''){ m.className='msg'; m.textContent='Fill in both boxes first: fence and garden.'; return; }
+  const f=+fv, a=+av, P=per(g), A=area(g), border = (g.l<2||g.w<2) ? A : 2*g.l+2*g.w-4;
+  const out=[]; let ok=true;
+  if(f===P) out.push(`Fence: <b>${P} meters</b> is right.`);
+  else { ok=false;
+    if(f===A) out.push(`Fence: ${f} is the garden <i>inside</i>. The fence goes <i>around</i> the outside. Trace it with your finger.`);
+    else if(f===border && border!==P) out.push(`Fence: you counted the ${border} squares along the edge. But corner squares have two sides of fence! Count the meters of fence, not the edge squares.`);
+    else out.push(`Fence: ${f} needs another look. Count one meter of fence for every side of a square on the outside edge.`);
+    S.walk = null; walkFence(0,0,140);
+  }
+  if(a===A) out.push(`Garden: <b>${A} square meters</b> is right.`);
+  else { ok=false;
+    if(a===P) out.push(`Garden: ${a} is the fence. The garden is the squares inside.`);
+    else out.push(`Garden: ${a} needs another look. The squares are numbered now. Or try ${g.l} rows of ${g.w}.`);
+    S.numbered = true; }
+  if(ok){ S.revealed = g.l+'x'+g.w; S.numbered=false; }
+  m.className = 'msg' + (ok?' good':''); m.innerHTML = out.join('<br>'); render();
+};
+$('#recordBtn').onclick = () => {
+  const g=S.gardens[0], m=$('#buildMsg'), P=per(g), list=(S.records[S.target]=S.records[S.target]||[]);
+  if(P!==S.target){ m.className='msg'; m.textContent = `This garden needs ${P} meters of fence. You have exactly ${S.target}. Change the length or width.`; return; }
+  const key = [Math.min(g.l,g.w),Math.max(g.l,g.w)].join('x');
+  const dup = list.find(r => r.key===key);
+  if(dup){ m.className='msg'; m.textContent = dup.l===g.l ? 'You already have that garden in the table.' : `That’s the ${dup.l} by ${dup.w} garden turned. It has the same fence and the same area, so it isn’t new.`; return; }
+  list.push({key, l:g.l, w:g.w, p:P, a:area(g)});
+  m.className='msg good'; m.textContent = `Recorded: ${g.l} by ${g.w}, ${area(g)} square meters.`;
+  renderData();
+};
+$('#sortBtn').onclick = () => { const list=S.records[S.target]||[]; list.sort((a,b)=>Math.min(a.l,a.w)-Math.min(b.l,b.w)); renderData(); };
+$('#clearRec').onclick = () => { S.records[S.target]=[]; $('#buildMsg').textContent=''; renderData(); };
+function renderData(){
+  const list = S.records[S.target] || [];
+  const mx = Math.max(...list.map(r=>r.a)), mn = Math.min(...list.map(r=>r.a));
+  $('#dataBody').innerHTML = list.length ? list.map((r,i) => `<tr data-i="${i}" class="${list.length>1&&r.a===mx?'best':list.length>1&&r.a===mn?'worst':''}"><td>${r.l}</td><td>${r.w}</td><td>${r.p}</td><td>${r.a}</td><td>${r.l+r.w}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="l small">Gardens you record show up here. Tap a row to see it again.</td></tr>`;
+  $$('#dataBody tr[data-i]').forEach(tr => tr.onclick = () => { const r=list[+tr.dataset.i]; setG(r.l,r.w); });
+  $('#summary').innerHTML = list.length>1 ? `<span>Gardens found: <b>${list.length}</b></span><span>Biggest so far: <b>${mx}</b> sq m</span><span>Smallest so far: <b>${mn}</b> sq m</span>` : '';
+}
+
+/* ---------- 4 Detective questions ---------- */
+function result(html, good){ const r=$('#qresult'); r.innerHTML=html; r.className='msg'+(good?' good':''); }
+function show(gs, opts={}){ S.gen++; S.walk=null; S.numbered=!!opts.numbered; S.wall=!!opts.wall; S.labels=!!opts.labels; S.gardens=gs; render(); }
+const ALL24 = [[11,1],[10,2],[9,3],[8,4],[7,5],[6,6]];
+function stats1(l,w){ S.gardens=[{x:OX,y:OY,l,w}]; }
+const Q = {
+  1:{ text:'How do you know you have found all of them?',
+    actions:[{label:'Start at width 1. What comes next?', run: async () => {
+      const g0 = ++S.gen; S.wall=false; S.labels=true; S.numbered=false; const done=[];
+      for(let w=1; w<=7; w++){
+        const l = 12 - w; S.gardens=[{x:OX,y:OY,l,w}]; render();
+        if(w<=6){ done.push(`<b>${l} × ${w} = ${l*w}</b>`); result(`<div class="chipline">${done.join('')}</div>`); }
+        else { result(`<div class="chipline">${done.join('')}</div><p style="margin:10px 0 0">Width 7 makes a 5 by 7. That’s the <b>7 by 5 turned</b>, and widths 8 to 11 repeat too. Going width 1, 2, 3, … in order means we can’t skip one. There are exactly <b>6 gardens</b>.</p>`, true); }
+        await sleep(reduced?200:1300); if(g0!==S.gen) return;
+      }
+    }}]},
+  2:{ text:'What do the length and the width always add up to? Why?',
+    actions:[{label:'Walk half the fence', run: async () => {
+      show([{x:OX,y:OY,l:8,w:4}], {labels:true});
+      result('Watch the count. Stop when the walker has gone along one length and one width.');
+      if(!await walkFence(0, 12, 300)) return;
+      result('One length (8) + one width (4) = <b>12 meters</b>. That’s half the trip. Keep walking…');
+      await sleep(reduced?200:1600);
+      if(!await walkFence(0, 24, 300)) return;
+      result(`<div class="rule">length + width = 24 ÷ 2 = 12</div><p style="margin:10px 0 0">The fence goes along a length and a width, then the <b>same</b> length and width again. So length + width is always <b>half the fence</b>. Try it on another garden: ${[[11,1],[9,3],[6,6]].map(([l,w])=>`${l} + ${w} = 12`).join(', ')}.</p>`, true);
+    }},
+    {label:'Try another garden', run: async () => {
+      const [l,w] = ALL24[Math.floor(Math.random()*ALL24.length)];
+      show([{x:OX,y:OY,l,w}], {labels:true}); result(`${l} by ${w}: ${l} + ${w} = ${l+w}. Walk it to see.`);
+      await walkFence(0, 0, 160);
+    }}]},
+  3:{ text:'What happens to the area as the length and width get closer together?',
+    actions:[{label:'Show every garden as a bar', run: () => {
+      show([{x:OX,y:OY,l:6,w:6}], {labels:true});
+      const rows = ALL24.map(([l,w],i) => `<div class="bar ${i===5?'max':''}"><span>${l} by ${w}</span><div style="width:${l*w/36*100}%"></div><b>${l*w}</b><i>${i? '+'+(l*w - ALL24[i-1][0]*ALL24[i-1][1]) : ''}</i></div>`).join('');
+      const v=S.votes, tot=v.matters+v.same+v.unsure;
+      result(`<div class="bars">${rows}</div><p style="margin:10px 0 0">The same 24 meters of fence gives anywhere from <b>11</b> to <b>36 square meters</b>. As the sides get closer, the garden grows, and the <b>6 by 6</b> is biggest. Look at the jumps: +9, +7, +5, +3, +1. What do you notice?${tot?`<br>Our class voted: ${v.matters} “the shape matters,” ${v.same} “always the same,” ${v.unsure} not sure.`:''}</p>`, true);
+    }},
+    {label:'Compare the skinniest and the squarest', run: () => {
+      show([{x:OX,y:OY,l:11,w:1,label:'11 by 1: 11 sq m'},{x:OX+13,y:OY+3,l:6,w:6,label:'6 by 6: 36 sq m'}], {});
+      result('Same 24 meters of fence. The skinny garden is almost all fence and hardly any garden. The 6 by 6 holds more than <b>3 times</b> as much.');
+    }}]},
+  4:{ text:'Is a 6 by 6 allowed? Is a square a rectangle?',
+    actions:[{label:'Check the definition', run: () => {
+      show([{x:OX,y:OY,l:6,w:6}], {labels:true});
+      result(`<div class="rule">A rectangle has 4 sides and 4 square corners (right angles).</div><p style="margin:10px 0 0">Does the 6 by 6 have 4 sides? 4 square corners? Then it <b>is</b> a rectangle. A square is a special rectangle with all 4 sides the same length. So the 6 by 6 counts, and it is the biggest garden.</p>`, true);
+    }}]},
+  5:{ text:'Challenge: A wall makes one side of the garden, so the 24 meters of fence covers only 3 sides. What is the biggest garden now?',
+    actions:[{label:'Try every depth', run: async () => {
+      const g0 = ++S.gen; const lines=[];
+      for(let w=1; w<=11; w++){
+        const l = 24 - 2*w; S.wall=true; S.labels=true; S.walk=null; S.gardens=[{x:OX,y:OY,l,w,wall:true}]; render();
+        lines.push([l,w,l*w]);
+        result(`<div class="bars">${lines.map(([l,w,a])=>`<div class="bar ${a===72?'max':''}"><span>${w} deep</span><div style="width:${a/72*100}%"></div><b>${a}</b><i>${l} long</i></div>`).join('')}</div>`);
+        await sleep(reduced?150:900); if(g0!==S.gen) return;
+      }
+      S.gardens=[{x:OX,y:OY,l:12,w:6,wall:true}]; depth=6; $('#dOut').textContent='6 m'; render();
+      result(`<div class="bars">${lines.map(([l,w,a])=>`<div class="bar ${a===72?'max':''}"><span>${w} deep</span><div style="width:${a/72*100}%"></div><b>${a}</b><i>${l} long</i></div>`).join('')}</div><p style="margin:10px 0 0">The best is <b>6 meters deep and 12 meters along the wall: 72 square meters</b>. It’s twice the 6 by 6! The wall does one side of the work for free. The best garden is <i>not</i> a square this time.</p>`, true);
+    }}],
+    extra:()=>`<div class="row" style="margin-top:4px"><span class="small">Try it yourself. How deep?</span>
+      <span class="stepper"><button id="dMinus" aria-label="Less deep">−</button><output id="dOut">6 m</output><button id="dPlus" aria-label="Deeper">+</button></span></div>`},
+};
+let depth = 6;
+function setDepth(d){
+  depth = Math.max(1, Math.min(11, d)); const l = 24 - 2*depth;
+  show([{x:OX,y:OY,l,w:depth,wall:true}], {wall:true, labels:true}); $('#dOut').textContent = depth+' m';
+  result(`${depth} deep: the fence is ${depth} + ${l} + ${depth} = 24 meters. The garden is ${l} × ${depth} = <b>${l*depth} square meters</b>.`, l*depth===72);
+}
+function renderQ(){
+  const nav=$('#qnav');
+  nav.innerHTML = [1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="Question ${i}">${i}</button>`).join('') + `<button class="star" data-q="5" aria-pressed="${S.q===5}">★ Challenge</button>`;
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; S.gen++; S.walk=null; S.wall=S.q===5; result(''); S.gardens=[]; render(); renderQ(); if(S.q===5) setDepth(1), result('Here the garden is 1 meter deep and 22 meters long. Predict before you try: what depth makes the biggest garden?'); });
+  const q=Q[S.q]; $('#qtext').textContent=q.text;
+  const box=$('#qactions'); box.innerHTML='';
+  q.actions.forEach((a,i)=>{ const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=a.label; b.onclick=()=>a.run(); box.appendChild(b); });
+  $('#qextra').innerHTML = q.extra ? q.extra() : '';
+  if(q.extra){ $('#dMinus').onclick=()=>setDepth(depth-1); $('#dPlus').onclick=()=>setDepth(depth+1); $('#dOut').textContent=depth+' m'; }
+}
+
+/* ---------- Global ---------- */
+function startOver(){
+  freshState(); $('#hideNums').checked=false; $('#gFence').value=''; $('#gArea').value=''; renderVotes(); result('');
+  $$('#pSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.p===24)); $('#tgtLead').textContent='24'; depth=6;
+  selectTab('warm');
+}
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+window.__test = {S, per, area, perimSegs, setG, selectTab};
+startOver();
+})();
+</script>
+</body></html>
+
+</body></html>

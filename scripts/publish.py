@@ -13,7 +13,8 @@ Two subcommands, run from the repo root:
       FILE is JSON {"<order>": "<path to fetched index.html>", ...} for the
       apps to (re)publish (orders may be fractional, e.g. "25.1"). Writes each
       page to week-NN/<grade>-<activity>/ (week 11 -> set3-projects/,
-      week 12 -> set4-projects/),
+      week 12 -> set4-projects/, week 13 or any unknown week -> extra-lessons/,
+      source "mif" -> mif-lessons/<grade>-<mifLesson>-<activity>/),
       updates apps.json, and rebuilds the home page index.html.
       ORDERS is a comma-separated list of orders that were flagged (e.g. they
       call window.claude) and must not be published.
@@ -36,6 +37,24 @@ RUNTIME_PATTERNS = [r"window\.claude", r"\bclaude\.(complete|ask|storage|db)\b",
 
 # Project sets live after the ten weekly sections, under their own folders.
 PROJECT_SETS = {11: ("set3-projects", "Set 3 projects"), 12: ("set4-projects", "Set 4 projects")}
+EXTRA = ("extra-lessons", "Extra lessons")
+MIF = ("mif-lessons", "Math in Focus chapter lessons")
+MIF_GRADES = ["Grade 1", "Grade 2", "Grade 3", "Grade 4"]
+# Section keys in page order: 1..10 (weeks), 11, 12 (project sets), "extra", "mif".
+SECTION_ORDER = list(range(1, 11)) + sorted(PROJECT_SETS) + ["extra", "mif"]
+
+
+def section_of(doc):
+    """Which home-page section (and folder) a tracker row / manifest entry belongs to."""
+    if doc.get("source") == "mif":
+        return "mif"
+    try:
+        w = float(doc.get("week"))
+    except (TypeError, ValueError):
+        return "extra"
+    if w.is_integer() and (1 <= w <= 10 or int(w) in PROJECT_SETS):
+        return int(w)
+    return "extra"  # week 13 and any unknown week value
 
 
 def okey(x):
@@ -50,9 +69,17 @@ def slug(s):
 
 
 def app_path(doc):
-    week = int(doc["week"])
-    folder = PROJECT_SETS[week][0] if week in PROJECT_SETS else f"week-{week:02d}"
-    return f"{folder}/{slug(doc['grade'])}-{slug(doc['activity'])}/index.html"
+    sec = section_of(doc)
+    name = f"{slug(doc['grade'])}-{slug(doc['activity'])}"
+    if sec == "mif":
+        return f"{MIF[0]}/{slug(doc['grade'])}-{slug(doc.get('mifLesson') or '')}-{slug(doc['activity'])}/index.html".replace("--", "-")
+    if sec == "extra":
+        folder = EXTRA[0]
+    elif sec in PROJECT_SETS:
+        folder = PROJECT_SETS[sec][0]
+    else:
+        folder = f"week-{sec:02d}"
+    return f"{folder}/{name}/index.html"
 
 
 def load_tracker(d):
@@ -178,6 +205,9 @@ a.card:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .meta{margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:8px; font-size:14px; color:var(--muted)}
 .meta span{white-space:nowrap}
 .go{font-weight:600; color:var(--accent)}
+.chap{margin:0; font-size:15px; font-weight:500; color:var(--ink)}
+h3.sub{margin:22px 0 10px; font-size:19px; font-weight:600; display:flex; align-items:baseline; gap:10px}
+h3.sub small{font-size:14px; font-weight:500; color:var(--muted)}
 .soon{padding:18px; border:1.5px dashed var(--line); border-radius:16px; color:var(--muted); font-family:var(--serif); font-style:italic}
 footer{margin-top:48px; padding-top:18px; border-top:1.5px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--muted); font-size:15px}
 @media (prefers-reduced-motion: reduce){a.card{transition:none} a.card:hover{transform:none}}
@@ -185,44 +215,79 @@ footer{margin-top:48px; padding-top:18px; border-top:1.5px solid var(--line); di
 """
 
 
-def render_index(manifest, notes, labels, total, today):
-    rows = sorted(manifest, key=lambda m: (m["week"], GRADES.index(m["grade"]) if m["grade"] in GRADES else 99, m["order"]))
-    # Weeks 1-10 always show; a project set shows once one of its apps is published.
-    shown = list(range(1, 11)) + [w for w in sorted(PROJECT_SETS) if any(m["week"] == w for m in rows)]
-    weeks = {w: [m for m in rows if m["week"] == w] for w in shown}
+def render_index(manifest, docs_by_order, labels, total, today):
+    def info(m):
+        d = docs_by_order.get(m["order"], {})
+        return {**d, **m}
 
-    def anchor(w):
-        return f"set-{w - 8}" if w in PROJECT_SETS else f"week-{w}"
+    rows = [info(m) for m in manifest]
+    rank = lambda m: (GRADES.index(m["grade"]) if m["grade"] in GRADES else 99, m["order"])
+    groups = {k: [] for k in SECTION_ORDER}
+    for m in rows:
+        groups[section_of(m)].append(m)
+    # Weeks 1-10 always show; the later sections show once one of their apps is published.
+    shown = [k for k in SECTION_ORDER if isinstance(k, int) and k <= 10 or groups[k]]
 
-    def short(w):
-        return PROJECT_SETS[w][1] if w in PROJECT_SETS else f"Week {w}"
+    def anchor(k):
+        if k == "extra":
+            return "extra-lessons"
+        if k == "mif":
+            return "math-in-focus"
+        return f"set-{k - 8}" if k in PROJECT_SETS else f"week-{k}"
+
+    def short(k):
+        if k == "extra":
+            return EXTRA[1]
+        if k == "mif":
+            return "Math in Focus"
+        return PROJECT_SETS[k][1] if k in PROJECT_SETS else f"Week {k}"
+
+    def title(k):
+        if k in PROJECT_SETS:
+            return labels.get(k) or short(k)
+        if k == "mif":
+            return MIF[1]
+        return short(k)
+
+    def card(m, tag=None, sub=None):
+        href = m["path"][: -len("index.html")]
+        built = nice_date(m.get("builtOn"))
+        note = (m.get("note") or "").strip()
+        return (
+            f'<a class="card" href="{html.escape(href)}">'
+            f'<span class="grade">{html.escape(tag or m["grade"])}</span>'
+            f'<h3>{html.escape(m["activity"])}</h3>'
+            + (f'<p class="chap">{html.escape(sub)}</p>' if sub else "")
+            + (f'<p class="note" title="{html.escape(note)}">{html.escape(note)}</p>' if note else "")
+            + f'<span class="meta"><span>{"Built " + built if built else "Build date not recorded"}</span>'
+            f'<span class="go">Open app &rarr;</span></span></a>'
+        )
+
+    def count(n):
+        return f"<small>{n} app{'s' if n != 1 else ''}</small>"
 
     empty = ' class="empty"'
-    nav = "".join(f'<a href="#{anchor(w)}"{"" if weeks[w] else empty}>{short(w)}</a>' for w in shown)
+    nav = "".join(f'<a href="#{anchor(k)}"{"" if groups[k] else empty}>{short(k)}</a>' for k in shown)
     sections = []
-    for w in shown:
-        apps = weeks[w]
-        title = html.escape(labels.get(w) or short(w))
-        if apps:
-            cards = []
-            for m in apps:
-                href = m["path"][: -len("index.html")]
-                built = nice_date(m.get("builtOn"))
-                note = (notes.get(m["order"]) or "").strip()
-                cards.append(
-                    f'<a class="card" href="{html.escape(href)}">'
-                    f'<span class="grade">{html.escape(m["grade"])}</span>'
-                    f'<h3>{html.escape(m["activity"])}</h3>'
-                    + (f'<p class="note" title="{html.escape(note)}">{html.escape(note)}</p>' if note else "")
-                    + f'<span class="meta"><span>{"Built " + built if built else "Build date not recorded"}</span>'
-                    f'<span class="go">Open app &rarr;</span></span></a>'
+    for k in shown:
+        apps = groups[k]
+        if k == "mif":
+            parts = []
+            for g in MIF_GRADES + sorted({m["grade"] for m in apps} - set(MIF_GRADES)):
+                ga = sorted([m for m in apps if m["grade"] == g], key=lambda m: m["order"])
+                if not ga:
+                    continue
+                cards = "".join(
+                    card(m, tag=f"Ch {m.get('chapter', '?')} · {m.get('mifLesson', '')}", sub=m.get("chapterTitle"))
+                    for m in ga
                 )
-            body = '<div class="grid">' + "".join(cards) + "</div>"
-            count = f"<small>{len(apps)} app{'s' if len(apps) != 1 else ''}</small>"
+                parts.append(f'<h3 class="sub">{html.escape(g)} {count(len(ga))}</h3><div class="grid">{cards}</div>')
+            body = "".join(parts)
+        elif apps:
+            body = '<div class="grid">' + "".join(card(m) for m in sorted(apps, key=rank)) + "</div>"
         else:
             body = '<p class="soon">Apps for this week are on the way.</p>'
-            count = ""
-        sections.append(f'<section id="{anchor(w)}"><h2>{title} {count}</h2>{body}</section>')
+        sections.append(f'<section id="{anchor(k)}"><h2>{html.escape(title(k))} {count(len(apps)) if apps else ""}</h2>{body}</section>')
     updated = nice_date(today)
     return f"""<!doctype html>
 <html lang="en">
@@ -230,7 +295,7 @@ def render_index(manifest, notes, labels, total, today):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Enrichment Apps</title>
-<meta name="description" content="Interactive K–5 math enrichment apps, organized by week and project set.">
+<meta name="description" content="Interactive K–5 math enrichment apps, organized by week, project set and Math in Focus chapter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet">
@@ -240,9 +305,9 @@ def render_index(manifest, notes, labels, total, today):
 <div class="wrap">
 <header>
 <h1>Enrichment Apps</h1>
-<p>Interactive K–5 math enrichment activities for the classroom board, organized by week. Tap a card to open an app.</p>
+<p>Interactive K–5 math enrichment activities for the classroom board, organized by week, project and chapter. Tap a card to open an app.</p>
 </header>
-<nav class="weeks" aria-label="Jump to week">{nav}</nav>
+<nav class="weeks" aria-label="Jump to section">{nav}</nav>
 <main>
 {chr(10).join(sections)}
 </main>
@@ -314,20 +379,28 @@ def main():
             "builtOn": doc.get("builtOn") or None,
             "publishedOn": a.today,
         }
+        if doc.get("source"):
+            entries[order]["source"] = doc["source"]
+        if doc.get("source") == "mif":
+            for k in ("mifLesson", "chapter", "chapterTitle"):
+                if doc.get(k) not in (None, ""):
+                    entries[order][k] = doc[k]
         added.append({"order": order, "activity": doc["activity"], "path": path, "rebuilt": bool(old)})
 
     manifest = sorted(entries.values(), key=lambda m: m["order"])
     with open(MANIFEST, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
-    notes = {d["order"]: d.get("note", "") for d in docs}
+    docs_by_order = {d["order"]: d for d in docs}
     labels = {}
     for d in docs:
-        if d.get("weekLabel"):
-            labels.setdefault(int(d["week"]), d["weekLabel"])
+        sec = section_of(d)
+        if d.get("weekLabel") and sec in PROJECT_SETS:
+            labels.setdefault(sec, d["weekLabel"])
+    unknown = sorted({str(d.get("week")) for d in docs if section_of(d) == "extra" and str(d.get("week")) != "13"})
     with open("index.html", "w", encoding="utf-8") as fh:
-        fh.write(render_index(manifest, notes, labels, len(docs), a.today))
-    print(json.dumps({"added": added, "flaggedRuntime": runtime, "published": len(manifest)}, indent=2, ensure_ascii=False))
+        fh.write(render_index(manifest, docs_by_order, labels, len(docs), a.today))
+    print(json.dumps({"added": added, "flaggedRuntime": runtime, "published": len(manifest), "unknownWeeks": unknown}, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

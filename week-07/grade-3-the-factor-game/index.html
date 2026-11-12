@@ -1,0 +1,696 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Factor Game</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&family=Shantell+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a colored-pencil game sheet. Board on the left, scorekeeper on the right; tabs follow the lesson flow. */
+:root{
+  --paper:#F3F5F9; --card:#FFFFFF; --ink:#1B2033; --muted:#5A6175; --line:#D5DAE4; --grid:#E6EAF2;
+  --a:#D9472F; --a-soft:#FBE3DD; --b:#2763C9; --b-soft:#DDE7F9;
+  --gold:#C98A00; --gold-soft:#FFF1CC; --good:#1E8A55; --good-soft:#DDF3E7; --bad:#C2324A; --bad-soft:#FBE0E5;
+  --plain:#9AA2B4;
+  --display:"Shantell Sans","Comic Sans MS","Segoe Print",system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141722; --card:#1D2130; --ink:#ECEEF4; --muted:#A7AEC2; --line:#363C50; --grid:#262B3B;
+    --a:#FF7A5F; --a-soft:#41241F; --b:#6F9CF5; --b-soft:#1F2C47;
+    --gold:#F1B937; --gold-soft:#3A3018; --good:#4CCB88; --good-soft:#173527; --bad:#FF6F86; --bad-soft:#3F1D26;
+    --plain:#6C7489; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141722; --card:#1D2130; --ink:#ECEEF4; --muted:#A7AEC2; --line:#363C50; --grid:#262B3B;
+  --a:#FF7A5F; --a-soft:#41241F; --b:#6F9CF5; --b-soft:#1F2C47;
+  --gold:#F1B937; --gold-soft:#3A3018; --good:#4CCB88; --good-soft:#173527; --bad:#FF6F86; --bad-soft:#3F1D26;
+  --plain:#6C7489; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 28px;
+  -webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+.wrap{max-width:1380px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; flex-wrap:wrap; align-items:flex-end; gap:12px 24px; padding-top:16px}
+.title h1{font-family:var(--display); font-weight:800; font-size:clamp(30px,3.4vw,48px); line-height:1; margin:0; letter-spacing:-.01em}
+.title h1 .x{color:var(--a)} .title h1 .y{color:var(--b)}
+.sub{margin:6px 0 0; font-size:14px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; font-weight:500}
+.dq{margin:4px 0 0; font-family:var(--display); font-size:clamp(17px,1.5vw,21px); color:var(--muted); text-wrap:balance}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.seg{display:inline-flex; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 14px; border-radius:11px; font-weight:500; font-size:15px; color:var(--muted); min-height:42px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:14px; padding:9px 16px; font-weight:500; font-size:15px; min-height:46px}
+.ghost:hover{border-color:var(--ink)}
+.toolLabel{font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+
+nav.tabs{display:flex; gap:4px; border-bottom:2px solid var(--line); overflow-x:auto}
+nav.tabs button{border:0; background:none; padding:12px 14px 10px; font-size:clamp(16px,1.35vw,20px); font-weight:600; color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; white-space:nowrap; display:flex; gap:8px; align-items:center}
+nav.tabs button .n{font-family:var(--display); font-size:.85em; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--grid)}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--a)}
+nav.tabs button[aria-selected="true"] .n{background:var(--a); color:#fff}
+
+.view{display:flex; flex-direction:column; gap:16px}
+.lead{font-size:clamp(18px,1.6vw,23px); margin:0; max-width:46em; text-wrap:pretty}
+.lead b{font-weight:600}
+.two{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:24px; align-items:start}
+.panel{display:flex; flex-direction:column; gap:14px; min-width:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--ink); color:var(--card); font-weight:600; font-size:clamp(17px,1.4vw,20px); padding:13px 24px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.4; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:600; font-size:clamp(15px,1.25vw,18px); padding:11px 18px; border-radius:14px; min-height:50px}
+.secondary:disabled{opacity:.4; cursor:default}
+.note{font-size:14px; color:var(--muted); margin:0}
+.msg{margin:0; padding:14px 18px; border-radius:14px; background:var(--card); border:1.5px solid var(--line); font-size:clamp(17px,1.45vw,21px); line-height:1.45; min-height:3.2em}
+.msg.good{background:var(--good-soft); border-color:var(--good)}
+.msg.try{background:var(--gold-soft); border-color:var(--gold)}
+.msg:empty{display:none}
+.msg b{font-weight:600}
+.eq{font-family:var(--display); font-weight:700; white-space:nowrap}
+
+/* Board */
+.board{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); background:var(--card); border:2.5px solid var(--ink); border-radius:10px; overflow:hidden; container-type:inline-size}
+.cell{position:relative; aspect-ratio:1; border:0; border-right:1px solid var(--grid); border-bottom:1px solid var(--grid); background:var(--card); padding:0; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:clamp(16px,4.2cqi,40px); transition:background-color .25s, opacity .25s}
+.cell:nth-child(10n){border-right:0}
+.cell .num{position:relative; z-index:1; line-height:1}
+.cell.A{background:var(--a-soft)} .cell.B{background:var(--b-soft)}
+.cell.A .num, .cell.B .num{color:var(--pc)}
+.cell.A{--pc:var(--a)} .cell.B{--pc:var(--b)}
+.cell.A .num::before, .cell.B .num::before{content:""; position:absolute; inset:-.32em -.42em; border:.11em solid var(--pc); border-radius:50%}
+.cell.pick .num::after{content:"★"; position:absolute; top:-.95em; right:-1.05em; font-size:.42em; color:var(--pc)}
+.cell.legal{background:#FFF6B8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cell.legal{background:#4D4520}}
+:root[data-theme="dark"] .cell.legal{background:#4D4520}
+.cell.dead .num{opacity:.35}
+.cell.nope{animation:nope .45s}
+.cell.flash{animation:flash .7s}
+.cell.hl{background:var(--gold-soft); box-shadow:inset 0 0 0 .13em var(--gold)}
+.board.focus .cell:not(.hl){opacity:.3}
+.cell.scored{box-shadow:inset 0 0 0 .16em var(--gold)}
+.fchips{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0 2px}
+.fchips .lbl{font-size:.8em; color:var(--muted); margin-right:2px}
+.fchip{display:inline-grid; place-items:center; min-width:2em; height:2em; padding:0 .3em; border-radius:999px; border:2.5px solid var(--muted); font-family:var(--display); font-weight:700; font-size:.95em; line-height:1; color:var(--muted)}
+.fchip.new{border-color:var(--gold); background:var(--gold-soft); color:var(--ink)}
+.fkey{font-size:.75em; color:var(--muted); margin-left:4px}
+.cell.hl.cat-prime{background:var(--good-soft); box-shadow:inset 0 0 0 .13em var(--good)}
+.cell.hl.cat-trap{background:var(--bad-soft); box-shadow:inset 0 0 0 .13em var(--bad)}
+.badge{position:absolute; bottom:6%; left:50%; transform:translateX(-50%); font-family:var(--body); font-weight:600; font-size:.36em; padding:.08em .45em; border-radius:.6em; background:var(--ink); color:var(--card); white-space:nowrap; z-index:2; display:none}
+.cell.hasbadge .badge{display:block}
+.cell.hasbadge .num{transform:translateY(-.22em)}
+.board.static .cell{cursor:default}
+@keyframes nope{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes flash{0%{box-shadow:inset 0 0 0 .3em var(--pc)}100%{box-shadow:inset 0 0 0 0 var(--pc)}}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+/* Scoreboard */
+.score{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.player{border:2px solid var(--line); border-radius:16px; padding:12px 16px; background:var(--card); display:flex; flex-direction:column; gap:2px}
+.player .who{font-weight:600; font-size:16px; display:flex; align-items:center; gap:8px}
+.player .dot{width:14px; height:14px; border-radius:50%; background:var(--pc)}
+.player .pts{font-family:var(--display); font-weight:800; font-size:clamp(40px,4.4vw,64px); line-height:1; color:var(--pc); font-variant-numeric:tabular-nums}
+.player.A{--pc:var(--a)} .player.B{--pc:var(--b)}
+.player.turn{border-color:var(--pc); box-shadow:0 0 0 3px color-mix(in srgb, var(--pc) 25%, transparent)}
+.player .tag{font-size:13px; color:var(--muted); min-height:1.3em}
+.player.turn .tag{color:var(--pc); font-weight:600}
+.check{display:flex; align-items:center; gap:10px; font-size:16px; cursor:pointer; min-height:40px}
+.check input{width:22px; height:22px; accent-color:var(--ink)}
+.log{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:260px; overflow:auto; font-size:15px}
+.log li{padding:8px 12px; border-radius:10px; background:var(--card); border-left:5px solid var(--pc)}
+.log li.A{--pc:var(--a)} .log li.B{--pc:var(--b)}
+h2{font-family:var(--display); font-size:clamp(20px,1.7vw,24px); margin:0; font-weight:700}
+h3{font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:6px 0 0; font-weight:600}
+
+/* Warm-up */
+.chips{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.chips button{border:2px solid var(--line); background:var(--card); border-radius:999px; font-family:var(--display); font-weight:700; font-size:22px; min-width:64px; min-height:52px; padding:4px 16px}
+.chips button[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.chips input{width:90px; min-height:52px; border:2px solid var(--line); border-radius:999px; background:var(--card); padding:4px 14px; font-size:20px; font-family:var(--display); font-weight:700}
+.tiles{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px}
+.tile{aspect-ratio:1; border:2px solid var(--line); border-radius:12px; background:var(--card); font-family:var(--display); font-weight:700; font-size:clamp(16px,2.2vw,30px); padding:0}
+.tile[aria-pressed="true"]{border-color:var(--ink); background:var(--ink); color:var(--card)}
+.tile.ok{background:var(--good-soft); border-color:var(--good); color:var(--ink)}
+.tile.no{background:var(--bad-soft); border-color:var(--bad); color:var(--ink); text-decoration:line-through}
+.tile .pp{display:block; font-family:var(--body); font-size:.42em; font-weight:500; color:var(--muted)}
+.pairs{display:flex; flex-wrap:wrap; gap:18px 26px; align-items:flex-end}
+.pair{display:flex; flex-direction:column; gap:6px; align-items:flex-start}
+.pair .lab{font-family:var(--display); font-weight:700; font-size:22px}
+.arr{display:grid; gap:3px}
+.arr i{width:12px; height:12px; border-radius:50%; background:var(--a)}
+.pair:nth-child(even) .arr i{background:var(--b)}
+
+/* First-move table */
+.fmt-wrap{overflow-x:auto}
+table.fmt{border-collapse:collapse; font-size:clamp(16px,1.35vw,19px); min-width:520px}
+.fmt th{font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; text-align:left; padding:6px 10px; border-bottom:2px solid var(--line)}
+.fmt td{padding:6px 10px; border-bottom:1px solid var(--grid); vertical-align:middle}
+.fmt td.n{font-family:var(--display); font-weight:800; font-size:1.35em; width:70px}
+.fmt input, .fmt select, .ans input{width:96px; min-height:46px; border:2px solid var(--line); border-radius:12px; background:var(--card); padding:4px 10px; font-size:19px; font-variant-numeric:tabular-nums}
+.fmt select{width:150px}
+.fmt tr.ok input, .fmt tr.ok select{border-color:var(--good); background:var(--good-soft)}
+.fmt tr.bad input.badv, .fmt tr.bad select.badv{border-color:var(--bad); background:var(--bad-soft)}
+.fmt .why{font-size:15px; color:var(--muted); min-width:220px}
+.fmt tr.ok .why{color:var(--good)}
+.ans{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px}
+.ans label{display:flex; flex-direction:column; gap:6px; font-weight:600}
+.ans input{width:100%}
+.chart-wrap{overflow-x:auto; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:12px}
+.chart-wrap svg{display:block; min-width:560px; width:100%; height:auto}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:15px; color:var(--muted)}
+.legend span{display:inline-flex; gap:7px; align-items:center}
+.legend i{width:16px; height:16px; border-radius:4px; background:var(--c)}
+
+/* Detective */
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:54px; height:54px; border-radius:27px; border:2px solid var(--line); background:var(--card); font-family:var(--display); font-weight:700; font-size:21px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:700; font-size:clamp(22px,2.1vw,32px); line-height:1.25; margin:0; text-wrap:balance}
+.starters{margin:0; padding-left:1.2em; font-size:clamp(17px,1.4vw,20px); display:flex; flex-direction:column; gap:6px}
+
+@media (max-width:900px){
+  .two{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+  .tiles{gap:4px}
+}
+@media (max-width:480px){
+  .cell .badge{font-size:.42em}
+  .seg button{padding:8px 10px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="title">
+    <h1>The <span class="x">Factor</span> <span class="y">Game</span></h1>
+    <p class="sub">Grade 3 · Week 7 · Lesson 3.7</p>
+    <p class="dq">Which first move is best, and which numbers are a trap?</p>
+  </div>
+  <div class="tools">
+    <span class="toolLabel" id="sizeLabel">Board</span>
+    <div class="seg" role="group" aria-labelledby="sizeLabel">
+      <button data-size="20" aria-pressed="false">1 to 20</button>
+      <button data-size="30" aria-pressed="true">1 to 30</button>
+      <button data-size="49" aria-pressed="false">1 to 49</button>
+    </div>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="false"><span class="n">1</span>Warm-up</button>
+  <button role="tab" data-tab="play" aria-selected="true"><span class="n">2</span>Play</button>
+  <button role="tab" data-tab="table" aria-selected="false"><span class="n">3</span>First-move table</button>
+  <button role="tab" data-tab="det" aria-selected="false"><span class="n">4</span>Detective questions</button>
+</nav>
+
+<!-- WARM-UP -->
+<section class="view" id="v-warm" hidden>
+  <p class="lead">List <b>all the factors</b> of a number. A factor divides it evenly, with nothing left over. Tap every factor you can find, then check.</p>
+  <div class="chips" id="warmChips">
+    <button data-w="24" aria-pressed="true">24</button>
+    <button data-w="23" aria-pressed="false">23</button>
+    <button data-w="25" aria-pressed="false">25</button>
+    <label class="note" for="warmOther">or any number to 49:</label>
+    <input id="warmOther" type="number" min="2" max="49" inputmode="numeric" placeholder="?">
+  </div>
+  <div class="tiles" id="tiles" aria-label="Number tiles"></div>
+  <div class="row">
+    <button class="primary" id="warmCheck">Check my factors</button>
+    <button class="secondary" id="warmPairs">Show the factor pairs</button>
+    <button class="secondary" id="warmClear">Clear</button>
+  </div>
+  <p class="msg" id="warmMsg" aria-live="polite"></p>
+  <div class="pairs" id="pairs"></div>
+</section>
+
+<!-- PLAY -->
+<section class="view" id="v-play">
+  <div class="two">
+    <div class="panel">
+      <div class="board" id="gameBoard" aria-label="Factor Game board"></div>
+      <p class="note">★ = the number a player picked. Plain circles = factors a player scored.</p>
+    </div>
+    <div class="panel">
+      <div class="score">
+        <div class="player A" id="pA"><span class="who"><span class="dot"></span><span id="nameA">Player A</span></span><span class="pts" id="sA">0</span><span class="tag" id="tA"></span></div>
+        <div class="player B" id="pB"><span class="who"><span class="dot"></span><span id="nameB">Player B</span></span><span class="pts" id="sB">0</span><span class="tag" id="tB"></span></div>
+      </div>
+      <p class="msg" id="playMsg" aria-live="polite"></p>
+      <div class="seg" role="group" aria-label="Who plays B">
+        <button data-opp="team" aria-pressed="true">Team vs. team</button>
+        <button data-opp="cpu" aria-pressed="false">Class vs. computer</button>
+      </div>
+      <label class="check"><input type="checkbox" id="showLegal"> Outline the numbers you're allowed to pick</label>
+      <div class="row">
+        <button class="secondary" id="undoBtn">Undo</button>
+        <button class="secondary" id="newGameBtn">New game</button>
+      </div>
+      <details>
+        <summary style="cursor:pointer; font-weight:600; min-height:40px">Rules</summary>
+        <p class="note" style="font-size:16px; margin-top:6px">Player A circles a number and scores it. Player B scores every factor of that number that is not circled yet (not the number itself). Then B picks a new number and A scores its free factors. You may not pick a number with no free factors. When no moves are left, highest total wins.</p>
+      </details>
+      <h3>Moves</h3>
+      <ol class="log" id="log"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- FIRST-MOVE TABLE -->
+<section class="view" id="v-table" hidden>
+  <p class="lead">If you pick this number <b>first</b>, on a fresh 1 to 30 board, what does your opponent get? You always get the number itself.</p>
+  <div class="fmt-wrap">
+    <table class="fmt">
+      <thead><tr><th>First move</th><th>You get</th><th>Opponent gets</th><th>Who comes out ahead?</th><th>Check</th></tr></thead>
+      <tbody id="fmtBody"></tbody>
+    </table>
+  </div>
+  <div class="row">
+    <button class="primary" id="fmtCheck">Check my table</button>
+    <button class="secondary" id="fmtHint">Show one answer</button>
+  </div>
+  <p class="msg" id="fmtMsg" aria-live="polite"></p>
+  <h2>Now decide</h2>
+  <div class="ans">
+    <label for="ansBest">Best first move<input id="ansBest" inputmode="numeric" placeholder="?"></label>
+    <label for="ansWorst">Worst first move<input id="ansWorst" inputmode="numeric" placeholder="?"></label>
+    <label for="ansTie">Which numbers give a tie?<input id="ansTie" placeholder="e.g. 4, 9"></label>
+  </div>
+  <div class="row"><button class="primary" id="ansCheck">Check my answers</button></div>
+  <p class="msg" id="ansMsg" aria-live="polite"></p>
+  <h2>Every first move at once</h2>
+  <div class="row"><button class="secondary" id="chartBtn">Draw the whole board</button><span class="note" id="chartNote"></span></div>
+  <div id="chartBox" hidden>
+    <div class="legend" id="chartLegend"></div>
+    <div class="chart-wrap"><svg id="chart" role="img" aria-label="How far ahead each first move puts you"></svg></div>
+  </div>
+</section>
+
+<!-- DETECTIVE -->
+<section class="view" id="v-det" hidden>
+  <div class="two">
+    <div class="panel">
+      <div class="board static focus0" id="detBoard" aria-label="Evidence board"></div>
+      <p class="note">Badges show what each first move gives away, or how far ahead it puts you.</p>
+    </div>
+    <div class="panel">
+      <div class="qnav" id="qnav"></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div class="msg" id="qresult" aria-live="polite"></div>
+      <p class="note">Talk it over first. Then tap a button to put evidence on the board.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Math ---------- */
+const pf = n => { const r=[]; for(let d=1; d<n; d++) if(n%d===0) r.push(d); return r; };   // proper factors
+const allF = n => { const r=[]; for(let d=1; d<=n; d++) if(n%d===0) r.push(d); return r; };
+const sum = a => a.reduce((x,y)=>x+y,0);
+const gift = n => sum(pf(n));                       // what the opponent scores on a first move
+const net = n => n - gift(n);
+const isPrime = n => n>1 && pf(n).length===1;
+const plusList = a => a.length ? a.join(' + ') : 'nothing';
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + (a.length>2?',':'') + ' and ' + a[a.length-1];
+const cat = n => n===1 ? 'one' : isPrime(n) ? 'prime' : gift(n)===n ? 'perfect' : gift(n)>n ? 'trap' : 'other';
+
+/* ---------- App state ---------- */
+const S = { N:30, tab:'play', opp:'team', gen:0 };
+
+/* ---------- Tabs, size, chrome ---------- */
+function selectTab(t){
+  S.tab = t;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','play','table','det'].forEach(k => $('#v-'+k).hidden = k!==t);
+  if(t==='det') renderQuestion();
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+function setSize(n){
+  S.N = n;
+  $$('[data-size]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.size===n));
+  newGame(); buildDetBoard(); clearEvidence(); renderQuestion();
+  if(!$('#chartBox').hidden) drawChart();
+}
+$$('[data-size]').forEach(b => b.onclick = () => setSize(+b.dataset.size));
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+/* ================= WARM-UP ================= */
+const W = { n:24, sel:new Set(), checked:false };
+function buildTiles(){
+  const box = $('#tiles'); box.innerHTML='';
+  for(let d=1; d<=W.n; d++){
+    const b = document.createElement('button');
+    b.className='tile'; b.id='tile-'+d; b.setAttribute('aria-pressed','false');
+    b.innerHTML = `${d}<span class="pp"></span>`;
+    b.onclick = () => { if(W.sel.has(d)) W.sel.delete(d); else W.sel.add(d); W.checked=false; renderTiles(); };
+    box.appendChild(b);
+  }
+  renderTiles();
+}
+function renderTiles(){
+  const f = allF(W.n);
+  for(let d=1; d<=W.n; d++){
+    const b = $('#tile-'+d); const on = W.sel.has(d);
+    b.setAttribute('aria-pressed', on && !W.checked);
+    b.classList.toggle('ok', W.checked && on && f.includes(d));
+    b.classList.toggle('no', W.checked && on && !f.includes(d));
+    b.querySelector('.pp').textContent = (W.checked && on && f.includes(d)) ? `× ${W.n/d}` : '';
+  }
+}
+function setWarm(n){
+  W.n=n; W.sel=new Set(); W.checked=false;
+  $$('#warmChips [data-w]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.w===n));
+  $('#warmMsg').textContent=''; $('#warmMsg').className='msg'; $('#pairs').innerHTML='';
+  buildTiles();
+}
+$$('#warmChips [data-w]').forEach(b => b.onclick = () => { $('#warmOther').value=''; setWarm(+b.dataset.w); });
+$('#warmOther').onchange = e => { const v = Math.round(+e.target.value); if(v>=2 && v<=49) setWarm(v); else { e.target.value=''; say('#warmMsg', 'Pick a number from 2 to 49.', 'try'); } };
+function say(sel, html, kind){ const m=$(sel); m.innerHTML=html; m.className='msg' + (kind?' '+kind:''); }
+$('#warmCheck').onclick = () => {
+  const n=W.n, f=allF(n), sel=[...W.sel].sort((a,b)=>a-b);
+  W.checked=true; renderTiles();
+  if(!sel.length){ say('#warmMsg', `Tap the numbers you think divide ${n} evenly, then check.`, 'try'); return; }
+  const wrong = sel.filter(d => !f.includes(d));
+  const right = sel.filter(d => f.includes(d));
+  const missing = f.filter(d => !W.sel.has(d));
+  let html='';
+  if(wrong.length){
+    const d=wrong[0], q=Math.floor(n/d), r=n%d;
+    html += `<span class="eq">${n} ÷ ${d} = ${q} R ${r}</span>. Something is left over, so ${d} is not a factor of ${n}.` + (wrong.length>1 ? ` Check ${listText(wrong.slice(1))} the same way.` : '') + ' ';
+  }
+  if(!missing.length && !wrong.length){
+    const pairs = f.filter(d => d*d<=n).map(d => `${d} and ${n/d}`);
+    html = `You found all ${f.length} factors of ${n}: ${listText(f)}. ` + (f.length===2 ? `Only 1 and ${n}, so <b>${n} is prime</b>.` : `In pairs: ${listText(pairs)}.`) + (Number.isInteger(Math.sqrt(n)) ? ` ${Math.sqrt(n)} × ${Math.sqrt(n)} pairs with itself, so ${n} has an odd number of factors.` : '');
+    say('#warmMsg', html, 'good'); return;
+  }
+  if(missing.length){
+    const lonely = right.find(d => !W.sel.has(n/d));
+    html += `You have ${right.length} of the ${f.length} factors. `;
+    html += lonely ? `Every factor has a partner. You found ${lonely}: what times ${lonely} makes ${n}?` : `Test the small numbers in order. Does ${n} ÷ ${missing[0]} come out even?`;
+  }
+  say('#warmMsg', html, 'try');
+};
+$('#warmPairs').onclick = () => {
+  const n=W.n, box=$('#pairs'); box.innerHTML='';
+  allF(n).filter(d => d*d<=n).forEach(a => {
+    const b=n/a, el=document.createElement('div'); el.className='pair';
+    const rows=a, cols=b;
+    el.innerHTML = `<span class="lab">${a} × ${b}</span><div class="arr" style="grid-template-columns:repeat(${cols},12px)">${'<i></i>'.repeat(rows*cols)}</div>`;
+    box.appendChild(el);
+  });
+  say('#warmMsg', `Each rectangle uses exactly ${n} dots. ` + (isPrime(n) ? `${n} makes only one rectangle, a single row. That's what prime means.` : `Every rectangle is a factor pair.`), '');
+};
+$('#warmClear').onclick = () => setWarm(W.n);
+
+/* ================= GAME ================= */
+let G;
+function newGame(){
+  S.gen++;
+  G = { N:S.N, owner:Array(S.N+1).fill(null), pick:Array(S.N+1).fill(false), turn:'A', score:{A:0,B:0}, log:[], hist:[], over:false };
+  buildGameBoard(); renderGame();
+  say('#playMsg', `<b>${nameOf('A')}</b>, circle any number. Then ${nameOf('B')} scores its factors.`, '');
+}
+const other = p => p==='A' ? 'B' : 'A';
+const nameOf = p => p==='A' ? (S.opp==='cpu' ? 'Class' : 'Player A') : (S.opp==='cpu' ? 'Computer' : 'Player B');
+const freeF = n => pf(n).filter(d => G.owner[d]===null);
+const legal = n => G.owner[n]===null && freeF(n).length>0;
+const anyLegal = () => { for(let n=2;n<=G.N;n++) if(legal(n)) return true; return false; };
+function buildGameBoard(){
+  const b=$('#gameBoard'); b.innerHTML='';
+  for(let n=1;n<=G.N;n++){
+    const c=document.createElement('button'); c.className='cell'; c.id='g-'+n; c.dataset.n=n;
+    c.innerHTML=`<span class="num">${n}</span>`;
+    c.onclick = () => tryMove(n, true);
+    b.appendChild(c);
+  }
+}
+function renderGame(){
+  const show = $('#showLegal').checked && !G.over;
+  for(let n=1;n<=G.N;n++){
+    const c=$('#g-'+n), o=G.owner[n];
+    c.classList.remove('A','B','pick','legal','dead','scored');
+    if(o) c.classList.add(o);
+    if(G.pick[n]) c.classList.add('pick');
+    if(show && legal(n)) c.classList.add('legal');
+    if(G.over && !o) c.classList.add('dead');
+    const lastE = G.log[G.log.length-1]; if(lastE && lastE.fr && lastE.fr.includes(n)) c.classList.add('scored');
+    c.setAttribute('aria-label', `${n}` + (o ? `, circled by ${nameOf(o)}${G.pick[n]?' (picked)':''}` : ''));
+  }
+  $('#sA').textContent=G.score.A; $('#sB').textContent=G.score.B;
+  $('#nameA').textContent=nameOf('A'); $('#nameB').textContent=nameOf('B');
+  $('#pA').classList.toggle('turn', !G.over && G.turn==='A'); $('#pB').classList.toggle('turn', !G.over && G.turn==='B');
+  $('#tA').textContent = G.over ? '' : G.turn==='A' ? 'Your pick' : '';
+  $('#tB').textContent = G.over ? '' : G.turn==='B' ? (S.opp==='cpu' ? 'Thinking…' : 'Your pick') : '';
+  $('#undoBtn').disabled = !G.hist.length;
+  $('#log').innerHTML = G.log.slice().reverse().map(l => `<li class="${l.p}">${l.html}</li>`).join('');
+}
+function nope(n, html){
+  const c=$('#g-'+n); c.classList.remove('nope'); void c.offsetWidth; c.classList.add('nope');
+  say('#playMsg', html, 'try');
+}
+function tryMove(n, human){
+  if(G.over){ say('#playMsg', 'This game is over. Tap <b>New game</b> to play again.', 'try'); return; }
+  if(human && S.opp==='cpu' && G.turn==='B'){ say('#playMsg', 'Wait for the computer to pick.', 'try'); return; }
+  const o=G.owner[n];
+  if(o){ nope(n, `${n} is already circled. ${nameOf(o)} ${G.pick[n] ? 'picked it' : 'scored it as a factor'}. Choose a number that isn't circled yet.`); return; }
+  const fr=freeF(n);
+  if(!fr.length){
+    if(n===1) nope(1, `1 has no factors except itself, so picking it would give your opponent nothing to score. That's not allowed. 1 gets scored as a factor instead.`);
+    else nope(n, `The factors of ${n} (besides ${n}) are ${listText(pf(n))}, and they are all circled already. Your opponent would get nothing, so you can't pick ${n}. Look for a number that still has a free factor.`);
+    return;
+  }
+  G.hist.push(JSON.stringify({owner:G.owner,pick:G.pick,turn:G.turn,score:G.score,log:G.log}));
+  const p=G.turn, q=other(p), taken=pf(n).filter(d => G.owner[d]!==null);
+  G.owner[n]=p; G.pick[n]=true; G.score[p]+=n;
+  fr.forEach(d => { G.owner[d]=q; G.score[q]+=d; });
+  const got=sum(fr);
+  const html = `<b>${nameOf(p)}</b> picks ${n} and scores ${n}. <b>${nameOf(q)}</b> scores <span class="eq">${fr.length>1 ? plusList(fr)+' = '+got : got}</span>.` + (pf(n).length ? `<div class="fchips"><span class="lbl">Factors of ${n}:</span>${pf(n).map(d => `<span class="fchip ${fr.includes(d)?'new':'old'}">${d}</span>`).join('')}<span class="fkey">highlighted = scored now, plain = already circled</span></div>` : '');
+  G.log.push({p, html, fr});
+  G.turn=q;
+  [n,...fr].forEach(d => { const c=$('#g-'+d); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); });
+  if(!anyLegal()){ G.over=true; renderGame(); finish(html); return; }
+  renderGame();
+  say('#playMsg', html + ` Now <b>${nameOf(q)}</b> picks.`, '');
+  maybeCpu();
+}
+function finish(last){
+  const left=[]; for(let n=1;n<=G.N;n++) if(!G.owner[n]) left.push(n);
+  const a=G.score.A, b=G.score.B;
+  const res = a===b ? `It's a tie, ${a} to ${b}!` : `<b>${nameOf(a>b?'A':'B')} wins</b>, ${Math.max(a,b)} to ${Math.min(a,b)}.`;
+  say('#playMsg', `${last}<br><b>Game over.</b> No number left has a free factor. ${res}` + (left.length ? ` Nobody can take ${listText(left)}.` : ''), 'good');
+  const total = a+b+sum(left);
+  console.assert(total === G.N*(G.N+1)/2, 'score total mismatch');
+}
+function cpuChoice(){
+  let best=null, bv=-Infinity;
+  for(let n=2;n<=G.N;n++) if(legal(n)){ const v=n-sum(freeF(n)); if(v>bv || (v===bv && n>best)){ bv=v; best=n; } }
+  return best;
+}
+function maybeCpu(){
+  if(S.opp!=='cpu' || G.turn!=='B' || G.over) return;
+  const g=S.gen;
+  setTimeout(() => { if(g!==S.gen || G.turn!=='B' || G.over) return; tryMove(cpuChoice(), false); }, reduced ? 350 : 1100);
+}
+$('#undoBtn').onclick = () => {
+  if(!G.hist.length) return;
+  S.gen++;
+  const pop = () => { const h=JSON.parse(G.hist.pop()); Object.assign(G, h); G.over=false; };
+  pop();
+  if(S.opp==='cpu' && G.turn==='B' && G.hist.length) pop();
+  if(S.opp==='cpu' && G.turn==='B'){ renderGame(); maybeCpu(); }
+  renderGame(); say('#playMsg', `Move taken back. <b>${nameOf(G.turn)}</b> picks.`, '');
+};
+$('#newGameBtn').onclick = newGame;
+$('#showLegal').onchange = renderGame;
+$$('[data-opp]').forEach(b => b.onclick = () => { S.opp=b.dataset.opp; $$('[data-opp]').forEach(x => x.setAttribute('aria-pressed', x===b)); newGame(); });
+
+/* ================= FIRST-MOVE TABLE ================= */
+const FM = [7,12,13,15,16,18,20,24,25,28,29,30];
+const aheadOf = n => net(n)>0 ? 'you' : net(n)===0 ? 'tie' : 'opp';
+function buildTable(){
+  $('#fmtBody').innerHTML = FM.map(n => `<tr id="fr-${n}"><td class="n">${n}</td><td style="font-size:1.15em">${n}</td>
+    <td><input id="fo-${n}" type="number" inputmode="numeric" min="0" aria-label="Opponent gets for ${n}"></td>
+    <td><select id="fa-${n}" aria-label="Who comes out ahead with ${n}"><option value="">choose…</option><option value="you">You</option><option value="tie">Tie</option><option value="opp">Opponent</option></select></td>
+    <td class="why" id="fw-${n}"></td></tr>`).join('');
+  $('#fo-7').value=1; $('#fa-7').value='you';
+}
+function rowFeedback(n){
+  const tr=$('#fr-'+n), inp=$('#fo-'+n), sel=$('#fa-'+n), why=$('#fw-'+n);
+  tr.classList.remove('ok','bad'); inp.classList.remove('badv'); sel.classList.remove('badv');
+  const raw=inp.value.trim(); if(raw==='' && !sel.value){ why.textContent=''; return 'blank'; }
+  const v=+raw, g=gift(n), f=pf(n);
+  let msg='', ok=true;
+  if(raw==='' ){ ok=false; msg=`Fill in what your opponent gets first.`; inp.classList.add('badv'); }
+  else if(v!==g){
+    ok=false; inp.classList.add('badv');
+    if(v===g+n) msg=`That counts ${n} itself. Your opponent only gets the factors other than ${n}.`;
+    else if(v===g-1 && f.length>1) msg=`So close! Did you count 1? It's a factor of every number.`;
+    else msg=`${n} has ${f.length} factor${f.length>1?'s':''} besides itself. Find them with factor pairs, then add.`;
+  } else if(!sel.value){ ok=false; sel.classList.add('badv'); msg=`Right: ${plusList(f)} = ${g}. Now, who comes out ahead?`; }
+  else if(sel.value!==aheadOf(n)){ ok=false; sel.classList.add('badv'); msg=`Compare: you get ${n}, your opponent gets ${g}. Which is bigger?`; }
+  if(ok) msg = (f.length>1 ? `${plusList(f)} = ${g}. ` : `Just the 1. `) + (aheadOf(n)==='you' ? `You're ahead by ${n-g}.` : aheadOf(n)==='tie' ? `${n} and ${g}: a tie!` : `Your opponent is ahead by ${g-n}. A trap!`);
+  tr.classList.add(ok?'ok':'bad'); why.textContent=msg;
+  return ok ? 'ok' : 'bad';
+}
+$('#fmtCheck').onclick = () => {
+  const r = FM.map(rowFeedback);
+  const ok=r.filter(x=>x==='ok').length, bad=r.filter(x=>x==='bad').length, blank=r.filter(x=>x==='blank').length;
+  if(ok===FM.length) say('#fmtMsg', `Every row checks out. Look down the "Who comes out ahead?" column. What do the numbers where you're far ahead have in common? Now decide the best and worst moves below.`, 'good');
+  else say('#fmtMsg', `${ok} row${ok===1?'':'s'} correct` + (bad ? `, ${bad} to look at again (read the hint beside each one)` : '') + (blank ? `, ${blank} still blank` : '') + '.', bad ? 'try' : '');
+};
+$('#fmtHint').onclick = () => {
+  const n = FM.find(n => rowFeedback(n)!=='ok');
+  if(n===undefined){ say('#fmtMsg', 'Every row is already right.', 'good'); return; }
+  $('#fo-'+n).value=gift(n); $('#fa-'+n).value=aheadOf(n); rowFeedback(n);
+  say('#fmtMsg', `Filled in ${n}: its factors besides ${n} are ${listText(pf(n))}.`, '');
+};
+const nums = s => (s.match(/\d+/g)||[]).map(Number);
+$('#ansCheck').onclick = () => {
+  const out=[]; let allOk=true;
+  const b = nums($('#ansBest').value)[0], w = nums($('#ansWorst').value)[0], t = [...new Set(nums($('#ansTie').value))].sort((x,y)=>x-y);
+  // Best (1 to 30 board)
+  if(b===undefined){ allOk=false; out.push('Best: write the number you think is the best first move.'); }
+  else if(b<1||b>30){ allOk=false; out.push(`Best: ${b} isn't on the 1 to 30 board.`); }
+  else if(b===29) out.push(`<b>Best: 29</b> ✓ You get 29, your opponent gets only 1, so you're ahead by 28. No other first move does better.`);
+  else if(b===1){ allOk=false; out.push('Best: 1 can never be picked. It has no other factors for your opponent to score.'); }
+  else if(isPrime(b)){ allOk=false; out.push(`Best: ${b} is a good move. It gives away only 1, so you're ahead by ${b-1}. Is there a bigger number that also gives away only 1?`); }
+  else { allOk=false; out.push(`Best: ${b} gives your opponent ${plusList(pf(b))} = ${gift(b)}, so ` + (net(b)>0 ? `you're ahead by only ${net(b)}.` : net(b)===0 ? 'it\'s a tie.' : `you fall behind by ${-net(b)}.`) + ' Look for a number that gives away just 1.'); }
+  // Worst
+  if(w===undefined){ allOk=false; out.push('Worst: write the number you think is the worst first move.'); }
+  else if(w<1||w>30){ allOk=false; out.push(`Worst: ${w} isn't on the 1 to 30 board.`); }
+  else if(w===24||w===30) out.push(`<b>Worst: ${w}</b> ✓ 24 and 30 tie for worst. Each puts you 12 behind (24 vs. 36, 30 vs. 42). 30 hands your opponent the most points of any move.`);
+  else if(w>1 && gift(w)>w){ allOk=false; out.push(`Worst: ${w} is a trap. You get ${w}, your opponent gets ${gift(w)}, so you fall ${gift(w)-w} behind. But another trap is even worse.`); }
+  else { allOk=false; out.push(`Worst: with ${w} your opponent gets ${w===1?'nothing (it can\'t be picked)':gift(w)}` + (w>1 ? `, so ${net(w)>0?'you\'re still ahead by '+net(w):'it\'s a tie'}` : '') + '. Look for numbers with lots of factors.'); }
+  // Ties
+  if(!t.length){ allOk=false; out.push('Ties: list the numbers where you and your opponent get the same.'); }
+  else {
+    const extra = t.filter(n => !(n===6||n===28));
+    if(extra.length){ allOk=false; const n=extra[0]; out.push(`Ties: ${n} is not a tie. ` + (n<2||n>30 ? `It isn't a move on this board.` : `You get ${n}, your opponent gets ${plusList(pf(n))} = ${gift(n)}.`)); }
+    else if(t.length===2) out.push(`<b>Ties: 6 and 28</b> ✓ 6 = 1 + 2 + 3 and 28 = 1 + 2 + 4 + 7 + 14. See Detective question 4 to find out what these numbers are called.`);
+    else { allOk=false; out.push(t[0]===28 ? `Ties: 28 is one (1 + 2 + 4 + 7 + 14 = 28). There's one more, and it isn't in the table. Try numbers under 10.` : `Ties: 6 is one (1 + 2 + 3 = 6). There's one more on the 1 to 30 board.`); }
+  }
+  say('#ansMsg', out.join('<br>'), allOk ? 'good' : 'try');
+};
+
+/* chart */
+function drawChart(){
+  const N=S.N, xs=[]; for(let n=2;n<=N;n++) xs.push(n);
+  const vals=xs.map(net), maxV=Math.max(...vals), minV=Math.min(...vals);
+  const top=Math.ceil(maxV/10)*10, bot=Math.floor(minV/10)*10;
+  const W=Math.max(640, xs.length*26+60), H=360, L=44, R=12, T=16, B=38;
+  const bw=(W-L-R)/xs.length, y=v => T + (top-v)*(H-T-B)/(top-bot);
+  const color = n => ({prime:'var(--good)', perfect:'var(--gold)', trap:'var(--bad)', other:'var(--plain)'})[cat(n)];
+  let s='';
+  for(let v=bot; v<=top; v+=10){ s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="${v===0?0:1}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="Lexend, sans-serif">${v>0?'+':''}${v}</text>`; }
+  xs.forEach((n,i) => {
+    const v=net(n), x=L+i*bw+bw*.14, w=bw*.72, y0=y(0), y1=y(v);
+    const h=Math.max(Math.abs(y1-y0), v===0?3:0);
+    s+=`<rect x="${x}" y="${v>=0?y0-h:y0}" width="${w}" height="${h}" rx="2" fill="${color(n)}"><title>${n}: you get ${n}, opponent gets ${gift(n)} (${v>0?'+':''}${v})</title></rect>`;
+    s+=`<text x="${x+w/2}" y="${H-B+18}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)" font-family="Lexend, sans-serif">${n}</text>`;
+  });
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  s+=`<text x="${L}" y="${H-4}" font-size="12" fill="var(--muted)" font-family="Lexend, sans-serif">First move →   bar = what you get minus what your opponent gets</text>`;
+  const svg=$('#chart'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.style.minWidth = Math.min(W, 1100)+'px'; svg.innerHTML=s;
+  $('#chartLegend').innerHTML = [['var(--good)','Prime: gives away only 1'],['var(--gold)','Tie'],['var(--bad)','Trap: opponent gets more'],['var(--plain)','Other']].map(([c,t])=>`<span><i style="--c:${c}"></i>${t}</span>`).join('');
+  const best=xs.reduce((a,b)=>net(b)>net(a)?b:a);
+  $('#chartNote').textContent = `Board 1 to ${N}. Tallest bar: ${best} (+${net(best)}).`;
+}
+$('#chartBtn').onclick = () => { $('#chartBox').hidden=false; drawChart(); };
+
+/* ================= DETECTIVE ================= */
+function buildDetBoard(){
+  const b=$('#detBoard'); b.innerHTML='';
+  for(let n=1;n<=S.N;n++){ const c=document.createElement('div'); c.className='cell'; c.id='d-'+n; c.innerHTML=`<span class="num">${n}</span><span class="badge"></span>`; b.appendChild(c); }
+}
+function clearEvidence(){
+  $('#detBoard').classList.remove('focus');
+  for(let n=1;n<=S.N;n++){ const c=$('#d-'+n); if(!c) continue; c.className='cell'; c.querySelector('.badge').textContent=''; }
+}
+function hl(list, badge, klass){
+  $('#detBoard').classList.add('focus');
+  list.forEach(n => { const c=$('#d-'+n); if(!c) return; c.classList.add('hl'); if(klass) c.classList.add(klass(n)); if(badge){ const t=badge(n); if(t!=null){ c.classList.add('hasbadge'); c.querySelector('.badge').textContent=t; } } });
+}
+const range = () => { const r=[]; for(let n=2;n<=S.N;n++) r.push(n); return r; };
+const sign = v => (v>0?'+':v<0?'−':'') + Math.abs(v);
+const res = h => say('#qresult', h, '');
+const Q = [
+  { k:'1', text:()=>'What kind of number gives your opponent only 1?', acts:[
+    {l:'Show the numbers that give away just 1', run(){ clearEvidence(); const p=range().filter(n=>gift(n)===1); hl(p, ()=> 'gives 1', ()=>'cat-prime');
+      res(`${listText(p)}. Every one is <b>prime</b>: its only factors are 1 and itself. So when you pick it, your opponent scores just the 1.`); }},
+    {l:'What about 1 itself?', run(){ clearEvidence(); hl([1]);
+      res(`1 can never be picked. Its only factor is 1, so there is nothing left for your opponent to score. 1 is a factor of every number, so it always gets scored on the very first move of the game.`); }} ]},
+  { k:'2', text:()=>'Which numbers give your opponent more than you get?', acts:[
+    {l:'Find the traps', run(){ clearEvidence(); const t=range().filter(n=>gift(n)>n); hl(t, n=>'gives '+gift(n), ()=>'cat-trap');
+      res(`On 1 to ${S.N}: ${t.map(n=>`<b>${n}</b> gives away ${gift(n)}`).join(', ')}. These are numbers with lots of factors. Big isn't always good!`); }},
+    {l:()=>`Show the factors of ${S.N>=24?24:12}`, run(){ clearEvidence(); const T=S.N>=24?24:12; hl(pf(T).concat(T), n=> n===T ? 'you get '+T : null, n=> n===T?'cat-prime':'cat-trap');
+      res(`Pick ${T} and your opponent scores <span class="eq">${plusList(pf(T))} = ${gift(T)}</span>. You get ${T}. You fall ${gift(T)-T} behind.`); }} ]},
+  { k:'3', text:()=>`Which first move is the very best? Why not ${S.N===20?'20':S.N===49?'48':'30'}?`, acts:[
+    {l:'Rank every first move', run(){ clearEvidence(); const r=range(); hl(r, n=>sign(net(n)), n=> net(n)<0?'cat-trap':isPrime(n)?'cat-prime':'x');
+      const best=r.reduce((a,b)=>net(b)>net(a)?b:a);
+      res(`Each badge is what you get minus what your opponent gets. The best is <b>${best}</b>: you're ahead by ${net(best)}. It's the biggest prime on the board.`); }},
+    {l:()=>{ const big=S.N===49?48:S.N; const p=range().filter(isPrime).pop(); return `Compare ${p} and ${big}`; }, run(){ clearEvidence();
+      const big=S.N===49?48:S.N, p=range().filter(isPrime).pop();
+      hl([p,big], n=>sign(net(n)), n=> n===p?'cat-prime':'cat-trap');
+      res(`<b>${p}</b>: you get ${p}, your opponent gets 1. You're ahead by ${p-1}.<br><b>${big}</b>: you get ${big}, your opponent gets ${plusList(pf(big))} = ${gift(big)}. ` + (net(big)<0 ? `You fall ${-net(big)} behind.` : `You're ahead by only ${net(big)}.`)); }} ]},
+  { k:'4', text:()=>'Two numbers give exactly a tie. What is special about them?', acts:[
+    {l:'Find the ties', run(){ clearEvidence(); const t=range().filter(n=>gift(n)===n); hl(t, ()=> 'tie', ()=>'hl');
+      res(t.length>1 ? `${listText(t)}. Picking either one gives your opponent exactly as many points as you get.` : `On this board only ${t[0]} ties. Switch to 1 to 30 to find the other one.`); }},
+    {l:'Add up their factors', run(){ clearEvidence(); const t=[6,28].filter(n=>n<=S.N); hl(t, ()=>'tie');
+      res(`<span class="eq">6 = 1 + 2 + 3</span><br><span class="eq">28 = 1 + 2 + 4 + 7 + 14</span><br>Each number equals the sum of its other factors. Mathematicians call these <b>perfect numbers</b>. The next one is 496!`); }} ]},
+  { k:'★', star:true, text:()=>'Challenge: on a board from 1 to 49, what is the best first move? Is it always the largest prime? Why?', acts:[
+    {l:'Rank the 1 to 49 board', run(){ if(S.N!==49) setSize(49); clearEvidence(); const r=range(); hl(r, n=>sign(net(n)), n=> net(n)<0?'cat-trap':isPrime(n)?'cat-prime':'x');
+      res(`The best first move is <b>47</b>: you're ahead by 46. Next best: 43 (+42), then 49 (+41).`); }},
+    {l:'Can a big composite beat 47?', run(){ if(S.N!==49) setSize(49); clearEvidence(); hl([47,48,49], n=>sign(net(n)), n=> n===47?'cat-prime':n===48?'cat-trap':'hl');
+      res(`<b>49 = 7 × 7</b> gives away only 1 + 7 = 8, so it comes close (+41). <b>48</b> gives away 76 (−28). A prime gives away just 1. Any other number gives away 1 <i>plus</i> more factors. We tested every board from 1 to 2 up to 1 to 1,000: the largest prime was always the best first move.`); }},
+    {l:'Every tie under 50', run(){ if(S.N!==49) setSize(49); clearEvidence(); hl([6,28], ()=>'tie');
+      res(`Only <b>6 and 28</b>. The next perfect number is 496, far off this board.`); }} ]},
+  { k:'✎', text:()=>'Explain to a new player how to choose a good first move.', acts:[], extra:`<ul class="starters"><li>A good first move is a number that…</li><li>Watch out for numbers like… because…</li><li>Don't pick 30, because…</li></ul>` }
+];
+S.q=0;
+function renderQuestion(){
+  $('#qnav').innerHTML = Q.map((q,i)=>`<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="${q.star?'Challenge':q.k==='✎'?'Journal prompt':'Question '+q.k}">${q.star?'★ Challenge':q.k==='✎'?'✎ Journal':q.k}</button>`).join('');
+  $$('#qnav button').forEach(b => b.onclick = () => { S.q=+b.dataset.q; clearEvidence(); res(''); renderQuestion(); });
+  const q=Q[S.q]; $('#qtext').textContent=q.text();
+  const box=$('#qactions'); box.innerHTML='';
+  q.acts.forEach((a,i) => { const b=document.createElement('button'); b.className=i===0?'primary':'secondary'; b.textContent=typeof a.l==='function'?a.l():a.l; b.onclick=()=>{ a.run(); if(typeof a.l==='function') b.textContent=a.l(); }; box.appendChild(b); });
+  if(q.extra) res(q.extra);
+}
+
+/* ---------- Reset ---------- */
+function resetAll(){
+  setWarm(24); $('#warmOther').value='';
+  buildTable(); ['#fmtMsg','#ansMsg'].forEach(s=>say(s,'',''));
+  ['#ansBest','#ansWorst','#ansTie'].forEach(s=>$(s).value='');
+  $('#chartBox').hidden=true; $('#chartNote').textContent='';
+  $('#showLegal').checked=false;
+  S.q=0; setSize(30); res('');
+}
+$('#resetBtn').onclick = resetAll;
+
+/* ---------- Boot ---------- */
+setWarm(24); buildTable(); setSize(30); selectTab('play');
+
+/* self-checks against the lesson's answer key */
+(function(){
+  const key={2:1,3:1,4:3,5:1,6:6,7:1,8:7,9:4,10:8,11:1,12:16,13:1,14:10,15:9,16:15,17:1,18:21,19:1,20:22,21:11,22:14,23:1,24:36,25:6,26:16,27:13,28:28,29:1,30:42};
+  for(const n in key) console.assert(gift(+n)===key[n], 'key mismatch '+n);
+})();
+})();
+</script>
+
+</body></html>

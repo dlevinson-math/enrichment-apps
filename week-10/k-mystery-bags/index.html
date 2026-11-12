@@ -1,0 +1,659 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mystery Bags</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a classroom table — the pan balance is the stage, bags wait on a shelf below, the "what we found" card sits beside it */
+:root{
+  --bg:#EAF1F4; --card:#FFFFFF; --ink:#1E2A3A; --muted:#5C6878; --line:#CCD7DF;
+  --wood:#B07A45; --wood-dark:#7D5330; --metal:#8A97A6; --pan:#C9D3DC;
+  --accent:#F2A516; --accent-ink:#4A3000; --accent-soft:#FFF1D3;
+  --good:#23885A; --good-soft:#DDF3E7; --hmm:#C2531F; --hmm-soft:#FCE6DA;
+  --bagA:#E0634D; --bagB:#2A9D8F; --bagC:#7B5EA7; --bagD:#C98A12;
+  --box:#D8A869; --box-dark:#A9773C; --rock:#8C8F94; --rock-dark:#5E6268;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141C26; --card:#1D2733; --ink:#EEF2F5; --muted:#A6B2BF; --line:#33414F;
+    --wood:#C48E58; --wood-dark:#9A6A3E; --metal:#9AA7B5; --pan:#4A5868;
+    --accent:#F6B73C; --accent-ink:#2A1C00; --accent-soft:#3A2E14;
+    --good:#4CC489; --good-soft:#173A2A; --hmm:#F08A5A; --hmm-soft:#43281B;
+    --bagA:#F07A64; --bagB:#3DB8A9; --bagC:#9C80CC; --bagD:#E2A62C;
+    --box:#C99A5D; --box-dark:#9C6C33; --rock:#9EA2A8; --rock-dark:#70757C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141C26; --card:#1D2733; --ink:#EEF2F5; --muted:#A6B2BF; --line:#33414F;
+  --wood:#C48E58; --wood-dark:#9A6A3E; --metal:#9AA7B5; --pan:#4A5868;
+  --accent:#F6B73C; --accent-ink:#2A1C00; --accent-soft:#3A2E14;
+  --good:#4CC489; --good-soft:#173A2A; --hmm:#F08A5A; --hmm-soft:#43281B;
+  --bagA:#F07A64; --bagB:#3DB8A9; --bagC:#9C80CC; --bagD:#E2A62C;
+  --box:#C99A5D; --box-dark:#9C6C33; --rock:#9EA2A8; --rock-dark:#70757C;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:12px 24px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:4px solid var(--accent); outline-offset:3px}
+h1,h2,h3{font-family:var(--display); margin:0; text-wrap:balance}
+
+header{display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; max-width:1400px; margin:0 auto 10px}
+header h1{font-size:clamp(28px,3.4vw,46px); font-weight:700; letter-spacing:-.01em; line-height:1}
+.sub{font-size:15px; color:var(--muted); font-weight:700; letter-spacing:.04em; text-transform:uppercase; margin-top:4px}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 18px; font-weight:800; font-size:16px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:10px; flex-wrap:wrap; max-width:1400px; margin:0 auto 14px}
+nav.steps button{display:flex; align-items:center; gap:10px; border:3px solid var(--line); background:var(--card); border-radius:999px; padding:8px 20px 8px 8px; font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,22px); min-height:56px}
+nav.steps button .n{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:var(--bg); font-size:20px}
+nav.steps button[aria-selected="true"]{border-color:var(--accent); background:var(--accent-soft)}
+nav.steps button[aria-selected="true"] .n{background:var(--accent); color:var(--accent-ink)}
+
+.view{max-width:1400px; margin:0 auto}
+.view[hidden]{display:none}
+.grid{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:20px; align-items:start}
+.stage{background:var(--card); border-radius:24px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0}
+.side{display:flex; flex-direction:column; gap:16px; min-width:0}
+.panel{background:var(--card); border-radius:24px; padding:18px 20px; display:flex; flex-direction:column; gap:12px}
+.panel h2{font-size:clamp(22px,2vw,28px); font-weight:600}
+.say{font-family:var(--display); font-weight:600; font-size:clamp(26px,2.8vw,40px); line-height:1.15; text-align:center; min-height:1.2em; margin:0}
+.say small{display:block; font-family:var(--body); font-size:.5em; color:var(--muted); font-weight:700; margin-top:4px}
+
+svg.balance{width:100%; height:auto; display:block; max-height:52vh}
+.shelf{display:flex; justify-content:center; align-items:flex-end; gap:clamp(10px,3vw,40px); flex-wrap:wrap; padding:10px 8px 0; border-top:8px solid var(--wood); border-radius:4px; min-height:150px}
+.bagbtn{border:0; background:none; padding:6px; border-radius:18px; display:flex; flex-direction:column; align-items:center; transition:transform .2s, opacity .2s}
+.bagbtn:hover{transform:translateY(-4px)}
+.bagbtn.away{opacity:.25}
+.bagbtn.pulse{animation:pulse 1s ease-in-out 3}
+@keyframes pulse{50%{transform:translateY(-10px) scale(1.06)}}
+.bagbtn svg{display:block}
+
+.bigbtn{border:0; background:var(--accent); color:var(--accent-ink); font-family:var(--display); font-weight:600; font-size:clamp(20px,1.8vw,26px); padding:14px 26px; border-radius:18px; min-height:60px}
+.bigbtn:disabled{opacity:.4; cursor:default}
+.bigbtn.alt{background:var(--card); color:var(--ink); border:3px solid var(--ink)}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center}
+
+/* tests list */
+.tests{display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto}
+.test{display:flex; align-items:center; gap:12px; font-size:20px; font-weight:800; padding:6px 10px; border-radius:14px; background:var(--bg)}
+.test .num{width:34px; height:34px; border-radius:50%; background:var(--card); display:grid; place-items:center; font-family:var(--display); font-size:18px; flex:none}
+.test svg{flex:none}
+.empty{color:var(--muted); font-size:18px}
+.count{display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:600; font-size:22px}
+.tally{display:flex; gap:6px; flex-wrap:wrap}
+.tally i{width:10px; height:34px; border-radius:5px; background:var(--accent)}
+.known{font-weight:800; color:var(--good); background:var(--good-soft); border-radius:14px; padding:10px 14px; font-size:19px}
+
+/* order slots */
+.order{display:grid; grid-template-columns:repeat(var(--n),minmax(0,1fr)); gap:10px}
+.slot{border:3px dashed var(--line); border-radius:18px; background:var(--bg); min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:6px 4px 8px; gap:4px}
+.slot.filled{border-style:solid; border-color:var(--ink)}
+.slot .lab{font-size:14px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; text-align:center}
+.weightscale{display:flex; justify-content:space-between; align-items:center; font-weight:800; color:var(--muted); font-size:15px}
+.weightscale span{display:flex; align-items:center; gap:6px}
+.picks{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.pick{width:60px; height:60px; border-radius:50%; border:0; color:#fff; font-family:var(--display); font-weight:700; font-size:28px; background:var(--c)}
+.pick:disabled{opacity:.2; cursor:default}
+.fb{border-radius:16px; padding:14px 16px; font-size:20px; font-weight:800; line-height:1.35; display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.fb:empty{display:none}
+.fb.good{background:var(--good-soft); color:var(--good)}
+.fb.hmm{background:var(--hmm-soft); color:var(--hmm)}
+.fb .t{color:var(--ink)}
+.chip{display:inline-grid; place-items:center; width:36px; height:36px; border-radius:50%; color:#fff; font-family:var(--display); font-weight:700; font-size:20px; background:var(--c); vertical-align:middle}
+
+.seg{display:inline-flex; background:var(--bg); border-radius:16px; padding:4px; gap:4px}
+.seg button{border:0; background:none; border-radius:12px; padding:10px 18px; font-weight:800; font-size:18px; min-height:48px; color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+/* warm-up */
+.qa{display:flex; flex-direction:column; gap:14px; align-items:center}
+.pickrow{display:flex; gap:20px; justify-content:center; flex-wrap:wrap}
+.thing{border:4px solid transparent; background:var(--bg); border-radius:22px; padding:10px 18px 6px; display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--display); font-weight:600; font-size:22px; min-width:150px}
+.thing[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+
+/* detective */
+.qnav{display:flex; gap:10px; flex-wrap:wrap}
+.qnav button{border:3px solid var(--line); background:var(--card); border-radius:999px; min-height:56px; padding:8px 20px; font-family:var(--display); font-weight:600; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qtext{font-family:var(--display); font-weight:600; font-size:clamp(26px,2.6vw,38px); line-height:1.2; margin:0}
+.stairs{width:100%; height:auto; max-height:40vh; display:block}
+.reveal{display:grid; grid-template-columns:repeat(var(--n),minmax(0,1fr)); gap:12px}
+.open{background:var(--bg); border-radius:18px; padding:10px 6px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; font-weight:800}
+.open svg{width:100%; height:auto; max-width:150px}
+.lineups{display:grid; gap:10px}
+.lineup{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-weight:800; font-size:19px}
+.lineup .lbl{min-width:190px; color:var(--muted)}
+details.teacher{max-width:1400px; margin:18px auto 0; background:var(--card); border-radius:18px; padding:12px 18px; font-size:16px; color:var(--muted)}
+details.teacher summary{cursor:pointer; font-weight:800; color:var(--ink); min-height:32px}
+details.teacher ul{margin:8px 0 0; padding-left:20px; display:grid; gap:6px; line-height:1.45}
+
+@media (max-width: 900px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .lineup .lbl{min-width:0; width:100%}
+  .slot{min-height:100px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+
+<header>
+  <div>
+    <h1>Mystery Bags</h1>
+    <div class="sub">Kindergarten · Week 10 · Lesson K.10</div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="newBtn">New mystery bags</button>
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="steps" role="tablist" aria-label="Lesson parts">
+  <button role="tab" data-v="warm" aria-selected="true"><span class="n">1</span>Box or rock?</button>
+  <button role="tab" data-v="weigh" aria-selected="false"><span class="n">2</span>Weigh the bags</button>
+  <button role="tab" data-v="det" aria-selected="false"><span class="n">3</span>Detective questions</button>
+</nav>
+
+<!-- 1. WARM-UP -->
+<section class="view" id="v-warm">
+  <div class="grid">
+    <div class="stage">
+      <svg class="balance" id="balWarm" viewBox="0 0 600 330" role="img" aria-label="Pan balance"></svg>
+      <p class="say" id="warmSay" aria-live="polite"></p>
+    </div>
+    <div class="side">
+      <div class="panel qa">
+        <h2 id="warmQ">Which is bigger?</h2>
+        <div class="pickrow">
+          <button class="thing" id="tBox" aria-pressed="false"></button>
+          <button class="thing" id="tRock" aria-pressed="false"></button>
+        </div>
+        <div class="row">
+          <button class="bigbtn" id="warmGo" hidden>Put them on the balance</button>
+          <button class="bigbtn alt" id="warmNext" hidden>Next: the mystery bags</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. WEIGH -->
+<section class="view" id="v-weigh" hidden>
+  <div class="grid">
+    <div class="stage">
+      <div class="row" style="justify-content:space-between">
+        <div class="seg" role="group" aria-label="How many bags">
+          <button id="n3" aria-pressed="true">3 bags</button>
+          <button id="n4" aria-pressed="false">4 bags ★</button>
+        </div>
+        <button class="ghost" id="clearPans">Empty the balance</button>
+      </div>
+      <svg class="balance" id="balMain" viewBox="0 0 600 330" role="img" aria-label="Pan balance"></svg>
+      <p class="say" id="weighSay" aria-live="polite"></p>
+      <div class="shelf" id="shelf" aria-label="Bags. Tap a bag to put it on the balance."></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <h2>What the balance told us</h2>
+        <div class="count"><span>Weighings:</span><span class="tally" id="tally"></span><span id="tallyN">0</span></div>
+        <div class="tests" id="tests"></div>
+        <div class="known" id="known" hidden></div>
+      </div>
+      <div class="panel">
+        <h2>Our order</h2>
+        <div class="weightscale"><span>
+          <svg width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><path d="M3 19 Q12 2 31 3 Q22 12 6 18Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>Lightest</span>
+          <span>Heaviest<svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true"><path d="M9 8 h12 l6 14 h-24z" fill="currentColor"/><circle cx="15" cy="5" r="3.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></span></div>
+        <div class="order" id="order"></div>
+        <div class="picks" id="picks" aria-label="Tap a letter to put that bag in the next box"></div>
+        <div class="row">
+          <button class="bigbtn" id="checkBtn">Check our order</button>
+          <button class="ghost" id="clearOrder">Clear</button>
+        </div>
+        <div class="fb" id="fb" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. DETECTIVE -->
+<section class="view" id="v-det" hidden>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="qnav" id="qnav">
+      <button data-q="1" aria-pressed="true">Do we need test 3?</button>
+      <button data-q="2" aria-pressed="false">Biggest = heaviest?</button>
+      <button data-q="3" aria-pressed="false">★ Four bags</button>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="stage" id="detStage">
+      <svg class="balance" id="balDet" viewBox="0 0 600 330" role="img" aria-label="Pan balance"></svg>
+      <div id="detVisual"></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <p class="qtext" id="qtext"></p>
+        <div class="row" id="qactions" style="justify-content:flex-start"></div>
+        <div class="fb" id="qfb" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<details class="teacher">
+  <summary>Teacher notes</summary>
+  <ul>
+    <li><b>Driving question:</b> How can we put three bags in order without opening them?</li>
+    <li><b>Warm-up:</b> “Which is bigger? Which is heavier? Are those the same question?”</li>
+    <li><b>While weighing:</b> “Show me how you know A is heavier than B.” “Heavier than which bag?” “Hands off. Wait until it stops moving.”</li>
+    <li><b>When two results chain</b> (one bag heavier than a second, the second heavier than a third): “Do you need to test the first against the third? Why not?”</li>
+    <li><b>Look for:</b> students who use the balance as evidence and reason that the heaviest-of-the-chain must beat the last bag without testing.</li>
+    <li><b>Challenge facts:</b> with 3 bags, 2 weighings can be enough if they chain; 3 is always enough. With 4 bags, 3 weighings can be enough if they chain; 5 is always enough with a smart plan, and no plan can promise fewer than 5.</li>
+    <li><b>Exit prompt:</b> Draw the three bags in order from lightest to heaviest. “New mystery bags” mixes up sizes and weights for another round.</li>
+  </ul>
+</details>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 60) : ms));
+const NS = 'http://www.w3.org/2000/svg';
+
+const COLORS = {A:'var(--bagA)', B:'var(--bagB)', C:'var(--bagC)', D:'var(--bagD)'};
+/* contents, lightest (rank 0) to heaviest */
+const STUFF3 = ['cotton','blocks','washers'];
+const STUFF4 = ['cotton','blocks','marbles','washers'];
+const STUFF_NAME = {cotton:'cotton balls', blocks:'wood blocks', marbles:'marbles', washers:'metal washers'};
+const SIZES = {3:[1.0,0.78,0.58], 4:[1.0,0.85,0.70,0.56]};
+
+/* ---------- state ---------- */
+const S = {n:3, bags:[], pans:[null,null], tests:[], order:[], weighing:false, firstRound:true};
+
+function makeBags(n, fixed){
+  const ids = ['A','B','C','D'].slice(0,n);
+  let sizeIdx, rank;
+  if(fixed && n===3){
+    /* lesson prep: biggest bag lightest, a small bag heaviest */
+    sizeIdx = [0,2,1]; rank = [0,2,1];
+  } else {
+    do {
+      sizeIdx = shuffle([...Array(n).keys()]);
+      rank = shuffle([...Array(n).keys()]);
+      /* size must not predict weight: the biggest bag is never the heaviest */
+    } while(rank[sizeIdx.indexOf(0)] === n-1);
+  }
+  const stuff = n===3 ? STUFF3 : STUFF4;
+  return ids.map((id,i) => ({id, size:SIZES[n][sizeIdx[i]], sizeRank:sizeIdx[i], w:rank[i], stuff:stuff[rank[i]]}));
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const bag = id => S.bags.find(b => b.id===id);
+
+/* what the tests prove: heavier[x] = set of bags x is proven heavier than (transitive) */
+function proven(tests){
+  const ids = S.bags.map(b=>b.id), H = {};
+  ids.forEach(i => H[i] = new Set());
+  tests.forEach(t => H[t.h].add(t.l));
+  let changed = true;
+  while(changed){ changed=false;
+    for(const a of ids) for(const b of [...H[a]]) for(const c of H[b]) if(!H[a].has(c)){ H[a].add(c); changed=true; }
+  }
+  return H;
+}
+const knows = (H,a,b) => H[a].has(b) || H[b].has(a);
+function fullyKnown(H){
+  const ids = S.bags.map(b=>b.id);
+  for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++) if(!knows(H,ids[i],ids[j])) return false;
+  return true;
+}
+
+/* ---------- drawing ---------- */
+const BAG_PATH = 'M37 24 Q50 30 63 24 L67 34 Q92 50 90 80 Q88 106 50 106 Q12 106 10 80 Q8 50 33 34 Z';
+function bagMarkup(b, opts={}){
+  /* drawn in a 100 x 110 box, bottom at y=106 */
+  const c = COLORS[b.id];
+  return `<path d="${BAG_PATH}" fill="${c}" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M35 24 Q38 6 50 14 Q62 4 65 24" fill="${c}" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="33" y="22" width="34" height="9" rx="4" fill="var(--wood-dark)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M22 62 Q30 52 40 56" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="4" stroke-linecap="round"/>
+    <text x="50" y="86" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="40" fill="#fff" stroke="var(--ink)" stroke-width="1.2" paint-order="stroke">${b.id}</text>`;
+}
+function bagSVG(b, h){
+  const w = h * 100/110;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 100 110" aria-hidden="true">${bagMarkup(b)}</svg>`;
+}
+function onPan(b){ /* returns markup with bottom at (0,0), centered */
+  const s = 0.95 * b.size;
+  return `<g transform="scale(${s}) translate(-50,-106)">${bagMarkup(b)}</g>`;
+}
+const BOX = `<g transform="translate(-62,-92)"><rect x="0" y="16" width="124" height="76" rx="4" fill="var(--box)" stroke="var(--ink)" stroke-width="3"/>
+  <path d="M0 16 L18 0 H106 L124 16 Z" fill="var(--box-dark)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M52 16 V92 M72 16 V92" stroke="var(--box-dark)" stroke-width="3"/></g>`;
+const ROCK = `<g transform="translate(-24,-30)"><path d="M4 30 Q0 14 14 6 Q26 0 38 6 Q50 14 46 30 Z" fill="var(--rock)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M14 14 Q20 10 26 12" stroke="var(--rock-dark)" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
+
+/* ---------- pan balance ---------- */
+class Balance{
+  constructor(svg){
+    this.svg = svg; this.a = 0; this.v = 0; this.t = 0; this.raf = null;
+    svg.innerHTML = `
+      <rect x="230" y="300" width="140" height="20" rx="8" fill="var(--wood)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M288 300 L292 112 H308 L312 300 Z" fill="var(--wood-dark)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+      <g class="needle"><path d="M300 104 L295 146 H305 Z" fill="var(--accent)" stroke="var(--ink)" stroke-width="2"/></g>
+      <g class="beam"><rect x="96" y="94" width="408" height="14" rx="7" fill="var(--metal)" stroke="var(--ink)" stroke-width="3"/></g>
+      <g class="panL"></g><g class="panR"></g>
+      <circle cx="300" cy="101" r="10" fill="var(--accent)" stroke="var(--ink)" stroke-width="3"/>`;
+    this.beam = svg.querySelector('.beam'); this.needle = svg.querySelector('.needle');
+    this.panL = svg.querySelector('.panL'); this.panR = svg.querySelector('.panR');
+    this.items = ['',''];
+    this.draw();
+  }
+  panMarkup(item){
+    return `<path d="M0 0 L-74 118 M0 0 L74 118" stroke="var(--metal)" stroke-width="3"/>
+      <circle cx="0" cy="0" r="6" fill="var(--metal)" stroke="var(--ink)" stroke-width="2"/>
+      <g transform="translate(0,116)">${item}</g>
+      <path d="M-86 116 Q0 150 86 116 Z" fill="var(--pan)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>`;
+  }
+  setItems(l, r){ this.items = [l||'', r||'']; this.panL.innerHTML = this.panMarkup(this.items[0]); this.panR.innerHTML = this.panMarkup(this.items[1]); this.draw(); }
+  draw(){
+    const deg = this.a, rad = deg*Math.PI/180, L = 200;
+    this.beam.setAttribute('transform', `rotate(${deg} 300 101)`);
+    this.needle.setAttribute('transform', `rotate(${deg} 300 101)`);
+    const dx = L*Math.cos(rad), dy = L*Math.sin(rad);
+    this.panL.setAttribute('transform', `translate(${300-dx} ${101-dy})`);
+    this.panR.setAttribute('transform', `translate(${300+dx} ${101+dy})`);
+  }
+  /* side: -1 left goes down, 1 right goes down, 0 level */
+  tilt(side){
+    const target = side * 13;
+    cancelAnimationFrame(this.raf);
+    return new Promise(res => {
+      if(reduced){ this.a = target; this.v = 0; this.draw(); setTimeout(res, 300); return; }
+      this.t = target; if(side!==0) this.v = side * 20; /* a little jiggle as the bags land */
+      let last = performance.now();
+      const step = now => {
+        const dt = Math.min(0.033, (now-last)/1000); last = now;
+        const acc = -45*(this.a - this.t) - 6*this.v;
+        this.v += acc*dt; this.a += this.v*dt;
+        this.draw();
+        if(Math.abs(this.a-this.t) < 0.06 && Math.abs(this.v) < 0.12){ this.a = this.t; this.draw(); res(); }
+        else this.raf = requestAnimationFrame(step);
+      };
+      this.raf = requestAnimationFrame(step);
+    });
+  }
+  level(){ cancelAnimationFrame(this.raf); this.a = 0; this.v = 0; this.draw(); }
+}
+
+/* ---------- mini evidence glyph: heavier bag sits lower ---------- */
+function testGlyph(h, l, leftId){
+  /* draw the weighing as it happened: leftId on the left */
+  const leftH = leftId===h;
+  const yl = leftH ? 52 : 32, yr = leftH ? 32 : 52;
+  const L = leftId, R = leftId===h ? l : h;
+  return `<svg width="96" height="60" viewBox="0 0 96 60" aria-hidden="true">
+    <line x1="18" y1="${yl}" x2="78" y2="${yr}" stroke="var(--metal)" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="48" cy="42" r="4" fill="var(--accent)"/>
+    <circle cx="18" cy="${yl-12}" r="13" fill="${COLORS[L]}" stroke="var(--ink)" stroke-width="2"/>
+    <text x="18" y="${yl-6}" text-anchor="middle" font-family="Fredoka,sans-serif" font-weight="700" font-size="17" fill="#fff">${L}</text>
+    <circle cx="78" cy="${yr-12}" r="13" fill="${COLORS[R]}" stroke="var(--ink)" stroke-width="2"/>
+    <text x="78" y="${yr-6}" text-anchor="middle" font-family="Fredoka,sans-serif" font-weight="700" font-size="17" fill="#fff">${R}</text>
+  </svg>`;
+}
+const chip = id => `<span class="chip" style="--c:${COLORS[id]}">${id}</span>`;
+
+/* ======================= 1. WARM-UP ======================= */
+const balWarm = new Balance($('#balWarm'));
+const W = {stage:0};
+function warmReset(){
+  W.stage = 0; balWarm.setItems('', ''); balWarm.level();
+  $('#tBox').innerHTML = `<svg width="130" height="100" viewBox="-66 -96 132 100" aria-hidden="true">${BOX}</svg>Box`;
+  $('#tRock').innerHTML = `<svg width="130" height="100" viewBox="-66 -96 132 100" aria-hidden="true">${ROCK}</svg>Rock`;
+  $$('.thing').forEach(t => { t.setAttribute('aria-pressed','false'); t.disabled = false; });
+  $('#warmQ').textContent = 'Which is bigger?';
+  $('#warmSay').innerHTML = 'A big box. A small rock.';
+  $('#warmGo').hidden = true; $('#warmNext').hidden = true;
+}
+function warmPick(which){
+  $$('.thing').forEach(t => t.setAttribute('aria-pressed', String(t.id === (which==='box'?'tBox':'tRock'))));
+  if(W.stage===0){
+    $('#warmSay').innerHTML = which==='box' ? 'Yes! The box is bigger.' : 'Look again. The box is much bigger.<small>Put your hands around each one.</small>';
+    if(which==='box'){ W.stage = 1; setTimeout(() => { $('#warmQ').textContent = 'Which is heavier?'; $$('.thing').forEach(t => t.setAttribute('aria-pressed','false')); $('#warmSay').innerHTML = 'Make a guess!'; }, reduced ? 200 : 1300); }
+  } else if(W.stage===1){
+    W.guess = which; W.stage = 2;
+    $('#warmSay').innerHTML = `You guessed the ${which}.<small>Let’s test it.</small>`;
+    $('#warmGo').hidden = false;
+  }
+}
+async function warmWeigh(){
+  $('#warmGo').hidden = true; $$('.thing').forEach(t => t.disabled = true);
+  balWarm.setItems(BOX, ROCK);
+  $('#warmSay').innerHTML = 'Hands off… wait…';
+  await balWarm.tilt(1);
+  $('#warmSay').innerHTML = `The rock went down. The rock is heavier!<small>${W.guess==='rock' ? 'Your guess was right.' : 'Big is not always heavy.'} Bigger and heavier are not the same question.</small>`;
+  $('#warmNext').hidden = false;
+}
+$('#tBox').onclick = () => warmPick('box');
+$('#tRock').onclick = () => warmPick('rock');
+$('#warmGo').onclick = warmWeigh;
+$('#warmNext').onclick = () => showView('weigh');
+
+/* ======================= 2. WEIGH ======================= */
+const balMain = new Balance($('#balMain'));
+function weighReset(newBags){
+  if(newBags) S.bags = makeBags(S.n, S.firstRound && S.n===3);
+  S.pans = [null,null]; S.tests = []; S.order = []; S.weighing = false; S.gen = (S.gen||0)+1;
+  balMain.setItems('',''); balMain.level();
+  $('#weighSay').innerHTML = S.n===3 ? 'Three mystery bags. No peeking!<small>Tap a bag to put it on the balance.</small>' : 'Four mystery bags! Use as few weighings as you can.<small>Tap a bag to put it on the balance.</small>';
+  $('#fb').innerHTML = '';
+  renderWeigh();
+}
+function renderWeigh(){
+  /* shelf */
+  const maxH = 130;
+  $('#shelf').innerHTML = S.bags.map(b => `<button class="bagbtn ${S.pans.includes(b.id)?'away':''}" data-id="${b.id}" aria-label="Bag ${b.id}${S.pans.includes(b.id)?', on the balance':''}">${bagSVG(b, Math.round(maxH*b.size))}</button>`).join('');
+  $$('#shelf .bagbtn').forEach(el => el.onclick = () => tapBag(el.dataset.id));
+  /* tests */
+  const n = S.tests.length;
+  $('#tally').innerHTML = '<i></i>'.repeat(n);
+  $('#tallyN').textContent = n;
+  $('#tests').innerHTML = n ? S.tests.map((t,i) => `<div class="test"><span class="num">${i+1}</span>${testGlyph(t.h,t.l,t.left)}<span>${chip(t.h)} is heavier than ${chip(t.l)}</span></div>`).join('')
+    : '<div class="empty">Nothing yet. Put two bags on the balance.</div>';
+  const H = proven(S.tests);
+  const k = $('#known');
+  if(fullyKnown(H)){
+    k.hidden = false;
+    k.textContent = `★ We have enough clues for the whole order! It took ${n} weighing${n===1?'':'s'}.`;
+  } else k.hidden = true;
+  /* order */
+  const ord = $('#order'); ord.style.setProperty('--n', S.n);
+  const labs = S.n===3 ? ['Lightest','Middle','Heaviest'] : ['Lightest','','','Heaviest'];
+  ord.innerHTML = labs.map((lab,i) => {
+    const id = S.order[i];
+    return `<button class="slot ${id?'filled':''}" data-i="${i}" aria-label="${lab||'Box '+(i+1)}${id?': bag '+id+'. Tap to take it out':''}">
+      ${id ? bagSVG(bag(id), Math.round(78*bag(id).size)) : ''}<span class="lab">${lab || '&nbsp;'}</span></button>`;
+  }).join('');
+  $$('#order .slot').forEach(el => el.onclick = () => { const i=+el.dataset.i; if(S.order[i]){ S.order.splice(i,1); $('#fb').innerHTML=''; renderWeigh(); } });
+  $('#picks').innerHTML = S.bags.map(b => `<button class="pick" style="--c:${COLORS[b.id]}" data-id="${b.id}" ${S.order.includes(b.id)?'disabled':''} aria-label="Put bag ${b.id} in the next box">${b.id}</button>`).join('');
+  $$('#picks .pick').forEach(el => el.onclick = () => { if(S.order.length < S.n){ S.order.push(el.dataset.id); $('#fb').innerHTML=''; renderWeigh(); } });
+  $('#checkBtn').disabled = S.order.length < S.n;
+}
+async function tapBag(id){
+  if(S.weighing) return;
+  const g = S.gen;
+  /* tap a bag on the balance to take it off */
+  const at = S.pans.indexOf(id);
+  if(at > -1){ S.pans[at] = null; balMain.level(); drawPans(); $('#weighSay').innerHTML = 'Pick a bag.'; renderWeigh(); return; }
+  if(S.pans[0] && S.pans[1]){ S.pans = [null,null]; balMain.level(); }
+  if(!S.pans[0]) S.pans[0] = id; else S.pans[1] = id;
+  drawPans(); renderWeigh();
+  if(S.pans[0] && S.pans[1]){
+    S.weighing = true;
+    const [L,R] = S.pans, wl = bag(L).w, wr = bag(R).w;
+    $('#weighSay').innerHTML = 'Hands off… wait until it stops…';
+    await balMain.tilt(wl > wr ? -1 : 1);
+    if(g !== S.gen) return;
+    const h = wl > wr ? L : R, l = wl > wr ? R : L;
+    S.tests.push({h, l, left:L});
+    S.weighing = false;
+    const H = proven(S.tests);
+    let extra = 'Tap another bag to weigh again.';
+    if(fullyKnown(H)) extra = 'Now put the bags in order →';
+    $('#weighSay').innerHTML = `${chip(h)} went down. ${chip(h)} is heavier than ${chip(l)}.<small>${extra}</small>`;
+    renderWeigh();
+  } else {
+    $('#weighSay').innerHTML = `${chip(id)} is on the balance. Pick a bag to weigh against it.`;
+  }
+}
+function drawPans(){ balMain.setItems(S.pans[0] ? onPan(bag(S.pans[0])) : '', S.pans[1] ? onPan(bag(S.pans[1])) : ''); }
+
+function checkOrder(){
+  const fb = $('#fb'), H = proven(S.tests), o = S.order;
+  /* 1. does our order break something the balance showed? */
+  for(let i=0;i<o.length;i++) for(let j=i+1;j<o.length;j++){
+    if(H[o[i]].has(o[j])){
+      fb.className = 'fb hmm';
+      fb.innerHTML = `<span>Hmm. The balance showed ${chip(o[i])} is heavier than ${chip(o[j])}.</span><span class="t">Heavier goes closer to “Heaviest.” Try again!</span>`;
+      return;
+    }
+  }
+  /* 2. is every neighbor pair backed by evidence? */
+  for(let i=0;i+1<o.length;i++){
+    if(!knows(H,o[i],o[i+1])){
+      fb.className = 'fb hmm';
+      fb.innerHTML = `<span>Maybe! But we can’t be sure yet.</span><span class="t">Which is heavier, ${chip(o[i])} or ${chip(o[i+1])}? Put them on the balance.</span>`;
+      pulse([o[i],o[i+1]]);
+      return;
+    }
+  }
+  /* 3. consistent with true evidence and fully determined, so it is correct */
+  const ok = o.every((id,i) => bag(id).w === i);
+  if(!ok){ fb.className='fb hmm'; fb.textContent='Something is off. Weigh again to check.'; return; }
+  fb.className = 'fb good';
+  fb.innerHTML = `<span>Yes! Lightest to heaviest: ${o.map(chip).join(' ')}</span><span class="t">And the balance proves it, with ${S.tests.length} weighing${S.tests.length===1?'':'s'}. Try the detective questions.</span>`;
+}
+function pulse(ids){
+  ids.forEach(id => { const el = $(`#shelf [data-id="${id}"]`); if(el){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); } });
+}
+function setN(n){
+  S.n = n; $('#n3').setAttribute('aria-pressed', n===3); $('#n4').setAttribute('aria-pressed', n===4);
+  weighReset(true);
+}
+$('#n3').onclick = () => setN(3);
+$('#n4').onclick = () => setN(4);
+$('#clearPans').onclick = () => { if(S.weighing) return; S.pans=[null,null]; balMain.level(); drawPans(); renderWeigh(); $('#weighSay').innerHTML='Pick a bag.'; };
+$('#checkBtn').onclick = checkOrder;
+$('#clearOrder').onclick = () => { S.order = []; $('#fb').innerHTML=''; renderWeigh(); };
+
+/* ======================= 3. DETECTIVE ======================= */
+const balDet = new Balance($('#balDet'));
+const D = {q:1, gen:0};
+const byWeight = () => [...S.bags].sort((a,b) => b.w - a.w);   /* heaviest first */
+const bySize = () => [...S.bags].sort((a,b) => b.size - a.size); /* biggest first */
+function say(html, cls){ const f=$('#qfb'); f.className = 'fb ' + (cls||'good'); f.innerHTML = html; }
+
+function stairs(list, upTo){
+  /* list heaviest first; heavier sits on a lower step */
+  const n = list.length, w = 600, stepW = w/n;
+  let g = '';
+  list.forEach((b,i) => {
+    const show = i < upTo;
+    const top = 200 - (n-1-i)*44;   /* lightest on the highest step */
+    const x = (n-1-i)*stepW;        /* lightest on the left */
+    g += `<rect x="${x+4}" y="${top}" width="${stepW-8}" height="${260-top}" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="3"/>`;
+    if(show) g += `<g transform="translate(${x+stepW/2} ${top}) scale(${Math.min(1.1, stepW/120)*b.size}) translate(-50,-106)">${bagMarkup(b)}</g>`;
+  });
+  return `<svg class="stairs" viewBox="0 -30 600 300" role="img" aria-label="Bags on steps: lightest on the highest step">
+    ${g}<text x="10" y="-8" font-family="Nunito,sans-serif" font-weight="800" font-size="20" fill="var(--muted)">lightest</text>
+    <text x="590" y="-8" text-anchor="end" font-family="Nunito,sans-serif" font-weight="800" font-size="20" fill="var(--muted)">heaviest</text></svg>`;
+}
+function renderQ(){
+  D.gen++; $$('#qnav button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.q===D.q)));
+  const qa = $('#qactions'); qa.innerHTML = ''; $('#qfb').innerHTML=''; $('#qfb').className='fb';
+  $('#detVisual').innerHTML = ''; balDet.setItems('',''); balDet.level(); $('#balDet').hidden = false;
+  const add = (label, fn, alt) => { const b=document.createElement('button'); b.className='bigbtn'+(alt?' alt':''); b.textContent=label; b.onclick=fn; qa.appendChild(b); return b; };
+  if(S.n !== 3 && D.q !== 3){ S.n = 3; $('#n3').setAttribute('aria-pressed','true'); $('#n4').setAttribute('aria-pressed','false'); weighReset(true); }
+  if(D.q===1){
+    const [hv, md, lt] = byWeight();
+    $('#qtext').innerHTML = `${chip(hv.id)} is heavier than ${chip(md.id)}.<br>${chip(md.id)} is heavier than ${chip(lt.id)}.<br>Do we need to test ${chip(hv.id)} and ${chip(lt.id)}?`;
+    add(`Test 1: ${hv.id} and ${md.id}`, async e => { await detWeigh(hv, md); $('#detVisual').innerHTML = stairs([hv,md,lt], 2); });
+    add(`Test 2: ${md.id} and ${lt.id}`, async () => { await detWeigh(md, lt); $('#detVisual').innerHTML = stairs([hv,md,lt], 3);
+      say(`<span>${chip(hv.id)} is heavier than ${chip(md.id)}. ${chip(md.id)} is heavier than ${chip(lt.id)}.</span><span class="t">So ${chip(hv.id)} must be heavier than ${chip(lt.id)}. Two tests were enough!</span>`); });
+    add(`Test 3 anyway: ${hv.id} and ${lt.id}`, async () => { await detWeigh(hv, lt);
+      say(`<span>${chip(hv.id)} went down, just like we figured.</span><span class="t">We did not need test 3.</span>`); }, true);
+  } else if(D.q===2){
+    $('#qtext').innerHTML = 'Was the biggest bag the heaviest?';
+    $('#balDet').hidden = true;
+    $('#detVisual').innerHTML = `<div class="reveal" style="--n:${S.n}">${S.bags.map(b => `<div class="open">${bagSVG(b, Math.round(120*b.size))}<span>Bag ${b.id}</span></div>`).join('')}</div>`;
+    add('Open the bags', () => openBags());
+  } else {
+    $('#qtext').innerHTML = 'Add bag D. Find the order of all four. What is the fewest weighings that worked?';
+    $('#balDet').hidden = true;
+    $('#detVisual').innerHTML = `<div class="row" style="padding:20px 0">${['A','B','C','D'].map(id => bagSVG({id}, 110)).join('')}</div>`;
+    add('Try 4 bags', () => { setN(4); showView('weigh'); });
+    add('How few can it be?', () => say(`<span>If the tests chain, 3 weighings can be enough.</span><span class="t">${chip('A')} → ${chip('B')} → ${chip('C')} → ${chip('D')}: each new bag only needs one test. A smart plan always works in 5.</span>`), true);
+  }
+}
+async function detWeigh(x, y){
+  const g = D.gen;
+  /* put the lighter-letter first on the left for variety */
+  const [L,R] = [x,y].sort((a,b) => a.id.localeCompare(b.id));
+  balDet.level(); balDet.setItems(onPan(L), onPan(R));
+  say('Hands off… wait…', 'hmm');
+  await balDet.tilt(L.w > R.w ? -1 : 1);
+  if(g !== D.gen) return;
+  const h = L.w > R.w ? L : R, l = h===L ? R : L;
+  say(`<span>${chip(h.id)} went down.</span><span class="t">${chip(h.id)} is heavier than ${chip(l.id)}.</span>`);
+}
+function openBags(){
+  const pile = stuff => {
+    let s = '';
+    for(let i=0;i<9;i++){ const x = 18 + (i%3)*32 + (Math.floor(i/3)%2)*10, y = 100 - Math.floor(i/3)*24;
+      if(stuff==='cotton') s += `<circle cx="${x}" cy="${y}" r="14" fill="#FFFFFF" stroke="var(--ink)" stroke-width="2"/>`;
+      else if(stuff==='blocks') s += `<rect x="${x-12}" y="${y-12}" width="24" height="22" rx="3" fill="var(--box)" stroke="var(--ink)" stroke-width="2"/>`;
+      else if(stuff==='marbles') s += `<circle cx="${x}" cy="${y}" r="11" fill="var(--bagB)" stroke="var(--ink)" stroke-width="2"/><circle cx="${x-4}" cy="${y-4}" r="3" fill="#FFFFFF" opacity=".7"/>`;
+      else s += `<circle cx="${x}" cy="${y}" r="13" fill="var(--metal)" stroke="var(--ink)" stroke-width="2"/><circle cx="${x}" cy="${y}" r="5" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"/>`;
+    }
+    return `<svg viewBox="0 0 120 120" aria-hidden="true">${s}</svg>`;
+  };
+  const big = bySize()[0], heavy = byWeight()[0];
+  $('#detVisual').innerHTML = `<div class="reveal" style="--n:${S.n}">${S.bags.map(b => `<div class="open">${bagSVG(b, Math.round(80*b.size))}${pile(b.stuff)}<span>${STUFF_NAME[b.stuff]}</span></div>`).join('')}</div>
+    <div class="lineups" style="margin-top:14px">
+      <div class="lineup"><span class="lbl">Biggest to smallest</span>${bySize().map(b=>chip(b.id)).join(' ')}</div>
+      <div class="lineup"><span class="lbl">Heaviest to lightest</span>${byWeight().map(b=>chip(b.id)).join(' ')}</div>
+    </div>`;
+  if(big.id === heavy.id) say(`<span>Yes. The biggest bag, ${chip(big.id)}, was the heaviest this time.</span><span class="t">Is that always true? Think of the box and the rock.</span>`);
+  else say(`<span>No! The biggest bag, ${chip(big.id)}, was not the heaviest.</span><span class="t">${chip(heavy.id)} was the heaviest. It has ${STUFF_NAME[heavy.stuff]} inside.</span>`, 'hmm');
+}
+$$('#qnav button').forEach(b => b.onclick = () => { D.q = +b.dataset.q; renderQ(); });
+
+/* ======================= shell ======================= */
+function showView(v){
+  $$('nav.steps button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v===v)));
+  ['warm','weigh','det'].forEach(k => $('#v-'+k).hidden = k!==v);
+  if(v==='det') renderQ();
+}
+$$('nav.steps button').forEach(b => b.onclick = () => showView(b.dataset.v));
+$('#newBtn').onclick = () => { S.firstRound = false; weighReset(true); if(!$('#v-det').hidden) renderQ(); };
+$('#resetBtn').onclick = () => { S.firstRound = true; S.n = 3; $('#n3').setAttribute('aria-pressed','true'); $('#n4').setAttribute('aria-pressed','false'); warmReset(); weighReset(true); D.q = 1; showView('warm'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+/* expose pure logic for checks */
+window.__mb = {S, proven, fullyKnown, makeBags};
+warmReset(); weighReset(true);
+})();
+</script>
+
+</body></html>

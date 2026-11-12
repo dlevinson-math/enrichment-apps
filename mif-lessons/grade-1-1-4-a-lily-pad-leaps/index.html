@@ -1,0 +1,508 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lily Pad Leaps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one pond (a 0–20 number path of lily pads) across the top, the lesson's steps as big tabs, the prompt + actions under the pond. */
+:root{
+  --water:#D8EAE7; --surface:#F4FAF8; --ink:#14302B; --muted:#4A6660; --line:#B5CEC8;
+  --pad:#8CC47B; --pad-edge:#5B9A4C; --pad-ink:#0F2C1C; --flower:#D23F76; --flower-soft:#FBE0EA;
+  --accent:#0C7A69; --accent-ink:#FFFFFF; --hint:#F0BC3E; --nobody:#5E7A75; --soft:#E9F3F0;
+  --frog:#D4441F; --cricket:#1E5DC8; --toad:#8B3DBF; --grass:#C98500;
+  --display:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --water:#0D1C1F; --surface:#142629; --ink:#E3F1EC; --muted:#9BB6AF; --line:#2B474B;
+    --pad:#3E7B45; --pad-edge:#2A5A31; --pad-ink:#F1FFF3; --flower:#FF77A6; --flower-soft:#3D1F2B;
+    --accent:#3CC4AA; --accent-ink:#06211C; --hint:#E9B53A; --nobody:#86A39D; --soft:#1A3034;
+    --frog:#FF7352; --cricket:#79A6FF; --toad:#C892F2; --grass:#FFC53D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --water:#0D1C1F; --surface:#142629; --ink:#E3F1EC; --muted:#9BB6AF; --line:#2B474B;
+  --pad:#3E7B45; --pad-edge:#2A5A31; --pad-ink:#F1FFF3; --flower:#FF77A6; --flower-soft:#3D1F2B;
+  --accent:#3CC4AA; --accent-ink:#06211C; --hint:#E9B53A; --nobody:#86A39D; --soft:#1A3034;
+  --frog:#FF7352; --cricket:#79A6FF; --toad:#C892F2; --grass:#FFC53D; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--water); color:var(--ink); font-family:var(--body); font-size:18px;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:12px 28px;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.wrap{max-width:1500px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+
+header{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(30px,3.6vw,52px); margin:0; line-height:1; letter-spacing:-.01em}
+.sub{margin:4px 0 0; color:var(--muted); font-weight:700; font-size:clamp(14px,1.2vw,17px); letter-spacing:.02em}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--surface); border-radius:14px; padding:10px 18px; font-weight:800; font-size:17px; min-height:48px}
+.ghost:hover{border-color:var(--ink)}
+
+nav{display:flex; gap:8px; flex-wrap:wrap}
+nav button{border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:10px 20px 10px 12px; min-height:52px;
+  font-family:var(--display); font-weight:600; font-size:clamp(18px,1.6vw,23px); display:flex; align-items:center; gap:10px; color:var(--muted)}
+nav button b{width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--soft); font-size:18px; color:var(--ink)}
+nav button[aria-current="step"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+nav button[aria-current="step"] b{background:var(--surface); color:var(--ink)}
+
+/* Pond */
+.pond{background:var(--surface); border-radius:22px; padding:clamp(14px,2vw,26px); padding-top:clamp(40px,4vw,56px); position:relative}
+.pads{display:grid; grid-template-columns:repeat(var(--cols,21),minmax(0,1fr)); column-gap:clamp(3px,.5vw,8px); row-gap:clamp(44px,5vw,64px)}
+.pad{position:relative; aspect-ratio:1; border:0; padding:0; background:none; container-type:inline-size; max-width:100%}
+.pad::before{content:""; position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, color-mix(in srgb,var(--pad) 70%, white) 0, var(--pad) 55%, var(--pad-edge) 100%);
+  -webkit-mask:conic-gradient(from 20deg, transparent 0 28deg, #000 0); mask:conic-gradient(from 20deg, transparent 0 28deg, #000 0);
+  transition:opacity .2s, filter .2s}
+.pad .n{position:relative; z-index:1; font-family:var(--display); font-weight:700; font-size:40cqw; color:var(--pad-ink); line-height:1}
+.pad.zero .n::after{content:"start"; position:absolute; left:50%; top:105%; transform:translateX(-50%); font-family:var(--body); font-size:.42em; color:var(--muted); font-weight:800; letter-spacing:.04em}
+.pad.beyond::before{opacity:.38}
+.pad.beyond .n{opacity:.6}
+.pad.flower::after{content:""; position:absolute; inset:-9%; border-radius:50%; border:max(3px,7cqw) solid var(--flower); box-shadow:0 0 0 max(2px,4cqw) var(--flower-soft); z-index:2}
+.pad.ring::after{content:""; position:absolute; inset:-7%; border-radius:50%; border:max(3px,6cqw) dashed var(--hint); z-index:2}
+.pad.nobody::before{opacity:.25; filter:grayscale(1)}
+.pad.nobody .n{color:var(--ink)}
+.pad.nobody .x{display:block}
+.pad .x{display:none; position:absolute; inset:18%; border:max(2px,5cqw) solid var(--nobody); border-radius:50%; z-index:1}
+.pad.oops{animation:oops .45s}
+@keyframes oops{20%{transform:translateX(-6%)}50%{transform:translateX(6%)}80%{transform:translateX(-3%)}}
+.dots{position:absolute; left:0; right:0; bottom:6%; display:flex; justify-content:center; gap:6%; z-index:3}
+.dot{width:24cqw; height:24cqw; border-radius:50%; background:var(--c); border:max(2px,4cqw) solid var(--surface)}
+.badge{position:absolute; top:-6%; right:-6%; z-index:4; min-width:36cqw; height:36cqw; padding:0 6cqw; border-radius:99px; background:var(--hint); color:#2A1D00;
+  font-weight:800; font-size:22cqw; display:grid; place-items:center}
+.tokens{position:absolute; left:50%; bottom:78%; transform:translateX(-50%); display:flex; gap:2px; z-index:5; pointer-events:none}
+.critter{width:64cqw; height:64cqw; color:var(--c); display:block; flex:none}
+.critter svg{width:100%; height:100%; overflow:visible}
+.critter.hop{animation:hop .42s ease-out}
+@keyframes hop{0%{transform:translateY(0) scale(1,1)}35%{transform:translateY(-55%) scale(.95,1.08)}70%{transform:translateY(0) scale(1.08,.92)}100%{transform:none}}
+@media (prefers-reduced-motion: reduce){ .critter.hop,.pad.oops{animation:none} .pad::before{transition:none} }
+
+/* Below the pond */
+.work{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:16px; align-items:start}
+.card{background:var(--surface); border-radius:22px; padding:clamp(16px,2vw,26px); display:flex; flex-direction:column; gap:16px; min-width:0}
+.prompt{font-family:var(--display); font-weight:600; font-size:clamp(26px,2.7vw,40px); line-height:1.2; margin:0; text-wrap:balance}
+.prompt .who{color:var(--c)}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.primary{border:0; background:var(--accent); color:var(--accent-ink); font-weight:800; font-size:clamp(19px,1.6vw,23px); padding:14px 26px; border-radius:16px; min-height:58px}
+.secondary{border:2.5px solid var(--ink); background:var(--surface); font-weight:800; font-size:clamp(17px,1.4vw,20px); padding:11px 20px; border-radius:16px; min-height:54px}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.say{font-size:clamp(20px,1.8vw,26px); line-height:1.4; font-weight:700; margin:0; padding:14px 18px; border-radius:16px; background:var(--soft)}
+.say.good{background:color-mix(in srgb,var(--accent) 16%, var(--surface))}
+.say.try{background:color-mix(in srgb,var(--hint) 24%, var(--surface))}
+.say:empty{display:none}
+.seq{font-family:var(--display); font-size:clamp(30px,3.4vw,52px); font-weight:700; letter-spacing:.02em; min-height:1.2em; margin:0; color:var(--frog); word-break:break-word}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{border:2.5px solid var(--line); background:var(--surface); border-radius:18px; padding:8px 14px 8px 10px; min-height:60px; display:flex; align-items:center; gap:8px; font-weight:800; font-size:18px}
+.chip[aria-pressed="true"]{border-color:var(--ink); background:var(--soft)}
+.chip .num{font-family:var(--display); font-size:22px; width:34px; height:34px; border-radius:50%; background:var(--ink); color:var(--surface); display:grid; place-items:center}
+.chip .mini{width:34px; height:34px; color:var(--c)}
+.chip .tag{font-size:13px; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:.06em}
+.who-row{display:flex; gap:12px; flex-wrap:wrap}
+.who-card{display:flex; align-items:center; gap:10px; padding:8px 14px 8px 8px; border-radius:16px; border:2.5px solid transparent; font-weight:800; font-size:20px}
+.who-card.on{border-color:var(--c); background:var(--soft)}
+.who-card .mini{width:48px; height:48px; color:var(--c)}
+.who-card small{display:block; font-size:15px; color:var(--muted)}
+.choices{display:flex; gap:10px; flex-wrap:wrap}
+.choices button{width:76px; height:76px; border-radius:50%; border:3px solid var(--ink); background:var(--surface); font-family:var(--display); font-size:34px; font-weight:700}
+.vote{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.vote > div{border-radius:20px; padding:16px; display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--soft)}
+.vote h3{margin:0; font-family:var(--display); font-size:clamp(30px,3vw,44px)}
+.vote .count{font-family:var(--display); font-size:clamp(48px,5vw,72px); font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+.vote .row button{width:60px; height:60px; border-radius:50%; font-size:30px; font-weight:800; border:2.5px solid var(--ink); background:var(--surface)}
+.side h2{margin:0; font-family:var(--display); font-size:22px; font-weight:600}
+.side p{margin:0; line-height:1.45}
+.chart{border-collapse:collapse; width:100%; font-size:19px; font-variant-numeric:tabular-nums}
+.chart th{text-align:left; font-size:13px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); padding:0 8px 6px 0}
+.chart td{padding:9px 8px 9px 0; border-top:1.5px solid var(--line); vertical-align:middle}
+.chart td.pair{display:flex; gap:4px; align-items:center}
+.chart .mini{width:30px; height:30px; color:var(--c)}
+.chart .tbd{color:var(--muted)}
+.chart b{font-family:var(--display); font-size:22px; color:var(--flower)}
+.note{font-size:15px; color:var(--muted); margin:0}
+.journal{border:2.5px dashed var(--line); border-radius:18px; padding:14px 16px}
+@media (max-width: 900px){
+  .work{grid-template-columns:minmax(0,1fr)}
+  .tools{margin-left:0}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lily Pad Leaps</h1>
+      <p class="sub">Grade 1 · Math in Focus Ch 4 · Lesson 1.4-A</p>
+    </div>
+    <div class="tools">
+      <button class="ghost" id="resetBtn">Start over</button>
+      <button class="ghost" id="fsBtn">Full screen</button>
+    </div>
+  </header>
+
+  <nav id="nav" aria-label="Lesson steps"></nav>
+
+  <section class="pond" aria-label="Lily pad path">
+    <div class="pads" id="pads"></div>
+  </section>
+
+  <div class="work">
+    <section class="card" id="main" aria-live="polite"></section>
+    <aside class="card side" id="side"></aside>
+  </div>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Critters ---------- */
+const ART = {
+  frog:`<svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="26" rx="15" ry="10" fill="currentColor"/><circle cx="11" cy="15" r="6" fill="currentColor"/><circle cx="29" cy="15" r="6" fill="currentColor"/><circle cx="11" cy="14" r="3.4" fill="#fff"/><circle cx="29" cy="14" r="3.4" fill="#fff"/><circle cx="11.6" cy="14.4" r="1.7" fill="#111"/><circle cx="28.4" cy="14.4" r="1.7" fill="#111"/><path d="M13 27 Q20 32 27 27" stroke="#111" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="7" cy="34" rx="5" ry="2.4" fill="currentColor"/><ellipse cx="33" cy="34" rx="5" ry="2.4" fill="currentColor"/></svg>`,
+  toad:`<svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="25" rx="16" ry="12" fill="currentColor"/><circle cx="12" cy="16" r="4.6" fill="currentColor"/><circle cx="28" cy="16" r="4.6" fill="currentColor"/><circle cx="12" cy="15.5" r="2.6" fill="#fff"/><circle cx="28" cy="15.5" r="2.6" fill="#fff"/><circle cx="12.4" cy="15.8" r="1.4" fill="#111"/><circle cx="27.6" cy="15.8" r="1.4" fill="#111"/><circle cx="14" cy="27" r="1.8" fill="#fff" opacity=".45"/><circle cx="25" cy="29" r="2.2" fill="#fff" opacity=".45"/><circle cx="20" cy="23" r="1.5" fill="#fff" opacity=".45"/><path d="M14 31 Q20 34 26 31" stroke="#111" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`,
+  cricket:`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M9 21 Q4 8 1 6 M10 20 Q8 7 6 3" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="23" cy="25" rx="14" ry="7.5" fill="currentColor"/><circle cx="10" cy="23" r="6" fill="currentColor"/><circle cx="8.5" cy="21.5" r="2" fill="#fff"/><circle cx="8.2" cy="21.7" r="1" fill="#111"/><path d="M27 28 L33 21 L38 34 M18 30 L15 36 M24 31 L23 37" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  grass:`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 21 Q3 9 2 4 M8 20 Q9 8 10 3" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="23" cy="25" rx="16" ry="5.5" fill="currentColor"/><ellipse cx="8" cy="24" rx="5" ry="5.5" fill="currentColor"/><circle cx="6.5" cy="22.5" r="2" fill="#fff"/><circle cx="6.3" cy="22.7" r="1" fill="#111"/><path d="M22 25 L31 12 L39 33 M15 29 L13 36 M20 30 L20 37" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+const J = {
+  frog:{name:'Frog', step:2, c:'var(--frog)'},
+  cricket:{name:'Cricket', step:3, c:'var(--cricket)'},
+  toad:{name:'Toad', step:5, c:'var(--toad)'},
+  grass:{name:'Grasshopper', step:4, c:'var(--grass)'}
+};
+const mini = k => `<span class="mini" style="--c:${J[k].c}">${ART[k]}</span>`;
+const who = k => `<span class="who" style="--c:${J[k].c}">${J[k].name}</span>`;
+
+/* ---------- Math (everything below is computed, never typed in) ---------- */
+const lands = (k, max) => { const r=[]; for(let n=J[k].step; n<=max; n+=J[k].step) r.push(n); return r; };
+const landsOn = (k, n) => n>0 && n % J[k].step === 0;
+const sharedPads = (a, b, max) => lands(a, max).filter(n => landsOn(b, n));
+const WORDS = ['one','two','three','four','five'];
+const countPhrase = step => WORDS.slice(0, step-1).concat('land').join(', ');
+const listText = a => a.length<=1 ? a.join('') : a.slice(0,-1).join(', ') + ' and ' + a[a.length-1];
+const below = (k, n) => Math.floor((n-1)/J[k].step)*J[k].step;   // last landing before n
+const above = (k, n) => below(k, n) + J[k].step;                 // next landing at or after n
+
+/* ---------- Puzzles (numbers match the worksheet) ---------- */
+const PUZZLES = {
+  1:{a:'frog', b:'cricket', label:'1'},
+  2:{a:'frog', b:'toad', label:'2', tag:'Easier start'},
+  3:{a:'cricket', b:'toad', label:'3'},
+  5:{a:'cricket', b:'grass', label:'5', tag:'Challenge'}
+};
+
+/* ---------- State ---------- */
+let S;
+function fresh(){
+  S = { step:'warm', votes:{yes:0,no:0}, puzzle:1, chal:'grass', results:{},
+        warm:{pos:0, seq:[], skipped:false},
+        game:null, next:{solved:false, showSix:false}, nobody:{found:new Set()},
+        msg:'', tone:'', hints:{}, oops:null, hopKey:null };
+}
+
+/* ---------- Pond view model ---------- */
+function view(){
+  const v = {max:20, tokens:{}, marks:{}, flowers:new Set(), rings:new Set(), beyond:new Set(), nobody:new Set(), hints:S.hints};
+  const mark = (k, list) => list.forEach(n => (v.marks[n] = v.marks[n] || []).includes(k) || v.marks[n].push(k));
+  if(S.step==='warm'){
+    v.tokens.frog = S.warm.pos; mark('frog', S.warm.seq);
+    if(S.warm.skipped) for(let n=1;n<=20;n+=2) v.rings.add(n);
+  } else if(S.step==='guess'){
+    v.tokens.frog = 0; v.tokens.cricket = 0;
+  } else if(S.step==='jump' || (S.step==='chal' && S.chal==='grass')){
+    const g = S.game; v.tokens[g.a] = g.pos[g.a]; v.tokens[g.b] = g.pos[g.b];
+    mark(g.a, g.seen[g.a]); mark(g.b, g.seen[g.b]); g.found.forEach(n => v.flowers.add(n));
+  } else if(S.step==='next'){
+    v.max = 30; const m = S.next.solved ? 30 : 20;
+    mark('frog', lands('frog', m)); mark('cricket', lands('cricket', m));
+    sharedPads('frog','cricket', m).forEach(n => v.flowers.add(n));
+    if(!S.next.solved) for(let n=21;n<=30;n++) v.beyond.add(n);
+  } else if(S.step==='chal' && S.chal==='nobody'){
+    mark('frog', lands('frog',20)); mark('cricket', lands('cricket',20));
+    S.nobody.found.forEach(n => v.nobody.add(n));
+  }
+  return v;
+}
+
+/* ---------- Render pond ---------- */
+const padsEl = $('#pads');
+function chooseCols(total){
+  const w = padsEl.clientWidth || 1000;
+  const opts = total===21 ? [21,11,7] : [31,16,11,8];
+  for(const c of opts) if(w / c >= 52) return c;
+  return opts[opts.length-1];
+}
+function renderPond(){
+  const v = view(), total = v.max + 1;
+  padsEl.style.setProperty('--cols', chooseCols(total));
+  let html = '';
+  for(let n=0; n<=v.max; n++){
+    const cls = ['pad']; if(n===0) cls.push('zero');
+    if(v.flowers.has(n)) cls.push('flower'); else if(v.rings.has(n)) cls.push('ring');
+    if(v.beyond.has(n)) cls.push('beyond'); if(v.nobody.has(n)) cls.push('nobody');
+    const ks = v.marks[n] || [];
+    const toks = Object.keys(v.tokens).filter(k => v.tokens[k]===n);
+    const label = [`pad ${n}`].concat(ks.map(k => J[k].name+' lands here')).concat(v.flowers.has(n)?['shared pad']:[]).join(', ');
+    html += `<button class="${cls.join(' ')}" data-n="${n}" aria-label="${label}"><span class="n">${n}</span><span class="x"></span>`+
+      (ks.length ? `<span class="dots">${ks.map(k=>`<span class="dot" style="--c:${J[k].c}"></span>`).join('')}</span>` : '') +
+      (v.hints[n]!=null ? `<span class="badge">${v.hints[n]}</span>` : '') +
+      (toks.length ? `<span class="tokens">${toks.map(k=>`<span class="critter${S.hopKey===k?' hop':''}" style="--c:${J[k].c}">${ART[k]}</span>`).join('')}</span>` : '') +
+      `</button>`;
+  }
+  padsEl.innerHTML = html;
+  if(S.oops!=null){ const el = padsEl.querySelector(`[data-n="${S.oops}"]`); if(el && !reduced) el.classList.add('oops'); }
+  S.oops = null; S.hopKey = null;
+}
+padsEl.addEventListener('click', e => { const b = e.target.closest('.pad'); if(b) onPad(+b.dataset.n); });
+new ResizeObserver(() => { const v = view(); padsEl.style.setProperty('--cols', chooseCols(v.max+1)); }).observe(padsEl);
+
+function say(msg, tone){ S.msg = msg; S.tone = tone||''; }
+function countHint(from, step){ const h={}; for(let i=1;i<=step;i++) h[from+i] = i===step ? '✓' : i; return h; }
+
+/* ---------- Jump game (Part 1 and Challenge 5) ---------- */
+function newGame(p){ const P = PUZZLES[p];
+  return {id:p, a:P.a, b:P.b, max:20, pos:{[P.a]:0,[P.b]:0}, seen:{[P.a]:[],[P.b]:[]}, phase:'jump', found:new Set(), apart:null}; }
+function activeKey(g){ for(const k of [g.a,g.b]) if(g.pos[k] + J[k].step <= g.max) return k; return null; }
+function hop(g, k){ const t = g.pos[k] + J[k].step; g.pos[k] = t; g.seen[k].push(t); S.hopKey = k; S.hints = {}; afterHop(g); }
+function afterHop(g){
+  if(!activeKey(g) && g.phase==='jump'){ g.phase = 'share';
+    say(`All done jumping! Now find the pads with <b>two</b> colors.`, 'good'); }
+}
+function gameTap(g, n){
+  if(g.phase==='jump'){
+    const k = activeKey(g), step = J[k].step, pos = g.pos[k], target = pos + step;
+    if(n===target){ hop(g,k); if(g.phase==='jump') say(`Yes! ${who(k)} lands on ${n}.`, 'good'); return; }
+    S.oops = n;
+    if(pos===0 && (n===1 || n===step+1)){ say(`Both start on 0. Where is the first landing?`, 'try'); S.hints = {}; return; }
+    if(n<=pos){ say(`${who(k)} is on ${pos}. It jumps forward. Try again.`, 'try'); return; }
+    S.hints = countHint(pos, step);
+    say(`Touch each pad you pass: ${countPhrase(step)}.`, 'try'); return;
+  }
+  if(g.phase==='share'){
+    const all = sharedPads(g.a, g.b, g.max);
+    if(n===0){ say(`Everyone starts on 0. Find a pad they both <b>jump</b> to.`, 'try'); S.oops=n; return; }
+    if(all.includes(n)){
+      if(g.found.has(n)){ say(`You found ${n} already. Look for more!`); return; }
+      g.found.add(n);
+      if(g.found.size===all.length) finishShare(g, all);
+      else say(`Yes! Both land on ${n}. Find ${all.length-g.found.size===1?'one more':'more'}.`, 'good');
+      return;
+    }
+    S.oops = n;
+    const a = landsOn(g.a,n), b = landsOn(g.b,n);
+    if(a) say(`Only ${who(g.a)} lands on ${n}. ${who(g.b)} lands on ${below(g.b,n)||0} and ${above(g.b,n)}.`, 'try');
+    else if(b) say(`Only ${who(g.b)} lands on ${n}. ${who(g.a)} lands on ${below(g.a,n)||0} and ${above(g.a,n)}.`, 'try');
+    else say(`Nobody lands on ${n}. Look for a pad with two colors.`, 'try');
+    return;
+  }
+  if(g.phase==='apart') say(`Tap a number below to answer.`);
+}
+function finishShare(g, all){
+  S.results[g.id] = {shared:all, apart: all.length>1 ? all[1]-all[0] : null};
+  if(all.length>1){ g.phase='apart'; say(`You found them all: ${listText(all)}! How far apart are they?`, 'good'); }
+  else { g.phase='done'; say(`Only one shared pad: <b>${all[0]}</b>!`, 'good'); }
+}
+function apartPick(g, d){
+  const all = sharedPads(g.a, g.b, g.max), gap = all[1]-all[0];
+  if(d===gap){ g.phase='done'; S.hints = {}; for(let i=1;i<=gap;i++) S.hints[all[0]+i] = i;
+    say(`Yes! ${all[0]} to ${all[1]} is ${gap} hops. The shared pads are ${gap} apart.`, 'good'); }
+  else { S.hints = {}; for(let i=1;i<=gap;i++) S.hints[all[0]+i] = i;
+    say(`Count the hops from ${all[0]} to ${all[1]}. Then try again.`, 'try'); }
+}
+
+/* ---------- Taps ---------- */
+function onPad(n){
+  if(S.step==='warm'){
+    const w = S.warm;
+    if(w.pos>=20){ say(`Frog made it to 20!`); }
+    else if(n===w.pos+2){ warmHop(); }
+    else { S.oops=n; S.hints = countHint(w.pos,2);
+      say(w.pos===0 && n===1 ? `Frog starts on 0. Where is the first landing?` : `Touch each pad you pass: ${countPhrase(2)}.`, 'try'); }
+  } else if(S.step==='guess'){
+    say(`Make a guess first. Then we jump!`);
+  } else if(S.step==='jump' || (S.step==='chal' && S.chal==='grass')){
+    gameTap(S.game, n);
+  } else if(S.step==='next'){ nextTap(n); }
+  else if(S.step==='chal' && S.chal==='nobody'){ nobodyTap(n); }
+  render();
+}
+function warmHop(){ const w=S.warm; w.pos+=2; w.seq.push(w.pos); S.hopKey='frog'; S.hints={};
+  say(w.pos===20 ? `20! Frog made it.` : `${w.pos}!`, 'good'); }
+
+function nextTap(n){
+  if(S.next.solved){ say(`Yes, they meet on 24, then 30.`); return; }
+  const f = landsOn('frog',n), c = landsOn('cricket',n);
+  if(n<=20){ S.oops=n; say(`Look past 20. The path keeps going.`, 'try'); return; }
+  if(n===24){ S.next.solved = true; S.hints = {};
+    say(`Yes! <b>24</b>. They meet on 6, 12, 18, 24. Each one is 6 more.`, 'good'); return; }
+  S.oops = n;
+  if(f && c) say(`They do meet on ${n}! But they meet once before that. Look between 18 and ${n}.`, 'try');
+  else if(f) say(`${who('frog')} lands on ${n}. ${who('cricket')} lands on ${below('cricket',n)} and ${above('cricket',n)}.`, 'try');
+  else if(c) say(`${who('cricket')} lands on ${n}. ${who('frog')} lands on ${n-1} and ${n+1}.`, 'try');
+  else say(`Nobody lands on ${n}. ${who('frog')} lands on ${n-1} and ${n+1}.`, 'try');
+}
+const NOBODY = (() => { const r=[]; for(let n=1;n<=20;n++) if(!landsOn('frog',n) && !landsOn('cricket',n)) r.push(n); return r; })();
+function nobodyTap(n){
+  const nb = S.nobody;
+  if(n===0){ S.oops=n; say(`Everyone starts on 0. Try another pad.`, 'try'); return; }
+  if(NOBODY.includes(n)){
+    if(nb.found.has(n)){ say(`You found ${n} already.`); return; }
+    nb.found.add(n);
+    say(nb.found.size===NOBODY.length ? `All ${NOBODY.length} found: ${listText(NOBODY)}. Nobody lands there!` : `Yes! Nobody lands on ${n}. ${nb.found.size} found.`, 'good');
+    return;
+  }
+  S.oops=n;
+  const ks = ['frog','cricket'].filter(k => landsOn(k,n));
+  say(`${ks.map(who).join(' and ')} land${ks.length===1?'s':''} on ${n}. Find a pad with no dots.`, 'try');
+}
+
+/* ---------- Panels ---------- */
+const STEPS = [
+  {id:'warm', n:'1', label:'Warm-up'},
+  {id:'guess', n:'2', label:'Guess'},
+  {id:'jump', n:'3', label:'Jump'},
+  {id:'next', n:'4', label:'What comes next?'},
+  {id:'chal', n:'★', label:'Challenge'}
+];
+function renderNav(){
+  $('#nav').innerHTML = STEPS.map(s => `<button data-s="${s.id}" ${S.step===s.id?'aria-current="step"':''}><b>${s.n}</b>${s.label}</button>`).join('');
+  $('#nav').querySelectorAll('button').forEach(b => b.onclick = () => goStep(b.dataset.s));
+}
+function goStep(id){
+  S.step = id; S.hints = {}; S.msg=''; S.tone='';
+  if(id==='jump' && (!S.game || PUZZLES[S.game.id] && S.game.id===5)) S.game = newGame(S.puzzle);
+  if(id==='chal' && S.chal==='grass') S.game = newGame(5);
+  render();
+}
+const sayBox = () => `<p class="say ${S.tone}">${S.msg}</p>`;
+
+function mainWarm(){
+  const w = S.warm;
+  return `<p class="prompt">Count by 2s with ${who('frog')}. Tap where Frog lands, or press Hop.</p>
+  <p class="seq" aria-label="Frog's count">${w.seq.length? w.seq.join(', ') : '0'}</p>
+  <div class="row">
+    <button class="primary" id="hopBtn" ${w.pos>=20?'disabled':''}>Hop!</button>
+    <button class="secondary" id="skipBtn" ${w.pos<20?'disabled':''}>Which pads did Frog skip?</button>
+  </div>${sayBox()}`;
+}
+function sideWarm(){
+  return `<h2>Talk about it</h2><p>Which pads did Frog skip?</p>
+  <p class="note">Count out loud together while one student hops (or taps) the path.</p>`;
+}
+function mainGuess(){
+  return `<p class="prompt">${who('frog')} jumps 2. ${who('cricket')} jumps 3. Both start on 0.<br>Will they ever land on the <b>same</b> pad?</p>
+  <div class="who-row"><div class="who-card on" style="--c:var(--frog)">${mini('frog')}<div>Frog<small>jumps 2</small></div></div>
+  <div class="who-card on" style="--c:var(--cricket)">${mini('cricket')}<div>Cricket<small>jumps 3</small></div></div></div>
+  <div class="vote">
+    <div><h3>Yes</h3><span class="count" id="vy">${S.votes.yes}</span><div class="row"><button data-v="yes" data-d="-1" aria-label="One less yes">−</button><button data-v="yes" data-d="1" aria-label="One more yes">+</button></div></div>
+    <div><h3>No</h3><span class="count" id="vn">${S.votes.no}</span><div class="row"><button data-v="no" data-d="-1" aria-label="One less no">−</button><button data-v="no" data-d="1" aria-label="One more no">+</button></div></div>
+  </div>
+  <div class="row"><button class="primary" id="goJump">Let's find out!</button></div>${sayBox()}`;
+}
+function sideGuess(){ return `<h2>Our question</h2><p style="font-size:22px;font-weight:700">Which lily pads do both jumpers land on?</p><p class="note">Tap + for each hand raised.</p>`; }
+
+function gameMain(g, chips){
+  const k = activeKey(g);
+  let prompt, actions = '';
+  if(g.phase==='jump'){
+    prompt = `Tap where ${who(k)} lands next.`;
+    actions = `<button class="primary" id="hopFor">Hop for me</button><button class="secondary" id="finishJ">Finish the jumps</button>`;
+  } else if(g.phase==='share'){
+    prompt = `Tap the pads they <b>share</b>.`;
+    actions = `<button class="secondary" id="showShared">Show the shared pads</button>`;
+  } else if(g.phase==='apart'){
+    const all = sharedPads(g.a,g.b,g.max), gap = all[1]-all[0];
+    const opts = [...new Set([J[g.a].step, J[g.b].step, J[g.a].step+J[g.b].step, gap])].sort((x,y)=>x-y);
+    prompt = `How far apart are ${listText(all)}?`;
+    actions = `<div class="choices">${opts.map(d=>`<button data-apart="${d}">${d}</button>`).join('')}</div>`;
+  } else {
+    const r = S.results[g.id];
+    prompt = `Shared pads: <b style="color:var(--flower)">${listText(r.shared)}</b>${r.apart?` · ${r.apart} apart`:''}`;
+    actions = g.id===1 ? `<button class="primary" id="toNext">What comes next? →</button>` :
+              g.id===5 ? `<button class="primary" id="toNobody">Next challenge →</button>` :
+              `<button class="primary" id="nextPuzzle">Next puzzle →</button>`;
+  }
+  return `${chips}
+  <div class="who-row">${[g.a,g.b].map(x=>`<div class="who-card ${x===k?'on':''}" style="--c:${J[x].c}">${mini(x)}<div>${J[x].name}<small>jumps ${J[x].step}</small></div></div>`).join('')}</div>
+  <p class="prompt">${prompt}</p><div class="row">${actions}</div>${sayBox()}`;
+}
+function puzzleChips(){
+  return `<div class="chips" role="group" aria-label="Worksheet puzzle">${[1,2,3].map(p=>{const P=PUZZLES[p];
+    return `<button class="chip" data-p="${p}" aria-pressed="${S.game.id===p}"><span class="num">${p}</span>${mini(P.a)}${mini(P.b)}${P.tag?`<span class="tag">${P.tag}</span>`:''}</button>`}).join('')}</div>`;
+}
+function chartSide(ids, title){
+  const rows = ids.map(p => { const P = PUZZLES[p], r = S.results[p];
+    return `<tr><td>${p}</td><td class="pair">${mini(P.a)}${mini(P.b)}</td><td>${r?`<b>${r.shared.join(', ')}</b>`:'<span class="tbd">?</span>'}</td><td>${r? (r.apart? r.apart : '—') : '<span class="tbd">?</span>'}</td></tr>`; }).join('');
+  return `<h2>${title}</h2><table class="chart"><tr><th>#</th><th>Jumpers</th><th>Shared pads</th><th>Apart</th></tr>${rows}</table>`;
+}
+function sideJump(){
+  return chartSide([1,2,3], 'Our class chart') + `<p>How far apart are the shared pads?</p>
+  <p class="note">Puzzle 2 (Frog and Toad) is a good first try for anyone who needs an easier start.</p>`;
+}
+function mainNext(){
+  const ns = S.next;
+  return `<p class="prompt">${who('frog')} and ${who('cricket')} share 6, 12, 18. The path keeps going. Where do they share a pad next?</p>
+  <div class="row">
+    <button class="secondary" id="sixBtn">Show the jumps between</button>
+    <button class="primary" id="runPast" ${ns.solved?'disabled':''}>Jump past 20</button>
+  </div>${sayBox()}`;
+}
+function sideNext(){
+  return `<div class="journal"><h2>Math journal</h2><p style="font-size:21px;font-weight:700;margin-top:8px">Frog and Cricket both land on 6. Where do they meet next? How do you know?</p></div>
+  <p class="note">Ask: “What do you notice about 6, 12 and 18?” Let students explain before you tap Jump past 20.</p>`;
+}
+function mainChal(){
+  const tabs = `<div class="chips" role="group" aria-label="Challenge">
+    <button class="chip" data-c="grass" aria-pressed="${S.chal==='grass'}"><span class="num">5</span>${mini('cricket')}${mini('grass')}<span class="tag">New jumper</span></button>
+    <button class="chip" data-c="nobody" aria-pressed="${S.chal==='nobody'}"><span class="num">?</span>${mini('frog')}${mini('cricket')}<span class="tag">Nobody's pads</span></button></div>`;
+  if(S.chal==='grass') return gameMain(S.game, tabs);
+  const nb = S.nobody;
+  return `${tabs}<p class="prompt">${who('frog')} and ${who('cricket')} jump to 20. Which pads does <b>nobody</b> land on?</p>
+  <p class="seq" style="color:var(--ink)">${nb.found.size} of ${NOBODY.length} found</p>
+  <div class="row"><button class="secondary" id="showNobody">Show them all</button></div>${sayBox()}`;
+}
+function sideChal(){
+  if(S.chal==='grass') return chartSide([5], 'Challenge chart') + `<p class="note">Ask: “Why do Cricket and Grasshopper share fewer pads than Frog and Cricket?”</p>`;
+  return `<h2>Think about it</h2><p>What do the empty pads have in common?</p><p class="note">None of them is in the 2s count or the 3s count.</p>`;
+}
+
+/* ---------- Main render + wiring ---------- */
+function render(){
+  renderNav(); renderPond();
+  const m = $('#main'), s = $('#side');
+  const map = {warm:[mainWarm,sideWarm], guess:[mainGuess,sideGuess], jump:[()=>gameMain(S.game,puzzleChips()),sideJump], next:[mainNext,sideNext], chal:[mainChal,sideChal]};
+  m.innerHTML = map[S.step][0](); s.innerHTML = map[S.step][1]();
+  wire();
+}
+function on(id, fn){ const el = document.getElementById(id); if(el) el.onclick = fn; }
+function wire(){
+  on('hopBtn', () => { if(S.warm.pos<20) warmHop(); render(); });
+  on('skipBtn', () => { S.warm.skipped = true; say(`Frog skipped ${listText([1,3,5,7,9,11,13,15,17,19])}.`, 'good'); render(); });
+  document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { const k=b.dataset.v; S.votes[k] = Math.max(0, S.votes[k] + +b.dataset.d); render(); });
+  on('goJump', () => { S.puzzle = 1; S.game = newGame(1); goStep('jump'); });
+  document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { S.puzzle = +b.dataset.p; S.game = newGame(S.puzzle); S.hints={}; say(''); render(); });
+  document.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { S.chal = b.dataset.c; if(S.chal==='grass') S.game = newGame(5); S.hints={}; say(''); render(); });
+  on('hopFor', () => { const g=S.game, k=activeKey(g); if(k){ hop(g,k); if(g.phase==='jump') say(`${who(k)} lands on ${g.pos[k]}.`); } render(); });
+  on('finishJ', () => { const g=S.game; let k; while((k=activeKey(g))){ const t=g.pos[k]+J[k].step; g.pos[k]=t; g.seen[k].push(t); } S.hints={}; afterHop(g); render(); });
+  on('showShared', () => { const g=S.game, all=sharedPads(g.a,g.b,g.max); all.forEach(n=>g.found.add(n)); finishShare(g, all); render(); });
+  document.querySelectorAll('[data-apart]').forEach(b => b.onclick = () => { apartPick(S.game, +b.dataset.apart); render(); });
+  on('nextPuzzle', () => { S.puzzle = S.game.id + 1; S.game = newGame(S.puzzle); S.hints={}; say(''); render(); });
+  on('toNext', () => goStep('next'));
+  on('toNobody', () => { S.chal='nobody'; S.hints={}; say(''); render(); });
+  on('sixBtn', () => { S.hints = {6:'+6', 12:'+6', 18:'+6'}; if(S.next.solved){ S.hints[24]='+6'; S.hints[30]='+6'; }
+    say(`0 to 6 is 6. 6 to 12 is 6. 12 to 18 is 6. What is 6 more than 18?`); render(); });
+  on('runPast', () => { S.next.solved = true; S.hints = {}; say(`They meet on <b>24</b>, and then 30. Each shared pad is 6 more.`, 'good'); render(); });
+  on('showNobody', () => { NOBODY.forEach(n=>S.nobody.found.add(n)); say(`Nobody lands on ${listText(NOBODY)}.`, 'good'); render(); });
+}
+$('#resetBtn').onclick = () => { fresh(); render(); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+fresh(); render();
+})();
+</script>
+
+</body></html>

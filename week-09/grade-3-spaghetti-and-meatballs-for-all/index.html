@@ -1,0 +1,632 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Spaghetti and Meatballs for All</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout: a dinner-party floor plan (the stage) beside a lesson panel; the stage is the evidence board for every step. */
+:root{
+  --floor:#E9EDF2; --tile:#DCE2EA; --card:#FFFFFF; --ink:#1F2635; --muted:#596277; --line:#CDD4DF;
+  --tomato:#C2362A; --tomato-soft:#FBE4E0; --basil:#2B7348; --basil-soft:#DFF0E5;
+  --cloth:#FFFFFF; --check:#E05A4C; --chair:#8B5A33; --plate:#FFFFFF; --sauce:#D44A31; --meatball:#6E3720; --noodle:#EDBE52;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --floor:#141922; --tile:#1B212C; --card:#1E2430; --ink:#EEF0F4; --muted:#A5ADBD; --line:#353E4F;
+    --tomato:#FF7565; --tomato-soft:#3E2220; --basil:#63CF91; --basil-soft:#1B3325;
+    --cloth:#F1EEE9; --check:#D24B3E; --chair:#C69062; --plate:#FFFFFF; --sauce:#D44A31; --meatball:#6E3720; --noodle:#EDBE52;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --floor:#141922; --tile:#1B212C; --card:#1E2430; --ink:#EEF0F4; --muted:#A5ADBD; --line:#353E4F;
+  --tomato:#FF7565; --tomato-soft:#3E2220; --basil:#63CF91; --basil-soft:#1B3325;
+  --cloth:#F1EEE9; --check:#D24B3E; --chair:#C69062; --plate:#FFFFFF; --sauce:#D44A31; --meatball:#6E3720; --noodle:#EDBE52;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--floor); color:var(--ink); font-family:var(--body); font-size:17px; display:flex; flex-direction:column;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); -webkit-tap-highlight-color:transparent}
+button,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tomato); outline-offset:2px}
+
+header{display:flex; align-items:center; gap:16px 24px; padding-block:14px 8px; flex-wrap:wrap}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(26px,3vw,40px); line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.title p{margin:4px 0 0; color:var(--muted); font-size:15px}
+.title p b{color:var(--tomato); font-weight:700}
+.tools{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+.ghost{border:2px solid var(--line); background:var(--card); border-radius:12px; padding:9px 16px; font-weight:700; font-size:15px; min-height:44px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.tabs{display:flex; gap:4px; border-bottom:2px solid var(--line); overflow-x:auto}
+nav.tabs button{border:0; background:none; padding:10px 14px; font-family:var(--display); font-weight:700; font-size:clamp(17px,1.6vw,22px); color:var(--muted); border-bottom:4px solid transparent; margin-bottom:-2px; white-space:nowrap; min-height:48px}
+nav.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--tomato)}
+nav.tabs button span{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--line); color:var(--ink); font-size:15px; margin-right:6px}
+nav.tabs button[aria-selected="true"] span{background:var(--tomato); color:#fff}
+
+main{flex:1; min-height:0; display:flex; gap:28px; padding-block:14px 18px}
+.stage-col{flex:none; display:flex; flex-direction:column; gap:10px; width:min(58vw, calc((100dvh - 250px) * 1.5)); min-width:0}
+.stage{width:100%; aspect-ratio:3/2; max-width:100%; background:var(--card); border-radius:16px; border:2px solid var(--line); overflow:hidden; touch-action:manipulation}
+.stage svg{display:block; width:100%; height:100%}
+.tileR{fill:var(--tile); stroke:var(--floor); stroke-width:2}
+.hit{fill:transparent; cursor:pointer}
+.hit:hover{fill:var(--tomato); fill-opacity:.07}
+.outline{fill:var(--ink); stroke:var(--ink); stroke-width:5; stroke-linejoin:round}
+.top{fill:url(#cloth)}
+.seam{stroke:var(--muted); stroke-width:2; stroke-dasharray:4 4; opacity:.75}
+.chair{fill:var(--chair)}
+.chairN{fill:var(--card); stroke:var(--chair); stroke-width:2.5}
+.chairT{font:700 11px var(--body); fill:var(--ink); text-anchor:middle; dominant-baseline:central}
+.ghostC{fill:var(--card); stroke:var(--tomato); stroke-width:2.6; stroke-dasharray:3.5 2.5}
+.ghostX{stroke:var(--tomato); stroke-width:2.2; stroke-linecap:round}
+.plate{fill:var(--plate); stroke:#00000022; stroke-width:1}
+.noodle{fill:none; stroke:var(--noodle); stroke-width:2.2; stroke-linecap:round}
+.sauce{fill:var(--sauce)}
+.mb{fill:var(--meatball)}
+@media (prefers-reduced-motion:no-preference){ .ghostC,.ghostX{animation:fadeIn .35s ease-out} }
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.stats{display:flex; gap:10px 26px; flex-wrap:wrap; align-items:flex-end}
+.stat b{display:block; font-family:var(--display); font-weight:800; font-size:clamp(30px,3vw,44px); line-height:1; font-variant-numeric:tabular-nums}
+.stat span{font-size:14px; color:var(--muted)}
+.stat.seats b{color:var(--basil)}
+.stat.stand b{color:var(--tomato)}
+.info{min-height:1.5em; font-size:clamp(16px,1.35vw,19px); line-height:1.4}
+
+.panel{flex:1; min-width:0; overflow:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px}
+.view{display:flex; flex-direction:column; gap:14px}
+.lead{font-size:clamp(19px,1.7vw,25px); line-height:1.4; margin:0; max-width:32em}
+.lead strong{font-family:var(--display); font-weight:700}
+.small{font-size:15px; color:var(--muted); margin:0}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--tomato); color:#fff; font-weight:700; font-size:clamp(17px,1.4vw,20px); padding:13px 22px; border-radius:14px; min-height:52px}
+.primary:disabled{opacity:.45; cursor:default}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.3vw,19px); padding:11px 18px; border-radius:14px; min-height:52px}
+.secondary:disabled{opacity:.4; cursor:default}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.seg{display:inline-flex; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:3px; flex-wrap:wrap}
+.seg button{border:0; background:none; padding:9px 18px; border-radius:11px; font-weight:700; font-size:17px; color:var(--muted); min-height:46px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.check{display:flex; align-items:center; gap:10px; font-size:16px; cursor:pointer}
+.check input{width:24px; height:24px; accent-color:var(--tomato)}
+.msg{margin:0; padding:14px 18px; border-radius:14px; background:var(--tomato-soft); font-size:clamp(17px,1.4vw,20px); line-height:1.45; max-width:34em}
+.msg.good{background:var(--basil-soft)}
+.msg:empty{display:none}
+.num{width:96px; font-size:22px; font-weight:700; padding:8px 10px; border:2px solid var(--line); border-radius:12px; background:var(--card); text-align:center; min-height:52px}
+.steps{display:flex; gap:8px; flex-wrap:wrap}
+.chipline{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-variant-numeric:tabular-nums; font-size:18px}
+.chipline b{background:var(--basil-soft); padding:4px 10px; border-radius:10px}
+.chipline i{font-style:normal; color:var(--tomato); font-weight:700; font-size:15px}
+
+.story{font-size:clamp(18px,1.55vw,23px); line-height:1.5; margin:0; max-width:32em}
+.votes{display:flex; gap:10px; flex-wrap:wrap}
+.vote{border:2px solid var(--line); background:var(--card); border-radius:14px; padding:10px 16px; font-weight:700; font-size:18px; display:flex; gap:10px; align-items:center; min-height:56px}
+.vote em{font-style:normal; font-family:var(--display); font-size:26px; min-width:1.4em; text-align:center; background:var(--floor); border-radius:10px; padding:0 6px; font-variant-numeric:tabular-nums}
+
+.tablewrap{overflow-x:auto}
+table.data{border-collapse:collapse; font-size:17px; min-width:100%}
+table.data th{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); text-align:left; padding:6px 10px; border-bottom:2px solid var(--line)}
+table.data td{padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:middle; font-variant-numeric:tabular-nums}
+table.data td.n{text-align:center; font-weight:700}
+table.data tr.best td{background:var(--basil-soft)}
+table.data tr.worst td{background:var(--tomato-soft)}
+.thumb{display:block}
+.thumb rect{fill:var(--check)}
+.ok{color:var(--basil); font-weight:700}
+.summary{display:flex; gap:8px 22px; flex-wrap:wrap; font-size:17px}
+.summary b{font-family:var(--display); font-size:22px}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{width:54px; height:54px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:20px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.qnav button.star{width:auto; padding:0 18px; border-radius:27px}
+.bars{display:flex; flex-direction:column; gap:6px; margin-top:8px}
+.bar{display:grid; grid-template-columns:92px 1fr 52px; gap:10px; align-items:center; font-size:16px}
+.bar div{height:22px; border-radius:6px; background:var(--basil)}
+.bar.min div{background:var(--tomato)}
+.bar span:last-child{font-weight:700; font-variant-numeric:tabular-nums}
+.rule{font-family:var(--display); font-weight:700; font-size:clamp(20px,2vw,28px); background:var(--card); border:2px dashed var(--tomato); border-radius:14px; padding:10px 16px}
+.journal{margin-top:auto; font-size:15px; color:var(--muted); border-top:1.5px solid var(--line); padding-top:10px}
+
+@media (max-width:900px), (orientation:portrait){
+  main{flex-direction:column; overflow:auto}
+  .stage-col{width:100%}
+  .panel{overflow:visible}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+
+<header>
+  <div class="title">
+    <h1>Spaghetti and Meatballs for All</h1>
+    <p><b>Grade 3 · Week 9 · Lesson 3.9</b> &nbsp;Same tables, different seats</p>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="warm" aria-selected="true"><span>1</span>Warm-up</button>
+  <button role="tab" data-tab="party" aria-selected="false"><span>2</span>The party</button>
+  <button role="tab" data-tab="floor" aria-selected="false"><span>3</span>Floor plan</button>
+  <button role="tab" data-tab="q" aria-selected="false"><span>4</span>Detective questions</button>
+</nav>
+
+<main>
+  <div class="stage-col">
+    <div class="stage" id="stage"></div>
+    <div class="stats">
+      <div class="stat"><b id="sTables">0</b><span id="sTablesL">tables</span></div>
+      <div class="stat"><b id="sTouch">0</b><span>touching sides</span></div>
+      <div class="stat seats"><b id="sSeats">0</b><span>seats</span></div>
+      <div class="stat stand" id="standBox"><b id="sStand">0</b><span id="sStandL">guests with no seat</span></div>
+    </div>
+    <div class="info" id="info" aria-live="polite"></div>
+  </div>
+
+  <section class="panel">
+    <!-- 1 Warm-up -->
+    <div class="view" id="v-warm">
+      <p class="lead"><strong>One square table seats 4</strong>, one chair on each side. Push two tables together. How many seats now?</p>
+      <div class="steps">
+        <button class="secondary" data-warm="0">1 table</button>
+        <button class="secondary" data-warm="1">2 tables, apart</button>
+        <button class="secondary" data-warm="2">Push them together</button>
+        <button class="secondary" data-warm="3">3 in a row?</button>
+      </div>
+      <div class="row"><button class="primary" id="whereBtn">Where did 2 seats go?</button></div>
+      <p class="msg" id="warmMsg" aria-live="polite"></p>
+      <p class="small">Predict first, then tap. Tap any floor square to add or remove a table.</p>
+    </div>
+
+    <!-- 2 The party -->
+    <div class="view" id="v-party" hidden>
+      <p class="story" id="storyText"></p>
+      <div class="row">
+        <button class="secondary" id="storyBack">Back</button>
+        <button class="primary" id="storyNext">Guests arrive</button>
+      </div>
+      <div id="voteBox" hidden>
+        <p class="lead"><strong>Should Mrs. Comfort be worried?</strong> Vote.</p>
+        <div class="votes">
+          <button class="vote" data-vote="yes">Yes, worry <em id="vYes">0</em></button>
+          <button class="vote" data-vote="no">No, it’s fine <em id="vNo">0</em></button>
+          <button class="vote" data-vote="unsure">Not sure <em id="vUnsure">0</em></button>
+        </div>
+        <div class="row"><button class="primary" id="goFloor">Go find out on the floor plan</button></div>
+      </div>
+    </div>
+
+    <!-- 3 Floor plan -->
+    <div class="view" id="v-floor" hidden>
+      <p class="lead">Arrange all the tables. Tables that touch must share a <strong>whole side</strong>. Find the most seats and the fewest.</p>
+      <div class="row">
+        <span class="small">Tables:</span>
+        <div class="seg" role="group" aria-label="Number of tables" id="nSeg">
+          <button data-n="4" aria-pressed="false">4</button>
+          <button data-n="8" aria-pressed="true">8</button>
+          <button data-n="12" aria-pressed="false">12</button>
+          <button data-n="25" aria-pressed="false">25</button>
+        </div>
+      </div>
+      <p class="small">Tap a table to pick it up. Tap an empty square to put it down.</p>
+      <div class="row">
+        <button class="primary" id="recordBtn">Record this arrangement</button>
+        <button class="secondary" id="spreadBtn">Spread them out</button>
+        <button class="secondary" id="clearBtn">Clear floor</button>
+      </div>
+      <label class="check"><input type="checkbox" id="hideSeats"> Hide the seat count (count it yourself)</label>
+      <div class="row" id="countRow" hidden>
+        <label for="seatGuess" class="small">Seats I counted:</label>
+        <input class="num" id="seatGuess" type="number" inputmode="numeric" min="0" max="200">
+        <button class="secondary" id="countBtn">Check my count</button>
+      </div>
+      <label class="check"><input type="checkbox" id="showMissing"> Show the chairs that had to leave</label>
+      <p class="msg" id="floorMsg" aria-live="polite"></p>
+      <div class="tablewrap">
+        <table class="data" aria-label="Arrangements we found">
+          <thead><tr><th>Arrangement</th><th></th><th>Tables</th><th>Touching sides</th><th>Seats</th><th id="ruleTh" hidden>Rule check</th></tr></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <!-- 4 Detective questions -->
+    <div class="view" id="v-q" hidden>
+      <div class="qnav" id="qnav"></div>
+      <p class="lead" id="qtext"></p>
+      <div class="row" id="qactions"></div>
+      <div id="qextra"></div>
+      <div class="msg" id="qresult" aria-live="polite"></div>
+      <p class="small">Talk it over first. Then tap a button to put the evidence on the floor.</p>
+      <p class="journal"><b>Journal:</b> Why do pushed-together tables seat fewer people?</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const COLS = 12, ROWS = 8, C = 60, IN = 13;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const K = (c,r) => c + ',' + r;
+const P = k => k.split(',').map(Number);
+
+const S = {};
+function freshState(){
+  Object.assign(S, {tab:'warm', N:null, tables:new Set(), showMissing:false, number:false, hideSeats:false, revealed:null,
+    records:{}, votes:{yes:0,no:0,unsure:0}, story:0, gen:0, q:1, ruleShown:false, floorN:8});
+}
+
+/* ---------- Math ---------- */
+const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+function stats(set = S.tables){
+  let touch = 0, seats = 0;
+  for(const k of set){
+    const [c,r] = P(k);
+    if(set.has(K(c+1,r))) touch++;
+    if(set.has(K(c,r+1))) touch++;
+    for(const [dc,dr] of DIRS) if(!set.has(K(c+dc,r+dr))) seats++;   // one chair per open side
+  }
+  const n = set.size;
+  if(seats !== 4*n - 2*touch) console.error('seat rule mismatch');
+  return {n, touch, seats};
+}
+const SYM = [(x,y)=>[x,y],(x,y)=>[-x,y],(x,y)=>[x,-y],(x,y)=>[-x,-y],(x,y)=>[y,x],(x,y)=>[-y,x],(x,y)=>[y,-x],(x,y)=>[-y,-x]];
+function norm(cells){ const mx=Math.min(...cells.map(p=>p[0])), my=Math.min(...cells.map(p=>p[1]));
+  return cells.map(([x,y])=>[x-mx,y-my]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p.join(',')).join(';'); }
+function canon(cells){ let best=null; for(const f of SYM){ const s = norm(cells.map(([x,y])=>f(x,y))); if(best===null || s<best) best=s; } return best; }
+function components(set){
+  const seen = new Set(), comps = [];
+  for(const k of set){ if(seen.has(k)) continue;
+    const q=[k], comp=[]; seen.add(k);
+    while(q.length){ const cur=q.pop(); comp.push(P(cur)); const [c,r]=P(cur);
+      for(const [dc,dr] of DIRS){ const nk=K(c+dc,r+dr); if(set.has(nk) && !seen.has(nk)){ seen.add(nk); q.push(nk); } } }
+    comps.push(comp);
+  }
+  return comps;
+}
+const identity = set => components(set).map(canon).sort().join('|');
+function compName(comp){
+  const xs=comp.map(p=>p[0]), ys=comp.map(p=>p[1]);
+  const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1;
+  if(w*h===comp.length){ const a=Math.min(w,h), b=Math.max(w,h);
+    if(b===1) return 'single'; if(a===1) return `row of ${b}`; return `${a}-by-${b} block`; }
+  return `${comp.length}-table shape`;
+}
+function arrName(set){
+  const comps = components(set); const singles = comps.filter(c=>c.length===1).length;
+  const others = comps.filter(c=>c.length>1).map(compName);
+  if(!others.length) return `${singles} separate tables`;
+  const parts = others.slice(); if(singles) parts.push(`${singles} single${singles>1?'s':''}`);
+  return parts.join(' + ');
+}
+/* every connected arrangement of n tables, up to turns and flips */
+function allShapes(n){
+  let cur = new Set(['0,0']);
+  for(let k=1;k<n;k++){ const nxt = new Set();
+    for(const s of cur){ const cells = s.split(';').map(t=>t.split(',').map(Number)); const has = new Set(cells.map(p=>p.join(',')));
+      for(const [x,y] of cells) for(const [dx,dy] of DIRS){ const q=[x+dx,y+dy]; if(!has.has(q.join(','))) nxt.add(canon([...cells,q])); } }
+    cur = nxt; }
+  return [...cur].map(s => s.split(';').map(t=>t.split(',').map(Number)));
+}
+
+/* ---------- Layouts ---------- */
+function separate(n, ox=0, oy=0){ const out=[]; for(let r=0;r<ROWS && out.length<n;r+=2) for(let c=0;c<COLS && out.length<n;c+=2) out.push(K(c+ox,r+oy)); return out; }
+const block = (a,b,c0,r0) => { const o=[]; for(let r=0;r<a;r++) for(let c=0;c<b;c++) o.push(K(c0+c,r0+r)); return o; };
+const PARTY_APART = [K(1,2),K(4,2),K(7,2),K(10,2),K(1,5),K(4,5),K(7,5),K(10,5)];
+const LAYOUT = {
+  apart: PARTY_APART,
+  row: block(1,8,2,3),
+  snake: [K(3,2),K(4,2),K(5,2),K(5,3),K(5,4),K(6,4),K(7,4),K(7,3)],
+  block: block(2,4,4,3),
+  nook: [K(5,2),K(6,2),K(7,2),K(5,3),K(6,3),K(7,3),K(5,4),K(6,4)],
+  b34: block(3,4,4,2),
+  b55: block(5,5,3,1),
+};
+function setTables(list, N){ S.tables = new Set(list); if(N!==undefined) S.N = N; S.number=false; S.revealed=null; render(); }
+
+/* ---------- Drawing ---------- */
+const has = (c,r) => S.tables.has(K(c,r));
+function svg(){
+  const W=COLS*C, H=ROWS*C; let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Floor plan with ${S.tables.size} tables">`;
+  o += `<defs><pattern id="cloth" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" style="fill:var(--cloth)"/><rect width="6" height="6" style="fill:var(--check)"/><rect x="6" y="6" width="6" height="6" style="fill:var(--check)"/></pattern></defs>`;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) o += `<rect class="tileR" x="${c*C}" y="${r*C}" width="${C}" height="${C}"/>`;
+  const shapes = [];
+  for(const k of S.tables){ const [c,r]=P(k), x=c*C, y=r*C;
+    shapes.push([x+IN, y+IN, C-2*IN, C-2*IN]);
+    if(has(c+1,r)) shapes.push([x+C-IN, y+IN, 2*IN, C-2*IN]);
+    if(has(c,r+1)) shapes.push([x+IN, y+C-IN, C-2*IN, 2*IN]);
+    if(has(c+1,r)&&has(c,r+1)&&has(c+1,r+1)) shapes.push([x+C-IN, y+C-IN, 2*IN, 2*IN]);
+  }
+  for(const s of shapes) o += `<rect class="outline" x="${s[0]}" y="${s[1]}" width="${s[2]}" height="${s[3]}"/>`;
+  for(const s of shapes) o += `<rect class="top" x="${s[0]}" y="${s[1]}" width="${s[2]}" height="${s[3]}"/>`;
+  let ghosts = '', chairs = '', plates = '', n = 0;
+  for(const k of S.tables){ const [c,r]=P(k), x=c*C, y=r*C, cx=x+C/2, cy=y+C/2;
+    if(has(c+1,r)){ o += `<line class="seam" x1="${x+C}" y1="${y+IN}" x2="${x+C}" y2="${y+C-IN}"/>`;
+      if(S.showMissing){ ghosts += ghost(x+C-11, cy-12, 9, 24) + ghost(x+C+2, cy-12, 9, 24); } }
+    if(has(c,r+1)){ o += `<line class="seam" x1="${x+IN}" y1="${y+C}" x2="${x+C-IN}" y2="${y+C}"/>`;
+      if(S.showMissing){ ghosts += ghost(cx-12, y+C-11, 24, 9) + ghost(cx-12, y+C+2, 24, 9); } }
+    plates += `<circle class="plate" cx="${cx}" cy="${cy}" r="11"/><path class="noodle" d="M${cx-7} ${cy-2} q3 -5 6 0 t6 0 M${cx-6} ${cy+3} q3 -4 6 0 t5 0"/><circle class="sauce" cx="${cx+1}" cy="${cy}" r="4.5"/><circle class="mb" cx="${cx+1}" cy="${cy}" r="2.6"/>`;
+    const spots = [];
+    if(!has(c,r-1)) spots.push([cx-12, y+2, 24, 9]);
+    if(!has(c+1,r)) spots.push([x+C-11, cy-12, 9, 24]);
+    if(!has(c,r+1)) spots.push([cx-12, y+C-11, 24, 9]);
+    if(!has(c-1,r)) spots.push([x+2, cy-12, 9, 24]);
+    for(const s of spots){
+      if(S.number){ n++; const mx=s[0]+s[2]/2, my=s[1]+s[3]/2; chairs += `<circle class="chairN" cx="${mx}" cy="${my}" r="10"/><text class="chairT" x="${mx}" y="${my}">${n}</text>`; }
+      else chairs += `<rect class="chair" x="${s[0]}" y="${s[1]}" width="${s[2]}" height="${s[3]}" rx="3"/>`;
+    }
+  }
+  o += plates + ghosts + chairs;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const t = has(c,r);
+    o += `<rect class="hit" data-c="${c}" data-r="${r}" x="${c*C}" y="${r*C}" width="${C}" height="${C}" tabindex="0" role="button" aria-label="${t?'Table':'Empty'} at column ${c+1}, row ${r+1}. ${t?'Tap to pick it up':'Tap to put a table here'}"/>`;
+  }
+  return o + '</svg>';
+}
+const ghost = (x,y,w,h) => { const mx=x+w/2, my=y+h/2, d=3.2; return `<rect class="ghostC" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><path class="ghostX" d="M${mx-d} ${my-d}L${mx+d} ${my+d}M${mx+d} ${my-d}L${mx-d} ${my+d}"/>`; };
+
+function seatsHidden(){ return S.tab==='floor' && S.hideSeats && S.revealed !== [...S.tables].sort().join(' '); }
+function render(){
+  $('#stage').innerHTML = svg();
+  const st = stats();
+  $('#sTables').textContent = S.N ? `${st.n}/${S.N}` : st.n;
+  $('#sTablesL').textContent = S.N ? 'tables out' : (st.n===1?'table':'tables');
+  $('#sTouch').textContent = st.touch;
+  $('#sSeats').textContent = seatsHidden() ? '?' : st.seats;
+  const showStand = S.N && st.n===S.N && !seatsHidden();
+  $('#standBox').hidden = !showStand;
+  if(showStand){ $('#sStand').textContent = 4*S.N - st.seats; $('#sStandL').textContent = `of ${4*S.N} guests with no seat`; }
+  $('#recordBtn').disabled = !(S.N && st.n===S.N);
+  $('#countRow').hidden = !(S.tab==='floor' && S.hideSeats);
+  $('#showMissing').checked = S.showMissing;
+  renderData();
+}
+
+/* ---------- Tapping the floor ---------- */
+function tap(c,r){
+  const k = K(c,r); S.gen++;
+  if(S.tables.has(k)){ S.tables.delete(k); say(''); }
+  else {
+    const limit = S.N || 40;
+    if(S.tables.size >= limit){ say(`All ${limit} tables are already out. Tap a table to pick it up, then put it somewhere new.`); return; }
+    S.tables.add(k);
+    const orth = DIRS.some(([dc,dr]) => has(c+dc,r+dr));
+    const diag = [[1,1],[1,-1],[-1,1],[-1,-1]].some(([dc,dr]) => has(c+dc,r+dr));
+    if(diag && !orth) say('These tables touch only at a corner. They don’t share a side, so nobody loses a seat.');
+    else if(orth){ const n = DIRS.filter(([dc,dr]) => has(c+dc,r+dr)).length; say(`This table shares ${n} side${n>1?'s':''} with its neighbors.`); }
+    else say('');
+  }
+  S.number = false; $('#floorMsg').textContent=''; $('#floorMsg').className='msg';
+  render();
+}
+$('#stage').addEventListener('click', e => { const t = e.target.closest('.hit'); if(t) tap(+t.dataset.c, +t.dataset.r); });
+$('#stage').addEventListener('keydown', e => { const t = e.target.closest('.hit'); if(t && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); tap(+t.dataset.c, +t.dataset.r); } });
+function say(t){ $('#info').textContent = t; }
+
+/* ---------- Tabs ---------- */
+function selectTab(t){
+  S.tab = t; S.gen++; S.number = false;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+  ['warm','party','floor','q'].forEach(v => $('#v-'+v).hidden = v!==t);
+  say('');
+  if(t==='warm'){ warm(0); }
+  if(t==='party'){ story(S.story); }
+  if(t==='floor'){ if(S.N!==S.floorN || S.tables.size!==S.N){ setFloorN(S.floorN, true); } else render(); }
+  if(t==='q'){ renderQ(); render(); }
+}
+$$('nav.tabs button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+
+/* ---------- 1 Warm-up ---------- */
+const WARM = [
+  {t:[K(5,3)], m:'One table, four sides, four chairs.'},
+  {t:[K(4,3),K(7,3)], m:'Two tables apart: 4 + 4 = 8 seats.'},
+  {t:[K(5,3),K(6,3)], m:'Pushed together. Count the chairs. Is it still 8?'},
+  {t:[K(4,3),K(5,3),K(6,3)], m:'Three in a row. Predict before you count!'},
+];
+function warm(i){
+  S.N = null; S.showMissing = false; setTables(WARM[i].t);
+  $$('[data-warm]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.warm===i));
+  $('#warmMsg').textContent = ''; $('#warmMsg').className='msg'; say(WARM[i].m);
+}
+$$('[data-warm]').forEach(b => b.onclick = () => warm(+b.dataset.warm));
+$('#whereBtn').onclick = () => {
+  const st = stats();
+  if(st.touch===0){ warm(2); }
+  S.showMissing = true; render();
+  const s2 = stats();
+  $('#warmMsg').className='msg good';
+  $('#warmMsg').innerHTML = `The dashed chairs had to leave. Where two tables touch, those two sides are pushed together, so <b>2 chairs</b> can’t fit. ${s2.n} tables × 4 = ${4*s2.n}, but only <b>${s2.seats} seats</b>.`;
+};
+
+/* ---------- 2 The party ---------- */
+const STORY = [
+  {t:PARTY_APART, h:`Mr. and Mrs. Comfort invite <b>32 guests</b> to a spaghetti dinner. They rent <b>8 square tables</b>, one chair on each side: 32 seats. Perfect!`},
+  {t:[K(1,2),K(2,2),K(7,2),K(10,2),K(1,5),K(4,5),K(7,5),K(10,5)], h:`The first guests arrive. Two friends want to sit together, so they <b>push two tables together</b>.`},
+  {t:[K(1,2),K(2,2),K(3,2),K(4,2),K(7,2),K(10,2),K(1,5),K(4,5)], h:`More guests arrive and push more tables together to sit near friends. Mrs. Comfort is getting worried…`},
+];
+function story(i){
+  S.story = i; S.N = 8; S.showMissing = false; setTables(STORY[i].t, 8);
+  $('#storyText').innerHTML = STORY[i].h;
+  $('#storyBack').disabled = i===0;
+  $('#storyNext').hidden = i===STORY.length-1;
+  $('#voteBox').hidden = i<STORY.length-1;
+  const st = stats();
+  say(`${st.seats} seats for 32 guests.`);
+}
+$('#storyNext').onclick = () => story(Math.min(S.story+1, STORY.length-1));
+$('#storyBack').onclick = () => story(Math.max(S.story-1, 0));
+$$('[data-vote]').forEach(b => b.onclick = () => { S.votes[b.dataset.vote]++; renderVotes(); });
+function renderVotes(){ $('#vYes').textContent=S.votes.yes; $('#vNo').textContent=S.votes.no; $('#vUnsure').textContent=S.votes.unsure; }
+$('#goFloor').onclick = () => { S.floorN = 8; selectTab('floor'); };
+
+/* ---------- 3 Floor plan ---------- */
+function setFloorN(n, spread){
+  S.floorN = n; S.N = n;
+  $$('#nSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.n===n));
+  S.tables = new Set(spread && n<=24 ? separate(n) : []);
+  S.number = false; S.revealed = null;
+  $('#floorMsg').textContent=''; $('#floorMsg').className='msg';
+  say(n>24 ? `Place ${n} tables on the floor.` : `${n} tables, all apart. Now push some together!`);
+  render();
+}
+$$('#nSeg button').forEach(b => b.onclick = () => setFloorN(+b.dataset.n, true));
+$('#spreadBtn').onclick = () => setFloorN(S.N || 8, true);
+$('#clearBtn').onclick = () => { setFloorN(S.N || 8, false); };
+$('#hideSeats').onchange = e => { S.hideSeats = e.target.checked; S.revealed = null; render(); };
+$('#showMissing').onchange = e => { S.showMissing = e.target.checked; render(); };
+$('#countBtn').onclick = () => {
+  const v = $('#seatGuess').value.trim(); const m = $('#floorMsg');
+  const st = stats();
+  if(v===''){ m.className='msg'; m.textContent = 'Type the number of chairs you counted first.'; return; }
+  const g = +v;
+  if(g===st.seats){ S.revealed = [...S.tables].sort().join(' '); S.number=false; m.className='msg good';
+    m.textContent = `Yes, ${st.seats} seats! Can you see a way to know that without counting every chair?`; render(); return; }
+  S.number = true; render(); m.className='msg';
+  if(g===4*st.n) m.textContent = `${g} is 4 chairs for every table. But where two tables touch, those sides are pushed together and no chair fits there. The chairs are numbered now. Count again.`;
+  else if(g>st.seats) m.textContent = `${g} is more chairs than fit. Chairs go only on open sides, one per side. The chairs are numbered now. How many are there?`;
+  else m.textContent = `Some chairs were missed. Check every open side, even the ones on the far end. The chairs are numbered now. How many are there?`;
+};
+$('#recordBtn').onclick = () => {
+  const st = stats(); const m = $('#floorMsg'); const N = S.N;
+  if(st.n!==N) return;
+  const id = identity(S.tables);
+  const list = (S.records[N] = S.records[N] || []);
+  const sepId = identity(new Set(separate(N)));
+  if(id===sepId || list.some(r=>r.id===id)){ m.className='msg';
+    m.textContent = 'You already have that one in the table. (Turning or flipping it doesn’t make a new arrangement.) Try a different shape.'; return; }
+  list.push({id, cells:[...S.tables].map(P), touch:st.touch, seats:st.seats, name:arrName(S.tables)});
+  m.className='msg good'; m.textContent = `Recorded: ${st.seats} seats with ${st.touch} touching side${st.touch===1?'':'s'}.`;
+  renderData();
+};
+function thumb(cells){
+  const xs=cells.map(p=>p[0]), ys=cells.map(p=>p[1]); const mx=Math.min(...xs), my=Math.min(...ys);
+  const w=Math.max(...xs)-mx+1, h=Math.max(...ys)-my+1, u=9;
+  return `<svg class="thumb" width="${w*u}" height="${h*u}" viewBox="0 0 ${w*u} ${h*u}" aria-hidden="true">${cells.map(([x,y])=>`<rect x="${(x-mx)*u+.5}" y="${(y-my)*u+.5}" width="${u-1}" height="${u-1}"/>`).join('')}</svg>`;
+}
+function renderData(){
+  const N = S.floorN;
+  const list = S.records[N] || [];
+  const rows = [{name:`${N} separate tables`, cells:N<=24?separate(N).map(P):null, touch:0, seats:4*N}, ...list];
+  const max = Math.max(...rows.map(r=>r.seats)), min = Math.min(...rows.map(r=>r.seats));
+  $('#ruleTh').hidden = !S.ruleShown;
+  $('#dataBody').innerHTML = rows.map(r => `<tr class="${rows.length>1 && r.seats===min ? 'worst' : rows.length>1 && r.seats===max ? 'best':''}"><td>${r.name}</td><td>${r.cells && r.cells.length<=25 ? thumb(r.cells):''}</td><td class="n">${N}</td><td class="n">${r.touch}</td><td class="n">${r.seats}</td>${S.ruleShown?`<td>4 × ${N} − 2 × ${r.touch} = ${4*N-2*r.touch} <span class="ok">${4*N-2*r.touch===r.seats?'✓':'✗'}</span></td>`:''}</tr>`).join('');
+  $('#summary').innerHTML = rows.length>1 ? `<span>Most seats so far: <b>${max}</b></span><span>Fewest so far: <b>${min}</b></span>` : `<span class="small">Record more arrangements of ${N} tables to fill the table.</span>`;
+}
+
+/* ---------- 4 Detective questions ---------- */
+function result(html, good){ const r=$('#qresult'); r.innerHTML = html; r.className = 'msg' + (good?' good':''); }
+function load(list, N){ S.gen++; S.showMissing=false; setTables(list, N); }
+let shapeCache = null;
+const Q = {
+  1:{ text:'Each time two tables touch, how many seats disappear?',
+      actions:[
+        {label:'Push 8 tables into a row, one at a time', run: async () => {
+          const g = ++S.gen; S.showMissing = true; S.N = 8; S.number = false; S.tables = new Set(PARTY_APART.map(k=>{const [c,r]=P(k); return K(c, r===2?1:4);})); render();
+          const from = [...S.tables]; const seq = [stats().seats]; const joins = [];
+          result(`<div class="chipline"><b>${seq[0]}</b></div>`);
+          for(let i=0;i<8;i++){
+            await sleep(reduced?150:800); if(g!==S.gen) return;
+            S.tables.delete(from[i]); S.tables.add(K(2+i,7)); render();
+            const s = stats().seats; joins.push(seq[seq.length-1]-s); seq.push(s);
+            result(`<div class="chipline">${seq.map((v,j)=> j? `<i>${joins[j-1]?'−'+joins[j-1]:'±0'}</i><b>${v}</b>` : `<b>${v}</b>`).join('')}</div>`);
+          }
+          result(`<div class="chipline">${seq.map((v,j)=> j? `<i>${joins[j-1]?'−'+joins[j-1]:'±0'}</i><b>${v}</b>` : `<b>${v}</b>`).join('')}</div><p style="margin:10px 0 0">Every time a table joined the row, <b>2 seats</b> disappeared: one chair from each table. The row has 7 touching sides, so 7 × 2 = 14 seats are gone. 32 − 14 = <b>18</b>.</p>`, true);
+        }}]},
+  2:{ text:'Which arrangement of 8 tables seats the most people? Which seats the fewest?',
+      actions:[
+        {label:'8 apart', run:()=>{ load(LAYOUT.apart,8); result('All 8 apart: no touching sides, so <b>32 seats</b>. That’s the most. Every push loses seats.'); }},
+        {label:'A row', run:()=>{ load(LAYOUT.row,8); result('A row of 8: 7 touching sides, <b>18 seats</b>.'); }},
+        {label:'A snake', run:()=>{ load(LAYOUT.snake,8); result('A snake also has 7 touching sides, so it also seats <b>18</b>. Any row or snake of 8 seats 18.'); }},
+        {label:'2-by-4 block', run:()=>{ load(LAYOUT.block,8); S.showMissing=true; render(); result('A 2-by-4 block: 10 touching sides, only <b>12 seats</b>. That is the fewest. The block packs the tables tight, so more sides touch.'); }},
+        {label:'Check every possible shape', run:()=>{
+          shapeCache = shapeCache || allShapes(8);
+          const h = {}; for(const s of shapeCache){ const st = stats(new Set(s.map(p=>K(p[0],p[1])))); h[st.seats]=(h[st.seats]||0)+1; }
+          const keys = Object.keys(h).map(Number).sort((a,b)=>b-a); const mx = Math.max(...Object.values(h)); const lo = Math.min(...keys);
+          result(`The computer built every way to push 8 tables into one group: <b>${shapeCache.length} shapes</b> (turns and flips count as the same).<div class="bars">${keys.map(k=>`<div class="bar ${k===lo?'min':''}"><span>${k} seats</span><div style="width:${Math.max(3,h[k]/mx*100)}%"></div><span>${h[k]}</span></div>`).join('')}</div><p style="margin:10px 0 0">Nothing beats ${lo}. Only <b>${h[lo]} shapes</b> get that low: the 2-by-4 block and one surprise.</p>`);
+          const b = document.createElement('button'); b.className='secondary'; b.textContent='Show the surprise shape';
+          b.onclick = () => { load(LAYOUT.nook,8); S.showMissing=true; render(); result('A 3-by-3 square with one corner missing. It has 10 touching sides too: 32 − 20 = <b>12 seats</b>, a tie with the 2-by-4 block.', true); };
+          $('#qresult').appendChild(b);
+        }},
+      ]},
+  3:{ text:'Can you find the number of seats without counting the chairs? Use the number of touching sides.',
+      actions:[
+        {label:'Show the rule on this floor', run:()=>{
+          if(!S.tables.size) load(LAYOUT.snake,8);
+          S.showMissing = true; S.ruleShown = true; render(); const st = stats();
+          result(`<div class="rule">seats = 4 × tables − 2 × touching sides</div><p style="margin:10px 0 0">Here: 4 × ${st.n} − 2 × ${st.touch} = ${4*st.n} − ${2*st.touch} = <b>${st.seats}</b>. Count the chairs on the floor to check.</p>`, true);
+        }},
+        {label:'Test it on our recorded arrangements', run:()=>{
+          S.ruleShown = true; renderData();
+          const list = S.records[S.floorN] || [];
+          result(`The rule is now checked on every row of the Floor plan table${list.length?'':' (so far only the separate tables are there. Record more!)'}. Each touching side hides one chair from <b>each</b> of the two tables, so it costs 2 seats.`, true);
+        }}]},
+  4:{ text:'So was Mrs. Comfort right to worry?',
+      actions:[
+        {label:'Show the worst case', run:()=>{ load(LAYOUT.block,8); S.showMissing=true; render();
+          const v = S.votes, tot = v.yes+v.no+v.unsure;
+          result(`Yes! If the guests push all 8 tables into a 2-by-4 block, there are only <b>12 seats</b> for 32 guests. <b>20 guests</b> have nowhere to sit.${tot?` Our class voted ${v.yes} yes, ${v.no} no, ${v.unsure} not sure.`:''}`); }}]},
+  5:{ text:'Challenge: With 12 tables, which arrangement seats the fewest? Then predict a 5-by-5 block of 25 tables without drawing it.',
+      actions:[
+        {label:'Try 12 tables', run:()=>{ S.floorN=12; load(separate(12),12); result('12 tables, all apart: 48 seats. Tap tables to pick them up and push them together. Find the fewest seats you can.'); }},
+        {label:'Reveal the fewest for 12', run:()=>{ S.floorN=12; load(LAYOUT.b34,12); S.showMissing=true; render();
+          result('A 3-by-4 block: 17 touching sides. 4 × 12 − 2 × 17 = 48 − 34 = <b>14 seats</b>. It’s the only shape of 12 tables that gets this low.', true); }},
+      ],
+      extra:()=>`<div class="row" style="margin-top:4px"><span class="lead" style="font-size:20px"><strong>5-by-5 block:</strong></span>
+        <label class="small" for="pTouch">touching sides</label><input class="num" id="pTouch" type="number" inputmode="numeric" min="0">
+        <label class="small" for="pSeats">seats</label><input class="num" id="pSeats" type="number" inputmode="numeric" min="0">
+        <button class="primary" id="pCheck">Check</button><button class="secondary" id="pBuild">Build it to check</button></div>`},
+};
+function check55(){
+  const tv = $('#pTouch').value.trim(), sv = $('#pSeats').value.trim();
+  if(tv===''||sv===''){ result('Fill in both boxes first: touching sides and seats.'); return; }
+  const t = +tv, s = +sv; const msgs = []; let good = true;
+  if(t===40) msgs.push('Touching sides: <b>40</b> is right.');
+  else { good = false;
+    if(t===20) msgs.push('Touching sides: you found 20. That’s one direction! Each of the 5 rows has 4 joins (5 × 4 = 20). The 5 columns have 4 joins each too.');
+    else msgs.push(`Touching sides: ${t} needs another look. A row of 5 tables has 4 joins, not 5. Count the joins across each of the 5 rows, then down each of the 5 columns.`); }
+  if(s===20) msgs.push('Seats: <b>20</b> is right. 4 × 25 − 2 × 40 = 100 − 80 = 20. That’s 5 chairs on each of the 4 sides of the block.');
+  else { good = false;
+    if(s===100-2*t) msgs.push(`Seats: you used the rule correctly with your touching sides: 100 − 2 × ${t} = ${s}. Fix the touching sides and the seats will follow.`);
+    else msgs.push(`Seats: ${s} needs another look. Use the rule: 4 × 25 − 2 × (touching sides). Or picture the block: how many chairs fit along each edge?`); }
+  result(msgs.join('<br>'), good);
+}
+function renderQ(){
+  const nav = $('#qnav');
+  nav.innerHTML = [1,2,3,4].map(i=>`<button data-q="${i}" aria-pressed="${S.q===i}" aria-label="Question ${i}">${i}</button>`).join('') + `<button class="star" data-q="5" aria-pressed="${S.q===5}">★ Challenge</button>`;
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { S.q = +b.dataset.q; S.gen++; result(''); renderQ(); });
+  const q = Q[S.q]; $('#qtext').textContent = q.text;
+  const box = $('#qactions'); box.innerHTML = '';
+  q.actions.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0?'primary':'secondary'; b.textContent = a.label; b.onclick = () => a.run(); box.appendChild(b); });
+  $('#qextra').innerHTML = q.extra ? q.extra() : '';
+  if(q.extra){ $('#pCheck').onclick = check55; $('#pBuild').onclick = () => { S.floorN=25; load(LAYOUT.b55,25); S.showMissing=true; render();
+    result('Here it is. Count the chairs: 5 on each side, <b>20 seats</b>. Count the dashed pairs: <b>40 touching sides</b>.', true); }; }
+}
+
+/* ---------- Global ---------- */
+function startOver(){
+  freshState(); $('#hideSeats').checked=false; $('#seatGuess').value=''; renderVotes(); result('');
+  $$('#nSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.n===8));
+  selectTab('warm');
+}
+$('#resetBtn').onclick = startOver;
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+
+window.__test = {stats, allShapes, identity, LAYOUT, separate};
+startOver();
+})();
+</script>
+
+</body></html>

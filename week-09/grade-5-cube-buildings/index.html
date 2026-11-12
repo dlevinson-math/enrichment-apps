@@ -1,0 +1,667 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cube Buildings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: an architect's drafting table. Left = the build plate (isometric model), right = the drawing set and tasks. */
+:root{
+  --paper:#ECEFF3; --card:#FFFFFF; --ink:#172033; --muted:#566074; --line:#CBD2DC; --grid:#DCE2EA;
+  --cube-top:#9CC0F7; --cube-front:#4F88E6; --cube-right:#2D5EB8; --cube-edge:#18346B;
+  --hot:#F07A1A; --hot-top:#FFC27D; --hot-right:#C45A08; --hot-soft:#FDEBDB;
+  --l1:#4F88E6; --l2:#16A37A; --l3:#B04BD0;
+  --ok:#17875A; --ok-soft:#DFF3E9; --bad:#CC3333; --bad-soft:#FBE4E4;
+  --sil:#3B4A63;
+  --display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10141B; --card:#19202A; --ink:#E7ECF3; --muted:#9AA5B6; --line:#323C4B; --grid:#252E3B;
+    --cube-top:#8DB6F6; --cube-front:#4A82E0; --cube-right:#2A57A8; --cube-edge:#0B1A36;
+    --hot:#FF9440; --hot-top:#FFC98F; --hot-right:#C9600F; --hot-soft:#3A2614;
+    --l1:#5B93EE; --l2:#2BC08F; --l3:#C46BE2;
+    --ok:#3CCB8A; --ok-soft:#163327; --bad:#FF6B6B; --bad-soft:#3A1C1C; --sil:#AFC0D8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10141B; --card:#19202A; --ink:#E7ECF3; --muted:#9AA5B6; --line:#323C4B; --grid:#252E3B;
+  --cube-top:#8DB6F6; --cube-front:#4A82E0; --cube-right:#2A57A8; --cube-edge:#0B1A36;
+  --hot:#FF9440; --hot-top:#FFC98F; --hot-right:#C9600F; --hot-soft:#3A2614;
+  --l1:#5B93EE; --l2:#2BC08F; --l3:#C46BE2;
+  --ok:#3CCB8A; --ok-soft:#163327; --bad:#FF6B6B; --bad-soft:#3A1C1C; --sil:#AFC0D8;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.4;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
+  display:flex; flex-direction:column; -webkit-tap-highlight-color:transparent}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--hot); outline-offset:2px}
+
+header{display:flex; align-items:flex-end; gap:16px 28px; flex-wrap:wrap; padding-block:14px 8px}
+.title h1{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(28px,3vw,44px); letter-spacing:-.02em; line-height:1}
+.sub{margin:6px 0 0; display:flex; gap:10px; flex-wrap:wrap; align-items:baseline}
+.tagline{font-family:var(--mono); font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.dq{font-style:italic; color:var(--ink); font-size:clamp(15px,1.3vw,19px)}
+.tools{margin-left:auto; display:flex; gap:8px}
+.ghost{border:1.5px solid var(--line); background:var(--card); border-radius:10px; padding:10px 16px; font-weight:700; font-size:15px; min-height:44px}
+.ghost:hover{border-color:var(--ink)}
+
+nav.steps{display:flex; gap:6px; flex-wrap:wrap; padding-block:4px 10px; border-bottom:2px solid var(--line)}
+nav.steps button{border:0; background:none; padding:10px 14px; border-radius:10px; font-family:var(--display); font-weight:700; font-size:clamp(15px,1.25vw,19px); color:var(--muted); display:flex; gap:8px; align-items:center; min-height:48px}
+nav.steps button small{font-family:var(--mono); font-weight:600; font-size:12px; color:inherit; opacity:.8}
+nav.steps button[aria-selected="true"]{background:var(--ink); color:var(--card)}
+
+main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:24px; padding-block:16px 20px}
+.stage-col{display:flex; flex-direction:column; gap:10px; min-width:0}
+.stage{position:relative; background:var(--card); border:1.5px solid var(--line); border-radius:14px; flex:1; min-height:300px; display:flex; align-items:center; justify-content:center; padding:10px;
+  background-image:radial-gradient(var(--grid) 1.2px, transparent 1.3px); background-size:22px 22px}
+.stage svg{width:100%; height:100%; max-height:62vh; display:block}
+.stage-cap{position:absolute; left:14px; top:10px; font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.stage-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.turn{border:2px solid var(--ink); background:var(--card); border-radius:12px; padding:10px 16px; font-weight:700; min-height:48px}
+.corner{font-size:15px; color:var(--muted)}
+
+.panel{min-width:0; display:flex; flex-direction:column; gap:14px; overflow:auto; padding-right:2px}
+.panel h2{margin:0; font-family:var(--display); font-weight:800; font-size:clamp(22px,2vw,30px); letter-spacing:-.01em; text-wrap:balance}
+.lead{margin:0; font-size:clamp(17px,1.45vw,22px); line-height:1.45; max-width:34em}
+.lead b{font-family:var(--display)}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.primary{border:0; background:var(--hot); color:#fff; font-weight:700; font-size:clamp(17px,1.35vw,20px); padding:13px 22px; border-radius:12px; min-height:52px}
+.secondary{border:2px solid var(--ink); background:var(--card); font-weight:700; font-size:clamp(16px,1.2vw,18px); padding:11px 18px; border-radius:12px; min-height:52px}
+.secondary[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.primary:disabled,.secondary:disabled{opacity:.4; cursor:default}
+.seg{display:inline-flex; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:3px}
+.seg button{border:0; background:none; padding:9px 18px; border-radius:9px; font-weight:700; font-size:16px; color:var(--muted); min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.msg{margin:0; padding:14px 16px; border-radius:12px; font-size:clamp(16px,1.3vw,20px); line-height:1.45; background:var(--hot-soft); max-width:36em}
+.msg:empty{display:none}
+.msg.ok{background:var(--ok-soft)}
+.msg.bad{background:var(--bad-soft)}
+.label{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+.sheet{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start}
+.block{display:flex; flex-direction:column; align-items:flex-start}
+
+/* Height map */
+.hmap{display:grid; gap:0; border:2px solid var(--ink); border-radius:4px; overflow:hidden; background:var(--card)}
+.hmap button,.hmap div{width:clamp(48px,5vw,64px); height:clamp(48px,5vw,64px); border:0; border-right:1.5px solid var(--line); border-bottom:1.5px solid var(--line);
+  background:var(--card); font-family:var(--mono); font-weight:600; font-size:clamp(22px,2.2vw,30px); display:grid; place-items:center; padding:0}
+.hmap .zero{color:var(--muted)}
+.hmap button:hover{background:var(--hot-soft)}
+.hmap .sel{background:var(--hot-soft); box-shadow:inset 0 0 0 3px var(--hot)}
+.front-tag{font-family:var(--mono); font-size:12px; letter-spacing:.12em; color:var(--muted); margin-top:4px; align-self:stretch; text-align:center}
+
+/* Shade grids */
+.shade{display:grid; border:2px solid var(--ink); border-radius:4px; overflow:hidden; background:var(--card)}
+.shade button{width:clamp(40px,4.2vw,54px); height:clamp(40px,4.2vw,54px); border:0; border-right:1.5px solid var(--line); border-bottom:1.5px solid var(--line); background:var(--card); padding:0}
+.shade button.on{background:var(--sil)}
+.shade button.wrong{background:repeating-linear-gradient(45deg, var(--bad-soft) 0 6px, var(--card) 6px 12px); box-shadow:inset 0 0 0 3px var(--bad)}
+.shade button.on.wrong{background:repeating-linear-gradient(45deg, var(--bad) 0 6px, var(--sil) 6px 12px)}
+.shade.locked button{cursor:default}
+.axis{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:4px}
+
+.stepper{display:inline-flex; align-items:center; border:2px solid var(--ink); border-radius:12px; overflow:hidden; background:var(--card)}
+.stepper button{border:0; background:none; width:52px; height:52px; font-size:26px; font-weight:700}
+.stepper output{min-width:64px; text-align:center; font-family:var(--mono); font-size:28px; font-weight:600}
+
+.status{display:flex; gap:20px; flex-wrap:wrap; padding-top:10px; border-top:1.5px solid var(--line)}
+.stat b{display:block; font-family:var(--display); font-size:clamp(28px,2.6vw,40px); font-weight:800; line-height:1; font-variant-numeric:tabular-nums}
+.stat span{font-size:14px; color:var(--muted)}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; font-weight:700; font-size:15px; background:var(--card); border:1.5px solid var(--line); color:var(--muted)}
+.pill.ok{background:var(--ok-soft); border-color:var(--ok); color:var(--ok)}
+.pill.no{background:var(--bad-soft); border-color:var(--bad); color:var(--bad)}
+.trophies{display:flex; gap:8px; flex-wrap:wrap}
+.trophy{padding:8px 14px; border-radius:10px; border:1.5px dashed var(--line); color:var(--muted); font-weight:700; font-size:15px}
+.trophy.got{border-style:solid; border-color:var(--ok); color:var(--ok); background:var(--ok-soft)}
+
+.qnav{display:flex; gap:8px; flex-wrap:wrap}
+.qnav button{min-width:52px; height:52px; border-radius:26px; border:2px solid var(--line); background:var(--card); font-weight:700; font-size:19px; padding:0 14px}
+.qnav button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.hint{font-size:14px; color:var(--muted); margin:0}
+.bars{display:flex; gap:10px; align-items:flex-end; height:130px; padding-top:6px}
+.bar{display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--mono); font-size:13px}
+.bar i{display:block; width:34px; background:var(--cube-front); border-radius:4px 4px 0 0}
+.views-mini{display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end}
+.views-mini svg{display:block}
+.guess{display:flex; gap:8px; flex-wrap:wrap}
+.guess button{width:56px; height:56px; border-radius:50%; border:2px solid var(--line); background:var(--card); font-family:var(--mono); font-size:22px; font-weight:600}
+.guess button[aria-pressed="true"]{border-color:var(--hot); background:var(--hot-soft)}
+
+svg text{font-family:var(--mono)}
+.f-top{fill:var(--cube-top)} .f-front{fill:var(--cube-front)} .f-right{fill:var(--cube-right)}
+.cube polygon{stroke:var(--cube-edge); stroke-width:1.4; stroke-linejoin:round}
+.cube.hot .f-top{fill:var(--hot-top)} .cube.hot .f-front{fill:var(--hot)} .cube.hot .f-right{fill:var(--hot-right)}
+.cube.l1 polygon{fill:var(--l1)} .cube.l2 polygon{fill:var(--l2)} .cube.l3 polygon{fill:var(--l3)}
+.cube.l1 .f-top,.cube.l2 .f-top,.cube.l3 .f-top{filter:brightness(1.25)}
+.cube.l1 .f-right,.cube.l2 .f-right,.cube.l3 .f-right{filter:brightness(.75)}
+.cube.dim{opacity:.18}
+.cube.ghost polygon{fill:var(--hot); fill-opacity:.12; stroke:var(--hot); stroke-dasharray:5 4; stroke-width:2}
+.cube.pop{animation:drop .28s ease-out}
+@keyframes drop{from{transform:translateY(-18px); opacity:0}to{transform:none; opacity:1}}
+.tile{fill:var(--card); stroke:var(--line); stroke-width:1.2}
+.tile.frontrow{fill:var(--grid)}
+.frontline{stroke:var(--ink); stroke-width:3; stroke-linecap:round}
+.lbl-bg{fill:var(--card); stroke:var(--ink); stroke-width:1.5}
+.lbl{font-weight:600; fill:var(--ink)}
+.front-lbl{font-weight:600; fill:var(--ink); letter-spacing:.12em}
+@media (prefers-reduced-motion: reduce){ .cube.pop{animation:none} *{transition:none!important} }
+
+@media (max-width: 900px), (orientation: portrait){
+  main{grid-template-columns:1fr}
+  .stage{min-height:300px; flex:none; height:min(52vh, 440px)}
+  .panel{overflow:visible}
+}
+</style>
+
+<header>
+  <div class="title">
+    <h1>Cube Buildings</h1>
+    <div class="sub"><span class="tagline">Grade 5 · Week 9 · Lesson 5.9</span><span class="dq">Can three views pin down one building?</span></div>
+  </div>
+  <div class="tools">
+    <button class="ghost" id="resetBtn">Start over</button>
+    <button class="ghost" id="fsBtn">Full screen</button>
+  </div>
+</header>
+
+<nav class="steps" role="tablist" id="steps">
+  <button role="tab" data-tab="warm" aria-selected="true"><small>1</small>Warm-up</button>
+  <button role="tab" data-tab="partA" aria-selected="false"><small>2</small>Build from a map</button>
+  <button role="tab" data-tab="partB" aria-selected="false"><small>3</small>Mystery building</button>
+  <button role="tab" data-tab="chal" aria-selected="false"><small>4</small>★ Challenge</button>
+  <button role="tab" data-tab="det" aria-selected="false"><small>5</small>Detective questions</button>
+</nav>
+
+<main>
+  <div class="stage-col">
+    <div class="stage" id="stage"><span class="stage-cap" id="stageCap"></span><svg id="stageSvg" role="img" aria-label="Cube building"></svg></div>
+    <div class="stage-bar" id="stageBar">
+      <button class="turn" id="turnL" aria-label="Turn the building left">⟲ Turn</button>
+      <button class="turn" id="turnR" aria-label="Turn the building right">Turn ⟳</button>
+      <span class="corner" id="corner"></span>
+    </div>
+  </div>
+  <section class="panel" id="panel"></section>
+</main>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clone = h => h.map(r => r.slice());
+/* Heights are stored h[y][x]: y = 0 is the FRONT row, x = 0 is the left column. */
+const views = h => ({ front: h[0].map((_,x) => Math.max(...h.map(r => r[x]))), right: h.map(r => Math.max(...r)) });
+const vol = h => h.flat().reduce((a,b) => a+b, 0);
+const eqA = (a,b) => a.length===b.length && a.every((v,i) => v===b[i]);
+const sameViews = (h,t) => { const v = views(h); return eqA(v.front,t.front) && eqA(v.right,t.right); };
+const colName = (x,W) => W===3 ? ['left','middle','right'][x]+' column' : W===2 ? ['left','right'][x]+' column' : 'column '+(x+1);
+const rowName = (y,D) => D===3 ? ['front','middle','back'][y]+' row' : D===2 ? ['front','back'][y]+' row' : 'row '+(y+1);
+const listJoin = a => a.length<2 ? a.join('') : a.slice(0,-1).join(', ') + ' and ' + a[a.length-1];
+function enumerate(D, W, max, keep){
+  const n = D*W, base = max+1, total = base**n, out = [];
+  for(let k=0;k<total;k++){
+    let t=k; const h=[];
+    for(let y=0;y<D;y++){ const r=[]; for(let x=0;x<W;x++){ r.push(t%base); t=Math.floor(t/base); } h.push(r); }
+    if(keep(h)) out.push(h);
+  }
+  return out;
+}
+
+/* ---------- Data from Lesson 5.9 / Handout 5.9 ---------- */
+// Maps as printed (top row = back). Converted so row 0 = front.
+const MAPS = {
+  A: [[2,1,0],[3,2,1],[1,0,0]].reverse(),
+  B: [[1,3],[2,2],[0,1]].reverse()
+};
+const PB_TARGET = { front:[3,1,2], right:[2,3] };     // Part B silhouettes (right view: front, back)
+const CH_TARGET = { front:[3,3,3], right:[3,3,3] };   // Challenge
+const WARM = [[2,1,1],[0,1,0]];                       // 5 cubes; one hides behind the middle front cube
+
+/* ---------- Isometric stage ---------- */
+const S = 46, AX = S*0.866, AY = S*0.5;
+const P = (x,y,z) => [ (x+y)*AX, (x-y)*AY - z*S ];
+const pts = a => a.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+function rotPt(px,py,W,D,r){ for(let i=0;i<r;i++){ [px,py] = [py, W-px]; [W,D] = [D,W]; } return [px,py,W,D]; }
+const CORNERS = ['front-right','back-right','back-left','front-left'];
+
+function cubeSVG(x,y,z,cls){
+  const top = [P(x,y,z+1),P(x+1,y,z+1),P(x+1,y+1,z+1),P(x,y+1,z+1)];
+  const fr  = [P(x,y,z),P(x+1,y,z),P(x+1,y,z+1),P(x,y,z+1)];
+  const rt  = [P(x+1,y,z),P(x+1,y+1,z),P(x+1,y+1,z+1),P(x+1,y,z+1)];
+  return `<g class="cube ${cls||''}"><polygon class="f-front" points="${pts(fr)}"/><polygon class="f-right" points="${pts(rt)}"/><polygon class="f-top" points="${pts(top)}"/></g>`;
+}
+/* st: {h, rot, marks:{'x,y,z':cls}, ghosts:[[x,y,z]], labels:[{x,y,z,text}], dimOthers, popKeys:Set, hidden:Set} */
+function drawIso(svg, st){
+  const h = st.h, D = h.length, W = h[0].length, r = st.rot||0;
+  let [, , W2, D2] = rotPt(0,0,W,D,r);
+  const cell = (x,y) => { const [px,py] = rotPt(x+.5,y+.5,W,D,r); return [Math.floor(px), Math.floor(py)]; };
+  const items = [];
+  for(let y=0;y<D;y++) for(let x=0;x<W;x++) for(let z=0;z<h[y][x];z++){
+    const key = `${x},${y},${z}`; if(st.hidden && st.hidden.has(key)) continue;
+    const [tx,ty] = cell(x,y);
+    let cls = (st.marks && st.marks[key]) || (st.dimOthers ? 'dim' : '');
+    if(st.popKeys && st.popKeys.has(key)) cls += ' pop';
+    items.push({tx,ty,z,cls});
+  }
+  for(const [x,y,z] of (st.ghosts||[])){ const [tx,ty] = cell(x,y); items.push({tx,ty,z,cls:'ghost'}); }
+  items.sort((a,b) => (a.tx-a.ty)-(b.tx-b.ty) || a.z-b.z);
+  // ground
+  let g = '';
+  for(let y=0;y<D;y++) for(let x=0;x<W;x++){
+    const [tx,ty] = cell(x,y);
+    g += `<polygon class="tile ${y===0?'frontrow':''}" points="${pts([P(tx,ty,0),P(tx+1,ty,0),P(tx+1,ty+1,0),P(tx,ty+1,0)])}"/>`;
+  }
+  const [ax,ay] = rotPt(0,0,W,D,r), [bx,by] = rotPt(W,0,W,D,r), [mx,my] = rotPt(W/2,-0.75,W,D,r);
+  g += `<line class="frontline" x1="${P(ax,ay,0)[0]}" y1="${P(ax,ay,0)[1]}" x2="${P(bx,by,0)[0]}" y2="${P(bx,by,0)[1]}"/>`;
+  const fl = P(mx,my,0);
+  g += `<text class="front-lbl" x="${fl[0]}" y="${fl[1]+6}" text-anchor="middle" font-size="16">FRONT</text>`;
+  const body = items.map(it => cubeSVG(it.tx,it.ty,it.z,it.cls)).join('');
+  let labs = '';
+  for(const L of (st.labels||[])){
+    const [tx,ty] = cell(L.x,L.y); const p = P(tx+.5,ty+.5,L.z);
+    const w = 16 + String(L.text).length*11;
+    labs += `<g><rect class="lbl-bg" x="${p[0]-w/2}" y="${p[1]-15}" width="${w}" height="28" rx="8" style="${L.color?`stroke:${L.color}`:''}"/><text class="lbl" x="${p[0]}" y="${p[1]+6}" text-anchor="middle" font-size="18">${L.text}</text></g>`;
+  }
+  // viewBox from the ground footprint and max height 3 (plus labels)
+  const Hm = Math.max(3, ...h.flat());
+  const cs = []; for(const [x,y] of [[0,0],[W2,0],[0,D2],[W2,D2]]) for(const z of [0,Hm]) cs.push(P(x,y,z));
+  cs.push([fl[0]-40, fl[1]+20],[fl[0]+40, fl[1]+20]);
+  const xs = cs.map(c=>c[0]), ys = cs.map(c=>c[1]); const pad = 26;
+  const minx = Math.min(...xs)-pad, miny = Math.min(...ys)-pad-10, wv = Math.max(...xs)-minx+pad, hv = Math.max(...ys)-miny+pad;
+  svg.setAttribute('viewBox', `${minx} ${miny} ${wv} ${hv}`);
+  svg.innerHTML = g + body + labs;
+  svg.setAttribute('aria-label', `Cube building, ${vol(h)} cubes, seen from the ${CORNERS[r]} corner`);
+}
+/* Flat, straight-on front view (warm-up) */
+function drawFlatFront(svg, h){
+  const v = views(h).front, W = v.length, c = 70;
+  let s = `<line x1="-10" y1="${3*c}" x2="${W*c+10}" y2="${3*c}" class="frontline"/>`;
+  v.forEach((n,x) => { for(let z=0;z<n;z++) s += `<rect x="${x*c}" y="${(2-z)*c}" width="${c}" height="${c}" class="f-front" stroke="var(--cube-edge)" stroke-width="2"/>`; });
+  s += `<text x="${W*c/2}" y="${3*c+32}" text-anchor="middle" class="front-lbl" font-size="16">YOU ARE HERE: FRONT</text>`;
+  svg.setAttribute('viewBox', `-40 -30 ${W*c+80} ${3*c+90}`);
+  svg.innerHTML = s;
+  svg.setAttribute('aria-label', 'The building seen straight from the front');
+}
+/* Silhouette picture: heights list, optional target for comparison */
+function silSVG(heights, target, title, axisNote){
+  const c = 26, n = heights.length, H = 3; let s = '';
+  for(let i=0;i<n;i++) for(let z=0;z<H;z++){
+    const have = z < heights[i], need = target ? z < target[i] : have;
+    const x = i*c, y = (H-1-z)*c;
+    if(have && need) s += `<rect x="${x}" y="${y}" width="${c}" height="${c}" fill="var(--sil)" stroke="var(--card)" stroke-width="1.5"/>`;
+    else if(have && !need) s += `<rect x="${x+1.5}" y="${y+1.5}" width="${c-3}" height="${c-3}" fill="var(--bad)" stroke="var(--bad)" stroke-width="2"/><line x1="${x+5}" y1="${y+5}" x2="${x+c-5}" y2="${y+c-5}" stroke="var(--card)" stroke-width="3"/>`;
+    else if(!have && need) s += `<rect x="${x+2}" y="${y+2}" width="${c-4}" height="${c-4}" fill="none" stroke="var(--bad)" stroke-width="2" stroke-dasharray="4 3"/>`;
+    else s += `<rect x="${x}" y="${y}" width="${c}" height="${c}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  }
+  return `<div class="block"><p class="label">${title}</p><svg width="${n*c+2}" height="${H*c+2}" viewBox="-1 -1 ${n*c+2} ${H*c+2}" aria-label="${title}: heights ${heights.join(', ')}">${s}</svg>${axisNote?`<span class="axis">${axisNote}</span>`:''}</div>`;
+}
+
+/* ---------- App state ---------- */
+let TAB = 'warm', ROT = 0, GEN = 0;
+let W_ = null, A_ = null, B_ = null, C_ = null, Q_ = null;
+function freshState(){
+  W_ = { stage:'flat', guess:null, counted:false };
+  A_ = { map:'A', built:{A:false,B:false}, shadeF:{A:new Set(),B:new Set()}, shadeR:{A:new Set(),B:new Set()}, wrongF:new Set(), wrongR:new Set(), vol:{A:0,B:0}, sel:null, count:null, msgV:'', msgVcls:'', msgS:'', msgScls:'' };
+  B_ = { h:[[1,1,1],[3,1,2]], show:null, found:new Set(), big:false, small:false };
+  C_ = { h:[[0,0,0],[0,0,0],[3,0,0]], show:null, found:new Set(), few:false, most:false };
+  Q_ = { q:1, idx:0, which:'big' };
+}
+let STAGE = { h:WARM };
+
+function render(){
+  document.querySelectorAll('#steps button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===TAB));
+  ({warm:renderWarm, partA:renderA, partB:renderB, chal:renderC, det:renderDet})[TAB]();
+}
+function paintStage(st, cap){
+  STAGE = st; $('#stageCap').textContent = cap || '';
+  const svg = $('#stageSvg');
+  if(st.flat){ drawFlatFront(svg, st.h); $('#corner').textContent = 'Straight-on view from the front'; }
+  else { drawIso(svg, {...st, rot:ROT}); $('#corner').textContent = `Seen from the ${CORNERS[ROT]} corner`; }
+}
+
+/* ---------- 1. Warm-up ---------- */
+function renderWarm(){
+  const total = vol(WARM);
+  const flat = W_.stage==='flat';
+  let labels = [];
+  if(W_.counted){ for(let y=0;y<WARM.length;y++) for(let x=0;x<3;x++) if(WARM[y][x]) labels.push({x,y,z:WARM[y][x],text:WARM[y][x]}); }
+  const hiddenKey = '1,1,0';
+  paintStage({ h:WARM, flat, labels, marks: W_.counted ? {[hiddenKey]:'hot'} : {} }, flat ? 'Front view only' : 'Turned');
+  $('#panel').innerHTML = `
+    <h2>How many cubes?</h2>
+    <p class="lead">${flat ? 'You can only see this building <b>from the front</b>. How many cubes is it made of? Could any be hidden?' : 'Now we can walk around it. Turn it again. Can you see every cube from one spot?'}</p>
+    <div><p class="label">Your class’s guess</p><div class="guess" id="guess">${[3,4,5,6,7].map(n=>`<button data-g="${n}" aria-pressed="${W_.guess===n}">${n}</button>`).join('')}</div></div>
+    <div class="row">
+      <button class="primary" id="wTurn">${flat ? 'Turn it' : 'Back to the front view'}</button>
+      <button class="secondary" id="wCount" ${flat?'disabled':''}>Count every cube</button>
+    </div>
+    <p class="msg ${W_.counted?'ok':''}" id="wMsg">${W_.counted
+      ? `<b>${total} cubes.</b> The labels show how tall each stack is: ${WARM.flat().filter(n=>n).join(' + ')} = ${total}. The orange cube sits behind the middle cube, so the front view shows only ${vol([views(WARM).front])} squares. A view shows the cube nearest you in each line of sight.${W_.guess!=null ? (W_.guess===total ? ' Your guess was right.' : ` Your guess was ${W_.guess}. What did you miss, or what did you imagine?`) : ''}`
+      : (W_.guess!=null ? `Guess locked in: ${W_.guess}. ${flat ? 'Now turn it to check.' : 'Count to check.'}` : '')}</p>`;
+  document.querySelectorAll('#guess button').forEach(b => b.onclick = () => { W_.guess = +b.dataset.g; renderWarm(); });
+  $('#wTurn').onclick = () => { W_.stage = flat ? 'iso' : 'flat'; if(!flat) W_.counted = false; ROT = 0; renderWarm(); };
+  $('#wCount').onclick = () => { W_.counted = true; renderWarm(); };
+  $('#stageBar').hidden = flat;
+}
+
+/* ---------- 2. Part A ---------- */
+function hmapHTML(h, opts={}){
+  const D = h.length, W = h[0].length; let s = '';
+  for(let y=D-1;y>=0;y--) for(let x=0;x<W;x++){
+    const v = h[y][x], tag = opts.edit || opts.pick ? 'button' : 'div';
+    const sel = opts.sel && opts.sel[0]===x && opts.sel[1]===y ? ' sel' : '';
+    s += `<${tag} class="${v===0?'zero':''}${sel}" data-x="${x}" data-y="${y}" aria-label="${colName(x,W)}, ${rowName(y,D)}: ${v} cube${v===1?'':'s'} tall">${v}</${tag}>`;
+  }
+  return `<div class="block"><p class="label">${opts.title||'Height map'}</p><div class="hmap" style="grid-template-columns:repeat(${W},auto)">${s}</div><span class="front-tag">FRONT</span></div>`;
+}
+function shadeHTML(id, n, set, wrongSet, title, axis){
+  let s='';
+  for(let z=2;z>=0;z--) for(let i=0;i<n;i++){
+    const k = `${i},${z}`; s += `<button class="${set.has(k)?'on':''} ${wrongSet.has(k)?'wrong':''}" data-k="${k}" aria-pressed="${set.has(k)}" aria-label="${title} square, position ${i+1}, level ${z+1}"></button>`;
+  }
+  return `<div class="block"><p class="label">${title}</p><div class="shade" id="${id}" style="grid-template-columns:repeat(${n},auto)">${s}</div><span class="axis">${axis}</span></div>`;
+}
+const silSet = hs => { const s = new Set(); hs.forEach((n,i) => { for(let z=0;z<n;z++) s.add(`${i},${z}`); }); return s; };
+const setEq = (a,b) => a.size===b.size && [...a].every(k => b.has(k));
+const heightsFromSet = (set, n) => Array.from({length:n}, (_,i) => { let m=0; for(let z=0;z<3;z++) if(set.has(`${i},${z}`)) m = z+1; return m; });
+
+function renderA(){
+  const m = A_.map, h = MAPS[m], D = h.length, W = h[0].length;
+  const marks = {}, labels = [];
+  if(A_.sel){ const [sx,sy] = A_.sel; for(let z=0;z<h[sy][sx];z++) marks[`${sx},${sy},${z}`] = 'hot'; labels.push({x:sx,y:sy,z:h[sy][sx],text:h[sy][sx],color:'var(--hot)'}); }
+  if(A_.count==='cols'){ for(let y=0;y<D;y++) for(let x=0;x<W;x++) if(h[y][x]) labels.push({x,y,z:h[y][x],text:h[y][x]}); }
+  if(A_.count==='layers'){ for(let y=0;y<D;y++) for(let x=0;x<W;x++) for(let z=0;z<h[y][x];z++) marks[`${x},${y},${z}`] = 'l'+(z+1); }
+  const shown = A_.built[m] ? h : h.map(r => r.map(() => 0));
+  paintStage({ h:shown, marks, labels: A_.built[m] ? labels : [], popKeys: A_.pop }, `Map ${m}`);
+  A_.pop = null;
+  $('#stageBar').hidden = false;
+  $('#panel').innerHTML = `
+    <div class="row" style="justify-content:space-between"><h2>The architect’s drawings</h2>
+      <div class="seg" role="group" aria-label="Choose a map"><button data-m="A" aria-pressed="${m==='A'}">Map A</button><button data-m="B" aria-pressed="${m==='B'}">Map B</button></div></div>
+    <p class="lead">Each number tells how many cubes tall that spot is. The bottom row is the <b>front</b>. Build it, shade the two views, then find the volume.</p>
+    <div class="sheet">
+      ${hmapHTML(h, {pick:true, sel:A_.sel, title:`Map ${m} · tap a spot`})}
+      ${shadeHTML('shF', W, A_.shadeF[m], A_.wrongF, 'Front view', 'left → right')}
+      ${shadeHTML('shR', D, A_.shadeR[m], A_.wrongR, 'Right view', 'front → back')}
+    </div>
+    <div class="row">
+      <button class="primary" id="aBuild">${A_.built[m] ? 'Build it again' : 'Build it'}</button>
+      <button class="secondary" id="aCheckS">Check my views</button>
+    </div>
+    <p class="msg ${A_.msgScls}" id="aMsgS">${A_.msgS}</p>
+    <div class="row">
+      <span class="label" style="margin:0">Volume ${m}</span>
+      <span class="stepper"><button id="vMinus" aria-label="One less">−</button><output id="vOut">${A_.vol[m]}</output><button id="vPlus" aria-label="One more">+</button></span>
+      <span style="color:var(--muted)">cubic units</span>
+      <button class="secondary" id="aCheckV">Check volume</button>
+    </div>
+    <div class="row">
+      <button class="secondary" id="cCols" aria-pressed="${A_.count==='cols'}">Count by columns</button>
+      <button class="secondary" id="cLayers" aria-pressed="${A_.count==='layers'}">Count by layers</button>
+    </div>
+    <p class="msg ${A_.msgVcls}" id="aMsgV">${A_.msgV}</p>`;
+  document.querySelectorAll('.seg [data-m]').forEach(b => b.onclick = () => { A_.map = b.dataset.m; A_.sel=null; A_.count=null; A_.wrongF.clear(); A_.wrongR.clear(); A_.msgS=''; A_.msgV=''; A_.msgScls=''; A_.msgVcls=''; ROT=0; renderA(); });
+  document.querySelectorAll('.hmap button').forEach(b => b.onclick = () => {
+    const x=+b.dataset.x, y=+b.dataset.y;
+    A_.sel = (A_.sel && A_.sel[0]===x && A_.sel[1]===y) ? null : [x,y];
+    if(A_.sel && !A_.built[m]) A_.built[m] = true;
+    if(A_.sel){ const v = h[y][x]; A_.msgV = `The ${colName(x,W).replace(' column','')} spot in the ${rowName(y,D)} says <b>${v}</b>: that column is ${v} cube${v===1?'':'s'} tall${v===0?', so nothing stands there':''}, even if some are hidden from where you stand.`; A_.msgVcls=''; }
+    renderA();
+  });
+  const wire = (id, store, wrong) => document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => {
+    const k = b.dataset.k; store.has(k) ? store.delete(k) : store.add(k); wrong.clear(); A_.msgS=''; renderA();
+  });
+  wire('shF', A_.shadeF[m], A_.wrongF); wire('shR', A_.shadeR[m], A_.wrongR);
+  $('#aBuild').onclick = () => buildAnim(m);
+  $('#aCheckS').onclick = () => { checkViews(m); renderA(); };
+  $('#vMinus').onclick = () => { A_.vol[m] = Math.max(0, A_.vol[m]-1); $('#vOut').textContent = A_.vol[m]; };
+  $('#vPlus').onclick = () => { A_.vol[m] = Math.min(40, A_.vol[m]+1); $('#vOut').textContent = A_.vol[m]; };
+  $('#aCheckV').onclick = () => { checkVol(m); renderA(); };
+  $('#cCols').onclick = () => { A_.built[m] = true; A_.sel=null; A_.count = A_.count==='cols' ? null : 'cols'; if(A_.count) explainCols(m); renderA(); };
+  $('#cLayers').onclick = () => { A_.built[m] = true; A_.sel=null; A_.count = A_.count==='layers' ? null : 'layers'; if(A_.count) explainLayers(m); renderA(); };
+}
+async function buildAnim(m){
+  const h = MAPS[m], g = ++GEN; A_.built[m] = true; A_.sel=null; A_.count=null;
+  if(reduced){ renderA(); return; }
+  const D=h.length, W=h[0].length, order=[];
+  for(let z=0;z<3;z++) for(let y=D-1;y>=0;y--) for(let x=0;x<W;x++) if(z<h[y][x]) order.push(`${x},${y},${z}`);
+  for(let i=1;i<=order.length;i++){
+    if(g!==GEN || TAB!=='partA' || A_.map!==m) return;
+    const hidden = new Set(order.slice(i));
+    drawIso($('#stageSvg'), {h, rot:ROT, hidden, popKeys:new Set([order[i-1]])});
+    await sleep(170);
+  }
+  if(g===GEN && TAB==='partA') renderA();
+}
+function checkViews(m){
+  const h = MAPS[m], v = views(h), W = v.front.length, D = v.right.length;
+  const F = A_.shadeF[m], R = A_.shadeR[m];
+  const cF = silSet(v.front), cR = silSet(v.right);
+  const okF = setEq(F,cF), okR = setEq(R,cR);
+  A_.wrongF = new Set([...F].filter(k=>!cF.has(k)).concat([...cF].filter(k=>!F.has(k))));
+  A_.wrongR = new Set([...R].filter(k=>!cR.has(k)).concat([...cR].filter(k=>!R.has(k))));
+  if(okF && okR){ A_.wrongF.clear(); A_.wrongR.clear(); A_.msgScls='ok'; A_.msgS = `Both views are right. Front: ${v.front.join(', ')} tall, left to right. Right: ${v.right.join(', ')} tall, front to back. Each view shows the <b>tallest</b> stack in each line of sight.`; return; }
+  if(F.size===0 && R.size===0){ A_.wrongF.clear(); A_.wrongR.clear(); A_.msgScls=''; A_.msgS = 'Tap squares in the two grids to shade what you would see. Start from the bottom of each grid.'; return; }
+  const notes = [];
+  const fH = heightsFromSet(F,W), rH = heightsFromSet(R,D);
+  if(!okF){
+    if(eqA(fH, v.front.slice().reverse()) && !eqA(fH, v.front)) notes.push(`Your front view is flipped left to right. That is the view from the <b>back</b>. Stand at the FRONT edge: the left column is on your left.`);
+    else {
+      const x = v.front.findIndex((t,i) => fH[i]!==t);
+      const col = h.map(r => r[x]);
+      notes.push(`Front view, ${colName(x,W)}: look down that column of the map (${col.slice().reverse().join(', ')}, back to front). The tallest is <b>${v.front[x]}</b>, so the view is ${v.front[x]} tall there. You shaded ${fH[x]}.`);
+    }
+  }
+  if(!okR){
+    if(eqA(rH, v.right.slice().reverse()) && !eqA(rH, v.right)) notes.push(`Your right view looks like the view from the <b>left</b> side. Stand on the right side of your building: the front row is the one on your left.`);
+    else {
+      const y = v.right.findIndex((t,i) => rH[i]!==t);
+      notes.push(`Right view, ${rowName(y,D)}: read that row of the map (${h[y].join(', ')}). The tallest is <b>${v.right[y]}</b>, so you see ${v.right[y]} square${v.right[y]===1?'':'s'} there. You shaded ${rH[y]}.`);
+    }
+  }
+  const gap = [...F,...R].length && [[F,W],[R,D]].some(([s,n]) => Array.from({length:n},(_,i)=>i).some(i => { const zs=[0,1,2].map(z=>s.has(`${i},${z}`)); return (!zs[0]&&(zs[1]||zs[2])) || (!zs[1]&&zs[2]); }));
+  if(gap) notes.push('A cube can’t float: shade each stack from the bottom up.');
+  A_.msgScls='bad'; A_.msgS = notes.join(' ') + ' Fix it and check again. Striped squares need another look.';
+}
+function checkVol(m){
+  const h = MAPS[m], v = vol(h), g = A_.vol[m];
+  const visibleFront = vol([views(h).front]);
+  if(g===v){ A_.msgVcls='ok'; A_.msgV = `<b>${v} cubes.</b> Right. How did you count? Try the other way with the buttons above and see if you get ${v} again.`; return; }
+  A_.msgVcls='bad';
+  if(g===visibleFront) A_.msgV = `${g} is how many squares the front view shows. Some cubes hide behind others. The height map counts every cube, seen or not. Try “Count by columns”.`;
+  else if(g<v) A_.msgV = `${g} is too few. Some cubes may be hidden behind or under others. Turn the building, or use “Count by columns” or “Count by layers” to check.`;
+  else A_.msgV = `${g} is too many. Did you count a cube twice? Count one way, then check with the other.`;
+}
+function explainCols(m){
+  const h = MAPS[m], terms = h.slice().reverse().flat();
+  A_.msgVcls=''; A_.msgV = `<b>By columns:</b> add every number on the map. ${terms.join(' + ')} = <b>${vol(h)}</b>.`;
+}
+function explainLayers(m){
+  const h = MAPS[m], L = [1,2,3].map(z => h.flat().filter(n => n>=z).length).filter(n=>n>0);
+  A_.msgVcls=''; A_.msgV = `<b>By layers:</b> ${L.map((n,i)=>`<span style="color:var(--l${i+1});font-weight:700">layer ${i+1}: ${n}</span>`).join(', ')}. ${L.join(' + ')} = <b>${vol(h)}</b>. Each layer counts spots that are at least that tall.`;
+}
+
+/* ---------- 3 & 4. Silhouette puzzles ---------- */
+function puzzle(stateObj, target, cfg){
+  const h = stateObj.h, D = h.length, W = h[0].length, v = views(h), V = vol(h);
+  const okF = eqA(v.front, target.front), okR = eqA(v.right, target.right), ok = okF && okR;
+  if(ok) stateObj.found.add(JSON.stringify(h));
+  const cap = (x,y) => Math.min(target.front[x], target.right[y]);
+  const marks = {}, ghosts = [];
+  if(stateObj.show==='remove'){
+    for(let y=0;y<D;y++) for(let x=0;x<W;x++) if(h[y][x]>0){ const t = clone(h); t[y][x]--; if(sameViews(t, v)) marks[`${x},${y},${h[y][x]-1}`] = 'hot'; }
+  }
+  if(stateObj.show==='add'){
+    for(let y=0;y<D;y++) for(let x=0;x<W;x++) if(h[y][x] < cap(x,y)) ghosts.push([x,y,h[y][x]]);
+  }
+  paintStage({h, marks, ghosts}, cfg.cap);
+  $('#stageBar').hidden = false;
+  // message
+  let msg = '', cls = '';
+  if(ok){
+    cls = 'ok';
+    if(V===cfg.maxV) msg = `<b>It matches, with ${V} cubes: the biggest.</b> Every spot is as tall as both views allow. Any extra cube would poke above a view.`;
+    else if(V===cfg.minV) msg = `<b>It matches, with ${V} cubes: the smallest.</b> Every cube left is the tallest one in some line of sight. Take any away and a view changes.`;
+    else {
+      let canRemove = false;
+      for(let y=0;y<D;y++) for(let x=0;x<W;x++) if(h[y][x]>0){ const t = clone(h); t[y][x]--; if(sameViews(t, target)) canRemove = true; }
+      msg = canRemove
+        ? `<b>It matches both views, with ${V} cubes.</b> Is this the biggest? The smallest? Use the buttons to see where you could add or take away a cube.`
+        : `<b>It matches both views, with ${V} cubes.</b> No single cube can come off now, but this is not the smallest. Could one tall stack do two jobs at once, filling a column <i>and</i> a row? Try moving a stack.`;
+    }
+  } else {
+    cls = 'bad'; const notes = [];
+    for(let x=0;x<W;x++){ const a=v.front[x], t=target.front[x];
+      if(a>t) notes.push(`The ${colName(x,W)} is too tall: the front view shows only ${t}.`);
+      else if(a<t) notes.push(`The front view needs a stack ${t} tall somewhere in the ${colName(x,W)}.`); }
+    for(let y=0;y<D;y++){ const a=v.right[y], t=target.right[y];
+      if(a>t) notes.push(`The ${rowName(y,D)} is too tall: the right view shows only ${t}.`);
+      else if(a<t) notes.push(`The right view needs a stack ${t} tall somewhere in the ${rowName(y,D)}.`); }
+    msg = notes.slice(0,2).join(' ') + (notes.length>2 ? ` (${notes.length-2} more to fix.)` : '') + ' Red squares are too tall; dashed squares are missing.';
+  }
+  if(stateObj.show==='remove'){ const n = Object.keys(marks).length; msg += n ? ` <br><b>Orange:</b> ${n} cube${n===1?'':'s'} you could take away (one at a time) without changing either view.` : ' <br>No single cube can come off without changing a view.'; }
+  if(stateObj.show==='add'){ msg += ghosts.length ? ` <br><b>Dashed:</b> ${ghosts.length} spot${ghosts.length===1?'':'s'} where one more cube still fits under both views.` : ' <br>No spot has room for another cube.'; }
+  return {v, V, ok, okF, okR, msg, cls};
+}
+function puzzlePanel(stateObj, target, cfg, rerender){
+  const r = puzzle(stateObj, target, cfg);
+  const h = stateObj.h, D = h.length, W = h[0].length;
+  if(r.ok && r.V===cfg.maxV) stateObj[cfg.maxKey] = true;
+  if(r.ok && r.V===cfg.minV) stateObj[cfg.minKey] = true;
+  $('#panel').innerHTML = `
+    <h2>${cfg.title}</h2>
+    <p class="lead">${cfg.lead}</p>
+    <div class="sheet">
+      ${silSVG(target.front, null, 'Front view (given)', 'left → right')}
+      ${silSVG(target.right, null, 'Right view (given)', 'front → back')}
+    </div>
+    <div class="sheet">
+      ${hmapHTML(h, {edit:true, title:'Your height map · tap to add'})}
+      <div class="views-mini">
+        ${silSVG(r.v.front, target.front, 'Your front view', 'left → right')}
+        ${silSVG(r.v.right, target.right, 'Your right view', 'front → back')}
+      </div>
+    </div>
+    <div class="status">
+      <div class="stat"><b>${r.V}</b><span>cubes (volume)</span></div>
+      <div class="row"><span class="pill ${r.okF?'ok':'no'}">${r.okF?'✓':'✗'} Front</span><span class="pill ${r.okR?'ok':'no'}">${r.okR?'✓':'✗'} Right</span></div>
+      <div class="trophies"><span class="trophy ${stateObj[cfg.maxKey]?'got':''}">${cfg.maxLabel}${stateObj[cfg.maxKey]?`: ${cfg.maxV}`:''}</span><span class="trophy ${stateObj[cfg.minKey]?'got':''}">${cfg.minLabel}${stateObj[cfg.minKey]?`: ${cfg.minV}`:''}</span></div>
+    </div>
+    <p class="msg ${r.cls}">${r.msg}</p>
+    <div class="row">
+      <button class="secondary" id="pRemove" aria-pressed="${stateObj.show==='remove'}">Which cubes can come off?</button>
+      <button class="secondary" id="pAdd" aria-pressed="${stateObj.show==='add'}">Where does a cube still fit?</button>
+      <button class="secondary" id="pClear">Clear map</button>
+    </div>
+    <p class="hint">Tap a spot to add a cube (after ${cfg.maxH} it goes back to 0). Matching buildings you have found: ${stateObj.found.size}.</p>`;
+  document.querySelectorAll('.hmap button').forEach(b => b.onclick = () => {
+    const x=+b.dataset.x, y=+b.dataset.y; h[y][x] = (h[y][x]+1) % (cfg.maxH+1); rerender();
+  });
+  $('#pRemove').onclick = () => { stateObj.show = stateObj.show==='remove' ? null : 'remove'; rerender(); };
+  $('#pAdd').onclick = () => { stateObj.show = stateObj.show==='add' ? null : 'add'; rerender(); };
+  $('#pClear').onclick = () => { stateObj.h = h.map(r => r.map(() => 0)); stateObj.show=null; rerender(); };
+}
+function renderB(){
+  puzzlePanel(B_, PB_TARGET, {
+    title:'The mystery building', cap:'Your building · 3-by-2 base',
+    lead:'Only two drawings came in: the front and the right side. Build the <b>biggest</b> building that matches both, then the <b>smallest</b>.',
+    maxV:11, minV:6, maxKey:'big', minKey:'small', maxLabel:'Biggest', minLabel:'Smallest', maxH:3
+  }, renderB);
+}
+function renderC(){
+  puzzlePanel(C_, CH_TARGET, {
+    title:'Challenge: two square views', cap:'Your building · 3-by-3 base',
+    lead:'The front view and the right view are both a 3-by-3 square. What is the <b>fewest</b> cubes that works? The <b>most</b>?',
+    maxV:27, minV:9, maxKey:'most', minKey:'few', maxLabel:'Most', minLabel:'Fewest', maxH:3
+  }, renderC);
+}
+
+/* ---------- 5. Detective questions ---------- */
+let CACHE = {};
+const sameAsA = () => CACHE.a || (CACHE.a = enumerate(3,3,3, h => sameViews(h, views(MAPS.A))));
+const matchB  = () => CACHE.b || (CACHE.b = enumerate(2,3,3, h => sameViews(h, PB_TARGET)).sort((p,q) => vol(p)-vol(q)));
+const BIG = [[2,1,2],[3,1,2]];
+const SMALL = [[0,0,2],[3,1,0]];
+const J1 = [[1,2],[2,1]], J2 = [[2,1],[1,2]];
+const topSil = h => h.map(r => r.map(n => n>0 ? 1 : 0));
+
+const QS = {
+  1:{ text:'From Map A’s height map, did everyone build the same thing? How do you know? What if the architect had sent only the front and right views?',
+      acts:[
+        {label:'Buildings that fit the height map', run(){ Q_.which='A'; Q_.idx=0; detStage(MAPS.A, 'Map A'); say(`<b>Exactly 1.</b> The map gives the height of every spot, so there is only one way to build it: ${vol(MAPS.A)} cubes.`); }},
+        {label:'Buildings that fit just the two views', run(){ const L = sameAsA(); const vs = L.map(vol); say(`<b>${L.length} different buildings</b> have Map A’s front view (3, 2, 1) and right view (1, 3, 2). They use from ${Math.min(...vs)} to ${Math.max(...vs)} cubes. Tap “Show another” to see some.`); Q_.which='A2'; Q_.idx = 0; detStage(L[0], `1 of ${L.length}`); }},
+        {label:'Show another', run(){ const L = sameAsA(); Q_.idx = (Q_.idx + 37) % L.length; const h = L[Q_.idx]; detStage(h, `${Q_.idx+1} of ${L.length}`); say(`This one has ${vol(h)} cubes. Its front view is ${views(h).front.join(', ')} and its right view is ${views(h).right.join(', ')}, the same as Map A.`); }}
+      ]},
+  2:{ text:'How are you counting the cubes: by columns or by layers? Do both ways always agree?',
+      acts:[
+        {label:'Count Map A by columns', run(){ const h = MAPS.A, labels=[]; for(let y=0;y<3;y++) for(let x=0;x<3;x++) if(h[y][x]) labels.push({x,y,z:h[y][x],text:h[y][x]}); detStage(h,'Map A by columns',{labels}); say(`Add each column’s height: ${h.slice().reverse().flat().join(' + ')} = <b>${vol(h)}</b>.`); }},
+        {label:'Count Map A by layers', run(){ const h = MAPS.A, marks={}; for(let y=0;y<3;y++) for(let x=0;x<3;x++) for(let z=0;z<h[y][x];z++) marks[`${x},${y},${z}`]='l'+(z+1); const L=[1,2,3].map(z=>h.flat().filter(n=>n>=z).length); detStage(h,'Map A by layers',{marks}); say(`Bottom layer ${L[0]}, middle layer ${L[1]}, top layer ${L[2]}: ${L.join(' + ')} = <b>${vol(h)}</b>. Same total, because every cube is counted once either way.`); }}
+      ]},
+  3:{ text:'The biggest building (11 cubes) and the smallest (6 cubes) have exactly the same front and right views. So what does a view tell you, and what does it hide?',
+      acts:[
+        {label:'Show the biggest', run(){ detStage(BIG,'Biggest · 11 cubes', {}, true); say(`11 cubes. ${viewLine(BIG)}`); }},
+        {label:'Show the smallest', run(){ detStage(SMALL,'Smallest · 6 cubes', {}, true); say(`6 cubes. ${viewLine(SMALL)} (The middle 1 could also sit at the front.)`); }},
+        {label:'Show the hidden difference', run(){ const ghosts=[]; for(let y=0;y<2;y++) for(let x=0;x<3;x++) for(let z=SMALL[y][x];z<BIG[y][x];z++) ghosts.push([x,y,z]); detStage(SMALL,'Smallest + 5 dashed cubes = biggest',{ghosts}, true); say(`The <b>5 dashed cubes</b> are in the biggest building but not the smallest. Each one hides behind or under a taller stack, so neither view can see it.`); }}
+      ]},
+  4:{ text:'Which cubes can you take away without changing either view?',
+      acts:[
+        {label:'Test each cube in the biggest building', run(){ const marks={}; let n=0; for(let y=0;y<2;y++) for(let x=0;x<3;x++) if(BIG[y][x]){ const t=clone(BIG); t[y][x]--; if(sameViews(t,PB_TARGET)){ marks[`${x},${y},${BIG[y][x]-1}`]='hot'; n++; } } detStage(BIG,'Biggest · orange can come off',{marks}); say(`<b>${n} orange cubes</b> can each come off on its own. Every other top cube is the tallest in its column or row, so taking it away shrinks a view. Keep removing and re-testing. Watch out: in some orders you get stuck at 8 cubes with nothing left to remove, even though the smallest is 6. Then a stack has to <b>move</b>, so one tall stack can do two jobs.`); }},
+        {label:'Go try it', run(){ B_.h = clone(BIG); B_.show='remove'; go('partB'); }}
+      ]},
+  5:{ text:'Why does the height map pin down the building, but the silhouettes don’t?',
+      acts:[
+        {label:'Find every building that matches', run(){ const L = matchB(); Q_.idx=0; detStage(L[0], `1 of ${L.length}`); const hist={}; L.forEach(h=>hist[vol(h)]=(hist[vol(h)]||0)+1); const ks=Object.keys(hist).map(Number).sort((a,b)=>a-b), mx=Math.max(...Object.values(hist)); say(`<b>${L.length} different buildings</b> match Part B’s two views. A computer tried all ${4**6} ways to fill the 6 spots with 0 to 3 cubes.<div class="bars" aria-label="How many matching buildings have each volume">${ks.map(k=>`<div class="bar"><span>${hist[k]}</span><i style="height:${Math.round(hist[k]/mx*80)}px"></i><span>${k}</span></div>`).join('')}</div><span class="hint">Volume (cubes) along the bottom, number of buildings above each bar.</span>`); }},
+        {label:'Step through them', run(){ const L = matchB(); Q_.idx = (Q_.idx+1) % L.length; const h=L[Q_.idx]; detStage(h, `${Q_.idx+1} of ${L.length} · ${vol(h)} cubes`); say(`Building ${Q_.idx+1} of ${L.length}: ${vol(h)} cubes. Same front view, same right view. A view only shows the <b>tallest</b> stack in each line of sight. The height map lists <b>every</b> stack.`); }}
+      ]},
+  6:{ text:'Journal: can two different buildings have the same front, right, and top views? Give an example.',
+      acts:[
+        {label:'Building 1', run(){ detStage(J1,'Building 1 · 6 cubes'); say(`${viewLine(J1)} From the top, all 4 spots are covered.`); }},
+        {label:'Building 2', run(){ detStage(J2,'Building 2 · 6 cubes'); say(`${viewLine(J2)} From the top, all 4 spots are covered. Same three views as Building 1, but the tall stacks swapped places.`); }},
+        {label:'How many share these views?', run(){ const L = enumerate(2,2,3, h => sameViews(h,{front:[2,2],right:[2,2]}) && topSil(h).flat().every(n=>n===1)); say(`<b>${L.length} buildings</b> on a 2-by-2 base have front 2, 2, right 2, 2, and every spot covered from the top. They use ${listJoin([...new Set(L.map(vol))].sort((a,b)=>a-b).map(String))} cubes. So yes: even three views can fail to pin down one building.`); }}
+      ]},
+  7:{ text:'Challenge: front view and right view are both a 3-by-3 square. Fewest cubes? Most cubes?',
+      acts:[
+        {label:'Show the fewest', run(){ const h=[[3,0,0],[0,3,0],[0,0,3]]; detStage(h,'Fewest · 9 cubes'); say(`<b>9 cubes:</b> three columns of 3 on a diagonal. Each column and each row needs one stack 3 tall, and one stack can serve one column and one row at once. Fewer than 3 stacks can’t cover 3 columns.`); }},
+        {label:'Show the most', run(){ const h=[[3,3,3],[3,3,3],[3,3,3]]; detStage(h,'Most · 27 cubes'); say(`<b>27 cubes:</b> every spot 3 tall. No spot can be taller than 3, or a view would grow.`); }},
+        {label:'How many ways make 9?', run(){ const L = enumerate(3,3,3, h => sameViews(h,CH_TARGET) && vol(h)===9); say(`<b>${L.length} ways.</b> Put one 3 in each row and each column, like rooks on a chessboard that can’t attack each other: 3 × 2 × 1 = 6.`); detStage(L[1],'Another 9-cube answer'); }}
+      ]}
+};
+function viewLine(h){ const v=views(h); return `Front view ${v.front.join(', ')}; right view ${v.right.join(', ')}.`; }
+function say(html){ const el = $('#qres'); if(el){ el.innerHTML = html; } }
+function detStage(h, cap, extra={}, withViews){ Q_.stage = {h, cap, extra, withViews}; paintStage({h, ...extra}, cap); }
+function renderDet(){
+  const q = QS[Q_.q];
+  if(!Q_.stage) Q_.stage = {h:MAPS.A, cap:'Map A', extra:{}};
+  paintStage({h:Q_.stage.h, ...Q_.stage.extra}, Q_.stage.cap);
+  $('#stageBar').hidden = false;
+  $('#panel').innerHTML = `
+    <h2>Detective questions</h2>
+    <div class="qnav" id="qnav">${[1,2,3,4,5,6].map(i=>`<button data-q="${i}" aria-pressed="${Q_.q===i}" aria-label="Question ${i}">${i}</button>`).join('')}<button data-q="7" aria-pressed="${Q_.q===7}">★ Challenge</button></div>
+    <p class="lead">${q.text}</p>
+    <div class="row" id="qacts"></div>
+    <div class="msg" id="qres" aria-live="polite"></div>
+    <p class="hint">Talk it over first. Then tap a button to put evidence on the build plate.</p>`;
+  document.querySelectorAll('#qnav button').forEach(b => b.onclick = () => { Q_.q = +b.dataset.q; Q_.idx = 0; renderDet(); });
+  const box = $('#qacts');
+  q.acts.forEach((a,i) => { const b = document.createElement('button'); b.className = i===0 ? 'primary' : 'secondary'; b.textContent = a.label; b.onclick = () => a.run(); box.appendChild(b); });
+}
+
+/* ---------- Wiring ---------- */
+function go(tab){ TAB = tab; GEN++; ROT = 0; if(tab==='det') Q_.stage = null; render(); }
+document.querySelectorAll('#steps button').forEach(b => b.onclick = () => go(b.dataset.tab));
+$('#turnL').onclick = () => { ROT = (ROT+3)%4; paintStage(STAGE, $('#stageCap').textContent); };
+$('#turnR').onclick = () => { ROT = (ROT+1)%4; paintStage(STAGE, $('#stageCap').textContent); };
+$('#resetBtn').onclick = () => { freshState(); CACHE = {}; go('warm'); };
+$('#fsBtn').onclick = () => { try{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
+document.addEventListener('fullscreenchange', () => $('#fsBtn').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen');
+freshState(); render();
+})();
+</script>
+
+</body></html>
