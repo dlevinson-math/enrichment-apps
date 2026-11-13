@@ -7,7 +7,8 @@
     "sourceUrl": "https://claude.ai/artifact/QokgtAcwk5FDNJfPmjqNK4",
     "path": "week-01/k-the-great-counting-collection/index.html",
     "builtOn": "2026-09-25",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "David's app: tap-count canvas, 10- and 5-frames, strategy race, tens-and-ones challenge"
   },
   {
     "order": 2,
@@ -17,7 +18,8 @@
     "sourceUrl": "https://gemini.google.com/share/d/18Cyf3ot75noh0DTgbeuwkQl-F4HVwCn0?usp=drive_link",
     "path": "week-01/grade-1-counting-collections/index.html",
     "builtOn": null,
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Built earlier in Gemini (shared link)"
   },
   {
     "order": 3,
@@ -27,7 +29,8 @@
     "sourceUrl": "https://claude.ai/artifact/97XHWjD1X7quMJ2zQLMNq7",
     "path": "week-01/grade-2-patterns-on-the-hundred-chart/index.html",
     "builtOn": "2026-09-26",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "64 number talk, +10/+9/+11 hops, skip-count stripes, corner sums, windows & moth holes"
   },
   {
     "order": 4,
@@ -37,7 +40,8 @@
     "sourceUrl": "https://claude.ai/artifact/XGVjHiKrJYoR1Rekpd5uiF?sk=h9Nf3BfS8LiMmDleN5dpjQ",
     "path": "week-01/grade-3-the-array-hunt/index.html",
     "builtOn": null,
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Rectangle Factory: build every array for a product, champion search 1–36, exit ticket"
   },
   {
     "order": 5,
@@ -47,7 +51,8 @@
     "sourceUrl": "https://claude.ai/artifact/QtZj6c1JewkKaokjHfLwCB",
     "path": "week-01/grade-4-the-factor-hunt/index.html",
     "builtOn": "2026-09-27",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Common multiples warm-up, tile Rectangle Factory, Factor Capture game, factor-count proofs"
   },
   {
     "order": 6,
@@ -57,7 +62,8 @@
     "sourceUrl": "https://claude.ai/artifact/3jQVMi8mMq9WqvM29iFSzZ",
     "path": "week-02/k-dot-talks-seeing-without-counting/index.html",
     "builtOn": "2026-09-28",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Flash 4 and 7, flash rounds with 'how did you see it', build a Hard 8, compare layouts"
   },
   {
     "order": 8,
@@ -67,7 +73,8 @@
     "sourceUrl": "https://claude.ai/artifact/6daJG1muuUMQ7aEPZguZtN",
     "path": "week-02/grade-2-build-the-biggest-number/index.html",
     "builtOn": "2026-09-28",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Base-ten quick images, digit-card game vs robot/team, 7-round plan, seat-choice evidence"
   },
   {
     "order": 9,
@@ -77,7 +84,8 @@
     "sourceUrl": "https://gemini.google.com/share/d/1llNgivkIA5KIXUy4qrEkv2W4VsZL_TUM",
     "path": "week-02/grade-3-hundred-chart-safari/index.html",
     "builtOn": "2026-09-28",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Built earlier in Gemini (shared link)"
   },
   {
     "order": 10,
@@ -87,7 +95,8 @@
     "sourceUrl": "https://claude.ai/artifact/FDCACUg8ccpPJpn5tuRHTi",
     "path": "week-02/grade-4-the-sieve-of-eratosthenes/index.html",
     "builtOn": "2026-09-25",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Built before the schedule; this is the style reference for all apps"
   },
   {
     "order": 11,
@@ -97,7 +106,8 @@
     "sourceUrl": "https://claude.ai/artifact/Hp7ndnhMUARW3GtqxPnhP9",
     "path": "week-03/k-more-fewer-or-the-same/index.html",
     "builtOn": "2026-09-28",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Vote on towers, grab-and-compare with match lines or counts, rig big vs. little, order 3 bags"
   },
   {
     "order": 12,
@@ -107,7 +117,8 @@
     "sourceUrl": "https://claude.ai/artifact/CEb6kQxhAA6fHaPyYtRR65",
     "path": "week-03/grade-1-tens-and-ones-building/index.html",
     "builtOn": "2026-09-29",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Bundle a pile of 23, build cards on a mat + recount check, 39+1 predict, 6-bundle max"
   },
   {
     "order": 13,
@@ -117,7 +128,8 @@
     "sourceUrl": "https://claude.ai/artifact/RErD6roCSWLpzDQBmkn6G2",
     "path": "week-03/grade-2-magic-squares/index.html",
     "builtOn": "2026-09-30",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "15 number string, Lo Shu turtle, tile builder 1–9/2–10/evens, 7 puzzles, why-5-is-middle proofs"
   },
   {
     "order": 14,
@@ -127,7 +139,8 @@
     "sourceUrl": "https://claude.ai/artifact/S7oAror1A8PXTF8htc4S7Q",
     "path": "week-03/grade-3-secrets-of-the-times-table/index.html",
     "builtOn": "2026-10-01",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Fold the table, quarter-turn arrays, square-tile builder, cut-apart teardowns, n×n vs (n−1)(n+1)"
   },
   {
     "order": 15,
@@ -137,7 +150,8 @@
     "sourceUrl": "https://claude.ai/artifact/Spx662KEbtq3hgXaXTTt87",
     "path": "week-03/grade-4-divisibility-detectives/index.html",
     "builtOn": "2026-10-02",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "3,741 digit-sum judge, ÷3/÷9 lab + why, bust-a-rule stations, Codex scanner, digit cards"
   },
   {
     "order": 16,
@@ -147,7 +161,8 @@
     "sourceUrl": "https://claude.ai/artifact/FR72ii6xVK8ca6ewc4Bugd",
     "path": "week-04/k-the-estimation-station/index.html",
     "builtOn": "2026-10-03",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Peek & guess, ten-jar revise + tens lines, count by tens, closer/about talk, cotton vs marble ten"
   },
   {
     "order": 17,
@@ -157,7 +172,8 @@
     "sourceUrl": "https://claude.ai/artifact/HAezZTMorFuYHcwChjRUMe",
     "path": "week-04/grade-1-odd-even-investigators/index.html",
     "builtOn": "2026-10-04",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Partner line-up, sort 1–10 bins, egg-carton pairing 1–20, last-digit rule, odd+odd claim"
   },
   {
     "order": 18,
@@ -167,7 +183,8 @@
     "sourceUrl": "https://claude.ai/artifact/FtkKhpHNB24vXMysxRBYQT",
     "path": "week-04/grade-2-mystery-digits-cryptarithm-puzzles/index.html",
     "builtOn": "2026-10-05",
-    "publishedOn": "2026-10-05"
+    "publishedOn": "2026-10-05",
+    "note": "Who-am-I riddle chart, 4□+□3 think-aloud, A/B/C puzzle board w/ column checks, ON+ON=GO"
   },
   {
     "order": 19,
@@ -177,7 +194,8 @@
     "sourceUrl": "https://claude.ai/artifact/W23axLFxsLeNZuE6ganYzj",
     "path": "week-04/grade-3-the-leftovers-game/index.html",
     "builtOn": "2026-10-06",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Deal counters onto plates, play Leftovers with predictions, find why remainders repeat"
   },
   {
     "order": 20,
@@ -187,7 +205,8 @@
     "sourceUrl": "https://claude.ai/artifact/Vkp2wy2SFWrm1oMrJX1mwQ",
     "path": "week-04/grade-4-factor-trees-prime-factorization/index.html",
     "builtOn": "2026-10-06",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Smallest-prime round, two trees for 36, tap-to-split race, prime kitchen, 210 proof"
   },
   {
     "order": 21,
@@ -197,7 +216,8 @@
     "sourceUrl": "https://claude.ai/artifact/M6reyZ1DckKF1oKuAJPr3p",
     "path": "week-05/k-patterns-in-the-count-the-number-chart-hunt/index.html",
     "builtOn": "2026-10-06",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Count on to find decade bumps, fold tape into chart, hunt 5s, hidden numbers, after-9s, past 100"
   },
   {
     "order": 22,
@@ -207,7 +227,8 @@
     "sourceUrl": "https://claude.ai/artifact/GPa6wX9PEr9hEJtsDbHvTr",
     "path": "week-05/grade-1-comparing-ordering-numbers/index.html",
     "builtOn": "2026-10-06",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Build numbers with tens/ones, pick alligator signs, Number War, line up on a number line"
   },
   {
     "order": 23,
@@ -217,7 +238,8 @@
     "sourceUrl": "https://claude.ai/artifact/LQVNUAokc3cb9uXt5DbW3K",
     "path": "week-05/grade-2-open-middle-number-puzzle-tournament/index.html",
     "builtOn": "2026-10-07",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Digit-tile puzzles with a class record chart, plus proofs for 100 and the smallest difference"
   },
   {
     "order": 24,
@@ -227,7 +249,8 @@
     "sourceUrl": "https://claude.ai/artifact/4odndJSfopNWQo9rJNamFM",
     "path": "week-05/grade-3-product-detectives/index.html",
     "builtOn": "2026-10-07",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Clue cases, build every array 1–40, then find champions, loners & squares"
   },
   {
     "order": 25,
@@ -237,7 +260,8 @@
     "sourceUrl": "https://claude.ai/artifact/AYmX2w8nad9EmJYBzdiSgw",
     "path": "week-05/grade-4-perfect-abundant-deficient-numbers/index.html",
     "builtOn": "2026-10-07",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Find proper factors, sort 1–100 into kingdoms on a map, hunt 28, 945 and 220/284"
   },
   {
     "order": 25.1,
@@ -247,7 +271,8 @@
     "sourceUrl": "https://claude.ai/artifact/1rBnQPVjGsButpFsKdLHty",
     "path": "week-02/grade-2-even-odd-the-pairing-proof/index.html",
     "builtOn": "2026-10-08",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Pair dots to test even/odd, find the 3 sum laws, solve loner cases without adding"
   },
   {
     "order": 25.2,
@@ -257,7 +282,8 @@
     "sourceUrl": "https://claude.ai/artifact/DUKKV5AfepHAKgtpq6sUwk",
     "path": "week-03/grade-2-place-value-power/index.html",
     "builtOn": "2026-10-08",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Digit-card builds, Greedy Game with odds tips, riddle clue filter and riddle maker"
   },
   {
     "order": 25.3,
@@ -267,7 +293,8 @@
     "sourceUrl": "https://claude.ai/artifact/2i3b48F1bmWZvyMqiaaeMa",
     "path": "week-04/grade-2-arrays-rectangle-numbers/index.html",
     "builtOn": "2026-10-08",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Deal tiles into equal rows, run the rectangle census, sort line & square numbers"
   },
   {
     "order": 25.4,
@@ -277,7 +304,8 @@
     "sourceUrl": "https://claude.ai/artifact/Vf7L8VpLzeJLsAgMFcfy4R",
     "path": "week-05/grade-2-expedition-to-1-000/index.html",
     "builtOn": "2026-10-09",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Place numbers on a 0–1,000 trail, skip-count past borders, odometer and window puzzles"
   },
   {
     "order": 26,
@@ -287,7 +315,8 @@
     "sourceUrl": "https://claude.ai/artifact/4gYXDuKAYoLczbB7YEvCgy",
     "path": "week-06/k-the-estimation-jar/index.html",
     "builtOn": "2026-10-09",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Guess Jar B before/after the 10-jar, 3-guess mystery jars, count in ten frames"
   },
   {
     "order": 27,
@@ -297,7 +326,8 @@
     "sourceUrl": "https://claude.ai/artifact/5K2U3wxbLvnaeHNMJGf8T4",
     "path": "week-06/grade-1-guess-my-number/index.html",
     "builtOn": "2026-10-09",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Clue riddles, a hundred-chart guessing game, and evidence for halving questions"
   },
   {
     "order": 28,
@@ -307,7 +337,8 @@
     "sourceUrl": "https://claude.ai/artifact/QRZPhGkuadbhVhCF7F7Weo",
     "path": "week-06/grade-2-the-broken-calculator/index.html",
     "builtOn": "2026-10-10",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Taped-key calculator counts presses: no-4 routes, 1/0 targets, 5s grid, 7s challenge"
   },
   {
     "order": 29,
@@ -317,7 +348,8 @@
     "sourceUrl": "https://claude.ai/artifact/A6otS3gETDGWXR8A4JUskE",
     "path": "week-06/grade-3-the-magic-square/index.html",
     "builtOn": "2026-10-11",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Hunt the 8 sets of 15, build on the shell, prove why 5 is center"
   },
   {
     "order": 30,
@@ -327,7 +359,8 @@
     "sourceUrl": "https://claude.ai/artifact/QZSLXtL5jTn3hhqsEDbPHW",
     "path": "week-06/grade-4-how-many-blades-of-grass/index.html",
     "builtOn": "2026-10-12",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Count blades in a sample inch, convert yards to sq in, round and multiply to a ballpark"
   },
   {
     "order": 31,
@@ -337,7 +370,8 @@
     "sourceUrl": "https://claude.ai/artifact/37RRWG2h3g1dNMcCC5CHHD",
     "path": "week-06/grade-5-four-fours/index.html",
     "builtOn": "2026-10-12",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Build four-4s expressions with step-by-step checking, fill 1–20, parentheses lab, decimal tool"
   },
   {
     "order": 32,
@@ -347,7 +381,8 @@
     "sourceUrl": "https://claude.ai/artifact/QixtD42ppja4RN4JTg2Toj",
     "path": "week-07/k-how-many-are-hiding/index.html",
     "builtOn": "2026-10-13",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Bears hide in a cave; find the missing part, count up, collect every bond for 8"
   },
   {
     "order": 33,
@@ -357,7 +392,8 @@
     "sourceUrl": "https://claude.ai/artifact/TD2taYoZ8fTP5hvaw4adJK",
     "path": "week-07/grade-1-number-pyramids/index.html",
     "builtOn": "2026-10-13",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Fill sum pyramids, solve missing blocks, try 1-2-3 orders; middle counts twice"
   },
   {
     "order": 34,
@@ -367,7 +403,8 @@
     "sourceUrl": "https://claude.ai/artifact/SenLtb2EAH7V8gtD5P2pXq",
     "path": "week-07/grade-2-whats-my-rule/index.html",
     "builtOn": "2026-10-14",
-    "publishedOn": "2026-10-14"
+    "publishedOn": "2026-10-14",
+    "note": "Function machines: find & test rules, fill forward/backward blanks, partner machines"
   },
   {
     "order": 35,
@@ -377,7 +414,8 @@
     "sourceUrl": "https://claude.ai/artifact/N9JNjedzRJXpXsMz49mb9P",
     "path": "week-07/grade-3-the-factor-game/index.html",
     "builtOn": "2026-10-15",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Play the Factor Game (team or vs. computer), fill the first-move table, chart traps and primes"
   },
   {
     "order": 36,
@@ -387,7 +425,8 @@
     "sourceUrl": "https://claude.ai/artifact/WBu3LZ4AsHs1otQYrewUzg",
     "path": "week-07/grade-4-exponents-doubling-down/index.html",
     "builtOn": "2026-10-20",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Paper folds, 2¢ doubling table to Day 20, power builder, base duels, powers of 10"
   },
   {
     "order": 37,
@@ -397,7 +436,8 @@
     "sourceUrl": "https://claude.ai/artifact/FbyAcTEP2FzrZJmvfkpZQg",
     "path": "week-07/grade-5-think-of-a-number/index.html",
     "builtOn": "2026-10-17",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Test 4 number tricks with bars and n; design a trick that always ends at 7"
   },
   {
     "order": 38,
@@ -407,7 +447,8 @@
     "sourceUrl": "https://claude.ai/artifact/BTCgNMvwK5CzAhsWeN5NBn",
     "path": "week-08/k-build-what-i-say/index.html",
     "builtOn": "2026-10-18",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Barrier game: build from position words, compare mats, fix vague words"
   },
   {
     "order": 39,
@@ -417,7 +458,8 @@
     "sourceUrl": "https://claude.ai/artifact/HW1mEPLbufe4TAk5CStFyj",
     "path": "week-08/grade-1-tangram-teasers/index.html",
     "builtOn": "2026-10-19",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Drag/turn/flip tangram pieces; app checks shapes, square ladder 1–7, trade evidence"
   },
   {
     "order": 40,
@@ -427,7 +469,8 @@
     "sourceUrl": "https://claude.ai/artifact/9XzETdHrws3hqL3Y5AYip5",
     "path": "week-08/grade-2-odd-plus-odd/index.html",
     "builtOn": "2026-10-20",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Cube pairs: test odd/even sums, then a pairs-plus-one picture proves odd + odd is even"
   },
   {
     "order": 41,
@@ -437,7 +480,8 @@
     "sourceUrl": "https://claude.ai/artifact/J7489RpAotPKeyWGTys5d8",
     "path": "week-08/grade-3-sharing-brownies/index.html",
     "builtOn": "2026-10-21",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Cut and hand out brownies, name shares 2 ways, find brownies/people, fewest-cuts challenge"
   },
   {
     "order": 42,
@@ -447,7 +491,8 @@
     "sourceUrl": "https://claude.ai/artifact/5fuodXXBUNPb7qJmS1nLRG",
     "path": "week-08/grade-4-clothesline-numbers/index.html",
     "builtOn": "2026-10-22",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Drag cards onto a 0–2 clothesline, check with reasons, zoom in on 1.05 and 1/3 vs 0.33"
   },
   {
     "order": 43,
@@ -457,7 +502,8 @@
     "sourceUrl": "https://claude.ai/artifact/Rw2sXDrfZ2EHkUhWzXT75G",
     "path": "week-08/grade-5-best-buy/index.html",
     "builtOn": "2026-10-23",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Shelf tags: find unit prices, scale to a common amount, test store deals"
   },
   {
     "order": 44,
@@ -467,7 +513,8 @@
     "sourceUrl": "https://claude.ai/artifact/7wAF8mvFhjoSJyYsKa4riQ",
     "path": "week-09/k-guess-my-rule/index.html",
     "builtOn": "2026-10-23",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Odd-one-out warm-up, guess the secret sorting rule, sort-and-check, two-loop puzzles"
   },
   {
     "order": 45,
@@ -477,7 +524,8 @@
     "sourceUrl": "https://claude.ai/artifact/LTJmucx9ifZBzfMZSVyenf",
     "path": "week-09/grade-1-balance-puzzles/index.html",
     "builtOn": "2026-10-24",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Pan balance: solve bear/cube/car puzzles by trading and taking the same off both sides"
   },
   {
     "order": 46,
@@ -487,7 +535,8 @@
     "sourceUrl": "https://claude.ai/artifact/AD38md24BsGYW1WjVkBkfa",
     "path": "week-09/grade-2-how-big-is-typical/index.html",
     "builtOn": "2026-10-24",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Measure hand spans, build class and pencil line plots, debate typical, find the half"
   },
   {
     "order": 46.5,
@@ -497,7 +546,8 @@
     "sourceUrl": "https://claude.ai/artifact/6qPhNmrBtRZV5HyVx2mhev",
     "path": "week-09/grade-3-same-fence-biggest-garden/index.html",
     "builtOn": "2026-11-03",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Every 24 m rectangle, fence-walk and count checks, ordered table, square-is-a-rectangle, wall challenge"
   },
   {
     "order": 47,
@@ -507,7 +557,8 @@
     "sourceUrl": "https://claude.ai/artifact/XschX5nRooCBdA1QeMFe69",
     "path": "week-09/grade-3-spaghetti-and-meatballs-for-all/index.html",
     "builtOn": "2026-10-24",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Push square tables together, count seats, find the 4 × tables − 2 × touching-sides rule"
   },
   {
     "order": 48,
@@ -517,7 +568,8 @@
     "sourceUrl": "https://claude.ai/artifact/J9VVouigyDKiz9pcvBsE6v",
     "path": "week-09/grade-4-eleven-nets/index.html",
     "builtOn": "2026-10-24",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Draw hexominoes, fold them in 3D, sort by longest row to find all 11 cube nets"
   },
   {
     "order": 49,
@@ -527,7 +579,8 @@
     "sourceUrl": "https://claude.ai/artifact/4sXiNH9thoUYpDvFyYUcmQ",
     "path": "week-09/grade-5-cube-buildings/index.html",
     "builtOn": "2026-10-24",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "3D cube builder: height maps to views, then biggest/smallest buildings from silhouettes"
   },
   {
     "order": 50,
@@ -537,7 +590,8 @@
     "sourceUrl": "https://claude.ai/artifact/XZfdE4635TM5mXmUXq4bKt",
     "path": "week-10/k-mystery-bags/index.html",
     "builtOn": "2026-10-25",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Weigh mystery bags on a pan balance, track clues, prove the light-to-heavy order"
   },
   {
     "order": 51,
@@ -547,7 +601,8 @@
     "sourceUrl": "https://claude.ai/artifact/BHoQpFsXocoFUuZ3EFeb1m",
     "path": "week-10/grade-1-twenty-five-cents/index.html",
     "builtOn": "2026-10-25",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Coin riddles, pay 25¢ every way, sort the list to prove all 12; 10¢/30¢ and quarters"
   },
   {
     "order": 52,
@@ -557,7 +612,8 @@
     "sourceUrl": "https://claude.ai/artifact/KBKfJkJUgz1xXGnr8vXSqU",
     "path": "week-10/grade-2-shape-riddles/index.html",
     "builtOn": "2026-10-26",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Solve riddles 1–8, test clues on 14 shapes, write riddles, find the fewest clues"
   },
   {
     "order": 53,
@@ -567,7 +623,8 @@
     "sourceUrl": "https://claude.ai/artifact/NJcsBRWs8yS4tJFNnP4hVV",
     "path": "week-10/grade-3-fair-or-misleading/index.html",
     "builtOn": "2026-10-27",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Measure bars, fix uneven axes, read half-symbol pictographs, build fair & sneaky graphs"
   },
   {
     "order": 54,
@@ -577,7 +634,8 @@
     "sourceUrl": "https://claude.ai/artifact/AJhunHGwYCqGA8nfMFp6ht",
     "path": "week-10/grade-4-the-caesar-cipher/index.html",
     "builtOn": "2026-10-28",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Cipher wheel: encode, decode, big shifts via remainders, crack by letter counts"
   },
   {
     "order": 55,
@@ -587,7 +645,8 @@
     "sourceUrl": "https://claude.ai/artifact/9qp7XcQ4xJLVTivDnuAadP",
     "path": "week-10/grade-5-the-missing-corner/index.html",
     "builtOn": "2026-10-29",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Tap to find missing rectangle corners; sides, perimeter, area from coordinates; squares"
   },
   {
     "order": 61,
@@ -597,7 +656,8 @@
     "sourceUrl": "https://claude.ai/artifact/JyNHK7mfKSpYLh3TSS3gE8",
     "path": "set3-projects/grade-1-number-detective-agency/index.html",
     "builtOn": "2026-10-29",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "120-chart mysteries: torn pieces, clue cases, fact-family files, and a class case box"
   },
   {
     "order": 62,
@@ -607,7 +667,8 @@
     "sourceUrl": "https://claude.ai/artifact/B9Hune5fpstarfLoU8fxn1",
     "path": "set3-projects/grade-2-flag-designers/index.html",
     "builtOn": "2026-10-30",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Fold-line lab, flag designer with spec checker, rebuild scoring, gallery and square counts"
   },
   {
     "order": 63,
@@ -617,7 +678,8 @@
     "sourceUrl": "https://claude.ai/artifact/HmqqG7KratY5y4ErxtkAbH",
     "path": "set3-projects/grade-2-the-thousand-project/index.html",
     "builtOn": "2026-10-31",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Bundle into cups/bags, jump to 1,000 on the road, Museum of 1,000 card tour"
   },
   {
     "order": 64,
@@ -627,7 +689,8 @@
     "sourceUrl": "https://claude.ai/artifact/4B5ZcCC7NNFUVUHjLwHGyG",
     "path": "set3-projects/grade-3-plan-the-field-trip/index.html",
     "builtOn": "2026-11-01",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Itinerary on number lines, draggable clocks, budget & change, committee pitch and vote"
   },
   {
     "order": 65,
@@ -637,7 +700,8 @@
     "sourceUrl": "https://claude.ai/artifact/1rxtY9A7XYKUJFWZDq4Ji2",
     "path": "set3-projects/grade-3-secrets-of-the-multiplication-table/index.html",
     "builtOn": "2026-11-02",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Claim tester on the table, array proofs of properties, strategy booths and lightning round"
   },
   {
     "order": 66,
@@ -647,7 +711,8 @@
     "sourceUrl": "https://claude.ai/artifact/EMYXG5CNuAXL9bnKotJ85M",
     "path": "set4-projects/grade-1-camp-half-past/index.html",
     "builtOn": "2026-11-03",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Set clock hands to :00/:30, plan a half-hourly camp day, cut and stack fair halves/fourths"
   },
   {
     "order": 67,
@@ -657,7 +722,8 @@
     "sourceUrl": "https://claude.ai/artifact/JZFdj6zUEBcw2iq11wNfXe",
     "path": "set4-projects/grade-2-station-masters/index.html",
     "builtOn": "2026-11-04",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Read/draw clocks, minutes between trains, build a timetable, tally riders, showcase board"
   },
   {
     "order": 68,
@@ -667,7 +733,8 @@
     "sourceUrl": "https://claude.ai/artifact/WJ31BgeS8JqHnqXLvsxuvR",
     "path": "set4-projects/grade-3-expedition-outfitters/index.html",
     "builtOn": "2026-11-05",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Benchmarks, gear-check stations, pack a 1,000 g manifest, base camp inspection, showcase"
   },
   {
     "order": 69,
@@ -677,7 +744,8 @@
     "sourceUrl": "https://claude.ai/artifact/9u7DcmDCVbgEf1WQZPxztY",
     "path": "set4-projects/grade-4-the-kite-works/index.html",
     "builtOn": "2026-11-06",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Name figures, fold-test shapes, solve the practice kite, blueprint a kite, judge the festival"
   },
   {
     "order": 70,
@@ -687,7 +755,8 @@
     "sourceUrl": "https://claude.ai/artifact/2HdHFMrehAjhv7AMTupsWc",
     "path": "set4-projects/grade-4-the-flight-lab/index.html",
     "builtOn": "2026-11-07",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Simulated flights in hundredths, ft→in conversions, line plot, bar graph and champion showcase"
   },
   {
     "order": 71,
@@ -697,7 +766,8 @@
     "sourceUrl": "https://claude.ai/artifact/TYoR3P2Bom4Wx2AD8LVAX2",
     "path": "extra-lessons/k-shape-city-architects/index.html",
     "builtOn": "2026-10-25",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Name It games (see it/name it, hear it/find it), city builder with 6 challenge cards, Mayor's surprise challenges, architect's checklist"
   },
   {
     "order": 72,
@@ -707,7 +777,8 @@
     "sourceUrl": "https://claude.ai/artifact/26YRCwERjiW1G6ATEnAc2P",
     "path": "extra-lessons/grade-3-seven-pieces-same-size/index.html",
     "builtOn": "2026-11-05",
-    "publishedOn": "2026-11-12"
+    "publishedOn": "2026-11-12",
+    "note": "Vote on the big question, measure pieces in small triangles and fractions, 8 silhouette puzzles, Square Challenge 1–7 (6 is impossible)"
   },
   {
     "order": 117,
@@ -721,7 +792,8 @@
     "source": "mif",
     "mifLesson": "1.3-A",
     "chapter": 3,
-    "chapterTitle": "Shapes and Patterns"
+    "chapterTitle": "Shapes and Patterns",
+    "note": "Tap a shape + a reason card for Sets A–C (checked live); build your own set of four"
   },
   {
     "order": 118,
@@ -735,7 +807,8 @@
     "source": "mif",
     "mifLesson": "2.3-A",
     "chapter": 3,
-    "chapterTitle": "Subtraction Within 1,000"
+    "chapterTitle": "Subtraction Within 1,000",
+    "note": "Flip digit cards, subtract with on-screen blocks, find the 9×gap rule, hunt all starts giving 45"
   },
   {
     "order": 119,
@@ -749,7 +822,8 @@
     "source": "mif",
     "mifLesson": "3.3-A",
     "chapter": 3,
-    "chapterTitle": "Subtraction Within 10,000"
+    "chapterTitle": "Subtraction Within 10,000",
+    "note": "Build largest/smallest with digit cards, subtract, chain to 6,174; class record, 7-step hunt"
   },
   {
     "order": 120,
@@ -763,7 +837,8 @@
     "source": "mif",
     "mifLesson": "4.3-A",
     "chapter": 3,
-    "chapterTitle": "Fractions and Mixed Numbers"
+    "chapterTitle": "Fractions and Mixed Numbers",
+    "note": "Rebuild the tangram, prove piece fractions by covering, build 1/2 (8 ways) and 3/8"
   },
   {
     "order": 121,
@@ -777,7 +852,8 @@
     "source": "mif",
     "mifLesson": "1.3-B",
     "chapter": 3,
-    "chapterTitle": "Shapes and Patterns"
+    "chapterTitle": "Shapes and Patterns",
+    "note": "Box the core, predict the 10th/20th shape, build to check; make-your-own and 100th cube"
   },
   {
     "order": 122,
@@ -791,7 +867,8 @@
     "source": "mif",
     "mifLesson": "2.3-B",
     "chapter": 3,
-    "chapterTitle": "Subtraction Within 1,000"
+    "chapterTitle": "Subtraction Within 1,000",
+    "note": "Type each side's difference on a keypad, grow squares to zeros; class record + 10,000-start test"
   },
   {
     "order": 123,
@@ -805,7 +882,8 @@
     "source": "mif",
     "mifLesson": "3.3-B",
     "chapter": 3,
-    "chapterTitle": "Subtraction Within 10,000"
+    "chapterTitle": "Subtraction Within 10,000",
+    "note": "Keypad column math runs the trick; 99s ladder, regrouping replay show why it's 1,089"
   },
   {
     "order": 124,
@@ -819,7 +897,8 @@
     "source": "mif",
     "mifLesson": "4.3-B",
     "chapter": 3,
-    "chapterTitle": "Fractions and Mixed Numbers"
+    "chapterTitle": "Fractions and Mixed Numbers",
+    "note": "Frog hops by fractions, label landings, predict first whole; 3/4 vs 6/8, hunt for 7"
   },
   {
     "order": 125,
@@ -833,7 +912,8 @@
     "source": "mif",
     "mifLesson": "1.4-A",
     "chapter": 4,
-    "chapterTitle": "Numbers to 20"
+    "chapterTitle": "Numbers to 20",
+    "note": "Tap where Frog, Cricket, Toad land on a 0–20 pad path; find shared pads, predict 24"
   },
   {
     "order": 126,
@@ -847,6 +927,7 @@
     "source": "mif",
     "mifLesson": "2.4-A",
     "chapter": 4,
-    "chapterTitle": "Using Bar Models: Addition and Subtraction"
+    "chapterTitle": "Using Bar Models: Addition and Subtraction",
+    "note": "Cover the extra, split what is left: two bars find both numbers, then check both clues."
   }
 ]

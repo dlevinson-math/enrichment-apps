@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Publish finished enrichment apps from the build tracker to GitHub Pages.
 
-Two subcommands, run from the repo root:
+Three subcommands, run from the repo root:
 
   plan  --tracker DIR
       Reads the tracker documents (one JSON file per doc, as saved by
@@ -15,11 +15,18 @@ Two subcommands, run from the repo root:
       page to week-NN/<grade>-<activity>/ (week 11 -> set3-projects/,
       week 12 -> set4-projects/, week 13 or any unknown week -> extra-lessons/,
       source "mif" -> mif-lessons/<grade>-<mifLesson>-<activity>/),
-      updates apps.json, and rebuilds the home page index.html.
+      updates apps.json and site.json, and rebuilds the home page index.html.
       ORDERS is a comma-separated list of orders that were flagged (e.g. they
       call window.claude) and must not be published.
       --manual publishes FILE's pages even for done apps the plan skips
       because their url isn't a claude.ai artifact (HTML uploaded by hand).
+
+  render
+      Rebuilds index.html from apps.json and site.json alone, without the
+      tracker. Use it after changing the home page's markup in this file.
+
+The home page's styles, script and drawing are in assets/. Each app page
+loads assets/home-link.js, a small button that leads back to the home page.
 """
 import argparse
 import datetime as dt
@@ -32,6 +39,8 @@ import sys
 
 GRADES = ["K", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5"]
 MANIFEST = "apps.json"
+SITE = "site.json"
+HOME_LINK = '<script src="../../assets/home-link.js" defer></script>'
 RUNTIME_PATTERNS = [r"window\.claude", r"\bclaude\.(complete|ask|storage|db)\b", r"window\.storage\b", r"sendPrompt\s*\("]
 
 
@@ -137,7 +146,7 @@ def needs_runtime(page):
 
 
 def standalone(page, title):
-    """Make sure the page has a doctype, charset and viewport."""
+    """Make sure the page has a doctype, charset, viewport and a way back to the home page."""
     head_meta = ""
     if not re.search(r"<meta[^>]+charset", page, re.I):
         head_meta += '<meta charset="utf-8">'
@@ -154,7 +163,15 @@ def standalone(page, title):
             page = "<head>" + head_meta + "</head>" + page
     if not re.match(r"\s*<!doctype html", page, re.I):
         page = "<!doctype html>\n" + page
-    return page
+    return with_home_link(page)
+
+
+def with_home_link(page):
+    """Add the small 'all apps' button that leads back to the home page."""
+    if "assets/home-link.js" in page:
+        return page
+    i = page.lower().rfind("</body>")
+    return page + HOME_LINK if i < 0 else page[:i] + HOME_LINK + page[i:]
 
 
 def nice_date(s):
@@ -165,65 +182,16 @@ def nice_date(s):
     return f"{d.strftime('%b')} {d.day}, {d.year}"
 
 
-CSS = """
-:root{
-  --paper:#F3F4F6; --card:#FFFFFF; --ink:#1C2130; --muted:#5B6170; --line:#D6D8DD;
-  --accent:#DF661A; --accent-soft:#FDEBDD;
-  --sans:"Poppins","Segoe UI",system-ui,sans-serif;
-  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
-    --accent:#F2893C; --accent-soft:#3A2618; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#14161B; --card:#1D2027; --ink:#ECEBE8; --muted:#A4A8B2; --line:#353A46;
-  --accent:#F2893C; --accent-soft:#3A2618; color-scheme:dark;
-}
-*,*::before,*::after{box-sizing:border-box}
-body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.4; -webkit-tap-highlight-color:transparent}
-.wrap{max-width:1120px; margin:0 auto; padding:32px 16px 48px}
-header h1{margin:0; font-size:clamp(30px,5vw,44px); font-weight:700; letter-spacing:-0.01em}
-header p{margin:6px 0 0; font-family:var(--serif); font-style:italic; color:var(--muted); font-size:clamp(17px,2.2vw,20px)}
-nav.weeks{display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 4px}
-nav.weeks a{min-width:48px; min-height:48px; display:inline-grid; place-items:center; padding:0 14px; border-radius:24px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); text-decoration:none; font-weight:600}
-nav.weeks a:hover{border-color:var(--ink)}
-nav.weeks a.empty{color:var(--muted); font-weight:500}
-section{margin-top:34px; scroll-margin-top:16px}
-section h2{margin:0 0 14px; font-size:clamp(22px,3vw,28px); font-weight:700; display:flex; align-items:baseline; gap:12px}
-section h2 small{font-size:15px; font-weight:500; color:var(--muted)}
-.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr)); gap:14px}
-a.card{min-width:0; display:flex; flex-direction:column; gap:6px; min-height:150px; padding:18px 18px 16px; background:var(--card); border:1.5px solid var(--line); border-radius:16px; color:var(--ink); text-decoration:none; transition:border-color .15s, transform .15s}
-a.card:hover{border-color:var(--accent); transform:translateY(-2px)}
-a.card:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-.grade{align-self:flex-start; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:3px 10px; border-radius:12px}
-.card h3{margin:2px 0 0; font-size:19px; font-weight:600; line-height:1.25}
-.note{margin:0; font-family:var(--serif); color:var(--muted); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.meta{margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:8px; font-size:14px; color:var(--muted)}
-.meta span{white-space:nowrap}
-.go{font-weight:600; color:var(--accent)}
-.chap{margin:0; font-size:15px; font-weight:500; color:var(--ink)}
-h3.sub{margin:22px 0 10px; font-size:19px; font-weight:600; display:flex; align-items:baseline; gap:10px}
-h3.sub small{font-size:14px; font-weight:500; color:var(--muted)}
-.soon{padding:18px; border:1.5px dashed var(--line); border-radius:16px; color:var(--muted); font-family:var(--serif); font-style:italic}
-footer{margin-top:48px; padding-top:18px; border-top:1.5px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--muted); font-size:15px}
-@media (prefers-reduced-motion: reduce){a.card{transition:none} a.card:hover{transform:none}}
-@media (max-width:540px){.wrap{padding-top:22px} .grid{grid-template-columns:1fr} a.card{min-height:0}}
-"""
+GRADE_CLASS = {"K": "g-k", "Grade 1": "g-1", "Grade 2": "g-2", "Grade 3": "g-3", "Grade 4": "g-4", "Grade 5": "g-5"}
+SEARCH_ICON = ('<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" '
+               'stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><path d="M13 13l5 5"/></svg>')
 
 
-def render_index(manifest, docs_by_order, labels, total, today):
-    def info(m):
-        d = docs_by_order.get(m["order"], {})
-        return {**d, **m}
-
-    rows = [info(m) for m in manifest]
+def render_index(manifest, labels, total, today):
+    """The home page. Its look lives in assets/site.css, its filtering in assets/site.js."""
     rank = lambda m: (GRADES.index(m["grade"]) if m["grade"] in GRADES else 99, m["order"])
     groups = {k: [] for k in SECTION_ORDER}
-    for m in rows:
+    for m in manifest:
         groups[section_of(m)].append(m)
     # Weeks 1-10 always show; the later sections show once one of their apps is published.
     shown = [k for k in SECTION_ORDER if isinstance(k, int) and k <= 10 or groups[k]]
@@ -249,41 +217,51 @@ def render_index(manifest, docs_by_order, labels, total, today):
             return MIF[1]
         return short(k)
 
-    def card(m, tag=None, sub=None):
+    def card(m):
         href = m["path"][: -len("index.html")]
         built = nice_date(m.get("builtOn"))
         note = (m.get("note") or "").strip()
+        grade = m["grade"]
+        chap = ""
+        if section_of(m) == "mif":
+            bits = [f"Chapter {m['chapter']}" if m.get("chapter") not in (None, "") else "",
+                    f"Lesson {m['mifLesson']}" if m.get("mifLesson") else "", m.get("chapterTitle") or ""]
+            chap = " · ".join(b for b in bits if b)
         return (
-            f'<a class="card" href="{html.escape(href)}">'
-            f'<span class="grade">{html.escape(tag or m["grade"])}</span>'
-            f'<h3>{html.escape(m["activity"])}</h3>'
-            + (f'<p class="chap">{html.escape(sub)}</p>' if sub else "")
-            + (f'<p class="note" title="{html.escape(note)}">{html.escape(note)}</p>' if note else "")
-            + f'<span class="meta"><span>{"Built " + built if built else "Build date not recorded"}</span>'
-            f'<span class="go">Open app &rarr;</span></span></a>'
+            f'<a class="card {GRADE_CLASS.get(grade, "")}" href="{html.escape(href)}" data-grade="{html.escape(grade)}">'
+            f'<span class="tag">{"Kindergarten" if grade == "K" else html.escape(grade)}</span>'
+            f'<span class="card-body"><h3>{html.escape(m["activity"])}</h3>'
+            + (f'<p class="chap">{html.escape(chap)}</p>' if chap else "")
+            + (f'<p class="note">{html.escape(note)}</p>' if note else "")
+            + '<span class="meta">'
+            + (f"<span>Built {built}</span>" if built else "")
+            + '<span class="go">Open &rarr;</span></span></span></a>'
         )
 
     def count(n):
         return f"<small>{n} app{'s' if n != 1 else ''}</small>"
 
-    empty = ' class="empty"'
-    nav = "".join(f'<a href="#{anchor(k)}"{"" if groups[k] else empty}>{short(k)}</a>' for k in shown)
+    def jump(k):
+        off = "" if groups[k] else " off"
+        if isinstance(k, int) and k <= 10:
+            return f'<a class="jump wk{off}" href="#{anchor(k)}" aria-label="Week {k}">{k}</a>'
+        return f'<a class="jump{off}" href="#{anchor(k)}">{html.escape(short(k))}</a>'
+
+    weeks = "".join(jump(k) for k in shown if isinstance(k, int) and k <= 10)
+    rest = "".join(jump(k) for k in shown if not (isinstance(k, int) and k <= 10))
+    def chip_label(g):  # phones get the short form: K, 1, 2 ...
+        if g == "K":
+            return 'K<span class="wide">indergarten</span>'
+        return f'<span class="wide">Grade </span>{g.split()[-1]}'
+
+    chips = '<button type="button" class="chip all" data-grade="" aria-pressed="true"><span>All<span class="wide"> grades</span></span></button>' + "".join(
+        f'<button type="button" class="chip {GRADE_CLASS[g]}" data-grade="{g}" aria-label="{"Kindergarten" if g == "K" else g}" aria-pressed="false"><span>{chip_label(g)}</span></button>'
+        for g in GRADES if any(m["grade"] == g for m in manifest)
+    )
     sections = []
     for k in shown:
         apps = groups[k]
-        if k == "mif":
-            parts = []
-            for g in MIF_GRADES + sorted({m["grade"] for m in apps} - set(MIF_GRADES)):
-                ga = sorted([m for m in apps if m["grade"] == g], key=lambda m: m["order"])
-                if not ga:
-                    continue
-                cards = "".join(
-                    card(m, tag=f"Ch {m.get('chapter', '?')} · {m.get('mifLesson', '')}", sub=m.get("chapterTitle"))
-                    for m in ga
-                )
-                parts.append(f'<h3 class="sub">{html.escape(g)} {count(len(ga))}</h3><div class="grid">{cards}</div>')
-            body = "".join(parts)
-        elif apps:
+        if apps:
             body = '<div class="grid">' + "".join(card(m) for m in sorted(apps, key=rank)) + "</div>"
         else:
             body = '<p class="soon">Apps for this week are on the way.</p>'
@@ -298,24 +276,47 @@ def render_index(manifest, docs_by_order, labels, total, today):
 <meta name="description" content="Interactive K–5 math enrichment apps, organized by week, project set and Math in Focus chapter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet">
-<style>{CSS}</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,700;6..12,800&family=Shantell+Sans:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<div class="wrap">
-<header>
+<a class="skip" href="#apps">Skip to the apps</a>
+<div class="wrap" id="top">
+<header class="banner">
+<div class="banner-text">
 <h1>Enrichment Apps</h1>
-<p>Interactive K–5 math enrichment activities for the classroom board, organized by week, project and chapter. Tap a card to open an app.</p>
-</header>
-<nav class="weeks" aria-label="Jump to section">{nav}</nav>
-<main>
-{chr(10).join(sections)}
-</main>
-<footer><span>Updated {updated}</span><span>{len(manifest)} of {total} apps</span></footer>
+<p>Interactive K–5 math activities for the classroom board. Pick a grade, then tap a card to open an app.</p>
 </div>
+<img src="assets/crowd.svg" width="1220" height="232" alt="">
+</header>
+<form class="search needs-js" role="search" onsubmit="return false" hidden>
+{SEARCH_ICON}
+<input id="q" type="search" placeholder="Search apps, e.g. fractions" aria-label="Search apps" autocomplete="off">
+</form>
+<div class="bar needs-js" hidden>
+<div class="row" role="group" aria-label="Show one grade"><span class="row-label">Grade</span>{chips}</div>
+<nav class="row" aria-label="Jump to section"><span class="row-label">Week</span>{weeks}<span class="gap"></span>{rest}</nav>
+</div>
+<p class="status needs-js" id="status" aria-live="polite" hidden><span></span><button type="button" hidden>Show everything</button></p>
+<main id="apps">
+{chr(10).join(sections)}
+<p class="none" id="none" hidden>No apps match. Try another word or grade.</p>
+</main>
+<footer><span>Updated {updated}</span><span>{len(manifest)} of {total} apps built so far</span></footer>
+</div>
+<a class="top" href="#top" aria-label="Back to top" hidden>&uarr;</a>
+<script src="assets/site.js"></script>
 </body>
 </html>
 """
+
+
+def load_site():
+    """Facts about the tracker that the home page needs, kept so `render` can run without it."""
+    if not os.path.exists(SITE):
+        return {}
+    with open(SITE) as fh:
+        return json.load(fh)
 
 
 def main():
@@ -330,7 +331,17 @@ def main():
     b.add_argument("--manual", action="store_true",
                    help="publish the fetched files even for apps the plan skips (HTML uploaded by hand, e.g. Gemini builds)")
     b.add_argument("--today", default=dt.date.today().isoformat())
+    sub.add_parser("render")
     a = ap.parse_args()
+
+    if a.cmd == "render":
+        site = load_site()
+        manifest = load_manifest()
+        labels = {int(k): v for k, v in site.get("labels", {}).items()}
+        with open("index.html", "w", encoding="utf-8") as fh:
+            fh.write(render_index(manifest, labels, site.get("total", len(manifest)), site.get("updated")))
+        print(json.dumps({"published": len(manifest)}))
+        return
 
     docs = load_tracker(a.tracker)
     if not docs:
@@ -388,10 +399,17 @@ def main():
         added.append({"order": order, "activity": doc["activity"], "path": path, "rebuilt": bool(old)})
 
     manifest = sorted(entries.values(), key=lambda m: m["order"])
+    for m in manifest:  # card descriptions follow the tracker's notes
+        d = by_order.get(m["order"])
+        if d and "note" in d:
+            note = (d.get("note") or "").strip()
+            if note:
+                m["note"] = note
+            else:
+                m.pop("note", None)
     with open(MANIFEST, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
-    docs_by_order = {d["order"]: d for d in docs}
     labels = {}
     for d in docs:
         sec = section_of(d)
@@ -399,7 +417,10 @@ def main():
             labels.setdefault(sec, d["weekLabel"])
     unknown = sorted({str(d.get("week")) for d in docs if section_of(d) == "extra" and str(d.get("week")) != "13"})
     with open("index.html", "w", encoding="utf-8") as fh:
-        fh.write(render_index(manifest, docs_by_order, labels, len(docs), a.today))
+        fh.write(render_index(manifest, labels, len(docs), a.today))
+    with open(SITE, "w", encoding="utf-8") as fh:
+        json.dump({"total": len(docs), "updated": a.today, "labels": {str(k): v for k, v in labels.items()}}, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
     print(json.dumps({"added": added, "flaggedRuntime": runtime, "published": len(manifest), "unknownWeeks": unknown}, indent=2, ensure_ascii=False))
 
 
